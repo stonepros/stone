@@ -1,6 +1,9 @@
 [submodule "stone-object-corpus"]
 	path = stone-object-corpus
 	url = https://github.com/stonepros/stone-object-corpus.git
+[submodule "src/civetweb"]
+	path = src/civetweb
+	url = https://github.com/stonepros/civetweb
 [submodule "src/erasure-code/jerasure/jerasure"]
 	path = src/erasure-code/jerasure/jerasure
 	url = https://github.com/stonepros/jerasure.git
@@ -34,7 +37,7 @@
 	url = https://github.com/facebook/zstd
 [submodule "src/crypto/isa-l/isa-l_crypto"]
 	path = src/crypto/isa-l/isa-l_crypto
-	url = https://github.com/intel/isa-l_crypto
+	url = https://github.com/01org/isa-l_crypto
 [submodule "src/blkin"]
 	path = src/blkin
 	url = https://github.com/stonepros/blkin
@@ -62,16 +65,19 @@
 [submodule "s3select"]
 	path = src/s3select
 	url = https://github.com/stonepros/s3select.git
+[submodule "src/jaegertracing/opentracing-cpp"]
+	path = src/jaegertracing/opentracing-cpp
+	url = https://github.com/opentracing/opentracing-cpp.git
+	branch = v1.6.0
+[submodule "src/jaegertracing/jaeger-client-cpp"]
+	path = src/jaegertracing/jaeger-client-cpp
+	url = https://github.com/stonepros/jaeger-client-cpp.git
+	branch = hunter-disabled
+[submodule "src/jaegertracing/thrift"]
+	path = src/jaegertracing/thrift
+	url = https://github.com/apache/thrift.git
+	branch = 0.13.0
 [submodule "src/libkmip"]
 	path = src/libkmip
 	url = https://github.com/stonepros/libkmip
 	branch = ceph-master
-[submodule "src/arrow"]
-	path = src/arrow
-	url = https://github.com/apache/arrow.git
-[submodule "src/utf8proc"]
-	path = src/utf8proc
-	url = https://github.com/JuliaStrings/utf8proc
-[submodule "src/jaegertracing/opentelemetry-cpp"]
-	path = src/jaegertracing/opentelemetry-cpp
-	url = https://github.com/open-telemetry/opentelemetry-cpp.git
