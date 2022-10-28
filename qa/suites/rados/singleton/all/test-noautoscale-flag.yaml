@@ -11,10 +11,10 @@ openstack:
       count: 4
       size: 10 # GB
 overrides:
-  ceph:
+  stone:
     create_rbd_pool: false
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     conf:
       mon:
         osd pool default pg autoscale mode: on
@@ -32,7 +32,7 @@ overrides:
       - slow request
 tasks:
 - install:
-- ceph:
+- stone:
 - workunit:
     clients:
       all:

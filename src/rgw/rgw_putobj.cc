@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -19,7 +19,7 @@ namespace rgw::putobj {
 
 int ChunkProcessor::process(bufferlist&& data, uint64_t offset)
 {
-  ceph_assert(offset >= chunk.length());
+  stone_assert(offset >= chunk.length());
   uint64_t position = offset - chunk.length();
 
   const bool flush = (data.length() == 0);
@@ -51,7 +51,7 @@ int ChunkProcessor::process(bufferlist&& data, uint64_t offset)
 
 int StripeProcessor::process(bufferlist&& data, uint64_t offset)
 {
-  ceph_assert(offset >= bounds.first);
+  stone_assert(offset >= bounds.first);
 
   const bool flush = (data.length() == 0);
   if (flush) {
@@ -82,7 +82,7 @@ int StripeProcessor::process(bufferlist&& data, uint64_t offset)
     if (r < 0) {
       return r;
     }
-    ceph_assert(stripe_size > 0);
+    stone_assert(stripe_size > 0);
 
     bounds.first = offset;
     bounds.second = offset + stripe_size;

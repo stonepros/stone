@@ -16,7 +16,7 @@
 #include "rgw_resolve.h"
 #include "common/dns_resolve.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 RGWResolver::~RGWResolver() {
@@ -27,7 +27,7 @@ RGWResolver::RGWResolver() {
 }
 
 int RGWResolver::resolve_cname(const string& hostname, string& cname, bool *found) {
-  return resolver->resolve_cname(g_ceph_context, hostname, &cname, found);
+  return resolver->resolve_cname(g_stone_context, hostname, &cname, found);
 }
 
 RGWResolver *rgw_resolver;

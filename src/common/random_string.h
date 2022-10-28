@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  * Copyright (C) 2015 Yehuda Sadeh <yehuda@redhat.com>
@@ -20,16 +20,16 @@
 #include "include/common_fwd.h"
 
 /* size should be the required string size + 1 */
-int gen_rand_base64(CephContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric(CephContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_lower(CephContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_upper(CephContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_no_underscore(CephContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_plain(CephContext *cct, char *dest, size_t size);
+int gen_rand_base64(StoneeContext *cct, char *dest, size_t size);
+void gen_rand_alphanumeric(StoneeContext *cct, char *dest, size_t size);
+void gen_rand_alphanumeric_lower(StoneeContext *cct, char *dest, size_t size);
+void gen_rand_alphanumeric_upper(StoneeContext *cct, char *dest, size_t size);
+void gen_rand_alphanumeric_no_underscore(StoneeContext *cct, char *dest, size_t size);
+void gen_rand_alphanumeric_plain(StoneeContext *cct, char *dest, size_t size);
 
 // returns a std::string with 'size' random characters
-std::string gen_rand_alphanumeric(CephContext *cct, size_t size);
-std::string gen_rand_alphanumeric_lower(CephContext *cct, size_t size);
-std::string gen_rand_alphanumeric_upper(CephContext *cct, size_t size);
-std::string gen_rand_alphanumeric_no_underscore(CephContext *cct, size_t size);
-std::string gen_rand_alphanumeric_plain(CephContext *cct, size_t size);
+std::string gen_rand_alphanumeric(StoneeContext *cct, size_t size);
+std::string gen_rand_alphanumeric_lower(StoneeContext *cct, size_t size);
+std::string gen_rand_alphanumeric_upper(StoneeContext *cct, size_t size);
+std::string gen_rand_alphanumeric_no_underscore(StoneeContext *cct, size_t size);
+std::string gen_rand_alphanumeric_plain(StoneeContext *cct, size_t size);

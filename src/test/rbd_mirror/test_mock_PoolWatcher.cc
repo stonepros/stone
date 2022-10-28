@@ -27,7 +27,7 @@ struct MockTestImageCtx : public librbd::MockImageCtx {
 struct MockMirroringWatcher {
   static MockMirroringWatcher *s_instance;
   static MockMirroringWatcher &get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return *s_instance;
   }
 
@@ -53,7 +53,7 @@ struct MirroringWatcher<MockTestImageCtx> {
   }
 
   static MirroringWatcher<MockTestImageCtx> &get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return *s_instance;
   }
 
@@ -89,7 +89,7 @@ namespace mirror {
 template <>
 struct Threads<librbd::MockTestImageCtx> {
   MockSafeTimer *timer;
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
 
   MockContextWQ *work_queue;
 
@@ -114,7 +114,7 @@ struct RefreshImagesRequest<librbd::MockTestImageCtx> {
   static RefreshImagesRequest *create(librados::IoCtx &io_ctx,
                                       ImageIds *image_ids,
                                       Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->image_ids = image_ids;
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -252,8 +252,8 @@ public:
     }
   }
 
-  ceph::mutex m_lock = ceph::make_mutex("TestMockPoolWatcher::m_lock");
-  ceph::condition_variable m_cond;
+  stone::mutex m_lock = stone::make_mutex("TestMockPoolWatcher::m_lock");
+  stone::condition_variable m_cond;
   uint32_t m_update_count = 0;
 };
 

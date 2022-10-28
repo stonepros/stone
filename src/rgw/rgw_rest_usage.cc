@@ -8,7 +8,7 @@
 
 #include "include/str_list.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 class RGWOp_Usage_Get : public RGWRESTOp {
 

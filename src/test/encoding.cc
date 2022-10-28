@@ -234,7 +234,7 @@ TEST(EncodingRoundTrip, MultimapConstructorCounter) {
   EXPECT_EQ(my_val_t::get_assigns(), 0);
 }
 
-namespace ceph {
+namespace stone {
 // make sure that the legacy encode/decode methods are selected
 // over the ones defined using templates. the later is likely to
 // be slower, see also the definition of "WRITE_INT_DENC" in
@@ -253,12 +253,12 @@ void encode<uint64_t, denc_traits<uint64_t>>(const uint64_t&,
 }
 
 template<>
-void encode<ceph_le64, denc_traits<ceph_le64>>(const ceph_le64&,
+void encode<stone_le64, denc_traits<stone_le64>>(const stone_le64&,
                                                bufferlist&,
                                                uint64_t f) {
-  static_assert(denc_traits<ceph_le64>::supported,
+  static_assert(denc_traits<stone_le64>::supported,
                 "should support new encoder");
-  static_assert(!denc_traits<ceph_le64>::featured,
+  static_assert(!denc_traits<stone_le64>::featured,
                 "should not be featured");
   ASSERT_EQ(0UL, f);
   // make sure the test fails if i get called
@@ -303,7 +303,7 @@ TEST(EncodingRoundTrip, Integers) {
   }
   // raw encoder
   {
-    ceph_le64 i;
+    stone_le64 i;
     i = 42;
     test_encode_and_decode(i);
   }

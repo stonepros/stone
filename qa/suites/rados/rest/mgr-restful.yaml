@@ -6,7 +6,7 @@ roles:
 - [mon.a, mgr.x, osd.0, osd.1, osd.2, mds.a, client.a]
 tasks:
 - install:
-- ceph:
+- stone:
     log-ignorelist:
       - overall HEALTH_
       - \(MGR_DOWN\)
@@ -16,15 +16,15 @@ tasks:
       - \(OSDMAP_FLAGS\)
 - exec:
     mon.a:
-      - ceph restful create-key admin
-      - ceph restful create-self-signed-cert
-      - ceph restful restart
+      - stone restful create-key admin
+      - stone restful create-self-signed-cert
+      - stone restful restart
 - workunit:
     clients:
       client.a:
         - rest/test-restful.sh
 - exec:
     mon.a:
-      - ceph restful delete-key admin
-      - ceph restful list-keys | jq ".admin" | grep null
+      - stone restful delete-key admin
+      - stone restful list-keys | jq ".admin" | grep null
 

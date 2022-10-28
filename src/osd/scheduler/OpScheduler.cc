@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat Inc.
  *
@@ -19,10 +19,10 @@
 #include "common/WeightedPriorityQueue.h"
 #include "osd/scheduler/mClockScheduler.h"
 
-namespace ceph::osd::scheduler {
+namespace stone::osd::scheduler {
 
 OpSchedulerRef make_scheduler(
-  CephContext *cct, uint32_t num_shards, bool is_rotational)
+  StoneContext *cct, uint32_t num_shards, bool is_rotational)
 {
   const std::string *type = &cct->_conf->osd_op_queue;
   if (*type == "debug_random") {
@@ -44,7 +44,7 @@ OpSchedulerRef make_scheduler(
   } else if (*type == "mclock_scheduler") {
     return std::make_unique<mClockScheduler>(cct, num_shards, is_rotational);
   } else {
-    ceph_assert("Invalid choice of wq" == 0);
+    stone_assert("Invalid choice of wq" == 0);
   }
 }
 

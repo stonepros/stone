@@ -3,11 +3,11 @@
 
 #include "mgr_perf_counters.h"
 #include "common/perf_counters.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 PerfCounters *perfcounter = NULL;
 
-int mgr_perf_start(CephContext *cct)
+int mgr_perf_start(StoneContext *cct)
 {
   PerfCountersBuilder plb(cct, "mgr", l_mgr_first, l_mgr_last);
   plb.set_prio_default(PerfCountersBuilder::PRIO_USEFUL);
@@ -20,9 +20,9 @@ int mgr_perf_start(CephContext *cct)
   return 0;
 }
 
-void mgr_perf_stop(CephContext *cct)
+void mgr_perf_stop(StoneContext *cct)
 {
-  ceph_assert(perfcounter);
+  stone_assert(perfcounter);
   cct->get_perfcounters_collection()->remove(perfcounter);
   delete perfcounter;
 }

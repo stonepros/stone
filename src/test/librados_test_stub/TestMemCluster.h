@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_TEST_MEM_CLUSTER_H
-#define CEPH_TEST_MEM_CLUSTER_H
+#ifndef STONE_TEST_MEM_CLUSTER_H
+#define STONE_TEST_MEM_CLUSTER_H
 
 #include "test/librados_test_stub/TestCluster.h"
 #include "include/buffer.h"
@@ -71,7 +71,7 @@ public:
   TestMemCluster();
   ~TestMemCluster() override;
 
-  TestRadosClient *create_rados_client(CephContext *cct) override;
+  TestRadosClient *create_rados_client(StoneeContext *cct) override;
 
   int register_object_handler(int64_t pool_id, const ObjectLocator& locator,
                               ObjectHandler* object_handler) override;
@@ -122,4 +122,4 @@ private:
 
 } // namespace librados
 
-#endif // CEPH_TEST_MEM_CLUSTER_H
+#endif // STONE_TEST_MEM_CLUSTER_H

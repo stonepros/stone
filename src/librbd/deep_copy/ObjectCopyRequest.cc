@@ -18,7 +18,7 @@
 #include "librbd/io/Utils.h"
 #include "osdc/Striper.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::deep_copy::ObjectCopyRequest: " \
                            << this << " " << __func__ << ": "
@@ -46,9 +46,9 @@ ObjectCopyRequest<I>::ObjectCopyRequest(I *src_image_ctx,
     m_dst_snap_id_start(dst_snap_id_start), m_snap_map(snap_map),
     m_dst_object_number(dst_object_number), m_flags(flags),
     m_handler(handler), m_on_finish(on_finish) {
-  ceph_assert(src_image_ctx->data_ctx.is_valid());
-  ceph_assert(dst_image_ctx->data_ctx.is_valid());
-  ceph_assert(!m_snap_map.empty());
+  stone_assert(src_image_ctx->data_ctx.is_valid());
+  stone_assert(dst_image_ctx->data_ctx.is_valid());
+  stone_assert(!m_snap_map.empty());
 
   m_src_async_op = new io::AsyncOperation();
   m_src_async_op->start_op(*get_image_ctx(m_src_image_ctx));
@@ -194,7 +194,7 @@ void ObjectCopyRequest<I>::handle_read(int r) {
     m_handler->handle_read(read_op.out_bl.length());
   }
 
-  ceph_assert(!m_read_snaps.empty());
+  stone_assert(!m_read_snaps.empty());
   m_read_snaps.erase(m_read_snaps.begin());
 
   send_read();
@@ -222,7 +222,7 @@ void ObjectCopyRequest<I>::send_update_object_map() {
 
   auto &dst_object_state = *m_dst_object_state.begin();
   auto it = m_snap_map.find(dst_object_state.first);
-  ceph_assert(it != m_snap_map.end());
+  stone_assert(it != m_snap_map.end());
   auto dst_snap_id = it->second.front();
   auto object_state = dst_object_state.second;
   m_dst_object_state.erase(m_dst_object_state.begin());
@@ -254,7 +254,7 @@ void ObjectCopyRequest<I>::send_update_object_map() {
   dst_image_ctx->image_lock.unlock_shared();
   dst_image_ctx->owner_lock.unlock_shared();
   if (!sent) {
-    ceph_assert(dst_snap_id == CEPH_NOSNAP);
+    stone_assert(dst_snap_id == STONE_NOSNAP);
     ctx->complete(0);
   }
 }
@@ -305,7 +305,7 @@ void ObjectCopyRequest<I>::process_copyup() {
 
 template <typename I>
 void ObjectCopyRequest<I>::send_write_object() {
-  ceph_assert(!m_snapshot_sparse_bufferlist.empty());
+  stone_assert(!m_snapshot_sparse_bufferlist.empty());
   auto& sparse_bufferlist = m_snapshot_sparse_bufferlist.begin()->second;
 
   m_src_image_ctx->image_lock.lock_shared();
@@ -319,16 +319,16 @@ void ObjectCopyRequest<I>::send_write_object() {
   librados::snap_t src_snap_seq = m_snapshot_sparse_bufferlist.begin()->first;
   if (src_snap_seq != 0) {
     auto snap_map_it = m_snap_map.find(src_snap_seq);
-    ceph_assert(snap_map_it != m_snap_map.end());
+    stone_assert(snap_map_it != m_snap_map.end());
 
     auto dst_snap_id = snap_map_it->second.front();
     auto dst_may_exist_it = m_dst_object_may_exist.find(dst_snap_id);
-    ceph_assert(dst_may_exist_it != m_dst_object_may_exist.end());
+    stone_assert(dst_may_exist_it != m_dst_object_may_exist.end());
     if (!dst_may_exist_it->second && !sparse_bufferlist.empty()) {
       // if the object cannot exist, the only valid op is to remove it
       ldout(m_cct, 20) << "object DNE: src_snap_seq=" << src_snap_seq << dendl;
-      ceph_assert(sparse_bufferlist.ext_count() == 1U);
-      ceph_assert(sparse_bufferlist.begin().get_val().state ==
+      stone_assert(sparse_bufferlist.ext_count() == 1U);
+      stone_assert(sparse_bufferlist.begin().get_val().state ==
                     io::SPARSE_EXTENT_STATE_ZEROED &&
                   sparse_bufferlist.begin().get_off() == 0 &&
                   sparse_bufferlist.begin().get_len() ==
@@ -336,7 +336,7 @@ void ObjectCopyRequest<I>::send_write_object() {
     }
 
     // write snapshot context should be before actual snapshot
-    ceph_assert(!snap_map_it->second.empty());
+    stone_assert(!snap_map_it->second.empty());
     auto dst_snap_ids_it = snap_map_it->second.begin();
     ++dst_snap_ids_it;
 
@@ -344,7 +344,7 @@ void ObjectCopyRequest<I>::send_write_object() {
     if (!dst_snap_ids.empty()) {
       dst_snap_seq = dst_snap_ids.front();
     }
-    ceph_assert(dst_snap_seq != CEPH_NOSNAP);
+    stone_assert(dst_snap_seq != STONE_NOSNAP);
   }
 
   ldout(m_cct, 20) << "src_snap_seq=" << src_snap_seq << ", "
@@ -392,7 +392,7 @@ void ObjectCopyRequest<I>::send_write_object() {
       }
       break;
     default:
-      ceph_abort();
+      stone_abort();
     }
   }
 
@@ -420,7 +420,7 @@ void ObjectCopyRequest<I>::send_write_object() {
   librados::AioCompletion *comp = create_rados_callback(ctx);
   r = m_dst_io_ctx.aio_operate(m_dst_oid, comp, &op, dst_snap_seq, dst_snap_ids,
                                nullptr);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -451,9 +451,9 @@ void ObjectCopyRequest<I>::handle_write_object(int r) {
 }
 
 template <typename I>
-Context *ObjectCopyRequest<I>::start_lock_op(ceph::shared_mutex &owner_lock,
+Context *ObjectCopyRequest<I>::start_lock_op(stone::shared_mutex &owner_lock,
 					     int* r) {
-  ceph_assert(ceph_mutex_is_locked(m_dst_image_ctx->owner_lock));
+  stone_assert(stone_mutex_is_locked(m_dst_image_ctx->owner_lock));
   if (m_dst_image_ctx->exclusive_lock == nullptr) {
     return new LambdaContext([](int r) {});
   }
@@ -482,11 +482,11 @@ void ObjectCopyRequest<I>::compute_read_ops() {
       // don't attempt to read from snapshots that shouldn't exist in
       // case the OSD fails to give a correct snap list
       auto snap_map_it = m_snap_map.find(write_read_snap_ids.first);
-      ceph_assert(snap_map_it != m_snap_map.end());
+      stone_assert(snap_map_it != m_snap_map.end());
       auto dst_snap_seq = snap_map_it->second.front();
 
       auto dst_may_exist_it = m_dst_object_may_exist.find(dst_snap_seq);
-      ceph_assert(dst_may_exist_it != m_dst_object_may_exist.end());
+      stone_assert(dst_may_exist_it != m_dst_object_may_exist.end());
       if (!dst_may_exist_it->second) {
         ldout(m_cct, 20) << "DNE snapshot: " << write_read_snap_ids.first
                          << dendl;
@@ -522,7 +522,7 @@ void ObjectCopyRequest<I>::compute_read_ops() {
         only_dne_extents = false;
         break;
       default:
-        ceph_abort();
+        stone_abort();
         break;
       }
     }
@@ -531,7 +531,7 @@ void ObjectCopyRequest<I>::compute_read_ops() {
   bool flatten = ((m_flags & OBJECT_COPY_REQUEST_FLAG_FLATTEN) != 0);
   if (!dne_image_interval.empty() && (!only_dne_extents || flatten)) {
     auto snap_map_it = m_snap_map.begin();
-    ceph_assert(snap_map_it != m_snap_map.end());
+    stone_assert(snap_map_it != m_snap_map.end());
 
     auto src_snap_seq = snap_map_it->first;
     WriteReadSnapIds write_read_snap_ids{src_snap_seq, src_snap_seq};
@@ -653,11 +653,11 @@ void ObjectCopyRequest<I>::compute_zero_ops() {
     auto &zero_interval = it.second;
 
     auto snap_map_it = m_snap_map.find(src_snap_seq);
-    ceph_assert(snap_map_it != m_snap_map.end());
+    stone_assert(snap_map_it != m_snap_map.end());
     auto dst_snap_seq = snap_map_it->second.front();
 
     auto dst_may_exist_it = m_dst_object_may_exist.find(dst_snap_seq);
-    ceph_assert(dst_may_exist_it != m_dst_object_may_exist.end());
+    stone_assert(dst_may_exist_it != m_dst_object_may_exist.end());
     if (!dst_may_exist_it->second && object_exists) {
       ldout(m_cct, 5) << "object DNE for snap_id: " << dst_snap_seq << dendl;
       m_snapshot_sparse_bufferlist[src_snap_seq].insert(
@@ -728,7 +728,7 @@ void ObjectCopyRequest<I>::compute_zero_ops() {
         case io::SPARSE_EXTENT_STATE_DATA:
           break;
         default:
-          ceph_abort();
+          stone_abort();
           break;
         }
       }
@@ -761,7 +761,7 @@ void ObjectCopyRequest<I>::compute_zero_ops() {
       io::util::file_to_extents(m_dst_image_ctx, z.get_start(), z.get_len(), 0,
                                 &object_extents);
       for (auto& object_extent : object_extents) {
-        ceph_assert(object_extent.offset + object_extent.length <=
+        stone_assert(object_extent.offset + object_extent.length <=
                       m_dst_image_ctx->layout.object_size);
 
         if (object_extent.offset + object_extent.length >= end_size) {
@@ -828,7 +828,7 @@ void ObjectCopyRequest<I>::compute_dst_object_may_exist() {
   std::shared_lock image_locker{m_dst_image_ctx->image_lock};
 
   auto snap_ids = m_dst_image_ctx->snaps;
-  snap_ids.push_back(CEPH_NOSNAP);
+  snap_ids.push_back(STONE_NOSNAP);
 
   for (auto snap_id : snap_ids) {
     m_dst_object_may_exist[snap_id] =

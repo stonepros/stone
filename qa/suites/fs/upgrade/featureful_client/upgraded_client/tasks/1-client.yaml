@@ -2,7 +2,7 @@ nuke-on-error: false
 overrides:
   nuke-on-error: false
 tasks:
-- ceph-fuse:
+- stone-fuse:
 - print: "**** done nautilus client"
 #- workunit:
 #    clients:

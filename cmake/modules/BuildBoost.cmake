@@ -136,7 +136,7 @@ function(do_build_boost version)
   endif()
   set(build_command
     ${b2} headers stage
-    #"--buildid=ceph" # changes lib names--can omit for static
+    #"--buildid=stone" # changes lib names--can omit for static
     ${boost_features})
   set(install_command
     ${b2} install)
@@ -150,7 +150,7 @@ function(do_build_boost version)
   else()
     message(STATUS "boost will be downloaded...")
     # NOTE: If you change this version number make sure the package is available
-    # at the three URLs below (may involve uploading to download.ceph.com)
+    # at the three URLs below (may involve uploading to download.stone.com)
     set(boost_version 1.73.0)
     set(boost_sha256 4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402)
     string(REPLACE "." "_" boost_version_underscore ${boost_version} )
@@ -160,7 +160,7 @@ function(do_build_boost version)
       set(boost_url
         "${boost_url} http://downloads.sourceforge.net/project/boost/boost/${boost_version}/boost_${boost_version_underscore}.tar.bz2")
       set(boost_url
-        "${boost_url} https://download.ceph.com/qa/boost_${boost_version_underscore}.tar.bz2")
+        "${boost_url} https://download.stone.com/qa/boost_${boost_version_underscore}.tar.bz2")
     endif()
     set(source_dir
       URL ${boost_url}

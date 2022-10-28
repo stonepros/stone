@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
   *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_BLK_BLOCKDEVICE_H
-#define CEPH_BLK_BLOCKDEVICE_H
+#ifndef STONE_BLK_BLOCKDEVICE_H
+#define STONE_BLK_BLOCKDEVICE_H
 
 #include <atomic>
 #include <condition_variable>
@@ -73,7 +73,7 @@ private:
   int r = 0;
 
 public:
-  CephContext* cct;
+  StoneeContext* cct;
   void *priv;
 #ifdef HAVE_SPDK
   void *nvme_task_first = nullptr;
@@ -89,7 +89,7 @@ public:
   std::atomic_int num_running = {0};
   bool allow_eio;
 
-  explicit IOContext(CephContext* cct, void *p, bool allow_eio = false)
+  explicit IOContext(StoneeContext* cct, void *p, bool allow_eio = false)
     : cct(cct), priv(p), allow_eio(allow_eio)
     {}
 
@@ -130,7 +130,7 @@ public:
 
 class BlockDevice {
 public:
-  CephContext* cct;
+  StoneeContext* cct;
   typedef void (*aio_callback_t)(void *handle, void *aio);
 private:
   ceph::mutex ioc_reap_lock = ceph::make_mutex("BlockDevice::ioc_reap_lock");
@@ -154,7 +154,7 @@ private:
   static block_device_t detect_device_type(const std::string& path);
   static block_device_t device_type_from_name(const std::string& blk_dev_name);
   static BlockDevice *create_with_type(block_device_t device_type,
-    CephContext* cct, const std::string& path, aio_callback_t cb,
+    StoneeContext* cct, const std::string& path, aio_callback_t cb,
     void *cbpriv, aio_callback_t d_cb, void *d_cbpriv);
 
 protected:
@@ -177,7 +177,7 @@ protected:
 public:
   aio_callback_t aio_callback;
   void *aio_callback_priv;
-  BlockDevice(CephContext* cct, aio_callback_t cb, void *cbpriv)
+  BlockDevice(StoneeContext* cct, aio_callback_t cb, void *cbpriv)
   : cct(cct),
     aio_callback(cb),
     aio_callback_priv(cbpriv)
@@ -185,7 +185,7 @@ public:
   virtual ~BlockDevice() = default;
 
   static BlockDevice *create(
-    CephContext* cct, const std::string& path, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv);
+    StoneeContext* cct, const std::string& path, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv);
   virtual bool supported_bdev_label() { return true; }
   virtual bool is_rotational() { return rotational; }
 
@@ -275,4 +275,4 @@ protected:
   bool is_valid_io(uint64_t off, uint64_t len) const;
 };
 
-#endif //CEPH_BLK_BLOCKDEVICE_H
+#endif //STONE_BLK_BLOCKDEVICE_H

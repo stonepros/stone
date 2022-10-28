@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_READAHEAD_H
-#define CEPH_READAHEAD_H
+#ifndef STONE_READAHEAD_H
+#define STONE_READAHEAD_H
 
 #include <list>
 #include <vector>

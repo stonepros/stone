@@ -19,8 +19,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_MSG_DPDK_NET_H
-#define CEPH_MSG_DPDK_NET_H
+#ifndef STONE_MSG_DPDK_NET_H
+#define STONE_MSG_DPDK_NET_H
 
 #include "const.h"
 #include "ethernet.h"
@@ -100,7 +100,7 @@ class DPDKDevice;
 struct ipv4_address;
 
 class interface {
-  CephContext *cct;
+  StoneeContext *cct;
   struct l3_rx_stream {
     stream<Packet, ethernet_address> packet_stream;
     std::function<bool (forward_hash&, Packet&, size_t)> forward;
@@ -117,7 +117,7 @@ class interface {
  private:
   int dispatch_packet(EventCenter *c, Packet p);
  public:
-  explicit interface(CephContext *cct, std::shared_ptr<DPDKDevice> dev, EventCenter *center);
+  explicit interface(StoneeContext *cct, std::shared_ptr<DPDKDevice> dev, EventCenter *center);
   ethernet_address hw_address() { return _hw_address; }
   const struct hw_features& get_hw_features() const { return _hw_features; }
   subscription<Packet, ethernet_address> register_l3(
@@ -135,4 +135,4 @@ class interface {
   friend class l3_protocol;
 };
 
-#endif //CEPH_MSG_DPDK_NET_H
+#endif //STONE_MSG_DPDK_NET_H

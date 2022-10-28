@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MDENTRYUNLINK_H
-#define CEPH_MDENTRYUNLINK_H
+#ifndef STONE_MDENTRYUNLINK_H
+#define STONE_MDENTRYUNLINK_H
 
 #include <string_view>
 

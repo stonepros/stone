@@ -52,7 +52,7 @@ swab(T val) {
 #endif
 
 // mswab == maybe swab (if not LE)
-#ifdef CEPH_BIG_ENDIAN
+#ifdef STONE_BIG_ENDIAN
 template<typename T>
 inline T mswab(T val) {
   return swab(val);

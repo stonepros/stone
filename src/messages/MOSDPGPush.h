@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -33,7 +33,7 @@ private:
   uint64_t cost = 0;
 
 public:
-  void compute_cost(CephContext *cct) {
+  void compute_cost(StoneeContext *cct) {
     cost = 0;
     for (auto i = pushes.begin(); i != pushes.end(); ++i) {
       cost += i->cost(cct);

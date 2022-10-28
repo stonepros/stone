@@ -13,13 +13,13 @@ template <typename T>
 class TestObjectPlayer : public RadosTestFixture, public T {
 public:
   auto create_object(const std::string &oid, uint8_t order) {
-    auto object = ceph::make_ref<journal::ObjectPlayer>(
+    auto object = stone::make_ref<journal::ObjectPlayer>(
       m_ioctx, oid + ".", 0, *m_timer, m_timer_lock, order,
       T::max_fetch_bytes);
     return object;
   }
 
-  int fetch(const ceph::ref_t<journal::ObjectPlayer>& object_player) {
+  int fetch(const stone::ref_t<journal::ObjectPlayer>& object_player) {
     while (true) {
       C_SaferCond ctx;
       object_player->set_refetch_state(
@@ -33,7 +33,7 @@ public:
     return 0;
   }
 
-  int watch_and_wait_for_entries(const ceph::ref_t<journal::ObjectPlayer>& object_player,
+  int watch_and_wait_for_entries(const stone::ref_t<journal::ObjectPlayer>& object_player,
                                  journal::ObjectPlayer::Entries *entries,
                                  size_t count) {
     for (size_t i = 0; i < 50; ++i) {

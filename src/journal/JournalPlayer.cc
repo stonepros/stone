@@ -9,7 +9,7 @@
 #include "journal/Types.h"
 #include "journal/Utils.h"
 
-#define dout_subsys ceph_subsys_journaler
+#define dout_subsys stone_subsys_journaler
 #undef dout_prefix
 #define dout_prefix *_dout << "JournalPlayer: " << this << " "
 
@@ -43,7 +43,7 @@ struct C_HandleEntriesAvailable : public Context {
 
 JournalPlayer::JournalPlayer(librados::IoCtx &ioctx,
                              std::string_view object_oid_prefix,
-                             ceph::ref_t<JournalMetadata> journal_metadata,
+                             stone::ref_t<JournalMetadata> journal_metadata,
                              ReplayHandler* replay_handler,
                              CacheManagerHandler *cache_manager_handler)
   : m_object_oid_prefix(object_oid_prefix),
@@ -53,7 +53,7 @@ JournalPlayer::JournalPlayer(librados::IoCtx &ioctx,
     m_cache_rebalance_handler(this)
 {
   m_ioctx.dup(ioctx);
-  m_cct = reinterpret_cast<CephContext *>(m_ioctx.cct());
+  m_cct = reinterpret_cast<StoneContext *>(m_ioctx.cct());
 
   ObjectSetPosition commit_position;
   m_journal_metadata->get_commit_position(&commit_position);
@@ -91,12 +91,12 @@ JournalPlayer::JournalPlayer(librados::IoCtx &ioctx,
 }
 
 JournalPlayer::~JournalPlayer() {
-  ceph_assert(m_async_op_tracker.empty());
+  stone_assert(m_async_op_tracker.empty());
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_shut_down);
-    ceph_assert(m_fetch_object_numbers.empty());
-    ceph_assert(!m_watch_scheduled);
+    stone_assert(m_shut_down);
+    stone_assert(m_fetch_object_numbers.empty());
+    stone_assert(!m_watch_scheduled);
   }
 
   if (m_cache_manager_handler != nullptr) {
@@ -106,7 +106,7 @@ JournalPlayer::~JournalPlayer() {
 
 void JournalPlayer::prefetch() {
   std::lock_guard locker{m_lock};
-  ceph_assert(m_state == STATE_INIT);
+  stone_assert(m_state == STATE_INIT);
 
   if (m_shut_down) {
     return;
@@ -129,7 +129,7 @@ void JournalPlayer::prefetch() {
   // active set)
   std::map<uint8_t, uint64_t> splay_offset_to_objects;
   for (auto &position : m_commit_positions) {
-    ceph_assert(splay_offset_to_objects.count(position.first) == 0);
+    stone_assert(splay_offset_to_objects.count(position.first) == 0);
     splay_offset_to_objects[position.first] = position.second.object_number;
   }
 
@@ -166,7 +166,7 @@ void JournalPlayer::shut_down(Context *on_finish) {
   ldout(m_cct, 20) << __func__ << dendl;
   std::lock_guard locker{m_lock};
 
-  ceph_assert(!m_shut_down);
+  stone_assert(!m_shut_down);
   m_shut_down = true;
   m_watch_enabled = false;
 
@@ -209,7 +209,7 @@ bool JournalPlayer::try_pop_front(Entry *entry, uint64_t *commit_tid) {
   }
 
   auto object_player = get_object_player();
-  ceph_assert(object_player && !object_player->empty());
+  stone_assert(object_player && !object_player->empty());
 
   object_player->front(entry);
   object_player->pop_front();
@@ -240,7 +240,7 @@ void JournalPlayer::process_state(uint64_t object_number, int r) {
   ldout(m_cct, 10) << __func__ << ": object_num=" << object_number << ", "
                    << "r=" << r << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   if (r >= 0) {
     switch (m_state) {
     case STATE_PREFETCH:
@@ -256,7 +256,7 @@ void JournalPlayer::process_state(uint64_t object_number, int r) {
       break;
     default:
       lderr(m_cct) << "UNEXPECTED STATE (" << m_state << ")" << dendl;
-      ceph_abort();
+      stone_abort();
       break;
     }
   }
@@ -269,7 +269,7 @@ void JournalPlayer::process_state(uint64_t object_number, int r) {
 
 int JournalPlayer::process_prefetch(uint64_t object_number) {
   ldout(m_cct, 10) << __func__ << ": object_num=" << object_number << dendl;
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   uint8_t splay_width = m_journal_metadata->get_splay_width();
   uint8_t splay_offset = object_number % splay_width;
@@ -281,7 +281,7 @@ int JournalPlayer::process_prefetch(uint64_t object_number) {
   }
 
   bool prefetch_complete = false;
-  ceph_assert(m_object_players.count(splay_offset) == 1);
+  stone_assert(m_object_players.count(splay_offset) == 1);
   auto object_player = m_object_players[splay_offset];
 
   // prefetch in-order since a newer splay object could prefetch first
@@ -374,7 +374,7 @@ int JournalPlayer::process_prefetch(uint64_t object_number) {
 
 int JournalPlayer::process_playback(uint64_t object_number) {
   ldout(m_cct, 10) << __func__ << ": object_num=" << object_number << dendl;
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   if (verify_playback_ready()) {
     notify_entries_available();
@@ -385,7 +385,7 @@ int JournalPlayer::process_playback(uint64_t object_number) {
 }
 
 bool JournalPlayer::is_object_set_ready() const {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   if (m_watch_scheduled || !m_fetch_object_numbers.empty()) {
     ldout(m_cct, 20) << __func__ << ": waiting for in-flight fetch" << dendl;
     return false;
@@ -395,7 +395,7 @@ bool JournalPlayer::is_object_set_ready() const {
 }
 
 bool JournalPlayer::verify_playback_ready() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   while (true) {
     if (!is_object_set_ready()) {
@@ -404,7 +404,7 @@ bool JournalPlayer::verify_playback_ready() {
     }
 
     auto object_player = get_object_player();
-    ceph_assert(object_player);
+    stone_assert(object_player);
     uint64_t object_num = object_player->get_object_number();
 
     // Verify is the active object player has another entry available
@@ -453,7 +453,7 @@ bool JournalPlayer::verify_playback_ready() {
         ldout(m_cct, 20) << __func__ << ": "
                          << "object_num=" << object_num << ", "
                          << "entry: " << entry << dendl;
-        ceph_assert(entry.get_tag_tid() == *m_active_tag_tid);
+        stone_assert(entry.get_tag_tid() == *m_active_tag_tid);
         return true;
       }
     } else {
@@ -498,7 +498,7 @@ bool JournalPlayer::verify_playback_ready() {
 }
 
 void JournalPlayer::prune_tag(uint64_t tag_tid) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   ldout(m_cct, 10) << __func__ << ": pruning remaining entries for tag "
                    << tag_tid << dendl;
 
@@ -542,8 +542,8 @@ void JournalPlayer::prune_tag(uint64_t tag_tid) {
 }
 
 void JournalPlayer::prune_active_tag(const boost::optional<uint64_t>& tag_tid) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(m_active_tag_tid);
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(m_active_tag_tid);
 
   uint64_t active_tag_tid = *m_active_tag_tid;
   if (tag_tid) {
@@ -555,30 +555,30 @@ void JournalPlayer::prune_active_tag(const boost::optional<uint64_t>& tag_tid) {
   prune_tag(active_tag_tid);
 }
 
-ceph::ref_t<ObjectPlayer> JournalPlayer::get_object_player() const {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+stone::ref_t<ObjectPlayer> JournalPlayer::get_object_player() const {
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   SplayedObjectPlayers::const_iterator it = m_object_players.find(
     m_splay_offset);
-  ceph_assert(it != m_object_players.end());
+  stone_assert(it != m_object_players.end());
   return it->second;
 }
 
-ceph::ref_t<ObjectPlayer> JournalPlayer::get_object_player(uint64_t object_number) const {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+stone::ref_t<ObjectPlayer> JournalPlayer::get_object_player(uint64_t object_number) const {
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   uint8_t splay_width = m_journal_metadata->get_splay_width();
   uint8_t splay_offset = object_number % splay_width;
   auto splay_it = m_object_players.find(splay_offset);
-  ceph_assert(splay_it != m_object_players.end());
+  stone_assert(splay_it != m_object_players.end());
 
   auto object_player = splay_it->second;
-  ceph_assert(object_player->get_object_number() == object_number);
+  stone_assert(object_player->get_object_number() == object_number);
   return object_player;
 }
 
 void JournalPlayer::advance_splay_object() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   ++m_splay_offset;
   m_splay_offset %= m_journal_metadata->get_splay_width();
   m_watch_step = WATCH_STEP_FETCH_CURRENT;
@@ -586,9 +586,9 @@ void JournalPlayer::advance_splay_object() {
                    << static_cast<uint32_t>(m_splay_offset) << dendl;
 }
 
-bool JournalPlayer::remove_empty_object_player(const ceph::ref_t<ObjectPlayer> &player) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(!m_watch_scheduled);
+bool JournalPlayer::remove_empty_object_player(const stone::ref_t<ObjectPlayer> &player) {
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(!m_watch_scheduled);
 
   uint8_t splay_width = m_journal_metadata->get_splay_width();
   uint64_t object_set = player->get_object_number() / splay_width;
@@ -621,9 +621,9 @@ bool JournalPlayer::remove_empty_object_player(const ceph::ref_t<ObjectPlayer> &
 }
 
 void JournalPlayer::fetch(uint64_t object_num) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
-  auto object_player = ceph::make_ref<ObjectPlayer>(
+  auto object_player = stone::make_ref<ObjectPlayer>(
     m_ioctx, m_object_oid_prefix, object_num, m_journal_metadata->get_timer(),
     m_journal_metadata->get_timer_lock(), m_journal_metadata->get_order(),
     m_max_fetch_bytes);
@@ -633,12 +633,12 @@ void JournalPlayer::fetch(uint64_t object_num) {
   fetch(object_player);
 }
 
-void JournalPlayer::fetch(const ceph::ref_t<ObjectPlayer> &object_player) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+void JournalPlayer::fetch(const stone::ref_t<ObjectPlayer> &object_player) {
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   uint64_t object_num = object_player->get_object_number();
   std::string oid = utils::get_object_name(m_object_oid_prefix, object_num);
-  ceph_assert(m_fetch_object_numbers.count(object_num) == 0);
+  stone_assert(m_fetch_object_numbers.count(object_num) == 0);
   m_fetch_object_numbers.insert(object_num);
 
   ldout(m_cct, 10) << __func__ << ": " << oid << dendl;
@@ -653,7 +653,7 @@ void JournalPlayer::handle_fetched(uint64_t object_num, int r) {
                    << ": r=" << r << dendl;
 
   std::lock_guard locker{m_lock};
-  ceph_assert(m_fetch_object_numbers.count(object_num) == 1);
+  stone_assert(m_fetch_object_numbers.count(object_num) == 1);
   m_fetch_object_numbers.erase(object_num);
 
   if (m_shut_down) {
@@ -669,7 +669,7 @@ void JournalPlayer::handle_fetched(uint64_t object_num, int r) {
 
 void JournalPlayer::refetch(bool immediate) {
   ldout(m_cct, 10) << __func__ << dendl;
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   m_handler_notified = false;
 
   // if watching the object, handle the periodic re-fetch
@@ -690,7 +690,7 @@ void JournalPlayer::refetch(bool immediate) {
 
 void JournalPlayer::schedule_watch(bool immediate) {
   ldout(m_cct, 10) << __func__ << dendl;
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   if (m_watch_scheduled) {
     return;
   }
@@ -711,7 +711,7 @@ void JournalPlayer::schedule_watch(bool immediate) {
     return;
   }
 
-  ceph::ref_t<ObjectPlayer> object_player;
+  stone::ref_t<ObjectPlayer> object_player;
   double watch_interval = m_watch_interval;
 
   switch (m_watch_step) {
@@ -739,7 +739,7 @@ void JournalPlayer::schedule_watch(bool immediate) {
     watch_interval = 0;
     break;
   default:
-    ceph_abort();
+    stone_abort();
   }
 
   ldout(m_cct, 20) << __func__ << ": scheduling watch on "
@@ -752,7 +752,7 @@ void JournalPlayer::schedule_watch(bool immediate) {
 void JournalPlayer::handle_watch(uint64_t object_num, int r) {
   ldout(m_cct, 10) << __func__ << ": r=" << r << dendl;
   std::lock_guard locker{m_lock};
-  ceph_assert(m_watch_scheduled);
+  stone_assert(m_watch_scheduled);
   m_watch_scheduled = false;
 
   if (m_shut_down || r == -ECANCELED) {
@@ -786,7 +786,7 @@ void JournalPlayer::handle_watch_assert_active(int r) {
   ldout(m_cct, 10) << __func__ << ": r=" << r << dendl;
 
   std::lock_guard locker{m_lock};
-  ceph_assert(m_watch_scheduled);
+  stone_assert(m_watch_scheduled);
   m_watch_scheduled = false;
 
   if (r == -ESTALE) {
@@ -805,7 +805,7 @@ void JournalPlayer::handle_watch_assert_active(int r) {
 }
 
 void JournalPlayer::notify_entries_available() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   if (m_handler_notified) {
     return;
   }
@@ -816,7 +816,7 @@ void JournalPlayer::notify_entries_available() {
 }
 
 void JournalPlayer::notify_complete(int r) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   m_handler_notified = true;
 
   ldout(m_cct, 10) << __func__ << ": replay complete: r=" << r << dendl;

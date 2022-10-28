@@ -1,7 +1,7 @@
-add_executable(ceph_test_cls_lock
+add_executable(stone_test_cls_lock
   test_cls_lock.cc
   )
-target_link_libraries(ceph_test_cls_lock
+target_link_libraries(stone_test_cls_lock
   cls_lock_client
   librados
   global
@@ -13,5 +13,5 @@ target_link_libraries(ceph_test_cls_lock
   radostest-cxx
   )
 install(TARGETS
-  ceph_test_cls_lock
+  stone_test_cls_lock
   DESTINATION ${CMAKE_INSTALL_BINDIR})

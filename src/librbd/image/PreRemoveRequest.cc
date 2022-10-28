@@ -12,7 +12,7 @@
 #include "librbd/journal/DisabledPolicy.h"
 #include "librbd/operation/SnapshotRemoveRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::PreRemoveRequest: " << this \
                            << " " << __func__ << ": "
@@ -150,7 +150,7 @@ void PreRemoveRequest<I>::handle_shut_down_exclusive_lock(int r) {
     return;
   }
 
-  ceph_assert(m_image_ctx->exclusive_lock == nullptr);
+  stone_assert(m_image_ctx->exclusive_lock == nullptr);
   validate_image_removal();
 }
 
@@ -252,7 +252,7 @@ void PreRemoveRequest<I>::check_group() {
   m_out_bl.clear();
   int r = m_image_ctx->md_ctx.aio_operate(m_image_ctx->header_oid,
                                           rados_completion, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
@@ -323,7 +323,7 @@ void PreRemoveRequest<I>::handle_remove_snapshot(int r) {
     return;
   }
 
-  ceph_assert(!m_snap_infos.empty());
+  stone_assert(!m_snap_infos.empty());
   m_snap_infos.erase(m_snap_infos.begin());
 
   remove_snapshot();

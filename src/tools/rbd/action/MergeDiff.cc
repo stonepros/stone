@@ -15,8 +15,8 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 
 namespace rbd {
 namespace action {
@@ -336,7 +336,7 @@ static int do_merge_diff(const char *first, const char *second,
         continue;
       }
     }
-    ceph_assert(f_off >= s_off);
+    stone_assert(f_off >= s_off);
 
     if (f_off < s_off + s_len && f_len) {
       uint64_t delta = s_off + s_len - f_off;
@@ -363,7 +363,7 @@ static int do_merge_diff(const char *first, const char *second,
         continue;
       }
     }
-    ceph_assert(f_off >= s_off + s_len);
+    stone_assert(f_off >= s_off + s_len);
     if (s_len) {
       r = accept_diff_body(sd, pd, s_tag, s_off, s_len);
       if (r < 0) {
@@ -374,7 +374,7 @@ static int do_merge_diff(const char *first, const char *second,
       s_len = 0;
       s_tag = 0;
     } else {
-      ceph_assert(f_end && s_end);
+      stone_assert(f_end && s_end);
     }
     continue;
   }
@@ -415,7 +415,7 @@ void get_arguments(po::options_description *positional,
 }
 
 int execute(const po::variables_map &vm,
-            const std::vector<std::string> &ceph_global_init_args) {
+            const std::vector<std::string> &stone_global_init_args) {
   std::string first_diff = utils::get_positional_argument(vm, 0);
   if (first_diff.empty()) {
     std::cerr << "rbd: first diff was not specified" << std::endl;

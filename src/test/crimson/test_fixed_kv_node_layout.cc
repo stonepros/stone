@@ -24,8 +24,8 @@ struct test_val_t {
 };
 
 struct test_val_le_t {
-  ceph_le32 t1 = init_le32(0);
-  ceph_les32 t2 = init_les32(0);
+  stone_le32 t1 = init_le32(0);
+  stone_les32 t2 = init_les32(0);
 
   test_val_le_t() = default;
   test_val_le_t(const test_val_le_t &) = default;
@@ -67,8 +67,8 @@ struct test_meta_t {
 };
 
 struct test_meta_le_t {
-  ceph_le32 t1 = init_le32(0);
-  ceph_le32 t2 = init_le32(0);
+  stone_le32 t1 = init_le32(0);
+  stone_le32 t2 = init_le32(0);
 
   test_meta_le_t() = default;
   test_meta_le_t(const test_meta_le_t &) = default;
@@ -85,7 +85,7 @@ constexpr size_t CAPACITY = 339;
 struct TestNode : FixedKVNodeLayout<
   CAPACITY,
   test_meta_t, test_meta_le_t,
-  uint32_t, ceph_le32,
+  uint32_t, stone_le32,
   test_val_t, test_val_le_t> {
   char buf[4096];
   TestNode() : FixedKVNodeLayout(buf) {

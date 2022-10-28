@@ -45,7 +45,7 @@ struct GetInfoRequest<librbd::MockTestImageCtx> {
                                 PromotionState *promotion_state,
                                 std::string* primary_mirror_uuid,
                                 Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->mirror_image = mirror_image;
     s_instance->promotion_state = promotion_state;
     s_instance->primary_mirror_uuid = primary_mirror_uuid;
@@ -54,7 +54,7 @@ struct GetInfoRequest<librbd::MockTestImageCtx> {
   }
 
   GetInfoRequest() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
   ~GetInfoRequest() {
@@ -80,7 +80,7 @@ struct ImageDeleter<librbd::MockTestImageCtx> {
                          const std::string& global_image_id, bool resync,
                          librbd::asio::ContextWQ* work_queue,
                          Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->trash_move(global_image_id, resync, on_finish);
   }
 
@@ -105,7 +105,7 @@ struct GetMirrorImageIdRequest<librbd::MockTestImageCtx> {
                                          const std::string& global_image_id,
                                          std::string* image_id,
                                          Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->image_id = image_id;
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -141,7 +141,7 @@ struct StateBuilder<librbd::MockTestImageCtx>
   std::string local_primary_mirror_uuid;
 
   static StateBuilder* create(const std::string&) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -165,7 +165,7 @@ struct StateBuilder<librbd::MockTestImageCtx>
     cls::rbd::MIRROR_IMAGE_MODE_SNAPSHOT;
 
   static StateBuilder* create(const std::string&) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 

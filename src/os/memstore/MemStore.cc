@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank
  *
@@ -29,12 +29,12 @@
 #include "include/compat.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_filestore
+#define dout_subsys stone_subsys_filestore
 #undef dout_prefix
 #define dout_prefix *_dout << "memstore(" << path << ") "
 
-using ceph::decode;
-using ceph::encode;
+using stone::decode;
+using stone::encode;
 
 // for comparing collections for lock ordering
 bool operator>(const MemStore::CollectionRef& l,
@@ -68,8 +68,8 @@ int MemStore::_save()
   for (auto p = coll_map.begin(); p != coll_map.end(); ++p) {
     dout(20) << __func__ << " coll " << p->first << " " << p->second << dendl;
     collections.insert(p->first);
-    ceph::buffer::list bl;
-    ceph_assert(p->second);
+    stone::buffer::list bl;
+    stone_assert(p->second);
     p->second->encode(bl);
     std::string fn = path + "/" + stringify(p->first);
     int r = bl.write_file(fn.c_str());
@@ -78,7 +78,7 @@ int MemStore::_save()
   }
 
   std::string fn = path + "/collections";
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   encode(collections, bl);
   int r = bl.write_file(fn.c_str());
   if (r < 0)
@@ -89,7 +89,7 @@ int MemStore::_save()
 
 void MemStore::dump_all()
 {
-  auto f = ceph::Formatter::create("json-pretty");
+  auto f = stone::Formatter::create("json-pretty");
   f->open_object_section("store");
   dump(f);
   f->close_section();
@@ -99,7 +99,7 @@ void MemStore::dump_all()
   delete f;
 }
 
-void MemStore::dump(ceph::Formatter *f)
+void MemStore::dump(stone::Formatter *f)
 {
   f->open_array_section("collections");
   for (auto p = coll_map.begin(); p != coll_map.end(); ++p) {
@@ -137,7 +137,7 @@ void MemStore::dump(ceph::Formatter *f)
 int MemStore::_load()
 {
   dout(10) << __func__ << dendl;
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   std::string fn = path + "/collections";
   std::string err;
   int r = bl.read_file(fn.c_str(), &err);
@@ -152,11 +152,11 @@ int MemStore::_load()
        q != collections.end();
        ++q) {
     std::string fn = path + "/" + stringify(*q);
-    ceph::buffer::list cbl;
+    stone::buffer::list cbl;
     int r = cbl.read_file(fn.c_str(), &err);
     if (r < 0)
       return r;
-    auto c = ceph::make_ref<Collection>(cct, *q);
+    auto c = stone::make_ref<Collection>(cct, *q);
     auto p = cbl.cbegin();
     c->decode(p);
     coll_map[*q] = c;
@@ -171,17 +171,17 @@ int MemStore::_load()
 void MemStore::set_fsid(uuid_d u)
 {
   int r = write_meta("fsid", stringify(u));
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
 }
 
 uuid_d MemStore::get_fsid()
 {
   std::string fsid_str;
   int r = read_meta("fsid", &fsid_str);
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
   uuid_d uuid;
   bool b = uuid.parse(fsid_str.c_str());
-  ceph_assert(b);
+  stone_assert(b);
   return uuid;
 }
 
@@ -205,7 +205,7 @@ int MemStore::mkfs()
 
   std::string fn = path + "/collections";
   derr << path << dendl;
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   std::set<coll_t> collections;
   encode(collections, bl);
   r = bl.write_file(fn.c_str());
@@ -248,7 +248,7 @@ objectstore_perf_stat_t MemStore::get_cur_stats()
 MemStore::CollectionRef MemStore::get_collection(const coll_t& cid)
 {
   std::shared_lock l{coll_lock};
-  ceph::unordered_map<coll_t,CollectionRef>::iterator cp = coll_map.find(cid);
+  stone::unordered_map<coll_t,CollectionRef>::iterator cp = coll_map.find(cid);
   if (cp == coll_map.end())
     return CollectionRef();
   return cp->second;
@@ -257,7 +257,7 @@ MemStore::CollectionRef MemStore::get_collection(const coll_t& cid)
 ObjectStore::CollectionHandle MemStore::create_new_collection(const coll_t& cid)
 {
   std::lock_guard l{coll_lock};
-  auto c = ceph::make_ref<Collection>(cct, cid);
+  auto c = stone::make_ref<Collection>(cct, cid);
   new_coll_map[cid] = c;
   return c;
 }
@@ -310,7 +310,7 @@ int MemStore::read(
   const ghobject_t& oid,
   uint64_t offset,
   size_t len,
-  ceph::buffer::list& bl,
+  stone::buffer::list& bl,
   uint32_t op_flags)
 {
   Collection *c = static_cast<Collection*>(c_.get());
@@ -333,7 +333,7 @@ int MemStore::read(
 }
 
 int MemStore::fiemap(CollectionHandle& ch, const ghobject_t& oid,
-		     uint64_t offset, size_t len, ceph::buffer::list& bl)
+		     uint64_t offset, size_t len, stone::buffer::list& bl)
 {
   std::map<uint64_t, uint64_t> destmap;
   int r = fiemap(ch, oid, offset, len, destmap);
@@ -365,7 +365,7 @@ int MemStore::fiemap(CollectionHandle& ch, const ghobject_t& oid,
 }
 
 int MemStore::getattr(CollectionHandle &c_, const ghobject_t& oid,
-		      const char *name, ceph::buffer::ptr& value)
+		      const char *name, stone::buffer::ptr& value)
 {
   Collection *c = static_cast<Collection*>(c_.get());
   dout(10) << __func__ << " " << c->cid << " " << oid << " " << name << dendl;
@@ -384,7 +384,7 @@ int MemStore::getattr(CollectionHandle &c_, const ghobject_t& oid,
 }
 
 int MemStore::getattrs(CollectionHandle &c_, const ghobject_t& oid,
-		       std::map<std::string,ceph::buffer::ptr>& aset)
+		       std::map<std::string,stone::buffer::ptr>& aset)
 {
   Collection *c = static_cast<Collection*>(c_.get());
   dout(10) << __func__ << " " << c->cid << " " << oid << dendl;
@@ -403,7 +403,7 @@ int MemStore::list_collections(std::vector<coll_t>& ls)
 {
   dout(10) << __func__ << dendl;
   std::shared_lock l{coll_lock};
-  for (ceph::unordered_map<coll_t,CollectionRef>::iterator p = coll_map.begin();
+  for (stone::unordered_map<coll_t,CollectionRef>::iterator p = coll_map.begin();
        p != coll_map.end();
        ++p) {
     ls.push_back(p->first);
@@ -466,8 +466,8 @@ int MemStore::collection_list(CollectionHandle& ch,
 int MemStore::omap_get(
   CollectionHandle& ch,                ///< [in] Collection containing oid
   const ghobject_t &oid,   ///< [in] Object containing omap
-  ceph::buffer::list *header,      ///< [out] omap header
-  std::map<std::string, ceph::buffer::list> *out /// < [out] Key to value map
+  stone::buffer::list *header,      ///< [out] omap header
+  std::map<std::string, stone::buffer::list> *out /// < [out] Key to value map
   )
 {
   dout(10) << __func__ << " " << ch->cid << " " << oid << dendl;
@@ -485,7 +485,7 @@ int MemStore::omap_get(
 int MemStore::omap_get_header(
   CollectionHandle& ch,                ///< [in] Collection containing oid
   const ghobject_t &oid,   ///< [in] Object containing omap
-  ceph::buffer::list *header,      ///< [out] omap header
+  stone::buffer::list *header,      ///< [out] omap header
   bool allow_eio ///< [in] don't assert on eio
   )
 {
@@ -520,7 +520,7 @@ int MemStore::omap_get_values(
   CollectionHandle& ch,                    ///< [in] Collection containing oid
   const ghobject_t &oid,       ///< [in] Object containing omap
   const std::set<std::string> &keys,     ///< [in] Keys to get
-  std::map<std::string, ceph::buffer::list> *out ///< [out] Returned keys and values
+  std::map<std::string, stone::buffer::list> *out ///< [out] Returned keys and values
   )
 {
   dout(10) << __func__ << " " << ch->cid << " " << oid << dendl;
@@ -561,7 +561,7 @@ int MemStore::omap_check_keys(
 class MemStore::OmapIteratorImpl : public ObjectMap::ObjectMapIteratorImpl {
   CollectionRef c;
   ObjectRef o;
-  std::map<std::string,ceph::buffer::list>::iterator it;
+  std::map<std::string,stone::buffer::list>::iterator it;
 public:
   OmapIteratorImpl(CollectionRef c, ObjectRef o)
     : c(c), o(o), it(o->omap.begin()) {}
@@ -594,7 +594,7 @@ public:
     std::lock_guard lock{o->omap_mutex};
     return it->first;
   }
-  ceph::buffer::list value() override {
+  stone::buffer::list value() override {
     std::lock_guard lock{o->omap_mutex};
     return it->second;
   }
@@ -679,7 +679,7 @@ void MemStore::_do_transaction(Transaction& t)
         uint64_t off = op->off;
         uint64_t len = op->len;
 	uint32_t fadvise_flags = i.get_fadvise_flags();
-        ceph::buffer::list bl;
+        stone::buffer::list bl;
         i.decode_bl(bl);
 	r = _write(cid, oid, off, len, bl, fadvise_flags);
       }
@@ -723,10 +723,10 @@ void MemStore::_do_transaction(Transaction& t)
         coll_t cid = i.get_cid(op->cid);
         ghobject_t oid = i.get_oid(op->oid);
         std::string name = i.decode_string();
-        ceph::buffer::list bl;
+        stone::buffer::list bl;
         i.decode_bl(bl);
-	std::map<std::string, ceph::buffer::ptr> to_set;
-	to_set[name] = ceph::buffer::ptr(bl.c_str(), bl.length());
+	std::map<std::string, stone::buffer::ptr> to_set;
+	to_set[name] = stone::buffer::ptr(bl.c_str(), bl.length());
 	r = _setattrs(cid, oid, to_set);
       }
       break;
@@ -735,7 +735,7 @@ void MemStore::_do_transaction(Transaction& t)
       {
         coll_t cid = i.get_cid(op->cid);
         ghobject_t oid = i.get_oid(op->oid);
-	std::map<std::string, ceph::buffer::ptr> aset;
+	std::map<std::string, stone::buffer::ptr> aset;
         i.decode_attrset(aset);
 	r = _setattrs(cid, oid, aset);
       }
@@ -801,7 +801,7 @@ void MemStore::_do_transaction(Transaction& t)
       {
         coll_t cid = i.get_cid(op->cid);
         uint32_t type = op->hint;
-        ceph::buffer::list hint;
+        stone::buffer::list hint;
         i.decode_bl(hint);
         auto hiter = hint.cbegin();
         if (type == Transaction::COLL_HINT_EXPECTED_NUM_OBJECTS) {
@@ -842,7 +842,7 @@ void MemStore::_do_transaction(Transaction& t)
       break;
 
     case Transaction::OP_COLL_MOVE:
-      ceph_abort_msg("deprecated");
+      stone_abort_msg("deprecated");
       break;
 
     case Transaction::OP_COLL_MOVE_RENAME:
@@ -870,19 +870,19 @@ void MemStore::_do_transaction(Transaction& t)
 
     case Transaction::OP_COLL_SETATTR:
       {
-	ceph_abort_msg("not implemented");
+	stone_abort_msg("not implemented");
       }
       break;
 
     case Transaction::OP_COLL_RMATTR:
       {
-	ceph_abort_msg("not implemented");
+	stone_abort_msg("not implemented");
       }
       break;
 
     case Transaction::OP_COLL_RENAME:
       {
-	ceph_abort_msg("not implemented");
+	stone_abort_msg("not implemented");
       }
       break;
 
@@ -897,7 +897,7 @@ void MemStore::_do_transaction(Transaction& t)
       {
         coll_t cid = i.get_cid(op->cid);
         ghobject_t oid = i.get_oid(op->oid);
-        ceph::buffer::list aset_bl;
+        stone::buffer::list aset_bl;
         i.decode_attrset_bl(&aset_bl);
 	r = _omap_setkeys(cid, oid, aset_bl);
       }
@@ -906,7 +906,7 @@ void MemStore::_do_transaction(Transaction& t)
       {
         coll_t cid = i.get_cid(op->cid);
         ghobject_t oid = i.get_oid(op->oid);
-        ceph::buffer::list keys_bl;
+        stone::buffer::list keys_bl;
         i.decode_keyset_bl(&keys_bl);
 	r = _omap_rmkeys(cid, oid, keys_bl);
       }
@@ -925,13 +925,13 @@ void MemStore::_do_transaction(Transaction& t)
       {
         coll_t cid = i.get_cid(op->cid);
         ghobject_t oid = i.get_oid(op->oid);
-        ceph::buffer::list bl;
+        stone::buffer::list bl;
         i.decode_bl(bl);
 	r = _omap_setheader(cid, oid, bl);
       }
       break;
     case Transaction::OP_SPLIT_COLLECTION:
-      ceph_abort_msg("deprecated");
+      stone_abort_msg("deprecated");
       break;
     case Transaction::OP_SPLIT_COLLECTION2:
       {
@@ -965,7 +965,7 @@ void MemStore::_do_transaction(Transaction& t)
 
     default:
       derr << "bad op " << op->op << dendl;
-      ceph_abort();
+      stone_abort();
     }
 
     if (r < 0) {
@@ -1002,13 +1002,13 @@ void MemStore::_do_transaction(Transaction& t)
 		<< " (op " << pos << ", counting from 0)" << dendl;
 	dout(0) << msg << dendl;
 	dout(0) << " transaction dump:\n";
-	ceph::JSONFormatter f(true);
+	stone::JSONFormatter f(true);
 	f.open_object_section("transaction");
 	t.dump(&f);
 	f.close_section();
 	f.flush(*_dout);
 	*_dout << dendl;
-	ceph_abort_msg("unexpected error");
+	stone_abort_msg("unexpected error");
       }
     }
 
@@ -1028,12 +1028,12 @@ int MemStore::_touch(const coll_t& cid, const ghobject_t& oid)
 }
 
 int MemStore::_write(const coll_t& cid, const ghobject_t& oid,
-		     uint64_t offset, size_t len, const ceph::buffer::list& bl,
+		     uint64_t offset, size_t len, const stone::buffer::list& bl,
 		     uint32_t fadvise_flags)
 {
   dout(10) << __func__ << " " << cid << " " << oid << " "
 	   << offset << "~" << len << dendl;
-  ceph_assert(len == bl.length());
+  stone_assert(len == bl.length());
 
   CollectionRef c = get_collection(cid);
   if (!c)
@@ -1054,7 +1054,7 @@ int MemStore::_zero(const coll_t& cid, const ghobject_t& oid,
 {
   dout(10) << __func__ << " " << cid << " " << oid << " " << offset << "~"
 	   << len << dendl;
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   bl.append_zero(len);
   return _write(cid, oid, offset, len, bl);
 }
@@ -1096,7 +1096,7 @@ int MemStore::_remove(const coll_t& cid, const ghobject_t& oid)
 }
 
 int MemStore::_setattrs(const coll_t& cid, const ghobject_t& oid,
-			std::map<std::string,ceph::buffer::ptr>& aset)
+			std::map<std::string,stone::buffer::ptr>& aset)
 {
   dout(10) << __func__ << " " << cid << " " << oid << dendl;
   CollectionRef c = get_collection(cid);
@@ -1218,7 +1218,7 @@ int MemStore::_omap_clear(const coll_t& cid, const ghobject_t &oid)
 }
 
 int MemStore::_omap_setkeys(const coll_t& cid, const ghobject_t &oid,
-			    ceph::buffer::list& aset_bl)
+			    stone::buffer::list& aset_bl)
 {
   dout(10) << __func__ << " " << cid << " " << oid << dendl;
   CollectionRef c = get_collection(cid);
@@ -1241,7 +1241,7 @@ int MemStore::_omap_setkeys(const coll_t& cid, const ghobject_t &oid,
 }
 
 int MemStore::_omap_rmkeys(const coll_t& cid, const ghobject_t &oid,
-			   ceph::buffer::list& keys_bl)
+			   stone::buffer::list& keys_bl)
 {
   dout(10) << __func__ << " " << cid << " " << oid << dendl;
   CollectionRef c = get_collection(cid);
@@ -1283,7 +1283,7 @@ int MemStore::_omap_rmkeyrange(const coll_t& cid, const ghobject_t &oid,
 }
 
 int MemStore::_omap_setheader(const coll_t& cid, const ghobject_t &oid,
-			      const ceph::buffer::list &bl)
+			      const stone::buffer::list &bl)
 {
   dout(10) << __func__ << " " << cid << " " << oid << dendl;
   CollectionRef c = get_collection(cid);
@@ -1306,7 +1306,7 @@ int MemStore::_create_collection(const coll_t& cid, int bits)
   if (!result.second)
     return -EEXIST;
   auto p = new_coll_map.find(cid);
-  ceph_assert(p != new_coll_map.end());
+  stone_assert(p != new_coll_map.end());
   result.first->second = p->second;
   result.first->second->bits = bits;
   new_coll_map.erase(p);
@@ -1317,7 +1317,7 @@ int MemStore::_destroy_collection(const coll_t& cid)
 {
   dout(10) << __func__ << " " << cid << dendl;
   std::lock_guard l{coll_lock};
-  ceph::unordered_map<coll_t,CollectionRef>::iterator cp = coll_map.find(cid);
+  stone::unordered_map<coll_t,CollectionRef>::iterator cp = coll_map.find(cid);
   if (cp == coll_map.end())
     return -ENOENT;
   {
@@ -1367,7 +1367,7 @@ int MemStore::_collection_move_rename(const coll_t& oldcid, const ghobject_t& ol
     return -ENOENT;
 
   // note: c and oc may be the same
-  ceph_assert(&(*c) == &(*oc));
+  stone_assert(&(*c) == &(*oc));
 
   std::lock_guard l{c->lock};
   if (c->object_hash.count(oid))
@@ -1413,7 +1413,7 @@ int MemStore::_split_collection(const coll_t& cid, uint32_t bits, uint32_t match
   }
 
   sc->bits = bits;
-  ceph_assert(dc->bits == (int)bits);
+  stone_assert(dc->bits == (int)bits);
 
   return 0;
 }
@@ -1446,8 +1446,8 @@ int MemStore::_merge_collection(const coll_t& cid, uint32_t bits, coll_t dest)
 
   {
     std::lock_guard l{coll_lock};
-    ceph::unordered_map<coll_t,CollectionRef>::iterator cp = coll_map.find(cid);
-    ceph_assert(cp != coll_map.end());
+    stone::unordered_map<coll_t,CollectionRef>::iterator cp = coll_map.find(cid);
+    stone_assert(cp != coll_map.end());
     used_bytes -= cp->second->used_bytes();
     coll_map.erase(cp);
   }
@@ -1457,24 +1457,24 @@ int MemStore::_merge_collection(const coll_t& cid, uint32_t bits, coll_t dest)
 
 namespace {
 struct BufferlistObject : public MemStore::Object {
-  ceph::spinlock mutex;
-  ceph::buffer::list data;
+  stone::spinlock mutex;
+  stone::buffer::list data;
 
   size_t get_size() const override { return data.length(); }
 
-  int read(uint64_t offset, uint64_t len, ceph::buffer::list &bl) override;
-  int write(uint64_t offset, const ceph::buffer::list &bl) override;
+  int read(uint64_t offset, uint64_t len, stone::buffer::list &bl) override;
+  int write(uint64_t offset, const stone::buffer::list &bl) override;
   int clone(Object *src, uint64_t srcoff, uint64_t len,
             uint64_t dstoff) override;
   int truncate(uint64_t offset) override;
 
-  void encode(ceph::buffer::list& bl) const override {
+  void encode(stone::buffer::list& bl) const override {
     ENCODE_START(1, 1, bl);
     encode(data, bl);
     encode_base(bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) override {
+  void decode(stone::buffer::list::const_iterator& p) override {
     DECODE_START(1, p);
     decode(data, p);
     decode_base(p);
@@ -1484,21 +1484,21 @@ struct BufferlistObject : public MemStore::Object {
 }
 // BufferlistObject
 int BufferlistObject::read(uint64_t offset, uint64_t len,
-                                     ceph::buffer::list &bl)
+                                     stone::buffer::list &bl)
 {
   std::lock_guard<decltype(mutex)> lock(mutex);
   bl.substr_of(data, offset, len);
   return bl.length();
 }
 
-int BufferlistObject::write(uint64_t offset, const ceph::buffer::list &src)
+int BufferlistObject::write(uint64_t offset, const stone::buffer::list &src)
 {
   unsigned len = src.length();
 
   std::lock_guard<decltype(mutex)> lock(mutex);
 
   // before
-  ceph::buffer::list newdata;
+  stone::buffer::list newdata;
   if (get_size() >= offset) {
     newdata.substr_of(data, 0, offset);
   } else {
@@ -1512,7 +1512,7 @@ int BufferlistObject::write(uint64_t offset, const ceph::buffer::list &src)
 
   // after
   if (get_size() > offset + len) {
-    ceph::buffer::list tail;
+    stone::buffer::list tail;
     tail.substr_of(data, offset + len, get_size() - (offset + len));
     newdata.append(tail);
   }
@@ -1528,7 +1528,7 @@ int BufferlistObject::clone(Object *src, uint64_t srcoff,
   if (srcbl == nullptr)
     return -ENOTSUP;
 
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   {
     std::lock_guard<decltype(srcbl->mutex)> lock(srcbl->mutex);
     if (srcoff == dstoff && len == src->get_size()) {
@@ -1544,7 +1544,7 @@ int BufferlistObject::truncate(uint64_t size)
 {
   std::lock_guard<decltype(mutex)> lock(mutex);
   if (get_size() > size) {
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     bl.substr_of(data, 0, size);
     data = std::move(bl);
   } else if (get_size() == size) {
@@ -1568,20 +1568,20 @@ struct MemStore::PageSetObject : public Object {
 
   size_t get_size() const override { return data_len; }
 
-  int read(uint64_t offset, uint64_t len, ceph::buffer::list &bl) override;
-  int write(uint64_t offset, const ceph::buffer::list &bl) override;
+  int read(uint64_t offset, uint64_t len, stone::buffer::list &bl) override;
+  int write(uint64_t offset, const stone::buffer::list &bl) override;
   int clone(Object *src, uint64_t srcoff, uint64_t len,
             uint64_t dstoff) override;
   int truncate(uint64_t offset) override;
 
-  void encode(ceph::buffer::list& bl) const override {
+  void encode(stone::buffer::list& bl) const override {
     ENCODE_START(1, 1, bl);
     encode(data_len, bl);
     data.encode(bl);
     encode_base(bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) override {
+  void decode(stone::buffer::list::const_iterator& p) override {
     DECODE_START(1, p);
     decode(data_len, p);
     data.decode(p);
@@ -1603,7 +1603,7 @@ thread_local PageSet::page_vector MemStore::PageSetObject::tls_pages;
 #define DEFINE_PAGE_VECTOR(name) PageSet::page_vector name;
 #endif
 
-int MemStore::PageSetObject::read(uint64_t offset, uint64_t len, ceph::buffer::list& bl)
+int MemStore::PageSetObject::read(uint64_t offset, uint64_t len, stone::buffer::list& bl)
 {
   const auto start = offset;
   const auto end = offset + len;
@@ -1613,7 +1613,7 @@ int MemStore::PageSetObject::read(uint64_t offset, uint64_t len, ceph::buffer::l
   data.get_range(offset, len, tls_pages);
 
   // allocate a buffer for the data
-  ceph::buffer::ptr buf(len);
+  stone::buffer::ptr buf(len);
 
   auto p = tls_pages.begin();
   while (remaining) {
@@ -1652,7 +1652,7 @@ int MemStore::PageSetObject::read(uint64_t offset, uint64_t len, ceph::buffer::l
   return len;
 }
 
-int MemStore::PageSetObject::write(uint64_t offset, const ceph::buffer::list &src)
+int MemStore::PageSetObject::write(uint64_t offset, const stone::buffer::list &src)
 {
   unsigned len = src.length();
 
@@ -1795,6 +1795,6 @@ int MemStore::PageSetObject::truncate(uint64_t size)
 
 MemStore::ObjectRef MemStore::Collection::create_object() const {
   if (use_page_set)
-    return ceph::make_ref<PageSetObject>(cct->_conf->memstore_page_size);
+    return stone::make_ref<PageSetObject>(cct->_conf->memstore_page_size);
   return new BufferlistObject();
 }

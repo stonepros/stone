@@ -11,7 +11,7 @@
 #include "librbd/Utils.h"
 #include "librbd/managed_lock/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::managed_lock::ReacquireRequest: " \
                            << this << ": " << __func__
@@ -42,7 +42,7 @@ void ReacquireRequest<I>::send() {
 
 template <typename I>
 void ReacquireRequest<I>::set_cookie() {
-  CephContext *cct = reinterpret_cast<CephContext *>(m_ioctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(m_ioctx.cct());
   ldout(cct, 10) << dendl;
 
   librados::ObjectWriteOperation op;
@@ -54,13 +54,13 @@ void ReacquireRequest<I>::set_cookie() {
   librados::AioCompletion *rados_completion = create_rados_callback<
     ReacquireRequest, &ReacquireRequest::handle_set_cookie>(this);
   int r = m_ioctx.aio_operate(m_oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 template <typename I>
 void ReacquireRequest<I>::handle_set_cookie(int r) {
-  CephContext *cct = reinterpret_cast<CephContext *>(m_ioctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(m_ioctx.cct());
   ldout(cct, 10) << ": r=" << r << dendl;
 
   if (r == -EOPNOTSUPP) {

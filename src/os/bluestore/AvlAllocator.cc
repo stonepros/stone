@@ -9,7 +9,7 @@
 #include "common/debug.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_bluestore
+#define dout_subsys stone_subsys_bluestore
 #undef  dout_prefix
 #define dout_prefix *_dout << "AvlAllocator "
 
@@ -90,7 +90,7 @@ uint64_t AvlAllocator::_pick_block_fits(uint64_t size,
 
 void AvlAllocator::_add_to_tree(uint64_t start, uint64_t size)
 {
-  ceph_assert(size != 0);
+  stone_assert(size != 0);
 
   uint64_t end = start + size;
 
@@ -136,7 +136,7 @@ void AvlAllocator::_process_range_removal(uint64_t start, uint64_t end,
   if (left_over && right_over) {
     auto old_right_end = rs->end;
     auto insert_pos = rs;
-    ceph_assert(insert_pos != range_tree.end());
+    stone_assert(insert_pos != range_tree.end());
     ++insert_pos;
     rs->end = start;
 
@@ -162,14 +162,14 @@ void AvlAllocator::_remove_from_tree(uint64_t start, uint64_t size)
 {
   uint64_t end = start + size;
 
-  ceph_assert(size != 0);
-  ceph_assert(size <= num_free);
+  stone_assert(size != 0);
+  stone_assert(size <= num_free);
 
   auto rs = range_tree.find(range_t{start, end}, range_tree.key_comp());
   /* Make sure we completely overlap with someone */
-  ceph_assert(rs != range_tree.end());
-  ceph_assert(rs->start <= start);
-  ceph_assert(rs->end >= end);
+  stone_assert(rs != range_tree.end());
+  stone_assert(rs->start <= start);
+  stone_assert(rs->end >= end);
 
   _process_range_removal(start, end, rs);
 }
@@ -179,7 +179,7 @@ void AvlAllocator::_try_remove_from_tree(uint64_t start, uint64_t size,
 {
   uint64_t end = start + size;
 
-  ceph_assert(size != 0);
+  stone_assert(size != 0);
 
   auto rs = range_tree.find(range_t{ start, end },
     range_tree.key_comp());
@@ -249,7 +249,7 @@ int AvlAllocator::_allocate(
       return -ENOSPC;
     }
     size = p2align(max_size, unit);
-    ceph_assert(size > 0);
+    stone_assert(size > 0);
     force_range_size_alloc = true;
   }
 
@@ -270,7 +270,7 @@ int AvlAllocator::_allocate(
      * region.
      */
     uint64_t align = size & -size;
-    ceph_assert(align != 0);
+    stone_assert(align != 0);
     uint64_t* cursor = &lbas[cbits(align) - 1];
     start = _pick_block_after(cursor, size, unit);
     dout(20) << __func__ << " first fit=" << start << " size=" << size << dendl;
@@ -327,7 +327,7 @@ void AvlAllocator::_shutdown()
   range_tree.clear_and_dispose(dispose_rs{});
 }
 
-AvlAllocator::AvlAllocator(CephContext* cct,
+AvlAllocator::AvlAllocator(StoneContext* cct,
                            int64_t device_size,
                            int64_t block_size,
                            uint64_t max_mem,
@@ -347,7 +347,7 @@ AvlAllocator::AvlAllocator(CephContext* cct,
   cct(cct)
 {}
 
-AvlAllocator::AvlAllocator(CephContext* cct,
+AvlAllocator::AvlAllocator(StoneContext* cct,
 			   int64_t device_size,
 			   int64_t block_size,
 			   const std::string& name) :
@@ -372,8 +372,8 @@ int64_t AvlAllocator::allocate(
                  << " max_alloc_size 0x" << max_alloc_size
                  << " hint 0x" << hint
                  << std::dec << dendl;
-  ceph_assert(isp2(unit));
-  ceph_assert(want % unit == 0);
+  stone_assert(isp2(unit));
+  stone_assert(want % unit == 0);
 
   if (max_alloc_size == 0) {
     max_alloc_size = want;

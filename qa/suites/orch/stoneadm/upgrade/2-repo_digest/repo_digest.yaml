@@ -1,0 +1,4 @@
+tasks:
+- stoneadm.shell:
+    mon.a:
+      - stone config set mgr mgr/stoneadm/use_repo_digest false --force

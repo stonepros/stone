@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_MIRROR_IMAGE_REPLAYER_STATE_BUILDER_H
-#define CEPH_RBD_MIRROR_IMAGE_REPLAYER_STATE_BUILDER_H
+#ifndef STONE_RBD_MIRROR_IMAGE_REPLAYER_STATE_BUILDER_H
+#define STONE_RBD_MIRROR_IMAGE_REPLAYER_STATE_BUILDER_H
 
 #include "include/rados/librados_fwd.hpp"
 #include "cls/rbd/cls_rbd_types.h"
@@ -110,4 +110,4 @@ private:
 
 extern template class rbd::mirror::image_replayer::StateBuilder<librbd::ImageCtx>;
 
-#endif // CEPH_RBD_MIRROR_IMAGE_REPLAYER_STATE_BUILDER_H
+#endif // STONE_RBD_MIRROR_IMAGE_REPLAYER_STATE_BUILDER_H

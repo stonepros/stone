@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - bad backtrace
       - object missing on disk
@@ -19,7 +19,7 @@ overrides:
       - MDS_READ_ONLY
       - force file system read-only
 tasks:
-  - cephfs_test_runner:
+  - stonefs_test_runner:
       modules:
-        - tasks.cephfs.test_damage
+        - tasks.stonefs.test_damage
 

@@ -1,8 +1,8 @@
 // -*- mode:C; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_OBJECT_MAP_LOCK_REQUEST_H
-#define CEPH_LIBRBD_OBJECT_MAP_LOCK_REQUEST_H
+#ifndef STONE_LIBRBD_OBJECT_MAP_LOCK_REQUEST_H
+#define STONE_LIBRBD_OBJECT_MAP_LOCK_REQUEST_H
 
 #include "include/buffer.h"
 #include "cls/lock/cls_lock_types.h"
@@ -72,4 +72,4 @@ private:
 
 extern template class librbd::object_map::LockRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_OBJECT_MAP_LOCK_REQUEST_H
+#endif // STONE_LIBRBD_OBJECT_MAP_LOCK_REQUEST_H

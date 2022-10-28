@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
  *
@@ -24,11 +24,11 @@
 extern "C"{
 #include <curl/curl.h>
 }
-#include "common/ceph_crypto.h"
+#include "common/stone_crypto.h"
 #include "include/str_list.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/code_environment.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/Finisher.h"
 #include "global/global_init.h"
 #include "rgw/rgw_common.h"
@@ -39,22 +39,22 @@ using namespace std;
 
 #define CURL_VERBOSE 0
 #define HTTP_RESPONSE_STR "RespCode"
-#define CEPH_CRYPTO_HMACSHA1_DIGESTSIZE 20
+#define STONE_CRYPTO_HMACSHA1_DIGESTSIZE 20
 #define RGW_ADMIN_RESP_PATH "/tmp/.test_rgw_admin_resp"
-#define CEPH_UID  "ceph"
+#define STONE_UID  "stone"
 
-static string uid = CEPH_UID;
-static string display_name = "CEPH";
+static string uid = STONE_UID;
+static string display_name = "STONE";
 static string meta_caps = "metadata";
 
-extern "C" int ceph_armor(char *dst, const char *dst_end, 
+extern "C" int stone_armor(char *dst, const char *dst_end, 
                           const char *src, const char *end);
 static void print_usage(char *exec){
   cout << "Usage: " << exec << " <Options>\n";
   cout << "Options:\n"
           "-g <gw-ip> - The ip address of the gateway\n"
           "-p <gw-port> - The port number of the gateway\n"
-          "-c <ceph.conf> - Absolute path of ceph config file\n"
+          "-c <stone.conf> - Absolute path of stone config file\n"
           "-rgw-admin <path/to/radosgw-admin> - radosgw-admin absolute path\n";
 }
 
@@ -96,7 +96,7 @@ class test_helper {
     string& get_rgw_admin_path() {
       return rgw_admin_path;
     }
-    string& get_ceph_conf_path() {
+    string& get_stone_conf_path() {
       return conf_path;
     }
     void set_creds(string& c) {
@@ -168,14 +168,14 @@ static inline void buf_to_hex(const unsigned char *buf, int len, char *str)
 
 static void calc_hmac_sha1(const char *key, int key_len,
                     const char *msg, int msg_len, char *dest)
-/* destination should be CEPH_CRYPTO_HMACSHA1_DIGESTSIZE bytes long */
+/* destination should be STONE_CRYPTO_HMACSHA1_DIGESTSIZE bytes long */
 {
-  ceph::crypto::HMACSHA1 hmac((const unsigned char *)key, key_len);
+  stone::crypto::HMACSHA1 hmac((const unsigned char *)key, key_len);
   hmac.Update((const unsigned char *)msg, msg_len);
   hmac.Final((unsigned char *)dest);
   
-  char hex_str[(CEPH_CRYPTO_HMACSHA1_DIGESTSIZE * 2) + 1];
-  admin_meta::buf_to_hex((unsigned char *)dest, CEPH_CRYPTO_HMACSHA1_DIGESTSIZE, hex_str);
+  char hex_str[(STONE_CRYPTO_HMACSHA1_DIGESTSIZE * 2) + 1];
+  admin_meta::buf_to_hex((unsigned char *)dest, STONE_CRYPTO_HMACSHA1_DIGESTSIZE, hex_str);
 }
 
 static int get_s3_auth(const string &method, string creds, const string &date, string res, string& out){
@@ -188,7 +188,7 @@ static int get_s3_auth(const string &method, string creds, const string &date, s
     secret.assign(creds, off + 1, string::npos);
 
     /*sprintf(auth_hdr, "%s\n\n\n%s\n%s", req_type, date, res);*/
-    char hmac_sha1[CEPH_CRYPTO_HMACSHA1_DIGESTSIZE];
+    char hmac_sha1[STONE_CRYPTO_HMACSHA1_DIGESTSIZE];
     char b64[65]; /* 64 is really enough */
     size_t off = res.find("?");
     if(off == string::npos)
@@ -198,10 +198,10 @@ static int get_s3_auth(const string &method, string creds, const string &date, s
     auth_hdr.append(method + string("\n\n\n") + date + string("\n") + tmp_res);
     admin_meta::calc_hmac_sha1(secret.c_str(), secret.length(), 
                                auth_hdr.c_str(), auth_hdr.length(), hmac_sha1);
-    int ret = ceph_armor(b64, b64 + 64, hmac_sha1,
-                         hmac_sha1 + CEPH_CRYPTO_HMACSHA1_DIGESTSIZE);
+    int ret = stone_armor(b64, b64 + 64, hmac_sha1,
+                         hmac_sha1 + STONE_CRYPTO_HMACSHA1_DIGESTSIZE);
     if (ret < 0) {
-      cout << "ceph_armor failed\n";
+      cout << "stone_armor failed\n";
       return -1;
     }
     b64[ret] = 0;
@@ -369,7 +369,7 @@ int get_creds(string& json, string& creds) {
 int user_create(string& uid, string& display_name, bool set_creds = true) {
   stringstream ss;
   string creds;
-  ss << "-c " << g_test->get_ceph_conf_path() << " user create --uid=" << uid
+  ss << "-c " << g_test->get_stone_conf_path() << " user create --uid=" << uid
     << " --display-name=" << display_name;
 
   string out;
@@ -386,7 +386,7 @@ int user_create(string& uid, string& display_name, bool set_creds = true) {
 
 int user_info(string& uid, string& display_name, RGWUserInfo& uinfo) {
   stringstream ss;
-  ss << "-c " << g_test->get_ceph_conf_path() << " user info --uid=" << uid
+  ss << "-c " << g_test->get_stone_conf_path() << " user info --uid=" << uid
     << " --display-name=" << display_name;
 
   string out;
@@ -406,7 +406,7 @@ int user_info(string& uid, string& display_name, RGWUserInfo& uinfo) {
 
 int user_rm(string& uid, string& display_name) {
   stringstream ss;
-  ss << "-c " << g_test->get_ceph_conf_path() << " user rm --uid=" << uid
+  ss << "-c " << g_test->get_stone_conf_path() << " user rm --uid=" << uid
     << " --display-name=" << display_name;
 
   string out;
@@ -421,7 +421,7 @@ int user_rm(string& uid, string& display_name) {
 int meta_caps_add(const char *perm) {
   stringstream ss;
 
-  ss << "-c " << g_test->get_ceph_conf_path() << " caps add --caps=" <<
+  ss << "-c " << g_test->get_stone_conf_path() << " caps add --caps=" <<
      meta_caps << "=" << perm << " --uid=" << uid;
   string out;
   string cmd = ss.str();
@@ -435,7 +435,7 @@ int meta_caps_add(const char *perm) {
 int meta_caps_rm(const char *perm) {
   stringstream ss;
 
-  ss << "-c " << g_test->get_ceph_conf_path() << " caps rm --caps=" <<
+  ss << "-c " << g_test->get_stone_conf_path() << " caps rm --caps=" <<
      meta_caps << "=" << perm << " --uid=" << uid;
   string out;
   string cmd = ss.str();
@@ -596,7 +596,7 @@ TEST(TestRGWAdmin, meta_list){
   EXPECT_TRUE(found);
 
   /*Check with second user*/
-  string uid2 = "ceph1", display_name2 = "CEPH1";
+  string uid2 = "stone1", display_name2 = "STONE1";
   ASSERT_EQ(0, user_create(uid2, display_name2, false));
   /*Check the list of keys*/
   g_test->send_request(string("GET"), string("/admin/metadata/user"));
@@ -783,88 +783,88 @@ TEST(TestRGWAdmin, meta_lock_unlock) {
   ASSERT_EQ(0, user_create(uid, display_name));
   ASSERT_EQ(0, meta_caps_add(perm));
 
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&lock&length=3";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&lock&length=3";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(400U, g_test->get_resp_code()); /*Bad request*/
   
-  rest_req = "/admin/metadata/user?lock&length=3&lock_id=ceph";
-  g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
-  EXPECT_EQ(400U, g_test->get_resp_code()); /*Bad request*/
-
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&unlock";
+  rest_req = "/admin/metadata/user?lock&length=3&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(400U, g_test->get_resp_code()); /*Bad request*/
 
-  rest_req = "/admin/metadata/user?unlock&lock_id=ceph";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&unlock";
+  g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
+  EXPECT_EQ(400U, g_test->get_resp_code()); /*Bad request*/
+
+  rest_req = "/admin/metadata/user?unlock&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(400U, g_test->get_resp_code()); /*Bad request*/
   
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&lock&length=3&lock_id=ceph";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&lock&length=3&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(200U, g_test->get_resp_code()); 
   
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&unlock&lock_id=ceph";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&unlock&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(200U, g_test->get_resp_code()); 
   
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&lock&length=3&lock_id=ceph1";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&lock&length=3&lock_id=stone1";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(200U, g_test->get_resp_code()); 
   
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&unlock&lock_id=ceph1";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&unlock&lock_id=stone1";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(200U, g_test->get_resp_code()); 
   
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&lock&length=3&lock_id=ceph";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&lock&length=3&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(200U, g_test->get_resp_code()); 
   utime_t sleep_time(3, 0);
 
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&lock&length=3&lock_id=ceph1";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&lock&length=3&lock_id=stone1";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(500U, g_test->get_resp_code()); 
 
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&lock&length=3&lock_id=ceph";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&lock&length=3&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(409U, g_test->get_resp_code()); 
   sleep_time.sleep();
 
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&lock&length=3&lock_id=ceph1";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&lock&length=3&lock_id=stone1";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(200U, g_test->get_resp_code()); 
   
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&unlock&lock_id=ceph1";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&unlock&lock_id=stone1";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(200U, g_test->get_resp_code()); 
 
   ASSERT_EQ(0, meta_caps_rm(perm));
   perm = "read";
   ASSERT_EQ(0, meta_caps_add(perm));
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&lock&length=3&lock_id=ceph";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&lock&length=3&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(403U, g_test->get_resp_code()); 
   
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&unlock&lock_id=ceph";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&unlock&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(403U, g_test->get_resp_code()); 
   
   ASSERT_EQ(0, meta_caps_rm(perm));
   perm = "write";
   ASSERT_EQ(0, meta_caps_add(perm));
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&lock&length=3&lock_id=ceph";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&lock&length=3&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(200U, g_test->get_resp_code()); 
   
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&unlock&lock_id=ceph";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&unlock&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(200U, g_test->get_resp_code()); 
   
   ASSERT_EQ(0, meta_caps_rm(perm));
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&lock&length=3&lock_id=ceph";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&lock&length=3&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(403U, g_test->get_resp_code()); 
   
-  rest_req = "/admin/metadata/user?key=" CEPH_UID "&unlock&lock_id=ceph";
+  rest_req = "/admin/metadata/user?key=" STONE_UID "&unlock&lock_id=stone";
   g_test->send_request(string("POST"), rest_req, read_dummy_post, NULL, sizeof(int));
   EXPECT_EQ(403U, g_test->get_resp_code()); 
   
@@ -897,12 +897,12 @@ int main(int argc, char *argv[]){
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
   g_test = new admin_meta::test_helper();
-  finisher = new Finisher(g_ceph_context);
+  finisher = new Finisher(g_stone_context);
 #ifdef GTEST
   ::testing::InitGoogleTest(&argc, argv);
 #endif

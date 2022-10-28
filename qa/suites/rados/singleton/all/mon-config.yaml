@@ -13,9 +13,9 @@ openstack:
       size: 10 # GB
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
 - workunit:
     clients:
       all:

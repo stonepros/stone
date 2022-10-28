@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_PRIORITY_CACHE_H
-#define CEPH_PRIORITY_CACHE_H
+#ifndef STONE_PRIORITY_CACHE_H
+#define STONE_PRIORITY_CACHE_H
 
 #include <stdint.h>
 #include <string>
@@ -103,7 +103,7 @@ namespace PriorityCache {
   };
 
   class Manager {
-    CephContext* cct = nullptr;
+    StoneeContext* cct = nullptr;
     PerfCounters* logger;
     std::unordered_map<std::string, PerfCounters*> loggers;
     std::unordered_map<std::string, std::vector<int>> indexes;
@@ -119,7 +119,7 @@ namespace PriorityCache {
     bool reserve_extra;
     std::string name;
   public:
-    Manager(CephContext *c, uint64_t min, uint64_t max, uint64_t target,
+    Manager(StoneeContext *c, uint64_t min, uint64_t max, uint64_t target,
             bool reserve_extra, const std::string& name = std::string());
     ~Manager();
     void set_min_memory(uint64_t min) {

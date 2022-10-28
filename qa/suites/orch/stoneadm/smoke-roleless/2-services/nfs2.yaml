@@ -1,0 +1,12 @@
+tasks:
+
+# stop kernel nfs server, if running
+- vip.exec:
+    all-hosts:
+      - systemctl stop nfs-server
+
+- stoneadm.shell:
+    host.a:
+      - stone nfs cluster create foo
+- stoneadm.wait_for_service:
+    service: nfs.foo

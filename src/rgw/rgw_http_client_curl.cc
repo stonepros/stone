@@ -7,8 +7,8 @@
 #include <curl/curl.h>
 
 #include "rgw_common.h"
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 #ifdef WITH_CURL_OPENSSL
 #include <openssl/crypto.h>

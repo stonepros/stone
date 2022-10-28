@@ -8,7 +8,7 @@ openstack:
     count: 4
     size: 10 # GB
 overrides:
-  ceph:
+  stone:
     conf:
       osd:
         osd shutdown pgref assert: true

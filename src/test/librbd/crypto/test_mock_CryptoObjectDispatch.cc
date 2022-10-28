@@ -122,7 +122,7 @@ struct TestMockCryptoCryptoObjectDispatch : public TestMockFixture {
   C_SaferCond dispatched_cond;
   Context *on_dispatched = &dispatched_cond;
   Context *dispatcher_ctx;
-  ceph::bufferlist data;
+  stone::bufferlist data;
   io::DispatchResult dispatch_result;
   io::Extents extent_map;
   int object_dispatch_flags = 0;
@@ -334,7 +334,7 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, AlignedRead) {
 TEST_F(TestMockCryptoCryptoObjectDispatch, ReadFromParent) {
   io::ReadExtents extents = {{0, 4096}, {8192, 4096}};
   expect_object_read(&extents);
-  expect_read_parent(mock_utils, 0, &extents, CEPH_NOSNAP, 8192);
+  expect_read_parent(mock_utils, 0, &extents, STONE_NOSNAP, 8192);
   ASSERT_TRUE(mock_crypto_object_dispatch->read(
           0, &extents, mock_image_ctx->get_data_io_context(), 0, 0, {},
           nullptr, &object_dispatch_flags, &dispatch_result,
@@ -415,7 +415,7 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, AlignedWrite) {
 }
 
 TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWrite) {
-  ceph::bufferlist write_data;
+  stone::bufferlist write_data;
   uint64_t version = 1234;
   write_data.append(std::string(8192, '1'));
   io::ReadExtents extents = {{0, 4096}, {8192, 4096}};
@@ -439,7 +439,7 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWrite) {
 }
 
 TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteWithNoObject) {
-  ceph::bufferlist write_data;
+  stone::bufferlist write_data;
   write_data.append(std::string(8192, '1'));
   io::ReadExtents extents = {{0, 4096}, {8192, 4096}};
   expect_object_read(&extents);
@@ -463,7 +463,7 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteWithNoObject) {
 }
 
 TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteFailCreate) {
-  ceph::bufferlist write_data;
+  stone::bufferlist write_data;
   write_data.append(std::string(8192, '1'));
   io::ReadExtents extents = {{0, 4096}, {8192, 4096}};
   expect_object_read(&extents);
@@ -505,7 +505,7 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteCopyup) {
   MockExclusiveLock mock_exclusive_lock;
   mock_image_ctx->exclusive_lock = &mock_exclusive_lock;
 
-  ceph::bufferlist write_data;
+  stone::bufferlist write_data;
   write_data.append(std::string(8192, '1'));
   io::ReadExtents extents = {{0, 4096}, {8192, 4096}};
   expect_object_read(&extents);
@@ -550,7 +550,7 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteEmptyCopyup) {
   MockExclusiveLock mock_exclusive_lock;
   mock_image_ctx->exclusive_lock = &mock_exclusive_lock;
 
-  ceph::bufferlist write_data;
+  stone::bufferlist write_data;
   write_data.append(std::string(8192, '1'));
   io::ReadExtents extents = {{0, 4096}, {8192, 4096}};
   expect_object_read(&extents);
@@ -589,7 +589,7 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteEmptyCopyup) {
 }
 
 TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteFailVersionCheck) {
-  ceph::bufferlist write_data;
+  stone::bufferlist write_data;
   uint64_t version = 1234;
   write_data.append(std::string(8192, '1'));
   io::ReadExtents extents = {{0, 4096}, {8192, 4096}};
@@ -624,7 +624,7 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteFailVersionCheck) {
 }
 
 TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteWithAssertVersion) {
-  ceph::bufferlist write_data;
+  stone::bufferlist write_data;
   uint64_t version = 1234;
   uint64_t assert_version = 1233;
   write_data.append(std::string(8192, '1'));
@@ -644,7 +644,7 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteWithAssertVersion) {
 }
 
 TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteWithExclusiveCreate) {
-  ceph::bufferlist write_data;
+  stone::bufferlist write_data;
   write_data.append(std::string(8192, '1'));
   io::ReadExtents extents = {{0, 4096}, {8192, 4096}};
   extents[0].bl.append(std::string(4096, '2'));
@@ -662,10 +662,10 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, UnalignedWriteWithExclusiveCreate) {
 }
 
 TEST_F(TestMockCryptoCryptoObjectDispatch, CompareAndWrite) {
-  ceph::bufferlist write_data;
+  stone::bufferlist write_data;
   uint64_t version = 1234;
   write_data.append(std::string(8192, '1'));
-  ceph::bufferlist cmp_data;
+  stone::bufferlist cmp_data;
   cmp_data.append(std::string(4096, '2'));
   io::ReadExtents extents = {{0, 4096}, {8192, 4096}, {0, 8192}};
   extents[0].bl.append(std::string(4096, '2'));
@@ -690,10 +690,10 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, CompareAndWrite) {
 }
 
 TEST_F(TestMockCryptoCryptoObjectDispatch, CompareAndWriteFail) {
-  ceph::bufferlist write_data;
+  stone::bufferlist write_data;
   uint64_t version = 1234;
   write_data.append(std::string(8192, '1'));
-  ceph::bufferlist cmp_data;
+  stone::bufferlist cmp_data;
   cmp_data.append(std::string(4094, '2') + std::string(2, '4'));
   io::ReadExtents extents = {{0, 4096}, {8192, 4096}, {0, 8192}};
   extents[0].bl.append(std::string(4096, '2'));
@@ -716,7 +716,7 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, CompareAndWriteFail) {
 
 TEST_F(TestMockCryptoCryptoObjectDispatch, WriteSame) {
   io::LightweightBufferExtents buffer_extents;
-  ceph::bufferlist write_data;
+  stone::bufferlist write_data;
   write_data.append(std::string("12"));
   expect_object_write(0, std::string("12121") , 0, std::nullopt);
   ASSERT_TRUE(mock_crypto_object_dispatch->write_same(
@@ -737,17 +737,17 @@ TEST_F(TestMockCryptoCryptoObjectDispatch, PrepareCopyup) {
   auto& snap2 = snapshot_sparse_bufferlist[1];
 
   snap1.insert(0, 1, {io::SPARSE_EXTENT_STATE_DATA, 1,
-                      ceph::bufferlist::static_from_mem(data + 1, 1)});
+                      stone::bufferlist::static_from_mem(data + 1, 1)});
   snap1.insert(8191, 1, {io::SPARSE_EXTENT_STATE_DATA, 1,
-                         ceph::bufferlist::static_from_mem(data + 2, 1)});
+                         stone::bufferlist::static_from_mem(data + 2, 1)});
   snap1.insert(8193, 3, {io::SPARSE_EXTENT_STATE_DATA, 3,
-                         ceph::bufferlist::static_from_mem(data + 3, 3)});
+                         stone::bufferlist::static_from_mem(data + 3, 3)});
 
   snap2.insert(0, 2, {io::SPARSE_EXTENT_STATE_ZEROED, 2});
   snap2.insert(8191, 3, {io::SPARSE_EXTENT_STATE_DATA, 3,
-                         ceph::bufferlist::static_from_mem(data + 6, 3)});
+                         stone::bufferlist::static_from_mem(data + 6, 3)});
   snap2.insert(16384, 1, {io::SPARSE_EXTENT_STATE_DATA, 1,
-                          ceph::bufferlist::static_from_mem(data + 9, 1)});
+                          stone::bufferlist::static_from_mem(data + 9, 1)});
 
   expect_get_object_size();
   expect_encrypt(6);

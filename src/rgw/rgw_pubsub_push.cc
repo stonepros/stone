@@ -135,7 +135,7 @@ public:
     return new PostCR(json_format_pubsub_event(event), env, endpoint, ack_level, verify_ssl);
   }
 
-  int send_to_completion_async(CephContext* cct, const rgw_pubsub_s3_event& event, optional_yield y) override {
+  int send_to_completion_async(StoneContext* cct, const rgw_pubsub_s3_event& event, optional_yield y) override {
     bufferlist read_bl;
     RGWPostHTTPData request(cct, "POST", endpoint, &read_bl, verify_ssl);
     const auto post_data = json_format_pubsub_event(event);
@@ -167,7 +167,7 @@ private:
     Broker,
     Routable
   };
-  CephContext* const cct;
+  StoneContext* const cct;
   const std::string endpoint;
   const std::string topic;
   const std::string exchange;
@@ -225,7 +225,7 @@ private:
     const std::string message;
 
   public:
-    NoAckPublishCR(CephContext* cct,
+    NoAckPublishCR(StoneContext* cct,
               const std::string& _topic,
               amqp::connection_ptr_t& _conn,
               const std::string& _message) :
@@ -255,7 +255,7 @@ private:
     const std::string message;
 
   public:
-    AckPublishCR(CephContext* cct,
+    AckPublishCR(StoneContext* cct,
               const std::string& _topic,
               amqp::connection_ptr_t& _conn,
               const std::string& _message) :
@@ -287,7 +287,7 @@ private:
 
     // callback invoked from the amqp manager thread when ack/nack is received
     void request_complete(int status) {
-      ceph_assert(!is_done());
+      stone_assert(!is_done());
       if (status != 0) {
         // server replied with a nack
         set_cr_error(status);
@@ -309,7 +309,7 @@ public:
   RGWPubSubAMQPEndpoint(const std::string& _endpoint,
       const std::string& _topic,
       const RGWHTTPArgs& args,
-      CephContext* _cct) : 
+      StoneContext* _cct) : 
         cct(_cct),
         endpoint(_endpoint), 
         topic(_topic),
@@ -322,7 +322,7 @@ public:
   }
 
   RGWCoroutine* send_to_completion_async(const rgw_pubsub_event& event, RGWDataSyncEnv* env) override {
-    ceph_assert(conn);
+    stone_assert(conn);
     if (ack_level == ack_level_t::None) {
       return new NoAckPublishCR(cct, topic, conn, json_format_pubsub_event(event));
     } else {
@@ -331,7 +331,7 @@ public:
   }
   
   RGWCoroutine* send_to_completion_async(const rgw_pubsub_s3_event& event, RGWDataSyncEnv* env) override {
-    ceph_assert(conn);
+    stone_assert(conn);
     if (ack_level == ack_level_t::None) {
       return new NoAckPublishCR(cct, topic, conn, json_format_pubsub_event(event));
     } else {
@@ -344,7 +344,7 @@ public:
   // with compilation flag support and whether the optional_yield is set
   class Waiter {
     using Signature = void(boost::system::error_code);
-    using Completion = ceph::async::Completion<Signature>;
+    using Completion = stone::async::Completion<Signature>;
     std::unique_ptr<Completion> completion = nullptr;
     int ret;
 
@@ -393,8 +393,8 @@ public:
     }
   };
 
-  int send_to_completion_async(CephContext* cct, const rgw_pubsub_s3_event& event, optional_yield y) override {
-    ceph_assert(conn);
+  int send_to_completion_async(StoneContext* cct, const rgw_pubsub_s3_event& event, optional_yield y) override {
+    stone_assert(conn);
     if (ack_level == ack_level_t::None) {
       return amqp::publish(conn, topic, json_format_pubsub_event(event));
     } else {
@@ -435,7 +435,7 @@ private:
     None,
     Broker,
   };
-  CephContext* const cct;
+  StoneContext* const cct;
   const std::string topic;
   kafka::connection_ptr_t conn;
   const ack_level_t ack_level;
@@ -497,7 +497,7 @@ private:
     const std::string message;
 
   public:
-    NoAckPublishCR(CephContext* cct,
+    NoAckPublishCR(StoneContext* cct,
               const std::string& _topic,
               kafka::connection_ptr_t& _conn,
               const std::string& _message) :
@@ -527,7 +527,7 @@ private:
     const std::string message;
 
   public:
-    AckPublishCR(CephContext* cct,
+    AckPublishCR(StoneContext* cct,
               const std::string& _topic,
               kafka::connection_ptr_t& _conn,
               const std::string& _message) :
@@ -559,7 +559,7 @@ private:
 
     // callback invoked from the kafka manager thread when ack/nack is received
     void request_complete(int status) {
-      ceph_assert(!is_done());
+      stone_assert(!is_done());
       if (status != 0) {
         // server replied with a nack
         set_cr_error(status);
@@ -581,7 +581,7 @@ public:
   RGWPubSubKafkaEndpoint(const std::string& _endpoint,
       const std::string& _topic,
       const RGWHTTPArgs& args,
-      CephContext* _cct) : 
+      StoneContext* _cct) : 
         cct(_cct),
         topic(_topic),
         conn(kafka::connect(_endpoint, get_use_ssl(args), get_verify_ssl(args), args.get_optional("ca-location"))) ,
@@ -592,7 +592,7 @@ public:
   }
 
   RGWCoroutine* send_to_completion_async(const rgw_pubsub_event& event, RGWDataSyncEnv* env) override {
-    ceph_assert(conn);
+    stone_assert(conn);
     if (ack_level == ack_level_t::None) {
       return new NoAckPublishCR(cct, topic, conn, json_format_pubsub_event(event));
     } else {
@@ -601,7 +601,7 @@ public:
   }
   
   RGWCoroutine* send_to_completion_async(const rgw_pubsub_s3_event& event, RGWDataSyncEnv* env) override {
-    ceph_assert(conn);
+    stone_assert(conn);
     if (ack_level == ack_level_t::None) {
       return new NoAckPublishCR(cct, topic, conn, json_format_pubsub_event(event));
     } else {
@@ -614,7 +614,7 @@ public:
   // with compilation flag support and whether the optional_yield is set
   class Waiter {
     using Signature = void(boost::system::error_code);
-    using Completion = ceph::async::Completion<Signature>;
+    using Completion = stone::async::Completion<Signature>;
     std::unique_ptr<Completion> completion = nullptr;
     int ret;
 
@@ -663,8 +663,8 @@ public:
     }
   };
 
-  int send_to_completion_async(CephContext* cct, const rgw_pubsub_s3_event& event, optional_yield y) override {
-    ceph_assert(conn);
+  int send_to_completion_async(StoneContext* cct, const rgw_pubsub_s3_event& event, optional_yield y) override {
+    stone_assert(conn);
     if (ack_level == ack_level_t::None) {
       return kafka::publish(conn, topic, json_format_pubsub_event(event));
     } else {
@@ -723,7 +723,7 @@ const std::string& get_schema(const std::string& endpoint) {
 RGWPubSubEndpoint::Ptr RGWPubSubEndpoint::create(const std::string& endpoint, 
     const std::string& topic, 
     const RGWHTTPArgs& args,
-    CephContext* cct) {
+    StoneContext* cct) {
   const auto& schema = get_schema(endpoint);
   if (schema == WEBHOOK_SCHEMA) {
     return Ptr(new RGWPubSubHTTPEndpoint(endpoint, args));

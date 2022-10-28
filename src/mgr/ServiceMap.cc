@@ -9,8 +9,8 @@
 
 #include "common/Formatter.h"
 
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
 // Daemon
 
@@ -87,7 +87,7 @@ std::string ServiceMap::Service::get_summary() const
   //   "hostname" -> host(s)
   //   "zone_id" -> zone(s)
   //
-  // The `ceph -s` will be something likes:
+  // The `stone -s` will be something likes:
   //    iscsi: 3 portals active (3 hosts)
   //      rgw: 3 gateways active (3 hosts, 1 zone)
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -12,8 +12,8 @@
  */
 
 
-#ifndef CEPH_MMGRREPORT_H_
-#define CEPH_MMGRREPORT_H_
+#ifndef STONE_MMGRREPORT_H_
+#define STONE_MMGRREPORT_H_
 
 #include <boost/optional.hpp>
 

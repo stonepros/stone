@@ -7,8 +7,8 @@
 #include "Server.h"
 #include "Request.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::ggate::Server: " << this \
                            << " " << __func__ << ": "
@@ -26,7 +26,7 @@ void Server::run() {
   dout(10) << dendl;
 
   int r = start();
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   dout(20) << "entering run loop" << dendl;
 
@@ -53,7 +53,7 @@ void Server::stop() {
 
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_stopping);
+    stone_assert(m_stopping);
   }
 
   m_reader_thread.join();
@@ -73,7 +73,7 @@ void Server::io_finish(IOContext *ctx) {
   dout(20) << ctx << dendl;
 
   std::lock_guard locker{m_lock};
-  ceph_assert(ctx->item.is_on_list());
+  stone_assert(ctx->item.is_on_list());
 
   ctx->item.remove_myself();
   m_io_finished.push_back(&ctx->item);
@@ -99,7 +99,7 @@ Server::IOContext *Server::wait_io_finish() {
 void Server::wait_clean() {
   dout(20) << dendl;
 
-  ceph_assert(!m_reader_thread.is_started());
+  stone_assert(!m_reader_thread.is_started());
 
   std::unique_lock locker{m_lock};
   m_cond.wait(locker, [this] { return m_io_pending.empty();});

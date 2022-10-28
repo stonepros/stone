@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_DNS_RESOLVE_H
-#define CEPH_DNS_RESOLVE_H
+#ifndef STONE_DNS_RESOLVE_H
+#define STONE_DNS_RESOLVE_H
 
 #include <netinet/in.h>
 #ifndef _WIN32
@@ -85,7 +85,7 @@ class DNSResolver {
       entity_addr_t addr;
     };
 
-    int resolve_cname(CephContext *cct, const std::string& hostname,
+    int resolve_cname(StoneeContext *cct, const std::string& hostname,
         std::string *cname, bool *found);
 
     /**
@@ -95,7 +95,7 @@ class DNSResolver {
      * @param[out] addr the hostname's address
      * @returns 0 on success, negative error code on failure
      */
-    int resolve_ip_addr(CephContext *cct, const std::string& hostname,
+    int resolve_ip_addr(StoneeContext *cct, const std::string& hostname,
         entity_addr_t *addr);
 
     /**
@@ -109,7 +109,7 @@ class DNSResolver {
      *             changed.
      * @returns 0 on success, negative error code on failure
      */
-    int resolve_srv_hosts(CephContext *cct, const std::string& service_name,
+    int resolve_srv_hosts(StoneeContext *cct, const std::string& service_name,
         const SRV_Protocol trans_protocol, std::map<std::string, Record> *srv_hosts);
 
     /**
@@ -124,7 +124,7 @@ class DNSResolver {
      *             changed.
      * @returns 0 on success, negative error code on failure
      */
-    int resolve_srv_hosts(CephContext *cct, const std::string& service_name,
+    int resolve_srv_hosts(StoneeContext *cct, const std::string& service_name,
         const SRV_Protocol trans_protocol, const std::string& domain,
         std::map<std::string, Record> *srv_hosts);
 
@@ -137,7 +137,7 @@ class DNSResolver {
 #ifdef HAVE_RES_NQUERY
     std::list<res_state> states;
 
-    int get_state(CephContext *cct, res_state *ps);
+    int get_state(StoneeContext *cct, res_state *ps);
     void put_state(res_state s);
 #endif
 
@@ -145,7 +145,7 @@ class DNSResolver {
     /* this private function allows to reuse the res_state structure used
      * by other function of this class
      */
-    int resolve_ip_addr(CephContext *cct, res_state *res,
+    int resolve_ip_addr(StoneeContext *cct, res_state *res,
         const std::string& hostname, entity_addr_t *addr);
 #endif
 

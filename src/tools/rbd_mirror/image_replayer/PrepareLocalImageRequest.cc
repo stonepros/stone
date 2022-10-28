@@ -17,8 +17,8 @@
 #include "tools/rbd_mirror/image_replayer/snapshot/StateBuilder.h"
 #include <type_traits>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::" \
                            << "PrepareLocalImageRequest: " << this << " " \
@@ -74,7 +74,7 @@ void PrepareLocalImageRequest<I>::get_local_image_name() {
     PrepareLocalImageRequest<I>,
     &PrepareLocalImageRequest<I>::handle_get_local_image_name>(this);
   int r = m_io_ctx.aio_operate(RBD_DIRECTORY, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

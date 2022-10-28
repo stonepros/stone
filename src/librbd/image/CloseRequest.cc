@@ -17,7 +17,7 @@
 #include "librbd/io/ImageDispatchSpec.h"
 #include "librbd/io/ObjectDispatcherInterface.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::CloseRequest: "
 
@@ -31,7 +31,7 @@ template <typename I>
 CloseRequest<I>::CloseRequest(I *image_ctx, Context *on_finish)
   : m_image_ctx(image_ctx), m_on_finish(on_finish), m_error_result(0),
     m_exclusive_lock(nullptr) {
-  ceph_assert(image_ctx != nullptr);
+  stone_assert(image_ctx != nullptr);
 }
 
 template <typename I>
@@ -53,7 +53,7 @@ void CloseRequest<I>::send_block_image_watcher() {
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   // prevent incoming requests from our peers
@@ -63,7 +63,7 @@ void CloseRequest<I>::send_block_image_watcher() {
 
 template <typename I>
 void CloseRequest<I>::handle_block_image_watcher(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   send_shut_down_update_watchers();
@@ -71,7 +71,7 @@ void CloseRequest<I>::handle_block_image_watcher(int r) {
 
 template <typename I>
 void CloseRequest<I>::send_shut_down_update_watchers() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_image_ctx->state->shut_down_update_watchers(create_async_context_callback(
@@ -81,7 +81,7 @@ void CloseRequest<I>::send_shut_down_update_watchers() {
 
 template <typename I>
 void CloseRequest<I>::handle_shut_down_update_watchers(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   save_result(r);
@@ -95,7 +95,7 @@ void CloseRequest<I>::handle_shut_down_update_watchers(int r) {
 
 template <typename I>
 void CloseRequest<I>::send_flush() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   std::shared_lock owner_locker{m_image_ctx->owner_lock};
@@ -111,7 +111,7 @@ void CloseRequest<I>::send_flush() {
 
 template <typename I>
 void CloseRequest<I>::handle_flush(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   if (r < 0) {
@@ -140,7 +140,7 @@ void CloseRequest<I>::send_shut_down_exclusive_lock() {
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   // in-flight IO will be flushed and in-flight requests will be canceled
@@ -151,17 +151,17 @@ void CloseRequest<I>::send_shut_down_exclusive_lock() {
 
 template <typename I>
 void CloseRequest<I>::handle_shut_down_exclusive_lock(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   {
     std::shared_lock owner_locker{m_image_ctx->owner_lock};
-    ceph_assert(m_image_ctx->exclusive_lock == nullptr);
+    stone_assert(m_image_ctx->exclusive_lock == nullptr);
 
     // object map and journal closed during exclusive lock shutdown
     std::shared_lock image_locker{m_image_ctx->image_lock};
-    ceph_assert(m_image_ctx->journal == nullptr);
-    ceph_assert(m_image_ctx->object_map == nullptr);
+    stone_assert(m_image_ctx->journal == nullptr);
+    stone_assert(m_image_ctx->object_map == nullptr);
   }
 
   m_exclusive_lock->put();
@@ -183,7 +183,7 @@ void CloseRequest<I>::send_unregister_image_watcher() {
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_image_ctx->image_watcher->unregister_watch(create_context_callback<
@@ -192,7 +192,7 @@ void CloseRequest<I>::send_unregister_image_watcher() {
 
 template <typename I>
 void CloseRequest<I>::handle_unregister_image_watcher(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   save_result(r);
@@ -206,7 +206,7 @@ void CloseRequest<I>::handle_unregister_image_watcher(int r) {
 
 template <typename I>
 void CloseRequest<I>::send_flush_readahead() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_image_ctx->readahead.wait_for_pending(create_async_context_callback(
@@ -216,7 +216,7 @@ void CloseRequest<I>::send_flush_readahead() {
 
 template <typename I>
 void CloseRequest<I>::handle_flush_readahead(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   send_shut_down_image_dispatcher();
@@ -224,7 +224,7 @@ void CloseRequest<I>::handle_flush_readahead(int r) {
 
 template <typename I>
 void CloseRequest<I>::send_shut_down_image_dispatcher() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_image_ctx->io_image_dispatcher->shut_down(create_context_callback<
@@ -234,7 +234,7 @@ void CloseRequest<I>::send_shut_down_image_dispatcher() {
 
 template <typename I>
 void CloseRequest<I>::handle_shut_down_image_dispatcher(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   save_result(r);
@@ -248,7 +248,7 @@ void CloseRequest<I>::handle_shut_down_image_dispatcher(int r) {
 
 template <typename I>
 void CloseRequest<I>::send_shut_down_object_dispatcher() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_image_ctx->io_object_dispatcher->shut_down(create_context_callback<
@@ -258,7 +258,7 @@ void CloseRequest<I>::send_shut_down_object_dispatcher() {
 
 template <typename I>
 void CloseRequest<I>::handle_shut_down_object_dispatcher(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   save_result(r);
@@ -272,7 +272,7 @@ void CloseRequest<I>::handle_shut_down_object_dispatcher(int r) {
 
 template <typename I>
 void CloseRequest<I>::send_flush_op_work_queue() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_image_ctx->op_work_queue->queue(create_context_callback<
@@ -281,7 +281,7 @@ void CloseRequest<I>::send_flush_op_work_queue() {
 
 template <typename I>
 void CloseRequest<I>::handle_flush_op_work_queue(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
   send_close_parent();
 }
@@ -293,7 +293,7 @@ void CloseRequest<I>::send_close_parent() {
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_image_ctx->parent->state->close(create_async_context_callback(
@@ -303,7 +303,7 @@ void CloseRequest<I>::send_close_parent() {
 
 template <typename I>
 void CloseRequest<I>::handle_close_parent(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   m_image_ctx->parent = nullptr;
@@ -327,7 +327,7 @@ void CloseRequest<I>::send_flush_image_watcher() {
 
 template <typename I>
 void CloseRequest<I>::handle_flush_image_watcher(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   if (r < 0) {

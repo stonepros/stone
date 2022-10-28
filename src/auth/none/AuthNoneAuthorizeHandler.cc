@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2009-2011 New Dream Network
  *
@@ -15,14 +15,14 @@
 #include "AuthNoneAuthorizeHandler.h"
 #include "common/debug.h"
 
-#define dout_subsys ceph_subsys_auth
+#define dout_subsys stone_subsys_auth
 
 bool AuthNoneAuthorizeHandler::verify_authorizer(
-  CephContext *cct,
+  StoneContext *cct,
   const KeyStore& keys,
-  const ceph::buffer::list& authorizer_data,
+  const stone::buffer::list& authorizer_data,
   size_t connection_secret_required_len,
-  ceph::buffer::list *authorizer_reply,
+  stone::buffer::list *authorizer_reply,
   EntityName *entity_name,
   uint64_t *global_id,
   AuthCapsInfo *caps_info,
@@ -30,7 +30,7 @@ bool AuthNoneAuthorizeHandler::verify_authorizer(
   std::string *connection_secret,
   std::unique_ptr<AuthAuthorizerChallenge> *challenge)
 {
-  using ceph::decode;
+  using stone::decode;
   auto iter = authorizer_data.cbegin();
 
   try {
@@ -38,7 +38,7 @@ bool AuthNoneAuthorizeHandler::verify_authorizer(
     decode(struct_v, iter);
     decode(*entity_name, iter);
     decode(*global_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     ldout(cct, 0) << "AuthNoneAuthorizeHandle::verify_authorizer() failed to decode" << dendl;
     return false;
   }

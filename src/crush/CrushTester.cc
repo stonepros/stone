@@ -15,7 +15,7 @@
 #include "include/stringify.h"
 #include "CrushTester.h"
 #include "CrushTreeDumper.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 
 
 using std::cerr;
@@ -419,7 +419,7 @@ bool CrushTester::check_name_maps(unsigned max_id) const
     // walk through the crush, to see if its self-contained
     crush_walker.dump(NULL);
     // and see if the maps is also able to handle straying OSDs, whose id >= 0.
-    // "ceph osd tree" will try to print them, even they are not listed in the
+    // "stone osd tree" will try to print them, even they are not listed in the
     // crush map.
     crush_walker.dump_item(CrushTreeDumper::Item(0, 0, 0, 0), NULL);
   } catch (const BadCrushMap& e) {

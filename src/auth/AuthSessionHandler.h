@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_AUTHSESSIONHANDLER_H
-#define CEPH_AUTHSESSIONHANDLER_H
+#ifndef STONE_AUTHSESSIONHANDLER_H
+#define STONE_AUTHSESSIONHANDLER_H
 
 #include "include/common_fwd.h"
 #include "include/types.h"
@@ -44,7 +44,7 @@ struct DummyAuthSessionHandler : AuthSessionHandler {
 struct DecryptionError : public std::exception {};
 
 extern AuthSessionHandler *get_auth_session_handler(
-  CephContext *cct, int protocol,
+  StoneContext *cct, int protocol,
   const CryptoKey& key,
   uint64_t features);
 

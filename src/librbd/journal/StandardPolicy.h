@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_JOURNAL_STANDARD_POLICY_H
-#define CEPH_LIBRBD_JOURNAL_STANDARD_POLICY_H
+#ifndef STONE_LIBRBD_JOURNAL_STANDARD_POLICY_H
+#define STONE_LIBRBD_JOURNAL_STANDARD_POLICY_H
 
 #include "librbd/journal/Policy.h"
 
@@ -35,4 +35,4 @@ private:
 
 extern template class librbd::journal::StandardPolicy<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_JOURNAL_STANDARD_POLICY_H
+#endif // STONE_LIBRBD_JOURNAL_STANDARD_POLICY_H

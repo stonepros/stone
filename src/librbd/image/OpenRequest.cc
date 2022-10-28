@@ -16,9 +16,9 @@
 #include "librbd/image/SetSnapRequest.h"
 #include "librbd/io/SimpleSchedulerObjectDispatch.h"
 #include <boost/algorithm/string/predicate.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::OpenRequest: "
 
@@ -67,7 +67,7 @@ void OpenRequest<I>::send_v1_detect_header() {
 
 template <typename I>
 Context *OpenRequest<I>::handle_v1_detect_header(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -92,7 +92,7 @@ Context *OpenRequest<I>::handle_v1_detect_header(int *result) {
 template <typename I>
 void OpenRequest<I>::send_v2_detect_header() {
   if (m_image_ctx->id.empty()) {
-    CephContext *cct = m_image_ctx->cct;
+    StoneContext *cct = m_image_ctx->cct;
     ldout(cct, 10) << this << " " << __func__ << dendl;
 
     librados::ObjectReadOperation op;
@@ -112,7 +112,7 @@ void OpenRequest<I>::send_v2_detect_header() {
 
 template <typename I>
 Context *OpenRequest<I>::handle_v2_detect_header(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result == -ENOENT) {
@@ -130,7 +130,7 @@ Context *OpenRequest<I>::handle_v2_detect_header(int *result) {
 
 template <typename I>
 void OpenRequest<I>::send_v2_get_id() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -147,7 +147,7 @@ void OpenRequest<I>::send_v2_get_id() {
 
 template <typename I>
 Context *OpenRequest<I>::handle_v2_get_id(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result == 0) {
@@ -166,7 +166,7 @@ Context *OpenRequest<I>::handle_v2_get_id(int *result) {
 
 template <typename I>
 void OpenRequest<I>::send_v2_get_name() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -182,7 +182,7 @@ void OpenRequest<I>::send_v2_get_name() {
 
 template <typename I>
 Context *OpenRequest<I>::handle_v2_get_name(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result == 0) {
@@ -206,7 +206,7 @@ Context *OpenRequest<I>::handle_v2_get_name(int *result) {
 
 template <typename I>
 void OpenRequest<I>::send_v2_get_name_from_trash() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -222,7 +222,7 @@ void OpenRequest<I>::send_v2_get_name_from_trash() {
 
 template <typename I>
 Context *OpenRequest<I>::handle_v2_get_name_from_trash(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   cls::rbd::TrashImageSpec trash_spec;
@@ -252,14 +252,14 @@ Context *OpenRequest<I>::handle_v2_get_name_from_trash(int *result) {
 
 template <typename I>
 void OpenRequest<I>::send_v2_get_initial_metadata() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_image_ctx->old_format = false;
   m_image_ctx->header_oid = util::header_name(m_image_ctx->id);
 
   librados::ObjectReadOperation op;
-  cls_client::get_size_start(&op, CEPH_NOSNAP);
+  cls_client::get_size_start(&op, STONE_NOSNAP);
   cls_client::get_object_prefix_start(&op);
   cls_client::get_features_start(&op, true);
 
@@ -274,7 +274,7 @@ void OpenRequest<I>::send_v2_get_initial_metadata() {
 
 template <typename I>
 Context *OpenRequest<I>::handle_v2_get_initial_metadata(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   auto it = m_out_bl.cbegin();
@@ -312,7 +312,7 @@ Context *OpenRequest<I>::handle_v2_get_initial_metadata(int *result) {
 
 template <typename I>
 void OpenRequest<I>::send_v2_get_stripe_unit_count() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -329,7 +329,7 @@ void OpenRequest<I>::send_v2_get_stripe_unit_count() {
 
 template <typename I>
 Context *OpenRequest<I>::handle_v2_get_stripe_unit_count(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result == 0) {
@@ -355,7 +355,7 @@ Context *OpenRequest<I>::handle_v2_get_stripe_unit_count(int *result) {
 
 template <typename I>
 void OpenRequest<I>::send_v2_get_create_timestamp() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -372,7 +372,7 @@ void OpenRequest<I>::send_v2_get_create_timestamp() {
 
 template <typename I>
 Context *OpenRequest<I>::handle_v2_get_create_timestamp(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result == 0) {
@@ -394,7 +394,7 @@ Context *OpenRequest<I>::handle_v2_get_create_timestamp(int *result) {
 
 template <typename I>
 void OpenRequest<I>::send_v2_get_access_modify_timestamp() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -413,7 +413,7 @@ void OpenRequest<I>::send_v2_get_access_modify_timestamp() {
 
 template <typename I>
 Context *OpenRequest<I>::handle_v2_get_access_modify_timestamp(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result == 0) {
@@ -438,7 +438,7 @@ Context *OpenRequest<I>::handle_v2_get_access_modify_timestamp(int *result) {
 
 template <typename I>
 void OpenRequest<I>::send_v2_get_data_pool() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -455,7 +455,7 @@ void OpenRequest<I>::send_v2_get_data_pool() {
 
 template <typename I>
 Context *OpenRequest<I>::handle_v2_get_data_pool(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   int64_t data_pool_id = -1;
@@ -498,7 +498,7 @@ template <typename I>
 void OpenRequest<I>::send_refresh() {
   m_image_ctx->init();
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_image_ctx->config_watcher = ConfigWatcher<I>::create(*m_image_ctx);
@@ -513,7 +513,7 @@ void OpenRequest<I>::send_refresh() {
 
 template <typename I>
 Context *OpenRequest<I>::handle_refresh(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -529,7 +529,7 @@ Context *OpenRequest<I>::handle_refresh(int *result) {
 
 template <typename I>
 void OpenRequest<I>::send_init_plugin_registry() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
 
   auto plugins = m_image_ctx->config.template get_val<std::string>(
     "rbd_plugins");
@@ -542,7 +542,7 @@ void OpenRequest<I>::send_init_plugin_registry() {
 
 template <typename I>
 Context* OpenRequest<I>::handle_init_plugin_registry(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -562,7 +562,7 @@ Context *OpenRequest<I>::send_init_cache(int *result) {
     return send_register_watch(result);
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   size_t max_dirty = m_image_ctx->config.template get_val<Option::size_t>(
@@ -601,7 +601,7 @@ Context *OpenRequest<I>::send_register_watch(int *result) {
     return send_set_snap(result);
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   using klass = OpenRequest<I>;
@@ -613,7 +613,7 @@ Context *OpenRequest<I>::send_register_watch(int *result) {
 
 template <typename I>
 Context *OpenRequest<I>::handle_register_watch(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result == -EPERM) {
@@ -633,22 +633,22 @@ Context *OpenRequest<I>::handle_register_watch(int *result) {
 template <typename I>
 Context *OpenRequest<I>::send_set_snap(int *result) {
   if (m_image_ctx->snap_name.empty() &&
-      m_image_ctx->open_snap_id == CEPH_NOSNAP) {
+      m_image_ctx->open_snap_id == STONE_NOSNAP) {
     *result = 0;
     return finalize(*result);
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
-  uint64_t snap_id = CEPH_NOSNAP;
+  uint64_t snap_id = STONE_NOSNAP;
   std::swap(m_image_ctx->open_snap_id, snap_id);
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     std::shared_lock image_locker{m_image_ctx->image_lock};
     snap_id = m_image_ctx->get_snap_id(m_image_ctx->snap_namespace,
                                        m_image_ctx->snap_name);
   }
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     lderr(cct) << "failed to find snapshot " << m_image_ctx->snap_name << dendl;
     send_close_image(-ENOENT);
     return nullptr;
@@ -664,7 +664,7 @@ Context *OpenRequest<I>::send_set_snap(int *result) {
 
 template <typename I>
 Context *OpenRequest<I>::handle_set_snap(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -695,7 +695,7 @@ Context *OpenRequest<I>::finalize(int r) {
 
 template <typename I>
 void OpenRequest<I>::send_close_image(int error_result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_error_result = error_result;
@@ -709,7 +709,7 @@ void OpenRequest<I>::send_close_image(int error_result) {
 
 template <typename I>
 Context *OpenRequest<I>::handle_close_image(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {

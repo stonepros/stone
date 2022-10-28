@@ -1,11 +1,11 @@
 overrides:
-  ceph:
+  stone:
     fs: xfs
     conf:
       osd:
         osd objectstore: bluestore
         bluestore block size: 96636764160
-  ceph-deploy:
+  stone-deploy:
     fs: xfs
     bluestore: yes
     conf:

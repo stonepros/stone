@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_MSG_TYPES_H
-#define CEPH_MSG_TYPES_H
+#ifndef STONE_MSG_TYPES_H
+#define STONE_MSG_TYPES_H
 
 #include <sstream>
 
@@ -41,11 +41,11 @@ public:
   int64_t _num;
 
 public:
-  static const int TYPE_MON = CEPH_ENTITY_TYPE_MON;
-  static const int TYPE_MDS = CEPH_ENTITY_TYPE_MDS;
-  static const int TYPE_OSD = CEPH_ENTITY_TYPE_OSD;
-  static const int TYPE_CLIENT = CEPH_ENTITY_TYPE_CLIENT;
-  static const int TYPE_MGR = CEPH_ENTITY_TYPE_MGR;
+  static const int TYPE_MON = STONE_ENTITY_TYPE_MON;
+  static const int TYPE_MDS = STONE_ENTITY_TYPE_MDS;
+  static const int TYPE_OSD = STONE_ENTITY_TYPE_OSD;
+  static const int TYPE_CLIENT = STONE_ENTITY_TYPE_CLIENT;
+  static const int TYPE_MGR = STONE_ENTITY_TYPE_MGR;
 
   static const int64_t NEW = -1;
 
@@ -465,7 +465,7 @@ struct entity_addr_t {
 
   void encode(ceph::buffer::list& bl, uint64_t features) const {
     using ceph::encode;
-    if ((features & CEPH_FEATURE_MSG_ADDR2) == 0) {
+    if ((features & STONE_FEATURE_MSG_ADDR2) == 0) {
       encode((__u32)0, bl);
       encode(nonce, bl);
       sockaddr_storage ss = get_sockaddr_storage();

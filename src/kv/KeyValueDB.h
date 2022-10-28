@@ -136,7 +136,7 @@ public:
   typedef std::shared_ptr< TransactionImpl > Transaction;
 
   /// create a new instance
-  static KeyValueDB *create(CephContext *cct, const std::string& type,
+  static KeyValueDB *create(StoneeContext *cct, const std::string& type,
 			    const std::string& dir,
 			    std::map<std::string,std::string> options = {},
 			    void *p = NULL);

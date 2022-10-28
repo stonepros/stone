@@ -12,7 +12,7 @@
 #include "librbd/io/ObjectDispatcherInterface.h"
 #include "librbd/io/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::journal::ObjectDispatch: " << this \
                            << " " << __func__ << ": "
@@ -107,7 +107,7 @@ bool ObjectDispatch<I>::discard(
 
 template <typename I>
 bool ObjectDispatch<I>::write(
-    uint64_t object_no, uint64_t object_off, ceph::bufferlist&& data,
+    uint64_t object_no, uint64_t object_off, stone::bufferlist&& data,
     IOContext io_context, int op_flags, int write_flags,
     std::optional<uint64_t> assert_version,
     const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
@@ -136,7 +136,7 @@ bool ObjectDispatch<I>::write(
 template <typename I>
 bool ObjectDispatch<I>::write_same(
     uint64_t object_no, uint64_t object_off, uint64_t object_len,
-    io::LightweightBufferExtents&& buffer_extents, ceph::bufferlist&& data,
+    io::LightweightBufferExtents&& buffer_extents, stone::bufferlist&& data,
     IOContext io_context, int op_flags,
     const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
     uint64_t* journal_tid, io::DispatchResult* dispatch_result,
@@ -163,8 +163,8 @@ bool ObjectDispatch<I>::write_same(
 
 template <typename I>
 bool ObjectDispatch<I>::compare_and_write(
-    uint64_t object_no, uint64_t object_off, ceph::bufferlist&& cmp_data,
-    ceph::bufferlist&& write_data, IOContext io_context, int op_flags,
+    uint64_t object_no, uint64_t object_off, stone::bufferlist&& cmp_data,
+    stone::bufferlist&& write_data, IOContext io_context, int op_flags,
     const ZTracer::Trace &parent_trace, uint64_t* mismatch_offset,
     int* object_dispatch_flags, uint64_t* journal_tid,
     io::DispatchResult* dispatch_result, Context** on_finish,

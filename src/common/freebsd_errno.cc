@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -23,7 +23,7 @@
 // and the Linux error as value
 // Use the fact that the arry is initialised per default on all 0's
 // And we do not translate for 0's, but return the original value.
-static const __s32 ceph_to_hostos_conv[256] = {
+static const __s32 stone_to_hostos_conv[256] = {
 //       Linux errno  FreeBSD errno
        C2H_ERRNO(11,  EAGAIN),	
        C2H_ERRNO(35,  EDEADLK),	
@@ -129,7 +129,7 @@ static const __s32 ceph_to_hostos_conv[256] = {
 // and the Linux error as value
 // Use the fact that the arry is initialised per default on all 0's
 // And we do not translate for 0's, but return the original value.
-static const __s32 hostos_to_ceph_conv[256] = {
+static const __s32 hostos_to_stone_conv[256] = {
 	//        FreeBSD errno Linux errno
 	H2C_ERRNO(EDEADLK,	35),   	/* Resource deadlock avoided */
         H2C_ERRNO(EAGAIN,	11),   	/* Resource temporarily unavailable */
@@ -197,23 +197,23 @@ static const __s32 hostos_to_ceph_conv[256] = {
 	};
 
 // converts from linux errno values to host values
-__s32 ceph_to_hostos_errno(__s32 r)
+__s32 stone_to_hostos_errno(__s32 r)
 {
   int sign = (r < 0 ? -1 : 1);
   int err = std::abs(r);
-  if (err < 256 && ceph_to_hostos_conv[err] !=0 ) {
-    err = ceph_to_hostos_conv[err];
+  if (err < 256 && stone_to_hostos_conv[err] !=0 ) {
+    err = stone_to_hostos_conv[err];
   }
   return err * sign;
 }
 
-// converts Host OS errno values to linux/Ceph values
-__s32 hostos_to_ceph_errno(__s32 r)
+// converts Host OS errno values to linux/Stone values
+__s32 hostos_to_stone_errno(__s32 r)
 {
   int sign = (r < 0 ? -1 : 1);
   int err = std::abs(r);
-  if (err < 256 && hostos_to_ceph_conv[err] !=0 ) {
-    err = hostos_to_ceph_conv[err];
+  if (err < 256 && hostos_to_stone_conv[err] !=0 ) {
+    err = hostos_to_stone_conv[err];
   }
   return err * sign;
 }

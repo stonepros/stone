@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  * Copyright (C) 2020 Abutalib Aghayev
@@ -41,11 +41,11 @@ extern "C" {
 }
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_bdev
+#define dout_subsys stone_subsys_bdev
 #undef dout_prefix
 #define dout_prefix *_dout << "smrbdev(" << this << " " << path << ") "
 
-HMSMRDevice::HMSMRDevice(CephContext* cct, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv)
+HMSMRDevice::HMSMRDevice(StoneContext* cct, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv)
   : BlockDevice(cct, cb, cbpriv),
     aio(false), dio(false),
     discard_callback(d_cb),
@@ -175,7 +175,7 @@ int HMSMRDevice::open(const string& p)
   dio = true;
   aio = cct->_conf->bdev_aio;
   if (!aio) {
-    ceph_abort_msg("non-aio not supported");
+    stone_abort_msg("non-aio not supported");
   }
 
   // disable readahead as it will wreak havoc on our mix of
@@ -458,14 +458,14 @@ int HMSMRDevice::flush()
     cct->_log->flush();
     _exit(1);
   }
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   int r = ::fdatasync(fd_directs[WRITE_LIFE_NOT_SET]);
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   utime_t dur = end - start;
   if (r < 0) {
     r = -errno;
     derr << __func__ << " fdatasync got: " << cpp_strerror(r) << dendl;
-    ceph_abort();
+    stone_abort();
   }
   dout(5) << __func__ << " in " << dur << dendl;;
   return r;
@@ -561,7 +561,7 @@ void HMSMRDevice::_aio_thread()
 					 aio, max);
     if (r < 0) {
       derr << __func__ << " got " << cpp_strerror(r) << dendl;
-      ceph_abort_msg("got unexpected error from io_getevents");
+      stone_abort_msg("got unexpected error from io_getevents");
     }
     if (r > 0) {
       dout(30) << __func__ << " got " << r << " completed aios" << dendl;
@@ -602,12 +602,12 @@ void HMSMRDevice::_aio_thread()
 #endif
 		aio[i]->offset,
 		aio[i]->length);
-	      ceph_abort_msg(
+	      stone_abort_msg(
 		"Unexpected IO error. "
 		"This may suggest a hardware issue. "
 		"Please check your kernel log!");
 	    }
-	    ceph_abort_msg(
+	    stone_abort_msg(
 	      "Unexpected IO error. "
 	      "This may suggest HW issue. Please check your dmesg!");
           }
@@ -615,7 +615,7 @@ void HMSMRDevice::_aio_thread()
           derr << "aio to 0x" << std::hex << aio[i]->offset
 	       << "~" << aio[i]->length << std::dec
                << " but returned: " << r << dendl;
-          ceph_abort_msg("unexpected aio return value: does not match length");
+          stone_abort_msg("unexpected aio return value: does not match length");
         }
 
         dout(10) << __func__ << " finished aio " << aio[i] << " r " << r
@@ -636,7 +636,7 @@ void HMSMRDevice::_aio_thread()
       }
     }
     if (cct->_conf->bdev_debug_aio) {
-      utime_t now = ceph_clock_now();
+      utime_t now = stone_clock_now();
       std::lock_guard l(debug_queue_lock);
       if (debug_oldest) {
 	if (debug_stall_since == utime_t()) {
@@ -650,7 +650,7 @@ void HMSMRDevice::_aio_thread()
 		   << " since " << debug_stall_since << ", timeout is "
 		   << cct->_conf->bdev_debug_aio_suicide_timeout
 		   << "s, suicide" << dendl;
-	      ceph_abort_msg("stalled aio... buggy kernel or bad device?");
+	      stone_abort_msg("stalled aio... buggy kernel or bad device?");
 	    }
 	  }
 	}
@@ -675,11 +675,11 @@ void HMSMRDevice::_aio_thread()
 void HMSMRDevice::_discard_thread()
 {
   std::unique_lock l(discard_lock);
-  ceph_assert(!discard_started);
+  stone_assert(!discard_started);
   discard_started = true;
   discard_cond.notify_all();
   while (true) {
-    ceph_assert(discard_finishing.empty());
+    stone_assert(discard_finishing.empty());
     if (discard_queued.empty()) {
       if (discard_stop)
 	break;
@@ -734,7 +734,7 @@ void HMSMRDevice::_aio_log_start(
 	   << std::hex
 	   << offset << "~" << length << std::dec
 	   << " with " << debug_inflight << dendl;
-      ceph_abort();
+      stone_abort();
     }
     debug_inflight.insert(offset, length);
   }
@@ -755,7 +755,7 @@ void HMSMRDevice::debug_aio_unlink(aio_t& aio)
     if (debug_oldest == &aio) {
       auto age = cct->_conf->bdev_debug_aio_log_age;
       if (age && debug_stall_since != utime_t()) {
-        utime_t cutoff = ceph_clock_now();
+        utime_t cutoff = stone_clock_now();
 	cutoff -= age;
 	if (debug_stall_since < cutoff) {
 	  derr << __func__ << " stalled aio " << debug_oldest
@@ -808,8 +808,8 @@ void HMSMRDevice::aio_submit(IOContext *ioc)
   int pending = ioc->num_pending.load();
   ioc->num_running += pending;
   ioc->num_pending -= pending;
-  ceph_assert(ioc->num_pending.load() == 0);  // we should be only thread doing this
-  ceph_assert(ioc->pending_aios.size() == 0);
+  stone_assert(ioc->num_pending.load() == 0);  // we should be only thread doing this
+  stone_assert(ioc->pending_aios.size() == 0);
 
   if (cct->_conf->bdev_debug_aio) {
     list<aio_t>::iterator p = ioc->running_aios.begin();
@@ -829,7 +829,7 @@ void HMSMRDevice::aio_submit(IOContext *ioc)
     derr << __func__ << " retries " << retries << dendl;
   if (r < 0) {
     derr << " aio submit got " << cpp_strerror(r) << dendl;
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
 }
 
@@ -882,7 +882,7 @@ int HMSMRDevice::write(
   dout(20) << __func__ << " 0x" << std::hex << off << "~" << len << std::dec
 	   << (buffered ? " (buffered)" : " (direct)")
 	   << dendl;
-  ceph_assert(is_valid_io(off, len));
+  stone_assert(is_valid_io(off, len));
   if (cct->_conf->objectstore_blackhole) {
     lderr(cct) << __func__ << " objectstore_blackhole=true, throwing out IO"
 	       << dendl;
@@ -911,7 +911,7 @@ int HMSMRDevice::aio_write(
   dout(20) << __func__ << " 0x" << std::hex << off << "~" << len << std::dec
 	   << (buffered ? " (buffered)" : " (direct)")
 	   << dendl;
-  ceph_assert(is_valid_io(off, len));
+  stone_assert(is_valid_io(off, len));
   if (cct->_conf->objectstore_blackhole) {
     lderr(cct) << __func__ << " objectstore_blackhole=true, throwing out IO"
 	       << dendl;
@@ -1018,7 +1018,7 @@ int HMSMRDevice::read(uint64_t off, uint64_t len, bufferlist *pbl,
   dout(5) << __func__ << " 0x" << std::hex << off << "~" << len << std::dec
 	  << (buffered ? " (buffered)" : " (direct)")
 	  << dendl;
-  ceph_assert(is_valid_io(off, len));
+  stone_assert(is_valid_io(off, len));
 
   _aio_log_start(ioc, off, len);
 
@@ -1045,7 +1045,7 @@ int HMSMRDevice::read(uint64_t off, uint64_t len, bufferlist *pbl,
     }
     goto out;
   }
-  ceph_assert((uint64_t)r == len);
+  stone_assert((uint64_t)r == len);
   pbl->push_back(std::move(p));
 
   dout(40) << "data: ";
@@ -1069,7 +1069,7 @@ int HMSMRDevice::aio_read(
   int r = 0;
 #ifdef HAVE_LIBAIO
   if (aio && dio) {
-    ceph_assert(is_valid_io(off, len));
+    stone_assert(is_valid_io(off, len));
     _aio_log_start(ioc, off, len);
     ioc->pending_aios.push_back(aio_t(ioc, fd_directs[WRITE_LIFE_NOT_SET]));
     ++ioc->num_pending;
@@ -1115,7 +1115,7 @@ int HMSMRDevice::direct_read_unaligned(uint64_t off, uint64_t len, char *buf)
       << " error: " << cpp_strerror(r) << dendl;
     goto out;
   }
-  ceph_assert((uint64_t)r == aligned_len);
+  stone_assert((uint64_t)r == aligned_len);
   memcpy(buf, p.c_str() + (off - aligned_off), len);
 
   dout(40) << __func__ << " data: ";
@@ -1134,16 +1134,16 @@ int HMSMRDevice::read_random(uint64_t off, uint64_t len, char *buf,
   dout(5) << __func__ << " 0x" << std::hex << off << "~" << len << std::dec
           << "buffered " << buffered
 	  << dendl;
-  ceph_assert(len > 0);
-  ceph_assert(off < size);
-  ceph_assert(off + len <= size);
+  stone_assert(len > 0);
+  stone_assert(off < size);
+  stone_assert(off + len <= size);
   int r = 0;
   auto age = cct->_conf->bdev_debug_aio_log_age;
 
   //if it's direct io and unaligned, we have to use a internal buffer
   if (!buffered && ((off % block_size != 0)
                     || (len % block_size != 0)
-                    || (uintptr_t(buf) % CEPH_PAGE_SIZE != 0)))
+                    || (uintptr_t(buf) % STONE_PAGE_SIZE != 0)))
     return direct_read_unaligned(off, len, buf);
 
   auto start1 = mono_clock::now();
@@ -1188,7 +1188,7 @@ int HMSMRDevice::read_random(uint64_t off, uint64_t len, char *buf,
         << dendl;
       goto out;
     }
-    ceph_assert((uint64_t)r == len);
+    stone_assert((uint64_t)r == len);
   }
 
   dout(40) << __func__ << " data: ";
@@ -1205,8 +1205,8 @@ int HMSMRDevice::invalidate_cache(uint64_t off, uint64_t len)
 {
   dout(5) << __func__ << " 0x" << std::hex << off << "~" << len << std::dec
 	  << dendl;
-  ceph_assert(off % block_size == 0);
-  ceph_assert(len % block_size == 0);
+  stone_assert(off % block_size == 0);
+  stone_assert(len % block_size == 0);
   int r = posix_fadvise(fd_buffereds[WRITE_LIFE_NOT_SET], off, len, POSIX_FADV_DONTNEED);
   if (r) {
     r = -r;

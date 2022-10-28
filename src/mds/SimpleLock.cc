@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -16,8 +16,8 @@
 #include "SimpleLock.h"
 #include "Mutation.h"
 
-void SimpleLock::dump(ceph::Formatter *f) const {
-  ceph_assert(f != NULL);
+void SimpleLock::dump(stone::Formatter *f) const {
+  stone_assert(f != NULL);
   if (is_sync_and_unlocked()) {
     return;
   }
@@ -44,37 +44,37 @@ void SimpleLock::dump(ceph::Formatter *f) const {
 
 int SimpleLock::get_wait_shift() const {
   switch (get_type()) {
-    case CEPH_LOCK_DN:       return 8;
-    case CEPH_LOCK_DVERSION: return 8 + 1*SimpleLock::WAIT_BITS;
-    case CEPH_LOCK_IAUTH:    return 8 + 2*SimpleLock::WAIT_BITS;
-    case CEPH_LOCK_ILINK:    return 8 + 3*SimpleLock::WAIT_BITS;
-    case CEPH_LOCK_IDFT:     return 8 + 4*SimpleLock::WAIT_BITS;
-    case CEPH_LOCK_IFILE:    return 8 + 5*SimpleLock::WAIT_BITS;
-    case CEPH_LOCK_IVERSION: return 8 + 6*SimpleLock::WAIT_BITS;
-    case CEPH_LOCK_IXATTR:   return 8 + 7*SimpleLock::WAIT_BITS;
-    case CEPH_LOCK_ISNAP:    return 8 + 8*SimpleLock::WAIT_BITS;
-    case CEPH_LOCK_INEST:    return 8 + 9*SimpleLock::WAIT_BITS;
-    case CEPH_LOCK_IFLOCK:   return 8 +10*SimpleLock::WAIT_BITS;
-    case CEPH_LOCK_IPOLICY:  return 8 +11*SimpleLock::WAIT_BITS;
+    case STONE_LOCK_DN:       return 8;
+    case STONE_LOCK_DVERSION: return 8 + 1*SimpleLock::WAIT_BITS;
+    case STONE_LOCK_IAUTH:    return 8 + 2*SimpleLock::WAIT_BITS;
+    case STONE_LOCK_ILINK:    return 8 + 3*SimpleLock::WAIT_BITS;
+    case STONE_LOCK_IDFT:     return 8 + 4*SimpleLock::WAIT_BITS;
+    case STONE_LOCK_IFILE:    return 8 + 5*SimpleLock::WAIT_BITS;
+    case STONE_LOCK_IVERSION: return 8 + 6*SimpleLock::WAIT_BITS;
+    case STONE_LOCK_IXATTR:   return 8 + 7*SimpleLock::WAIT_BITS;
+    case STONE_LOCK_ISNAP:    return 8 + 8*SimpleLock::WAIT_BITS;
+    case STONE_LOCK_INEST:    return 8 + 9*SimpleLock::WAIT_BITS;
+    case STONE_LOCK_IFLOCK:   return 8 +10*SimpleLock::WAIT_BITS;
+    case STONE_LOCK_IPOLICY:  return 8 +11*SimpleLock::WAIT_BITS;
     default:
-      ceph_abort();
+      stone_abort();
   }
 }
 
 int SimpleLock::get_cap_shift() const {
   switch (get_type()) {
-    case CEPH_LOCK_IAUTH: return CEPH_CAP_SAUTH;
-    case CEPH_LOCK_ILINK: return CEPH_CAP_SLINK;
-    case CEPH_LOCK_IFILE: return CEPH_CAP_SFILE;
-    case CEPH_LOCK_IXATTR: return CEPH_CAP_SXATTR;
+    case STONE_LOCK_IAUTH: return STONE_CAP_SAUTH;
+    case STONE_LOCK_ILINK: return STONE_CAP_SLINK;
+    case STONE_LOCK_IFILE: return STONE_CAP_SFILE;
+    case STONE_LOCK_IXATTR: return STONE_CAP_SXATTR;
     default: return 0;
   }
 }
 
 int SimpleLock::get_cap_mask() const {
   switch (get_type()) {
-    case CEPH_LOCK_IFILE: return (1 << CEPH_CAP_FILE_BITS) - 1;
-    default: return (1 << CEPH_CAP_SIMPLE_BITS) - 1;
+    case STONE_LOCK_IFILE: return (1 << STONE_CAP_FILE_BITS) - 1;
+    default: return (1 << STONE_CAP_SIMPLE_BITS) - 1;
   }
 }
 

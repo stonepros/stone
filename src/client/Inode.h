@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CLIENT_INODE_H
-#define CEPH_CLIENT_INODE_H
+#ifndef STONE_CLIENT_INODE_H
+#define STONE_CLIENT_INODE_H
 
 #include <numeric>
 
@@ -165,7 +165,7 @@ struct Inode : RefCountedObject {
 
   bool fscrypt = false; // fscrypt enabled ?
 
-  bool is_root()    const { return ino == CEPH_INO_ROOT; }
+  bool is_root()    const { return ino == STONE_INO_ROOT; }
   bool is_symlink() const { return (mode & S_IFMT) == S_IFLNK; }
   bool is_dir()     const { return (mode & S_IFMT) == S_IFDIR; }
   bool is_file()    const { return (mode & S_IFMT) == S_IFREG; }
@@ -177,7 +177,7 @@ struct Inode : RefCountedObject {
   __u32 hash_dentry_name(const string &dn) {
     int which = dir_layout.dl_dir_hash;
     if (!which)
-      which = CEPH_STR_HASH_LINUX;
+      which = STONE_STR_HASH_LINUX;
     ceph_assert(ceph_str_hash_valid(which));
     return ceph_str_hash(which, dn.data(), dn.length());
   }
@@ -219,7 +219,7 @@ struct Inode : RefCountedObject {
   InodeRef snapdir_parent;  // only if we are a snapdir inode
   map<snapid_t,CapSnap> cap_snaps;   // pending flush to mds
 
-  //int open_by_mode[CEPH_FILE_MODE_NUM];
+  //int open_by_mode[STONE_FILE_MODE_NUM];
   map<int,int> open_by_mode;
   map<int,int> cap_refs;
 
@@ -339,8 +339,8 @@ private:
   // how many opens for write on this Inode?
   long open_count_for_write()
   {
-    return (long)(open_by_mode[CEPH_FILE_MODE_RDWR] +
-		  open_by_mode[CEPH_FILE_MODE_WR]);
+    return (long)(open_by_mode[STONE_FILE_MODE_RDWR] +
+		  open_by_mode[STONE_FILE_MODE_WR]);
   };
 
   // how many opens of any sort on this inode?

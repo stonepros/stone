@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_MIRROR_THREADS_H
-#define CEPH_RBD_MIRROR_THREADS_H
+#ifndef STONE_RBD_MIRROR_THREADS_H
+#define STONE_RBD_MIRROR_THREADS_H
 
 #include "include/common_fwd.h"
 #include "include/rados/librados_fwd.hpp"
@@ -42,4 +42,4 @@ public:
 
 extern template class rbd::mirror::Threads<librbd::ImageCtx>;
 
-#endif // CEPH_RBD_MIRROR_THREADS_H
+#endif // STONE_RBD_MIRROR_THREADS_H

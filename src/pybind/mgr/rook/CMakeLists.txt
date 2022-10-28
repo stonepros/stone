@@ -6,10 +6,10 @@ ExternalProject_Add(mgr-rook-client
   INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/rook_client"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ${CMAKE_COMMAND} -E make_directory <INSTALL_DIR>
-  COMMAND       ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/ceph <INSTALL_DIR>/ceph
+  COMMAND       ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/stone <INSTALL_DIR>/stone
   COMMAND       ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/__init__.py <INSTALL_DIR>
   COMMAND       ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/_helper.py <INSTALL_DIR>
   BUILD_BYPRODUCTS "<INSTALL_DIR>/__init__.py"
   INSTALL_COMMAND "")
 
-add_dependencies(ceph-mgr mgr-rook-client)
+add_dependencies(stone-mgr mgr-rook-client)

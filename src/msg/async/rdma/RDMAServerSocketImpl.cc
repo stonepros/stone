@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 XSKY <haomai@xsky.com>
  *
@@ -20,12 +20,12 @@
 #include "include/compat.h"
 #include "include/sock_compat.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #undef dout_prefix
 #define dout_prefix *_dout << " RDMAServerSocketImpl "
 
 RDMAServerSocketImpl::RDMAServerSocketImpl(
-  CephContext *cct, std::shared_ptr<Infiniband>& ib,
+  StoneContext *cct, std::shared_ptr<Infiniband>& ib,
   std::shared_ptr<RDMADispatcher>& rdma_dispatcher,
   RDMAWorker *w, entity_addr_t& a, unsigned slot)
   : ServerSocketImpl(a.get_type(), slot),
@@ -83,7 +83,7 @@ int RDMAServerSocketImpl::accept(ConnectedSocket *sock, const SocketOptions &opt
 {
   ldout(cct, 15) << __func__ << dendl;
 
-  ceph_assert(sock);
+  stone_assert(sock);
 
   sockaddr_storage ss;
   socklen_t slen = sizeof(ss);
@@ -104,7 +104,7 @@ int RDMAServerSocketImpl::accept(ConnectedSocket *sock, const SocketOptions &opt
     return -errno;
   }
 
-  ceph_assert(NULL != out); //out should not be NULL in accept connection
+  stone_assert(NULL != out); //out should not be NULL in accept connection
 
   out->set_type(addr_type);
   out->set_sockaddr((sockaddr*)&ss);

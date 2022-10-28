@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_JOURNAL_JOURNAL_TRIMMER_H
-#define CEPH_JOURNAL_JOURNAL_TRIMMER_H
+#ifndef STONE_JOURNAL_JOURNAL_TRIMMER_H
+#define STONE_JOURNAL_JOURNAL_TRIMMER_H
 
 #include "include/int_types.h"
 #include "include/rados/librados.hpp"
@@ -61,7 +61,7 @@ private:
   struct C_RemoveSet;
 
   librados::IoCtx m_ioctx;
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   std::string m_object_oid_prefix;
 
   ceph::ref_t<JournalMetadata> m_journal_metadata;
@@ -90,4 +90,4 @@ private:
 
 } // namespace journal
 
-#endif // CEPH_JOURNAL_JOURNAL_TRIMMER_H
+#endif // STONE_JOURNAL_JOURNAL_TRIMMER_H

@@ -1,8 +1,8 @@
 if(${WITH_RADOSGW})
-  add_executable(ceph_test_cls_rgw
+  add_executable(stone_test_cls_rgw
     test_cls_rgw.cc
     )
-  target_link_libraries(ceph_test_cls_rgw
+  target_link_libraries(stone_test_cls_rgw
     cls_rgw_client
     librados
     global
@@ -12,7 +12,7 @@ if(${WITH_RADOSGW})
     ${CMAKE_DL_LIBS}
     radostest-cxx)
   install(TARGETS
-    ceph_test_cls_rgw
+    stone_test_cls_rgw
     DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif(${WITH_RADOSGW})
 

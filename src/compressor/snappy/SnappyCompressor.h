@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 Haomai Wang <haomaiwang@gmail.com>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_SNAPPYCOMPRESSOR_H
-#define CEPH_SNAPPYCOMPRESSOR_H
+#ifndef STONE_SNAPPYCOMPRESSOR_H
+#define STONE_SNAPPYCOMPRESSOR_H
 
 #include <snappy.h>
 #include <snappy-sinksource.h>
@@ -21,7 +21,7 @@
 #include "compressor/Compressor.h"
 #include "include/buffer.h"
 
-class CEPH_BUFFER_API BufferlistSource : public snappy::Source {
+class STONE_BUFFER_API BufferlistSource : public snappy::Source {
   ceph::bufferlist::const_iterator pb;
   size_t remaining;
 
@@ -57,7 +57,7 @@ class CEPH_BUFFER_API BufferlistSource : public snappy::Source {
 
 class SnappyCompressor : public Compressor {
  public:
-  SnappyCompressor(CephContext* cct) : Compressor(COMP_ALG_SNAPPY, "snappy") {
+  SnappyCompressor(StoneeContext* cct) : Compressor(COMP_ALG_SNAPPY, "snappy") {
 #ifdef HAVE_QATZIP
     if (cct->_conf->qat_compressor_enabled && qat_accel.init("snappy"))
       qat_enabled = true;

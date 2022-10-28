@@ -19,7 +19,7 @@
 *.rej
 *.rpm
 *.pyc
-ceph.spec
+stone.spec
 cscope.*
 gmon.out
 py-compile

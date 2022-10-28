@@ -8,12 +8,12 @@
 #include "MetricAggregator.h"
 #include "mgr/MgrClient.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds.metric.aggregator" << " " << __func__
 
-MetricAggregator::MetricAggregator(CephContext *cct, MDSRank *mds, MgrClient *mgrc)
+MetricAggregator::MetricAggregator(StoneContext *cct, MDSRank *mds, MgrClient *mgrc)
   : Dispatcher(cct),
     mds(mds),
     mgrc(mgrc),
@@ -59,7 +59,7 @@ void MetricAggregator::shutdown() {
 
   {
     std::scoped_lock locker(lock);
-    ceph_assert(!stopping);
+    stone_assert(!stopping);
     stopping = true;
   }
 
@@ -74,17 +74,17 @@ bool MetricAggregator::ms_can_fast_dispatch2(const cref_t<Message> &m) const {
 
 void MetricAggregator::ms_fast_dispatch2(const ref_t<Message> &m) {
   bool handled = ms_dispatch2(m);
-  ceph_assert(handled);
+  stone_assert(handled);
 }
 
 bool MetricAggregator::ms_dispatch2(const ref_t<Message> &m) {
   if (m->get_type() == MSG_MDS_METRICS &&
-      m->get_connection()->get_peer_type() == CEPH_ENTITY_TYPE_MDS) {
+      m->get_connection()->get_peer_type() == STONE_ENTITY_TYPE_MDS) {
     const Message *msg = m.get();
     const MMDSOp *op = dynamic_cast<const MMDSOp*>(msg);
     if (!op)
       dout(0) << typeid(*msg).name() << " is not an MMDSOp type" << dendl;
-    ceph_assert(op);
+    stone_assert(op);
     handle_mds_metrics(ref_cast<MMDSMetrics>(m));
     return true;
   }
@@ -105,7 +105,7 @@ void MetricAggregator::refresh_metrics_for_rank(const entity_inst_t &client,
 
   auto update_counter_func = [&metrics](const MDSPerformanceCounterDescriptor &d,
                                         PerformanceCounter *c) {
-    ceph_assert(d.is_supported());
+    stone_assert(d.is_supported());
 
     dout(20) << ": performance_counter_descriptor=" << d << dendl;
 
@@ -169,13 +169,13 @@ void MetricAggregator::refresh_metrics_for_rank(const entity_inst_t &client,
       }
       break;
     default:
-      ceph_abort_msg("unknown counter type");
+      stone_abort_msg("unknown counter type");
     }
   };
 
   auto sub_key_func = [client, rank](const MDSPerfMetricSubKeyDescriptor &d,
                                      MDSPerfMetricSubKey *sub_key) {
-    ceph_assert(d.is_supported());
+    stone_assert(d.is_supported());
 
     dout(20) << ": sub_key_descriptor=" << d << dendl;
 
@@ -188,7 +188,7 @@ void MetricAggregator::refresh_metrics_for_rank(const entity_inst_t &client,
       match_string = stringify(client);
       break;
     default:
-      ceph_abort_msg("unknown counter type");
+      stone_abort_msg("unknown counter type");
     }
 
     dout(20) << ": match_string=" << match_string << dendl;
@@ -221,14 +221,14 @@ void MetricAggregator::remove_metrics_for_rank(const entity_inst_t &client,
   if (remove) {
     auto &p = clients_by_rank.at(rank);
     bool rm = p.erase(client) != 0;
-    ceph_assert(rm);
+    stone_assert(rm);
     dout(20) << ": rank=" << rank << " has " << p.size() << " connected"
              << " client(s)" << dendl;
   }
 
   auto sub_key_func = [client, rank](const MDSPerfMetricSubKeyDescriptor &d,
                                      MDSPerfMetricSubKey *sub_key) {
-    ceph_assert(d.is_supported());
+    stone_assert(d.is_supported());
     dout(20) << ": sub_key_descriptor=" << d << dendl;
 
     std::string match_string;
@@ -240,7 +240,7 @@ void MetricAggregator::remove_metrics_for_rank(const entity_inst_t &client,
       match_string = stringify(client);
       break;
     default:
-      ceph_abort_msg("unknown counter type");
+      stone_abort_msg("unknown counter type");
     }
 
     dout(20) << ": match_string=" << match_string << dendl;
@@ -292,7 +292,7 @@ void MetricAggregator::handle_mds_metrics(const cref_t<MMDSMetrics> &m) {
       remove_metrics_for_rank(client, rank, true);
       break;
     default:
-      ceph_abort();
+      stone_abort();
     }
   }
 }

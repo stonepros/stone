@@ -3,7 +3,7 @@
 
 #include "SyncPoint.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::SyncPoint: " << this << " " \
                            <<  __func__ << ": "
@@ -12,7 +12,7 @@ namespace librbd {
 namespace cache {
 namespace pwl {
 
-SyncPoint::SyncPoint(uint64_t sync_gen_num, CephContext *cct)
+SyncPoint::SyncPoint(uint64_t sync_gen_num, StoneContext *cct)
   : log_entry(std::make_shared<SyncPointLogEntry>(sync_gen_num)), m_cct(cct) {
   m_prior_log_entries_persisted = new C_Gather(cct, nullptr);
   m_sync_point_persist = new C_Gather(cct, nullptr);
@@ -22,9 +22,9 @@ SyncPoint::SyncPoint(uint64_t sync_gen_num, CephContext *cct)
 }
 
 SyncPoint::~SyncPoint() {
-  ceph_assert(on_sync_point_appending.empty());
-  ceph_assert(on_sync_point_persisted.empty());
-  ceph_assert(!earlier_sync_point);
+  stone_assert(on_sync_point_appending.empty());
+  stone_assert(on_sync_point_persisted.empty());
+  stone_assert(!earlier_sync_point);
 }
 
 std::ostream &operator<<(std::ostream &os,
@@ -47,7 +47,7 @@ void SyncPoint::persist_gather_set_finisher(Context *ctx) {
   /* All prior sync points that are still in this list must already be scheduled for append */
   std::shared_ptr<SyncPoint> previous = earlier_sync_point;
   while (previous) {
-    ceph_assert(previous->m_append_scheduled);
+    stone_assert(previous->m_append_scheduled);
     previous = previous->earlier_sync_point;
   }
 

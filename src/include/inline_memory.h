@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  * 
  */
-#ifndef CEPH_INLINE_MEMORY_H
-#define CEPH_INLINE_MEMORY_H
+#ifndef STONE_INLINE_MEMORY_H
+#define STONE_INLINE_MEMORY_H
 
 #if defined(__GNUC__)
 

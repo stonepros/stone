@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2015 Mirantis, Inc.
  *
@@ -16,14 +16,14 @@
 
 #include <unistd.h>
 
-#include "ceph_ver.h"
+#include "stone_ver.h"
 #include "compressor/CompressionPlugin.h"
 #include "compressor_example.h"
 
 class CompressorPluginExample : public CompressionPlugin {
 public:
 
-  explicit CompressorPluginExample(CephContext* cct) : CompressionPlugin(cct)
+  explicit CompressorPluginExample(StoneContext* cct) : CompressionPlugin(cct)
   {}
 
   int factory(CompressorRef *cs,
@@ -40,14 +40,14 @@ public:
 
 // -----------------------------------------------------------------------------
 
-const char *__ceph_plugin_version()
+const char *__stone_plugin_version()
 {
-  return CEPH_GIT_NICE_VER;
+  return STONE_GIT_NICE_VER;
 }
 
 // -----------------------------------------------------------------------------
 
-int __ceph_plugin_init(CephContext *cct,
+int __stone_plugin_init(StoneContext *cct,
                        const std::string& type,
                        const std::string& name)
 {

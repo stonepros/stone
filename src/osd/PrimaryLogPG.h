@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_REPLICATEDPG_H
-#define CEPH_REPLICATEDPG_H
+#ifndef STONE_REPLICATEDPG_H
+#define STONE_REPLICATEDPG_H
 
 #include <boost/tuple/tuple.hpp>
 #include "include/ceph_assert.h"
@@ -1605,7 +1605,7 @@ private:
     bool can_trim() {
       return
 	permit_trim() &&
-	!pg->get_osdmap()->test_flag(CEPH_OSDMAP_NOSNAPTRIM);
+	!pg->get_osdmap()->test_flag(STONE_OSDMAP_NOSNAPTRIM);
     }
   } snap_trimmer_machine;
 

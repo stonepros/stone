@@ -78,7 +78,7 @@ public:
   }
 
 private:
-  ceph::mutex m_lock = ceph::make_mutex("Namespace");
+  stone::mutex m_lock = stone::make_mutex("Namespace");
   std::set<std::string> m_names;
 
   int list(std::vector<std::string> *names) {
@@ -104,18 +104,18 @@ struct Throttler<librbd::MockTestImageCtx> {
   static Throttler* s_instance;
 
   static Throttler *create(
-      CephContext *cct,
+      StoneContext *cct,
       const std::string &max_concurrent_ops_config_param_name) {
     return s_instance;
   }
 
   Throttler() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
 
   virtual ~Throttler() {
-    ceph_assert(s_instance == this);
+    stone_assert(s_instance == this);
     s_instance = nullptr;
   }
 
@@ -141,7 +141,7 @@ struct NamespaceReplayer<librbd::MockTestImageCtx> {
       ServiceDaemon<librbd::MockTestImageCtx> *service_daemon,
       journal::CacheManagerHandler *cache_manager_handler,
       PoolMetaCache* pool_meta_cache) {
-    ceph_assert(s_instances.count(name));
+    stone_assert(s_instances.count(name));
     auto namespace_replayer = s_instances[name];
     s_instances.erase(name);
     return namespace_replayer;
@@ -166,7 +166,7 @@ struct NamespaceReplayer<librbd::MockTestImageCtx> {
   MOCK_METHOD0(flush, void());
 
   NamespaceReplayer(const std::string &name = "") {
-    ceph_assert(!s_instances.count(name));
+    stone_assert(!s_instances.count(name));
     s_instances[name] = this;
   }
 };
@@ -181,7 +181,7 @@ struct LeaderWatcher<librbd::MockTestImageCtx> {
   static LeaderWatcher *create(Threads<librbd::MockTestImageCtx> *threads,
                                librados::IoCtx &ioctx,
                                leader_watcher::Listener* listener) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->listener = listener;
     return s_instance;
   }
@@ -216,7 +216,7 @@ struct RemotePoolPoller<librbd::MockTestImageCtx> {
       const std::string& local_site_name,
       const std::string& local_mirror_uuid,
       remote_pool_poller::Listener& listener) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->listener = &listener;
     return s_instance;
   }
@@ -251,8 +251,8 @@ struct ServiceDaemon<librbd::MockTestImageCtx> {
 template <>
 struct Threads<librbd::MockTestImageCtx> {
   MockSafeTimer *timer;
-  ceph::mutex &timer_lock;
-  ceph::condition_variable timer_cond;
+  stone::mutex &timer_lock;
+  stone::condition_variable timer_cond;
 
   MockContextWQ *work_queue;
 
@@ -305,9 +305,9 @@ public:
 
   void expect_connect(librados::MockTestMemCluster& mock_cluster,
                       librados::MockTestMemRadosClient* mock_rados_client,
-                      const std::string& cluster_name, CephContext** cct_ref) {
+                      const std::string& cluster_name, StoneContext** cct_ref) {
     EXPECT_CALL(mock_cluster, create_rados_client(_))
-      .WillOnce(Invoke([cluster_name, mock_rados_client, cct_ref](CephContext* cct) {
+      .WillOnce(Invoke([cluster_name, mock_rados_client, cct_ref](StoneContext* cct) {
                   EXPECT_EQ(cluster_name, cct->_conf->cluster);
                   if (cct_ref != nullptr) {
                     cct->get();
@@ -533,7 +533,7 @@ public:
         mock_service_daemon, "instance_id", {instance_id});
   }
 
-  PoolMetaCache m_pool_meta_cache{g_ceph_context};
+  PoolMetaCache m_pool_meta_cache{g_stone_context};
 };
 
 TEST_F(TestMockPoolReplayer, ConfigKeyOverride) {
@@ -556,12 +556,12 @@ TEST_F(TestMockPoolReplayer, ConfigKeyOverride) {
 
   auto& mock_cluster = get_mock_cluster();
   auto mock_local_rados_client = mock_cluster.do_create_rados_client(
-    g_ceph_context);
-  expect_connect(mock_cluster, mock_local_rados_client, "ceph", nullptr);
+    g_stone_context);
+  expect_connect(mock_cluster, mock_local_rados_client, "stone", nullptr);
 
   auto mock_remote_rados_client = mock_cluster.do_create_rados_client(
-    g_ceph_context);
-  CephContext* remote_cct = nullptr;
+    g_stone_context);
+  StoneContext* remote_cct = nullptr;
   expect_connect(mock_cluster, mock_remote_rados_client, "cluster name",
                  &remote_cct);
 
@@ -619,11 +619,11 @@ TEST_F(TestMockPoolReplayer, AcquireReleaseLeader) {
 
   auto& mock_cluster = get_mock_cluster();
   auto mock_local_rados_client = mock_cluster.do_create_rados_client(
-    g_ceph_context);
-  expect_connect(mock_cluster, mock_local_rados_client, "ceph", nullptr);
+    g_stone_context);
+  expect_connect(mock_cluster, mock_local_rados_client, "stone", nullptr);
 
   auto mock_remote_rados_client = mock_cluster.do_create_rados_client(
-    g_ceph_context);
+    g_stone_context);
   expect_connect(mock_cluster, mock_remote_rados_client, "cluster name",
                  nullptr);
 
@@ -678,7 +678,7 @@ TEST_F(TestMockPoolReplayer, Namespaces) {
   peer_spec.mon_host = "123";
   peer_spec.key = "234";
 
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
       "rbd_mirror_pool_replayers_refresh_interval", "1");
 
   MockNamespace mock_namespace;
@@ -705,17 +705,17 @@ TEST_F(TestMockPoolReplayer, Namespaces) {
 
   auto& mock_cluster = get_mock_cluster();
   auto mock_local_rados_client = mock_cluster.do_create_rados_client(
-      g_ceph_context);
+      g_stone_context);
   auto mock_local_io_ctx = mock_local_rados_client->do_create_ioctx(
       m_local_io_ctx.get_id(), m_local_io_ctx.get_pool_name());
   auto mock_remote_rados_client = mock_cluster.do_create_rados_client(
-      g_ceph_context);
+      g_stone_context);
 
   expect_mirror_mode_get(mock_local_io_ctx);
 
   InSequence seq;
 
-  expect_connect(mock_cluster, mock_local_rados_client, "ceph", nullptr);
+  expect_connect(mock_cluster, mock_local_rados_client, "stone", nullptr);
   expect_connect(mock_cluster, mock_remote_rados_client, "cluster name",
                  nullptr);
   expect_create_ioctx(mock_local_rados_client, mock_local_io_ctx);
@@ -799,7 +799,7 @@ TEST_F(TestMockPoolReplayer, NamespacesError) {
   peer_spec.mon_host = "123";
   peer_spec.key = "234";
 
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
       "rbd_mirror_pool_replayers_refresh_interval", "1");
 
   MockNamespace mock_namespace;
@@ -823,17 +823,17 @@ TEST_F(TestMockPoolReplayer, NamespacesError) {
 
   auto& mock_cluster = get_mock_cluster();
   auto mock_local_rados_client = mock_cluster.do_create_rados_client(
-      g_ceph_context);
+      g_stone_context);
   auto mock_local_io_ctx = mock_local_rados_client->do_create_ioctx(
       m_local_io_ctx.get_id(), m_local_io_ctx.get_pool_name());
   auto mock_remote_rados_client = mock_cluster.do_create_rados_client(
-      g_ceph_context);
+      g_stone_context);
 
   expect_mirror_mode_get(mock_local_io_ctx);
 
   InSequence seq;
 
-  expect_connect(mock_cluster, mock_local_rados_client, "ceph", nullptr);
+  expect_connect(mock_cluster, mock_local_rados_client, "stone", nullptr);
   expect_connect(mock_cluster, mock_remote_rados_client, "cluster name",
                  nullptr);
   expect_create_ioctx(mock_local_rados_client, mock_local_io_ctx);

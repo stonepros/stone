@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc. <contact@redhat.com>
  *
@@ -13,8 +13,8 @@
  * COPYING.
  */
 
-#ifndef COMMON_CEPH_ERROR_CODE
-#define COMMON_CEPH_ERROR_CODE
+#ifndef COMMON_STONE_ERROR_CODE
+#define COMMON_STONE_ERROR_CODE
 
 #include <netdb.h>
 
@@ -148,4 +148,4 @@ struct error_code : public error {
 }
 }
 
-#endif // COMMON_CEPH_ERROR_CODE
+#endif // COMMON_STONE_ERROR_CODE

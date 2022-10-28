@@ -1,4 +1,4 @@
 overrides:
-  ceph:
-    cephfs:
+  stone:
+    stonefs:
       standby_replay: true

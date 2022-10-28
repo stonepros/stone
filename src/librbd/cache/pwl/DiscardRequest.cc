@@ -23,7 +23,7 @@ namespace fs = std::experimental::filesystem;
 #include "librbd/Utils.h"
 
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl:DiscardRequest: " \
                            << this << " " << __func__ << ": "
@@ -61,7 +61,7 @@ void DiscardRequest<I>::send() {
 
 template <typename I>
 void DiscardRequest<I>::delete_image_cache_file() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   m_cache_state = ImageCacheState<I>::get_image_cache_state(&m_image_ctx, m_plugin_api);
@@ -70,7 +70,7 @@ void DiscardRequest<I>::delete_image_cache_file() {
     return;
   }
   if (m_cache_state->present &&
-      !m_cache_state->host.compare(ceph_get_short_hostname()) &&
+      !m_cache_state->host.compare(stone_get_short_hostname()) &&
       fs::exists(m_cache_state->path)) {
     std::error_code ec;
     fs::remove(m_cache_state->path, ec);
@@ -86,7 +86,7 @@ void DiscardRequest<I>::delete_image_cache_file() {
 
 template <typename I>
 void DiscardRequest<I>::remove_image_cache_state() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = DiscardRequest<I>;
@@ -98,7 +98,7 @@ void DiscardRequest<I>::remove_image_cache_state() {
 
 template <typename I>
 void DiscardRequest<I>::handle_remove_image_cache_state(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   if (r < 0) {
@@ -114,7 +114,7 @@ void DiscardRequest<I>::handle_remove_image_cache_state(int r) {
 
 template <typename I>
 void DiscardRequest<I>::remove_feature_bit() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   uint64_t new_features = m_image_ctx.features & ~RBD_FEATURE_DIRTY_CACHE;
@@ -135,7 +135,7 @@ void DiscardRequest<I>::remove_feature_bit() {
 
 template <typename I>
 void DiscardRequest<I>::handle_remove_feature_bit(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   if (r < 0) {

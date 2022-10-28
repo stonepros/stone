@@ -1,0 +1,12 @@
+meta:
+- desc: run one stonefs-mirror daemon on primary cluster
+tasks:
+- stonefs-mirror:
+    client: client.mirror1
+    run_in_foreground: True
+- stonefs-mirror:
+    client: client.mirror2
+    run_in_foreground: True
+- stonefs-mirror:
+    client: client.mirror3
+    run_in_foreground: True

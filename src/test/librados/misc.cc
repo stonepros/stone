@@ -52,7 +52,7 @@ static void test_rados_log_cb(void *arg,
 TEST(LibRadosMiscConnectFailure, ConnectFailure) {
   rados_t cluster;
 
-  char *id = getenv("CEPH_CLIENT_ID");
+  char *id = getenv("STONE_CLIENT_ID");
   if (id)
     std::cerr << "Client id is: " << id << std::endl;
 
@@ -88,7 +88,7 @@ TEST(LibRadosMiscConnectFailure, ConnectFailure) {
 TEST(LibRadosMiscPool, PoolCreationRace) {
   rados_t cluster_a, cluster_b;
 
-  char *id = getenv("CEPH_CLIENT_ID");
+  char *id = getenv("STONE_CLIENT_ID");
   if (id)
     std::cerr << "Client id is: " << id << std::endl;
 
@@ -297,7 +297,7 @@ TEST_F(LibRadosMisc, MinCompatOSD) {
   int8_t require_osd_release;
   ASSERT_EQ(0, rados_get_min_compatible_osd(cluster, &require_osd_release));
   ASSERT_LE(-1, require_osd_release);
-  ASSERT_GT(CEPH_RELEASE_MAX, require_osd_release);
+  ASSERT_GT(STONE_RELEASE_MAX, require_osd_release);
 }
 
 TEST_F(LibRadosMisc, MinCompatClient) {
@@ -307,10 +307,10 @@ TEST_F(LibRadosMisc, MinCompatClient) {
                                                &min_compat_client,
                                                &require_min_compat_client));
   ASSERT_LE(-1, min_compat_client);
-  ASSERT_GT(CEPH_RELEASE_MAX, min_compat_client);
+  ASSERT_GT(STONE_RELEASE_MAX, min_compat_client);
 
   ASSERT_LE(-1, require_min_compat_client);
-  ASSERT_GT(CEPH_RELEASE_MAX, require_min_compat_client);
+  ASSERT_GT(STONE_RELEASE_MAX, require_min_compat_client);
 }
 
 static void shutdown_racer_func()

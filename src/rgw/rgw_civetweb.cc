@@ -11,7 +11,7 @@
 #include "rgw_perf_counters.h"
 
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 size_t RGWCivetWeb::write_data(const char *buf, const size_t len)
 {
@@ -84,7 +84,7 @@ size_t RGWCivetWeb::complete_request()
   return 0;
 }
 
-int RGWCivetWeb::init_env(CephContext *cct)
+int RGWCivetWeb::init_env(StoneContext *cct)
 {
   env.init(cct);
   const struct mg_request_info* info = mg_get_request_info(conn);

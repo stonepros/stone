@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -13,14 +13,14 @@
  */
 #include <boost/intrusive_ptr.hpp>
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "os/ObjectStore.h"
 #include <gtest/gtest.h>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/errno.h"
 #include "store_test_fixture.h"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 namespace {
 
@@ -28,7 +28,7 @@ const coll_t cid;
 
 ghobject_t make_ghobject(const char *oid)
 {
-  return ghobject_t{hobject_t{oid, "", CEPH_NOSNAP, 0, 0, ""}};
+  return ghobject_t{hobject_t{oid, "", STONE_NOSNAP, 0, 0, ""}};
 }
 
 } // anonymous namespace
@@ -192,10 +192,10 @@ int main(int argc, char** argv)
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(&defaults, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(&defaults, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

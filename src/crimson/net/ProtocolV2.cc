@@ -22,7 +22,7 @@
 #include "Interceptor.h"
 #endif
 
-using namespace ceph::msgr::v2;
+using namespace stone::msgr::v2;
 using crimson::common::local_conf;
 
 namespace {
@@ -51,7 +51,7 @@ namespace {
 //   - integrity checks;
 //   - etc.
 seastar::logger& logger() {
-  return crimson::get_logger(ceph_subsys_ms);
+  return crimson::get_logger(stone_subsys_ms);
 }
 
 [[noreturn]] void abort_in_fault() {
@@ -89,7 +89,7 @@ inline void unexpected_tag(const Tag& unexpected,
 }
 
 inline uint64_t generate_client_cookie() {
-  return ceph::util::generate_random_number<uint64_t>(
+  return stone::util::generate_random_number<uint64_t>(
       1, std::numeric_limits<uint64_t>::max());
 }
 
@@ -116,7 +116,7 @@ intercept({static_cast<Tag>(tag), type}, \
 #define INTERCEPT_N_RW(bp)                               \
 if (conn.interceptor) {                                  \
   auto action = conn.interceptor->intercept(conn, {bp}); \
-  ceph_assert(action != bp_action_t::BLOCK);             \
+  stone_assert(action != bp_action_t::BLOCK);             \
   if (action == bp_action_t::FAULT) {                    \
     abort_in_fault();                                    \
   }                                                      \
@@ -162,9 +162,9 @@ bool ProtocolV2::is_connected() const {
 void ProtocolV2::start_connect(const entity_addr_t& _peer_addr,
                                const entity_name_t& _peer_name)
 {
-  ceph_assert(state == state_t::NONE);
-  ceph_assert(!socket);
-  ceph_assert(!gate.is_closed());
+  stone_assert(state == state_t::NONE);
+  stone_assert(!socket);
+  stone_assert(!gate.is_closed());
   conn.peer_addr = _peer_addr;
   conn.target_addr = _peer_addr;
   conn.set_peer_name(_peer_name);
@@ -183,8 +183,8 @@ void ProtocolV2::start_connect(const entity_addr_t& _peer_addr,
 void ProtocolV2::start_accept(SocketRef&& sock,
                               const entity_addr_t& _peer_addr)
 {
-  ceph_assert(state == state_t::NONE);
-  ceph_assert(!socket);
+  stone_assert(state == state_t::NONE);
+  stone_assert(!socket);
   // until we know better
   conn.target_addr = _peer_addr;
   socket = std::move(sock);
@@ -247,7 +247,7 @@ seastar::future<> ProtocolV2::write_flush(bufferlist&& buf)
 
 size_t ProtocolV2::get_current_msg_size() const
 {
-  ceph_assert(rx_frame_asm.get_num_segments() > 0);
+  stone_assert(rx_frame_asm.get_num_segments() > 0);
   size_t sum = 0;
   // we don't include SegmentIndex::Msg::HEADER.
   for (size_t idx = 1; idx < rx_frame_asm.get_num_segments(); idx++) {
@@ -276,7 +276,7 @@ seastar::future<Tag> ProtocolV2::read_main_preamble()
 
 seastar::future<> ProtocolV2::read_frame_payload()
 {
-  ceph_assert(rx_segments_data.empty());
+  stone_assert(rx_segments_data.empty());
 
   return seastar::do_until(
     [this] { return rx_frame_asm.get_num_segments() == rx_segments_data.size(); },
@@ -311,7 +311,7 @@ seastar::future<> ProtocolV2::read_frame_payload()
     } catch (FrameError& e) {
       logger().error("read_frame_payload: {} {}", conn, e.what());
       abort_in_fault();
-    } catch (ceph::crypto::onwire::MsgAuthError&) {
+    } catch (stone::crypto::onwire::MsgAuthError&) {
       logger().error("read_frame_payload: {} bad auth tag", conn);
       abort_in_fault();
     }
@@ -320,7 +320,7 @@ seastar::future<> ProtocolV2::read_frame_payload()
     // the kernel client to avoid unnecessary buffering.
     if (!ok) {
       // TODO
-      ceph_assert(false);
+      stone_assert(false);
     }
   });
 }
@@ -346,7 +346,7 @@ void ProtocolV2::trigger_state(state_t _state, write_state_t _write_state, bool 
   if (!reentrant && _state == state) {
     logger().error("{} is not allowed to re-trigger state {}",
                    conn, get_state_name(state));
-    ceph_assert(false);
+    stone_assert(false);
   }
   logger().debug("{} TRIGGER {}, was {}",
                  conn, get_state_name(_state), get_state_name(state));
@@ -396,34 +396,34 @@ ProtocolV2::banner_exchange(bool is_connect)
 {
   // 1. prepare and send banner
   bufferlist banner_payload;
-  encode((uint64_t)CEPH_MSGR2_SUPPORTED_FEATURES, banner_payload, 0);
-  encode((uint64_t)CEPH_MSGR2_REQUIRED_FEATURES, banner_payload, 0);
+  encode((uint64_t)STONE_MSGR2_SUPPORTED_FEATURES, banner_payload, 0);
+  encode((uint64_t)STONE_MSGR2_REQUIRED_FEATURES, banner_payload, 0);
 
   bufferlist bl;
-  bl.append(CEPH_BANNER_V2_PREFIX, strlen(CEPH_BANNER_V2_PREFIX));
+  bl.append(STONE_BANNER_V2_PREFIX, strlen(STONE_BANNER_V2_PREFIX));
   auto len_payload = static_cast<uint16_t>(banner_payload.length());
   encode(len_payload, bl, 0);
   bl.claim_append(banner_payload);
   logger().debug("{} SEND({}) banner: len_payload={}, supported={}, "
                  "required={}, banner=\"{}\"",
                  conn, bl.length(), len_payload,
-                 CEPH_MSGR2_SUPPORTED_FEATURES, CEPH_MSGR2_REQUIRED_FEATURES,
-                 CEPH_BANNER_V2_PREFIX);
+                 STONE_MSGR2_SUPPORTED_FEATURES, STONE_MSGR2_REQUIRED_FEATURES,
+                 STONE_BANNER_V2_PREFIX);
   INTERCEPT_CUSTOM(custom_bp_t::BANNER_WRITE, bp_type_t::WRITE);
   return write_flush(std::move(bl)).then([this] {
       // 2. read peer banner
-      unsigned banner_len = strlen(CEPH_BANNER_V2_PREFIX) + sizeof(ceph_le16);
+      unsigned banner_len = strlen(STONE_BANNER_V2_PREFIX) + sizeof(stone_le16);
       INTERCEPT_CUSTOM(custom_bp_t::BANNER_READ, bp_type_t::READ);
       return read_exactly(banner_len); // or read exactly?
     }).then([this] (auto bl) {
       // 3. process peer banner and read banner_payload
-      unsigned banner_prefix_len = strlen(CEPH_BANNER_V2_PREFIX);
+      unsigned banner_prefix_len = strlen(STONE_BANNER_V2_PREFIX);
       logger().debug("{} RECV({}) banner: \"{}\"",
                      conn, bl.size(),
                      std::string((const char*)bl.get(), banner_prefix_len));
 
-      if (memcmp(bl.get(), CEPH_BANNER_V2_PREFIX, banner_prefix_len) != 0) {
-        if (memcmp(bl.get(), CEPH_BANNER, strlen(CEPH_BANNER)) == 0) {
+      if (memcmp(bl.get(), STONE_BANNER_V2_PREFIX, banner_prefix_len) != 0) {
+        if (memcmp(bl.get(), STONE_BANNER, strlen(STONE_BANNER)) == 0) {
           logger().warn("{} peer is using V1 protocol", conn);
         } else {
           logger().warn("{} peer sent bad banner", conn);
@@ -462,8 +462,8 @@ ProtocolV2::banner_exchange(bool is_connect)
                      peer_supported_features, peer_required_features);
 
       // Check feature bit compatibility
-      uint64_t supported_features = CEPH_MSGR2_SUPPORTED_FEATURES;
-      uint64_t required_features = CEPH_MSGR2_REQUIRED_FEATURES;
+      uint64_t supported_features = STONE_MSGR2_SUPPORTED_FEATURES;
+      uint64_t required_features = STONE_MSGR2_REQUIRED_FEATURES;
       if ((required_features & peer_supported_features) != required_features) {
         logger().error("{} peer does not support all required features"
                        " required={} peer_supported={}",
@@ -487,7 +487,7 @@ ProtocolV2::banner_exchange(bool is_connect)
       auto hello = HelloFrame::Encode(messenger.get_mytype(),
                                       conn.target_addr);
       logger().debug("{} WRITE HelloFrame: my_type={}, peer_addr={}",
-                     conn, ceph_entity_type_name(messenger.get_mytype()),
+                     conn, stone_entity_type_name(messenger.get_mytype()),
                      conn.target_addr);
       return write_frame(hello);
     }).then([this] {
@@ -500,7 +500,7 @@ ProtocolV2::banner_exchange(bool is_connect)
       // 6. process peer HelloFrame
       auto hello = HelloFrame::Decode(rx_segments_data.back());
       logger().debug("{} GOT HelloFrame: my_type={} peer_addr={}",
-                     conn, ceph_entity_type_name(hello.entity_type()),
+                     conn, stone_entity_type_name(hello.entity_type()),
                      hello.peer_addr());
       return seastar::make_ready_future<std::tuple<entity_type_t, entity_addr_t>>(
         std::make_tuple(hello.entity_type(), hello.peer_addr()));
@@ -522,7 +522,7 @@ seastar::future<> ProtocolV2::handle_auth_reply()
                         "allowed_methods={}, allowed_modes={}",
                         conn, bad_method.method(), cpp_strerror(bad_method.result()),
                         bad_method.allowed_methods(), bad_method.allowed_modes());
-          ceph_assert(messenger.get_auth_client());
+          stone_assert(messenger.get_auth_client());
           int r = messenger.get_auth_client()->handle_auth_bad_method(
               conn.shared_from_this(), auth_meta,
               bad_method.method(), bad_method.result(),
@@ -540,7 +540,7 @@ seastar::future<> ProtocolV2::handle_auth_reply()
           auto auth_more = AuthReplyMoreFrame::Decode(rx_segments_data.back());
           logger().debug("{} GOT AuthReplyMoreFrame: payload_len={}",
                          conn, auth_more.auth_payload().length());
-          ceph_assert(messenger.get_auth_client());
+          stone_assert(messenger.get_auth_client());
           // let execute_connecting() take care of the thrown exception
           auto reply = messenger.get_auth_client()->handle_auth_reply_more(
             conn.shared_from_this(), auth_meta, auth_more.auth_payload());
@@ -557,9 +557,9 @@ seastar::future<> ProtocolV2::handle_auth_reply()
           auto auth_done = AuthDoneFrame::Decode(rx_segments_data.back());
           logger().debug("{} GOT AuthDoneFrame: gid={}, con_mode={}, payload_len={}",
                          conn, auth_done.global_id(),
-                         ceph_con_mode_name(auth_done.con_mode()),
+                         stone_con_mode_name(auth_done.con_mode()),
                          auth_done.auth_payload().length());
-          ceph_assert(messenger.get_auth_client());
+          stone_assert(messenger.get_auth_client());
           int r = messenger.get_auth_client()->handle_auth_done(
               conn.shared_from_this(), auth_meta,
               auth_done.global_id(),
@@ -570,7 +570,7 @@ seastar::future<> ProtocolV2::handle_auth_reply()
             abort_in_fault();
           }
           auth_meta->con_mode = auth_done.con_mode();
-          session_stream_handlers = ceph::crypto::onwire::rxtx_t::create_handler_pair(
+          session_stream_handlers = stone::crypto::onwire::rxtx_t::create_handler_pair(
               nullptr, *auth_meta, tx_frame_asm.get_is_rev1(), false);
           return finish_auth();
         });
@@ -585,7 +585,7 @@ seastar::future<> ProtocolV2::handle_auth_reply()
 seastar::future<> ProtocolV2::client_auth(std::vector<uint32_t> &allowed_methods)
 {
   // send_auth_request() logic
-  ceph_assert(messenger.get_auth_client());
+  stone_assert(messenger.get_auth_client());
 
   try {
     auto [auth_method, preferred_modes, bl] =
@@ -622,7 +622,7 @@ ProtocolV2::client_connect()
   // send_client_ident() logic
   uint64_t flags = 0;
   if (conn.policy.lossy) {
-    flags |= CEPH_MSG_CONNECT_LOSSY;
+    flags |= STONE_MSG_CONNECT_LOSSY;
   }
 
   auto client_ident = ClientIdentFrame::Encode(
@@ -705,7 +705,7 @@ ProtocolV2::client_connect()
                             conn.policy.features_supported);
           peer_global_seq = server_ident.global_seq();
 
-          bool lossy = server_ident.flags() & CEPH_MSG_CONNECT_LOSSY;
+          bool lossy = server_ident.flags() & STONE_MSG_CONNECT_LOSSY;
           if (lossy != conn.policy.lossy) {
             logger().warn("{} UPDATE Policy(lossy={}) from server flags", conn, lossy);
             conn.policy.lossy = lossy;
@@ -850,8 +850,8 @@ void ProtocolV2::execute_connecting()
           auto [_peer_type, _my_addr_from_peer] = std::move(ret);
           if (conn.get_peer_type() != _peer_type) {
             logger().warn("{} connection peer type does not match what peer advertises {} != {}",
-                          conn, ceph_entity_type_name(conn.get_peer_type()),
-                          ceph_entity_type_name(_peer_type));
+                          conn, stone_entity_type_name(conn.get_peer_type()),
+                          stone_entity_type_name(_peer_type));
             abort_in_close(*this, true);
           }
           if (unlikely(state != state_t::CONNECTING)) {
@@ -872,10 +872,10 @@ void ProtocolV2::execute_connecting()
           return client_auth();
         }).then([this] {
           if (server_cookie == 0) {
-            ceph_assert(connect_seq == 0);
+            stone_assert(connect_seq == 0);
             return client_connect();
           } else {
-            ceph_assert(connect_seq > 0);
+            stone_assert(connect_seq > 0);
             return client_reconnect();
           }
         }).then([this] (next_step_t next) {
@@ -901,7 +901,7 @@ void ProtocolV2::execute_connecting()
             break;
            }
            default: {
-            ceph_abort("impossible next step");
+            stone_abort("impossible next step");
            }
           }
         }).handle_exception([this] (std::exception_ptr eptr) {
@@ -934,7 +934,7 @@ void ProtocolV2::execute_connecting()
 seastar::future<> ProtocolV2::_auth_bad_method(int r)
 {
   // _auth_bad_method() logic
-  ceph_assert(r < 0);
+  stone_assert(r < 0);
   auto [allowed_methods, allowed_modes] =
       messenger.get_auth_server()->get_supported_auth_methods(conn.get_peer_type());
   auto bad_method = AuthBadMethodFrame::Encode(
@@ -951,7 +951,7 @@ seastar::future<> ProtocolV2::_auth_bad_method(int r)
 seastar::future<> ProtocolV2::_handle_auth_request(bufferlist& auth_payload, bool more)
 {
   // _handle_auth_request() logic
-  ceph_assert(messenger.get_auth_server());
+  stone_assert(messenger.get_auth_server());
   bufferlist reply;
   int r = messenger.get_auth_server()->handle_auth_request(
       conn.shared_from_this(), auth_meta,
@@ -964,10 +964,10 @@ seastar::future<> ProtocolV2::_handle_auth_request(bufferlist& auth_payload, boo
         conn.peer_global_id, auth_meta->con_mode, reply);
     logger().debug("{} WRITE AuthDoneFrame: gid={}, con_mode={}, payload_len={}",
                    conn, conn.peer_global_id,
-                   ceph_con_mode_name(auth_meta->con_mode), reply.length());
+                   stone_con_mode_name(auth_meta->con_mode), reply.length());
     return write_frame(auth_done).then([this] {
-      ceph_assert(auth_meta);
-      session_stream_handlers = ceph::crypto::onwire::rxtx_t::create_handler_pair(
+      stone_assert(auth_meta);
+      session_stream_handlers = stone::crypto::onwire::rxtx_t::create_handler_pair(
           nullptr, *auth_meta, tx_frame_asm.get_is_rev1(), true);
       return finish_auth();
     });
@@ -1018,8 +1018,8 @@ seastar::future<> ProtocolV2::server_auth()
     auth_meta->con_mode = messenger.get_auth_server()->pick_con_mode(
         conn.get_peer_type(), auth_meta->auth_method,
         request.preferred_modes());
-    if (auth_meta->con_mode == CEPH_CON_MODE_UNKNOWN) {
-      logger().warn("{} auth_server pick_con_mode returned mode CEPH_CON_MODE_UNKNOWN", conn);
+    if (auth_meta->con_mode == STONE_CON_MODE_UNKNOWN) {
+      logger().warn("{} auth_server pick_con_mode returned mode STONE_CON_MODE_UNKNOWN", conn);
       return _auth_bad_method(-EOPNOTSUPP);
     }
     return _handle_auth_request(request.auth_payload(), false);
@@ -1086,7 +1086,7 @@ ProtocolV2::handle_existing_connection(SocketConnectionRef existing_conn)
   // handle_existing_connection() logic
   ProtocolV2 *existing_proto = dynamic_cast<ProtocolV2*>(
       existing_conn->protocol.get());
-  ceph_assert(existing_proto);
+  stone_assert(existing_proto);
   logger().debug("{}(gs={}, pgs={}, cs={}, cc={}, sc={}) connecting,"
                  " found existing {}(state={}, gs={}, pgs={}, cs={}, cc={}, sc={})",
                  conn, global_seq, peer_global_seq, connect_seq,
@@ -1376,7 +1376,7 @@ ProtocolV2::server_reconnect()
 
     ProtocolV2 *existing_proto = dynamic_cast<ProtocolV2*>(
         existing_conn->protocol.get());
-    ceph_assert(existing_proto);
+    stone_assert(existing_proto);
     logger().debug("{}(gs={}, pgs={}, cs={}, cc={}, sc={}) re-connecting,"
                    " found existing {}(state={}, gs={}, pgs={}, cs={}, cc={}, sc={})",
                    conn, global_seq, peer_global_seq, reconnect.connect_seq(),
@@ -1478,13 +1478,13 @@ void ProtocolV2::execute_accepting()
           return banner_exchange(false);
         }).then([this] (auto&& ret) {
           auto [_peer_type, _my_addr_from_peer] = std::move(ret);
-          ceph_assert(conn.get_peer_type() == 0);
+          stone_assert(conn.get_peer_type() == 0);
           conn.set_peer_type(_peer_type);
 
           conn.policy = messenger.get_policy(_peer_type);
           logger().info("{} UPDATE: peer_type={},"
                         " policy(lossy={} server={} standby={} resetcheck={})",
-                        conn, ceph_entity_type_name(_peer_type),
+                        conn, stone_entity_type_name(_peer_type),
                         conn.policy.lossy, conn.policy.server,
                         conn.policy.standby, conn.policy.resetcheck);
           if (messenger.get_myaddr().get_port() != _my_addr_from_peer.get_port() ||
@@ -1525,7 +1525,7 @@ void ProtocolV2::execute_accepting()
             execute_server_wait();
             break;
            default:
-            ceph_abort("impossible next step");
+            stone_abort("impossible next step");
           }
         }).handle_exception([this] (std::exception_ptr eptr) {
           logger().info("{} execute_accepting(): fault at {}, going to CLOSING -- {}",
@@ -1539,12 +1539,12 @@ void ProtocolV2::execute_accepting()
 
 seastar::future<> ProtocolV2::finish_auth()
 {
-  ceph_assert(auth_meta);
+  stone_assert(auth_meta);
 
   const auto sig = auth_meta->session_key.empty() ? sha256_digest_t() :
     auth_meta->session_key.hmac_sha256(nullptr, rxbuf);
   auto sig_frame = AuthSignatureFrame::Encode(sig);
-  ceph_assert(record_io);
+  stone_assert(record_io);
   record_io = false;
   rxbuf.clear();
   logger().debug("{} WRITE AuthSignatureFrame: signature={}", conn, sig);
@@ -1649,12 +1649,12 @@ ProtocolV2::send_server_ident()
     conn.in_seq = 0;
 
     if (!conn.policy.lossy) {
-      server_cookie = ceph::util::generate_random_number<uint64_t>(1, -1ll);
+      server_cookie = stone::util::generate_random_number<uint64_t>(1, -1ll);
     }
 
     uint64_t flags = 0;
     if (conn.policy.lossy) {
-      flags = flags | CEPH_MSG_CONNECT_LOSSY;
+      flags = flags | STONE_MSG_CONNECT_LOSSY;
     }
 
     auto server_ident = ServerIdentFrame::Encode(
@@ -1686,7 +1686,7 @@ void ProtocolV2::trigger_replacing(bool reconnect,
                                    bool do_reset,
                                    SocketRef&& new_socket,
                                    AuthConnectionMetaRef&& new_auth_meta,
-                                   ceph::crypto::onwire::rxtx_t new_rxtx,
+                                   stone::crypto::onwire::rxtx_t new_rxtx,
                                    uint64_t new_peer_global_seq,
                                    uint64_t new_client_cookie,
                                    entity_name_t new_peer_name,
@@ -1791,31 +1791,31 @@ void ProtocolV2::trigger_replacing(bool reconnect,
 
 // READY state
 
-ceph::bufferlist ProtocolV2::do_sweep_messages(
+stone::bufferlist ProtocolV2::do_sweep_messages(
     const std::deque<MessageRef>& msgs,
     size_t num_msgs,
     bool require_keepalive,
     std::optional<utime_t> _keepalive_ack,
     bool require_ack)
 {
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
 
   if (unlikely(require_keepalive)) {
     auto keepalive_frame = KeepAliveFrame::Encode();
     bl.append(keepalive_frame.get_buffer(tx_frame_asm));
-    INTERCEPT_FRAME(ceph::msgr::v2::Tag::KEEPALIVE2, bp_type_t::WRITE);
+    INTERCEPT_FRAME(stone::msgr::v2::Tag::KEEPALIVE2, bp_type_t::WRITE);
   }
 
   if (unlikely(_keepalive_ack.has_value())) {
     auto keepalive_ack_frame = KeepAliveFrameAck::Encode(*_keepalive_ack);
     bl.append(keepalive_ack_frame.get_buffer(tx_frame_asm));
-    INTERCEPT_FRAME(ceph::msgr::v2::Tag::KEEPALIVE2_ACK, bp_type_t::WRITE);
+    INTERCEPT_FRAME(stone::msgr::v2::Tag::KEEPALIVE2_ACK, bp_type_t::WRITE);
   }
 
   if (require_ack && !num_msgs) {
     auto ack_frame = AckFrame::Encode(conn.in_seq);
     bl.append(ack_frame.get_buffer(tx_frame_asm));
-    INTERCEPT_FRAME(ceph::msgr::v2::Tag::ACK, bp_type_t::WRITE);
+    INTERCEPT_FRAME(stone::msgr::v2::Tag::ACK, bp_type_t::WRITE);
   }
 
   std::for_each(msgs.begin(), msgs.begin()+num_msgs, [this, &bl](const MessageRef& msg) {
@@ -1825,13 +1825,13 @@ ceph::bufferlist ProtocolV2::do_sweep_messages(
 
     msg->encode(conn.features, 0);
 
-    ceph_assert(!msg->get_seq() && "message already has seq");
+    stone_assert(!msg->get_seq() && "message already has seq");
     msg->set_seq(++conn.out_seq);
 
-    ceph_msg_header &header = msg->get_header();
-    ceph_msg_footer &footer = msg->get_footer();
+    stone_msg_header &header = msg->get_header();
+    stone_msg_footer &footer = msg->get_footer();
 
-    ceph_msg_header2 header2{header.seq,        header.tid,
+    stone_msg_header2 header2{header.seq,        header.tid,
                              header.type,       header.priority,
                              header.version,
                              init_le32(0),      header.data_off,
@@ -1844,7 +1844,7 @@ ceph::bufferlist ProtocolV2::do_sweep_messages(
     logger().debug("{} --> #{} === {} ({})",
 		   conn, msg->get_seq(), *msg, msg->get_type());
     bl.append(message.get_buffer(tx_frame_asm));
-    INTERCEPT_FRAME(ceph::msgr::v2::Tag::MESSAGE, bp_type_t::WRITE);
+    INTERCEPT_FRAME(stone::msgr::v2::Tag::MESSAGE, bp_type_t::WRITE);
   });
 
   return bl;
@@ -1860,7 +1860,7 @@ seastar::future<> ProtocolV2::read_message(utime_t throttle_stamp)
     const size_t cur_msg_size = get_current_msg_size();
     auto msg_frame = MessageFrame::Decode(rx_segments_data);
     // XXX: paranoid copy just to avoid oops
-    ceph_msg_header2 current_header = msg_frame.header();
+    stone_msg_header2 current_header = msg_frame.header();
 
     logger().trace("{} got {} + {} + {} byte message,"
                    " envelope type={} src={} off={} seq={}",
@@ -1868,7 +1868,7 @@ seastar::future<> ProtocolV2::read_message(utime_t throttle_stamp)
                    msg_frame.data_len(), current_header.type, conn.get_peer_name(),
                    current_header.data_off, current_header.seq);
 
-    ceph_msg_header header{current_header.seq,
+    stone_msg_header header{current_header.seq,
                            current_header.tid,
                            current_header.type,
                            current_header.priority,
@@ -1881,7 +1881,7 @@ seastar::future<> ProtocolV2::read_message(utime_t throttle_stamp)
                            current_header.compat_version,
                            current_header.reserved,
                            init_le32(0)};
-    ceph_msg_footer footer{init_le32(0), init_le32(0),
+    stone_msg_footer footer{init_le32(0), init_le32(0),
                            init_le32(0), init_le64(0), current_header.flags};
 
     auto conn_ref = seastar::static_pointer_cast<SocketConnection>(
@@ -1912,14 +1912,14 @@ seastar::future<> ProtocolV2::read_message(utime_t throttle_stamp)
                      conn, message->get_seq(), cur_seq, *message);
       if (HAVE_FEATURE(conn.features, RECONNECT_SEQ) &&
           local_conf()->ms_die_on_old_message) {
-        ceph_assert(0 == "old msgs despite reconnect_seq feature");
+        stone_assert(0 == "old msgs despite reconnect_seq feature");
       }
       return seastar::now();
     } else if (message->get_seq() > cur_seq + 1) {
       logger().error("{} missed message? skipped from seq {} to {}",
                      conn, cur_seq, message->get_seq());
       if (local_conf()->ms_die_on_skipped_message) {
-        ceph_assert(0 == "skipped incoming seq");
+        stone_assert(0 == "skipped incoming seq");
       }
     }
 
@@ -1963,7 +1963,7 @@ void ProtocolV2::execute_ready(bool dispatch_connect)
                 return seastar::now();
               }
               // TODO: message throttler
-              ceph_assert(false);
+              stone_assert(false);
               return seastar::now();
             }).then([this] {
               // throttle_bytes() logic
@@ -2117,7 +2117,7 @@ void ProtocolV2::trigger_close()
         conn.shared_from_this()));
   } else {
     // cannot happen
-    ceph_assert(false);
+    stone_assert(false);
   }
 
   protocol_timer.cancel();

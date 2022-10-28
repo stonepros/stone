@@ -19,8 +19,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_MSG_DPDK_QUEUE_H_
-#define CEPH_MSG_DPDK_QUEUE_H_
+#ifndef STONE_MSG_DPDK_QUEUE_H_
+#define STONE_MSG_DPDK_QUEUE_H_
 
 #include <queue>
 
@@ -93,4 +93,4 @@ inline bool queue<T>::full() const {
   return _q.size() == _max;
 }
 
-#endif /* CEPH_MSG_DPDK_QUEUE_H_ */
+#endif /* STONE_MSG_DPDK_QUEUE_H_ */

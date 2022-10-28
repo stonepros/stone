@@ -39,7 +39,7 @@ public:
 
   MOSDPGQuery2() : MOSDPeeringOp{MSG_OSD_PG_QUERY2,
 				  HEAD_VERSION, COMPAT_VERSION} {
-    set_priority(CEPH_MSG_PRIO_HIGH);
+    set_priority(STONE_MSG_PRIO_HIGH);
   }
   MOSDPGQuery2(
     spg_t s,
@@ -47,7 +47,7 @@ public:
     : MOSDPeeringOp{MSG_OSD_PG_QUERY2, HEAD_VERSION, COMPAT_VERSION},
       spgid(s),
       query(q) {
-    set_priority(CEPH_MSG_PRIO_HIGH);
+    set_priority(STONE_MSG_PRIO_HIGH);
   }
 
 private:

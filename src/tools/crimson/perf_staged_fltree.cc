@@ -15,7 +15,7 @@ using namespace crimson::os::seastore::onode;
 namespace bpo = boost::program_options;
 
 seastar::logger& logger() {
-  return crimson::get_logger(ceph_subsys_test);
+  return crimson::get_logger(stone_subsys_test);
 }
 
 template <bool TRACK>
@@ -73,16 +73,16 @@ seastar::future<> run(const bpo::variables_map& config) {
     } else if (backend == "seastore") {
       is_dummy = false;
     } else {
-      ceph_abort(false && "invalid backend");
+      stone_abort(false && "invalid backend");
     }
     auto str_sizes = config["str-sizes"].as<std::vector<size_t>>();
     auto onode_sizes = config["onode-sizes"].as<std::vector<size_t>>();
     auto range2 = config["range2"].as<std::vector<int>>();
-    ceph_assert(range2.size() == 2);
+    stone_assert(range2.size() == 2);
     auto range1 = config["range1"].as<std::vector<unsigned>>();
-    ceph_assert(range1.size() == 2);
+    stone_assert(range1.size() == 2);
     auto range0 = config["range0"].as<std::vector<unsigned>>();
-    ceph_assert(range0.size() == 2);
+    stone_assert(range0.size() == 2);
 
     KVPool kvs{str_sizes, onode_sizes,
                {range2[0], range2[1]},

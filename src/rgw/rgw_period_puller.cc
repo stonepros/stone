@@ -4,12 +4,12 @@
 #include "rgw_rados.h"
 #include "rgw_zone.h"
 #include "rgw_rest_conn.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/errno.h"
 
 #include "services/svc_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #undef dout_prefix
 #define dout_prefix (*_dout << "rgw period puller: ")

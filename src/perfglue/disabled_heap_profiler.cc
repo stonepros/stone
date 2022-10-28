@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network/Sage Weil <sage@newdream.net>
  *
@@ -13,35 +13,35 @@
  */
 #include "heap_profiler.h"
 
-bool ceph_using_tcmalloc() { return false; }
+bool stone_using_tcmalloc() { return false; }
 
-void ceph_heap_profiler_init() { return; }
+void stone_heap_profiler_init() { return; }
 
-void ceph_heap_profiler_stats(char *buf, int length) { return; }
+void stone_heap_profiler_stats(char *buf, int length) { return; }
 
-void ceph_heap_release_free_memory() { return; }
+void stone_heap_release_free_memory() { return; }
 
-double ceph_heap_get_release_rate() { return 0; }
+double stone_heap_get_release_rate() { return 0; }
 
-void ceph_heap_set_release_rate(double value) { return; }
+void stone_heap_set_release_rate(double value) { return; }
 
-bool ceph_heap_profiler_running() { return false; }
+bool stone_heap_profiler_running() { return false; }
 
-void ceph_heap_profiler_start() { return; }
+void stone_heap_profiler_start() { return; }
 
-void ceph_heap_profiler_stop() { return; }
+void stone_heap_profiler_stop() { return; }
 
-void ceph_heap_profiler_dump(const char *reason) { return; }
+void stone_heap_profiler_dump(const char *reason) { return; }
 
-bool ceph_heap_get_numeric_property(const char *property, size_t *value)
+bool stone_heap_get_numeric_property(const char *property, size_t *value)
 {
   return false;
 }
 
-bool ceph_heap_set_numeric_property(const char *property, size_t value)
+bool stone_heap_set_numeric_property(const char *property, size_t value)
 {
   return false;
 }
 
-void ceph_heap_profiler_handle_command(const std::vector<std::string>& cmd,
+void stone_heap_profiler_handle_command(const std::vector<std::string>& cmd,
                                        std::ostream& out) { return; }

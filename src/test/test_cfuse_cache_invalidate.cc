@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #define REGION 1048576
 int main(int argc, char *argv[]) {
@@ -28,10 +28,10 @@ int main(int argc, char *argv[]) {
     int i = 0;
     while(!done) {
       printf("writing %d\n", i++);
-      ceph_assert(pwrite(fd, buf, REGION, 0) == REGION);
+      stone_assert(pwrite(fd, buf, REGION, 0) == REGION);
       int status;
       int ret = waitpid(p, &status, WNOHANG);
-      ceph_assert(ret >= 0);
+      stone_assert(ret >= 0);
       if (ret > 0) {
 	done = 1;
       }
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     }
 
     printf("reading\n");
-    ceph_assert(pread(fd, buf, REGION, 0) == REGION);
+    stone_assert(pread(fd, buf, REGION, 0) == REGION);
     close(fd);
   }
 

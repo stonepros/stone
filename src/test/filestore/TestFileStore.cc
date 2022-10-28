@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -14,7 +14,7 @@
  *
  */
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "os/filestore/FileStore.h"
 #include <gtest/gtest.h>
@@ -30,7 +30,7 @@ TEST(FileStore, create)
 {
   {
     map<string,string> pm;
-    FileStore fs(g_ceph_context, "a", "b");
+    FileStore fs(g_stone_context, "a", "b");
     TestFileStore::create_backend(fs, 0);
     fs.collect_metadata(&pm);
     ASSERT_EQ(pm["filestore_backend"], "generic");
@@ -38,7 +38,7 @@ TEST(FileStore, create)
 #if defined(__linux__)
   {
     map<string,string> pm;
-    FileStore fs(g_ceph_context, "a", "b");
+    FileStore fs(g_stone_context, "a", "b");
     TestFileStore::create_backend(fs, BTRFS_SUPER_MAGIC);
     fs.collect_metadata(&pm);
     ASSERT_EQ(pm["filestore_backend"], "btrfs");
@@ -46,7 +46,7 @@ TEST(FileStore, create)
 # ifdef HAVE_LIBXFS
   {
     map<string,string> pm;
-    FileStore fs(g_ceph_context, "a", "b");
+    FileStore fs(g_stone_context, "a", "b");
     TestFileStore::create_backend(fs, XFS_SUPER_MAGIC);
     fs.collect_metadata(&pm);
     ASSERT_EQ(pm["filestore_backend"], "xfs");
@@ -68,12 +68,12 @@ int main(int argc, char **argv) {
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.set_val("osd_journal_size", "100");
-  g_ceph_context->_conf.apply_changes(NULL);
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.set_val("osd_journal_size", "100");
+  g_stone_context->_conf.apply_changes(NULL);
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
@@ -81,8 +81,8 @@ int main(int argc, char **argv) {
 
 /*
  * Local Variables:
- * compile-command: "cd ../.. ; make ceph_test_filestore && 
- *    ./ceph_test_filestore \
+ * compile-command: "cd ../.. ; make stone_test_filestore && 
+ *    ./stone_test_filestore \
  *        --gtest_filter=*.* --log-to-stderr=true --debug-filestore=20
  *  "
  * End:

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_LIBRADOS_POOLASYNCCOMPLETIONIMPL_H
-#define CEPH_LIBRADOS_POOLASYNCCOMPLETIONIMPL_H
+#ifndef STONE_LIBRADOS_POOLASYNCCOMPLETIONIMPL_H
+#define STONE_LIBRADOS_POOLASYNCCOMPLETIONIMPL_H
 
 #include "common/ceph_mutex.h"
 

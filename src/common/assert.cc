@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2008-2011 New Dream Network
  *
@@ -17,10 +17,10 @@
 
 using std::ostringstream;
 
-namespace ceph {
-  static CephContext *g_assert_context = NULL;
+namespace stone {
+  static StoneContext *g_assert_context = NULL;
 
-  /* If you register an assert context, ceph_assert() will try to lock the dout
+  /* If you register an assert context, stone_assert() will try to lock the dout
    * stream of that context before starting an assert. This is nice because the
    * output looks better. Your assert will not be interleaved with other dout
    * statements.
@@ -29,13 +29,13 @@ namespace ceph {
    * register an assert context. The extra complexity of supporting this
    * wouldn't really be worth it.
    */
-  void register_assert_context(CephContext *cct)
+  void register_assert_context(StoneContext *cct)
   {
-    ceph_assert(!g_assert_context);
+    stone_assert(!g_assert_context);
     g_assert_context = cct;
   }
 
-  [[gnu::cold]] void __ceph_assert_fail(const char *assertion,
+  [[gnu::cold]] void __stone_assert_fail(const char *assertion,
 					const char *file, int line,
 					const char *func)
   {
@@ -44,15 +44,15 @@ namespace ceph {
     g_assert_line = line;
     g_assert_func = func;
     g_assert_thread = (unsigned long long)pthread_self();
-    ceph_pthread_getname(pthread_self(), g_assert_thread_name,
+    stone_pthread_getname(pthread_self(), g_assert_thread_name,
 		       sizeof(g_assert_thread_name));
 
     ostringstream tss;
-    tss << ceph_clock_now();
+    tss << stone_clock_now();
 
     snprintf(g_assert_msg, sizeof(g_assert_msg),
 	     "%s: In function '%s' thread %llx time %s\n"
-	     "%s: %d: FAILED ceph_assert(%s)\n",
+	     "%s: %d: FAILED stone_assert(%s)\n",
 	     file, func, (unsigned long long)pthread_self(), tss.str().c_str(),
 	     file, line, assertion);
     dout_emergency(g_assert_msg);
@@ -75,9 +75,9 @@ namespace ceph {
     abort();
   }
 
-  [[gnu::cold]] void __ceph_assert_fail(const assert_data &ctx)
+  [[gnu::cold]] void __stone_assert_fail(const assert_data &ctx)
   {
-    __ceph_assert_fail(ctx.assertion, ctx.file, ctx.line, ctx.function);
+    __stone_assert_fail(ctx.assertion, ctx.file, ctx.line, ctx.function);
   }
 
   class BufAppender {
@@ -109,26 +109,26 @@ namespace ceph {
   };
 
 
-  [[gnu::cold]] void __ceph_assertf_fail(const char *assertion,
+  [[gnu::cold]] void __stone_assertf_fail(const char *assertion,
 					 const char *file, int line,
 					 const char *func, const char* msg,
 					 ...)
   {
     ostringstream tss;
-    tss << ceph_clock_now();
+    tss << stone_clock_now();
 
     g_assert_condition = assertion;
     g_assert_file = file;
     g_assert_line = line;
     g_assert_func = func;
     g_assert_thread = (unsigned long long)pthread_self();
-    ceph_pthread_getname(pthread_self(), g_assert_thread_name,
+    stone_pthread_getname(pthread_self(), g_assert_thread_name,
 		       sizeof(g_assert_thread_name));
 
     BufAppender ba(g_assert_msg, sizeof(g_assert_msg));
     BackTrace *bt = new BackTrace(1);
     ba.printf("%s: In function '%s' thread %llx time %s\n"
-	     "%s: %d: FAILED ceph_assert(%s)\n",
+	     "%s: %d: FAILED stone_assert(%s)\n",
 	     file, func, (unsigned long long)pthread_self(), tss.str().c_str(),
 	     file, line, assertion);
     ba.printf("Assertion details: ");
@@ -157,24 +157,24 @@ namespace ceph {
     abort();
   }
 
-  [[gnu::cold]] void __ceph_abort(const char *file, int line,
+  [[gnu::cold]] void __stone_abort(const char *file, int line,
 				  const char *func, const std::string& msg)
   {
     ostringstream tss;
-    tss << ceph_clock_now();
+    tss << stone_clock_now();
 
     g_assert_condition = "abort";
     g_assert_file = file;
     g_assert_line = line;
     g_assert_func = func;
     g_assert_thread = (unsigned long long)pthread_self();
-    ceph_pthread_getname(pthread_self(), g_assert_thread_name,
+    stone_pthread_getname(pthread_self(), g_assert_thread_name,
 		       sizeof(g_assert_thread_name));
 
     BackTrace *bt = new BackTrace(1);
     snprintf(g_assert_msg, sizeof(g_assert_msg),
              "%s: In function '%s' thread %llx time %s\n"
-	     "%s: %d: ceph_abort_msg(\"%s\")\n", file, func,
+	     "%s: %d: stone_abort_msg(\"%s\")\n", file, func,
 	     (unsigned long long)pthread_self(),
 	     tss.str().c_str(), file, line,
 	     msg.c_str());
@@ -198,19 +198,19 @@ namespace ceph {
     abort();
   }
 
-  [[gnu::cold]] void __ceph_abortf(const char *file, int line,
+  [[gnu::cold]] void __stone_abortf(const char *file, int line,
 				   const char *func, const char* msg,
 				   ...)
   {
     ostringstream tss;
-    tss << ceph_clock_now();
+    tss << stone_clock_now();
 
     g_assert_condition = "abort";
     g_assert_file = file;
     g_assert_line = line;
     g_assert_func = func;
     g_assert_thread = (unsigned long long)pthread_self();
-    ceph_pthread_getname(pthread_self(), g_assert_thread_name,
+    stone_pthread_getname(pthread_self(), g_assert_thread_name,
 		       sizeof(g_assert_thread_name));
 
     BufAppender ba(g_assert_msg, sizeof(g_assert_msg));
@@ -245,13 +245,13 @@ namespace ceph {
     abort();
   }
 
-  [[gnu::cold]] void __ceph_assert_warn(const char *assertion,
+  [[gnu::cold]] void __stone_assert_warn(const char *assertion,
 					const char *file,
 					int line, const char *func)
   {
     char buf[8096];
     snprintf(buf, sizeof(buf),
-	     "WARNING: ceph_assert(%s) at: %s: %d: %s()\n",
+	     "WARNING: stone_assert(%s) at: %s: %d: %s()\n",
 	     assertion, file, line, func);
     dout_emergency(buf);
   }

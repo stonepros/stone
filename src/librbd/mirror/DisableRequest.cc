@@ -18,7 +18,7 @@
 #include "librbd/mirror/ImageStateUpdateRequest.h"
 #include "librbd/mirror/snapshot/PromoteRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::DisableRequest: " \
                            << this << " " << __func__ << ": "
@@ -42,7 +42,7 @@ void DisableRequest<I>::send() {
 
 template <typename I>
 void DisableRequest<I>::send_get_mirror_info() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << dendl;
 
 
@@ -58,7 +58,7 @@ void DisableRequest<I>::send_get_mirror_info() {
 
 template <typename I>
 Context *DisableRequest<I>::handle_get_mirror_info(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << "r=" << *result << dendl;
 
   if (*result < 0) {
@@ -88,7 +88,7 @@ Context *DisableRequest<I>::handle_get_mirror_info(int *result) {
 
 template <typename I>
 void DisableRequest<I>::send_image_state_update() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << dendl;
 
   auto ctx = util::create_context_callback<
@@ -102,7 +102,7 @@ void DisableRequest<I>::send_image_state_update() {
 
 template <typename I>
 Context *DisableRequest<I>::handle_image_state_update(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << "r=" << *result << dendl;
 
   if (*result < 0) {
@@ -122,14 +122,14 @@ void DisableRequest<I>::send_promote_image() {
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << dendl;
 
   auto ctx = util::create_context_callback<
     DisableRequest<I>, &DisableRequest<I>::handle_promote_image>(this);
   if (m_mirror_image.mode == cls::rbd::MIRROR_IMAGE_MODE_JOURNAL) {
     // Not primary -- shouldn't have the journal open
-    ceph_assert(m_image_ctx->journal == nullptr);
+    stone_assert(m_image_ctx->journal == nullptr);
 
     auto req = journal::PromoteRequest<I>::create(m_image_ctx, true, ctx);
     req->send();
@@ -145,7 +145,7 @@ void DisableRequest<I>::send_promote_image() {
 
 template <typename I>
 Context *DisableRequest<I>::handle_promote_image(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << "r=" << *result << dendl;
 
   if (*result < 0) {
@@ -164,7 +164,7 @@ void DisableRequest<I>::send_refresh_image() {
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << dendl;
 
   auto ctx = util::create_context_callback<
@@ -175,7 +175,7 @@ void DisableRequest<I>::send_refresh_image() {
 
 template <typename I>
 Context *DisableRequest<I>::handle_refresh_image(int* result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << "r=" << *result << dendl;
 
   if (*result < 0) {
@@ -189,7 +189,7 @@ Context *DisableRequest<I>::handle_refresh_image(int* result) {
 
 template <typename I>
 void DisableRequest<I>::clean_mirror_state() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << dendl;
 
   if (m_mirror_image.mode == cls::rbd::MIRROR_IMAGE_MODE_SNAPSHOT) {
@@ -201,7 +201,7 @@ void DisableRequest<I>::clean_mirror_state() {
 
 template <typename I>
 void DisableRequest<I>::send_get_clients() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << dendl;
 
   using klass = DisableRequest<I>;
@@ -216,11 +216,11 @@ void DisableRequest<I>::send_get_clients() {
 
 template <typename I>
 Context *DisableRequest<I>::handle_get_clients(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << "r=" << *result << dendl;
 
   std::unique_lock locker{m_lock};
-  ceph_assert(m_current_ops.empty());
+  stone_assert(m_current_ops.empty());
 
   if (*result < 0) {
     lderr(cct) << "failed to get registered clients: " << cpp_strerror(*result)
@@ -232,7 +232,7 @@ Context *DisableRequest<I>::handle_get_clients(int *result) {
     journal::ClientData client_data;
     auto bl_it = client.data.cbegin();
     try {
-      using ceph::decode;
+      using stone::decode;
       decode(client_data, bl_it);
     } catch (const buffer::error &err) {
       lderr(cct) << "failed to decode client data" << dendl;
@@ -286,7 +286,7 @@ Context *DisableRequest<I>::handle_get_clients(int *result) {
 
 template <typename I>
 void DisableRequest<I>::remove_mirror_snapshots() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << dendl;
 
   // remove snapshot-based mirroring snapshots
@@ -316,11 +316,11 @@ void DisableRequest<I>::send_remove_snap(
     const std::string &client_id,
     const cls::rbd::SnapshotNamespace &snap_namespace,
     const std::string &snap_name) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << "client_id=" << client_id
                  << ", snap_name=" << snap_name << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   m_current_ops[client_id]++;
 
@@ -339,12 +339,12 @@ void DisableRequest<I>::send_remove_snap(
 template <typename I>
 Context *DisableRequest<I>::handle_remove_snap(int *result,
     const std::string &client_id) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << "r=" << *result << dendl;
 
   std::unique_lock locker{m_lock};
 
-  ceph_assert(m_current_ops[client_id] > 0);
+  stone_assert(m_current_ops[client_id] > 0);
   m_current_ops[client_id]--;
 
   if (*result < 0 && *result != -ENOENT) {
@@ -355,7 +355,7 @@ Context *DisableRequest<I>::handle_remove_snap(int *result,
 
   if (m_current_ops[client_id] == 0) {
     if (m_mirror_image.mode == cls::rbd::MIRROR_IMAGE_MODE_SNAPSHOT) {
-      ceph_assert(client_id.empty());
+      stone_assert(client_id.empty());
       m_current_ops.erase(client_id);
       if (m_ret[client_id] < 0) {
         return m_on_finish;
@@ -375,11 +375,11 @@ Context *DisableRequest<I>::handle_remove_snap(int *result,
 template <typename I>
 void DisableRequest<I>::send_unregister_client(
   const std::string &client_id) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(m_current_ops[client_id] == 0);
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(m_current_ops[client_id] == 0);
 
   Context *ctx = create_context_callback(
     &DisableRequest<I>::handle_unregister_client, client_id);
@@ -395,7 +395,7 @@ void DisableRequest<I>::send_unregister_client(
   librados::AioCompletion *comp = create_rados_callback(ctx);
 
   int r = m_image_ctx->md_ctx.aio_operate(header_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -403,11 +403,11 @@ template <typename I>
 Context *DisableRequest<I>::handle_unregister_client(
   int *result, const std::string &client_id) {
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << "r=" << *result << dendl;
 
   std::unique_lock locker{m_lock};
-  ceph_assert(m_current_ops[client_id] == 0);
+  stone_assert(m_current_ops[client_id] == 0);
   m_current_ops.erase(client_id);
 
   if (*result < 0 && *result != -ENOENT) {
@@ -432,7 +432,7 @@ Context *DisableRequest<I>::handle_unregister_client(
 
 template <typename I>
 void DisableRequest<I>::send_remove_mirror_image() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << dendl;
 
   auto ctx = util::create_context_callback<
@@ -446,7 +446,7 @@ void DisableRequest<I>::send_remove_mirror_image() {
 
 template <typename I>
 Context *DisableRequest<I>::handle_remove_mirror_image(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << "r=" << *result << dendl;
 
   if (*result < 0) {

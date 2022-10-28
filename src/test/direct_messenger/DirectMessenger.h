@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_MSG_DIRECTMESSENGER_H
-#define CEPH_MSG_DIRECTMESSENGER_H
+#ifndef STONE_MSG_DIRECTMESSENGER_H
+#define STONE_MSG_DIRECTMESSENGER_H
 
 #include "msg/SimplePolicyMessenger.h"
 #include "common/Semaphore.h"
@@ -44,7 +44,7 @@ class DirectMessenger : public SimplePolicyMessenger {
   Semaphore sem;
 
  public:
-  DirectMessenger(CephContext *cct, entity_name_t name,
+  DirectMessenger(StoneeContext *cct, entity_name_t name,
                   string mname, uint64_t nonce,
                   DispatchStrategy *dispatchers);
   ~DirectMessenger();

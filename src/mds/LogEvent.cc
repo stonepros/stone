@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -39,7 +39,7 @@
 
 #include "events/ENoOp.h"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 
 std::unique_ptr<LogEvent> LogEvent::decode_event(bufferlist::const_iterator p)
@@ -47,7 +47,7 @@ std::unique_ptr<LogEvent> LogEvent::decode_event(bufferlist::const_iterator p)
   // parse type, length
   EventType type;
   std::unique_ptr<LogEvent> event;
-  using ceph::decode;
+  using stone::decode;
   decode(type, p);
 
   if (EVENT_NEW_ENCODING == type) {
@@ -209,7 +209,7 @@ std::unique_ptr<LogEvent> LogEvent::decode_event(bufferlist::const_iterator& p, 
     return nullptr;
   }
 
-  ceph_assert(p.end());
+  stone_assert(p.end());
   return le;
 }
 

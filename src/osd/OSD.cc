@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2017 OVH
@@ -49,9 +49,9 @@
 #include "osdc/Objecter.h"
 
 #include "common/errno.h"
-#include "common/ceph_argparse.h"
-#include "common/ceph_releases.h"
-#include "common/ceph_time.h"
+#include "common/stone_argparse.h"
+#include "common/stone_releases.h"
+#include "common/stone_time.h"
 #include "common/version.h"
 #include "common/async/blocked_completion.h"
 #include "common/pick_address.h"
@@ -138,7 +138,7 @@
 #include "common/AsyncReserver.h"
 #include "common/HeartbeatMap.h"
 #include "common/admin_socket.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 #include "global/signal_handler.h"
 #include "global/pidfile.h"
@@ -159,7 +159,7 @@
 #include "include/str_list.h"
 #include "include/util.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/config.h"
 #include "common/EventTrace.h"
 
@@ -180,7 +180,7 @@
 #endif
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, whoami, get_osdmap_epoch())
 
@@ -201,16 +201,16 @@ using std::to_string;
 using std::unique_ptr;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::decode;
-using ceph::encode;
-using ceph::fixed_u_to_string;
-using ceph::Formatter;
-using ceph::heartbeat_handle_d;
-using ceph::make_mutex;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::decode;
+using stone::encode;
+using stone::fixed_u_to_string;
+using stone::Formatter;
+using stone::heartbeat_handle_d;
+using stone::make_mutex;
 
-using namespace ceph::osd::scheduler;
+using namespace stone::osd::scheduler;
 using TOPNSPC::common::cmd_getval;
 
 static ostream& _prefix(std::ostream* _dout, int whoami, epoch_t epoch) {
@@ -220,38 +220,38 @@ static ostream& _prefix(std::ostream* _dout, int whoami, epoch_t epoch) {
 //Initial features in new superblock.
 //Features here are also automatically upgraded
 CompatSet OSD::get_osd_initial_compat_set() {
-  CompatSet::FeatureSet ceph_osd_feature_compat;
-  CompatSet::FeatureSet ceph_osd_feature_ro_compat;
-  CompatSet::FeatureSet ceph_osd_feature_incompat;
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_BASE);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_PGINFO);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_OLOC);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_LEC);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_CATEGORIES);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_HOBJECTPOOL);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_BIGINFO);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_LEVELDBINFO);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_LEVELDBLOG);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_SNAPMAPPER);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_HINTS);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_PGMETA);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_MISSING);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_FASTINFO);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_RECOVERY_DELETES);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_SNAPMAPPER2);
-  return CompatSet(ceph_osd_feature_compat, ceph_osd_feature_ro_compat,
-		   ceph_osd_feature_incompat);
+  CompatSet::FeatureSet stone_osd_feature_compat;
+  CompatSet::FeatureSet stone_osd_feature_ro_compat;
+  CompatSet::FeatureSet stone_osd_feature_incompat;
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_BASE);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_PGINFO);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_OLOC);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_LEC);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_CATEGORIES);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_HOBJECTPOOL);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_BIGINFO);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_LEVELDBINFO);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_LEVELDBLOG);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_SNAPMAPPER);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_HINTS);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_PGMETA);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_MISSING);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_FASTINFO);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_RECOVERY_DELETES);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_SNAPMAPPER2);
+  return CompatSet(stone_osd_feature_compat, stone_osd_feature_ro_compat,
+		   stone_osd_feature_incompat);
 }
 
 //Features are added here that this OSD supports.
 CompatSet OSD::get_osd_compat_set() {
   CompatSet compat =  get_osd_initial_compat_set();
   //Any features here can be set in code, but not in initial superblock
-  compat.incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_SHARDS);
+  compat.incompat.insert(STONE_OSD_FEATURE_INCOMPAT_SHARDS);
   return compat;
 }
 
-OSDService::OSDService(OSD *osd, ceph::async::io_context_pool& poolctx) :
+OSDService::OSDService(OSD *osd, stone::async::io_context_pool& poolctx) :
   osd(osd),
   cct(osd->cct),
   whoami(osd->whoami), store(osd->store),
@@ -264,8 +264,8 @@ OSDService::OSDService(OSD *osd, ceph::async::io_context_pool& poolctx) :
   monc(osd->monc),
   osd_max_object_size(cct->_conf, "osd_max_object_size"),
   osd_skip_data_digest(cct->_conf, "osd_skip_data_digest"),
-  publish_lock{ceph::make_mutex("OSDService::publish_lock")},
-  pre_publish_lock{ceph::make_mutex("OSDService::pre_publish_lock")},
+  publish_lock{stone::make_mutex("OSDService::publish_lock")},
+  pre_publish_lock{stone::make_mutex("OSDService::pre_publish_lock")},
   max_oldest_map(0),
   scrubs_local(0),
   scrubs_remote(0),
@@ -276,7 +276,7 @@ OSDService::OSDService(OSD *osd, ceph::async::io_context_pool& poolctx) :
   agent_thread(this),
   agent_stop_flag(false),
   agent_timer(osd->client_messenger->cct, agent_timer_lock),
-  last_recalibrate(ceph_clock_now()),
+  last_recalibrate(stone_clock_now()),
   promote_max_objects(0),
   promote_max_bytes(0),
   poolctx(poolctx),
@@ -326,8 +326,8 @@ void OSDService::add_pgid(spg_t pgid, PG *pg) {
 void OSDService::remove_pgid(spg_t pgid, PG *pg)
 {
   std::lock_guard l(pgid_lock);
-  ceph_assert(pgid_tracker.count(pgid));
-  ceph_assert(pgid_tracker[pgid] > 0);
+  stone_assert(pgid_tracker.count(pgid));
+  stone_assert(pgid_tracker[pgid] > 0);
   pgid_tracker[pgid]--;
   if (pgid_tracker[pgid] == 0) {
     pgid_tracker.erase(pgid);
@@ -348,9 +348,9 @@ void OSDService::dump_live_pgids()
 #endif
 
 
-ceph::signedspan OSDService::get_mnow()
+stone::signedspan OSDService::get_mnow()
 {
-  return ceph::mono_clock::now() - osd->startup_time;
+  return stone::mono_clock::now() - osd->startup_time;
 }
 
 void OSDService::identify_splits_and_merges(
@@ -472,7 +472,7 @@ HeartbeatStampsRef OSDService::get_hb_stamps(unsigned peer)
     hb_stamps.resize(peer + 1);
   }
   if (!hb_stamps[peer]) {
-    hb_stamps[peer] = ceph::make_ref<HeartbeatStamps>(peer);
+    hb_stamps[peer] = stone::make_ref<HeartbeatStamps>(peer);
   }
   return hb_stamps[peer];
 }
@@ -561,7 +561,7 @@ void OSDService::activate_map()
   // wake/unwake the tiering agent
   std::lock_guard l{agent_lock};
   agent_active =
-    !osdmap->test_flag(CEPH_OSDMAP_NOTIERAGENT) &&
+    !osdmap->test_flag(STONE_OSDMAP_NOTIERAGENT) &&
     osd->is_active();
   agent_cond.notify_all();
 }
@@ -643,12 +643,12 @@ void OSDService::agent_stop()
     std::lock_guard l(agent_lock);
 
     // By this time all ops should be cancelled
-    ceph_assert(agent_ops == 0);
+    stone_assert(agent_ops == 0);
     // By this time all PGs are shutdown and dequeued
     if (!agent_queue.empty()) {
       set<PGRef>& top = agent_queue.rbegin()->second;
       derr << "agent queue not empty, for example " << (*top.begin())->get_pgid() << dendl;
-      ceph_abort_msg("agent queue not empty");
+      stone_abort_msg("agent queue not empty");
     }
 
     agent_stop_flag = true;
@@ -661,7 +661,7 @@ void OSDService::agent_stop()
 
 void OSDService::promote_throttle_recalibrate()
 {
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   double dur = now - last_recalibrate;
   last_recalibrate = now;
   unsigned prob = promote_probability_millis;
@@ -754,7 +754,7 @@ OSDService::s_names OSDService::recalc_full_state(float ratio, float pratio, str
   float full_ratio = std::max(osdmap->get_full_ratio(), backfillfull_ratio);
   float failsafe_ratio = std::max(get_failsafe_full_ratio(), full_ratio);
 
-  if (osdmap->require_osd_release < ceph_release_t::luminous) {
+  if (osdmap->require_osd_release < stone_release_t::luminous) {
     // use the failsafe for nearfull and full; the mon isn't using the
     // flags anyway because we're mid-upgrade.
     full_ratio = failsafe_ratio;
@@ -823,11 +823,11 @@ bool OSDService::need_fullness_update()
   OSDMapRef osdmap = get_osdmap();
   s_names cur = NONE;
   if (osdmap->exists(whoami)) {
-    if (osdmap->get_state(whoami) & CEPH_OSD_FULL) {
+    if (osdmap->get_state(whoami) & STONE_OSD_FULL) {
       cur = FULL;
-    } else if (osdmap->get_state(whoami) & CEPH_OSD_BACKFILLFULL) {
+    } else if (osdmap->get_state(whoami) & STONE_OSD_BACKFILLFULL) {
       cur = BACKFILLFULL;
-    } else if (osdmap->get_state(whoami) & CEPH_OSD_NEARFULL) {
+    } else if (osdmap->get_state(whoami) & STONE_OSD_NEARFULL) {
       cur = NEARFULL;
     }
   }
@@ -994,7 +994,7 @@ void OSDService::set_statfs(const struct store_statfs_t &stbuf,
 osd_stat_t OSDService::set_osd_stat(vector<int>& hb_peers,
 				    int num_pgs)
 {
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   auto stale_time = g_conf().get_val<int64_t>("osd_mon_heartbeat_stat_stale");
   std::lock_guard l(stat_lock);
   osd_stat.hb_peers.swap(hb_peers);
@@ -1054,7 +1054,7 @@ void OSDService::send_message_osd_cluster(int peer, Message *m, epoch_t from_epo
 {
   OSDMapRef next_map = get_nextmap_reserved();
   // service map is always newer/newest
-  ceph_assert(from_epoch <= next_map->get_epoch());
+  stone_assert(from_epoch <= next_map->get_epoch());
 
   if (next_map->is_down(peer) ||
       next_map->get_info(peer).up_from > from_epoch) {
@@ -1078,7 +1078,7 @@ void OSDService::send_message_osd_cluster(std::vector<std::pair<int, Message*>>&
 {
   OSDMapRef next_map = get_nextmap_reserved();
   // service map is always newer/newest
-  ceph_assert(from_epoch <= next_map->get_epoch());
+  stone_assert(from_epoch <= next_map->get_epoch());
 
   for (auto& iter : messages) {
     if (next_map->is_down(iter.first) ||
@@ -1102,7 +1102,7 @@ ConnectionRef OSDService::get_con_osd_cluster(int peer, epoch_t from_epoch)
 {
   OSDMapRef next_map = get_nextmap_reserved();
   // service map is always newer/newest
-  ceph_assert(from_epoch <= next_map->get_epoch());
+  stone_assert(from_epoch <= next_map->get_epoch());
 
   if (next_map->is_down(peer) ||
       next_map->get_info(peer).up_from > from_epoch) {
@@ -1124,7 +1124,7 @@ pair<ConnectionRef,ConnectionRef> OSDService::get_con_osd_hb(int peer, epoch_t f
 {
   OSDMapRef next_map = get_nextmap_reserved();
   // service map is always newer/newest
-  ceph_assert(from_epoch <= next_map->get_epoch());
+  stone_assert(from_epoch <= next_map->get_epoch());
 
   pair<ConnectionRef,ConnectionRef> ret;
   if (next_map->is_down(peer) ||
@@ -1227,7 +1227,7 @@ void OSDService::send_pg_created(pg_t pgid)
   std::lock_guard l(pg_created_lock);
   dout(20) << __func__ << dendl;
   auto o = get_osdmap();
-  if (o->require_osd_release >= ceph_release_t::luminous) {
+  if (o->require_osd_release >= stone_release_t::luminous) {
     pg_created.insert(pgid);
     monc->send_mon_message(new MOSDPGCreated(pgid));
   }
@@ -1238,7 +1238,7 @@ void OSDService::send_pg_created()
   std::lock_guard l(pg_created_lock);
   dout(20) << __func__ << dendl;
   auto o = get_osdmap();
-  if (o->require_osd_release >= ceph_release_t::luminous) {
+  if (o->require_osd_release >= stone_release_t::luminous) {
     for (auto pgid : pg_created) {
       monc->send_mon_message(new MOSDPGCreated(pgid));
     }
@@ -1305,7 +1305,7 @@ void OSDService::dec_scrubs_local()
   dout(20) << __func__ << " " << scrubs_local << " -> " << (scrubs_local-1)
 	   << " (max " << cct->_conf->osd_max_scrubs << ", remote " << scrubs_remote << ")" << dendl;
   --scrubs_local;
-  ceph_assert(scrubs_local >= 0);
+  stone_assert(scrubs_local >= 0);
 }
 
 bool OSDService::inc_scrubs_remote()
@@ -1329,7 +1329,7 @@ void OSDService::dec_scrubs_remote()
   dout(20) << __func__ << " " << scrubs_remote << " -> " << (scrubs_remote-1)
 	   << " (max " << cct->_conf->osd_max_scrubs << ", local " << scrubs_local << ")" << dendl;
   --scrubs_remote;
-  ceph_assert(scrubs_remote >= 0);
+  stone_assert(scrubs_remote >= 0);
 }
 
 void OSDService::dump_scrub_reservations(Formatter *f)
@@ -1357,15 +1357,15 @@ void OSDService::set_epochs(const epoch_t *_boot_epoch, const epoch_t *_up_epoch
 {
   std::lock_guard l(epoch_lock);
   if (_boot_epoch) {
-    ceph_assert(*_boot_epoch == 0 || *_boot_epoch >= boot_epoch);
+    stone_assert(*_boot_epoch == 0 || *_boot_epoch >= boot_epoch);
     boot_epoch = *_boot_epoch;
   }
   if (_up_epoch) {
-    ceph_assert(*_up_epoch == 0 || *_up_epoch >= up_epoch);
+    stone_assert(*_up_epoch == 0 || *_up_epoch >= up_epoch);
     up_epoch = *_up_epoch;
   }
   if (_bind_epoch) {
-    ceph_assert(*_bind_epoch == 0 || *_bind_epoch >= bind_epoch);
+    stone_assert(*_bind_epoch == 0 || *_bind_epoch >= bind_epoch);
     bind_epoch = *_bind_epoch;
   }
 }
@@ -1389,7 +1389,7 @@ bool OSDService::prepare_to_stop()
 	true,  // request ack
 	true   // mark as down and dead
 	));
-    const auto timeout = ceph::make_timespan(cct->_conf->osd_mon_shutdown_timeout);
+    const auto timeout = stone::make_timespan(cct->_conf->osd_mon_shutdown_timeout);
     is_stopping_cond.wait_for(l, timeout,
       [this] { return get_state() == STOPPING; });
   }
@@ -1472,7 +1472,7 @@ MOSDMap *OSDService::build_incremental_map_msg(epoch_t since, epoch_t to,
     if (!get_map_bl(m->newest_map, bl)) {
       derr << __func__ << " unable to load latest full map " << m->newest_map
 	   << dendl;
-      ceph_abort();
+      stone_abort();
     }
     m->maps[m->newest_map] = std::move(bl);
   }
@@ -1526,7 +1526,7 @@ bool OSDService::_get_map_bl(epoch_t e, bufferlist& bl)
   logger->inc(l_osd_map_bl_cache_miss);
   found = store->read(meta_ch,
 		      OSD::get_osdmap_pobject_name(e), 0, 0, bl,
-		      CEPH_OSD_OP_FLAG_FADVISE_WILLNEED) >= 0;
+		      STONE_OSD_OP_FLAG_FADVISE_WILLNEED) >= 0;
   if (found) {
     _add_map_bl(e, bl);
   }
@@ -1544,7 +1544,7 @@ bool OSDService::get_inc_map_bl(epoch_t e, bufferlist& bl)
   logger->inc(l_osd_map_bl_cache_miss);
   found = store->read(meta_ch,
 		      OSD::get_inc_osdmap_pobject_name(e), 0, 0, bl,
-		      CEPH_OSD_OP_FLAG_FADVISE_WILLNEED) >= 0;
+		      STONE_OSD_OP_FLAG_FADVISE_WILLNEED) >= 0;
   if (found) {
     _add_map_inc_bl(e, bl);
   }
@@ -1640,12 +1640,12 @@ void OSDService::reply_op_error(OpRequestRef op, int err, eversion_t v,
 				vector<pg_log_op_return_item_t> op_returns)
 {
   auto m = op->get_req<MOSDOp>();
-  ceph_assert(m->get_type() == CEPH_MSG_OSD_OP);
+  stone_assert(m->get_type() == STONE_MSG_OSD_OP);
   int flags;
-  flags = m->get_flags() & (CEPH_OSD_FLAG_ACK|CEPH_OSD_FLAG_ONDISK);
+  flags = m->get_flags() & (STONE_OSD_FLAG_ACK|STONE_OSD_FLAG_ONDISK);
 
   MOSDOpReply *reply = new MOSDOpReply(m, err, osdmap->get_epoch(), flags,
-				       !m->has_flag(CEPH_OSD_FLAG_RETURNVEC));
+				       !m->has_flag(STONE_OSD_FLAG_RETURNVEC));
   reply->set_reply_versions(v, uv);
   reply->set_op_returns(op_returns);
   m->get_connection()->send_message(reply);
@@ -1658,9 +1658,9 @@ void OSDService::handle_misdirected_op(PG *pg, OpRequestRef op)
   }
 
   auto m = op->get_req<MOSDOp>();
-  ceph_assert(m->get_type() == CEPH_MSG_OSD_OP);
+  stone_assert(m->get_type() == STONE_MSG_OSD_OP);
 
-  ceph_assert(m->get_map_epoch() >= pg->get_history().same_primary_since);
+  stone_assert(m->get_map_epoch() >= pg->get_history().same_primary_since);
 
   if (pg->is_ec_pg()) {
     /**
@@ -1679,7 +1679,7 @@ void OSDService::handle_misdirected_op(PG *pg, OpRequestRef op)
        * splitting.  The simplest thing is to detect such cases here and drop
        * them without an error (the client will resend anyway).
        */
-    ceph_assert(m->get_map_epoch() <= superblock.newest_map);
+    stone_assert(m->get_map_epoch() <= superblock.newest_map);
     OSDMapRef opmap = try_get_map(m->get_map_epoch());
     if (!opmap) {
       dout(7) << __func__ << ": " << *pg << " no longer have map for "
@@ -1688,7 +1688,7 @@ void OSDService::handle_misdirected_op(PG *pg, OpRequestRef op)
     }
     pg_t _pgid = m->get_raw_pg();
     spg_t pgid;
-    if ((m->get_flags() & CEPH_OSD_FLAG_PGOP) == 0)
+    if ((m->get_flags() & STONE_OSD_FLAG_PGOP) == 0)
       _pgid = opmap->raw_pg_to_pg(_pgid);
     if (opmap->get_primary_shard(_pgid, &pgid) &&
 	pgid.shard != pg->pg_id.shard) {
@@ -1727,7 +1727,7 @@ void OSDService::queue_recovery_context(
 	new PGRecoveryContext(pg->get_pgid(), c, e)),
       cct->_conf->osd_recovery_cost,
       cct->_conf->osd_recovery_priority,
-      ceph_clock_now(),
+      stone_clock_now(),
       0,
       e));
 }
@@ -1741,7 +1741,7 @@ void OSDService::queue_for_snap_trim(PG *pg)
 	new PGSnapTrim(pg->get_pgid(), pg->get_osdmap_epoch())),
       cct->_conf->osd_snap_trim_cost,
       cct->_conf->osd_snap_trim_priority,
-      ceph_clock_now(),
+      stone_clock_now(),
       0,
       pg->get_osdmap_epoch()));
 }
@@ -1759,7 +1759,7 @@ void OSDService::queue_scrub_event_msg(PG* pg,
 
   enqueue_back(OpSchedulerItem(
     unique_ptr<OpSchedulerItem::OpQueueable>(msg), cct->_conf->osd_scrub_cost,
-    pg->scrub_requeue_priority(with_priority, qu_priority), ceph_clock_now(), 0, epoch));
+    pg->scrub_requeue_priority(with_priority, qu_priority), stone_clock_now(), 0, epoch));
 }
 
 template <class MSG_TYPE>
@@ -1772,7 +1772,7 @@ void OSDService::queue_scrub_event_msg(PG* pg,
 
   enqueue_back(OpSchedulerItem(
     unique_ptr<OpSchedulerItem::OpQueueable>(msg), cct->_conf->osd_scrub_cost,
-    pg->scrub_requeue_priority(with_priority), ceph_clock_now(), 0, epoch));
+    pg->scrub_requeue_priority(with_priority), stone_clock_now(), 0, epoch));
 }
 
 void OSDService::queue_for_scrub(PG* pg, Scrub::scrub_prio_t with_priority)
@@ -1901,7 +1901,7 @@ void OSDService::queue_for_pg_delete(spg_t pgid, epoch_t e)
 	new PGDelete(pgid, e)),
       cct->_conf->osd_pg_delete_cost,
       cct->_conf->osd_pg_delete_priority,
-      ceph_clock_now(),
+      stone_clock_now(),
       0,
       e));
 }
@@ -2048,7 +2048,7 @@ void OSDService::_queue_for_recovery(
   std::pair<epoch_t, PGRef> p,
   uint64_t reserved_pushes)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(recovery_lock));
+  stone_assert(stone_mutex_is_locked_by_me(recovery_lock));
   enqueue_back(
     OpSchedulerItem(
       unique_ptr<OpSchedulerItem::OpQueueable>(
@@ -2056,7 +2056,7 @@ void OSDService::_queue_for_recovery(
 	  p.second->get_pgid(), p.first, reserved_pushes)),
       cct->_conf->osd_recovery_cost,
       cct->_conf->osd_recovery_priority,
-      ceph_clock_now(),
+      stone_clock_now(),
       0,
       p.first));
 }
@@ -2068,13 +2068,13 @@ void OSDService::_queue_for_recovery(
 #define dout_prefix *_dout
 
 // Commands shared between OSD's console and admin console:
-namespace ceph::osd_cmds {
+namespace stone::osd_cmds {
 
-int heap(CephContext& cct, const cmdmap_t& cmdmap, Formatter& f, std::ostream& os);
+int heap(StoneContext& cct, const cmdmap_t& cmdmap, Formatter& f, std::ostream& os);
 
-} // namespace ceph::osd_cmds
+} // namespace stone::osd_cmds
 
-int OSD::mkfs(CephContext *cct, ObjectStore *store, uuid_d fsid, int whoami, string osdspec_affinity)
+int OSD::mkfs(StoneContext *cct, ObjectStore *store, uuid_d fsid, int whoami, string osdspec_affinity)
 {
   int ret;
 
@@ -2165,12 +2165,12 @@ free_store:
   return ret;
 }
 
-int OSD::write_meta(CephContext *cct, ObjectStore *store, uuid_d& cluster_fsid, uuid_d& osd_fsid, int whoami, string& osdspec_affinity)
+int OSD::write_meta(StoneContext *cct, ObjectStore *store, uuid_d& cluster_fsid, uuid_d& osd_fsid, int whoami, string& osdspec_affinity)
 {
   char val[80];
   int r;
 
-  snprintf(val, sizeof(val), "%s", CEPH_OSD_ONDISK_MAGIC);
+  snprintf(val, sizeof(val), "%s", STONE_OSD_ONDISK_MAGIC);
   r = store->write_meta("magic", val);
   if (r < 0)
     return r;
@@ -2181,7 +2181,7 @@ int OSD::write_meta(CephContext *cct, ObjectStore *store, uuid_d& cluster_fsid, 
     return r;
 
   cluster_fsid.print(val);
-  r = store->write_meta("ceph_fsid", val);
+  r = store->write_meta("stone_fsid", val);
   if (r < 0)
     return r;
 
@@ -2224,7 +2224,7 @@ int OSD::peek_meta(ObjectStore *store,
 		   uuid_d *cluster_fsid,
 		   uuid_d *osd_fsid,
 		   int *whoami,
-		   ceph_release_t *require_osd_release)
+		   stone_release_t *require_osd_release)
 {
   string val;
 
@@ -2238,7 +2238,7 @@ int OSD::peek_meta(ObjectStore *store,
     return r;
   *whoami = atoi(val.c_str());
 
-  r = store->read_meta("ceph_fsid", &val);
+  r = store->read_meta("stone_fsid", &val);
   if (r < 0)
     return r;
   r = cluster_fsid->parse(val.c_str());
@@ -2256,7 +2256,7 @@ int OSD::peek_meta(ObjectStore *store,
 
   r = store->read_meta("require_osd_release", &val);
   if (r >= 0) {
-    *require_osd_release = ceph_release_from_name(val);
+    *require_osd_release = stone_release_from_name(val);
   }
 
   return 0;
@@ -2268,7 +2268,7 @@ int OSD::peek_meta(ObjectStore *store,
 
 // cons/des
 
-OSD::OSD(CephContext *cct_, ObjectStore *store_,
+OSD::OSD(StoneContext *cct_, ObjectStore *store_,
 	 int id,
 	 Messenger *internal_messenger,
 	 Messenger *external_messenger,
@@ -2279,7 +2279,7 @@ OSD::OSD(CephContext *cct_, ObjectStore *store_,
 	 Messenger *osdc_messenger,
 	 MonClient *mc,
 	 const std::string &dev, const std::string &jdev,
-	 ceph::async::io_context_pool& poolctx) :
+	 stone::async::io_context_pool& poolctx) :
   Dispatcher(cct_),
   tick_timer(cct, osd_lock),
   tick_timer_without_osd_lock(cct, tick_timer_lock),
@@ -2318,8 +2318,8 @@ OSD::OSD(CephContext *cct_, ObjectStore *store_,
   test_ops_hook(NULL),
   op_shardedwq(
     this,
-    ceph::make_timespan(cct->_conf->osd_op_thread_timeout),
-    ceph::make_timespan(cct->_conf->osd_op_thread_suicide_timeout),
+    stone::make_timespan(cct->_conf->osd_op_thread_timeout),
+    stone::make_timespan(cct->_conf->osd_op_thread_suicide_timeout),
     &osd_op_tp),
   last_pg_create_epoch(0),
   boot_finisher(cct),
@@ -2342,7 +2342,7 @@ OSD::OSD(CephContext *cct_, ObjectStore *store_,
     */
     const int32_t set_result(setenv("KRB5_CLIENT_KTNAME",
                                     gss_ktfile_client.c_str(), 1));
-    ceph_assert(set_result == 0);
+    stone_assert(set_result == 0);
   }
 
   monc->set_messenger(client_messenger);
@@ -2388,12 +2388,12 @@ double OSD::get_tick_interval() const
   // vary +/- 5% to avoid scrub scheduling livelocks
   constexpr auto delta = 0.05;
   return (OSD_TICK_INTERVAL *
-	  ceph::util::generate_random_number(1.0 - delta, 1.0 + delta));
+	  stone::util::generate_random_number(1.0 - delta, 1.0 + delta));
 }
 
 void OSD::handle_signal(int signum)
 {
-  ceph_assert(signum == SIGINT || signum == SIGTERM);
+  stone_assert(signum == SIGINT || signum == SIGTERM);
   derr << "*** Got signal " << sig_str(signum) << " ***" << dendl;
   shutdown();
 }
@@ -2406,7 +2406,7 @@ int OSD::pre_init()
 
   if (store->test_mount_in_use()) {
     derr << "OSD::pre_init: object store '" << dev_path << "' is "
-         << "currently in use. (Is ceph-osd already running?)" << dendl;
+         << "currently in use. (Is stone-osd already running?)" << dendl;
     return -EBUSY;
   }
 
@@ -2505,7 +2505,7 @@ public:
 	   Formatter *f,
 	   std::ostream& ss,
 	   bufferlist& out) override {
-    ceph_abort("should use async hook");
+    stone_abort("should use async hook");
   }
   void call_async(
     std::string_view prefix,
@@ -2746,7 +2746,7 @@ will start to track new ops received afterwards.";
     } else if (value < 0) {
       error = "negative value not allowed";
       success = false;
-    } else if (!ceph_heap_set_numeric_property(property.c_str(), (size_t)value)) {
+    } else if (!stone_heap_set_numeric_property(property.c_str(), (size_t)value)) {
       error = "invalid property";
       success = false;
     } else {
@@ -2764,7 +2764,7 @@ will start to track new ops received afterwards.";
     if (!cmd_getval(cmdmap, "property", property)) {
       error = "unable to get property";
       success = false;
-    } else if (!ceph_heap_get_numeric_property(property.c_str(), &value)) {
+    } else if (!stone_heap_get_numeric_property(property.c_str(), &value)) {
       error = "invalid property";
       success = false;
     } else {
@@ -2799,9 +2799,9 @@ will start to track new ops received afterwards.";
     f->close_section();
   } else if (prefix == "compact") {
     dout(1) << "triggering manual compaction" << dendl;
-    auto start = ceph::coarse_mono_clock::now();
+    auto start = stone::coarse_mono_clock::now();
     store->compact();
-    auto end = ceph::coarse_mono_clock::now();
+    auto end = stone::coarse_mono_clock::now();
     double duration = std::chrono::duration<double>(end-start).count();
     dout(1) << "finished manual compaction in "
             << duration
@@ -2840,7 +2840,7 @@ will start to track new ops received afterwards.";
   } else if (prefix == "send_beacon") {
     lock_guard l(osd_lock);
     if (is_active()) {
-      send_beacon(ceph::coarse_mono_clock::now());
+      send_beacon(stone::coarse_mono_clock::now());
     }
   }
 
@@ -2899,7 +2899,7 @@ will start to track new ops received afterwards.";
   }
 
   else if (prefix == "heap") {
-    ret = ceph::osd_cmds::heap(*cct, cmdmap, *f, ss);
+    ret = stone::osd_cmds::heap(*cct, cmdmap, *f, ss);
   }
 
   else if (prefix == "debug dump_missing") {
@@ -3095,7 +3095,7 @@ will start to track new ops received afterwards.";
     f->dump_int("threshold", value / 1000);
     f->open_array_section("entries");
     for (auto &sitem : boost::adaptors::reverse(sorted)) {
-      ceph_assert(sitem.pingtime >= value);
+      stone_assert(sitem.pingtime >= value);
       f->open_object_section("entry");
 
       const time_t lu(sitem.last_update);
@@ -3104,7 +3104,7 @@ will start to track new ops received afterwards.";
       lustr.pop_back();   // Remove trailing \n
       auto stale = cct->_conf.get_val<int64_t>("osd_heartbeat_stale");
       f->dump_string("last update", lustr);
-      f->dump_bool("stale", ceph_clock_now().sec() - sitem.last_update > stale);
+      f->dump_bool("stale", stone_clock_now().sec() - sitem.last_update > stale);
       f->dump_int("from osd", whoami);
       f->dump_int("to osd", sitem.to);
       f->dump_string("interface", (sitem.back ? "back" : "front"));
@@ -3129,7 +3129,7 @@ will start to track new ops received afterwards.";
     f->close_section(); // entries
     f->close_section(); // network_ping_times
   } else {
-    ceph_abort_msg("broken asok registration");
+    stone_abort_msg("broken asok registration");
   }
 
  out:
@@ -3239,7 +3239,7 @@ int OSD::run_osd_bench_test(
     }
   }
 
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   for (int64_t pos = 0; pos < count; pos += bsize) {
     char nm[30];
     unsigned offset = 0;
@@ -3265,7 +3265,7 @@ int OSD::run_osd_bench_test(
       waiter.wait();
     }
   }
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   *elapsed = end - start;
 
   // clean up
@@ -3454,7 +3454,7 @@ int OSD::init()
   {
     string val;
     store->read_meta("require_osd_release", &val);
-    last_require_osd_release = ceph_release_from_name(val);
+    last_require_osd_release = stone_release_from_name(val);
   }
 
   // mount.
@@ -3462,7 +3462,7 @@ int OSD::init()
 	  << " (looks like " << (store_is_rotational ? "hdd" : "ssd") << ")"
 	  << dendl;
   dout(2) << "journal " << journal_path << dendl;
-  ceph_assert(store);  // call pre_init() first!
+  stone_assert(store);  // call pre_init() first!
 
   store->set_cache_shards(get_num_cache_shards());
 
@@ -3554,7 +3554,7 @@ int OSD::init()
     goto out;
   }
 
-  startup_time = ceph::mono_clock::now();
+  startup_time = stone::mono_clock::now();
 
   // load up "current" osdmap
   assert_warn(!get_osdmap());
@@ -3570,7 +3570,7 @@ int OSD::init()
   {
     vector<coll_t> ls;
     int r = store->list_collections(ls);
-    ceph_assert(r >= 0);
+    stone_assert(r >= 0);
     for (auto c : ls) {
       spg_t pgid;
       if (c.is_pg(&pgid) &&
@@ -3581,7 +3581,7 @@ int OSD::init()
 	       << pgid.pool() << " for pg " << pgid
 	       << "; please downgrade to luminous and allow "
 	       << "pg deletion to complete before upgrading" << dendl;
-	  ceph_abort();
+	  stone_abort();
 	}
       }
     }
@@ -3591,7 +3591,7 @@ int OSD::init()
   diff = superblock.compat_features.unsupported(initial);
   if (superblock.compat_features.merge(initial)) {
     // Are we adding SNAPMAPPER2?
-    if (diff.incompat.contains(CEPH_OSD_FEATURE_INCOMPAT_SNAPMAPPER2)) {
+    if (diff.incompat.contains(STONE_OSD_FEATURE_INCOMPAT_SNAPMAPPER2)) {
       dout(1) << __func__ << " upgrade snap_mapper (first start as octopus)"
 	      << dendl;
       auto ch = service.meta_ch;
@@ -3665,7 +3665,7 @@ int OSD::init()
     struct store_statfs_t stbuf;
     osd_alert_list_t alerts;
     int r = store->statfs(&stbuf, &alerts);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     service.set_statfs(stbuf, alerts);
   }
 
@@ -3686,8 +3686,8 @@ int OSD::init()
   }
   monc->set_handle_authentication_dispatcher(this);
 
-  monc->set_want_keys(CEPH_ENTITY_TYPE_MON | CEPH_ENTITY_TYPE_OSD
-                      | CEPH_ENTITY_TYPE_MGR);
+  monc->set_want_keys(STONE_ENTITY_TYPE_MON | STONE_ENTITY_TYPE_OSD
+                      | STONE_ENTITY_TYPE_MGR);
   r = monc->init();
   if (r < 0)
     goto out;
@@ -3823,7 +3823,7 @@ int OSD::init()
   monc->sub_want("mgrmap", 0, 0);
 
   // we don't need to ask for an osdmap here; objecter will
-  //monc->sub_want("osdmap", osdmap->get_epoch(), CEPH_SUBSCRIBE_ONETIME);
+  //monc->sub_want("osdmap", osdmap->get_epoch(), STONE_SUBSCRIBE_ONETIME);
 
   monc->renew_subs();
 
@@ -3849,122 +3849,122 @@ void OSD::final_init()
   asok_hook = new OSDSocketHook(this);
   int r = admin_socket->register_command("status", asok_hook,
 					 "high-level status of OSD");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("flush_journal",
                                      asok_hook,
                                      "flush the journal to permanent store");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("dump_ops_in_flight " \
-				     "name=filterstr,type=CephString,n=N,req=false",
+				     "name=filterstr,type=StoneString,n=N,req=false",
 				     asok_hook,
 				     "show the ops currently in flight");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("ops " \
-				     "name=filterstr,type=CephString,n=N,req=false",
+				     "name=filterstr,type=StoneString,n=N,req=false",
 				     asok_hook,
 				     "show the ops currently in flight");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("dump_blocked_ops " \
-				     "name=filterstr,type=CephString,n=N,req=false",
+				     "name=filterstr,type=StoneString,n=N,req=false",
 				     asok_hook,
 				     "show the blocked ops currently in flight");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("dump_historic_ops " \
-                                     "name=filterstr,type=CephString,n=N,req=false",
+                                     "name=filterstr,type=StoneString,n=N,req=false",
 				     asok_hook,
 				     "show recent ops");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("dump_historic_slow_ops " \
-                                     "name=filterstr,type=CephString,n=N,req=false",
+                                     "name=filterstr,type=StoneString,n=N,req=false",
 				     asok_hook,
 				     "show slowest recent ops");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("dump_historic_ops_by_duration " \
-                                     "name=filterstr,type=CephString,n=N,req=false",
+                                     "name=filterstr,type=StoneString,n=N,req=false",
 				     asok_hook,
 				     "show slowest recent ops, sorted by duration");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("dump_op_pq_state",
 				     asok_hook,
 				     "dump op priority queue state");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("dump_blocklist",
 				     asok_hook,
 				     "dump blocklisted clients and times");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("dump_watchers",
 				     asok_hook,
 				     "show clients which have active watches,"
 				     " and on which objects");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("dump_recovery_reservations",
 				     asok_hook,
 				     "show recovery reservations");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("dump_scrub_reservations",
 				     asok_hook,
 				     "show scrub reservations");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("get_latest_osdmap",
 				     asok_hook,
 				     "force osd to update the latest map from "
 				     "the mon");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command("set_heap_property " \
-				     "name=property,type=CephString " \
-				     "name=value,type=CephInt",
+				     "name=property,type=StoneString " \
+				     "name=value,type=StoneInt",
 				     asok_hook,
 				     "update malloc extension heap property");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command("get_heap_property " \
-				     "name=property,type=CephString",
+				     "name=property,type=StoneString",
 				     asok_hook,
 				     "get malloc extension heap property");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command("dump_objectstore_kv_stats",
 				     asok_hook,
 				     "print statistics of kvdb which used by bluestore");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command("dump_scrubs",
 				     asok_hook,
 				     "print scheduled scrubs");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command("calc_objectstore_db_histogram",
                                      asok_hook,
                                      "Generate key value histogram of kvdb(rocksdb) which used by bluestore");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command("flush_store_cache",
                                      asok_hook,
                                      "Flush bluestore internal cache");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command("dump_pgstate_history",
 				     asok_hook,
 				     "show recent state history");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command("compact",
 				     asok_hook,
 				     "Commpact object store's omap."
                                      " WARNING: Compaction probably slows your requests");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command("get_mapped_pools",
                                      asok_hook,
                                      "dump pools whose PG(s) are mapped to this OSD.");
 
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
-  r = admin_socket->register_command("smart name=devid,type=CephString,req=false",
+  r = admin_socket->register_command("smart name=devid,type=StoneString,req=false",
                                      asok_hook,
                                      "probe OSD devices for SMART data.");
 
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command("list_devices",
                                      asok_hook,
@@ -3974,235 +3974,235 @@ void OSD::final_init()
                                      "send OSD beacon to mon immediately");
 
   r = admin_socket->register_command(
-    "dump_osd_network name=value,type=CephInt,req=false", asok_hook,
+    "dump_osd_network name=value,type=StoneInt,req=false", asok_hook,
     "Dump osd heartbeat network ping times");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   test_ops_hook = new TestOpsSocketHook(&(this->service), this->store);
-  // Note: pools are CephString instead of CephPoolname because
+  // Note: pools are StoneString instead of StonePoolname because
   // these commands traditionally support both pool names and numbers
   r = admin_socket->register_command(
    "setomapval " \
-   "name=pool,type=CephString " \
-   "name=objname,type=CephObjectname " \
-   "name=key,type=CephString "\
-   "name=val,type=CephString",
+   "name=pool,type=StoneString " \
+   "name=objname,type=StoneObjectname " \
+   "name=key,type=StoneString "\
+   "name=val,type=StoneString",
    test_ops_hook,
    "set omap key");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "rmomapkey " \
-    "name=pool,type=CephString " \
-    "name=objname,type=CephObjectname " \
-    "name=key,type=CephString",
+    "name=pool,type=StoneString " \
+    "name=objname,type=StoneObjectname " \
+    "name=key,type=StoneString",
     test_ops_hook,
     "remove omap key");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "setomapheader " \
-    "name=pool,type=CephString " \
-    "name=objname,type=CephObjectname " \
-    "name=header,type=CephString",
+    "name=pool,type=StoneString " \
+    "name=objname,type=StoneObjectname " \
+    "name=header,type=StoneString",
     test_ops_hook,
     "set omap header");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command(
     "getomap " \
-    "name=pool,type=CephString " \
-    "name=objname,type=CephObjectname",
+    "name=pool,type=StoneString " \
+    "name=objname,type=StoneObjectname",
     test_ops_hook,
     "output entire object map");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command(
     "truncobj " \
-    "name=pool,type=CephString " \
-    "name=objname,type=CephObjectname " \
-    "name=len,type=CephInt",
+    "name=pool,type=StoneString " \
+    "name=objname,type=StoneObjectname " \
+    "name=len,type=StoneInt",
     test_ops_hook,
     "truncate object to length");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command(
     "injectdataerr " \
-    "name=pool,type=CephString " \
-    "name=objname,type=CephObjectname " \
-    "name=shardid,type=CephInt,req=false,range=0|255",
+    "name=pool,type=StoneString " \
+    "name=objname,type=StoneObjectname " \
+    "name=shardid,type=StoneInt,req=false,range=0|255",
     test_ops_hook,
     "inject data error to an object");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   r = admin_socket->register_command(
     "injectmdataerr " \
-    "name=pool,type=CephString " \
-    "name=objname,type=CephObjectname " \
-    "name=shardid,type=CephInt,req=false,range=0|255",
+    "name=pool,type=StoneString " \
+    "name=objname,type=StoneObjectname " \
+    "name=shardid,type=StoneInt,req=false,range=0|255",
     test_ops_hook,
     "inject metadata error to an object");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "set_recovery_delay " \
-    "name=utime,type=CephInt,req=false",
+    "name=utime,type=StoneInt,req=false",
     test_ops_hook,
      "Delay osd recovery by specified seconds");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
    "injectfull " \
-   "name=type,type=CephString,req=false " \
-   "name=count,type=CephInt,req=false ",
+   "name=type,type=StoneString,req=false " \
+   "name=count,type=StoneInt,req=false ",
    test_ops_hook,
    "Inject a full disk (optional count times)");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "bench " \
-    "name=count,type=CephInt,req=false "    \
-    "name=size,type=CephInt,req=false "		   \
-    "name=object_size,type=CephInt,req=false "	   \
-    "name=object_num,type=CephInt,req=false ",
+    "name=count,type=StoneInt,req=false "    \
+    "name=size,type=StoneInt,req=false "		   \
+    "name=object_size,type=StoneInt,req=false "	   \
+    "name=object_num,type=StoneInt,req=false ",
     asok_hook,
     "OSD benchmark: write <count> <size>-byte objects(with <obj_size> <obj_num>), " \
     "(default count=1G default size=4MB). Results in log.");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "cluster_log " \
-    "name=level,type=CephChoices,strings=error,warning,info,debug "	\
-    "name=message,type=CephString,n=N",
+    "name=level,type=StoneChoices,strings=error,warning,info,debug "	\
+    "name=message,type=StoneString,n=N",
     asok_hook,
     "log a message to the cluster log");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "flush_pg_stats",
     asok_hook,
     "flush pg stats");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "heap " \
-    "name=heapcmd,type=CephChoices,strings="				\
+    "name=heapcmd,type=StoneChoices,strings="				\
     "dump|start_profiler|stop_profiler|release|get_release_rate|set_release_rate|stats " \
-    "name=value,type=CephString,req=false",
+    "name=value,type=StoneString,req=false",
     asok_hook,
     "show heap usage info (available only if compiled with tcmalloc)");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "debug dump_missing "			\
-    "name=filename,type=CephFilepath",
+    "name=filename,type=StoneFilepath",
     asok_hook,
     "dump missing objects to a named file");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "debug kick_recovery_wq "						\
-    "name=delay,type=CephInt,range=0",
+    "name=delay,type=StoneInt,range=0",
     asok_hook,
     "set osd_recovery_delay_start to <val>");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "cpu_profiler "						\
-    "name=arg,type=CephChoices,strings=status|flush",
+    "name=arg,type=StoneChoices,strings=status|flush",
     asok_hook,
     "run cpu profiling on daemon");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "dump_pg_recovery_stats",
     asok_hook,
     "dump pg recovery statistics");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "reset_pg_recovery_stats",
     asok_hook,
     "reset pg recovery statistics");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "cache drop",
     asok_hook,
     "Drop all OSD caches");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "cache status",
     asok_hook,
     "Get OSD caches statistics");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "scrub_purged_snaps",
     asok_hook,
     "Scrub purged_snaps vs snapmapper index");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   // -- pg commands --
-  // old form: ceph pg <pgid> command ...
+  // old form: stone pg <pgid> command ...
   r = admin_socket->register_command(
     "pg "			   \
-    "name=pgid,type=CephPgid "	   \
-    "name=cmd,type=CephChoices,strings=query",
+    "name=pgid,type=StonePgid "	   \
+    "name=cmd,type=StoneChoices,strings=query",
     asok_hook,
     "");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "pg "			   \
-    "name=pgid,type=CephPgid "	   \
-    "name=cmd,type=CephChoices,strings=mark_unfound_lost " \
-    "name=mulcmd,type=CephChoices,strings=revert|delete",
+    "name=pgid,type=StonePgid "	   \
+    "name=cmd,type=StoneChoices,strings=mark_unfound_lost " \
+    "name=mulcmd,type=StoneChoices,strings=revert|delete",
     asok_hook,
     "");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "pg "			   \
-    "name=pgid,type=CephPgid "	   \
-    "name=cmd,type=CephChoices,strings=list_unfound " \
-    "name=offset,type=CephString,req=false",
+    "name=pgid,type=StonePgid "	   \
+    "name=cmd,type=StoneChoices,strings=list_unfound " \
+    "name=offset,type=StoneString,req=false",
     asok_hook,
     "");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "pg "			   \
-    "name=pgid,type=CephPgid "	   \
-    "name=cmd,type=CephChoices,strings=scrub " \
-    "name=time,type=CephInt,req=false",
+    "name=pgid,type=StonePgid "	   \
+    "name=cmd,type=StoneChoices,strings=scrub " \
+    "name=time,type=StoneInt,req=false",
     asok_hook,
     "");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "pg "			   \
-    "name=pgid,type=CephPgid "	   \
-    "name=cmd,type=CephChoices,strings=deep_scrub " \
-    "name=time,type=CephInt,req=false",
+    "name=pgid,type=StonePgid "	   \
+    "name=cmd,type=StoneChoices,strings=deep_scrub " \
+    "name=time,type=StoneInt,req=false",
     asok_hook,
     "");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   // new form: tell <pgid> <cmd> for both cli and rest
   r = admin_socket->register_command(
     "query",
     asok_hook,
     "show details of a specific pg");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "mark_unfound_lost "					\
-    "name=pgid,type=CephPgid,req=false "			\
-    "name=mulcmd,type=CephChoices,strings=revert|delete",
+    "name=pgid,type=StonePgid,req=false "			\
+    "name=mulcmd,type=StoneChoices,strings=revert|delete",
     asok_hook,
     "mark all unfound objects in this pg as lost, either removing or reverting to a prior version if one is available");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "list_unfound "					\
-    "name=pgid,type=CephPgid,req=false "		\
-    "name=offset,type=CephString,req=false",
+    "name=pgid,type=StonePgid,req=false "		\
+    "name=offset,type=StoneString,req=false",
     asok_hook,
     "list unfound objects on this pg, perhaps starting at an offset given in JSON");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "scrub "				\
-    "name=pgid,type=CephPgid,req=false "	\
-    "name=time,type=CephInt,req=false",
+    "name=pgid,type=StonePgid,req=false "	\
+    "name=time,type=StoneInt,req=false",
     asok_hook,
     "Trigger a scheduled scrub ");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = admin_socket->register_command(
     "deep_scrub "			\
-    "name=pgid,type=CephPgid,req=false "	\
-    "name=time,type=CephInt,req=false",
+    "name=pgid,type=StonePgid,req=false "	\
+    "name=time,type=StoneInt,req=false",
     asok_hook,
     "Trigger a scheduled deep scrub ");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 }
 
 PerfCounters* OSD::create_logger()
@@ -4358,7 +4358,7 @@ int OSD::shutdown()
 	pg->dump_live_ids();
 #endif
 	if (cct->_conf->osd_shutdown_pgref_assert) {
-	  ceph_abort();
+	  stone_abort();
 	}
       }
       pg->ch.reset();
@@ -4524,8 +4524,8 @@ void OSD::write_superblock(ObjectStore::Transaction& t)
   dout(10) << "write_superblock " << superblock << dendl;
 
   //hack: at minimum it's using the baseline feature set
-  if (!superblock.compat_features.incompat.contains(CEPH_OSD_FEATURE_INCOMPAT_BASE))
-    superblock.compat_features.incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_BASE);
+  if (!superblock.compat_features.incompat.contains(STONE_OSD_FEATURE_INCOMPAT_BASE))
+    superblock.compat_features.incompat.insert(STONE_OSD_FEATURE_INCOMPAT_BASE);
 
   bufferlist bl;
   encode(superblock, bl);
@@ -4565,7 +4565,7 @@ void OSD::clear_temp_objects()
     while (1) {
       vector<ghobject_t> objects;
       auto ch = store->open_collection(*p);
-      ceph_assert(ch);
+      stone_assert(ch);
       store->collection_list(ch, next, ghobject_t::get_max(),
 			     store->get_ideal_list_max(),
 			     &objects, &next);
@@ -4604,7 +4604,7 @@ void OSD::clear_temp_objects()
   }
 }
 
-void OSD::recursive_remove_collection(CephContext* cct,
+void OSD::recursive_remove_collection(StoneContext* cct,
 				      ObjectStore *store, spg_t pgid,
 				      coll_t tmp)
 {
@@ -4632,16 +4632,16 @@ void OSD::recursive_remove_collection(CephContext* cct,
       OSDriver::OSTransaction _t(driver.get_transaction(&t));
       int r = mapper.remove_oid(p.hobj, &_t);
       if (r != 0 && r != -ENOENT)
-        ceph_abort();
+        stone_abort();
       t.remove(tmp, p);
     }
     int r = store->queue_transaction(ch, std::move(t));
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     t = ObjectStore::Transaction();
   }
   t.remove_collection(tmp);
   int r = store->queue_transaction(ch, std::move(t));
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   C_SaferCond waiter;
   if (!ch->flush_commit(&waiter)) {
@@ -4677,7 +4677,7 @@ PG* OSD::_make_pg(
 	   << dendl;
       return nullptr;
     }
-    ceph_assert(r >= 0);
+    stone_assert(r >= 0);
     auto p = bl.cbegin();
     decode(pi, p);
     decode(name, p);
@@ -4694,7 +4694,7 @@ PG* OSD::_make_pg(
       pi.type == pg_pool_t::TYPE_ERASURE)
     pg = new PrimaryLogPG(&service, createmap, pool, ec_profile, pgid);
   else
-    ceph_abort();
+    stone_abort();
   return pg;
 }
 
@@ -4738,7 +4738,7 @@ void OSD::register_pg(PGRef pg)
   auto sdata = shards[shard_index];
   std::lock_guard l(sdata->shard_lock);
   auto r = sdata->pg_slots.emplace(pgid, make_unique<OSDShardPGSlot>());
-  ceph_assert(r.second);
+  stone_assert(r.second);
   auto *slot = r.first->second.get();
   dout(20) << __func__ << " " << pgid << " " << pg << dendl;
   sdata->_attach_pg(slot, pg.get());
@@ -4747,7 +4747,7 @@ void OSD::register_pg(PGRef pg)
 bool OSD::try_finish_pg_delete(PG *pg, unsigned old_pg_num)
 {
   auto sdata = pg->osd_shard;
-  ceph_assert(sdata);
+  stone_assert(sdata);
   {
     std::lock_guard l(sdata->shard_lock);
     auto p = sdata->pg_slots.find(pg->pg_id);
@@ -4812,7 +4812,7 @@ PGRef OSD::lookup_lock_pg(spg_t pgid)
 
 void OSD::load_pgs()
 {
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
   dout(0) << "load_pgs" << dendl;
 
   {
@@ -4867,14 +4867,14 @@ void OSD::load_pgs()
 	  derr << __func__ << ": could not find map for epoch " << map_epoch
 	       << " on pg " << pgid << ", but the pool is not present in the "
 	       << "current map, so this is probably a result of bug 10617.  "
-	       << "Skipping the pg for now, you can use ceph-objectstore-tool "
+	       << "Skipping the pg for now, you can use stone-objectstore-tool "
 	       << "to clean it up later." << dendl;
 	  continue;
 	} else {
 	  derr << __func__ << ": have pgid " << pgid << " at epoch "
 	       << map_epoch << ", but missing map.  Crashing."
 	       << dendl;
-	  ceph_abort_msg("Missing map in load_pgs");
+	  stone_abort_msg("Missing map in load_pgs");
 	}
       }
       pg = _make_pg(pgosdmap, pgid);
@@ -4940,7 +4940,7 @@ PGRef OSD::handle_pg_create_info(const OSDMapRef& osdmap,
       dout(10) << __func__ << " ignoring " << pgid << ", pool dne" << dendl;
       return nullptr;
     }
-    if (osdmap->require_osd_release >= ceph_release_t::nautilus &&
+    if (osdmap->require_osd_release >= stone_release_t::nautilus &&
 	!pool->has_flag(pg_pool_t::FLAG_CREATING)) {
       // this ensures we do not process old creating messages after the
       // pool's initial pgs have been created (and pg are subsequently
@@ -4982,7 +4982,7 @@ PGRef OSD::handle_pg_create_info(const OSDMapRef& osdmap,
   pg->lock(true);
 
   // we are holding the shard lock
-  ceph_assert(!pg->is_deleted());
+  stone_assert(!pg->is_deleted());
 
   pg->init(
     role,
@@ -5106,7 +5106,7 @@ void OSD::resume_creating_pg()
   } else if (do_sub_pg_creates) {
     // no need to subscribe the osdmap continuously anymore
     // once the pgtemp and/or mon_subscribe(pg_creates) is sent
-    if (monc->sub_want_increment("osdmap", start, CEPH_SUBSCRIBE_ONETIME)) {
+    if (monc->sub_want_increment("osdmap", start, STONE_SUBSCRIBE_ONETIME)) {
       dout(4) << __func__ << ": re-subscribe osdmap(onetime) since "
 	      << start << dendl;
       do_renew_subs = true;
@@ -5213,14 +5213,14 @@ void OSD::_add_heartbeat_peer(int p)
 
     auto stamps = service.get_hb_stamps(p);
 
-    auto sb = ceph::make_ref<Session>(cct, cons.first.get());
+    auto sb = stone::make_ref<Session>(cct, cons.first.get());
     sb->peer = p;
     sb->stamps = stamps;
-    hi->hb_interval_start = ceph_clock_now();
+    hi->hb_interval_start = stone_clock_now();
     hi->con_back = cons.first.get();
     hi->con_back->set_priv(sb);
 
-    auto sf = ceph::make_ref<Session>(cct, cons.second.get());
+    auto sf = stone::make_ref<Session>(cct, cons.second.get());
     sf->peer = p;
     sf->stamps = stamps;
     hi->con_front = cons.second.get();
@@ -5239,7 +5239,7 @@ void OSD::_add_heartbeat_peer(int p)
 void OSD::_remove_heartbeat_peer(int n)
 {
   map<int,HeartbeatInfo>::iterator q = heartbeat_peers.find(n);
-  ceph_assert(q != heartbeat_peers.end());
+  stone_assert(q != heartbeat_peers.end());
   dout(20) << " removing heartbeat peer osd." << n
 	   << " " << q->second.con_back->get_peer_addr()
 	   << " " << (q->second.con_front ? q->second.con_front->get_peer_addr() : entity_addr_t())
@@ -5258,10 +5258,10 @@ void OSD::need_heartbeat_peer_update()
 
 void OSD::maybe_update_heartbeat_peers()
 {
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
 
   if (is_waiting_for_healthy() || is_active()) {
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     if (last_heartbeat_resample == utime_t()) {
       last_heartbeat_resample = now;
       heartbeat_set_peers_need_update();
@@ -5376,9 +5376,9 @@ void OSD::maybe_update_heartbeat_peers()
 
 void OSD::reset_heartbeat_peers(bool all)
 {
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
   dout(10) << "reset_heartbeat_peers" << dendl;
-  utime_t stale = ceph_clock_now();
+  utime_t stale = stone_clock_now();
   stale -= cct->_conf.get_val<int64_t>("osd_heartbeat_stale");
   std::lock_guard l(heartbeat_lock);
   for (auto it = heartbeat_peers.begin(); it != heartbeat_peers.end();) {
@@ -5414,7 +5414,7 @@ void OSD::handle_osd_ping(MOSDPing *m)
     return;
   }
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   auto mnow = service.get_mnow();
   ConnectionRef con(m->get_connection());
   OSDMapRef curmap = service.get_osdmap();
@@ -5464,7 +5464,7 @@ void OSD::handle_osd_ping(MOSDPing *m)
 	}
       }
 
-      ceph::signedspan sender_delta_ub{};
+      stone::signedspan sender_delta_ub{};
       s->stamps->got_ping(
 	m->up_from,
 	mnow,
@@ -5530,12 +5530,12 @@ void OSD::handle_osd_ping(MOSDPing *m)
                      << " last_rx_front " << i->second.last_rx_front
                      << dendl;
             i->second.last_rx_back = now;
-            ceph_assert(unacknowledged > 0);
+            stone_assert(unacknowledged > 0);
             --unacknowledged;
             // if there is no front con, set both stamps.
             if (i->second.con_front == NULL) {
               i->second.last_rx_front = now;
-              ceph_assert(unacknowledged > 0);
+              stone_assert(unacknowledged > 0);
               --unacknowledged;
             }
           } else if (con == i->second.con_front) {
@@ -5547,7 +5547,7 @@ void OSD::handle_osd_ping(MOSDPing *m)
 		     << " -> " << now
                      << dendl;
             i->second.last_rx_front = now;
-            ceph_assert(unacknowledged > 0);
+            stone_assert(unacknowledged > 0);
             --unacknowledged;
           }
 
@@ -5573,7 +5573,7 @@ void OSD::handle_osd_ping(MOSDPing *m)
 	    if (front_pingtime > i->second.hb_max_front)
 	      i->second.hb_max_front = front_pingtime;
 
-	    ceph_assert(i->second.hb_interval_start != utime_t());
+	    stone_assert(i->second.hb_interval_start != utime_t());
 	    if (i->second.hb_interval_start == utime_t())
 	      i->second.hb_interval_start = now;
 	    int64_t hb_avg_time_period = 60;
@@ -5599,7 +5599,7 @@ void OSD::handle_osd_ping(MOSDPing *m)
 	      // Record per osd interace ping times
 	      // Based on osd_heartbeat_interval ignoring that it is randomly short than this interval
 	      if (i->second.hb_back_pingtime.size() == 0) {
-		ceph_assert(i->second.hb_front_pingtime.size() == 0);
+		stone_assert(i->second.hb_front_pingtime.size() == 0);
 		for (unsigned k = 0 ; k < hb_vector_size; ++k) {
 	          i->second.hb_back_pingtime.push_back(back_avg);
 	          i->second.hb_back_min.push_back(back_min);
@@ -5757,7 +5757,7 @@ void OSD::heartbeat_entry()
     } else {
       wait = .5 + ((float)(rand() % 10)/10.0) * (float)cct->_conf->osd_heartbeat_interval;
     }
-    auto w = ceph::make_timespan(wait);
+    auto w = stone::make_timespan(wait);
     dout(30) << "heartbeat_entry sleeping for " << wait << dendl;
     heartbeat_cond.wait_for(l, w);
     if (is_stopping())
@@ -5768,8 +5768,8 @@ void OSD::heartbeat_entry()
 
 void OSD::heartbeat_check()
 {
-  ceph_assert(ceph_mutex_is_locked(heartbeat_lock));
-  utime_t now = ceph_clock_now();
+  stone_assert(stone_mutex_is_locked(heartbeat_lock));
+  utime_t now = stone_clock_now();
 
   // check for incoming heartbeats (move me elsewhere?)
   for (map<int,HeartbeatInfo>::iterator p = heartbeat_peers.begin();
@@ -5817,7 +5817,7 @@ void OSD::heartbeat_check()
 
 void OSD::heartbeat()
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(heartbeat_lock));
+  stone_assert(stone_mutex_is_locked_by_me(heartbeat_lock));
   dout(30) << "heartbeat" << dendl;
 
   // get CPU load avg
@@ -5847,14 +5847,14 @@ void OSD::heartbeat()
 
   auto new_stat = service.set_osd_stat(hb_peers, get_num_pgs());
   dout(5) << __func__ << " " << new_stat << dendl;
-  ceph_assert(new_stat.statfs.total);
+  stone_assert(new_stat.statfs.total);
 
   float pratio;
   float ratio = service.compute_adjusted_ratio(new_stat, &pratio);
 
   service.check_full_status(ratio, pratio);
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   auto mnow = service.get_mnow();
   utime_t deadline = now;
   deadline += cct->_conf->osd_heartbeat_grace;
@@ -5879,7 +5879,7 @@ void OSD::heartbeat()
     if (i->second.hb_interval_start == utime_t())
       i->second.hb_interval_start = now;
 
-    std::optional<ceph::signedspan> delta_ub;
+    std::optional<stone::signedspan> delta_ub;
     s->stamps->sent_ping(&delta_ub);
 
     i->second.con_back->send_message(
@@ -5966,10 +5966,10 @@ bool OSD::heartbeat_reset(Connection *con)
 
 void OSD::tick()
 {
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
   dout(10) << "tick" << dendl;
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   // throw out any obsolete markdown log
   utime_t grace = utime_t(cct->_conf->osd_max_markdown_period, 0);
   while (!osd_markdown_log.empty() &&
@@ -6008,7 +6008,7 @@ void OSD::tick()
     next +=
       cct->_conf->osd_scrub_min_interval *
       cct->_conf->osd_scrub_interval_randomize_ratio * r;
-    if (next < ceph_clock_now()) {
+    if (next < stone_clock_now()) {
       dout(20) << __func__ << " last_purged_snaps_scrub " << last
 	       << " next " << next << " ... now" << dendl;
       scrub_purged_snaps();
@@ -6023,18 +6023,18 @@ void OSD::tick()
 
 void OSD::tick_without_osd_lock()
 {
-  ceph_assert(ceph_mutex_is_locked(tick_timer_lock));
+  stone_assert(stone_mutex_is_locked(tick_timer_lock));
   dout(10) << "tick_without_osd_lock" << dendl;
 
-  logger->set(l_osd_cached_crc, ceph::buffer::get_cached_crc());
-  logger->set(l_osd_cached_crc_adjusted, ceph::buffer::get_cached_crc_adjusted());
-  logger->set(l_osd_missed_crc, ceph::buffer::get_missed_crc());
+  logger->set(l_osd_cached_crc, stone::buffer::get_cached_crc());
+  logger->set(l_osd_cached_crc_adjusted, stone::buffer::get_cached_crc_adjusted());
+  logger->set(l_osd_missed_crc, stone::buffer::get_missed_crc());
 
   // refresh osd stats
   struct store_statfs_t stbuf;
   osd_alert_list_t alerts;
   int r = store->statfs(&stbuf, &alerts);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   service.set_statfs(stbuf, alerts);
 
   // osd_lock is not being held, which means the OSD state
@@ -6048,7 +6048,7 @@ void OSD::tick_without_osd_lock()
     std::lock_guard l(mon_report_lock);
 
     // mon report?
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     if (service.need_fullness_update() ||
 	now - last_mon_report > cct->_conf->osd_mon_report_interval) {
       last_mon_report = now;
@@ -6076,7 +6076,7 @@ void OSD::tick_without_osd_lock()
     service.promote_throttle_recalibrate();
     resume_creating_pg();
     bool need_send_beacon = false;
-    const auto now = ceph::coarse_mono_clock::now();
+    const auto now = stone::coarse_mono_clock::now();
     {
       // borrow lec lock to pretect last_sent_beacon from changing
       std::lock_guard l{min_last_epoch_clean_lock};
@@ -6153,7 +6153,7 @@ void TestOpsSocketHook::test_ops(OSDService *service, ObjectStore *store,
 
     int64_t shardid;
     cmd_getval(cmdmap, "shardid", shardid, int64_t(shard_id_t::NO_SHARD));
-    hobject_t obj(object_t(objname), string(""), CEPH_NOSNAP, rawpg.ps(), pool, nspace);
+    hobject_t obj(object_t(objname), string(""), STONE_NOSNAP, rawpg.ps(), pool, nspace);
     ghobject_t gobj(obj, ghobject_t::NO_GEN, shard_id_t(uint8_t(shardid)));
     spg_t pgid(curmap->raw_pg_to_pg(rawpg), shard_id_t(shardid));
     if (curmap->pg_is_ec(rawpg)) {
@@ -6284,7 +6284,7 @@ void TestOpsSocketHook::test_ops(OSDService *service, ObjectStore *store,
 void OSD::ms_handle_connect(Connection *con)
 {
   dout(10) << __func__ << " con " << con << dendl;
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_MON) {
     std::lock_guard l(osd_lock);
     if (is_stopping())
       return;
@@ -6298,7 +6298,7 @@ void OSD::ms_handle_connect(Connection *con)
       map_lock.lock_shared();
       std::lock_guard l2(mon_report_lock);
 
-      utime_t now = ceph_clock_now();
+      utime_t now = stone_clock_now();
       last_mon_report = now;
 
       // resend everything, it's a new session
@@ -6314,7 +6314,7 @@ void OSD::ms_handle_connect(Connection *con)
 
       map_lock.unlock_shared();
       if (is_active()) {
-	send_beacon(ceph::coarse_mono_clock::now());
+	send_beacon(stone::coarse_mono_clock::now());
       }
     }
 
@@ -6327,39 +6327,39 @@ void OSD::ms_handle_connect(Connection *con)
 
 void OSD::ms_handle_fast_connect(Connection *con)
 {
-  if (con->get_peer_type() != CEPH_ENTITY_TYPE_MON &&
-      con->get_peer_type() != CEPH_ENTITY_TYPE_MGR) {
-    if (auto s = ceph::ref_cast<Session>(con->get_priv()); !s) {
-      s = ceph::make_ref<Session>(cct, con);
+  if (con->get_peer_type() != STONE_ENTITY_TYPE_MON &&
+      con->get_peer_type() != STONE_ENTITY_TYPE_MGR) {
+    if (auto s = stone::ref_cast<Session>(con->get_priv()); !s) {
+      s = stone::make_ref<Session>(cct, con);
       con->set_priv(s);
       dout(10) << " new session (outgoing) " << s << " con=" << s->con
           << " addr=" << s->con->get_peer_addr() << dendl;
       // we don't connect to clients
-      ceph_assert(con->get_peer_type() == CEPH_ENTITY_TYPE_OSD);
-      s->entity_name.set_type(CEPH_ENTITY_TYPE_OSD);
+      stone_assert(con->get_peer_type() == STONE_ENTITY_TYPE_OSD);
+      s->entity_name.set_type(STONE_ENTITY_TYPE_OSD);
     }
   }
 }
 
 void OSD::ms_handle_fast_accept(Connection *con)
 {
-  if (con->get_peer_type() != CEPH_ENTITY_TYPE_MON &&
-      con->get_peer_type() != CEPH_ENTITY_TYPE_MGR) {
-    if (auto s = ceph::ref_cast<Session>(con->get_priv()); !s) {
-      s = ceph::make_ref<Session>(cct, con);
+  if (con->get_peer_type() != STONE_ENTITY_TYPE_MON &&
+      con->get_peer_type() != STONE_ENTITY_TYPE_MGR) {
+    if (auto s = stone::ref_cast<Session>(con->get_priv()); !s) {
+      s = stone::make_ref<Session>(cct, con);
       con->set_priv(s);
       dout(10) << "new session (incoming)" << s << " con=" << con
           << " addr=" << con->get_peer_addr()
           << " must have raced with connect" << dendl;
-      ceph_assert(con->get_peer_type() == CEPH_ENTITY_TYPE_OSD);
-      s->entity_name.set_type(CEPH_ENTITY_TYPE_OSD);
+      stone_assert(con->get_peer_type() == STONE_ENTITY_TYPE_OSD);
+      s->entity_name.set_type(STONE_ENTITY_TYPE_OSD);
     }
   }
 }
 
 bool OSD::ms_handle_reset(Connection *con)
 {
-  auto session = ceph::ref_cast<Session>(con->get_priv());
+  auto session = stone::ref_cast<Session>(con->get_priv());
   dout(2) << "ms_handle_reset con " << con << " session " << session.get() << dendl;
   if (!session)
     return false;
@@ -6378,13 +6378,13 @@ bool OSD::ms_handle_refused(Connection *con)
   if (!cct->_conf->osd_fast_fail_on_connection_refused)
     return false;
 
-  auto session = ceph::ref_cast<Session>(con->get_priv());
+  auto session = stone::ref_cast<Session>(con->get_priv());
   dout(2) << "ms_handle_refused con " << con << " session " << session.get() << dendl;
   if (!session)
     return false;
   int type = con->get_peer_type();
   // handle only OSD failures here
-  if (monc && (type == CEPH_ENTITY_TYPE_OSD)) {
+  if (monc && (type == STONE_ENTITY_TYPE_OSD)) {
     OSDMapRef osdmap = get_osdmap();
     if (osdmap) {
       int id = osdmap->identify_osd_on_all_channels(con->get_peer_addr());
@@ -6444,7 +6444,7 @@ void OSD::_got_mon_epochs(epoch_t oldest, epoch_t newest)
 
 void OSD::_preboot(epoch_t oldest, epoch_t newest)
 {
-  ceph_assert(is_preboot());
+  stone_assert(is_preboot());
   dout(10) << __func__ << " _preboot mon has osdmaps "
 	   << oldest << ".." << newest << dendl;
 
@@ -6468,13 +6468,13 @@ void OSD::_preboot(epoch_t oldest, epoch_t newest)
     }
   } else if (osdmap->is_noup(whoami)) {
     derr << "osdmap NOUP flag is set, waiting for it to clear" << dendl;
-  } else if (!osdmap->test_flag(CEPH_OSDMAP_SORTBITWISE)) {
+  } else if (!osdmap->test_flag(STONE_OSDMAP_SORTBITWISE)) {
     derr << "osdmap SORTBITWISE OSDMap flag is NOT set; please set it"
 	 << dendl;
   } else if (service.need_fullness_update()) {
     derr << "osdmap fullness state needs update" << dendl;
     send_full_update();
-  } else if (monmap.min_mon_release >= ceph_release_t::octopus &&
+  } else if (monmap.min_mon_release >= stone_release_t::octopus &&
 	     superblock.purged_snaps_last < superblock.current_epoch) {
     dout(10) << __func__ << " purged_snaps_last " << superblock.purged_snaps_last
 	     << " < newest_map " << superblock.current_epoch << dendl;
@@ -6557,11 +6557,11 @@ void OSD::send_full_update()
     return;
   unsigned state = 0;
   if (service.is_full()) {
-    state = CEPH_OSD_FULL;
+    state = STONE_OSD_FULL;
   } else if (service.is_backfillfull()) {
-    state = CEPH_OSD_BACKFILLFULL;
+    state = STONE_OSD_BACKFILLFULL;
   } else if (service.is_nearfull()) {
-    state = CEPH_OSD_NEARFULL;
+    state = STONE_OSD_NEARFULL;
   }
   set<string> s;
   OSDMap::calc_state_set(state, s);
@@ -6587,7 +6587,7 @@ bool OSD::_is_healthy()
   }
 
   if (is_waiting_for_healthy()) {
-     utime_t now = ceph_clock_now();
+     utime_t now = stone_clock_now();
      if (osd_markdown_log.empty()) {
        dout(5) << __func__ << " force returning true since last markdown"
                << " was " << cct->_conf->osd_max_markdown_period
@@ -6665,7 +6665,7 @@ void OSD::_send_boot()
   MOSDBoot *mboot = new MOSDBoot(
     superblock, get_osdmap_epoch(), service.get_boot_epoch(),
     hb_back_addrs, hb_front_addrs, cluster_addrs,
-    CEPH_FEATURES_ALL);
+    STONE_FEATURES_ALL);
   dout(10) << " final client_addrs " << client_addrs
 	   << ", cluster_addrs " << cluster_addrs
 	   << ", hb_back_addrs " << hb_back_addrs
@@ -6779,7 +6779,7 @@ void OSD::queue_want_up_thru(epoch_t want)
 
 void OSD::send_alive()
 {
-  ceph_assert(ceph_mutex_is_locked(mon_report_lock));
+  stone_assert(stone_mutex_is_locked(mon_report_lock));
   const auto osdmap = get_osdmap();
   if (!osdmap->exists(whoami))
     return;
@@ -6796,10 +6796,10 @@ void OSD::request_full_map(epoch_t first, epoch_t last)
   dout(10) << __func__ << " " << first << ".." << last
 	   << ", previously requested "
 	   << requested_full_first << ".." << requested_full_last << dendl;
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
-  ceph_assert(first > 0 && last > 0);
-  ceph_assert(first <= last);
-  ceph_assert(first >= requested_full_first);  // we shouldn't ever ask for older maps
+  stone_assert(stone_mutex_is_locked(osd_lock));
+  stone_assert(first > 0 && last > 0);
+  stone_assert(first <= last);
+  stone_assert(first >= requested_full_first);  // we shouldn't ever ask for older maps
   if (requested_full_first == 0) {
     // first request
     requested_full_first = first;
@@ -6819,8 +6819,8 @@ void OSD::request_full_map(epoch_t first, epoch_t last)
 
 void OSD::got_full_map(epoch_t e)
 {
-  ceph_assert(requested_full_first <= requested_full_last);
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(requested_full_first <= requested_full_last);
+  stone_assert(stone_mutex_is_locked(osd_lock));
   if (requested_full_first == 0) {
     dout(20) << __func__ << " " << e << ", nothing requested" << dendl;
     return;
@@ -6860,10 +6860,10 @@ void OSD::requeue_failures()
 
 void OSD::send_failures()
 {
-  ceph_assert(ceph_mutex_is_locked(map_lock));
-  ceph_assert(ceph_mutex_is_locked(mon_report_lock));
+  stone_assert(stone_mutex_is_locked(map_lock));
+  stone_assert(stone_mutex_is_locked(mon_report_lock));
   std::lock_guard l(heartbeat_lock);
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   const auto osdmap = get_osdmap();
   while (!failure_queue.empty()) {
     int osd = failure_queue.begin()->first;
@@ -6902,14 +6902,14 @@ void OSD::cancel_pending_failures()
   }
 }
 
-void OSD::send_beacon(const ceph::coarse_mono_clock::time_point& now)
+void OSD::send_beacon(const stone::coarse_mono_clock::time_point& now)
 {
   const auto& monmap = monc->monmap;
   // send beacon to mon even if we are just connected, and the monmap is not
   // initialized yet by then.
   if (monmap.epoch > 0 &&
       monmap.get_required_features().contains_all(
-        ceph::features::mon::FEATURE_LUMINOUS)) {
+        stone::features::mon::FEATURE_LUMINOUS)) {
     dout(20) << __func__ << " sending" << dendl;
     MOSDBeacon* beacon = nullptr;
     {
@@ -6930,7 +6930,7 @@ void OSD::send_beacon(const ceph::coarse_mono_clock::time_point& now)
 void OSD::handle_command(MCommand *m)
 {
   ConnectionRef con = m->get_connection();
-  auto session = ceph::ref_cast<Session>(con->get_priv());
+  auto session = stone::ref_cast<Session>(con->get_priv());
   if (!session) {
     con->send_message(new MCommandReply(m, -EACCES));
     m->put();
@@ -6947,9 +6947,9 @@ void OSD::handle_command(MCommand *m)
 
 namespace {
   class unlock_guard {
-    ceph::mutex& m;
+    stone::mutex& m;
   public:
-    explicit unlock_guard(ceph::mutex& mutex)
+    explicit unlock_guard(stone::mutex& mutex)
       : m(mutex)
     {
       m.unlock();
@@ -6964,7 +6964,7 @@ namespace {
 void OSD::scrub_purged_snaps()
 {
   dout(10) << __func__ << dendl;
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
   SnapMapper::Scrubber s(cct, store, service.meta_ch,
 			 make_snapmapper_oid(),
 			 make_purged_snaps_oid());
@@ -7008,12 +7008,12 @@ void OSD::scrub_purged_snaps()
   }
   dout(10) << __func__ << " done queueing pgs, updating superblock" << dendl;
   ObjectStore::Transaction t;
-  superblock.last_purged_snaps_scrub = ceph_clock_now();
+  superblock.last_purged_snaps_scrub = stone_clock_now();
   write_superblock(t);
   int tr = store->queue_transaction(service.meta_ch, std::move(t), nullptr);
-  ceph_assert(tr == 0);
+  stone_assert(tr == 0);
   if (is_active()) {
-    send_beacon(ceph::coarse_mono_clock::now());
+    send_beacon(stone::coarse_mono_clock::now());
   }
   dout(10) << __func__ << " done" << dendl;
 }
@@ -7061,7 +7061,7 @@ bool OSD::heartbeat_dispatch(Message *m)
   dout(30) << "heartbeat_dispatch " << m << dendl;
   switch (m->get_type()) {
 
-  case CEPH_MSG_PING:
+  case STONE_MSG_PING:
     dout(10) << "ping from " << m->get_source_inst() << dendl;
     m->put();
     break;
@@ -7111,7 +7111,7 @@ void OSDService::maybe_share_map(
 {
   // NOTE: we assume caller hold something that keeps the Connection itself
   // pinned (e.g., an OpRequest's MessageRef).
-  auto session = ceph::ref_cast<Session>(con->get_priv());
+  auto session = stone::ref_cast<Session>(con->get_priv());
   if (!session) {
     return;
   }
@@ -7147,14 +7147,14 @@ void OSDService::maybe_share_map(
   session->sent_epoch_lock.unlock();
 }
 
-void OSD::dispatch_session_waiting(const ceph::ref_t<Session>& session, OSDMapRef osdmap)
+void OSD::dispatch_session_waiting(const stone::ref_t<Session>& session, OSDMapRef osdmap)
 {
-  ceph_assert(ceph_mutex_is_locked(session->session_dispatch_lock));
+  stone_assert(stone_mutex_is_locked(session->session_dispatch_lock));
 
   auto i = session->waiting_on_map.begin();
   while (i != session->waiting_on_map.end()) {
     OpRequestRef op = &(*i);
-    ceph_assert(ms_can_fast_dispatch(op->get_req()));
+    stone_assert(ms_can_fast_dispatch(op->get_req()));
     auto m = op->get_req<MOSDFastDispatchOp>();
     if (m->get_min_epoch() > osdmap->get_epoch()) {
       break;
@@ -7163,7 +7163,7 @@ void OSD::dispatch_session_waiting(const ceph::ref_t<Session>& session, OSDMapRe
     op->put();
 
     spg_t pgid;
-    if (m->get_type() == CEPH_MSG_OSD_OP) {
+    if (m->get_type() == STONE_MSG_OSD_OP) {
       pg_t actual_pgid = osdmap->raw_pg_to_pg(
 	static_cast<const MOSDOp*>(m)->get_pg());
       if (!osdmap->get_primary_shard(actual_pgid, &pgid)) {
@@ -7198,7 +7198,7 @@ void OSD::ms_fast_dispatch(Message *m)
 
   // peering event?
   switch (m->get_type()) {
-  case CEPH_MSG_PING:
+  case STONE_MSG_PING:
     dout(10) << "ping from " << m->get_source() << dendl;
     m->put();
     return;
@@ -7263,12 +7263,12 @@ void OSD::ms_fast_dispatch(Message *m)
   // note sender epoch, min req's epoch
   op->sent_epoch = static_cast<MOSDFastDispatchOp*>(m)->get_map_epoch();
   op->min_epoch = static_cast<MOSDFastDispatchOp*>(m)->get_min_epoch();
-  ceph_assert(op->min_epoch <= op->sent_epoch); // sanity check!
+  stone_assert(op->min_epoch <= op->sent_epoch); // sanity check!
 
   service.maybe_inject_dispatch_delay();
 
-  if (m->get_connection()->has_features(CEPH_FEATUREMASK_RESEND_ON_SPLIT) ||
-      m->get_type() != CEPH_MSG_OSD_OP) {
+  if (m->get_connection()->has_features(STONE_FEATUREMASK_RESEND_ON_SPLIT) ||
+      m->get_type() != STONE_MSG_OSD_OP) {
     // queue it directly
     enqueue_op(
       static_cast<MOSDFastDispatchOp*>(m)->get_spg(),
@@ -7294,9 +7294,9 @@ void OSD::ms_fast_dispatch(Message *m)
 int OSD::ms_handle_authentication(Connection *con)
 {
   int ret = 0;
-  auto s = ceph::ref_cast<Session>(con->get_priv());
+  auto s = stone::ref_cast<Session>(con->get_priv());
   if (!s) {
-    s = ceph::make_ref<Session>(cct, con);
+    s = stone::make_ref<Session>(cct, con);
     con->set_priv(s);
     s->entity_name = con->get_peer_entity_name();
     dout(10) << __func__ << " new session " << s << " con " << s->con
@@ -7317,7 +7317,7 @@ int OSD::ms_handle_authentication(Connection *con)
     try {
       decode(str, p);
     }
-    catch (ceph::buffer::error& e) {
+    catch (stone::buffer::error& e) {
       dout(10) << __func__ << " session " << s << " " << s->entity_name
 	       << " failed to decode caps string" << dendl;
       ret = -EACCES;
@@ -7341,7 +7341,7 @@ int OSD::ms_handle_authentication(Connection *con)
 
 void OSD::do_waiters()
 {
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
 
   dout(10) << "do_waiters -- start" << dendl;
   while (!finished.empty()) {
@@ -7364,14 +7364,14 @@ void OSD::dispatch_op(OpRequestRef op)
 
 void OSD::_dispatch(Message *m)
 {
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
   dout(20) << "_dispatch " << m << " " << *m << dendl;
 
   switch (m->get_type()) {
     // -- don't need OSDMap --
 
     // map and replication
-  case CEPH_MSG_OSD_MAP:
+  case STONE_MSG_OSD_MAP:
     handle_osd_map(static_cast<MOSDMap*>(m));
     break;
   case MSG_MON_GET_PURGED_SNAPS_REPLY:
@@ -7488,7 +7488,7 @@ bool OSD::scrub_random_backoff()
   return false;
 }
 
-OSDService::ScrubJob::ScrubJob(CephContext* cct,
+OSDService::ScrubJob::ScrubJob(StoneContext* cct,
 			       const spg_t& pg, const utime_t& timestamp,
 			       double pool_scrub_min_interval,
 			       double pool_scrub_max_interval, bool must)
@@ -7525,9 +7525,9 @@ bool OSDService::ScrubJob::ScrubJob::operator<(const OSDService::ScrubJob& rhs) 
   return pgid < rhs.pgid;
 }
 
-void OSDService::dumps_scrub(ceph::Formatter *f)
+void OSDService::dumps_scrub(stone::Formatter *f)
 {
-  ceph_assert(f != nullptr);
+  stone_assert(f != nullptr);
   std::lock_guard l(sched_scrub_lock);
 
   f->open_array_section("scrubs");
@@ -7547,7 +7547,7 @@ double OSD::scrub_sleep_time(bool must_scrub)
   if (must_scrub) {
     return cct->_conf->osd_scrub_sleep;
   }
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   if (scrub_time_permit(now)) {
     return cct->_conf->osd_scrub_sleep;
   }
@@ -7658,7 +7658,7 @@ void OSD::sched_scrub()
     allow_requested_repair_only = true;
   }
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   bool time_permit = scrub_time_permit(now);
   bool load_is_low = scrub_load_below_threshold();
   dout(20) << "sched_scrub load_is_low=" << (int)load_is_low << dendl;
@@ -7810,7 +7810,7 @@ vector<DaemonHealthMetric> OSD::get_health_metrics()
   vector<DaemonHealthMetric> metrics;
   {
     utime_t oldest_secs;
-    const utime_t now = ceph_clock_now();
+    const utime_t now = stone_clock_now();
     auto too_old = now;
     too_old -= cct->_conf.get_val<double>("osd_op_complaint_time");
     int slow = 0;
@@ -7927,7 +7927,7 @@ void OSD::wait_for_new_map(OpRequestRef op)
 
 void OSD::note_down_osd(int peer)
 {
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
   cluster_messenger->mark_down_addrs(get_osdmap()->get_cluster_addrs(peer));
 
   std::lock_guard l{heartbeat_lock};
@@ -7965,7 +7965,7 @@ void OSD::osdmap_subscribe(version_t epoch, bool force_request)
 
   latest_subscribed_epoch = std::max<uint64_t>(epoch, latest_subscribed_epoch);
 
-  if (monc->sub_want_increment("osdmap", epoch, CEPH_SUBSCRIBE_ONETIME) ||
+  if (monc->sub_want_increment("osdmap", epoch, STONE_SUBSCRIBE_ONETIME) ||
       force_request) {
     monc->renew_subs();
   }
@@ -7989,7 +7989,7 @@ void OSD::trim_maps(epoch_t oldest, int nreceived, bool skip_maps)
       service.publish_superblock(superblock);
       write_superblock(t);
       int tr = store->queue_transaction(service.meta_ch, std::move(t), nullptr);
-      ceph_assert(tr == 0);
+      stone_assert(tr == 0);
       num = 0;
       if (!skip_maps) {
 	// skip_maps leaves us with a range of old maps if we fail to remove all
@@ -8005,10 +8005,10 @@ void OSD::trim_maps(epoch_t oldest, int nreceived, bool skip_maps)
     service.publish_superblock(superblock);
     write_superblock(t);
     int tr = store->queue_transaction(service.meta_ch, std::move(t), nullptr);
-    ceph_assert(tr == 0);
+    stone_assert(tr == 0);
   }
   // we should not remove the cached maps
-  ceph_assert(min <= service.map_cache.cached_key_lower_bound());
+  stone_assert(min <= service.map_cache.cached_key_lower_bound());
 }
 
 void OSD::handle_osd_map(MOSDMap *m)
@@ -8021,7 +8021,7 @@ void OSD::handle_osd_map(MOSDMap *m)
     // up with.
     epoch_t max_lag = cct->_conf->osd_map_cache_size *
       m_osd_pg_epoch_max_lag_factor;
-    ceph_assert(max_lag > 0);
+    stone_assert(max_lag > 0);
     epoch_t osd_min = 0;
     for (auto shard : shards) {
       epoch_t min = shard->get_min_pg_epoch();
@@ -8051,7 +8051,7 @@ void OSD::handle_osd_map(MOSDMap *m)
     }
   }
 
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
   map<epoch_t,OSDMapRef> added_maps;
   map<epoch_t,bufferlist> added_maps_bl;
   if (m->fsid != monc->get_fsid()) {
@@ -8066,7 +8066,7 @@ void OSD::handle_osd_map(MOSDMap *m)
     return;
   }
 
-  auto session = ceph::ref_cast<Session>(m->get_connection()->get_priv());
+  auto session = stone::ref_cast<Session>(m->get_connection()->get_priv());
   if (session && !(session->entity_name.is_mon() ||
 		   session->entity_name.is_osd())) {
     //not enough perms!
@@ -8093,7 +8093,7 @@ void OSD::handle_osd_map(MOSDMap *m)
     logger->inc(l_osd_mape_dup, superblock.newest_map - first + 1);
   if (service.max_oldest_map < m->oldest_map) {
     service.max_oldest_map = m->oldest_map;
-    ceph_assert(service.max_oldest_map >= superblock.oldest_map);
+    stone_assert(service.max_oldest_map >= superblock.oldest_map);
   }
 
   // make sure there is something new, here, before we bother flushing
@@ -8136,7 +8136,7 @@ void OSD::handle_osd_map(MOSDMap *m)
   for (epoch_t e = start; e <= last; e++) {
     if (txn_size >= t.get_num_bytes()) {
       derr << __func__ << " transaction size overflowed" << dendl;
-      ceph_assert(txn_size < t.get_num_bytes());
+      stone_assert(txn_size < t.get_num_bytes());
     }
     txn_size = t.get_num_bytes();
     map<epoch_t,bufferlist>::iterator p;
@@ -8171,7 +8171,7 @@ void OSD::handle_osd_map(MOSDMap *m)
         bool got = get_map_bl(e - 1, obl);
 	if (!got) {
 	  auto p = added_maps_bl.find(e - 1);
-	  ceph_assert(p != added_maps_bl.end());
+	  stone_assert(p != added_maps_bl.end());
 	  obl = p->second;
 	}
 	o->decode(obl);
@@ -8183,11 +8183,11 @@ void OSD::handle_osd_map(MOSDMap *m)
 
       if (o->apply_incremental(inc) < 0) {
 	derr << "ERROR: bad fsid?  i have " << get_osdmap()->get_fsid() << " and inc has " << inc.fsid << dendl;
-	ceph_abort_msg("bad fsid");
+	stone_abort_msg("bad fsid");
       }
 
       bufferlist fbl;
-      o->encode(fbl, inc.encode_features | CEPH_FEATURE_RESERVED);
+      o->encode(fbl, inc.encode_features | STONE_FEATURE_RESERVED);
 
       bool injected_failure = false;
       if (cct->_conf->osd_inject_bad_map_crc_probability > 0 &&
@@ -8226,7 +8226,7 @@ void OSD::handle_osd_map(MOSDMap *m)
       continue;
     }
 
-    ceph_abort_msg("MOSDMap lied about what maps it had?");
+    stone_abort_msg("MOSDMap lied about what maps it had?");
   }
 
   // even if this map isn't from a mon, we may have satisfied our subscription
@@ -8266,7 +8266,7 @@ void OSD::handle_osd_map(MOSDMap *m)
         continue;
       }
     }
-    ceph_assert(lastmap->get_epoch() + 1 == i.second->get_epoch());
+    stone_assert(lastmap->get_epoch() + 1 == i.second->get_epoch());
     for (auto& j : lastmap->get_pools()) {
       if (!i.second->have_pg_pool(j.first)) {
 	pg_num_history.log_pool_delete(i.first, j.first);
@@ -8276,7 +8276,7 @@ void OSD::handle_osd_map(MOSDMap *m)
 	// the pool is deleted and need to instantiate a new (zombie) PG[Pool].
 	ghobject_t obj = make_final_pool_info_oid(j.first);
 	bufferlist bl;
-	encode(j.second, bl, CEPH_FEATURES_ALL);
+	encode(j.second, bl, STONE_FEATURES_ALL);
 	string name = lastmap->get_pool_name(j.first);
 	encode(name, bl);
 	map<string,string> profile;
@@ -8346,7 +8346,7 @@ void OSD::_committed_osd_maps(epoch_t first, epoch_t last, MOSDMap *m)
   }
   map_lock.lock();
 
-  ceph_assert(first <= last);
+  stone_assert(first <= last);
 
   bool do_shutdown = false;
   bool do_restart = false;
@@ -8361,7 +8361,7 @@ void OSD::_committed_osd_maps(epoch_t first, epoch_t last, MOSDMap *m)
 	     << ")" << dendl;
 
     OSDMapRef newmap = get_map(cur);
-    ceph_assert(newmap);  // we just cached it above!
+    stone_assert(newmap);  // we just cached it above!
 
     // start blocklisting messages sent to peers that go down.
     service.pre_publish_map(newmap);
@@ -8465,7 +8465,7 @@ void OSD::_committed_osd_maps(epoch_t first, epoch_t last, MOSDMap *m)
                         << " wrongly marked me down at e"
                         << osdmap->get_down_at(whoami);
 	}
-	if (monc->monmap.min_mon_release >= ceph_release_t::octopus) {
+	if (monc->monmap.min_mon_release >= stone_release_t::octopus) {
 	  // note that this is best-effort...
 	  monc->send_mon_message(
 	    new MOSDMarkMeDead(
@@ -8507,7 +8507,7 @@ void OSD::_committed_osd_maps(epoch_t first, epoch_t last, MOSDMap *m)
 	do_restart = true;
 
 	//add markdown log
-	utime_t now = ceph_clock_now();
+	utime_t now = stone_clock_now();
 	utime_t grace = utime_t(cct->_conf->osd_max_markdown_period, 0);
 	osd_markdown_log.push_back(now);
 	if ((int)osd_markdown_log.size() > cct->_conf->osd_max_markdown_count) {
@@ -8638,17 +8638,17 @@ void OSD::check_osdmap_features()
       cluster_messenger->set_policy(entity_name_t::TYPE_OSD, p);
     }
 
-    if (!superblock.compat_features.incompat.contains(CEPH_OSD_FEATURE_INCOMPAT_SHARDS)) {
+    if (!superblock.compat_features.incompat.contains(STONE_OSD_FEATURE_INCOMPAT_SHARDS)) {
       dout(0) << __func__ << " enabling on-disk ERASURE CODES compat feature" << dendl;
-      superblock.compat_features.incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_SHARDS);
+      superblock.compat_features.incompat.insert(STONE_OSD_FEATURE_INCOMPAT_SHARDS);
       ObjectStore::Transaction t;
       write_superblock(t);
       int err = store->queue_transaction(service.meta_ch, std::move(t), NULL);
-      ceph_assert(err == 0);
+      stone_assert(err == 0);
     }
   }
 
-  if (osdmap->require_osd_release < ceph_release_t::nautilus) {
+  if (osdmap->require_osd_release < stone_release_t::nautilus) {
     hb_front_server_messenger->set_require_authorizer(false);
     hb_back_server_messenger->set_require_authorizer(false);
   } else {
@@ -8720,7 +8720,7 @@ bool OSD::advance_pg(
   if (osd_epoch <= pg->get_osdmap_epoch()) {
     return true;
   }
-  ceph_assert(pg->is_locked());
+  stone_assert(pg->is_locked());
   OSDMapRef lastmap = pg->get_osdmap();
   set<PGRef> new_pgs;  // any split children
   bool ret = true;
@@ -8919,7 +8919,7 @@ bool OSD::advance_pg(
 
 void OSD::consume_map()
 {
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
   auto osdmap = get_osdmap();
   dout(7) << "consume_map version " << osdmap->get_epoch() << dendl;
 
@@ -8927,9 +8927,9 @@ void OSD::consume_map()
    *  speak the older sorting version any more. Be careful not to force
    *  a shutdown if we are merely processing old maps, though.
    */
-  if (!osdmap->test_flag(CEPH_OSDMAP_SORTBITWISE) && is_active()) {
+  if (!osdmap->test_flag(STONE_OSDMAP_SORTBITWISE) && is_active()) {
     derr << __func__ << " SORTBITWISE flag is not set" << dendl;
-    ceph_abort();
+    stone_abort();
   }
 
   service.pre_publish_map(osdmap);
@@ -8946,7 +8946,7 @@ void OSD::consume_map()
     for (auto& shard : shards) {
       shard->prime_splits(osdmap, &newly_split);
     }
-    ceph_assert(newly_split.empty());
+    stone_assert(newly_split.empty());
   }
 
   // prune sent_ready_to_merge
@@ -8968,7 +8968,7 @@ void OSD::consume_map()
     for (auto& shard : shards) {
       shard->prime_merges(osdmap, &merge_pgs);
     }
-    ceph_assert(merge_pgs.empty());
+    stone_assert(merge_pgs.empty());
   }
 
   service.prune_pg_created();
@@ -9037,13 +9037,13 @@ void OSD::consume_map()
 
 void OSD::activate_map()
 {
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
   auto osdmap = get_osdmap();
 
   dout(7) << "activate_map version " << osdmap->get_epoch() << dendl;
 
   // norecover?
-  if (osdmap->test_flag(CEPH_OSDMAP_NORECOVER)) {
+  if (osdmap->test_flag(STONE_OSDMAP_NORECOVER)) {
     if (!service.recovery_is_paused()) {
       dout(1) << "pausing recovery (NORECOVER flag set)" << dendl;
       service.pause_recovery();
@@ -9126,7 +9126,7 @@ bool OSD::require_same_peer_instance(const Message *m, const OSDMapRef& map,
 	    << dendl;
     ConnectionRef con = m->get_connection();
     con->mark_down();
-    if (auto s = ceph::ref_cast<Session>(con->get_priv()); s) {
+    if (auto s = stone::ref_cast<Session>(con->get_priv()); s) {
       if (!is_fast_dispatch)
 	s->session_dispatch_lock.lock();
       clear_session_waiting_on_map(s);
@@ -9153,7 +9153,7 @@ bool OSD::require_same_or_newer_map(OpRequestRef& op, epoch_t epoch,
   dout(15) << "require_same_or_newer_map " << epoch
 	   << " (i am " << osdmap->get_epoch() << ") " << m << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(osd_lock));
+  stone_assert(stone_mutex_is_locked(osd_lock));
 
   // do they have a newer map?
   if (epoch > osdmap->get_epoch()) {
@@ -9200,7 +9200,7 @@ void OSD::split_pgs(
   for (set<spg_t>::const_iterator i = childpgids.begin();
        i != childpgids.end();
        ++i, ++stat_iter) {
-    ceph_assert(stat_iter != updated_stats.end());
+    stone_assert(stat_iter != updated_stats.end());
     dout(10) << __func__ << " splitting " << *parent << " into " << *i << dendl;
     PG* child = _make_pg(nextmap, *i);
     child->lock(true);
@@ -9233,7 +9233,7 @@ void OSD::split_pgs(
     child->finish_split_stats(*stat_iter, rctx.transaction);
     child->unlock();
   }
-  ceph_assert(stat_iter != updated_stats.end());
+  stone_assert(stat_iter != updated_stats.end());
   parent->finish_split_stats(*stat_iter, rctx.transaction);
 }
 
@@ -9246,7 +9246,7 @@ void OSD::handle_pg_create(OpRequestRef op)
   // send MOSDPGCreate messages).
 
   auto m = op->get_req<MOSDPGCreate>();
-  ceph_assert(m->get_type() == MSG_OSD_PG_CREATE);
+  stone_assert(m->get_type() == MSG_OSD_PG_CREATE);
 
   dout(10) << "handle_pg_create " << *m << dendl;
 
@@ -9264,7 +9264,7 @@ void OSD::handle_pg_create(OpRequestRef op)
   for (map<pg_t,pg_create_t>::const_iterator p = m->mkpg.begin();
        p != m->mkpg.end();
        ++p, ++ci) {
-    ceph_assert(ci != m->ctimes.end() && ci->first == p->first);
+    stone_assert(ci != m->ctimes.end() && ci->first == p->first);
     epoch_t created = p->second.created;
     if (p->second.split_bits) // Skip split pgs
       continue;
@@ -9279,7 +9279,7 @@ void OSD::handle_pg_create(OpRequestRef op)
 
     spg_t pgid;
     bool mapped = osdmap->get_primary_shard(on, &pgid);
-    ceph_assert(mapped);
+    stone_assert(mapped);
 
     // is it still ours?
     vector<int> up, acting;
@@ -9377,7 +9377,7 @@ void OSD::dispatch_context(PeeringCtx &ctx, PG *pg, OSDMapRef curmap,
       pg->ch,
       std::move(ctx.transaction), TrackedOpRef(),
       handle);
-    ceph_assert(tr == 0);
+    stone_assert(tr == 0);
   }
 }
 
@@ -9635,9 +9635,9 @@ void OSD::handle_pg_query_nopg(const MQuery& q)
 
 void OSDService::queue_check_readable(spg_t spgid,
 				      epoch_t lpr,
-				      ceph::signedspan delay)
+				      stone::signedspan delay)
 {
-  if (delay == ceph::signedspan::zero()) {
+  if (delay == stone::signedspan::zero()) {
     osd->enqueue_peering_evt(
       spgid,
       PGPeeringEventRef(
@@ -9658,7 +9658,7 @@ void OSDService::queue_check_readable(spg_t spgid,
 // RECOVERY
 
 void OSDService::_maybe_queue_recovery() {
-  ceph_assert(ceph_mutex_is_locked_by_me(recovery_lock));
+  stone_assert(stone_mutex_is_locked_by_me(recovery_lock));
   uint64_t available_pushes;
   while (!awaiting_throttle.empty() &&
 	 _recover_now(&available_pushes)) {
@@ -9679,7 +9679,7 @@ bool OSDService::_recover_now(uint64_t *available_pushes)
   if (available_pushes)
       *available_pushes = 0;
 
-  if (ceph_clock_now() < defer_recovery_until) {
+  if (stone_clock_now() < defer_recovery_until) {
     dout(15) << __func__ << " defer until " << defer_recovery_until << dendl;
     return false;
   }
@@ -9743,7 +9743,7 @@ void OSD::do_recovery(
       PGRef pgref(pg);
       auto recovery_requeue_callback = new LambdaContext([this, pgref, queued, reserved_pushes](int r) {
         dout(20) << "do_recovery wake up at "
-                 << ceph_clock_now()
+                 << stone_clock_now()
 	         << ", re-queuing recovery" << dendl;
 	std::lock_guard l(service.sleep_lock);
         service.recovery_needs_sleep = false;
@@ -9754,11 +9754,11 @@ void OSD::do_recovery(
       // has been scheduled in the past. The next recovery op is scheduled after
       // completing the sleep from now.
 
-      if (auto now = ceph::real_clock::now();
+      if (auto now = stone::real_clock::now();
 	  service.recovery_schedule_time < now) {
         service.recovery_schedule_time = now;
       }
-      service.recovery_schedule_time += ceph::make_timespan(recovery_sleep);
+      service.recovery_schedule_time += stone::make_timespan(recovery_sleep);
       service.sleep_timer.add_event_at(service.recovery_schedule_time,
 				       recovery_requeue_callback);
       dout(20) << "Recovery event scheduled at "
@@ -9795,7 +9795,7 @@ void OSD::do_recovery(
   }
 
  out:
-  ceph_assert(started <= reserved_pushes);
+  stone_assert(started <= reserved_pushes);
   service.release_reserved_pushes(reserved_pushes);
 }
 
@@ -9810,7 +9810,7 @@ void OSDService::start_recovery_op(PG *pg, const hobject_t& soid)
 
 #ifdef DEBUG_RECOVERY_OIDS
   dout(20) << "  active was " << recovery_oids[pg->pg_id] << dendl;
-  ceph_assert(recovery_oids[pg->pg_id].count(soid) == 0);
+  stone_assert(recovery_oids[pg->pg_id].count(soid) == 0);
   recovery_oids[pg->pg_id].insert(soid);
 #endif
 }
@@ -9825,12 +9825,12 @@ void OSDService::finish_recovery_op(PG *pg, const hobject_t& soid, bool dequeue)
 	   << dendl;
 
   // adjust count
-  ceph_assert(recovery_ops_active > 0);
+  stone_assert(recovery_ops_active > 0);
   recovery_ops_active--;
 
 #ifdef DEBUG_RECOVERY_OIDS
   dout(20) << "  active oids was " << recovery_oids[pg->pg_id] << dendl;
-  ceph_assert(recovery_oids[pg->pg_id].count(soid));
+  stone_assert(recovery_oids[pg->pg_id].count(soid));
   recovery_oids[pg->pg_id].erase(soid);
 #endif
 
@@ -9851,7 +9851,7 @@ void OSDService::release_reserved_pushes(uint64_t pushes)
   dout(10) << __func__ << "(" << pushes << "), recovery_ops_reserved "
 	   << recovery_ops_reserved << " -> " << (recovery_ops_reserved-pushes)
 	   << dendl;
-  ceph_assert(recovery_ops_reserved >= pushes);
+  stone_assert(recovery_ops_reserved >= pushes);
   recovery_ops_reserved -= pushes;
   _maybe_queue_recovery();
 }
@@ -9872,7 +9872,7 @@ bool OSD::op_is_discardable(const MOSDOp *op)
 void OSD::enqueue_op(spg_t pg, OpRequestRef&& op, epoch_t epoch)
 {
   const utime_t stamp = op->get_req()->get_recv_stamp();
-  const utime_t latency = ceph_clock_now() - stamp;
+  const utime_t latency = stone_clock_now() - stamp;
   const unsigned priority = op->get_req()->get_priority();
   const int cost = op->get_req()->get_cost();
   const uint64_t owner = op->get_req()->get_source().num();
@@ -9940,7 +9940,7 @@ void OSD::dequeue_op(
   FUNCTRACE(cct);
   OID_EVENT_TRACE_WITH_MSG(m, "DEQUEUE_OP_BEGIN", false);
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   op->set_dequeued_time(now);
 
   utime_t latency = now - m->get_recv_stamp();
@@ -9985,7 +9985,7 @@ void OSD::dequeue_peering_evt(
       handle_pg_query_nopg(*q);
     } else {
       derr << __func__ << " unrecognized pg-less event " << evt->get_desc() << dendl;
-      ceph_abort();
+      stone_abort();
     }
   } else if (advance_pg(curmap->get_epoch(), pg, handle, rctx)) {
     pg->do_peering_event(evt, rctx);
@@ -10405,7 +10405,7 @@ void OSD::get_latest_osdmap()
   dout(10) << __func__ << " -- start" << dendl;
 
   boost::system::error_code ec;
-  service.objecter->wait_for_latest_osdmap(ceph::async::use_blocked[ec]);
+  service.objecter->wait_for_latest_osdmap(stone::async::use_blocked[ec]);
 
   dout(10) << __func__ << " -- finish" << dendl;
 }
@@ -10743,7 +10743,7 @@ void OSDShard::_prime_splits(set<pair<spg_t,epoch_t>> *pgids)
 	r.first->second->waiting_for_split.insert(p->second);
       } else {
 	auto q = r.first;
-	ceph_assert(q != pg_slots.end());
+	stone_assert(q != pg_slots.end());
 	dout(10) << "priming (existing) slot " << p->first << " e" << p->second
 		 << dendl;
 	q->second->waiting_for_split.insert(p->second);
@@ -10810,16 +10810,16 @@ void OSDShard::register_and_wake_split_child(PG *pg)
     std::lock_guard l(shard_lock);
     dout(10) << pg->pg_id << " " << pg << dendl;
     auto p = pg_slots.find(pg->pg_id);
-    ceph_assert(p != pg_slots.end());
+    stone_assert(p != pg_slots.end());
     auto *slot = p->second.get();
     dout(20) << pg->pg_id << " waiting_for_split " << slot->waiting_for_split
 	     << dendl;
-    ceph_assert(!slot->pg);
-    ceph_assert(!slot->waiting_for_split.empty());
+    stone_assert(!slot->pg);
+    stone_assert(!slot->waiting_for_split.empty());
     _attach_pg(slot, pg);
 
     epoch = pg->get_osdmap_epoch();
-    ceph_assert(slot->waiting_for_split.count(epoch));
+    stone_assert(slot->waiting_for_split.count(epoch));
     slot->waiting_for_split.erase(epoch);
     if (slot->waiting_for_split.empty()) {
       _wake_pg_slot(pg->pg_id, slot);
@@ -10868,7 +10868,7 @@ void OSDShard::update_scheduler_config()
 
 OSDShard::OSDShard(
   int id,
-  CephContext *cct,
+  StoneContext *cct,
   OSD *osd)
   : shard_id(id),
     cct(cct),
@@ -10879,7 +10879,7 @@ OSDShard::OSDShard(
     osdmap_lock{make_mutex(shard_name + "::osdmap_lock")},
     shard_lock_name(shard_name + "::shard_lock"),
     shard_lock{make_mutex(shard_lock_name)},
-    scheduler(ceph::osd::scheduler::make_scheduler(
+    scheduler(stone::osd::scheduler::make_scheduler(
       cct, osd->num_shards, osd->store->is_rotational())),
     context_queue(sdata_wait_lock, sdata_cond)
 {
@@ -10921,7 +10921,7 @@ void OSD::ShardedOpWQ::_process(uint32_t thread_index, heartbeat_handle_d *hb)
 {
   uint32_t shard_index = thread_index % osd->num_shards;
   auto& sdata = osd->shards[shard_index];
-  ceph_assert(sdata);
+  stone_assert(sdata);
 
   // If all threads of shards do oncommits, there is a out-of-order
   // problem.  So we choose the thread which has the smallest
@@ -11000,7 +11000,7 @@ void OSD::ShardedOpWQ::_process(uint32_t thread_index, heartbeat_handle_d *hb)
         return;
       }
       std::unique_lock wait_lock{sdata->sdata_wait_lock};
-      auto future_time = ceph::real_clock::from_double(*when_ready);
+      auto future_time = stone::real_clock::from_double(*when_ready);
       dout(10) << __func__ << " dequeue future request at " << future_time << dendl;
       // Disable heartbeat timeout until we find a non-future work item to process.
       osd->cct->get_heartbeat_map()->clear_timeout(hb);
@@ -11209,7 +11209,7 @@ void OSD::ShardedOpWQ::_process(uint32_t thread_index, heartbeat_handle_d *hb)
     for (auto shard : osd->shards) {
       shard->prime_splits(osdmap, &new_children);
     }
-    ceph_assert(new_children.empty());
+    stone_assert(new_children.empty());
   }
 
   // osd_opwq_process marks the point at which an operation has been dequeued
@@ -11280,7 +11280,7 @@ void OSD::ShardedOpWQ::_enqueue_front(OpSchedulerItem&& item)
 {
   auto shard_index = item.get_ordering_token().hash_to_shard(osd->shards.size());
   auto& sdata = osd->shards[shard_index];
-  ceph_assert(sdata);
+  stone_assert(sdata);
   sdata->shard_lock.lock();
   auto p = sdata->pg_slots.find(item.get_ordering_token());
   if (p != sdata->pg_slots.end() &&
@@ -11304,12 +11304,12 @@ void OSD::ShardedOpWQ::_enqueue_front(OpSchedulerItem&& item)
   sdata->sdata_cond.notify_one();
 }
 
-namespace ceph::osd_cmds {
+namespace stone::osd_cmds {
 
-int heap(CephContext& cct, const cmdmap_t& cmdmap, Formatter& f,
+int heap(StoneContext& cct, const cmdmap_t& cmdmap, Formatter& f,
 	 std::ostream& os)
 {
-  if (!ceph_using_tcmalloc()) {
+  if (!stone_using_tcmalloc()) {
         os << "could not issue heap profiler command -- not using tcmalloc!";
         return -EOPNOTSUPP;
   }
@@ -11328,9 +11328,9 @@ int heap(CephContext& cct, const cmdmap_t& cmdmap, Formatter& f,
     cmd_vec.push_back(val);
   }
 
-  ceph_heap_profiler_handle_command(cmd_vec, os);
+  stone_heap_profiler_handle_command(cmd_vec, os);
 
   return 0;
 }
 
-} // namespace ceph::osd_cmds
+} // namespace stone::osd_cmds

@@ -6,7 +6,7 @@
 #include "test/librados_test_stub/TestRadosClient.h"
 #include "test/librados_test_stub/TestWatchNotify.h"
 #include "librados/AioCompletionImpl.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/Finisher.h"
 #include "common/valgrind.h"
 #include "objclass/objclass.h"
@@ -22,7 +22,7 @@ TestIoCtxImpl::TestIoCtxImpl() : m_client(NULL) {
 TestIoCtxImpl::TestIoCtxImpl(TestRadosClient *client, int64_t pool_id,
                              const std::string& pool_name)
   : m_client(client), m_pool_id(pool_id), m_pool_name(pool_name),
-    m_snap_seq(CEPH_NOSNAP)
+    m_snap_seq(STONE_NOSNAP)
 {
   m_client->get();
   get();
@@ -40,7 +40,7 @@ TestIoCtxImpl::TestIoCtxImpl(const TestIoCtxImpl& rhs)
 }
 
 TestIoCtxImpl::~TestIoCtxImpl() {
-  ceph_assert(m_pending_ops == 0);
+  stone_assert(m_pending_ops == 0);
 }
 
 void TestObjectOperationImpl::get() {
@@ -268,7 +268,7 @@ int TestIoCtxImpl::set_alloc_hint(const std::string& oid,
 
 void TestIoCtxImpl::set_snap_read(snap_t seq) {
   if (seq == 0) {
-    seq = CEPH_NOSNAP;
+    seq = STONE_NOSNAP;
   }
   m_snap_seq = seq;
 }
@@ -292,7 +292,7 @@ int TestIoCtxImpl::tmap_update(const std::string& oid, bufferlist& cmdbl) {
 
   if (size > 0) {
     bufferlist inbl;
-    r = read(oid, size, 0, &inbl, CEPH_NOSNAP, nullptr);
+    r = read(oid, size, 0, &inbl, STONE_NOSNAP, nullptr);
     if (r < 0) {
       return r;
     }
@@ -309,11 +309,11 @@ int TestIoCtxImpl::tmap_update(const std::string& oid, bufferlist& cmdbl) {
   decode(key, iter);
 
   switch (c) {
-    case CEPH_OSD_TMAP_SET:
+    case STONE_OSD_TMAP_SET:
       decode(value, iter);
       tmap[key] = value;
       break;
-    case CEPH_OSD_TMAP_RM:
+    case STONE_OSD_TMAP_RM:
       r = tmap.erase(key);
       if (r == 0) {
         return -ENOENT;

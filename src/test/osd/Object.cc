@@ -47,12 +47,12 @@ void AppendGenerator::get_ranges_map(
     uint64_t segment_length = round_up(
       rand() % (max_append_size - min_append_size),
       alignment) + min_append_size;
-    ceph_assert(segment_length >= min_append_size);
+    stone_assert(segment_length >= min_append_size);
     if (segment_length + pos > limit) {
       segment_length = limit - pos;
     }
     if (alignment)
-      ceph_assert(segment_length % alignment == 0);
+      stone_assert(segment_length % alignment == 0);
     out.insert(std::pair<uint64_t, uint64_t>(pos, segment_length));
     pos += segment_length;
   }
@@ -66,8 +66,8 @@ void VarLenGenerator::get_ranges_map(
   bool include = false;
   while (pos < limit) {
     uint64_t segment_length = (rand() % (max_stride_size - min_stride_size)) + min_stride_size;
-    ceph_assert(segment_length < max_stride_size);
-    ceph_assert(segment_length >= min_stride_size);
+    stone_assert(segment_length < max_stride_size);
+    stone_assert(segment_length >= min_stride_size);
     if (segment_length + pos > limit) {
       segment_length = limit - pos;
     }
@@ -83,7 +83,7 @@ void VarLenGenerator::get_ranges_map(
 
 void ObjectDesc::iterator::adjust_stack() {
   while (!stack.empty() && pos >= stack.top().second.next) {
-    ceph_assert(pos == stack.top().second.next);
+    stone_assert(pos == stack.top().second.next);
     size = stack.top().second.size;
     current = stack.top().first;
     stack.pop();
@@ -161,7 +161,7 @@ bool ObjectDesc::check_sparse(const std::map<uint64_t, uint64_t>& extents,
       }
     }
 
-    ceph_assert(off <= to_check.length());
+    stone_assert(off <= to_check.length());
     pos = extiter.first;
     objiter.seek(pos);
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,7 +19,7 @@
 
 #include <sys/uio.h>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/types.h"
 #include "include/buffer_raw.h"
 #include "include/compat.h"
@@ -43,25 +43,25 @@ using std::make_pair;
 using std::pair;
 using std::string;
 
-using namespace ceph;
+using namespace stone;
 
-#define CEPH_BUFFER_ALLOC_UNIT  4096u
-#define CEPH_BUFFER_APPEND_SIZE (CEPH_BUFFER_ALLOC_UNIT - sizeof(raw_combined))
+#define STONE_BUFFER_ALLOC_UNIT  4096u
+#define STONE_BUFFER_APPEND_SIZE (STONE_BUFFER_ALLOC_UNIT - sizeof(raw_combined))
 
 #ifdef BUFFER_DEBUG
-static ceph::spinlock debug_lock;
-# define bdout { std::lock_guard<ceph::spinlock> lg(debug_lock); std::cout
+static stone::spinlock debug_lock;
+# define bdout { std::lock_guard<stone::spinlock> lg(debug_lock); std::cout
 # define bendl std::endl; }
 #else
 # define bdout if (0) { std::cout
 # define bendl std::endl; }
 #endif
 
-  static ceph::atomic<unsigned> buffer_cached_crc { 0 };
-  static ceph::atomic<unsigned> buffer_cached_crc_adjusted { 0 };
-  static ceph::atomic<unsigned> buffer_missed_crc { 0 };
+  static stone::atomic<unsigned> buffer_cached_crc { 0 };
+  static stone::atomic<unsigned> buffer_cached_crc_adjusted { 0 };
+  static stone::atomic<unsigned> buffer_missed_crc { 0 };
 
-  static bool buffer_track_crc = get_env_bool("CEPH_BUFFER_TRACK");
+  static bool buffer_track_crc = get_env_bool("STONE_BUFFER_TRACK");
 
   void buffer::track_cached_crc(bool b) {
     buffer_track_crc = b;
@@ -94,7 +94,7 @@ static ceph::spinlock debug_lock;
       return create(len, alignment).release();
     }
 
-    static ceph::unique_leakable_ptr<buffer::raw>
+    static stone::unique_leakable_ptr<buffer::raw>
     create(unsigned len,
 	   unsigned align,
 	   int mempool = mempool::mempool_buffer_anon)
@@ -118,7 +118,7 @@ static ceph::spinlock debug_lock;
 
       // actual data first, since it has presumably larger alignment restriction
       // then put the raw_combined at the end
-      return ceph::unique_leakable_ptr<buffer::raw>(
+      return stone::unique_leakable_ptr<buffer::raw>(
 	new (ptr + datalen) raw_combined(ptr, len, align, mempool));
     }
 
@@ -201,7 +201,7 @@ static ceph::spinlock debug_lock;
       //cout << "hack aligned " << (unsigned)data
       //<< " in raw " << (unsigned)realdata
       //<< " off " << off << std::endl;
-      ceph_assert(((uintptr_t)data & (align-1)) == 0);
+      stone_assert(((uintptr_t)data & (align-1)) == 0);
     }
     ~raw_hack_aligned() {
       delete[] realdata;
@@ -277,47 +277,47 @@ static ceph::spinlock debug_lock;
     }
   };
 
-  ceph::unique_leakable_ptr<buffer::raw> buffer::copy(const char *c, unsigned len) {
+  stone::unique_leakable_ptr<buffer::raw> buffer::copy(const char *c, unsigned len) {
     auto r = buffer::create_aligned(len, sizeof(size_t));
     memcpy(r->get_data(), c, len);
     return r;
   }
 
-  ceph::unique_leakable_ptr<buffer::raw> buffer::create(unsigned len) {
+  stone::unique_leakable_ptr<buffer::raw> buffer::create(unsigned len) {
     return buffer::create_aligned(len, sizeof(size_t));
   }
-  ceph::unique_leakable_ptr<buffer::raw> buffer::create(unsigned len, char c) {
+  stone::unique_leakable_ptr<buffer::raw> buffer::create(unsigned len, char c) {
     auto ret = buffer::create_aligned(len, sizeof(size_t));
     memset(ret->get_data(), c, len);
     return ret;
   }
-  ceph::unique_leakable_ptr<buffer::raw>
+  stone::unique_leakable_ptr<buffer::raw>
   buffer::create_in_mempool(unsigned len, int mempool) {
     return buffer::create_aligned_in_mempool(len, sizeof(size_t), mempool);
   }
-  ceph::unique_leakable_ptr<buffer::raw>
+  stone::unique_leakable_ptr<buffer::raw>
   buffer::claim_char(unsigned len, char *buf) {
-    return ceph::unique_leakable_ptr<buffer::raw>(
+    return stone::unique_leakable_ptr<buffer::raw>(
       new raw_claimed_char(len, buf));
   }
-  ceph::unique_leakable_ptr<buffer::raw> buffer::create_malloc(unsigned len) {
-    return ceph::unique_leakable_ptr<buffer::raw>(new raw_malloc(len));
+  stone::unique_leakable_ptr<buffer::raw> buffer::create_malloc(unsigned len) {
+    return stone::unique_leakable_ptr<buffer::raw>(new raw_malloc(len));
   }
-  ceph::unique_leakable_ptr<buffer::raw>
+  stone::unique_leakable_ptr<buffer::raw>
   buffer::claim_malloc(unsigned len, char *buf) {
-    return ceph::unique_leakable_ptr<buffer::raw>(new raw_malloc(len, buf));
+    return stone::unique_leakable_ptr<buffer::raw>(new raw_malloc(len, buf));
   }
-  ceph::unique_leakable_ptr<buffer::raw>
+  stone::unique_leakable_ptr<buffer::raw>
   buffer::create_static(unsigned len, char *buf) {
-    return ceph::unique_leakable_ptr<buffer::raw>(new raw_static(buf, len));
+    return stone::unique_leakable_ptr<buffer::raw>(new raw_static(buf, len));
   }
-  ceph::unique_leakable_ptr<buffer::raw>
+  stone::unique_leakable_ptr<buffer::raw>
   buffer::claim_buffer(unsigned len, char *buf, deleter del) {
-    return ceph::unique_leakable_ptr<buffer::raw>(
+    return stone::unique_leakable_ptr<buffer::raw>(
       new raw_claim_buffer(buf, len, std::move(del)));
   }
 
-  ceph::unique_leakable_ptr<buffer::raw> buffer::create_aligned_in_mempool(
+  stone::unique_leakable_ptr<buffer::raw> buffer::create_aligned_in_mempool(
     unsigned len, unsigned align, int mempool)
   {
     // If alignment is a page multiple, use a separate buffer::raw to
@@ -329,34 +329,34 @@ static ceph::spinlock debug_lock;
     //
     // I also see better performance from a separate buffer::raw once the
     // size passes 8KB.
-    if ((align & ~CEPH_PAGE_MASK) == 0 ||
-	len >= CEPH_PAGE_SIZE * 2) {
+    if ((align & ~STONE_PAGE_MASK) == 0 ||
+	len >= STONE_PAGE_SIZE * 2) {
 #ifndef __CYGWIN__
-      return ceph::unique_leakable_ptr<buffer::raw>(new raw_posix_aligned(len, align));
+      return stone::unique_leakable_ptr<buffer::raw>(new raw_posix_aligned(len, align));
 #else
-      return ceph::unique_leakable_ptr<buffer::raw>(new raw_hack_aligned(len, align));
+      return stone::unique_leakable_ptr<buffer::raw>(new raw_hack_aligned(len, align));
 #endif
     }
     return raw_combined::create(len, align, mempool);
   }
-  ceph::unique_leakable_ptr<buffer::raw> buffer::create_aligned(
+  stone::unique_leakable_ptr<buffer::raw> buffer::create_aligned(
     unsigned len, unsigned align) {
     return create_aligned_in_mempool(len, align,
 				     mempool::mempool_buffer_anon);
   }
 
-  ceph::unique_leakable_ptr<buffer::raw> buffer::create_page_aligned(unsigned len) {
-    return create_aligned(len, CEPH_PAGE_SIZE);
+  stone::unique_leakable_ptr<buffer::raw> buffer::create_page_aligned(unsigned len) {
+    return create_aligned(len, STONE_PAGE_SIZE);
   }
-  ceph::unique_leakable_ptr<buffer::raw> buffer::create_small_page_aligned(unsigned len) {
-    if (len < CEPH_PAGE_SIZE) {
-      return create_aligned(len, CEPH_BUFFER_ALLOC_UNIT);
+  stone::unique_leakable_ptr<buffer::raw> buffer::create_small_page_aligned(unsigned len) {
+    if (len < STONE_PAGE_SIZE) {
+      return create_aligned(len, STONE_BUFFER_ALLOC_UNIT);
     } else {
-      return create_aligned(len, CEPH_PAGE_SIZE);
+      return create_aligned(len, STONE_PAGE_SIZE);
     }
   }
 
-  buffer::ptr::ptr(ceph::unique_leakable_ptr<raw> r)
+  buffer::ptr::ptr(stone::unique_leakable_ptr<raw> r)
     : _raw(r.release()),
       _off(0),
       _len(_raw->get_len())
@@ -391,12 +391,12 @@ static ceph::spinlock debug_lock;
   buffer::ptr::ptr(const ptr& p, unsigned o, unsigned l)
     : _raw(p._raw), _off(p._off + o), _len(l)
   {
-    ceph_assert(o+l <= p._len);
-    ceph_assert(_raw);
+    stone_assert(o+l <= p._len);
+    stone_assert(_raw);
     _raw->nref++;
     bdout << "ptr " << this << " get " << _raw << bendl;
   }
-  buffer::ptr::ptr(const ptr& p, ceph::unique_leakable_ptr<raw> r)
+  buffer::ptr::ptr(const ptr& p, stone::unique_leakable_ptr<raw> r)
     : _raw(r.release()),
       _off(p._off),
       _len(p._len)
@@ -437,7 +437,7 @@ static ceph::spinlock debug_lock;
     return *this;
   }
 
-  ceph::unique_leakable_ptr<buffer::raw> buffer::ptr::clone()
+  stone::unique_leakable_ptr<buffer::raw> buffer::ptr::clone()
   {
     return _raw->clone();
   }
@@ -503,19 +503,19 @@ static ceph::spinlock debug_lock;
   }
 
   const char *buffer::ptr::c_str() const {
-    ceph_assert(_raw);
+    stone_assert(_raw);
     return _raw->get_data() + _off;
   }
   char *buffer::ptr::c_str() {
-    ceph_assert(_raw);
+    stone_assert(_raw);
     return _raw->get_data() + _off;
   }
   const char *buffer::ptr::end_c_str() const {
-    ceph_assert(_raw);
+    stone_assert(_raw);
     return _raw->get_data() + _off + _len;
   }
   char *buffer::ptr::end_c_str() {
-    ceph_assert(_raw);
+    stone_assert(_raw);
     return _raw->get_data() + _off + _len;
   }
 
@@ -525,23 +525,23 @@ static ceph::spinlock debug_lock;
   }
   const char& buffer::ptr::operator[](unsigned n) const
   {
-    ceph_assert(_raw);
-    ceph_assert(n < _len);
+    stone_assert(_raw);
+    stone_assert(n < _len);
     return _raw->get_data()[_off + n];
   }
   char& buffer::ptr::operator[](unsigned n)
   {
-    ceph_assert(_raw);
-    ceph_assert(n < _len);
+    stone_assert(_raw);
+    stone_assert(n < _len);
     return _raw->get_data()[_off + n];
   }
 
-  const char *buffer::ptr::raw_c_str() const { ceph_assert(_raw); return _raw->get_data(); }
-  unsigned buffer::ptr::raw_length() const { ceph_assert(_raw); return _raw->get_len(); }
-  int buffer::ptr::raw_nref() const { ceph_assert(_raw); return _raw->nref; }
+  const char *buffer::ptr::raw_c_str() const { stone_assert(_raw); return _raw->get_data(); }
+  unsigned buffer::ptr::raw_length() const { stone_assert(_raw); return _raw->get_len(); }
+  int buffer::ptr::raw_nref() const { stone_assert(_raw); return _raw->nref; }
 
   void buffer::ptr::copy_out(unsigned o, unsigned l, char *dest) const {
-    ceph_assert(_raw);
+    stone_assert(_raw);
     if (o+l > _len)
         throw end_of_buffer();
     char* src =  _raw->get_data() + _off + o;
@@ -575,8 +575,8 @@ static ceph::spinlock debug_lock;
 
   unsigned buffer::ptr::append(char c)
   {
-    ceph_assert(_raw);
-    ceph_assert(1 <= unused_tail_length());
+    stone_assert(_raw);
+    stone_assert(1 <= unused_tail_length());
     char* ptr = _raw->get_data() + _off + _len;
     *ptr = c;
     _len++;
@@ -585,8 +585,8 @@ static ceph::spinlock debug_lock;
 
   unsigned buffer::ptr::append(const char *p, unsigned l)
   {
-    ceph_assert(_raw);
-    ceph_assert(l <= unused_tail_length());
+    stone_assert(_raw);
+    stone_assert(l <= unused_tail_length());
     char* c = _raw->get_data() + _off + _len;
     maybe_inline_memcpy(c, p, l, 32);
     _len += l;
@@ -595,8 +595,8 @@ static ceph::spinlock debug_lock;
 
   unsigned buffer::ptr::append_zeros(unsigned l)
   {
-    ceph_assert(_raw);
-    ceph_assert(l <= unused_tail_length());
+    stone_assert(_raw);
+    stone_assert(l <= unused_tail_length());
     char* c = _raw->get_data() + _off + _len;
     // FIPS zeroization audit 20191115: this memset is not security related.
     memset(c, 0, l);
@@ -606,9 +606,9 @@ static ceph::spinlock debug_lock;
 
   void buffer::ptr::copy_in(unsigned o, unsigned l, const char *src, bool crc_reset)
   {
-    ceph_assert(_raw);
-    ceph_assert(o <= _len);
-    ceph_assert(o+l <= _len);
+    stone_assert(_raw);
+    stone_assert(o <= _len);
+    stone_assert(o+l <= _len);
     char* dest = _raw->get_data() + _off + o;
     if (crc_reset)
         _raw->invalidate_crc();
@@ -625,7 +625,7 @@ static ceph::spinlock debug_lock;
 
   void buffer::ptr::zero(unsigned o, unsigned l, bool crc_reset)
   {
-    ceph_assert(o+l <= _len);
+    stone_assert(o+l <= _len);
     if (crc_reset)
         _raw->invalidate_crc();
     // FIPS zeroization audit 20191115: this memset is not security related.
@@ -880,7 +880,7 @@ static ceph::spinlock debug_lock;
     while (length > 0) {
       const char *p;
       size_t l = get_ptr_and_advance(length, &p);
-      crc = ceph_crc32c(crc, (unsigned char*)p, l);
+      crc = stone_crc32c(crc, (unsigned char*)p, l);
       length -= l;
     }
     return crc;
@@ -947,7 +947,7 @@ static ceph::spinlock debug_lock;
     _buffers.swap(other._buffers);
   }
 
-  bool buffer::list::contents_equal(const ceph::buffer::list& other) const
+  bool buffer::list::contents_equal(const stone::buffer::list& other) const
   {
     if (length() != other.length())
       return false;
@@ -1070,7 +1070,7 @@ static ceph::spinlock debug_lock;
 
   void buffer::list::zero(const unsigned o, const unsigned l)
   {
-    ceph_assert(o+l <= _len);
+    stone_assert(o+l <= _len);
     unsigned p = 0;
     for (auto& node : _buffers) {
       if (p + node.length() > o) {
@@ -1106,12 +1106,12 @@ static ceph::spinlock debug_lock;
 
   bool buffer::list::is_n_page_sized() const
   {
-    return is_n_align_sized(CEPH_PAGE_SIZE);
+    return is_n_align_sized(STONE_PAGE_SIZE);
   }
 
   bool buffer::list::is_page_aligned() const
   {
-    return is_aligned(CEPH_PAGE_SIZE);
+    return is_aligned(STONE_PAGE_SIZE);
   }
 
   int buffer::list::get_mempool() const
@@ -1170,7 +1170,7 @@ static ceph::spinlock debug_lock;
       _num = 0;
       return;
     }
-    if ((_len & ~CEPH_PAGE_MASK) == 0)
+    if ((_len & ~STONE_PAGE_MASK) == 0)
       rebuild(ptr_node::create(buffer::create_page_aligned(_len)));
     else
       rebuild(ptr_node::create(buffer::create(_len)));
@@ -1267,7 +1267,7 @@ static ceph::spinlock debug_lock;
   
   bool buffer::list::rebuild_page_aligned()
   {
-   return  rebuild_aligned(CEPH_PAGE_SIZE);
+   return  rebuild_aligned(STONE_PAGE_SIZE);
   }
 
   void buffer::list::reserve(size_t prealloc)
@@ -1297,7 +1297,7 @@ static ceph::spinlock debug_lock;
     if (!gap) {
       // make a new buffer!
       auto buf = ptr_node::create(
-	raw_combined::create(CEPH_BUFFER_APPEND_SIZE, 0, get_mempool()));
+	raw_combined::create(STONE_BUFFER_APPEND_SIZE, 0, get_mempool()));
       buf->set_length(0);   // unused, so far.
       _carriage = buf.get();
       _buffers.push_back(*buf.release());
@@ -1319,7 +1319,7 @@ static ceph::spinlock debug_lock;
     // make a new buffer.  fill out a complete page, factoring in the
     // raw_combined overhead.
     size_t need = round_up_to(len, sizeof(size_t)) + sizeof(raw_combined);
-    size_t alen = round_up_to(need, CEPH_BUFFER_ALLOC_UNIT) -
+    size_t alen = round_up_to(need, STONE_BUFFER_ALLOC_UNIT) -
       sizeof(raw_combined);
     auto new_back = \
       ptr_node::create(raw_combined::create(alen, 0, get_mempool()));
@@ -1377,7 +1377,7 @@ static ceph::spinlock debug_lock;
       _carriage = new_back;
       return { new_back->c_str(), &new_back->_len, &_len };
     } else {
-      ceph_assert(!_buffers.empty());
+      stone_assert(!_buffers.empty());
       if (unlikely(_carriage != &_buffers.back())) {
         auto bptr = ptr_node::create(*_carriage, _carriage->length(), 0);
 	_carriage = bptr.get();
@@ -1400,7 +1400,7 @@ static ceph::spinlock debug_lock;
 
   void buffer::list::append(const ptr& bp, unsigned off, unsigned len)
   {
-    ceph_assert(len+off <= bp.length());
+    stone_assert(len+off <= bp.length());
     if (!_buffers.empty()) {
       ptr &l = _buffers.back();
       if (l._raw == bp._raw && l.end() == bp.start() + off) {
@@ -1505,7 +1505,7 @@ static ceph::spinlock debug_lock;
       }
       return node[n];
     }
-    ceph_abort();
+    stone_abort();
   }
 
   /*
@@ -1551,7 +1551,7 @@ static ceph::spinlock debug_lock;
       off -= (*curbuf).length();
       ++curbuf;
     }
-    ceph_assert(len == 0 || curbuf != std::cend(other._buffers));
+    stone_assert(len == 0 || curbuf != std::cend(other._buffers));
     
     while (len > 0) {
       // partial?
@@ -1584,14 +1584,14 @@ static ceph::spinlock debug_lock;
     if (off >= length())
       throw end_of_buffer();
 
-    ceph_assert(len > 0);
+    stone_assert(len > 0);
     //cout << "splice off " << off << " len " << len << " ... mylen = " << length() << std::endl;
       
     // skip off
     auto curbuf = std::begin(_buffers);
     auto curbuf_prev = _buffers.before_begin();
     while (off > 0) {
-      ceph_assert(curbuf != std::end(_buffers));
+      stone_assert(curbuf != std::end(_buffers));
       if (off >= (*curbuf).length()) {
 	// skip this buffer
 	//cout << "off = " << off << " skipping over " << *curbuf << std::endl;
@@ -1665,7 +1665,7 @@ static ceph::spinlock debug_lock;
 void buffer::list::encode_base64(buffer::list& o)
 {
   bufferptr bp(length() * 4 / 3 + 3);
-  int l = ceph_armor(bp.c_str(), bp.c_str() + bp.length(), c_str(), c_str() + length());
+  int l = stone_armor(bp.c_str(), bp.c_str() + bp.length(), c_str(), c_str() + length());
   bp.set_length(l);
   o.push_back(std::move(bp));
 }
@@ -1673,14 +1673,14 @@ void buffer::list::encode_base64(buffer::list& o)
 void buffer::list::decode_base64(buffer::list& e)
 {
   bufferptr bp(4 + ((e.length() * 3) / 4));
-  int l = ceph_unarmor(bp.c_str(), bp.c_str() + bp.length(), e.c_str(), e.c_str() + e.length());
+  int l = stone_unarmor(bp.c_str(), bp.c_str() + bp.length(), e.c_str(), e.c_str() + e.length());
   if (l < 0) {
     std::ostringstream oss;
     oss << "decode_base64: decoding failed:\n";
     hexdump(oss);
     throw buffer::malformed_input(oss.str().c_str());
   }
-  ceph_assert(l <= (int)bp.length());
+  stone_assert(l <= (int)bp.length());
   bp.set_length(l);
   push_back(std::move(bp));
 }
@@ -1995,7 +1995,7 @@ int buffer::list::send_fd(int fd) const
     while (written < p->length()) {
       int r = ::send(fd, p->c_str(), p->length() - written, 0);
       if (r < 0)
-        return -ceph_sock_errno();
+        return -stone_sock_errno();
 
       written += r;
     }
@@ -2042,13 +2042,13 @@ __u32 buffer::list::crc32c(__u32 crc) const
 	   * http://crcutil.googlecode.com/files/crc-doc.1.0.pdf
 	   * note, u for our crc32c implementation is 0
 	   */
-	  crc = ccrc.second ^ ceph_crc32c(ccrc.first ^ crc, NULL, node.length());
+	  crc = ccrc.second ^ stone_crc32c(ccrc.first ^ crc, NULL, node.length());
 	  cache_adjusts++;
 	}
       } else {
 	cache_misses++;
 	uint32_t base = crc;
-	crc = ceph_crc32c(crc, (unsigned char*)node.c_str(), node.length());
+	crc = stone_crc32c(crc, (unsigned char*)node.c_str(), node.length());
 	r->set_crc(ofs, make_pair(base, crc));
       }
     }
@@ -2204,7 +2204,7 @@ bool buffer::ptr_node::dispose_if_hypercombined(
   const bool is_hypercombined =
     reinterpret_cast<std::uintptr_t>(delete_this) == bptr;
   if (is_hypercombined) {
-    ceph_assert_always("hypercombining is currently disabled" == nullptr);
+    stone_assert_always("hypercombining is currently disabled" == nullptr);
     delete_this->~ptr_node();
     return true;
   } else {
@@ -2213,7 +2213,7 @@ bool buffer::ptr_node::dispose_if_hypercombined(
 }
 
 std::unique_ptr<buffer::ptr_node, buffer::ptr_node::disposer>
-buffer::ptr_node::create_hypercombined(ceph::unique_leakable_ptr<buffer::raw> r)
+buffer::ptr_node::create_hypercombined(stone::unique_leakable_ptr<buffer::raw> r)
 {
   // FIXME: we don't currently hypercombine buffers due to crashes
   // observed in the rados suite. After fixing we'll use placement
@@ -2270,23 +2270,23 @@ MEMPOOL_DEFINE_OBJECT_FACTORY(buffer::raw_static, buffer_raw_static,
 			      buffer_meta);
 
 
-void ceph::buffer::list::page_aligned_appender::_refill(size_t len) {
+void stone::buffer::list::page_aligned_appender::_refill(size_t len) {
   const size_t alloc = \
-    std::max((size_t)min_alloc, (len + CEPH_PAGE_SIZE - 1) & CEPH_PAGE_MASK);
+    std::max((size_t)min_alloc, (len + STONE_PAGE_SIZE - 1) & STONE_PAGE_MASK);
   auto new_back = \
     ptr_node::create(buffer::create_page_aligned(alloc));
   new_back->set_length(0);   // unused, so far.
   bl.push_back(std::move(new_back));
 }
 
-namespace ceph::buffer {
+namespace stone::buffer {
 inline namespace v15_2_0 {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-class buffer_error_category : public ceph::converting_category {
+class buffer_error_category : public stone::converting_category {
 public:
   buffer_error_category(){}
   const char* name() const noexcept override;
@@ -2294,7 +2294,7 @@ public:
   std::string message(int ev) const override;
   boost::system::error_condition default_error_condition(int ev) const noexcept
     override;
-  using ceph::converting_category::equivalent;
+  using stone::converting_category::equivalent;
   bool equivalent(int ev, const boost::system::error_condition& c) const
     noexcept override;
   int from_code(int ev) const noexcept override;
@@ -2308,7 +2308,7 @@ const char* buffer_error_category::name() const noexcept {
 
 const char*
 buffer_error_category::message(int ev, char*, std::size_t) const noexcept {
-  using ceph::buffer::errc;
+  using stone::buffer::errc;
   if (ev == 0)
     return "No error";
 
@@ -2332,7 +2332,7 @@ std::string buffer_error_category::message(int ev) const {
 
 boost::system::error_condition
 buffer_error_category::default_error_condition(int ev)const noexcept {
-  using ceph::buffer::errc;
+  using stone::buffer::errc;
   switch (static_cast<errc>(ev)) {
   case errc::bad_alloc:
     return boost::system::errc::not_enough_memory;
@@ -2348,7 +2348,7 @@ bool buffer_error_category::equivalent(int ev, const boost::system::error_condit
 }
 
 int buffer_error_category::from_code(int ev) const noexcept {
-  using ceph::buffer::errc;
+  using stone::buffer::errc;
   switch (static_cast<errc>(ev)) {
   case errc::bad_alloc:
     return -ENOMEM;

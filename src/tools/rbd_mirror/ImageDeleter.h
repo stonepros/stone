@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_RBD_MIRROR_IMAGE_DELETER_H
-#define CEPH_RBD_MIRROR_IMAGE_DELETER_H
+#ifndef STONE_RBD_MIRROR_IMAGE_DELETER_H
+#define STONE_RBD_MIRROR_IMAGE_DELETER_H
 
 #include "include/utime.h"
 #include "common/AsyncOpTracker.h"
@@ -186,4 +186,4 @@ private:
 
 extern template class rbd::mirror::ImageDeleter<librbd::ImageCtx>;
 
-#endif // CEPH_RBD_MIRROR_IMAGE_DELETER_H
+#endif // STONE_RBD_MIRROR_IMAGE_DELETER_H

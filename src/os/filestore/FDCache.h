@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_FDCACHE_H
-#define CEPH_FDCACHE_H
+#ifndef STONE_FDCACHE_H
+#define STONE_FDCACHE_H
 
 #include <memory>
 #include <errno.h>

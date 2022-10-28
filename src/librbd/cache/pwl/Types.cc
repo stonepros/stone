@@ -3,15 +3,15 @@
 
 #include <iostream>
 #include "Types.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "include/Context.h"
 #include "include/stringify.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::Types: " << this << " " \
                            <<  __func__ << ": "
-using ceph::Formatter;
+using stone::Formatter;
 
 namespace librbd {
 namespace cache {

@@ -121,7 +121,7 @@ enum {
   l_osd_last,
 };
 
-PerfCounters *build_osd_logger(CephContext *cct);
+PerfCounters *build_osd_logger(StoneeContext *cct);
 
 // PeeringState perf counters
 enum {
@@ -160,4 +160,4 @@ enum {
   rs_last,
 };
 
-PerfCounters *build_recoverystate_perf(CephContext *cct);
+PerfCounters *build_recoverystate_perf(StoneeContext *cct);

@@ -25,7 +25,7 @@ struct MockTestImageCtx : public MockImageCtx {
 struct MockManagedLock {
   static MockManagedLock *s_instance;
   static MockManagedLock &get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return *s_instance;
   }
 
@@ -75,7 +75,7 @@ struct ManagedLock<MockTestImageCtx> {
 
   librbd::asio::ContextWQ *m_work_queue;
 
-  mutable ceph::mutex m_lock = ceph::make_mutex("ManagedLock::m_lock");
+  mutable stone::mutex m_lock = stone::make_mutex("ManagedLock::m_lock");
 
   bool is_lock_owner() const {
     return MockManagedLock::get_instance().is_lock_owner();
@@ -105,12 +105,12 @@ struct ManagedLock<MockTestImageCtx> {
   }
 
   void release_lock(Context *on_released) {
-    ceph_assert(MockManagedLock::get_instance().m_on_released == nullptr);
+    stone_assert(MockManagedLock::get_instance().m_on_released == nullptr);
     MockManagedLock::get_instance().m_on_released = on_released;
 
     Context *post_release_ctx = new LambdaContext(
       [this](int r) {
-        ceph_assert(MockManagedLock::get_instance().m_on_released != nullptr);
+        stone_assert(MockManagedLock::get_instance().m_on_released != nullptr);
         post_release_lock_handler(false, r,
                                   MockManagedLock::get_instance().m_on_released);
         MockManagedLock::get_instance().m_on_released = nullptr;
@@ -183,7 +183,7 @@ namespace mirror {
 
 template <>
 struct Threads<librbd::MockTestImageCtx> {
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
   SafeTimer *timer;
   librbd::asio::ContextWQ *work_queue;
   librbd::AsioEngine* asio_engine;
@@ -202,17 +202,17 @@ struct Instances<librbd::MockTestImageCtx> {
                            librados::IoCtx &ioctx,
                            const std::string& instance_id,
                            instances::Listener&) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
   Instances() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
 
   ~Instances() {
-    ceph_assert(s_instance == this);
+    stone_assert(s_instance == this);
     s_instance = nullptr;
   }
 
@@ -248,12 +248,12 @@ struct MockListener : public leader_watcher::Listener {
   static MockListener* s_instance;
 
   MockListener() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
 
   ~MockListener() override {
-    ceph_assert(s_instance == this);
+    stone_assert(s_instance == this);
     s_instance = nullptr;
   }
 
@@ -317,7 +317,7 @@ public:
       .WillOnce(Invoke([on_finish, &mock_managed_lock, r](Context *ctx) {
                          if (on_finish != nullptr) {
                            auto on_released = mock_managed_lock.m_on_released;
-                           ceph_assert(on_released != nullptr);
+                           stone_assert(on_released != nullptr);
                            mock_managed_lock.m_on_released = new LambdaContext(
                              [on_released, on_finish](int r) {
                                on_released->complete(r);
@@ -561,7 +561,7 @@ TEST_F(TestMockLeaderWatcher, Break) {
   EXPECT_EQ(0, _rados->conf_set("rbd_mirror_leader_heartbeat_interval", "1"));
   EXPECT_EQ(0, _rados->conf_set("rbd_mirror_leader_max_missed_heartbeats",
                                 "1"));
-  CephContext *cct = reinterpret_cast<CephContext *>(m_local_io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(m_local_io_ctx.cct());
   int max_acquire_attempts = cct->_conf.get_val<uint64_t>(
     "rbd_mirror_leader_max_acquire_attempts_before_break");
 

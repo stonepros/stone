@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Adam Crume <adamcrume@gmail.com>
  *
@@ -14,7 +14,7 @@
 
 #include <vector>
 #include <boost/thread.hpp>
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "Replayer.hpp"
 #include "rbd_replay_debug.hpp"
@@ -62,11 +62,11 @@ int main(int argc, const char **argv) {
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage(argv[0]);
     exit(0);
   }
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY, 0);
 
   std::vector<const char*>::iterator i;
@@ -78,19 +78,19 @@ int main(int argc, const char **argv) {
   std::ostringstream err;
   bool dump_perf_counters = false;
   for (i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_double_dash(args, i)) {
+    if (stone_argparse_double_dash(args, i)) {
       break;
-    } else if (ceph_argparse_witharg(args, i, &val, "-p", "--pool", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-p", "--pool", (char*)NULL)) {
       pool_name = val;
-    } else if (ceph_argparse_witharg(args, i, &latency_multiplier, err, "--latency-multiplier",
+    } else if (stone_argparse_witharg(args, i, &latency_multiplier, err, "--latency-multiplier",
 				     (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return 1;
       }
-    } else if (ceph_argparse_flag(args, i, "--read-only", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--read-only", (char*)NULL)) {
       readonly = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--map-image", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--map-image", (char*)NULL)) {
       ImageNameMap::Mapping mapping;
       if (image_name_map.parse_mapping(val, &mapping)) {
 	image_name_map.add_mapping(mapping);
@@ -98,7 +98,7 @@ int main(int argc, const char **argv) {
 	cerr << "Unable to parse mapping string: '" << val << "'" << std::endl;
 	return 1;
       }
-    } else if (ceph_argparse_flag(args, i, "--dump-perf-counters", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--dump-perf-counters", (char*)NULL)) {
       dump_perf_counters = true;
     } else if (get_remainder(*i, "-")) {
       cerr << "Unrecognized argument: " << *i << std::endl;
@@ -108,7 +108,7 @@ int main(int argc, const char **argv) {
     }
   }
 
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   string replay_file;
   if (!args.empty()) {

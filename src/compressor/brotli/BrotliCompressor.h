@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2017 BI SHUN KE <aionshun@livemail.tw>
  *
@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef CEPH_BROTLICOMPRESSOR_H
-#define CEPH_BROTLICOMPRESSOR_H
+#ifndef STONE_BROTLICOMPRESSOR_H
+#define STONE_BROTLICOMPRESSOR_H
 
 
 #include "include/buffer.h"
@@ -27,5 +27,5 @@ class BrotliCompressor : public Compressor
   int decompress(bufferlist::const_iterator &p, size_t compressed_len, bufferlist &out, boost::optional<int32_t> compressor_message) override;
 };
 
-#endif //CEPH_BROTLICOMPRESSOR_H
+#endif //STONE_BROTLICOMPRESSOR_H
 

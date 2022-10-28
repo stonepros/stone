@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MGR_TYPES_H
-#define CEPH_MGR_TYPES_H
+#ifndef STONE_MGR_TYPES_H
+#define STONE_MGR_TYPES_H
 
 typedef int MetricQueryID;
 
@@ -23,4 +23,4 @@ struct PerfCollector {
   }
 };
 
-#endif // CEPH_MGR_TYPES_H
+#endif // STONE_MGR_TYPES_H

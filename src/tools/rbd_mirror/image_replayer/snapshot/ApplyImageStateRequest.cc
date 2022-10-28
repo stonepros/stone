@@ -12,8 +12,8 @@
 #include "tools/rbd_mirror/image_replayer/snapshot/Utils.h"
 #include <boost/algorithm/string/predicate.hpp>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::snapshot::" \
                            << "ApplyImageStateRequest: " << this << " " \
@@ -205,7 +205,7 @@ void ApplyImageStateRequest<I>::update_image_meta() {
     &ApplyImageStateRequest<I>::handle_update_image_meta>(this);
   int r = m_local_image_ctx->md_ctx.aio_operate(m_local_image_ctx->header_oid, aio_comp,
                                           &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -221,7 +221,7 @@ void ApplyImageStateRequest<I>::handle_update_image_meta(int r) {
 
   m_metadata.clear();
 
-  m_prev_snap_id = CEPH_NOSNAP;
+  m_prev_snap_id = STONE_NOSNAP;
   unprotect_snapshot();
 }
 
@@ -230,7 +230,7 @@ void ApplyImageStateRequest<I>::unprotect_snapshot() {
   std::shared_lock image_locker{m_local_image_ctx->image_lock};
 
   auto snap_it = m_local_image_ctx->snap_info.begin();
-  if (m_prev_snap_id != CEPH_NOSNAP) {
+  if (m_prev_snap_id != STONE_NOSNAP) {
     snap_it = m_local_image_ctx->snap_info.upper_bound(m_prev_snap_id);
   }
 
@@ -277,7 +277,7 @@ void ApplyImageStateRequest<I>::unprotect_snapshot() {
     image_locker.unlock();
 
     // no local snapshots to unprotect
-    m_prev_snap_id = CEPH_NOSNAP;
+    m_prev_snap_id = STONE_NOSNAP;
     remove_snapshot();
     return;
   }
@@ -316,7 +316,7 @@ void ApplyImageStateRequest<I>::remove_snapshot() {
   std::shared_lock image_locker{m_local_image_ctx->image_lock};
 
   auto snap_it = m_local_image_ctx->snap_info.begin();
-  if (m_prev_snap_id != CEPH_NOSNAP) {
+  if (m_prev_snap_id != STONE_NOSNAP) {
     snap_it = m_local_image_ctx->snap_info.upper_bound(m_prev_snap_id);
   }
 
@@ -351,7 +351,7 @@ void ApplyImageStateRequest<I>::remove_snapshot() {
     image_locker.unlock();
 
     // no local snapshots to remove
-    m_prev_snap_id = CEPH_NOSNAP;
+    m_prev_snap_id = STONE_NOSNAP;
     protect_snapshot();
     return;
   }
@@ -390,7 +390,7 @@ void ApplyImageStateRequest<I>::protect_snapshot() {
   std::shared_lock image_locker{m_local_image_ctx->image_lock};
 
   auto snap_it = m_local_image_ctx->snap_info.begin();
-  if (m_prev_snap_id != CEPH_NOSNAP) {
+  if (m_prev_snap_id != STONE_NOSNAP) {
     snap_it = m_local_image_ctx->snap_info.upper_bound(m_prev_snap_id);
   }
 
@@ -437,7 +437,7 @@ void ApplyImageStateRequest<I>::protect_snapshot() {
     image_locker.unlock();
 
     // no local snapshots to protect
-    m_prev_snap_id = CEPH_NOSNAP;
+    m_prev_snap_id = STONE_NOSNAP;
     rename_snapshot();
     return;
   }
@@ -476,7 +476,7 @@ void ApplyImageStateRequest<I>::rename_snapshot() {
   std::shared_lock image_locker{m_local_image_ctx->image_lock};
 
   auto snap_it = m_local_image_ctx->snap_info.begin();
-  if (m_prev_snap_id != CEPH_NOSNAP) {
+  if (m_prev_snap_id != STONE_NOSNAP) {
     snap_it = m_local_image_ctx->snap_info.upper_bound(m_prev_snap_id);
   }
 
@@ -520,7 +520,7 @@ void ApplyImageStateRequest<I>::rename_snapshot() {
     image_locker.unlock();
 
     // no local snapshots to protect
-    m_prev_snap_id = CEPH_NOSNAP;
+    m_prev_snap_id = STONE_NOSNAP;
     set_snapshot_limit();
     return;
   }
@@ -589,8 +589,8 @@ void ApplyImageStateRequest<I>::finish(int r) {
 template <typename I>
 uint64_t ApplyImageStateRequest<I>::compute_remote_snap_id(
     uint64_t local_snap_id) {
-  ceph_assert(ceph_mutex_is_locked(m_local_image_ctx->image_lock));
-  ceph_assert(ceph_mutex_is_locked(m_remote_image_ctx->image_lock));
+  stone_assert(stone_mutex_is_locked(m_local_image_ctx->image_lock));
+  stone_assert(stone_mutex_is_locked(m_remote_image_ctx->image_lock));
 
   // Search our local non-primary snapshots for a mapping to the remote
   // snapshot. The non-primary mirror snapshot with the mappings will always
@@ -598,7 +598,7 @@ uint64_t ApplyImageStateRequest<I>::compute_remote_snap_id(
   auto remote_snap_id = util::compute_remote_snap_id(
     m_local_image_ctx->image_lock, m_local_image_ctx->snap_info,
     local_snap_id, m_remote_mirror_uuid);
-  if (remote_snap_id != CEPH_NOSNAP) {
+  if (remote_snap_id != STONE_NOSNAP) {
     return remote_snap_id;
   }
 
@@ -634,12 +634,12 @@ uint64_t ApplyImageStateRequest<I>::compute_remote_snap_id(
     }
   }
 
-  return CEPH_NOSNAP;
+  return STONE_NOSNAP;
 }
 
 template <typename I>
 void ApplyImageStateRequest<I>::compute_local_to_remote_snap_ids() {
-  ceph_assert(ceph_mutex_is_locked(m_local_image_ctx->image_lock));
+  stone_assert(stone_mutex_is_locked(m_local_image_ctx->image_lock));
   std::shared_lock remote_image_locker{m_remote_image_ctx->image_lock};
 
   for (const auto& [snap_id, snap_info] : m_local_image_ctx->snap_info) {

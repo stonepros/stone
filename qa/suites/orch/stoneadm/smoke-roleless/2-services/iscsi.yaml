@@ -1,0 +1,8 @@
+tasks:
+- stoneadm.shell:
+    host.a:
+      - stone osd pool create foo
+      - rbd pool init foo
+      - stone orch apply iscsi foo u p
+- stoneadm.wait_for_service:
+    service: iscsi.foo

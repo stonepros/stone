@@ -44,16 +44,16 @@ set(common_srcs
   assert.cc
   bit_str.cc
   bloom_filter.cc
-  ceph_argparse.cc
-  ceph_context.cc
-  ceph_crypto.cc
-  ceph_frag.cc
-  ceph_fs.cc
-  ceph_hash.cc
-  ceph_json.cc
-  ceph_strings.cc
-  ceph_releases.cc
-  ceph_time.cc
+  stone_argparse.cc
+  stone_context.cc
+  stone_crypto.cc
+  stone_frag.cc
+  stone_fs.cc
+  stone_hash.cc
+  stone_json.cc
+  stone_strings.cc
+  stone_releases.cc
+  stone_time.cc
   cmdparse.cc
   code_environment.cc
   common_init.cc
@@ -141,7 +141,7 @@ else()
 endif()
 
 set_source_files_properties(${CMAKE_SOURCE_DIR}/src/common/version.cc
-  APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_BINARY_DIR}/src/include/ceph_ver.h)
+  APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_BINARY_DIR}/src/include/stone_ver.h)
 
 if(HAS_VTA)
   set_source_files_properties(
@@ -174,18 +174,18 @@ add_library(common-common-objs OBJECT
 target_include_directories(common-common-objs PRIVATE ${OPENSSL_INCLUDE_DIR})
 # for options.cc
 target_compile_definitions(common-common-objs PRIVATE
-  "CEPH_LIBDIR=\"${CMAKE_INSTALL_FULL_LIBDIR}\""
-  "CEPH_PKGLIBDIR=\"${CEPH_INSTALL_FULL_PKGLIBDIR}\""
-  "CEPH_DATADIR=\"${CEPH_INSTALL_DATADIR}\"")
+  "STONE_LIBDIR=\"${CMAKE_INSTALL_FULL_LIBDIR}\""
+  "STONE_PKGLIBDIR=\"${STONE_INSTALL_FULL_PKGLIBDIR}\""
+  "STONE_DATADIR=\"${STONE_INSTALL_DATADIR}\"")
 compile_with_fmt(common-common-objs)
 
-set(common_mountcephfs_srcs
+set(common_mountstonefs_srcs
   armor.c
   safe_io.c
   module.c
   addr_parsing.c)
-add_library(common_mountcephfs_objs OBJECT
-  ${common_mountcephfs_srcs})
+add_library(common_mountstonefs_objs OBJECT
+  ${common_mountstonefs_srcs})
 
 
 set(crc32_srcs

@@ -5,7 +5,7 @@
 
 #include "common/errno.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "include/types.h"
 #include "rgw_string.h"
@@ -18,7 +18,7 @@
 #include "rgw_oidc_provider.h"
 #include "rgw_sal_rados.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 int RGWRestOIDCProvider::verify_permission(optional_yield y)
 {

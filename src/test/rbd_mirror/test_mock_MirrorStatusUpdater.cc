@@ -34,7 +34,7 @@ struct MirrorStatusWatcher<librbd::MockTestImageCtx> {
   static MirrorStatusWatcher* s_instance;
   static MirrorStatusWatcher* create(librados::IoCtx& io_ctx,
                                      MockContextWQ* mock_context_wq) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -51,7 +51,7 @@ MirrorStatusWatcher<librbd::MockTestImageCtx>* MirrorStatusWatcher<librbd::MockT
 template <>
 struct Threads<librbd::MockTestImageCtx> {
   MockSafeTimer *timer;
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
 
   MockContextWQ *work_queue;
 
@@ -231,7 +231,7 @@ public:
     // fire the timer task
     {
       std::lock_guard timer_locker{m_mock_threads->timer_lock};
-      ceph_assert(*timer_event != nullptr);
+      stone_assert(*timer_event != nullptr);
       (*timer_event)->complete(0);
     }
   }

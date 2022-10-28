@@ -6,12 +6,12 @@
 #include "rgw_coroutine.h"
 
 // re-include our assert to clobber the system one; fix dout:
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include <boost/asio/yield.hpp>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 RGWCRHTTPGetDataCB::RGWCRHTTPGetDataCB(RGWCoroutinesEnv *_env, RGWCoroutine *_cr, RGWHTTPStreamRWRequest *_req) : env(_env), cr(_cr), req(_req) {
   io_id = req->get_io_id(RGWHTTPClient::HTTPCLIENT_IO_READ |RGWHTTPClient::HTTPCLIENT_IO_CONTROL);
@@ -258,7 +258,7 @@ int RGWStreamWriteHTTPResourceCRF::drain_writes(bool *need_retry)
   return 0;
 }
 
-RGWStreamSpliceCR::RGWStreamSpliceCR(CephContext *_cct, RGWHTTPManager *_mgr,
+RGWStreamSpliceCR::RGWStreamSpliceCR(StoneContext *_cct, RGWHTTPManager *_mgr,
                            shared_ptr<RGWStreamReadHTTPResourceCRF>& _in_crf,
                            shared_ptr<RGWStreamWriteHTTPResourceCRF>& _out_crf) : RGWCoroutine(_cct), cct(_cct), http_manager(_mgr),
                                                                in_crf(_in_crf), out_crf(_out_crf) {}

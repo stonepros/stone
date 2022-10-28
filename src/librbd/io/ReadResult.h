@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IO_READ_RESULT_H
-#define CEPH_LIBRBD_IO_READ_RESULT_H
+#ifndef STONE_LIBRBD_IO_READ_RESULT_H
+#define STONE_LIBRBD_IO_READ_RESULT_H
 
 #include "include/common_fwd.h"
 #include "include/int_types.h"
@@ -49,12 +49,12 @@ public:
   };
 
   struct C_ObjectReadMergedExtents : public Context {
-      CephContext* cct;
+      StoneContext* cct;
       ReadExtents* extents;
       Context *on_finish;
       bufferlist bl;
 
-      C_ObjectReadMergedExtents(CephContext* cct, ReadExtents* extents,
+      C_ObjectReadMergedExtents(StoneContext* cct, ReadExtents* extents,
                                 Context* on_finish);
 
       void finish(int r) override;
@@ -68,7 +68,7 @@ public:
 
   void set_image_extents(const Extents& image_extents);
 
-  void assemble_result(CephContext *cct);
+  void assemble_result(StoneContext *cct);
 
 private:
   struct Empty {
@@ -125,5 +125,5 @@ private:
 } // namespace io
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_IO_READ_RESULT_H
+#endif // STONE_LIBRBD_IO_READ_RESULT_H
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *           (C) 2019 SUSE Linux LLC
@@ -15,7 +15,7 @@
 
 namespace rgw::dmclock {
 
-ClientConfig::ClientConfig(CephContext *cct)
+ClientConfig::ClientConfig(StoneContext *cct)
 {
   update(cct->_conf);
 }
@@ -73,7 +73,7 @@ void ClientConfig::handle_conf_change(const ConfigProxy& conf,
   update(conf);
 }
 
-ClientCounters::ClientCounters(CephContext *cct)
+ClientCounters::ClientCounters(StoneContext *cct)
 {
   clients[static_cast<size_t>(client_id::admin)] =
       queue_counters::build(cct, "dmclock-admin");
@@ -131,7 +131,7 @@ void on_process(PerfCounters* c, const ClientSum& rsum, const ClientSum& psum)
 
 namespace queue_counters {
 
-PerfCountersRef build(CephContext *cct, const std::string& name)
+PerfCountersRef build(StoneContext *cct, const std::string& name)
 {
   if (!cct->_conf->throttler_perf_counter) {
     return {};
@@ -160,7 +160,7 @@ PerfCountersRef build(CephContext *cct, const std::string& name)
 
 namespace throttle_counters {
 
-PerfCountersRef build(CephContext *cct, const std::string& name)
+PerfCountersRef build(StoneContext *cct, const std::string& name)
 {
   if (!cct->_conf->throttler_perf_counter) {
     return {};

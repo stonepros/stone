@@ -48,15 +48,15 @@ enum {
 
 extern leveldb::Logger *create_leveldb_ceph_logger();
 
-class CephLevelDBLogger;
+class StoneeLevelDBLogger;
 
 /**
  * Uses LevelDB to implement the KeyValueDB interface
  */
 class LevelDBStore : public KeyValueDB {
-  CephContext *cct;
+  StoneeContext *cct;
   PerfCounters *logger;
-  CephLevelDBLogger *ceph_logger;
+  StoneeLevelDBLogger *ceph_logger;
   std::string path;
   boost::scoped_ptr<leveldb::Cache> db_cache;
 #ifdef HAVE_LEVELDB_FILTER_POLICY
@@ -157,7 +157,7 @@ public:
     {}
   } options;
 
-  LevelDBStore(CephContext *c, const std::string &path) :
+  LevelDBStore(StoneeContext *c, const std::string &path) :
     cct(c),
     logger(NULL),
     ceph_logger(NULL),

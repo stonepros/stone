@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat, Inc.
  *
@@ -26,14 +26,14 @@
 #include "rgw/rgw_file.h"
 
 #include "gtest/gtest.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/errno.h"
 #include "common/debug.h"
 #include "global/global_init.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 namespace {
 
@@ -387,31 +387,31 @@ int main(int argc, char *argv[])
   }
 
   for (auto arg_iter = args.begin(); arg_iter != args.end();) {
-    if (ceph_argparse_witharg(args, arg_iter, &val, "--access",
+    if (stone_argparse_witharg(args, arg_iter, &val, "--access",
 			      (char*) nullptr)) {
       access_key = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--secret",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--secret",
 				     (char*) nullptr)) {
       secret_key = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--uid",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--uid",
 				     (char*) nullptr)) {
       uid = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--bn",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--bn",
 				     (char*) nullptr)) {
       bucket_name = val;
-    } else if (ceph_argparse_flag(args, arg_iter, "--stat",
+    } else if (stone_argparse_flag(args, arg_iter, "--stat",
 					    (char*) nullptr)) {
       do_stat = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--create",
+    } else if (stone_argparse_flag(args, arg_iter, "--create",
 					    (char*) nullptr)) {
       do_create = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--delete",
+    } else if (stone_argparse_flag(args, arg_iter, "--delete",
 					    (char*) nullptr)) {
       do_delete = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--hexdump",
+    } else if (stone_argparse_flag(args, arg_iter, "--hexdump",
 					    (char*) nullptr)) {
       do_hexdump = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--verbose",
+    } else if (stone_argparse_flag(args, arg_iter, "--verbose",
 					    (char*) nullptr)) {
       verbose = true;
     } else {

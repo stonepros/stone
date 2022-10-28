@@ -17,7 +17,7 @@
 #include "librbd/mirror/DisableRequest.h"
 #include "librbd/object_map/RemoveRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::DisableFeaturesRequest: "
 
@@ -41,8 +41,8 @@ DisableFeaturesRequest<I>::DisableFeaturesRequest(I &image_ctx,
 template <typename I>
 void DisableFeaturesRequest<I>::send_op() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  StoneContext *cct = image_ctx.cct;
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
   ldout(cct, 20) << this << " " << __func__ << ": features=" << m_features
 		 << dendl;
@@ -53,7 +53,7 @@ void DisableFeaturesRequest<I>::send_op() {
 template <typename I>
 bool DisableFeaturesRequest<I>::should_complete(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << " r=" << r << dendl;
 
   if (r < 0) {
@@ -65,7 +65,7 @@ bool DisableFeaturesRequest<I>::should_complete(int r) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_prepare_lock() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << dendl;
 
   image_ctx.state->prepare_lock(create_async_context_callback(
@@ -77,7 +77,7 @@ void DisableFeaturesRequest<I>::send_prepare_lock() {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_prepare_lock(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -92,7 +92,7 @@ Context *DisableFeaturesRequest<I>::handle_prepare_lock(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_block_writes() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << dendl;
 
   std::unique_lock locker{image_ctx.owner_lock};
@@ -104,7 +104,7 @@ void DisableFeaturesRequest<I>::send_block_writes() {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_block_writes(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -131,7 +131,7 @@ Context *DisableFeaturesRequest<I>::handle_block_writes(int *result) {
 template <typename I>
 Context *DisableFeaturesRequest<I>::send_acquire_exclusive_lock(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << dendl;
 
   {
@@ -157,7 +157,7 @@ Context *DisableFeaturesRequest<I>::send_acquire_exclusive_lock(int *result) {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_acquire_exclusive_lock(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   image_ctx.owner_lock.lock_shared();
@@ -218,7 +218,7 @@ Context *DisableFeaturesRequest<I>::handle_acquire_exclusive_lock(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_get_mirror_mode() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   if ((m_features & RBD_FEATURE_JOURNALING) == 0) {
     send_append_op_event();
@@ -235,14 +235,14 @@ void DisableFeaturesRequest<I>::send_get_mirror_mode() {
     create_rados_callback<klass, &klass::handle_get_mirror_mode>(this);
   m_out_bl.clear();
   int r = image_ctx.md_ctx.aio_operate(RBD_MIRRORING, comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_get_mirror_mode(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result == 0) {
@@ -266,7 +266,7 @@ Context *DisableFeaturesRequest<I>::handle_get_mirror_mode(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_get_mirror_image() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   if (m_mirror_mode != cls::rbd::MIRROR_MODE_IMAGE) {
     send_disable_mirror_image();
@@ -283,14 +283,14 @@ void DisableFeaturesRequest<I>::send_get_mirror_image() {
     create_rados_callback<klass, &klass::handle_get_mirror_image>(this);
   m_out_bl.clear();
   int r = image_ctx.md_ctx.aio_operate(RBD_MIRRORING, comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_get_mirror_image(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << dendl;
 
   cls::rbd::MirrorImage mirror_image;
@@ -326,7 +326,7 @@ Context *DisableFeaturesRequest<I>::handle_get_mirror_image(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_disable_mirror_image() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   ldout(cct, 20) << this << " " << __func__ << dendl;
 
@@ -342,7 +342,7 @@ void DisableFeaturesRequest<I>::send_disable_mirror_image() {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_disable_mirror_image(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -358,7 +358,7 @@ Context *DisableFeaturesRequest<I>::handle_disable_mirror_image(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_close_journal() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   {
     std::unique_lock locker{image_ctx.owner_lock};
@@ -381,7 +381,7 @@ void DisableFeaturesRequest<I>::send_close_journal() {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_close_journal(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -389,7 +389,7 @@ Context *DisableFeaturesRequest<I>::handle_close_journal(int *result) {
                << dendl;
   }
 
-  ceph_assert(m_journal != nullptr);
+  stone_assert(m_journal != nullptr);
   m_journal->put();
   m_journal = nullptr;
 
@@ -400,7 +400,7 @@ Context *DisableFeaturesRequest<I>::handle_close_journal(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_remove_journal() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << dendl;
 
   Context *ctx = create_context_callback<
@@ -420,7 +420,7 @@ void DisableFeaturesRequest<I>::send_remove_journal() {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_remove_journal(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -436,7 +436,7 @@ Context *DisableFeaturesRequest<I>::handle_remove_journal(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_append_op_event() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   if (!this->template append_op_event<
       DisableFeaturesRequest<I>,
@@ -450,7 +450,7 @@ void DisableFeaturesRequest<I>::send_append_op_event() {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_append_op_event(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -466,7 +466,7 @@ Context *DisableFeaturesRequest<I>::handle_append_op_event(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_remove_object_map() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << dendl;
 
   if ((m_features & RBD_FEATURE_OBJECT_MAP) == 0) {
@@ -486,7 +486,7 @@ void DisableFeaturesRequest<I>::send_remove_object_map() {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_remove_object_map(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0 && *result != -ENOENT) {
@@ -501,7 +501,7 @@ Context *DisableFeaturesRequest<I>::handle_remove_object_map(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_set_features() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": new_features="
 		 << m_new_features << ", features_mask=" << m_features_mask
 		 << dendl;
@@ -513,14 +513,14 @@ void DisableFeaturesRequest<I>::send_set_features() {
   librados::AioCompletion *comp =
     create_rados_callback<klass, &klass::handle_set_features>(this);
   int r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_set_features(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result == -EINVAL && (m_features_mask & RBD_FEATURE_JOURNALING) != 0) {
@@ -545,7 +545,7 @@ Context *DisableFeaturesRequest<I>::handle_set_features(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_update_flags() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   if (m_disable_flags == 0) {
     send_notify_update();
@@ -567,7 +567,7 @@ void DisableFeaturesRequest<I>::send_update_flags() {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_update_flags(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -583,7 +583,7 @@ Context *DisableFeaturesRequest<I>::handle_update_flags(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_notify_update() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << dendl;
 
   Context *ctx = create_context_callback<
@@ -596,7 +596,7 @@ void DisableFeaturesRequest<I>::send_notify_update() {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_notify_update(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (image_ctx.exclusive_lock == nullptr || !m_acquired_lock) {
@@ -610,7 +610,7 @@ Context *DisableFeaturesRequest<I>::handle_notify_update(int *result) {
 template <typename I>
 void DisableFeaturesRequest<I>::send_release_exclusive_lock() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << dendl;
 
   Context *ctx = create_context_callback<
@@ -624,7 +624,7 @@ void DisableFeaturesRequest<I>::send_release_exclusive_lock() {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_release_exclusive_lock(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << *result << dendl;
 
   return handle_finish(*result);
@@ -633,7 +633,7 @@ Context *DisableFeaturesRequest<I>::handle_release_exclusive_lock(int *result) {
 template <typename I>
 Context *DisableFeaturesRequest<I>::handle_finish(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << ": r=" << r << dendl;
 
   {

@@ -17,7 +17,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -28,7 +28,7 @@ struct compound_state {
   seastar::promise<BufferedRecoveryMessages> promise;
   // assuming crimson-osd won't need to be compatible with pre-octopus
   // releases
-  BufferedRecoveryMessages ctx{ceph_release_t::octopus};
+  BufferedRecoveryMessages ctx{stone_release_t::octopus};
   compound_state() = default;
   ~compound_state() {
     promise.set_value(std::move(ctx));
@@ -48,7 +48,7 @@ public:
     state->ctx.accept_buffered_messages(ctx);
     state = {};
     if (!pg) {
-      ceph_assert(ctx.transaction.empty());
+      stone_assert(ctx.transaction.empty());
       return seastar::now();
     } else {
       return osd.get_shard_services().dispatch_context_transaction(
@@ -67,7 +67,7 @@ std::vector<OperationRef> handle_pg_create(
   for (auto& [pgid, when] : m->pgs) {
     const auto &[created, created_stamp] = when;
     auto q = m->pg_extra.find(pgid);
-    ceph_assert(q != m->pg_extra.end());
+    stone_assert(q != m->pg_extra.end());
     auto& [history, pi] = q->second;
     logger().debug(
       "{}: {} e{} @{} "

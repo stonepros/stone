@@ -27,10 +27,10 @@ set(zstd_sources
   CompressionPluginZstd.cc
 )
 
-add_library(ceph_zstd SHARED ${zstd_sources})
-target_link_libraries(ceph_zstd PRIVATE zstd $<$<PLATFORM_ID:Windows>:ceph-common>)
-set_target_properties(ceph_zstd PROPERTIES
+add_library(stone_zstd SHARED ${zstd_sources})
+target_link_libraries(stone_zstd PRIVATE zstd $<$<PLATFORM_ID:Windows>:stone-common>)
+set_target_properties(stone_zstd PROPERTIES
   VERSION 2.0.0
   SOVERSION 2
   INSTALL_RPATH "")
-install(TARGETS ceph_zstd DESTINATION ${compressor_plugin_dir})
+install(TARGETS stone_zstd DESTINATION ${compressor_plugin_dir})

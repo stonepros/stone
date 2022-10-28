@@ -14,7 +14,7 @@ namespace io {
 void ImageDispatchSpec::C_Dispatcher::complete(int r) {
   switch (image_dispatch_spec->dispatch_result) {
   case DISPATCH_RESULT_RESTART:
-    ceph_assert(image_dispatch_spec->dispatch_layer != 0);
+    stone_assert(image_dispatch_spec->dispatch_layer != 0);
     image_dispatch_spec->dispatch_layer = static_cast<ImageDispatchLayer>(
       image_dispatch_spec->dispatch_layer - 1);
     [[fallthrough]];
@@ -32,7 +32,7 @@ void ImageDispatchSpec::C_Dispatcher::complete(int r) {
     finish(r);
     break;
   case DISPATCH_RESULT_INVALID:
-    ceph_abort();
+    stone_abort();
     break;
   }
 }

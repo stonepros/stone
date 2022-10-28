@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -116,7 +116,7 @@ int main(int argc, const char **argv)
    */
   {
     /*
-     * "bufferlist"s are Ceph's native transfer type, and are carefully
+     * "bufferlist"s are Stone's native transfer type, and are carefully
      * designed to be efficient about copying. You can fill them
      * up from a lot of different data types, but strings or c strings
      * are often convenient. Just make sure not to deallocate the memory
@@ -144,7 +144,7 @@ int main(int argc, const char **argv)
    * now let's read that object back! Just for fun, we'll do it using
    * async IO instead of synchronous. (This would be more useful if we
    * wanted to send off multiple reads at once; see
-   * http://docs.ceph.com/docs/master/rados/api/librados/#asychronous-io )
+   * http://docs.stone.com/docs/master/rados/api/librados/#asychronous-io )
    */
   {
     librados::bufferlist read_buf;

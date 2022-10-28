@@ -6,7 +6,7 @@
 #include "librbd/Journal.h"
 #include "librbd/asio/ContextWQ.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::journal::StandardPolicy: "
 
@@ -15,7 +15,7 @@ namespace journal {
 
 template<typename I>
 void StandardPolicy<I>::allocate_tag_on_lock(Context *on_finish) {
-  ceph_assert(m_image_ctx->journal != nullptr);
+  stone_assert(m_image_ctx->journal != nullptr);
 
   if (!m_image_ctx->journal->is_tag_owner()) {
     lderr(m_image_ctx->cct) << "local image not promoted" << dendl;

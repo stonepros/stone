@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 SUSE LINUX GmbH
  *
@@ -12,8 +12,8 @@
  *
 */
 
-#ifndef CEPH_RANDOM_H
-#define CEPH_RANDOM_H 1
+#ifndef STONE_RANDOM_H
+#define STONE_RANDOM_H 1
 
 #include <mutex>
 #include <random>

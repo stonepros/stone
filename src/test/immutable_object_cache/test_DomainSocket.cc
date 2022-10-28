@@ -13,7 +13,7 @@
 #include "tools/immutable_object_cache/CacheClient.h"
 #include "tools/immutable_object_cache/CacheServer.h"
 
-using namespace ceph::immutable_obj_cache;
+using namespace stone::immutable_obj_cache;
 
 class TestCommunication :public ::testing::Test {
 public:
@@ -30,7 +30,7 @@ public:
 
   TestCommunication()
     : m_cache_server(nullptr), m_cache_client(nullptr),
-      m_local_path("/tmp/ceph_test_domain_socket"),
+      m_local_path("/tmp/stone_test_domain_socket"),
       m_send_request_index(0), m_recv_ack_index(0)
     {}
 
@@ -41,14 +41,14 @@ public:
 
   void SetUp() override {
     std::remove(m_local_path.c_str());
-    m_cache_server = new CacheServer(g_ceph_context, m_local_path,
+    m_cache_server = new CacheServer(g_stone_context, m_local_path,
       [this](CacheSession* sid, ObjectCacheRequest* req){
         handle_request(sid, req);
     });
     ASSERT_TRUE(m_cache_server != nullptr);
     srv_thd = new std::thread([this]() {m_cache_server->run();});
 
-    m_cache_client = new CacheClient(m_local_path, g_ceph_context);
+    m_cache_client = new CacheClient(m_local_path, g_stone_context);
     ASSERT_TRUE(m_cache_client != nullptr);
     m_cache_client->run();
 

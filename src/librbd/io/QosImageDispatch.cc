@@ -8,7 +8,7 @@
 #include "librbd/io/FlushTracker.h"
 #include <map>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::QosImageDispatch: " << this << " " \
                            << __func__ << ": "
@@ -54,7 +54,7 @@ QosImageDispatch<I>::QosImageDispatch(I* image_ctx)
   ldout(cct, 5) << "ictx=" << image_ctx << dendl;
 
   SafeTimer *timer;
-  ceph::mutex *timer_lock;
+  stone::mutex *timer_lock;
   ImageCtx::get_timer_instance(cct, &timer, &timer_lock);
   for (auto flag : throttle_flags) {
     m_throttles.push_back(make_pair(
@@ -95,7 +95,7 @@ void QosImageDispatch<I>::apply_qos_limit(uint64_t flag, uint64_t limit,
       break;
     }
   }
-  ceph_assert(throttle != nullptr);
+  stone_assert(throttle != nullptr);
 
   int r = throttle->set_limit(limit, burst, burst_seconds);
   if (r < 0) {

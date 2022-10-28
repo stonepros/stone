@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_TEST_DNS_MESSAGES_H
-#define CEPH_TEST_DNS_MESSAGES_H
+#ifndef STONE_TEST_DNS_MESSAGES_H
+#define STONE_TEST_DNS_MESSAGES_H
 
 #include "common/dns_resolve.h"
 #include "gmock/gmock.h"

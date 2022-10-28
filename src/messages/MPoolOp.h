@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MPOOLOP_H
-#define CEPH_MPOOLOP_H
+#ifndef STONE_MPOOLOP_H
+#define STONE_MPOOLOP_H
 
 #include "messages/PaxosServiceMessage.h"
 
@@ -32,9 +32,9 @@ public:
   __s16 crush_rule = 0;
 
   MPoolOp()
-    : PaxosServiceMessage{CEPH_MSG_POOLOP, 0, HEAD_VERSION, COMPAT_VERSION} {}
+    : PaxosServiceMessage{STONE_MSG_POOLOP, 0, HEAD_VERSION, COMPAT_VERSION} {}
   MPoolOp(const uuid_d& f, ceph_tid_t t, int p, std::string& n, int o, version_t v)
-    : PaxosServiceMessage{CEPH_MSG_POOLOP, v, HEAD_VERSION, COMPAT_VERSION},
+    : PaxosServiceMessage{STONE_MSG_POOLOP, v, HEAD_VERSION, COMPAT_VERSION},
       fsid(f), pool(p), name(n), op(o),
       snapid(0), crush_rule(0) {
     set_tid(t);

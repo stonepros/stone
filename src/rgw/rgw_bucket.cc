@@ -10,7 +10,7 @@
 #include <boost/format.hpp>
 
 #include "common/errno.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "include/scope_guard.h"
 
 #include "rgw_datalog.h"
@@ -46,15 +46,15 @@
 #include "rgw_bucket_layout.h"
 
 // stolen from src/cls/version/cls_version.cc
-#define VERSION_ATTR "ceph.objclass.version"
+#define VERSION_ATTR "stone.objclass.version"
 
 #include "cls/user/cls_user_types.h"
 
 #include "rgw_sal.h"
 #include "rgw_sal_rados.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 #define BUCKET_TAG_TIMEOUT 30
 
@@ -198,7 +198,7 @@ int rgw_bucket_parse_bucket_instance(const string& bucket_instance, string *buck
 }
 
 // parse key in format: [tenant/]name:instance[:shard_id]
-int rgw_bucket_parse_bucket_key(CephContext *cct, const string& key,
+int rgw_bucket_parse_bucket_key(StoneContext *cct, const string& key,
                                 rgw_bucket *bucket, int *shard_id)
 {
   std::string_view name{key};
@@ -269,7 +269,7 @@ void check_bad_user_bucket_mapping(rgw::sal::RGWRadosStore *store, const rgw_use
   rgw::sal::RGWRadosUser user(store, user_id);
   string marker;
 
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
 
   size_t max_entries = cct->_conf->rgw_list_buckets_max_chunk;
 
@@ -373,7 +373,7 @@ int rgw_remove_bucket_bypass_gc(rgw::sal::RGWRadosStore *store, rgw_bucket& buck
   map<string, bool> common_prefixes;
   RGWBucketInfo info;
   RGWObjectCtx obj_ctx(store);
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
 
   string bucket_ver, master_ver;
 
@@ -561,7 +561,7 @@ int RGWBucket::init(rgw::sal::RGWRadosStore *storage, RGWBucketAdminOpState& op_
   return 0;
 }
 
-bool rgw_find_bucket_by_id(const DoutPrefixProvider *dpp, CephContext *cct, RGWMetadataManager *mgr,
+bool rgw_find_bucket_by_id(const DoutPrefixProvider *dpp, StoneContext *cct, RGWMetadataManager *mgr,
                            const string& marker, const string& bucket_id, rgw_bucket* bucket_out)
 {
   void *handle = NULL;
@@ -1068,7 +1068,7 @@ int RGWBucket::sync(RGWBucketAdminOpState& op_state, map<string, bufferlist> *at
 
 int RGWBucket::policy_bl_to_stream(bufferlist& bl, ostream& o)
 {
-  RGWAccessControlPolicy_S3 policy(g_ceph_context);
+  RGWAccessControlPolicy_S3 policy(g_stone_context);
   int ret = decode_bl(bl, policy);
   if (ret < 0) {
     ldout(store->ctx(),0) << "failed to decode RGWAccessControlPolicy" << dendl;
@@ -1517,7 +1517,7 @@ int RGWBucketAdminOp::info(rgw::sal::RGWRadosStore *store,
   Formatter *formatter = flusher.get_formatter();
   flusher.start(0);
 
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
 
   const size_t max_entries = cct->_conf->rgw_list_buckets_max_chunk;
 
@@ -1929,7 +1929,7 @@ static bool has_object_expired(const DoutPrefixProvider *dpp,
     return false;  // failed to parse
   }
 
-  if (delete_at <= ceph_clock_now() && !delete_at.is_zero()) {
+  if (delete_at <= stone_clock_now() && !delete_at.is_zero()) {
     return true;
   }
 
@@ -2038,7 +2038,7 @@ public:
 
   string get_type() override { return "bucket"; }
 
-  RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const ceph::real_time& mtime) override {
+  RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const stone::real_time& mtime) override {
     RGWBucketEntryPoint be;
 
     try {
@@ -2196,8 +2196,8 @@ int RGWMetadataHandlerPut_Bucket::put_post(const DoutPrefixProvider *dpp)
 
 static void get_md5_digest(const RGWBucketEntryPoint *be, string& md5_digest) {
 
-   char md5[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
-   unsigned char m[CEPH_CRYPTO_MD5_DIGESTSIZE];
+   char md5[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+   unsigned char m[STONE_CRYPTO_MD5_DIGESTSIZE];
    bufferlist bl;
 
    Formatter *f = new JSONFormatter(false);
@@ -2210,7 +2210,7 @@ static void get_md5_digest(const RGWBucketEntryPoint *be, string& md5_digest) {
    hash.Update((const unsigned char *)bl.c_str(), bl.length());
    hash.Final(m);
 
-   buf_to_hex(m, CEPH_CRYPTO_MD5_DIGESTSIZE, md5);
+   buf_to_hex(m, STONE_CRYPTO_MD5_DIGESTSIZE, md5);
 
    delete f;
 
@@ -2222,7 +2222,7 @@ static void get_md5_digest(const RGWBucketEntryPoint *be, string& md5_digest) {
 struct archive_meta_info {
   rgw_bucket orig_bucket;
 
-  bool from_attrs(CephContext *cct, map<string, bufferlist>& attrs) {
+  bool from_attrs(StoneContext *cct, map<string, bufferlist>& attrs) {
     auto iter = attrs.find(ARCHIVE_META_ATTR);
     if (iter == attrs.end()) {
       return false;
@@ -2291,7 +2291,7 @@ public:
     /* read original bucket instance info */
 
     map<string, bufferlist> attrs_m;
-    ceph::real_time orig_mtime;
+    stone::real_time orig_mtime;
     RGWBucketInfo old_bi;
 
     ret = ctl.bucket->read_bucket_instance_info(be.bucket, &old_bi, y, dpp, RGWBucketCtl::BucketInstance::GetParams()
@@ -2426,7 +2426,7 @@ class RGWBucketInstanceMetadataHandler : public RGWBucketInstanceMetadataHandler
   int read_bucket_instance_entry(RGWSI_Bucket_BI_Ctx& ctx,
                                  const string& entry,
                                  RGWBucketCompleteInfo *bi,
-                                 ceph::real_time *pmtime,
+                                 stone::real_time *pmtime,
                                  optional_yield y,
                                  const DoutPrefixProvider *dpp) {
     return svc.bucket->read_bucket_instance_info(ctx,
@@ -2458,7 +2458,7 @@ public:
 
   string get_type() override { return "bucket.instance"; }
 
-  RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const ceph::real_time& mtime) override {
+  RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const stone::real_time& mtime) override {
     RGWBucketCompleteInfo bci;
 
     try {
@@ -2520,11 +2520,11 @@ public:
 
 class RGWMetadataHandlerPut_BucketInstance : public RGWMetadataHandlerPut_SObj
 {
-  CephContext *cct;
+  StoneContext *cct;
   RGWBucketInstanceMetadataHandler *bihandler;
   RGWBucketInstanceMetadataObject *obj;
 public:
-  RGWMetadataHandlerPut_BucketInstance(CephContext *_cct,
+  RGWMetadataHandlerPut_BucketInstance(StoneContext *_cct,
                                        RGWBucketInstanceMetadataHandler *_handler,
                                        RGWSI_MetaBackend_Handler::Op *_op, string& entry,
                                        RGWMetadataObject *_obj, RGWObjVersionTracker& objv_tracker,
@@ -2559,7 +2559,7 @@ int RGWBucketInstanceMetadataHandler::do_put(RGWSI_MetaBackend_Handler::Op *op,
   return do_put_operate(&put_op, dpp);
 }
 
-void init_default_bucket_layout(CephContext *cct, rgw::BucketLayout& layout,
+void init_default_bucket_layout(StoneContext *cct, rgw::BucketLayout& layout,
 				const RGWZone& zone,
 				std::optional<uint32_t> shards,
 				std::optional<rgw::BucketIndexType> type) {
@@ -3037,7 +3037,7 @@ int RGWBucketCtl::set_bucket_instance_attrs(RGWBucketInfo& bucket_info,
 
 int RGWBucketCtl::link_bucket(const rgw_user& user_id,
                               const rgw_bucket& bucket,
-                              ceph::real_time creation_time,
+                              stone::real_time creation_time,
 			      optional_yield y,
                               const DoutPrefixProvider *dpp,
                               bool update_entrypoint,
@@ -3052,7 +3052,7 @@ int RGWBucketCtl::link_bucket(const rgw_user& user_id,
 int RGWBucketCtl::do_link_bucket(RGWSI_Bucket_EP_Ctx& ctx,
                                  const rgw_user& user_id,
                                  const rgw_bucket& bucket,
-                                 ceph::real_time creation_time,
+                                 stone::real_time creation_time,
                                  bool update_entrypoint,
                                  rgw_ep_info *pinfo,
 				 optional_yield y,

@@ -4,7 +4,7 @@
 #include "Request.h"
 #include "librbd/cache/pwl/AbstractWriteLog.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::rwl::Request: " << this \
                            << " " <<  __func__ << ": "
@@ -20,7 +20,7 @@ void C_WriteRequest<T>::setup_buffer_resources(
     uint64_t *number_lanes, uint64_t *number_log_entries,
     uint64_t *number_unpublished_reserves) {
 
-  ceph_assert(!this->m_resources.allocated);
+  stone_assert(!this->m_resources.allocated);
 
   auto image_extents_size = this->image_extents.size();
   this->m_resources.buffers.reserve(image_extents_size);
@@ -61,7 +61,7 @@ void C_WriteSameRequest<T>::setup_buffer_resources(
     uint64_t *bytes_cached, uint64_t *bytes_dirtied, uint64_t *bytes_allocated,
     uint64_t *number_lanes, uint64_t *number_log_entries,
     uint64_t *number_unpublished_reserves) {
-  ceph_assert(this->image_extents.size() == 1);
+  stone_assert(this->image_extents.size() == 1);
   *number_log_entries = 1;
   *bytes_dirtied += this->image_extents[0].second;
   auto pattern_length = this->bl.length();

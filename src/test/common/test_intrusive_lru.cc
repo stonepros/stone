@@ -13,8 +13,8 @@ struct item_to_unsigned {
   }
 };
 
-struct TestLRUItem : public ceph::common::intrusive_lru_base<
-  ceph::common::intrusive_lru_config<
+struct TestLRUItem : public stone::common::intrusive_lru_base<
+  stone::common::intrusive_lru_config<
     unsigned, TestLRUItem, item_to_unsigned<TestLRUItem>>> {
   unsigned key = 0;
   int value = 0;

@@ -281,7 +281,7 @@ public:
     std::lock_guard l{lock};
     config.set_val_or_die(values, obs_mgr, key, val);
   }
-  int set_mon_vals(CephContext *cct,
+  int set_mon_vals(StoneeContext *cct,
 		   const std::map<std::string,std::string,std::less<>>& kv,
 		   md_config_t::config_callback config_cb) {
     std::unique_lock locker(lock);
@@ -304,7 +304,7 @@ public:
     return ret;
   }
   void parse_env(unsigned entity_type,
-		 const char *env_var = "CEPH_ARGS") {
+		 const char *env_var = "STONE_ARGS") {
     std::lock_guard l{lock};
     config.parse_env(entity_type, values, obs_mgr, env_var);
   }
@@ -324,7 +324,7 @@ public:
   std::string get_parse_error() {
     return config.parse_error;
   }
-  void complain_about_parse_error(CephContext *cct) {
+  void complain_about_parse_error(StoneeContext *cct) {
     return config.complain_about_parse_error(cct);
   }
   void do_argv_commands() const {

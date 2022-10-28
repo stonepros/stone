@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 Inktank
  *
@@ -74,8 +74,8 @@ TEST(MDSSessionFilter, IdEquality)
   SessionFilter filter;
   std::stringstream ss;
   filter.parse({"id=123"}, &ss);
-  auto a = ceph::make_ref<Session>(nullptr);;
-  auto b = ceph::make_ref<Session>(nullptr);;
+  auto a = stone::make_ref<Session>(nullptr);;
+  auto b = stone::make_ref<Session>(nullptr);;
   a->info.inst.name.parse("client.123");
   b->info.inst.name.parse("client.456");
 
@@ -88,9 +88,9 @@ TEST(MDSSessionFilter, StateEquality)
   SessionFilter filter;
   std::stringstream ss;
   filter.parse({"state=closing"}, &ss);
-  auto a = ceph::make_ref<Session>(nullptr);
+  auto a = stone::make_ref<Session>(nullptr);
   a->set_state(Session::STATE_CLOSING);
-  auto b = ceph::make_ref<Session>(nullptr);
+  auto b = stone::make_ref<Session>(nullptr);
   b->set_state(Session::STATE_OPENING);
 
   ASSERT_TRUE(filter.match(*a, [](client_t c) -> bool {return false;}));
@@ -102,9 +102,9 @@ TEST(MDSSessionFilter, AuthEquality)
   SessionFilter filter;
   std::stringstream ss;
   filter.parse({"auth_name=rhubarb"}, &ss);
-  auto a = ceph::make_ref<Session>(nullptr);
+  auto a = stone::make_ref<Session>(nullptr);
   a->info.auth_name.set_id("rhubarb");
-  auto b = ceph::make_ref<Session>(nullptr);
+  auto b = stone::make_ref<Session>(nullptr);
   b->info.auth_name.set_id("custard");
 
   ASSERT_TRUE(filter.match(*a, [](client_t c) -> bool {return false;}));
@@ -118,10 +118,10 @@ TEST(MDSSessionFilter, MetadataEquality)
   int r = filter.parse({"client_metadata.root=/rhubarb"}, &ss);
   ASSERT_EQ(r, 0);
   client_metadata_t meta;
-  auto a = ceph::make_ref<Session>(nullptr);
+  auto a = stone::make_ref<Session>(nullptr);
   meta.kv_map = {{"root", "/rhubarb"}};
   a->set_client_metadata(meta);
-  auto b = ceph::make_ref<Session>(nullptr);
+  auto b = stone::make_ref<Session>(nullptr);
   meta.kv_map = {{"root", "/custard"}};
   b->set_client_metadata(meta);
 
@@ -135,7 +135,7 @@ TEST(MDSSessionFilter, ReconnectingEquality)
   std::stringstream ss;
   int r = filter.parse({"reconnecting=true"}, &ss);
   ASSERT_EQ(r, 0);
-  auto a = ceph::make_ref<Session>(nullptr);
+  auto a = stone::make_ref<Session>(nullptr);
 
   ASSERT_TRUE(filter.match(*a, [](client_t c) -> bool {return true;}));
   ASSERT_FALSE(filter.match(*a, [](client_t c) -> bool {return false;}));

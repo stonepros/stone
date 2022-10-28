@@ -8,7 +8,7 @@
 #include "rgw_data_sync.h"
 #include "rgw_sync_module_log.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 class RGWLogStatRemoteObjCBCR : public RGWStatRemoteObjCBCR {
 public:
@@ -66,7 +66,7 @@ public:
   }
 };
 
-int RGWLogSyncModule::create_instance(CephContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) {
+int RGWLogSyncModule::create_instance(StoneContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) {
   string prefix = config["prefix"];
   instance->reset(new RGWLogSyncModuleInstance(prefix));
   return 0;

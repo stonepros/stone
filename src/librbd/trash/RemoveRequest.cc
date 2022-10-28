@@ -12,7 +12,7 @@
 #include "librbd/asio/ContextWQ.h"
 #include "librbd/image/RemoveRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::trash::RemoveRequest: " << this \
                            << " " << __func__ << ": "
@@ -39,7 +39,7 @@ void RemoveRequest<I>::set_state() {
   auto aio_comp = create_rados_callback<
       RemoveRequest<I>, &RemoveRequest<I>::handle_set_state>(this);
   int r = m_io_ctx.aio_operate(RBD_TRASH, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -64,7 +64,7 @@ void RemoveRequest<I>::handle_set_state(int r) {
   if (m_trash_set_state == cls::rbd::TRASH_IMAGE_STATE_REMOVING) {
     remove_image();
   } else {
-    ceph_assert(m_trash_set_state == cls::rbd::TRASH_IMAGE_STATE_NORMAL);
+    stone_assert(m_trash_set_state == cls::rbd::TRASH_IMAGE_STATE_NORMAL);
     finish(m_ret_val < 0 ? m_ret_val : r);
   };
 }
@@ -141,7 +141,7 @@ void RemoveRequest<I>::remove_trash_entry() {
   auto aio_comp = create_rados_callback<
       RemoveRequest<I>, &RemoveRequest<I>::handle_remove_trash_entry>(this);
   int r = m_io_ctx.aio_operate(RBD_TRASH, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

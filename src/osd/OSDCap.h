@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -23,8 +23,8 @@
  * should get *
  */
 
-#ifndef CEPH_OSDCAP_H
-#define CEPH_OSDCAP_H
+#ifndef STONE_OSDCAP_H
+#define STONE_OSDCAP_H
 
 #include <ostream>
 using std::ostream;

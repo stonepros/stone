@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/config.h"
 #include "common/debug.h"
 #include "common/errno.h"
@@ -12,8 +12,8 @@
 #include <string>
 #include <vector>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "random-write: "
 
@@ -24,7 +24,7 @@ const uint32_t MAX_IO_SIZE = 24576;
 const uint32_t MIN_IO_SIZE = 4;
 
 void usage() {
-  std::cout << "usage: ceph_test_rbd_mirror_random_write [options...] \\" << std::endl;
+  std::cout << "usage: stone_test_rbd_mirror_random_write [options...] \\" << std::endl;
   std::cout << "           <pool> <image>" << std::endl;
   std::cout << std::endl;
   std::cout << "  pool                 image pool" << std::endl;
@@ -42,8 +42,8 @@ void rbd_bencher_completion(void *c, void *pc);
 
 struct rbd_bencher {
   librbd::Image *image;
-  ceph::mutex lock = ceph::make_mutex("rbd_bencher::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("rbd_bencher::lock");
+  stone::condition_variable cond;
   int in_flight;
 
   explicit rbd_bencher(librbd::Image *i)
@@ -102,7 +102,7 @@ void write_image(librbd::Image &image) {
 
   uint64_t size = 0;
   image.size(&size);
-  ceph_assert(size != 0);
+  stone_assert(size != 0);
 
   vector<uint64_t> thread_offset;
   uint64_t i;
@@ -155,12 +155,12 @@ int main(int argc, const char **argv)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY,
                          CINIT_FLAG_NO_MON_CONFIG);
 
@@ -172,14 +172,14 @@ int main(int argc, const char **argv)
   std::string pool_name = args[0];
   std::string image_name = args[1];
 
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   dout(5) << "connecting to cluster" << dendl;
   librados::Rados rados;
   librados::IoCtx io_ctx;
   librbd::RBD rbd;
   librbd::Image image;
-  int r = rados.init_with_context(g_ceph_context);
+  int r = rados.init_with_context(g_stone_context);
   if (r < 0) {
     derr << "could not initialize RADOS handle" << dendl;
     return EXIT_FAILURE;

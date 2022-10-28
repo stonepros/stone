@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_MIRROR_IMAGE_DELETER_SNAPSHOT_PURGE_REQUEST_H
-#define CEPH_RBD_MIRROR_IMAGE_DELETER_SNAPSHOT_PURGE_REQUEST_H
+#ifndef STONE_RBD_MIRROR_IMAGE_DELETER_SNAPSHOT_PURGE_REQUEST_H
+#define STONE_RBD_MIRROR_IMAGE_DELETER_SNAPSHOT_PURGE_REQUEST_H
 
 #include "include/rados/librados.hpp"
 #include "cls/rbd/cls_rbd_types.h"
@@ -101,5 +101,5 @@ private:
 
 extern template class rbd::mirror::image_deleter::SnapshotPurgeRequest<librbd::ImageCtx>;
 
-#endif // CEPH_RBD_MIRROR_IMAGE_DELETER_SNAPSHOT_PURGE_REQUEST_H
+#endif // STONE_RBD_MIRROR_IMAGE_DELETER_SNAPSHOT_PURGE_REQUEST_H
 

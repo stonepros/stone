@@ -3,22 +3,22 @@
 
 #include <boost/bind/bind.hpp>
 #include "common/debug.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "CacheSession.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_immutable_obj_cache
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_immutable_obj_cache
 #undef dout_prefix
-#define dout_prefix *_dout << "ceph::cache::CacheSession: " << this << " " \
+#define dout_prefix *_dout << "stone::cache::CacheSession: " << this << " " \
                            << __func__ << ": "
 
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 CacheSession::CacheSession(io_service& io_service,
                            ProcessMsg processmsg,
-                           CephContext* cct)
+                           StoneContext* cct)
     : m_dm_socket(io_service),
       m_server_process_msg(processmsg), m_cct(cct) {
   m_bp_header = buffer::create(get_header_size());
@@ -137,4 +137,4 @@ void CacheSession::fault(const boost::system::error_code& ec) {
 }
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone

@@ -8,8 +8,8 @@
 #include "global/global_init.h"
 #include "global/global_context.h"
 
-#include "common/ceph_argparse.h"
-#include "common/ceph_json.h"
+#include "common/stone_argparse.h"
+#include "common/stone_json.h"
 #include "rgw_es_query.h"
 
 
@@ -18,10 +18,10 @@ int main(int argc, char *argv[])
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY, 0);
 
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   string expr;
 

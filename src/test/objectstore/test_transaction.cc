@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Casey Bodley <cbodley@redhat.com>
  *
@@ -186,7 +186,7 @@ void bench_num_bytes(bool legacy)
     cout << "get_encoded_bytes: ";
   }
 
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   if (legacy) {
     for (int i = 0; i < max; ++i) {
       a.get_encoded_bytes_test();
@@ -197,7 +197,7 @@ void bench_num_bytes(bool legacy)
     }
   }
 
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   cout << max << " encodes in " << (end - start) << std::endl;
 
 }

@@ -20,7 +20,7 @@ set(unittest_journal_srcs
 add_executable(unittest_journal
   ${unittest_journal_srcs} 
   )
-add_ceph_unittest(unittest_journal)
+add_stone_unittest(unittest_journal)
 target_link_libraries(unittest_journal 
   journal
   cls_journal

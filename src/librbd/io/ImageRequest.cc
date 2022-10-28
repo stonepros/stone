@@ -23,7 +23,7 @@
 #include <functional>
 #include <map>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::ImageRequest: " << __func__ << ": "
 
@@ -40,7 +40,7 @@ struct C_AssembleSnapshotDeltas : public C_AioRequest {
   I* image_ctx;
   SnapshotDelta* snapshot_delta;
 
-  ceph::mutex lock = ceph::make_mutex(
+  stone::mutex lock = stone::make_mutex(
     "librbd::io::C_AssembleSnapshotDeltas::lock", false);
   std::map<uint64_t, SnapshotDelta> object_snapshot_delta;
 
@@ -119,7 +119,7 @@ struct C_RBD_Readahead : public Context {
   }
 
   void finish(int r) override {
-    ceph_assert(extents.size() == 1);
+    stone_assert(extents.size() == 1);
     auto& extent = extents.front();
     ldout(ictx->cct, 20) << "C_RBD_Readahead on "
                          << data_object_name(ictx, object_no) << ": "
@@ -204,7 +204,7 @@ public:
 
     auto comp = librbd::util::create_rados_callback(this);
     int r = m_image_ctx.md_ctx.aio_operate(m_image_ctx.header_oid, comp, &op);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -297,10 +297,10 @@ void ImageRequest<I>::aio_compare_and_write(I *ictx, AioCompletion *c,
 template <typename I>
 void ImageRequest<I>::send() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(m_aio_comp->is_initialized(get_aio_type()));
-  ceph_assert(m_aio_comp->is_started());
+  stone_assert(m_aio_comp->is_initialized(get_aio_type()));
+  stone_assert(m_aio_comp->is_started());
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   AioCompletion *aio_comp = this->m_aio_comp;
   ldout(cct, 20) << get_request_type() << ": ictx=" << &image_ctx << ", "
                  << "completion=" << aio_comp << dendl;
@@ -333,7 +333,7 @@ void ImageRequest<I>::update_timestamp() {
     set_timestamp_fn = &I::set_access_timestamp;
   }
 
-  utime_t ts = ceph_clock_now();
+  utime_t ts = stone_clock_now();
   {
     std::shared_lock timestamp_locker{m_image_ctx.timestamp_lock};
     if(!should_update_timestamp(ts, std::invoke(get_timestamp_fn, m_image_ctx),
@@ -377,7 +377,7 @@ ImageReadRequest<I>::ImageReadRequest(I &image_ctx, AioCompletion *aio_comp,
 template <typename I>
 void ImageReadRequest<I>::send_request() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   auto &image_extents = this->m_image_extents;
   if (image_ctx.cache && image_ctx.readahead_max_bytes > 0 &&
@@ -460,7 +460,7 @@ void AbstractImageWriteRequest<I>::send_request() {
     uint64_t journal_tid = 0;
     if (journaling) {
       // in-flight ops are flushed prior to closing the journal
-      ceph_assert(image_ctx.journal != NULL);
+      stone_assert(image_ctx.journal != NULL);
       journal_tid = append_journal_event(m_synchronous);
     }
 
@@ -475,7 +475,7 @@ void AbstractImageWriteRequest<I>::send_object_requests(
     const LightweightObjectExtents &object_extents, IOContext io_context,
     uint64_t journal_tid) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   AioCompletion *aio_comp = this->m_aio_comp;
   bool single_extent = (object_extents.size() == 1);
@@ -507,7 +507,7 @@ uint64_t ImageWriteRequest<I>::append_journal_event(bool synchronous) {
 
   uint64_t tid = 0;
   uint64_t buffer_offset = 0;
-  ceph_assert(!this->m_image_extents.empty());
+  stone_assert(!this->m_image_extents.empty());
   for (auto &extent : this->m_image_extents) {
     bufferlist sub_bl;
     sub_bl.substr_of(m_bl, buffer_offset, extent.second);
@@ -554,7 +554,7 @@ uint64_t ImageDiscardRequest<I>::append_journal_event(bool synchronous) {
   I &image_ctx = this->m_image_ctx;
 
   uint64_t tid = 0;
-  ceph_assert(!this->m_image_extents.empty());
+  stone_assert(!this->m_image_extents.empty());
   for (auto &extent : this->m_image_extents) {
     journal::EventEntry event_entry(
       journal::AioDiscardEvent(extent.first,
@@ -663,7 +663,7 @@ void ImageFlushRequest<I>::send_request() {
   uint64_t journal_tid = 0;
   if (journaling) {
     // in-flight ops are flushed prior to closing the journal
-    ceph_assert(image_ctx.journal != NULL);
+    stone_assert(image_ctx.journal != NULL);
     journal_tid = image_ctx.journal->append_io_event(
       journal::EventEntry(journal::AioFlushEvent()), 0, 0, false, 0);
     image_ctx.journal->user_flushed();
@@ -694,7 +694,7 @@ uint64_t ImageWriteSameRequest<I>::append_journal_event(bool synchronous) {
   I &image_ctx = this->m_image_ctx;
 
   uint64_t tid = 0;
-  ceph_assert(!this->m_image_extents.empty());
+  stone_assert(!this->m_image_extents.empty());
   for (auto &extent : this->m_image_extents) {
     journal::EventEntry event_entry(journal::AioWriteSameEvent(extent.first,
                                                                extent.second,
@@ -746,7 +746,7 @@ uint64_t ImageCompareAndWriteRequest<I>::append_journal_event(
   I &image_ctx = this->m_image_ctx;
 
   uint64_t tid = 0;
-  ceph_assert(this->m_image_extents.size() == 1);
+  stone_assert(this->m_image_extents.size() == 1);
   auto &extent = this->m_image_extents.front();
   journal::EventEntry event_entry(
     journal::AioCompareAndWriteEvent(extent.first, extent.second, m_cmp_bl,
@@ -825,7 +825,7 @@ ImageListSnapsRequest<I>::ImageListSnapsRequest(
 template <typename I>
 void ImageListSnapsRequest<I>::send_request() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   // map image extents to object extents
   auto &image_extents = this->m_image_extents;

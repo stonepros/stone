@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2015 Mirantis, Inc.
  *
@@ -18,7 +18,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include "gtest/gtest.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "compressor/Compressor.h"
 #include "compressor/CompressionPlugin.h"
@@ -43,23 +43,23 @@ public:
       plugin = plugin.substr(0, pos);
       if (isal == "isal") {
 	g_conf().set_val("compressor_zlib_isal", "true");
-	g_ceph_context->_conf.apply_changes(nullptr);
+	g_stone_context->_conf.apply_changes(nullptr);
       } else if (isal == "noisal") {
 	g_conf().set_val("compressor_zlib_isal", "false");
-	g_ceph_context->_conf.apply_changes(nullptr);
+	g_stone_context->_conf.apply_changes(nullptr);
       } else {
-	ceph_abort_msg("bad option");
+	stone_abort_msg("bad option");
       }
     }
     cout << "[plugin " << plugin << " (" << GetParam() << ")]" << std::endl;
   }
   ~CompressorTest() override {
     g_conf().set_val("compressor_zlib_isal", old_zlib_isal ? "true" : "false");
-    g_ceph_context->_conf.apply_changes(nullptr);
+    g_stone_context->_conf.apply_changes(nullptr);
   }
 
   void SetUp() override {
-    compressor = Compressor::create(g_ceph_context, plugin);
+    compressor = Compressor::create(g_stone_context, plugin);
     ASSERT_TRUE(compressor);
   }
   void TearDown() override {
@@ -142,7 +142,7 @@ TEST_P(CompressorTest, big_round_trip_randomish)
 TEST_P(CompressorTest, big_round_trip_file)
 {
   bufferlist orig;
-  int fd = ::open("bin/ceph-osd", O_RDONLY);
+  int fd = ::open("bin/stone-osd", O_RDONLY);
   struct stat st;
   ::fstat(fd, &st);
   orig.read_fd(fd, st.st_size);
@@ -165,7 +165,7 @@ TEST_P(CompressorTest, round_trip_osdmap)
 {
 #include "osdmaps/osdmap.2982809.h"
 
-  auto compressor = Compressor::create(g_ceph_context, plugin);
+  auto compressor = Compressor::create(g_stone_context, plugin);
   bufferlist orig;
   orig.append((char*)osdmap_a, sizeof(osdmap_a));
   cout << "orig length " << orig.length() << std::endl;
@@ -173,7 +173,7 @@ TEST_P(CompressorTest, round_trip_osdmap)
   OSDMap *o = new OSDMap;
   o->decode(orig);
   bufferlist fbl;
-  o->encode(fbl, o->get_encoding_features() | CEPH_FEATURE_RESERVED);
+  o->encode(fbl, o->get_encoding_features() | STONE_FEATURE_RESERVED);
   ASSERT_TRUE(fbl.contents_equal(orig));
   for (int j = 0; j < 3; j++) {
     bufferlist chunk;
@@ -391,15 +391,15 @@ INSTANTIATE_TEST_SUITE_P(
 TEST(ZlibCompressor, zlib_isal_compatibility)
 {
   g_conf().set_val("compressor_zlib_isal", "true");
-  g_ceph_context->_conf.apply_changes(nullptr);
-  CompressorRef isal = Compressor::create(g_ceph_context, "zlib");
+  g_stone_context->_conf.apply_changes(nullptr);
+  CompressorRef isal = Compressor::create(g_stone_context, "zlib");
   if (!isal) {
     // skip the test if the plugin is not ready
     return;
   }
   g_conf().set_val("compressor_zlib_isal", "false");
-  g_ceph_context->_conf.apply_changes(nullptr);
-  CompressorRef zlib = Compressor::create(g_ceph_context, "zlib");
+  g_stone_context->_conf.apply_changes(nullptr);
+  CompressorRef zlib = Compressor::create(g_stone_context, "zlib");
   char test[101];
   srand(time(0));
   for (int i=0; i<100; ++i)
@@ -434,7 +434,7 @@ TEST(ZlibCompressor, zlib_isal_compatibility)
 TEST(CompressionPlugin, all)
 {
   CompressorRef compressor;
-  PluginRegistry *reg = g_ceph_context->get_plugin_registry();
+  PluginRegistry *reg = g_stone_context->get_plugin_registry();
   EXPECT_TRUE(reg);
   CompressionPlugin *factory = dynamic_cast<CompressionPlugin*>(reg->get_with_load("compressor", "invalid"));
   EXPECT_FALSE(factory);
@@ -456,15 +456,15 @@ TEST(CompressionPlugin, all)
 TEST(ZlibCompressor, isal_compress_zlib_decompress_random)
 {
   g_conf().set_val("compressor_zlib_isal", "true");
-  g_ceph_context->_conf.apply_changes(nullptr);
-  CompressorRef isal = Compressor::create(g_ceph_context, "zlib");
+  g_stone_context->_conf.apply_changes(nullptr);
+  CompressorRef isal = Compressor::create(g_stone_context, "zlib");
   if (!isal) {
     // skip the test if the plugin is not ready
     return;
   }
   g_conf().set_val("compressor_zlib_isal", "false");
-  g_ceph_context->_conf.apply_changes(nullptr);
-  CompressorRef zlib = Compressor::create(g_ceph_context, "zlib");
+  g_stone_context->_conf.apply_changes(nullptr);
+  CompressorRef zlib = Compressor::create(g_stone_context, "zlib");
 
   for (int cnt=0; cnt<100; cnt++)
   {
@@ -493,15 +493,15 @@ TEST(ZlibCompressor, isal_compress_zlib_decompress_random)
 TEST(ZlibCompressor, isal_compress_zlib_decompress_walk)
 {
   g_conf().set_val("compressor_zlib_isal", "true");
-  g_ceph_context->_conf.apply_changes(nullptr);
-  CompressorRef isal = Compressor::create(g_ceph_context, "zlib");
+  g_stone_context->_conf.apply_changes(nullptr);
+  CompressorRef isal = Compressor::create(g_stone_context, "zlib");
   if (!isal) {
     // skip the test if the plugin is not ready
     return;
   }
   g_conf().set_val("compressor_zlib_isal", "false");
-  g_ceph_context->_conf.apply_changes(nullptr);
-  CompressorRef zlib = Compressor::create(g_ceph_context, "zlib");
+  g_stone_context->_conf.apply_changes(nullptr);
+  CompressorRef zlib = Compressor::create(g_stone_context, "zlib");
 
   for (int cnt=0; cnt<100; cnt++)
   {
@@ -541,9 +541,9 @@ TEST(QAT, enc_qat_dec_noqat) {
 #endif
   for (auto alg : alg_collection) {
     g_conf().set_val("qat_compressor_enabled", "true");
-    CompressorRef q = Compressor::create(g_ceph_context, alg);
+    CompressorRef q = Compressor::create(g_stone_context, alg);
     g_conf().set_val("qat_compressor_enabled", "false");
-    CompressorRef noq = Compressor::create(g_ceph_context, alg);
+    CompressorRef noq = Compressor::create(g_stone_context, alg);
 
     // generate random buffer
     for (int cnt=0; cnt<100; cnt++) {
@@ -578,9 +578,9 @@ TEST(QAT, enc_noqat_dec_qat) {
 #endif
   for (auto alg : alg_collection) {
     g_conf().set_val("qat_compressor_enabled", "true");
-    CompressorRef q = Compressor::create(g_ceph_context, alg);
+    CompressorRef q = Compressor::create(g_stone_context, alg);
     g_conf().set_val("qat_compressor_enabled", "false");
-    CompressorRef noq = Compressor::create(g_ceph_context, alg);
+    CompressorRef noq = Compressor::create(g_stone_context, alg);
 
     // generate random buffer
     for (int cnt=0; cnt<100; cnt++) {

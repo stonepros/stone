@@ -1,12 +1,12 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - missing required features
 tasks:
 - exec:
     mon.a:
-      - ceph fs dump --format=json-pretty
-      - ceph fs required_client_features cephfs add metric_collect
+      - stone fs dump --format=json-pretty
+      - stone fs required_client_features stonefs add metric_collect
 - sleep:
     duration: 5
 - fs.clients_evicted:

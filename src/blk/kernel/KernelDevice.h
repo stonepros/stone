@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_BLK_KERNELDEVICE_H
-#define CEPH_BLK_KERNELDEVICE_H
+#ifndef STONE_BLK_KERNELDEVICE_H
+#define STONE_BLK_KERNELDEVICE_H
 
 #include <atomic>
 
@@ -25,7 +25,7 @@
 #include "aio/aio.h"
 #include "BlockDevice.h"
 
-#define RW_IO_MAX (INT_MAX & CEPH_PAGE_MASK)
+#define RW_IO_MAX (INT_MAX & STONE_PAGE_MASK)
 
 
 class KernelDevice : public BlockDevice {
@@ -109,7 +109,7 @@ class KernelDevice : public BlockDevice {
   int choose_fd(bool buffered, int write_hint) const;
 
 public:
-  KernelDevice(CephContext* cct, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv);
+  KernelDevice(StoneeContext* cct, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv);
 
   void aio_submit(IOContext *ioc) override;
   void discard_drain() override;

@@ -4,8 +4,8 @@
 #include "test/librados_test_stub/TestRadosClient.h"
 #include "test/librados_test_stub/TestIoCtxImpl.h"
 #include "librados/AioCompletionImpl.h"
-#include "include/ceph_assert.h"
-#include "common/ceph_json.h"
+#include "include/stone_assert.h"
+#include "common/stone_json.h"
 #include "common/Finisher.h"
 #include "common/async/context_pool.h"
 #include <boost/lexical_cast.hpp>
@@ -97,11 +97,11 @@ private:
   AioCompletionImpl *m_comp;
 };
 
-TestRadosClient::TestRadosClient(CephContext *cct,
+TestRadosClient::TestRadosClient(StoneContext *cct,
                                  TestWatchNotify *watch_notify)
   : m_cct(cct->get()), m_watch_notify(watch_notify),
     m_aio_finisher(new Finisher(m_cct)),
-    m_io_context_pool(std::make_unique<ceph::async::io_context_pool>())
+    m_io_context_pool(std::make_unique<stone::async::io_context_pool>())
 {
   get();
 
@@ -166,7 +166,7 @@ void TestRadosClient::put() {
   }
 }
 
-CephContext *TestRadosClient::cct() {
+StoneContext *TestRadosClient::cct() {
   return m_cct;
 }
 

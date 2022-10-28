@@ -58,15 +58,15 @@ struct TestMockWatcherRewatchRequest : public TestMockFixture {
 
   struct WatchCtx : public librados::WatchCtx2 {
     void handle_notify(uint64_t, uint64_t, uint64_t,
-                               ceph::bufferlist&) override {
-      ceph_abort();
+                               stone::bufferlist&) override {
+      stone_abort();
     }
     void handle_error(uint64_t, int) override {
-      ceph_abort();
+      stone_abort();
     }
   };
 
-  ceph::shared_mutex m_watch_lock = ceph::make_shared_mutex("watch_lock");
+  stone::shared_mutex m_watch_lock = stone::make_shared_mutex("watch_lock");
   WatchCtx m_watch_ctx;
   uint64_t m_watch_handle = 123;
 };

@@ -12,7 +12,7 @@
 #include "tools/immutable_object_cache/CacheClient.h"
 #include "tools/immutable_object_cache/CacheServer.h"
 
-using namespace ceph::immutable_obj_cache;
+using namespace stone::immutable_obj_cache;
 
 class TestMultiSession : public ::testing::Test {
 public:
@@ -25,7 +25,7 @@ public:
   std::atomic<uint64_t> m_recv_ack_index;
   uint64_t m_session_num = 110;
 
-  TestMultiSession() : m_local_path("/tmp/ceph_test_multisession_socket"),
+  TestMultiSession() : m_local_path("/tmp/stone_test_multisession_socket"),
                        m_cache_server_thread(nullptr),  m_send_request_index(0),
                        m_recv_ack_index(0) {
     m_cache_client_vec.resize(m_session_num + 1, nullptr);
@@ -38,7 +38,7 @@ public:
 
   void SetUp() override {
     std::remove(m_local_path.c_str());
-    m_cache_server = new CacheServer(g_ceph_context, m_local_path,
+    m_cache_server = new CacheServer(g_stone_context, m_local_path,
       [this](CacheSession* session_id, ObjectCacheRequest* req){
         server_handle_request(session_id, req);
     });
@@ -74,7 +74,7 @@ public:
   }
 
   CacheClient* create_session(uint64_t random_index) {
-     CacheClient* cache_client = new CacheClient(m_local_path, g_ceph_context);
+     CacheClient* cache_client = new CacheClient(m_local_path, g_stone_context);
      cache_client->run();
      while (true) {
        if (0 == cache_client->connect()) {

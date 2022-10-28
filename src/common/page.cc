@@ -4,7 +4,7 @@
 #include <windows.h>
 #endif
 
-namespace ceph {
+namespace stone {
 
   // page size crap, see page.h
   int _get_bits_of(int v) {

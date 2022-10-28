@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MDS_H
-#define CEPH_MDS_H
+#ifndef STONE_MDS_H
+#define STONE_MDS_H
 
 #include <string_view>
 
@@ -36,7 +36,7 @@
 #include "MDSMap.h"
 #include "MDSRank.h"
 
-#define CEPH_MDS_PROTOCOL    36 /* cluster internal */
+#define STONE_MDS_PROTOCOL    36 /* cluster internal */
 
 class Messenger;
 class MonClient;

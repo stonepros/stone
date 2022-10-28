@@ -13,8 +13,8 @@
 #include "ScrubStore.h"
 #include "scrub_machine_lstnr.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_osd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix *_dout << " scrubberFSM "
 
@@ -55,7 +55,7 @@ std::string ScrubMachine::current_states_desc() const
 
 void ScrubMachine::assert_not_active() const
 {
-  ceph_assert(state_cast<const NotActive*>());
+  stone_assert(state_cast<const NotActive*>());
 }
 
 bool ScrubMachine::is_reserving() const
@@ -66,7 +66,7 @@ bool ScrubMachine::is_reserving() const
 bool ScrubMachine::is_accepting_updates() const
 {
   DECLARE_LOCALS;  // 'scrbr' & 'pg_id' aliases
-  ceph_assert(scrbr->is_primary());
+  stone_assert(scrbr->is_primary());
 
   return state_cast<const WaitLastUpdate*>();
 }

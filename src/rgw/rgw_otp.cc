@@ -9,7 +9,7 @@
 
 #include "common/errno.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "rgw_otp.h"
 #include "rgw_zone.h"
 #include "rgw_metadata.h"
@@ -25,7 +25,7 @@
 #include "services/svc_meta_be_otp.h"
 #include "services/svc_otp.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 using namespace std;
 
@@ -80,7 +80,7 @@ class RGWOTPMetadataHandler : public RGWOTPMetadataHandlerBase {
     });
   }
 
-  RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const ceph::real_time& mtime) override {
+  RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const stone::real_time& mtime) override {
     otp_devices_list_t devices;
     try {
       JSONDecoder::decode_json("devices", devices, jo);

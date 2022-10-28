@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_MSG_EVENTSELECT_H
-#define CEPH_MSG_EVENTSELECT_H
+#ifndef STONE_MSG_EVENTSELECT_H
+#define STONE_MSG_EVENTSELECT_H
 
 #include "Event.h"
 
@@ -25,10 +25,10 @@ class SelectDriver : public EventDriver {
    * FD sets after select(). */
   fd_set _rfds, _wfds;
   int max_fd;
-  CephContext *cct;
+  StoneeContext *cct;
 
  public:
-  explicit SelectDriver(CephContext *c): max_fd(0), cct(c) {}
+  explicit SelectDriver(StoneeContext *c): max_fd(0), cct(c) {}
   ~SelectDriver() override {}
 
   int init(EventCenter *c, int nevent) override;

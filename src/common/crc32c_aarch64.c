@@ -90,14 +90,14 @@ asm(".arch_extension crypto");
 	PREF4X64L2((PREF_OFFSET), 12)
 
 
-uint32_t ceph_crc32c_aarch64(uint32_t crc, unsigned char const *buffer, unsigned len)
+uint32_t stone_crc32c_aarch64(uint32_t crc, unsigned char const *buffer, unsigned len)
 {
 	int64_t length = len;
 	uint32_t crc0, crc1, crc2;
 
 	if (buffer) {
 #ifdef HAVE_ARMV8_CRYPTO
-	        if (ceph_arch_aarch64_pmull) {
+	        if (stone_arch_aarch64_pmull) {
 #ifdef HAVE_ARMV8_CRC_CRYPTO_INTRINSICS
 		/* Calculate reflected crc with PMULL Instruction */
 		const poly64_t k1 = 0xe417f38a, k2 = 0x8f158014;
@@ -205,7 +205,7 @@ uint32_t ceph_crc32c_aarch64(uint32_t crc, unsigned char const *buffer, unsigned
 			CRC32CB(crc, *buffer);
 	} else {
 #ifdef HAVE_ARMV8_CRYPTO
-	        if (ceph_arch_aarch64_pmull) {
+	        if (stone_arch_aarch64_pmull) {
 #ifdef HAVE_ARMV8_CRC_CRYPTO_INTRINSICS
 		const poly64_t k1 = 0xe417f38a;
 		uint64_t t0;

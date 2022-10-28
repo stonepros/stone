@@ -1,5 +1,5 @@
-#ifndef CEPH_UNORDERED_SET_H
-#define CEPH_UNORDERED_SET_H
+#ifndef STONE_UNORDERED_SET_H
+#define STONE_UNORDERED_SET_H
 
 #include <unordered_set>
 

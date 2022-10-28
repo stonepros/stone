@@ -8,7 +8,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 }
 
@@ -235,7 +235,7 @@ SegmentCleaner::do_deferred_work_ret SegmentCleaner::do_deferred_work(
 {
   return do_deferred_work_ret(
     do_deferred_work_ertr::ready_future_marker{},
-    ceph::timespan());
+    stone::timespan());
 }
 
 SegmentCleaner::rewrite_dirty_ret SegmentCleaner::rewrite_dirty(

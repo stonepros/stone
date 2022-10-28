@@ -2,14 +2,14 @@
 os_type: ubuntu
 tasks:
 - install:
-- ceph:
+- stone:
 - rgw: [client.0]
 - workunit:
     clients:
       client.0:
         - rgw/s3_user_quota.pl
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         rgw relaxed s3 bucket names: true

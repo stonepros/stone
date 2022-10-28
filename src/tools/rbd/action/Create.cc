@@ -4,7 +4,7 @@
 #include "tools/rbd/ArgumentTypes.h"
 #include "tools/rbd/Shell.h"
 #include "tools/rbd/Utils.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/config_proxy.h"
 #include "common/errno.h"
 #include "global/global_context.h"
@@ -38,8 +38,8 @@ void thick_provision_writer_completion(rbd_completion_t, void *);
 
 struct thick_provision_writer {
   librbd::Image *image;
-  ceph::mutex lock = ceph::make_mutex("thick_provision_writer::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("thick_provision_writer::lock");
+  stone::condition_variable cond;
   uint64_t chunk_size;
   uint64_t concurr;
   struct {
@@ -53,11 +53,11 @@ struct thick_provision_writer {
   {
     // If error cases occur, the code is aborted, because
     // constructor cannot return error value.
-    ceph_assert(g_ceph_context != nullptr);
+    stone_assert(g_stone_context != nullptr);
 
     librbd::image_info_t info;
     int r = image->stat(info, sizeof(info));
-    ceph_assert(r >= 0);
+    stone_assert(r >= 0);
 
     uint64_t order = info.order;
     if (order == 0) {
@@ -180,9 +180,9 @@ int thick_write(const std::string &image_name,librados::IoCtx &io_ctx,
 
   // To prevent writesame from discarding data, thick_write sets
   // the rbd_discard_on_zeroed_write_same option to false.
-  ceph_assert(g_ceph_context != nullptr);
+  stone_assert(g_stone_context != nullptr);
   r = g_conf().set_val("rbd_discard_on_zeroed_write_same", "false");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = utils::open_image(io_ctx, image_name, false, &image);
   if (r < 0) {
     return r;
@@ -196,7 +196,7 @@ int thick_write(const std::string &image_name,librados::IoCtx &io_ctx,
 }
 
 int execute(const po::variables_map &vm,
-            const std::vector<std::string> &ceph_global_init_args) {
+            const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;

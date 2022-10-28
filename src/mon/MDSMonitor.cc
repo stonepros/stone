@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -33,7 +33,7 @@
 #include "messages/MMonCommand.h"
 #include "messages/MGenericMessage.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/str_list.h"
 #include "include/stringify.h"
 #include "mds/mdstypes.h"
@@ -56,18 +56,18 @@ using std::stringstream;
 using std::to_string;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::ErasureCodeInterfaceRef;
-using ceph::ErasureCodeProfile;
-using ceph::Formatter;
-using ceph::JSONFormatter;
-using ceph::make_message;
-using ceph::mono_clock;
-using ceph::mono_time;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::ErasureCodeInterfaceRef;
+using stone::ErasureCodeProfile;
+using stone::Formatter;
+using stone::JSONFormatter;
+using stone::make_message;
+using stone::mono_clock;
+using stone::mono_time;
 
-#define dout_subsys ceph_subsys_mon
+#define dout_subsys stone_subsys_mon
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, mon, get_fsmap())
 static ostream& _prefix(std::ostream *_dout, Monitor &mon, const FSMap& fsmap) {
@@ -134,7 +134,7 @@ void MDSMonitor::update_from_paxos(bool *need_bootstrap)
 
   dout(10) << __func__ << " version " << version
 	   << ", my e " << get_fsmap().epoch << dendl;
-  ceph_assert(version > get_fsmap().epoch);
+  stone_assert(version > get_fsmap().epoch);
 
   load_health();
 
@@ -142,13 +142,13 @@ void MDSMonitor::update_from_paxos(bool *need_bootstrap)
   bufferlist fsmap_bl;
   fsmap_bl.clear();
   int err = get_version(version, fsmap_bl);
-  ceph_assert(err == 0);
+  stone_assert(err == 0);
 
-  ceph_assert(fsmap_bl.length() > 0);
+  stone_assert(fsmap_bl.length() > 0);
   dout(10) << __func__ << " got " << version << dendl;
   try {
     PaxosFSMap::decode(fsmap_bl);
-  } catch (const ceph::buffer::malformed_input& e) {
+  } catch (const stone::buffer::malformed_input& e) {
     derr << "unable to decode FSMap: " << e.what() << dendl;
     throw;
   }
@@ -196,12 +196,12 @@ void MDSMonitor::encode_pending(MonitorDBStore::TransactionRef t)
   // Set 'modified' on maps modified this epoch
   for (auto &p : pending.filesystems) {
     if (p.second->mds_map.epoch == epoch) {
-      p.second->mds_map.modified = ceph_clock_now();
+      p.second->mds_map.modified = stone_clock_now();
     }
   }
 
   // apply to paxos
-  ceph_assert(get_last_committed() + 1 == pending.epoch);
+  stone_assert(get_last_committed() + 1 == pending.epoch);
   bufferlist pending_bl;
   pending.encode(pending_bl, mon.get_quorum_con_features());
 
@@ -337,7 +337,7 @@ bool MDSMonitor::preprocess_query(MonOpRequestRef op)
     return preprocess_offload_targets(op);
 
   default:
-    ceph_abort();
+    stone_abort();
     return true;
   }
 }
@@ -400,7 +400,7 @@ bool MDSMonitor::preprocess_beacon(MonOpRequestRef op)
   if (!fsmap.gid_exists(gid)) {
     if (state != MDSMap::STATE_BOOT) {
       dout(7) << "mds_beacon " << *m << " is not in fsmap (state "
-              << ceph_mds_state_name(state) << ")" << dendl;
+              << stone_mds_state_name(state) << ")" << dendl;
 
       /* We can't send an MDSMap this MDS was a part of because we no longer
        * know which FS it was part of. Nor does this matter. Sending an empty
@@ -488,12 +488,12 @@ bool MDSMonitor::preprocess_beacon(MonOpRequestRef op)
 
  reply:
   // note time and reply
-  ceph_assert(effective_epoch > 0);
+  stone_assert(effective_epoch > 0);
   _note_beacon(m);
   {
     auto beacon = make_message<MMDSBeacon>(mon.monmap->fsid,
         m->get_global_id(), m->get_name(), effective_epoch,
-        state, seq, CEPH_FEATURES_SUPPORTED_DEFAULT);
+        state, seq, STONE_FEATURES_SUPPORTED_DEFAULT);
     mon.send_reply(op, beacon.detach());
   }
   return true;
@@ -558,7 +558,7 @@ bool MDSMonitor::prepare_update(MonOpRequestRef op)
     return prepare_offload_targets(op);
   
   default:
-    ceph_abort();
+    stone_abort();
   }
 
   return true;
@@ -630,7 +630,7 @@ bool MDSMonitor::prepare_beacon(MonOpRequestRef op)
         failed_mds = true;
       }
       if (failed_mds) {
-        ceph_assert(mon.osdmon()->is_writeable());
+        stone_assert(mon.osdmon()->is_writeable());
         request_proposal(mon.osdmon());
       }
     }
@@ -668,7 +668,7 @@ bool MDSMonitor::prepare_beacon(MonOpRequestRef op)
     if (!pending.gid_exists(gid)) {
       /* gid has been removed from pending, send null map */
       dout(5) << "mds_beacon " << *m << " is not in fsmap (state "
-              << ceph_mds_state_name(state) << ")" << dendl;
+              << stone_mds_state_name(state) << ")" << dendl;
 
       /* We can't send an MDSMap this MDS was a part of because we no longer
        * know which FS it was part of. Nor does this matter. Sending an empty
@@ -695,15 +695,15 @@ bool MDSMonitor::prepare_beacon(MonOpRequestRef op)
     if ((info.state == MDSMap::STATE_STANDBY && state > 0) ||
         (info.state == MDSMap::STATE_STANDBY_REPLAY && state > 0 && state != MDSMap::STATE_DAMAGED)) {
       /* N.B.: standby-replay can indicate the rank is damaged due to failure to replay */
-      dout(10) << "mds_beacon mds can't activate itself (" << ceph_mds_state_name(info.state)
-	       << " -> " << ceph_mds_state_name(state) << ")" << dendl;
+      dout(10) << "mds_beacon mds can't activate itself (" << stone_mds_state_name(info.state)
+	       << " -> " << stone_mds_state_name(state) << ")" << dendl;
       goto evict;
     } else if ((state == MDSMap::STATE_STANDBY || state == MDSMap::STATE_STANDBY_REPLAY)
         && info.rank != MDS_RANK_NONE)
     {
       dout(4) << "mds_beacon MDS can't go back into standby after taking rank: "
                  "held rank " << info.rank << " while requesting state "
-              << ceph_mds_state_name(state) << dendl;
+              << stone_mds_state_name(state) << dendl;
       goto evict;
     } else if (info.state == MDSMap::STATE_STOPPING &&
         state != MDSMap::STATE_STOPPING &&
@@ -724,8 +724,8 @@ bool MDSMonitor::prepare_beacon(MonOpRequestRef op)
     }
 
     dout(5)  << "prepare_beacon mds." << info.rank
-	     << " " << ceph_mds_state_name(info.state)
-	     << " -> " << ceph_mds_state_name(state)
+	     << " " << stone_mds_state_name(info.state)
+	     << " -> " << stone_mds_state_name(state)
 	     << dendl;
 
     fs_cluster_id_t fscid = FS_CLUSTER_ID_NONE;
@@ -777,9 +777,9 @@ bool MDSMonitor::prepare_beacon(MonOpRequestRef op)
       auto rankinfo = pending.get_info_gid(rankgid);
       auto followergid = fs->mds_map.get_standby_replay(rank);
 
-      ceph_assert(gid == rankgid || gid == followergid);
+      stone_assert(gid == rankgid || gid == followergid);
 
-      utime_t until = ceph_clock_now();
+      utime_t until = stone_clock_now();
       until += g_conf().get_val<double>("mon_mds_blocklist_interval");
       const auto blocklist_epoch = mon.osdmon()->blocklist(rankinfo.addrs, until);
       if (followergid != MDS_GID_NONE) {
@@ -798,15 +798,15 @@ bool MDSMonitor::prepare_beacon(MonOpRequestRef op)
       // Standby daemons should never modify their own
       // state.  Reject any attempts to do so.
       derr << "standby " << gid << " attempted to change state to "
-           << ceph_mds_state_name(state) << ", rejecting" << dendl;
+           << stone_mds_state_name(state) << ", rejecting" << dendl;
       goto evict;
     } else if (info.state != MDSMap::STATE_STANDBY && state != info.state &&
                !MDSMap::state_transition_valid(info.state, state)) {
       // Validate state transitions for daemons that hold a rank
       derr << "daemon " << gid << " (rank " << info.rank << ") "
            << "reported invalid state transition "
-           << ceph_mds_state_name(info.state) << " -> "
-           << ceph_mds_state_name(state) << dendl;
+           << stone_mds_state_name(info.state) << " -> "
+           << stone_mds_state_name(state) << dendl;
       goto evict;
     } else {
       if (info.state != MDSMap::STATE_ACTIVE && state == MDSMap::STATE_ACTIVE) {
@@ -899,7 +899,7 @@ void MDSMonitor::_updated(MonOpRequestRef op)
   dout(10) << "_updated " << m->get_orig_source() << " " << *m << dendl;
   mon.clog->debug() << m->get_orig_source() << " "
 		     << m->get_orig_source_addrs() << " "
-		     << ceph_mds_state_name(m->get_state());
+		     << stone_mds_state_name(m->get_state());
 
   if (m->get_state() == MDSMap::STATE_STOPPED) {
     // send the map manually (they're out of the map, so they won't get it automatic)
@@ -908,7 +908,7 @@ void MDSMonitor::_updated(MonOpRequestRef op)
   } else {
     auto beacon = make_message<MMDSBeacon>(mon.monmap->fsid,
         m->get_global_id(), m->get_name(), fsmap.get_epoch(),
-        m->get_state(), m->get_seq(), CEPH_FEATURES_SUPPORTED_DEFAULT);
+        m->get_state(), m->get_seq(), STONE_FEATURES_SUPPORTED_DEFAULT);
     mon.send_reply(op, beacon.detach());
   }
 }
@@ -1040,8 +1040,8 @@ bool MDSMonitor::preprocess_command(MonOpRequestRef op)
 	r = -ENOENT;
         goto out;
       } else {
-	ceph_assert(err == 0);
-	ceph_assert(b.length());
+	stone_assert(err == 0);
+	stone_assert(b.length());
 	dummy.decode(b);
         fsmapp = &dummy;
       }
@@ -1105,7 +1105,7 @@ bool MDSMonitor::preprocess_command(MonOpRequestRef op)
   } else if (prefix == "mds versions") {
     if (!f)
       f.reset(Formatter::create("json-pretty"));
-    count_metadata("ceph_version", f.get());
+    count_metadata("stone_version", f.get());
     f->flush(ds);
     r = 0;
   } else if (prefix == "mds count-metadata") {
@@ -1218,18 +1218,18 @@ bool MDSMonitor::preprocess_command(MonOpRequestRef op)
     r = 0;
   } else if (prefix == "fs feature ls") {
     if (f) {
-      f->open_array_section("cephfs_features");
-      for (size_t i = 0; i <= CEPHFS_FEATURE_MAX; ++i) {
+      f->open_array_section("stonefs_features");
+      for (size_t i = 0; i <= STONEFS_FEATURE_MAX; ++i) {
 	f->open_object_section("feature");
 	f->dump_int("index", i);
-	f->dump_string("name", cephfs_feature_name(i));
+	f->dump_string("name", stonefs_feature_name(i));
 	f->close_section();
       }
       f->close_section();
       f->flush(ds);
     } else {
-      for (size_t i = 0; i <= CEPHFS_FEATURE_MAX; ++i) {
-        ds << i << " " << cephfs_feature_name(i) << std::endl;
+      for (size_t i = 0; i <= STONEFS_FEATURE_MAX; ++i) {
+        ds << i << " " << stonefs_feature_name(i) << std::endl;
       }
     }
     r = 0;
@@ -1251,11 +1251,11 @@ bool MDSMonitor::fail_mds_gid(FSMap &fsmap, mds_gid_t gid)
   const auto& info = fsmap.get_info_gid(gid);
   dout(1) << "fail_mds_gid " << gid << " mds." << info.name << " role " << info.rank << dendl;
 
-  ceph_assert(mon.osdmon()->is_writeable());
+  stone_assert(mon.osdmon()->is_writeable());
 
   epoch_t blocklist_epoch = 0;
   if (info.rank >= 0 && info.state != MDSMap::STATE_STANDBY_REPLAY) {
-    utime_t until = ceph_clock_now();
+    utime_t until = stone_clock_now();
     until += g_conf().get_val<double>("mon_mds_blocklist_interval");
     blocklist_epoch = mon.osdmon()->blocklist(info.addrs, until);
   }
@@ -1279,7 +1279,7 @@ mds_gid_t MDSMonitor::gid_from_arg(const FSMap &fsmap, const std::string &arg, s
   if (r == 0) {
     // See if a GID is assigned to this role
     const auto &fs = fsmap.get_filesystem(role.fscid);
-    ceph_assert(fs != nullptr);  // parse_role ensures it exists
+    stone_assert(fs != nullptr);  // parse_role ensures it exists
     if (fs->mds_map.is_up(role.rank)) {
       dout(10) << __func__ << ": validated rank/GID " << role
                << " as a rank" << dendl;
@@ -1319,7 +1319,7 @@ mds_gid_t MDSMonitor::gid_from_arg(const FSMap &fsmap, const std::string &arg, s
 int MDSMonitor::fail_mds(FSMap &fsmap, std::ostream &ss,
     const std::string &arg, MDSMap::mds_info_t *failed_info)
 {
-  ceph_assert(failed_info != nullptr);
+  stone_assert(failed_info != nullptr);
 
   mds_gid_t gid = gid_from_arg(fsmap, arg, ss);
   if (gid == MDS_GID_NONE) {
@@ -1335,7 +1335,7 @@ int MDSMonitor::fail_mds(FSMap &fsmap, std::ostream &ss,
 
   fail_mds_gid(fsmap, gid);
   ss << "failed mds gid " << gid;
-  ceph_assert(mon.osdmon()->is_writeable());
+  stone_assert(mon.osdmon()->is_writeable());
   request_proposal(mon.osdmon());
   return 0;
 }
@@ -1468,7 +1468,7 @@ int MDSMonitor::filesystem_command(
         info.state = state;
       });
       ss << "set mds gid " << gid << " to state " << state << " "
-         << ceph_mds_state_name(state);
+         << stone_mds_state_name(state);
       return 0;
     }
   } else if (prefix == "mds fail") {
@@ -1781,7 +1781,7 @@ void MDSMonitor::check_sub(Subscription *sub)
     MDSMap null_map = MDSMap::create_null_mdsmap();
     if (fscid == FS_CLUSTER_ID_NONE) {
       // For a client, we should have already dropped out
-      ceph_assert(is_mds);
+      stone_assert(is_mds);
 
       auto it = fsmap.standby_daemons.find(mds_gid);
       if (it != fsmap.standby_daemons.end()) {
@@ -1797,7 +1797,7 @@ void MDSMonitor::check_sub(Subscription *sub)
       mds_map = &fsmap.get_filesystem(fscid)->mds_map;
     }
 
-    ceph_assert(mds_map != nullptr);
+    stone_assert(mds_map != nullptr);
     dout(10) << __func__ << " selected MDS map epoch " <<
       mds_map->epoch << " for namespace " << fscid << " for subscriber "
       << sub->session->name << " who wants epoch " << sub->next << dendl;
@@ -1861,7 +1861,7 @@ int MDSMonitor::load_metadata(map<mds_gid_t, Metadata>& m)
   }
 
   auto it = bl.cbegin();
-  ceph::decode(m, it);
+  stone::decode(m, it);
   return 0;
 }
 
@@ -1898,7 +1898,7 @@ void MDSMonitor::get_versions(std::map<string, list<string> > &versions)
   std::map<mds_gid_t, mds_info_t> map = fsmap.get_mds_info();
   dout(10) << __func__ << " mds meta=" << meta << dendl;
   for (auto& p : meta) {
-    auto q = p.second.find("ceph_version_short");
+    auto q = p.second.find("stone_version_short");
     if (q == p.second.end()) continue;
     versions[q->second].push_back(string("mds.") + map[p.first].name);
   }
@@ -1907,7 +1907,7 @@ void MDSMonitor::get_versions(std::map<string, list<string> > &versions)
 int MDSMonitor::dump_metadata(const FSMap& fsmap, const std::string &who,
     Formatter *f, ostream& err)
 {
-  ceph_assert(f);
+  stone_assert(f);
 
   mds_gid_t gid = gid_from_arg(fsmap, who, err);
   if (gid == MDS_GID_NONE) {
@@ -1932,7 +1932,7 @@ int MDSMonitor::dump_metadata(const FSMap& fsmap, const std::string &who,
 
 int MDSMonitor::print_nodes(Formatter *f)
 {
-  ceph_assert(f);
+  stone_assert(f);
 
   const auto &fsmap = get_fsmap();
 
@@ -1988,7 +1988,7 @@ bool MDSMonitor::maybe_resize_cluster(FSMap &fsmap, fs_cluster_id_t fscid)
     return false;
   }
 
-  if (in < max && !mds_map.test_flag(CEPH_MDSMAP_NOT_JOINABLE)) {
+  if (in < max && !mds_map.test_flag(STONE_MDSMAP_NOT_JOINABLE)) {
     mds_rank_t mds = mds_rank_t(0);
     while (mds_map.is_in(mds)) {
       mds++;
@@ -2032,7 +2032,7 @@ bool MDSMonitor::maybe_resize_cluster(FSMap &fsmap, fs_cluster_id_t fscid)
  */
 bool MDSMonitor::drop_mds(FSMap &fsmap, mds_gid_t gid, const mds_info_t* rep_info, bool *osd_propose)
 {
-  ceph_assert(osd_propose != nullptr);
+  stone_assert(osd_propose != nullptr);
 
   const auto fscid = fsmap.mds_roles.at(gid);
   const auto& info = fsmap.get_info_gid(gid);
@@ -2045,20 +2045,20 @@ bool MDSMonitor::drop_mds(FSMap &fsmap, mds_gid_t gid, const mds_info_t* rep_inf
              state == MDSMap::STATE_STANDBY) {
     dout(1)  << " failing and removing standby " << gid << " " << info.addrs
 	     << " mds." << rank
-	     << "." << info.inc << " " << ceph_mds_state_name(state)
+	     << "." << info.inc << " " << stone_mds_state_name(state)
 	     << dendl;
     *osd_propose |= fail_mds_gid(fsmap, gid);
     return true;
   } else if (rank >= 0 && rep_info) {
     auto fs = fsmap.filesystems.at(fscid);
-    if (fs->mds_map.test_flag(CEPH_MDSMAP_NOT_JOINABLE)) {
+    if (fs->mds_map.test_flag(STONE_MDSMAP_NOT_JOINABLE)) {
       return false;
     }
     // are we in?
     // and is there a non-laggy standby that can take over for us?
     dout(1)  << " replacing " << gid << " " << info.addrs
 	     << " mds." << rank << "." << info.inc
-	     << " " << ceph_mds_state_name(state)
+	     << " " << stone_mds_state_name(state)
 	     << " with " << rep_info->global_id << "/" << rep_info->name << " " << rep_info->addrs
 	     << dendl;
 
@@ -2144,7 +2144,7 @@ bool MDSMonitor::check_health(FSMap& fsmap, bool* propose_osdmap)
       auto& info = fsmap.get_info_gid(gid);
       dout(1) << "no beacon from mds." << info.rank << "." << info.inc
               << " (gid: " << gid << " addr: " << info.addrs
-              << " state: " << ceph_mds_state_name(info.state) << ")"
+              << " state: " << stone_mds_state_name(info.state) << ")"
               << " since " << since_last.count() << dendl;
       if ((mon_down || new_quorum) && since_last < mds_beacon_mon_down_grace) {
         /* The MDS may be sending beacons to a monitor not yet in quorum or
@@ -2159,10 +2159,10 @@ bool MDSMonitor::check_health(FSMap& fsmap, bool* propose_osdmap)
       if (!info.laggy()) {
         dout(1)  << " marking " << gid << " " << info.addrs
 	         << " mds." << info.rank << "." << info.inc
-	         << " " << ceph_mds_state_name(info.state)
+	         << " " << stone_mds_state_name(info.state)
 	         << " laggy" << dendl;
         fsmap.modify_daemon(info.global_id, [](auto& info) {
-            info.laggy_since = ceph_clock_now();
+            info.laggy_since = stone_clock_now();
         });
         do_propose = true;
       }
@@ -2191,7 +2191,7 @@ bool MDSMonitor::check_health(FSMap& fsmap, bool* propose_osdmap)
 
   if (osdmap_writeable) {
     for (auto& [fscid, fs] : fsmap.filesystems) {
-      if (!fs->mds_map.test_flag(CEPH_MDSMAP_NOT_JOINABLE) &&
+      if (!fs->mds_map.test_flag(STONE_MDSMAP_NOT_JOINABLE) &&
           fs->mds_map.is_resizeable()) {
         // Check if a rank or standby-replay should be replaced with a stronger
         // affinity standby. This looks at ranks and standby-replay:
@@ -2208,7 +2208,7 @@ bool MDSMonitor::check_health(FSMap& fsmap, bool* propose_osdmap)
             rep_info = fsmap.find_replacement_for({fscid, rank});
           } else {
             /* N.B. !is_degraded() */
-            ceph_abort_msg("invalid state in MDSMap");
+            stone_abort_msg("invalid state in MDSMap");
           }
           if (!rep_info) {
             break;
@@ -2244,7 +2244,7 @@ bool MDSMonitor::check_health(FSMap& fsmap, bool* propose_osdmap)
 
 bool MDSMonitor::maybe_promote_standby(FSMap &fsmap, Filesystem& fs)
 {
-  if (fs.mds_map.test_flag(CEPH_MDSMAP_NOT_JOINABLE)) {
+  if (fs.mds_map.test_flag(STONE_MDSMAP_NOT_JOINABLE)) {
     return false;
   }
 
@@ -2317,11 +2317,11 @@ void MDSMonitor::tick()
       int err = get_version(v, bl);
       if (err) {
         derr << "could not get version " << v << dendl;
-        ceph_abort();
+        stone_abort();
       }
       try {
         fsmap.decode(bl);
-      } catch (const ceph::buffer::malformed_input& e) {
+      } catch (const stone::buffer::malformed_input& e) {
         dout(5) << "flushing old fsmap struct because unable to decode FSMap: " << e.what() << dendl;
       }
       /* N.B. FSMap::is_struct_old is also true for undecoded (failed to decode) FSMap */

@@ -5,7 +5,7 @@
 #include "LogEntry.h"
 #include "librbd/cache/ImageWriteback.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::LogEntry: " << this << " " \
                            <<  __func__ << ": "

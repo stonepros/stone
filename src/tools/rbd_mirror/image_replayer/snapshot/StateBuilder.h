@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_MIRROR_IMAGE_REPLAYER_SNAPSHOT_STATE_BUILDER_H
-#define CEPH_RBD_MIRROR_IMAGE_REPLAYER_SNAPSHOT_STATE_BUILDER_H
+#ifndef STONE_RBD_MIRROR_IMAGE_REPLAYER_SNAPSHOT_STATE_BUILDER_H
+#define STONE_RBD_MIRROR_IMAGE_REPLAYER_SNAPSHOT_STATE_BUILDER_H
 
 #include "tools/rbd_mirror/image_replayer/StateBuilder.h"
 #include <string>
@@ -90,4 +90,4 @@ private:
 
 extern template class rbd::mirror::image_replayer::snapshot::StateBuilder<librbd::ImageCtx>;
 
-#endif // CEPH_RBD_MIRROR_IMAGE_REPLAYER_SNAPSHOT_STATE_BUILDER_H
+#endif // STONE_RBD_MIRROR_IMAGE_REPLAYER_SNAPSHOT_STATE_BUILDER_H

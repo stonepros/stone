@@ -4,7 +4,7 @@
 #include "common/TracepointProvider.h"
 #include "common/config.h"
 
-TracepointProvider::TracepointProvider(CephContext *cct, const char *library,
+TracepointProvider::TracepointProvider(StoneContext *cct, const char *library,
                                        const char *config_key)
   : m_cct(cct), m_library(library), m_config_keys{config_key, NULL}
 {
@@ -40,6 +40,6 @@ void TracepointProvider::verify_config(const ConfigProxy& conf) {
   }
 
   m_handle = dlopen(m_library.c_str(), RTLD_NOW | RTLD_NODELETE);
-  ceph_assert(m_handle);
+  stone_assert(m_handle);
 }
 

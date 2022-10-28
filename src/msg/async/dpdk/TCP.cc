@@ -26,9 +26,9 @@
 #include "DPDKStack.h"
 
 #include "common/dout.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_dpdk
+#define dout_subsys stone_subsys_dpdk
 #undef dout_prefix
 #define dout_prefix *_dout << "tcp "
 
@@ -112,7 +112,7 @@ uint8_t tcp_option::fill(tcp_hdr* th, uint8_t options_size)
     new (off) tcp_option::eol;
     size += option_len::eol;
   }
-  ceph_assert(size == options_size);
+  stone_assert(size == options_size);
 
   return size;
 }

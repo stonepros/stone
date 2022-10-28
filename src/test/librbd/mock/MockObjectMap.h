@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_TEST_LIBRBD_MOCK_OBJECT_MAP_H
-#define CEPH_TEST_LIBRBD_MOCK_OBJECT_MAP_H
+#ifndef STONE_TEST_LIBRBD_MOCK_OBJECT_MAP_H
+#define STONE_TEST_LIBRBD_MOCK_OBJECT_MAP_H
 
 #include "common/RWLock.h"
 #include "librbd/Utils.h"
@@ -70,4 +70,4 @@ struct MockObjectMap {
 
 } // namespace librbd
 
-#endif // CEPH_TEST_LIBRBD_MOCK_OBJECT_MAP_H
+#endif // STONE_TEST_LIBRBD_MOCK_OBJECT_MAP_H

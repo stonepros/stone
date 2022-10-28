@@ -12,7 +12,7 @@
 #include "librbd/mirror/snapshot/UnlinkPeerRequest.h"
 #include "librbd/mirror/snapshot/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::snapshot::CreatePrimaryRequest: " \
@@ -58,7 +58,7 @@ void CreatePrimaryRequest<I>::send() {
 
 template <typename I>
 void CreatePrimaryRequest<I>::get_mirror_peers() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   librados::ObjectReadOperation op;
@@ -69,13 +69,13 @@ void CreatePrimaryRequest<I>::get_mirror_peers() {
     &CreatePrimaryRequest<I>::handle_get_mirror_peers>(this);
   m_out_bl.clear();
   int r = m_default_ns_ctx.aio_operate(RBD_MIRRORING, comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void CreatePrimaryRequest<I>::handle_get_mirror_peers(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   std::vector<cls::rbd::MirrorPeer> peers;
@@ -116,7 +116,7 @@ void CreatePrimaryRequest<I>::create_snapshot() {
       cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY),
     m_mirror_peer_uuids, "", m_clean_since_snap_id};
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "name=" << m_snap_name << ", "
                  << "ns=" << ns << dendl;
   auto ctx = create_context_callback<
@@ -128,7 +128,7 @@ void CreatePrimaryRequest<I>::create_snapshot() {
 
 template <typename I>
 void CreatePrimaryRequest<I>::handle_create_snapshot(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -150,7 +150,7 @@ void CreatePrimaryRequest<I>::refresh_image() {
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   auto ctx = create_context_callback<
@@ -161,7 +161,7 @@ void CreatePrimaryRequest<I>::refresh_image() {
 
 template <typename I>
 void CreatePrimaryRequest<I>::handle_refresh_image(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -184,10 +184,10 @@ template <typename I>
 void CreatePrimaryRequest<I>::unlink_peer() {
   uint64_t max_snapshots = m_image_ctx->config.template get_val<uint64_t>(
     "rbd_mirroring_max_mirroring_snapshots");
-  ceph_assert(max_snapshots >= 3);
+  stone_assert(max_snapshots >= 3);
 
   std::string peer_uuid;
-  uint64_t snap_id = CEPH_NOSNAP;
+  uint64_t snap_id = STONE_NOSNAP;
 
   for (auto &peer : m_mirror_peer_uuids) {
     std::shared_lock image_locker{m_image_ctx->image_lock};
@@ -227,17 +227,17 @@ void CreatePrimaryRequest<I>::unlink_peer() {
         break;
       }
     }
-    if (snap_id != CEPH_NOSNAP) {
+    if (snap_id != STONE_NOSNAP) {
       break;
     }
   }
 
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     finish(0);
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "peer=" << peer_uuid << ", snap_id=" << snap_id << dendl;
 
   auto ctx = create_context_callback<
@@ -249,7 +249,7 @@ void CreatePrimaryRequest<I>::unlink_peer() {
 
 template <typename I>
 void CreatePrimaryRequest<I>::handle_unlink_peer(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -263,7 +263,7 @@ void CreatePrimaryRequest<I>::handle_unlink_peer(int r) {
 
 template <typename I>
 void CreatePrimaryRequest<I>::finish(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

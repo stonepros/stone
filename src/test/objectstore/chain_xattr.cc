@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -25,7 +25,7 @@
 #include "include/Context.h"
 #include "include/coredumpctl.h"
 #include "common/errno.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include <gtest/gtest.h>
 
@@ -77,7 +77,7 @@ TEST(chain_xattr, get_and_set) {
   // remove user.foo@1 => CHAIN_XATTR_MAX_BLOCK_LEN bytes
   // leak user.foo@2 => 10 bytes
   // 
-  // see http://marc.info/?l=ceph-devel&m=136027076615853&w=4 for the 
+  // see http://marc.info/?l=stone-devel&m=136027076615853&w=4 for the 
   // discussion
   //
   {
@@ -170,7 +170,7 @@ TEST(chain_xattr, chunk_aligned) {
     char buf[len*2];
     ASSERT_EQ(len, chain_setxattr(file, name.c_str(), x.c_str(), len));
     char attrbuf[4096];
-    int l = ceph_os_listxattr(file, attrbuf, sizeof(attrbuf));
+    int l = stone_os_listxattr(file, attrbuf, sizeof(attrbuf));
     for (char *p = attrbuf; p - attrbuf < l; p += strlen(p) + 1) {
       cout << "  attr " << p << std::endl;
     }
@@ -178,7 +178,7 @@ TEST(chain_xattr, chunk_aligned) {
     ASSERT_EQ(0, chain_removexattr(file, name.c_str()));
 
     ASSERT_EQ(len, chain_fsetxattr(fd, name2.c_str(), x.c_str(), len));
-    l = ceph_os_flistxattr(fd, attrbuf, sizeof(attrbuf));
+    l = stone_os_flistxattr(fd, attrbuf, sizeof(attrbuf));
     for (char *p = attrbuf; p - attrbuf < l; p += strlen(p) + 1) {
       cout << "  attr " << p << std::endl;
     }
@@ -194,7 +194,7 @@ TEST(chain_xattr, chunk_aligned) {
     char buf[len*2];
     ASSERT_EQ(len, chain_setxattr(file, name.c_str(), x.c_str(), len));
     char attrbuf[4096];
-    int l = ceph_os_listxattr(file, attrbuf, sizeof(attrbuf));
+    int l = stone_os_listxattr(file, attrbuf, sizeof(attrbuf));
     for (char *p = attrbuf; p - attrbuf < l; p += strlen(p) + 1) {
       cout << "  attr " << p << std::endl;
     }
@@ -327,7 +327,7 @@ list<string> get_xattrs(int fd)
   while (len > 0) {
     size_t next_len = strlen(buf);
     ret.push_back(string(buf, buf + next_len));
-    ceph_assert(len >= (int)(next_len + 1));
+    stone_assert(len >= (int)(next_len + 1));
     buf += (next_len + 1);
     len -= (next_len + 1);
   }
@@ -350,7 +350,7 @@ TEST(chain_xattr, fskip_chain_cleanup_and_ensure_single_attr)
   const char *file = FILENAME;
   ::unlink(file);
   int fd = ::open(file, O_CREAT|O_RDWR|O_TRUNC, 0700);
-  ceph_assert(fd >= 0);
+  stone_assert(fd >= 0);
 
   std::size_t existing_xattrs = get_xattrs(fd).size();
   char buf[800];
@@ -395,7 +395,7 @@ TEST(chain_xattr, skip_chain_cleanup_and_ensure_single_attr)
   const char *file = FILENAME;
   ::unlink(file);
   int fd = ::open(file, O_CREAT|O_RDWR|O_TRUNC, 0700);
-  ceph_assert(fd >= 0);
+  stone_assert(fd >= 0);
   std::size_t existing_xattrs = get_xattrs(fd).size();
   ::close(fd);
 
@@ -438,21 +438,21 @@ int main(int argc, char **argv) {
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.set_val("err_to_stderr", "false");
-  g_ceph_context->_conf.set_val("log_to_stderr", "false");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.set_val("err_to_stderr", "false");
+  g_stone_context->_conf.set_val("log_to_stderr", "false");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   const char* file = FILENAME;
   int x = 1234;
   int y = 0;
   int tmpfd = ::open(file, O_CREAT|O_WRONLY|O_TRUNC, 0700);
-  int ret = ::ceph_os_fsetxattr(tmpfd, "user.test", &x, sizeof(x));
+  int ret = ::stone_os_fsetxattr(tmpfd, "user.test", &x, sizeof(x));
   if (ret >= 0)
-    ret = ::ceph_os_fgetxattr(tmpfd, "user.test", &y, sizeof(y));
+    ret = ::stone_os_fgetxattr(tmpfd, "user.test", &y, sizeof(y));
   ::close(tmpfd);
   ::unlink(file);
   if ((ret < 0) || (x != y)) {

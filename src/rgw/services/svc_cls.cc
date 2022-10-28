@@ -13,7 +13,7 @@
 #include "cls/lock/cls_lock_client.h"
 
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 static string log_lock_name = "rgw_log_lock";
 
@@ -75,7 +75,7 @@ int RGWSI_Cls::MFA::check_mfa(const DoutPrefixProvider *dpp, const rgw_user& use
 
 void RGWSI_Cls::MFA::prepare_mfa_write(librados::ObjectWriteOperation *op,
                                  RGWObjVersionTracker *objv_tracker,
-                                 const ceph::real_time& mtime)
+                                 const stone::real_time& mtime)
 {
   RGWObjVersionTracker ot;
 
@@ -98,7 +98,7 @@ void RGWSI_Cls::MFA::prepare_mfa_write(librados::ObjectWriteOperation *op,
 }
 
 int RGWSI_Cls::MFA::create_mfa(const DoutPrefixProvider *dpp, const rgw_user& user, const rados::cls::otp::otp_info_t& config,
-                         RGWObjVersionTracker *objv_tracker, const ceph::real_time& mtime, optional_yield y)
+                         RGWObjVersionTracker *objv_tracker, const stone::real_time& mtime, optional_yield y)
 {
   std::optional<RGWSI_RADOS::Obj> obj;
   int r = get_mfa_obj(dpp, user, &obj);
@@ -121,7 +121,7 @@ int RGWSI_Cls::MFA::create_mfa(const DoutPrefixProvider *dpp, const rgw_user& us
 int RGWSI_Cls::MFA::remove_mfa(const DoutPrefixProvider *dpp, 
                          const rgw_user& user, const string& id,
                          RGWObjVersionTracker *objv_tracker,
-                         const ceph::real_time& mtime,
+                         const stone::real_time& mtime,
                          optional_yield y)
 {
   std::optional<RGWSI_RADOS::Obj> obj;
@@ -178,7 +178,7 @@ int RGWSI_Cls::MFA::list_mfa(const DoutPrefixProvider *dpp, const rgw_user& user
   return 0;
 }
 
-int RGWSI_Cls::MFA::otp_get_current_time(const DoutPrefixProvider *dpp, const rgw_user& user, ceph::real_time *result,
+int RGWSI_Cls::MFA::otp_get_current_time(const DoutPrefixProvider *dpp, const rgw_user& user, stone::real_time *result,
 					 optional_yield y)
 {
   rgw_rados_ref ref;
@@ -226,7 +226,7 @@ int RGWSI_Cls::MFA::set_mfa(const DoutPrefixProvider *dpp, const string& oid, co
 }
 
 int RGWSI_Cls::MFA::list_mfa(const DoutPrefixProvider *dpp, const string& oid, list<rados::cls::otp::otp_info_t> *result,
-			     RGWObjVersionTracker *objv_tracker, ceph::real_time *pmtime,
+			     RGWObjVersionTracker *objv_tracker, stone::real_time *pmtime,
 			     optional_yield y)
 {
   rgw_raw_obj o(zone_svc->get_zone_params().otp_pool, oid);
@@ -248,7 +248,7 @@ int RGWSI_Cls::MFA::list_mfa(const DoutPrefixProvider *dpp, const string& oid, l
     return r;
   }
   if (pmtime) {
-    *pmtime = ceph::real_clock::from_timespec(mtime_ts);
+    *pmtime = stone::real_clock::from_timespec(mtime_ts);
   }
 
   return 0;

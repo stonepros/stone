@@ -1,6 +1,6 @@
 meta:
 - desc: |
-   install upgrade ceph/-x on one node only
+   install upgrade stone/-x on one node only
    1st half
    restart : osd.0,1,2,3,4,5
 tasks:
@@ -8,13 +8,13 @@ tasks:
     mon.a:
     mon.b:
 - print: "**** done install.upgrade osd.0"
-- ceph.restart:
+- stone.restart:
     daemons: [mgr.x, mgr.y]
-- ceph.restart:
+- stone.restart:
     daemons: [mon.a, mon.b]
     wait-for-healthy: false
     mon-health-to-clog: false
-- ceph.restart:
+- stone.restart:
     daemons: [osd.0, osd.1, osd.2, osd.3, osd.4, osd.5, osd.6, osd.7]
     wait-for-healthy: false
-- print: "**** done ceph.restart 1st 2/3s"
+- print: "**** done stone.restart 1st 2/3s"

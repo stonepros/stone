@@ -18,7 +18,7 @@
 #include "osdc/WritebackHandler.h"
 #include <vector>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::ObjectCacherObjectDispatch: " \
                            << this << " " << __func__ << ": "
@@ -47,7 +47,7 @@ struct ObjectCacherObjectDispatch<I>::C_InvalidateCache : public Context {
   }
 
   void finish(int r) override {
-    ceph_assert(ceph_mutex_is_locked(dispatcher->m_cache_lock));
+    stone_assert(stone_mutex_is_locked(dispatcher->m_cache_lock));
     auto cct = dispatcher->m_image_ctx->cct;
 
     if (r == -EBLOCKLISTED) {
@@ -82,9 +82,9 @@ ObjectCacherObjectDispatch<I>::ObjectCacherObjectDispatch(
     I* image_ctx, size_t max_dirty, bool writethrough_until_flush)
   : m_image_ctx(image_ctx), m_max_dirty(max_dirty),
     m_writethrough_until_flush(writethrough_until_flush),
-    m_cache_lock(ceph::make_mutex(util::unique_lock_name(
+    m_cache_lock(stone::make_mutex(util::unique_lock_name(
       "librbd::cache::ObjectCacherObjectDispatch::cache_lock", this))) {
-  ceph_assert(m_image_ctx->data_ctx.is_valid());
+  stone_assert(m_image_ctx->data_ctx.is_valid());
 }
 
 template <typename I>
@@ -212,7 +212,7 @@ bool ObjectCacherObjectDispatch<I>::read(
               ((read_flags << ObjectCacherWriteback::READ_FLAGS_SHIFT) &
                ObjectCacherWriteback::READ_FLAGS_MASK));
 
-  ceph::bufferlist* bl;
+  stone::bufferlist* bl;
   if (extents->size() > 1) {
     auto req = new io::ReadResult::C_ObjectReadMergedExtents(
             cct, extents, on_dispatched);
@@ -224,7 +224,7 @@ bool ObjectCacherObjectDispatch<I>::read(
 
   m_image_ctx->image_lock.lock_shared();
   auto rd = m_object_cacher->prepare_read(
-    io_context->read_snap().value_or(CEPH_NOSNAP), bl, op_flags);
+    io_context->read_snap().value_or(STONE_NOSNAP), bl, op_flags);
   m_image_ctx->image_lock.unlock_shared();
 
   uint64_t off = 0;
@@ -292,7 +292,7 @@ bool ObjectCacherObjectDispatch<I>::discard(
 
 template <typename I>
 bool ObjectCacherObjectDispatch<I>::write(
-    uint64_t object_no, uint64_t object_off, ceph::bufferlist&& data,
+    uint64_t object_no, uint64_t object_off, stone::bufferlist&& data,
     IOContext io_context, int op_flags, int write_flags,
     std::optional<uint64_t> assert_version,
     const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
@@ -333,7 +333,7 @@ bool ObjectCacherObjectDispatch<I>::write(
 
   m_image_ctx->image_lock.lock_shared();
   ObjectCacher::OSDWrite *wr = m_object_cacher->prepare_write(
-    snapc, data, ceph::real_time::min(), op_flags, *journal_tid);
+    snapc, data, stone::real_time::min(), op_flags, *journal_tid);
   m_image_ctx->image_lock.unlock_shared();
 
   ObjectExtent extent(data_object_name(m_image_ctx, object_no),
@@ -353,7 +353,7 @@ bool ObjectCacherObjectDispatch<I>::write(
 template <typename I>
 bool ObjectCacherObjectDispatch<I>::write_same(
     uint64_t object_no, uint64_t object_off, uint64_t object_len,
-    io::LightweightBufferExtents&& buffer_extents, ceph::bufferlist&& data,
+    io::LightweightBufferExtents&& buffer_extents, stone::bufferlist&& data,
     IOContext io_context, int op_flags,
     const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
     uint64_t* journal_tid, io::DispatchResult* dispatch_result,
@@ -376,8 +376,8 @@ bool ObjectCacherObjectDispatch<I>::write_same(
 
 template <typename I>
 bool ObjectCacherObjectDispatch<I>::compare_and_write(
-    uint64_t object_no, uint64_t object_off, ceph::bufferlist&& cmp_data,
-    ceph::bufferlist&& write_data, IOContext io_context, int op_flags,
+    uint64_t object_no, uint64_t object_off, stone::bufferlist&& cmp_data,
+    stone::bufferlist&& write_data, IOContext io_context, int op_flags,
     const ZTracer::Trace &parent_trace, uint64_t* mismatch_offset,
     int* object_dispatch_flags, uint64_t* journal_tid,
     io::DispatchResult* dispatch_result, Context** on_finish,

@@ -92,7 +92,7 @@ function(distutils_add_cython_module target name src)
     OPT=\"-DNDEBUG -g -fwrapv -O2 -w\"
     LDFLAGS=-L${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     CYTHON_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-    CEPH_LIBDIR=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+    STONE_LIBDIR=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     ${Python3_EXECUTABLE} ${setup_py}
     build --verbose --build-base ${CYTHON_MODULE_DIR}
     --build-platlib ${output_dir}
@@ -116,7 +116,7 @@ function(distutils_install_cython_module name)
                         -D'__Pyx_check_single_interpreter\(ARG\)=ARG \#\# 0'\")
     set(ENV{LDFLAGS} \"-L${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\")
     set(ENV{CYTHON_BUILD_DIR} \"${CMAKE_CURRENT_BINARY_DIR}\")
-    set(ENV{CEPH_LIBDIR} \"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\")
+    set(ENV{STONE_LIBDIR} \"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\")
 
     set(options --prefix=${CMAKE_INSTALL_PREFIX})
     if(DEFINED ENV{DESTDIR})

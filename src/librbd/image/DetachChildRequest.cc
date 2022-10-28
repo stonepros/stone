@@ -15,7 +15,7 @@
 #include "librbd/trash/RemoveRequest.h"
 #include <string>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::DetachChildRequest: " << this \
                            << " " << __func__ << ": "
@@ -28,7 +28,7 @@ using util::create_rados_callback;
 
 template <typename I>
 DetachChildRequest<I>::~DetachChildRequest() {
-  ceph_assert(m_parent_image_ctx == nullptr);
+  stone_assert(m_parent_image_ctx == nullptr);
 }
 
 template <typename I>
@@ -86,7 +86,7 @@ void DetachChildRequest<I>::clone_v2_child_detach() {
     DetachChildRequest<I>,
     &DetachChildRequest<I>::handle_clone_v2_child_detach>(this);
   r = m_parent_io_ctx.aio_operate(m_parent_header_name, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -119,7 +119,7 @@ void DetachChildRequest<I>::clone_v2_get_snapshot() {
     &DetachChildRequest<I>::handle_clone_v2_get_snapshot>(this);
   int r = m_parent_io_ctx.aio_operate(m_parent_header_name, aio_comp, &op,
                                       &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -251,7 +251,7 @@ void DetachChildRequest<I>::clone_v2_get_parent_trash_entry() {
     DetachChildRequest<I>,
     &DetachChildRequest<I>::handle_clone_v2_get_parent_trash_entry>(this);
   int r = m_parent_io_ctx.aio_operate(RBD_TRASH, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -277,7 +277,7 @@ void DetachChildRequest<I>::handle_clone_v2_get_parent_trash_entry(int r) {
     if (r == 0 &&
         trash_spec.source == cls::rbd::TRASH_IMAGE_SOURCE_USER_PARENT &&
         trash_spec.state == cls::rbd::TRASH_IMAGE_STATE_NORMAL &&
-        trash_spec.deferment_end_time <= ceph_clock_now()) {
+        trash_spec.deferment_end_time <= stone_clock_now()) {
       in_trash = true;
     }
   }
@@ -356,7 +356,7 @@ void DetachChildRequest<I>::clone_v1_remove_child() {
     DetachChildRequest<I>,
     &DetachChildRequest<I>::handle_clone_v1_remove_child>(this);
   int r = m_image_ctx.md_ctx.aio_operate(RBD_CHILDREN, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

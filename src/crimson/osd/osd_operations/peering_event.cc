@@ -13,7 +13,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -125,7 +125,7 @@ void RemotePeeringEvent::on_pg_absent()
     const pg_info_t empty{spg_t{pgid.pgid, q.query.to}};
     if (q.query.type == q.query.LOG ||
 	q.query.type == q.query.FULLLOG)  {
-      auto m = ceph::make_message<MOSDPGLog>(q.query.from, q.query.to,
+      auto m = stone::make_message<MOSDPGLog>(q.query.from, q.query.to,
 					     map_epoch, empty,
 					     q.query.epoch_sent);
       ctx.send_osd_message(q.from.osd, std::move(m));

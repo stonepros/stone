@@ -18,17 +18,17 @@ int main(int argc, char** argv)
 
   if (argc != 2) {
     cout << "Syntax: "
-         << "ceph_test_mon_memory_target <mon-memory-target-bytes>"
+         << "stone_test_mon_memory_target <mon-memory-target-bytes>"
          << endl;
     exit(EINVAL);
   }
 
-  string target_directory("/var/log/ceph/");
+  string target_directory("/var/log/stone/");
   unsigned long maxallowed = stoul(argv[1], nullptr, 10);
   regex reg(R"(cache_size:(\d*)\s)");
 
   string grep_command("grep _set_new_cache_sizes " + target_directory
-                      + "ceph-mon.a.log");
+                      + "stone-mon.a.log");
   bp::ipstream is;
   error_code ec;
   bp::child grep(grep_command, bp::std_out > is, ec);

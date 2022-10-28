@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MGRCAP_H
-#define CEPH_MGRCAP_H
+#ifndef STONE_MGRCAP_H
+#define STONE_MGRCAP_H
 
 #include <iosfwd>
 
@@ -132,7 +132,7 @@ struct MgrCapGrant {
    * @return bits we allow
    */
   mgr_rwxa_t get_allowed(
-      CephContext *cct,
+      StoneeContext *cct,
       EntityName name,
       const std::string& service,
       const std::string& module,
@@ -180,7 +180,7 @@ struct MgrCap {
    * @param op_may_exec whether the operation may exec
    * @return true if the operation is allowed, false otherwise
    */
-  bool is_capable(CephContext *cct,
+  bool is_capable(StoneeContext *cct,
 		  EntityName name,
 		  const std::string& service,
 		  const std::string& module,
@@ -198,4 +198,4 @@ WRITE_CLASS_ENCODER(MgrCap)
 
 std::ostream& operator<<(std::ostream& out, const MgrCap& cap);
 
-#endif // CEPH_MGRCAP_H
+#endif // STONE_MGRCAP_H

@@ -6,11 +6,11 @@
 #include "SubsystemMap.h"
 
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_context.h"
 #include "common/dout.h"
 
-using namespace ceph::logging;
+using namespace stone::logging;
 
 TEST(Log, Simple)
 {
@@ -261,11 +261,11 @@ TEST(Log, TimeFormat)
 {
   static constexpr auto buflen = 128u;
   char buf[buflen];
-  ceph::logging::log_clock clock;
+  stone::logging::log_clock clock;
   {
     clock.coarsen();
     auto t = clock.now();
-    ceph::logging::append_time(t, buf, buflen);
+    stone::logging::append_time(t, buf, buflen);
     auto c = std::strrchr(buf, '.');
     ASSERT_NE(c, nullptr);
     ASSERT_EQ(8u, strlen(c + 1));
@@ -273,26 +273,26 @@ TEST(Log, TimeFormat)
   {
     clock.refine();
     auto t = clock.now();
-    ceph::logging::append_time(t, buf, buflen);
+    stone::logging::append_time(t, buf, buflen);
     auto c = std::strrchr(buf, '.');
     ASSERT_NE(c, nullptr);
     ASSERT_EQ(11u, std::strlen(c + 1));
   }
 }
 
-#define dout_subsys ceph_subsys_context
+#define dout_subsys stone_subsys_context
 
 template <int depth, int x> struct do_log
 {
-  void log(CephContext* cct);
+  void log(StoneContext* cct);
 };
 
 template <int x> struct do_log<12, x>
 {
-  void log(CephContext* cct);
+  void log(StoneContext* cct);
 };
 
-template<int depth, int x> void do_log<depth,x>::log(CephContext* cct)
+template<int depth, int x> void do_log<depth,x>::log(StoneContext* cct)
 {
   ldout(cct, 20) << "Log depth=" << depth << " x=" << x << dendl;
   if (rand() % 2) {
@@ -304,13 +304,13 @@ template<int depth, int x> void do_log<depth,x>::log(CephContext* cct)
   }
 }
 
-std::string recursion(CephContext* cct)
+std::string recursion(StoneContext* cct)
 {
   ldout(cct, 20) << "Preparing recursion string" << dendl;
   return "here-recursion";
 }
 
-template<int x> void do_log<12, x>::log(CephContext* cct)
+template<int x> void do_log<12, x>::log(StoneContext* cct)
 {
   if ((rand() % 16) == 0) {
     ldout(cct, 20) << "End " << recursion(cct) << "x=" << x << dendl;
@@ -322,22 +322,22 @@ template<int x> void do_log<12, x>::log(CephContext* cct)
 TEST(Log, Speed_gather)
 {
   do_log<0,0> start;
-  g_ceph_context->_conf->subsys.set_gather_level(ceph_subsys_context, 30);
-  g_ceph_context->_conf->subsys.set_log_level(ceph_subsys_context, 0);
+  g_stone_context->_conf->subsys.set_gather_level(stone_subsys_context, 30);
+  g_stone_context->_conf->subsys.set_log_level(stone_subsys_context, 0);
   for (int i=0; i<100000;i++) {
-    ldout(g_ceph_context, 20) << "Iteration " << i << dendl;
-    start.log(g_ceph_context);
+    ldout(g_stone_context, 20) << "Iteration " << i << dendl;
+    start.log(g_stone_context);
   }
 }
 
 TEST(Log, Speed_nogather)
 {
   do_log<0,0> start;
-  g_ceph_context->_conf->subsys.set_gather_level(ceph_subsys_context, 0);
-  g_ceph_context->_conf->subsys.set_log_level(ceph_subsys_context, 0);
+  g_stone_context->_conf->subsys.set_gather_level(stone_subsys_context, 0);
+  g_stone_context->_conf->subsys.set_log_level(stone_subsys_context, 0);
   for (int i=0; i<100000;i++) {
-    ldout(g_ceph_context, 20) << "Iteration " << i << dendl;
-    start.log(g_ceph_context);
+    ldout(g_stone_context, 20) << "Iteration " << i << dendl;
+    start.log(g_stone_context);
   }
 }
 
@@ -345,20 +345,20 @@ TEST(Log, GarbleRecovery)
 {
   static const char* test_file="log_for_moment";
 
-  Log* saved = g_ceph_context->_log;
-  Log log(&g_ceph_context->_conf->subsys);
+  Log* saved = g_stone_context->_log;
+  Log log(&g_stone_context->_conf->subsys);
   log.start();
   unlink(test_file);
   log.set_log_file(test_file);
   log.reopen_log_file();
-  g_ceph_context->_log = &log;
+  g_stone_context->_log = &log;
 
   std::string long_message(1000,'c');
-  ldout(g_ceph_context, 0) << long_message << dendl;
-  ldout(g_ceph_context, 0) << "Prologue" << (std::streambuf*)nullptr << long_message << dendl;
-  ldout(g_ceph_context, 0) << "Epitaph" << long_message << dendl;
+  ldout(g_stone_context, 0) << long_message << dendl;
+  ldout(g_stone_context, 0) << "Prologue" << (std::streambuf*)nullptr << long_message << dendl;
+  ldout(g_stone_context, 0) << "Epitaph" << long_message << dendl;
 
-  g_ceph_context->_log = saved;
+  g_stone_context->_log = saved;
   log.flush();
   log.stop();
   struct stat file_status;
@@ -371,10 +371,10 @@ int main(int argc, char **argv)
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

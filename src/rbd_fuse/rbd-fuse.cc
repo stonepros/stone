@@ -25,11 +25,11 @@
 
 #include "include/compat.h"
 #include "include/rbd/librbd.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#include "common/ceph_argparse.h"
-#include "common/ceph_context.h"
-#include "include/ceph_fuse.h"
+#include "common/stone_argparse.h"
+#include "common/stone_context.h"
+#include "include/stone_fuse.h"
 
 #include "global/global_init.h"
 #include "global/global_context.h"
@@ -828,7 +828,7 @@ static void usage(const char *progname)
 "General options:\n"
 "    -h   --help            print help\n"
 "    -V   --version         print version\n"
-"    -c   --conf            ceph configuration file [/etc/ceph/ceph.conf]\n"
+"    -c   --conf            stone configuration file [/etc/stone/stone.conf]\n"
 "    -p   --poolname        rados pool name [rbd]\n"
 "    -s   --namespace       rados namespace name []\n"
 "    -r   --image           RBD image name\n"
@@ -892,11 +892,11 @@ int
 connect_to_cluster(rados_t *pcluster)
 {
 	int r;
-	global_init_postfork_start(g_ceph_context);
-	common_init_finish(g_ceph_context);
-	global_init_postfork_finish(g_ceph_context);
+	global_init_postfork_start(g_stone_context);
+	common_init_finish(g_stone_context);
+	global_init_postfork_finish(g_stone_context);
 
-	r = rados_create_with_context(pcluster, g_ceph_context);
+	r = rados_create_with_context(pcluster, g_stone_context);
 	if (r < 0) {
 		simple_err("Could not create cluster handle", r);
 		return r;
@@ -930,13 +930,13 @@ int main(int argc, const char *argv[])
 		arg_vector.push_back(argv[idx]);
 	}
 
-	auto cct = global_init(NULL, arg_vector, CEPH_ENTITY_TYPE_CLIENT,
+	auto cct = global_init(NULL, arg_vector, STONE_ENTITY_TYPE_CLIENT,
 			       CODE_ENVIRONMENT_DAEMON,
 			       CINIT_FLAG_UNPRIVILEGED_DAEMON_DEFAULTS);
-	g_ceph_context->_conf.set_val_or_die("pid_file", "");
-	g_ceph_context->_conf.set_val_or_die("daemonize", "true");
+	g_stone_context->_conf.set_val_or_die("pid_file", "");
+	g_stone_context->_conf.set_val_or_die("daemonize", "true");
 
-	if (global_init_prefork(g_ceph_context) < 0) {
+	if (global_init_prefork(g_stone_context) < 0) {
 		fprintf(stderr, "Failed to initialize librados\n");
 		exit(1);
 	}

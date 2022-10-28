@@ -11,7 +11,7 @@
 #include <thread>
 #include <stack>
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "include/stringify.h"
 #include "include/scope_guard.h"
 #include "common/errno.h"
@@ -40,12 +40,12 @@ private:
   static string get_temp_bdev(uint64_t size)
   {
     static int n = 0;
-    string fn = "ceph_test_bluefs.tmp.block." + stringify(getpid())
+    string fn = "stone_test_bluefs.tmp.block." + stringify(getpid())
       + "." + stringify(++n);
     int fd = ::open(fn.c_str(), O_CREAT|O_RDWR|O_TRUNC, 0644);
-    ceph_assert(fd >= 0);
+    stone_assert(fd >= 0);
     int r = ::ftruncate(fd, size);
-    ceph_assert(r >= 0);
+    stone_assert(r >= 0);
     ::close(fd);
     return fn;
   }
@@ -89,7 +89,7 @@ TEST(BlueFS, mkfs) {
   uint64_t size = 1048576 * 128;
   TempBdev bdev{size};
   uuid_d fsid;
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
 }
@@ -97,7 +97,7 @@ TEST(BlueFS, mkfs) {
 TEST(BlueFS, mkfs_mount) {
   uint64_t size = 1048576 * 128;
   TempBdev bdev{size};
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -111,7 +111,7 @@ TEST(BlueFS, mkfs_mount) {
 TEST(BlueFS, write_read) {
   uint64_t size = 1048576 * 128;
   TempBdev bdev{size};
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -141,7 +141,7 @@ TEST(BlueFS, write_read) {
 TEST(BlueFS, small_appends) {
   uint64_t size = 1048576 * 128;
   TempBdev bdev{size};
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -173,10 +173,10 @@ TEST(BlueFS, very_large_write) {
   // we'll write a ~5G file, so allocate more than that for the whole fs
   uint64_t size = 1048576 * 1024 * 6ull;
   TempBdev bdev{size};
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
 
-  bool old = g_ceph_context->_conf.get_val<bool>("bluefs_buffered_io");
-  g_ceph_context->_conf.set_val("bluefs_buffered_io", "false");
+  bool old = g_stone_context->_conf.get_val<bool>("bluefs_buffered_io");
+  g_stone_context->_conf.set_val("bluefs_buffered_io", "false");
   uint64_t total_written = 0;
 
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
@@ -240,7 +240,7 @@ TEST(BlueFS, very_large_write) {
   }
   fs.umount();
 
-  g_ceph_context->_conf.set_val("bluefs_buffered_io", stringify((int)old));
+  g_stone_context->_conf.set_val("bluefs_buffered_io", stringify((int)old));
 }
 
 TEST(BlueFS, very_large_write2) {
@@ -248,10 +248,10 @@ TEST(BlueFS, very_large_write2) {
   uint64_t size_full = 1048576 * 1024 * 6ull;
   uint64_t size = 1048576 * 1024 * 5ull;
   TempBdev bdev{ size_full };
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
 
-  bool old = g_ceph_context->_conf.get_val<bool>("bluefs_buffered_io");
-  g_ceph_context->_conf.set_val("bluefs_buffered_io", "false");
+  bool old = g_stone_context->_conf.get_val<bool>("bluefs_buffered_io");
+  g_stone_context->_conf.set_val("bluefs_buffered_io", "false");
   uint64_t total_written = 0;
 
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
@@ -287,13 +287,13 @@ TEST(BlueFS, very_large_write2) {
     int64_t r = fs.read(h, 0, l, NULL, buf.get());
     ASSERT_EQ(r, l);
     for (size_t i = 0; i < size; i += sizeof(fill_arr)) {
-      ceph_assert(memcmp(buf.get() + i, fill_arr, sizeof(fill_arr)) == 0);
+      stone_assert(memcmp(buf.get() + i, fill_arr, sizeof(fill_arr)) == 0);
     }
     delete h;
   }
   fs.umount();
 
-  g_ceph_context->_conf.set_val("bluefs_buffered_io", stringify((int)old));
+  g_stone_context->_conf.set_val("bluefs_buffered_io", stringify((int)old));
 }
 
 #define ALLOC_SIZE 4096
@@ -411,12 +411,12 @@ void join_all(std::vector<std::thread>& v)
 TEST(BlueFS, test_flush_1) {
   uint64_t size = 1048576 * 128;
   TempBdev bdev{size};
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
     "bluefs_alloc_size",
     "65536");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.apply_changes(nullptr);
 
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -445,12 +445,12 @@ TEST(BlueFS, test_flush_1) {
 TEST(BlueFS, test_flush_2) {
   uint64_t size = 1048576 * 256;
   TempBdev bdev{size};
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
     "bluefs_alloc_size",
     "65536");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.apply_changes(nullptr);
 
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -472,12 +472,12 @@ TEST(BlueFS, test_flush_2) {
 TEST(BlueFS, test_flush_3) {
   uint64_t size = 1048576 * 256;
   TempBdev bdev{size};
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
     "bluefs_alloc_size",
     "65536");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.apply_changes(nullptr);
 
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -504,13 +504,13 @@ TEST(BlueFS, test_flush_3) {
 }
 
 TEST(BlueFS, test_simple_compaction_sync) {
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
     "bluefs_compact_log_sync",
     "true");
   uint64_t size = 1048576 * 128;
   TempBdev bdev{size};
 
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -556,13 +556,13 @@ TEST(BlueFS, test_simple_compaction_sync) {
 }
 
 TEST(BlueFS, test_simple_compaction_async) {
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
     "bluefs_compact_log_sync",
     "false");
   uint64_t size = 1048576 * 128;
   TempBdev bdev{size};
 
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -610,14 +610,14 @@ TEST(BlueFS, test_simple_compaction_async) {
 TEST(BlueFS, test_compaction_sync) {
   uint64_t size = 1048576 * 128;
   TempBdev bdev{size};
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
     "bluefs_alloc_size",
     "65536");
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
     "bluefs_compact_log_sync",
     "true");
 
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -647,14 +647,14 @@ TEST(BlueFS, test_compaction_sync) {
 TEST(BlueFS, test_compaction_async) {
   uint64_t size = 1048576 * 128;
   TempBdev bdev{size};
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
     "bluefs_alloc_size",
     "65536");
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
     "bluefs_compact_log_sync",
     "false");
 
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -684,14 +684,14 @@ TEST(BlueFS, test_compaction_async) {
 TEST(BlueFS, test_replay) {
   uint64_t size = 1048576 * 128;
   TempBdev bdev{size};
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
     "bluefs_alloc_size",
     "65536");
-  g_ceph_context->_conf.set_val(
+  g_stone_context->_conf.set_val(
     "bluefs_compact_log_sync",
     "false");
 
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -726,7 +726,7 @@ TEST(BlueFS, test_replay_growth) {
   uint64_t size = 1048576LL * (2 * 1024 + 128);
   TempBdev bdev{size};
 
-  ConfSaver conf(g_ceph_context->_conf);
+  ConfSaver conf(g_stone_context->_conf);
   conf.SetVal("bluefs_alloc_size", "4096");
   conf.SetVal("bluefs_shared_alloc_size", "4096");
   conf.SetVal("bluefs_compact_log_sync", "false");
@@ -736,7 +736,7 @@ TEST(BlueFS, test_replay_growth) {
   conf.SetVal("bluefs_sync_write", "true");
   conf.ApplyChanges();
 
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB, bdev.path, false, 1048576));
   uuid_d fsid;
   ASSERT_EQ(0, fs.mkfs(fsid, { BlueFS::BDEV_DB, false, false }));
@@ -768,11 +768,11 @@ TEST(BlueFS, test_tracker_50965) {
   uint64_t size_slow = 1048576 * 256;
   TempBdev bdev_slow{size_slow};
 
-  ConfSaver conf(g_ceph_context->_conf);
+  ConfSaver conf(g_stone_context->_conf);
   conf.SetVal("bluefs_min_flush_size", "65536");
   conf.ApplyChanges();
 
-  BlueFS fs(g_ceph_context);
+  BlueFS fs(g_stone_context);
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_WAL,  bdev_wal.path,  false, 0));
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_DB,   bdev_db.path,   false, 0));
   ASSERT_EQ(0, fs.add_block_device(BlueFS::BDEV_SLOW, bdev_slow.path, false, 0));
@@ -835,14 +835,14 @@ int main(int argc, char **argv) {
     { "debug_bdev", "1/20" }
   };
 
-  auto cct = global_init(&defaults, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(&defaults, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.set_val(
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.set_val(
     "enable_experimental_unrecoverable_data_corrupting_features",
     "*");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.apply_changes(nullptr);
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

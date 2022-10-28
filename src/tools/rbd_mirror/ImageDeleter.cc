@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -36,8 +36,8 @@
 #include <map>
 #include <sstream>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 
 using std::string;
 using std::stringstream;
@@ -80,7 +80,7 @@ private:
 template <typename I>
 class ImageDeleterAdminSocketHook : public AdminSocketHook {
 public:
-  ImageDeleterAdminSocketHook(CephContext *cct, const std::string& pool_name,
+  ImageDeleterAdminSocketHook(StoneContext *cct, const std::string& pool_name,
                               ImageDeleter<I> *image_del) :
     admin_socket(cct->get_admin_socket()) {
 
@@ -109,7 +109,7 @@ public:
 	   std::ostream& errss,
 	   bufferlist& out) override {
     Commands::const_iterator i = commands.find(command);
-    ceph_assert(i != commands.end());
+    stone_assert(i != commands.end());
     return i->second->call(f);
   }
 
@@ -128,7 +128,7 @@ ImageDeleter<I>::ImageDeleter(
   : m_local_io_ctx(local_io_ctx), m_threads(threads),
     m_image_deletion_throttler(image_deletion_throttler),
     m_service_daemon(service_daemon), m_trash_listener(this),
-    m_lock(ceph::make_mutex(
+    m_lock(stone::make_mutex(
       librbd::util::unique_lock_name("rbd::mirror::ImageDeleter::m_lock",
 				     this))) {
 }
@@ -160,7 +160,7 @@ void ImageDeleter<I>::init(Context* on_finish) {
   dout(10) << dendl;
 
   m_asok_hook = new ImageDeleterAdminSocketHook<I>(
-    g_ceph_context, m_local_io_ctx.get_pool_name(), this);
+    g_stone_context, m_local_io_ctx.get_pool_name(), this);
 
   m_trash_watcher = image_deleter::TrashWatcher<I>::create(m_local_io_ctx,
                                                            m_threads,
@@ -184,7 +184,7 @@ void ImageDeleter<I>::shut_down(Context* on_finish) {
 template <typename I>
 void ImageDeleter<I>::shut_down_trash_watcher(Context* on_finish) {
   dout(10) << dendl;
-  ceph_assert(m_trash_watcher);
+  stone_assert(m_trash_watcher);
   auto ctx = new LambdaContext([this, on_finish](int r) {
       delete m_trash_watcher;
       m_trash_watcher = nullptr;
@@ -215,7 +215,7 @@ void ImageDeleter<I>::cancel_all_deletions(Context* on_finish) {
   {
     std::lock_guard locker{m_lock};
     // wake up any external state machines waiting on deletions
-    ceph_assert(m_in_flight_delete_queue.empty());
+    stone_assert(m_in_flight_delete_queue.empty());
     for (auto& queue : {&m_delete_queue, &m_retry_delete_queue}) {
       for (auto& info : *queue) {
         notify_on_delete(info->image_id, -ECANCELED);
@@ -275,7 +275,7 @@ void ImageDeleter<I>::enqueue_failed_delete(DeleteInfoRef* delete_info,
   delete_info_ref->error_code = error_code;
   ++delete_info_ref->retries;
   delete_info_ref->retry_time = (clock_t::now() +
-				 ceph::make_timespan(retry_delay));
+				 stone::make_timespan(retry_delay));
   m_retry_delete_queue.push_back(delete_info_ref);
 
   schedule_retry_timer();
@@ -284,7 +284,7 @@ void ImageDeleter<I>::enqueue_failed_delete(DeleteInfoRef* delete_info,
 template <typename I>
 typename ImageDeleter<I>::DeleteInfoRef
 ImageDeleter<I>::find_delete_info(const std::string &image_id) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   DeleteQueue delete_queues[] = {m_in_flight_delete_queue,
                                  m_retry_delete_queue,
                                  m_delete_queue};
@@ -359,7 +359,7 @@ void ImageDeleter<I>::remove_images() {
     DeleteInfoRef delete_info = m_delete_queue.front();
     m_delete_queue.pop_front();
 
-    ceph_assert(delete_info);
+    stone_assert(delete_info);
 
     auto on_start = create_async_context_callback(
         m_threads->work_queue, new LambdaContext(
@@ -405,10 +405,10 @@ void ImageDeleter<I>::handle_remove_image(DeleteInfoRef delete_info,
                                         delete_info->image_id);
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone_assert(stone_mutex_is_locked(m_lock));
     auto it = std::find(m_in_flight_delete_queue.begin(),
                         m_in_flight_delete_queue.end(), delete_info);
-    ceph_assert(it != m_in_flight_delete_queue.end());
+    stone_assert(it != m_in_flight_delete_queue.end());
     m_in_flight_delete_queue.erase(it);
   }
 
@@ -419,7 +419,7 @@ void ImageDeleter<I>::handle_remove_image(DeleteInfoRef delete_info,
                  image_deleter::ERROR_RESULT_RETRY_IMMEDIATELY) {
       enqueue_failed_delete(&delete_info, r, m_busy_interval);
     } else {
-      auto cct = reinterpret_cast<CephContext *>(m_local_io_ctx.cct());
+      auto cct = reinterpret_cast<StoneContext *>(m_local_io_ctx.cct());
       double failed_interval = cct->_conf.get_val<double>(
         "rbd_mirror_delete_retry_interval");
       enqueue_failed_delete(&delete_info, r, failed_interval);
@@ -434,8 +434,8 @@ void ImageDeleter<I>::handle_remove_image(DeleteInfoRef delete_info,
 
 template <typename I>
 void ImageDeleter<I>::schedule_retry_timer() {
-  ceph_assert(ceph_mutex_is_locked(m_threads->timer_lock));
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_threads->timer_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   if (!m_running || m_timer_ctx != nullptr || m_retry_delete_queue.empty()) {
     return;
   }
@@ -451,25 +451,25 @@ void ImageDeleter<I>::schedule_retry_timer() {
 template <typename I>
 void ImageDeleter<I>::cancel_retry_timer() {
   dout(10) << dendl;
-  ceph_assert(ceph_mutex_is_locked(m_threads->timer_lock));
+  stone_assert(stone_mutex_is_locked(m_threads->timer_lock));
   if (m_timer_ctx != nullptr) {
     bool canceled = m_threads->timer->cancel_event(m_timer_ctx);
     m_timer_ctx = nullptr;
-    ceph_assert(canceled);
+    stone_assert(canceled);
   }
 }
 
 template <typename I>
 void ImageDeleter<I>::handle_retry_timer() {
   dout(10) << dendl;
-  ceph_assert(ceph_mutex_is_locked(m_threads->timer_lock));
+  stone_assert(stone_mutex_is_locked(m_threads->timer_lock));
   std::lock_guard locker{m_lock};
 
-  ceph_assert(m_timer_ctx != nullptr);
+  stone_assert(m_timer_ctx != nullptr);
   m_timer_ctx = nullptr;
 
-  ceph_assert(m_running);
-  ceph_assert(!m_retry_delete_queue.empty());
+  stone_assert(m_running);
+  stone_assert(!m_retry_delete_queue.empty());
 
   // move all ready-to-ready items back to main queue
   auto now = clock_t::now();

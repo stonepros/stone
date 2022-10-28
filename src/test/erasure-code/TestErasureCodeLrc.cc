@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -123,7 +123,7 @@ TEST(ErasureCodeTest, create_rule)
     for (int h=0; h<num_host; ++h) {
       loc["host"] = string("host-") + stringify(r) + string("-") + stringify(h);
       for (int o=0; o<num_osd; ++o, ++osd) {
-	c->insert_item(g_ceph_context, osd, 1.0, string("osd.") + stringify(osd), loc);
+	c->insert_item(g_stone_context, osd, 1.0, string("osd.") + stringify(osd), loc);
       }
     }
   }
@@ -402,7 +402,7 @@ TEST(ErasureCodeLrc, layers_init)
     ErasureCodeLrc lrc(g_conf().get_val<std::string>("erasure_code_dir"));
     ErasureCodeProfile profile;
 
-    const char* env = getenv("CEPH_LIB");
+    const char* env = getenv("STONE_LIB");
     string directory(env ? env : "lib");
     string description_string = 
       "[ " 

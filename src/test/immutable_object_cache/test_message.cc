@@ -2,13 +2,13 @@
 #include "tools/immutable_object_cache/Types.h"
 #include "tools/immutable_object_cache/SocketCommon.h"
 
-using namespace ceph::immutable_obj_cache;
+using namespace stone::immutable_obj_cache;
 
 TEST(test_for_message, test_1) 
 {
   std::string pool_nspace("this is a pool namespace");
   std::string oid_name("this is a oid name");
-  std::string cache_file_path("/temp/ceph_immutable_object_cache");
+  std::string cache_file_path("/temp/stone_immutable_object_cache");
 
   uint16_t type = RBDSC_READ;
   uint64_t seq = 123456UL;

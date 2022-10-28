@@ -6,7 +6,7 @@ extern unsigned int crc32_iscsi_zero_00(unsigned char const *buffer, uint64_t le
 
 #ifdef HAVE_NASM_X64
 
-uint32_t ceph_crc32c_intel_fast(uint32_t crc, unsigned char const *buffer, unsigned len)
+uint32_t stone_crc32c_intel_fast(uint32_t crc, unsigned char const *buffer, unsigned len)
 {
 	uint32_t v;
 	unsigned left;
@@ -22,28 +22,28 @@ uint32_t ceph_crc32c_intel_fast(uint32_t crc, unsigned char const *buffer, unsig
 	 * that.
 	 */
 	if (len < 16)
-		return ceph_crc32c_intel_baseline(crc, buffer, len);
+		return stone_crc32c_intel_baseline(crc, buffer, len);
 	left = ((unsigned long)buffer + len) & 7;
 	len -= left;
 	v = crc32_iscsi_00(buffer, len, crc);
 	if (left)
-		v = ceph_crc32c_intel_baseline(v, buffer + len, left);
+		v = stone_crc32c_intel_baseline(v, buffer + len, left);
 	return v;
 }
 
-int ceph_crc32c_intel_fast_exists(void)
+int stone_crc32c_intel_fast_exists(void)
 {
 	return 1;
 }
 
 #else
 
-int ceph_crc32c_intel_fast_exists(void)
+int stone_crc32c_intel_fast_exists(void)
 {
 	return 0;
 }
 
-uint32_t ceph_crc32c_intel_fast(uint32_t crc, unsigned char const *buffer, unsigned len)
+uint32_t stone_crc32c_intel_fast(uint32_t crc, unsigned char const *buffer, unsigned len)
 {
 	return 0;
 }

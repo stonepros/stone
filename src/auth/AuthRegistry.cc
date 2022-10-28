@@ -3,22 +3,22 @@
 
 #include "AuthRegistry.h"
 
-#include "cephx/CephxAuthorizeHandler.h"
+#include "stonex/StonexAuthorizeHandler.h"
 #ifdef HAVE_GSSAPI
 #include "krb/KrbAuthorizeHandler.hpp"
 #endif
 #include "none/AuthNoneAuthorizeHandler.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/debug.h"
 #include "auth/KeyRing.h"
 
-#define dout_subsys ceph_subsys_auth
+#define dout_subsys stone_subsys_auth
 #undef dout_prefix
 #define dout_prefix *_dout << "AuthRegistry(" << this << ") "
 
 using std::string;
 
-AuthRegistry::AuthRegistry(CephContext *cct)
+AuthRegistry::AuthRegistry(StoneContext *cct)
   : cct(cct)
 {
   cct->_conf.add_observer(this);
@@ -71,12 +71,12 @@ void AuthRegistry::_parse_method_list(const string& s,
   v->clear();
   for (auto& i : sup_list) {
     ldout(cct, 5) << "adding auth protocol: " << i << dendl;
-    if (i == "cephx") {
-      v->push_back(CEPH_AUTH_CEPHX);
+    if (i == "stonex") {
+      v->push_back(STONE_AUTH_STONEX);
     } else if (i == "none") {
-      v->push_back(CEPH_AUTH_NONE);
+      v->push_back(STONE_AUTH_NONE);
     } else if (i == "gss") {
-      v->push_back(CEPH_AUTH_GSS);
+      v->push_back(STONE_AUTH_GSS);
     } else {
       lderr(cct) << "WARNING: unknown auth protocol defined: " << i << dendl;
     }
@@ -99,9 +99,9 @@ void AuthRegistry::_parse_mode_list(const string& s,
   for (auto& i : sup_list) {
     ldout(cct, 5) << "adding con mode: " << i << dendl;
     if (i == "crc") {
-      v->push_back(CEPH_CON_MODE_CRC);
+      v->push_back(STONE_CON_MODE_CRC);
     } else if (i == "secure") {
-      v->push_back(CEPH_CON_MODE_SECURE);
+      v->push_back(STONE_CON_MODE_SECURE);
     } else {
       lderr(cct) << "WARNING: unknown connection mode " << i << dendl;
     }
@@ -148,31 +148,31 @@ void AuthRegistry::_refresh_config()
 		<< " client_modes " << client_modes
 		<< dendl;
 
-  // if we have no keyring, filter out cephx
-  _no_keyring_disabled_cephx = false;
-  bool any_cephx = false;
+  // if we have no keyring, filter out stonex
+  _no_keyring_disabled_stonex = false;
+  bool any_stonex = false;
   for (auto *p : {&cluster_methods, &service_methods, &client_methods}) {
-    auto q = std::find(p->begin(), p->end(), CEPH_AUTH_CEPHX);
+    auto q = std::find(p->begin(), p->end(), STONE_AUTH_STONEX);
     if (q != p->end()) {
-      any_cephx = true;
+      any_stonex = true;
       break;
     }
   }
-  if (any_cephx) {
+  if (any_stonex) {
     KeyRing k;
-    int r = k.from_ceph_context(cct);
+    int r = k.from_stone_context(cct);
     if (r == -ENOENT) {
       for (auto *p : {&cluster_methods, &service_methods, &client_methods}) {
-	auto q = std::find(p->begin(), p->end(), CEPH_AUTH_CEPHX);
+	auto q = std::find(p->begin(), p->end(), STONE_AUTH_STONEX);
 	if (q != p->end()) {
 	  p->erase(q);
-	  _no_keyring_disabled_cephx = true;
+	  _no_keyring_disabled_stonex = true;
 	}
       }
     }
-    if (_no_keyring_disabled_cephx) {
+    if (_no_keyring_disabled_stonex) {
       lderr(cct) << "no keyring found at " << cct->_conf->keyring
-	       << ", disabling cephx" << dendl;
+	       << ", disabling stonex" << dendl;
     }
   }
 }
@@ -190,15 +190,15 @@ void AuthRegistry::get_supported_methods(
   }
   std::scoped_lock l(lock);
   switch (cct->get_module_type()) {
-  case CEPH_ENTITY_TYPE_CLIENT:
+  case STONE_ENTITY_TYPE_CLIENT:
     // i am client
     if (methods) {
       *methods = client_methods;
     }
     if (modes) {
       switch (peer_type) {
-      case CEPH_ENTITY_TYPE_MON:
-      case CEPH_ENTITY_TYPE_MGR:
+      case STONE_ENTITY_TYPE_MON:
+      case STONE_ENTITY_TYPE_MGR:
 	*modes = mon_client_modes;
 	break;
       default:
@@ -206,12 +206,12 @@ void AuthRegistry::get_supported_methods(
       }
     }
     return;
-  case CEPH_ENTITY_TYPE_MON:
-  case CEPH_ENTITY_TYPE_MGR:
+  case STONE_ENTITY_TYPE_MON:
+  case STONE_ENTITY_TYPE_MGR:
     // i am mon/mgr
     switch (peer_type) {
-    case CEPH_ENTITY_TYPE_MON:
-    case CEPH_ENTITY_TYPE_MGR:
+    case STONE_ENTITY_TYPE_MON:
+    case STONE_ENTITY_TYPE_MGR:
       // they are mon/mgr
       if (methods) {
 	*methods = cluster_methods;
@@ -233,8 +233,8 @@ void AuthRegistry::get_supported_methods(
   default:
     // i am a non-mon daemon
     switch (peer_type) {
-    case CEPH_ENTITY_TYPE_MON:
-    case CEPH_ENTITY_TYPE_MGR:
+    case STONE_ENTITY_TYPE_MON:
+    case STONE_ENTITY_TYPE_MGR:
       // they are a mon daemon
       if (methods) {
 	*methods = cluster_methods;
@@ -243,8 +243,8 @@ void AuthRegistry::get_supported_methods(
 	*modes = mon_cluster_modes;
       }
       break;
-    case CEPH_ENTITY_TYPE_MDS:
-    case CEPH_ENTITY_TYPE_OSD:
+    case STONE_ENTITY_TYPE_MDS:
+    case STONE_ENTITY_TYPE_OSD:
       // they are another daemon
       if (methods) {
 	*methods = cluster_methods;
@@ -287,11 +287,11 @@ void AuthRegistry::get_supported_modes(
 {
   std::vector<uint32_t> s;
   get_supported_methods(peer_type, nullptr, &s);
-  if (auth_method == CEPH_AUTH_NONE) {
+  if (auth_method == STONE_AUTH_NONE) {
     // filter out all but crc for AUTH_NONE
     modes->clear();
     for (auto mode : s) {
-      if (mode == CEPH_CON_MODE_CRC) {
+      if (mode == STONE_CON_MODE_CRC) {
 	modes->push_back(mode);
       }
     }
@@ -315,7 +315,7 @@ uint32_t AuthRegistry::pick_mode(
   }
   ldout(cct,1) << "failed to pick con mode from client's " << preferred_modes
 	       << " and our " << allowed_modes << dendl;
-  return CEPH_CON_MODE_UNKNOWN;
+  return STONE_CON_MODE_UNKNOWN;
 }
 
 AuthAuthorizeHandler *AuthRegistry::get_handler(int peer_type, int method)
@@ -326,14 +326,14 @@ AuthAuthorizeHandler *AuthRegistry::get_handler(int peer_type, int method)
 		<< " service_methods " << service_methods
 		<< " client_methods " << client_methods
 		<< dendl;
-  if (cct->get_module_type() == CEPH_ENTITY_TYPE_CLIENT) {
+  if (cct->get_module_type() == STONE_ENTITY_TYPE_CLIENT) {
     return nullptr;
   }
   switch (peer_type) {
-  case CEPH_ENTITY_TYPE_MON:
-  case CEPH_ENTITY_TYPE_MGR:
-  case CEPH_ENTITY_TYPE_MDS:
-  case CEPH_ENTITY_TYPE_OSD:
+  case STONE_ENTITY_TYPE_MON:
+  case STONE_ENTITY_TYPE_MGR:
+  case STONE_ENTITY_TYPE_MDS:
+  case STONE_ENTITY_TYPE_OSD:
     if (std::find(cluster_methods.begin(), cluster_methods.end(), method) ==
 	cluster_methods.end()) {
       return nullptr;
@@ -353,14 +353,14 @@ AuthAuthorizeHandler *AuthRegistry::get_handler(int peer_type, int method)
   }
   AuthAuthorizeHandler *ah = nullptr;
   switch (method) {
-  case CEPH_AUTH_NONE:
+  case STONE_AUTH_NONE:
     ah = new AuthNoneAuthorizeHandler();
     break;
-  case CEPH_AUTH_CEPHX:
-    ah = new CephxAuthorizeHandler();
+  case STONE_AUTH_STONEX:
+    ah = new StonexAuthorizeHandler();
     break;
 #ifdef HAVE_GSSAPI
-  case CEPH_AUTH_GSS:
+  case STONE_AUTH_GSS:
     ah = new KrbAuthorizeHandler();
     break;
 #endif

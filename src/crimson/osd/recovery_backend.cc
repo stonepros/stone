@@ -13,7 +13,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -31,7 +31,7 @@ hobject_t RecoveryBackend::get_temp_recovery_object(
   return hoid;
 }
 
-void RecoveryBackend::clean_up(ceph::os::Transaction& t,
+void RecoveryBackend::clean_up(stone::os::Transaction& t,
 			       std::string_view why)
 {
   for (auto& soid : temp_contents) {
@@ -70,8 +70,8 @@ void RecoveryBackend::handle_backfill_finish(
   MOSDPGBackfill& m)
 {
   logger().debug("{}", __func__);
-  ceph_assert(!pg.is_primary());
-  ceph_assert(crimson::common::local_conf()->osd_kill_backfill_at != 1);
+  stone_assert(!pg.is_primary());
+  stone_assert(crimson::common::local_conf()->osd_kill_backfill_at != 1);
   auto reply = make_message<MOSDPGBackfill>(
     MOSDPGBackfill::OP_BACKFILL_FINISH_ACK,
     pg.get_osdmap_epoch(),
@@ -93,8 +93,8 @@ seastar::future<> RecoveryBackend::handle_backfill_progress(
   MOSDPGBackfill& m)
 {
   logger().debug("{}", __func__);
-  ceph_assert(!pg.is_primary());
-  ceph_assert(crimson::common::local_conf()->osd_kill_backfill_at != 2);
+  stone_assert(!pg.is_primary());
+  stone_assert(crimson::common::local_conf()->osd_kill_backfill_at != 2);
 
   ObjectStore::Transaction t;
   pg.get_peering_state().update_backfill_progress(
@@ -111,8 +111,8 @@ seastar::future<> RecoveryBackend::handle_backfill_finish_ack(
   MOSDPGBackfill& m)
 {
   logger().debug("{}", __func__);
-  ceph_assert(pg.is_primary());
-  ceph_assert(crimson::common::local_conf()->osd_kill_backfill_at != 3);
+  stone_assert(pg.is_primary());
+  stone_assert(crimson::common::local_conf()->osd_kill_backfill_at != 3);
   // TODO:
   // finish_recovery_op(hobject_t::get_max());
   return seastar::now();
@@ -131,7 +131,7 @@ seastar::future<> RecoveryBackend::handle_backfill(
     case MOSDPGBackfill::OP_BACKFILL_FINISH_ACK:
       return handle_backfill_finish_ack(m);
     default:
-      ceph_assert("unknown op type for pg backfill");
+      stone_assert("unknown op type for pg backfill");
       return seastar::now();
   }
 }
@@ -245,7 +245,7 @@ seastar::future<> RecoveryBackend::handle_scan_digest(
 {
   logger().debug("{}", __func__);
   // Check that from is in backfill_targets vector
-  ceph_assert(pg.is_backfill_target(m.from));
+  stone_assert(pg.is_backfill_target(m.from));
 
   BackfillInterval bi;
   bi.begin = m.begin;
@@ -275,7 +275,7 @@ seastar::future<> RecoveryBackend::handle_scan(
       return handle_scan_digest(m);
     default:
       // FIXME: move to errorator
-      ceph_assert("unknown op type for pg scan");
+      stone_assert("unknown op type for pg scan");
       return seastar::now();
   }
 }

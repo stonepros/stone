@@ -52,7 +52,7 @@ public:
     return next_id != unblock_id;
   }
 
-#ifdef CEPH_DEBUG_MUTEX
+#ifdef STONE_DEBUG_MUTEX
   bool is_locked_by_me() const {
     return is_locked() && locked_by == std::this_thread::get_id();
   }
@@ -73,7 +73,7 @@ private:
   unsigned unblock_id = 0;
   ceph::condition_variable cond;
   ceph::mutex mutex;
-#ifdef CEPH_DEBUG_MUTEX
+#ifdef STONE_DEBUG_MUTEX
   std::thread::id locked_by = {};
 #endif
 };

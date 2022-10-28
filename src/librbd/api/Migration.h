@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_API_MIGRATION_H
-#define CEPH_LIBRBD_API_MIGRATION_H
+#ifndef STONE_LIBRBD_API_MIGRATION_H
+#define STONE_LIBRBD_API_MIGRATION_H
 
 #include "include/int_types.h"
 #include "include/rados/librados_fwd.hpp"
@@ -39,7 +39,7 @@ public:
   static int get_source_spec(ImageCtxT* image_ctx, std::string* source_spec);
 
 private:
-  CephContext* m_cct;
+  StoneContext* m_cct;
   ImageCtx* m_src_image_ctx;
   ImageCtx* m_dst_image_ctx;
   librados::IoCtx m_dst_io_ctx;
@@ -110,4 +110,4 @@ private:
 
 extern template class librbd::api::Migration<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_API_MIGRATION_H
+#endif // STONE_LIBRBD_API_MIGRATION_H

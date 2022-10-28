@@ -14,16 +14,16 @@ public:
   // client
   std::pair<std::vector<uint32_t>, std::vector<uint32_t>>
   get_supported_auth_methods(int peer_type) final {
-    return {{CEPH_AUTH_NONE}, {CEPH_AUTH_NONE}};
+    return {{STONE_AUTH_NONE}, {STONE_AUTH_NONE}};
   }
 
   uint32_t pick_con_mode(int peer_type,
 			 uint32_t auth_method,
 			 const std::vector<uint32_t>& preferred_modes) final {
-    ceph_assert(auth_method == CEPH_AUTH_NONE);
+    ceph_assert(auth_method == STONE_AUTH_NONE);
     ceph_assert(preferred_modes.size() &&
-                preferred_modes[0] == CEPH_CON_MODE_CRC);
-    return CEPH_CON_MODE_CRC;
+                preferred_modes[0] == STONE_CON_MODE_CRC);
+    return STONE_CON_MODE_CRC;
   }
 
   AuthAuthorizeHandler* get_auth_authorize_handler(int peer_type,
@@ -34,7 +34,7 @@ public:
   AuthClient::auth_request_t get_auth_request(
     crimson::net::ConnectionRef conn,
     AuthConnectionMetaRef auth_meta) override {
-    return {CEPH_AUTH_NONE, {CEPH_CON_MODE_CRC}, {}};
+    return {STONE_AUTH_NONE, {STONE_CON_MODE_CRC}, {}};
   }
 
   ceph::bufferlist handle_auth_reply_more(

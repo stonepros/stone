@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 SUSE LINUX GmbH
  *
@@ -52,7 +52,7 @@ void get_move_arguments(po::options_description *positional,
 }
 
 int execute_move(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -74,7 +74,7 @@ int execute_move(const po::variables_map &vm,
     return r;
   }
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   utime_t exp_time = now;
   std::string expires_at;
   if (vm.find(EXPIRES_AT) != vm.end()) {
@@ -118,7 +118,7 @@ void get_remove_arguments(po::options_description *positional,
 }
 
 int execute_remove(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -350,7 +350,7 @@ void get_list_arguments(po::options_description *positional,
 }
 
 int execute_list(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   std::string namespace_name;
   size_t arg_index = 0;
@@ -401,7 +401,7 @@ void get_purge_arguments(po::options_description *positional,
 }
 
 int execute_purge(const po::variables_map &vm,
-                  const std::vector<std::string> &ceph_global_init_args) {
+                  const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   std::string namespace_name;
   size_t arg_index = 0;
@@ -473,7 +473,7 @@ void get_restore_arguments(po::options_description *positional,
 }
 
 int execute_restore(const po::variables_map &vm,
-                    const std::vector<std::string> &ceph_global_init_args) {
+                    const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc.
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_BUFFER_RAW_H
-#define CEPH_BUFFER_RAW_H
+#ifndef STONE_BUFFER_RAW_H
+#define STONE_BUFFER_RAW_H
 
 #include <map>
 #include <utility>
@@ -123,4 +123,4 @@ public:
 } // inline namespace v15_2_0
 } // namespace ceph::buffer
 
-#endif // CEPH_BUFFER_RAW_H
+#endif // STONE_BUFFER_RAW_H

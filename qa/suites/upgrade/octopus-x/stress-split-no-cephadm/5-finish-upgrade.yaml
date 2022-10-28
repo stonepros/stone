@@ -6,8 +6,8 @@ tasks:
       - python3-rados
       - python3-rgw
       - python3-rbd
-      - python3-cephfs
-- ceph.restart:
+      - python3-stonefs
+- stone.restart:
     daemons: [mon.c, osd.8, osd.9, osd.10, osd.11, rgw.*]
     wait-for-healthy: false
     wait-for-osds-up: true

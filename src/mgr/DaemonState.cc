@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -19,8 +19,8 @@
 #include "include/stringify.h"
 #include "common/Formatter.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr " << __func__ << " "
 
@@ -185,15 +185,15 @@ void DaemonStateIndex::_insert(DaemonStatePtr dm)
 
 void DaemonStateIndex::_erase(const DaemonKey& dmk)
 {
-  ceph_assert(ceph_mutex_is_wlocked(lock));
+  stone_assert(stone_mutex_is_wlocked(lock));
 
   const auto to_erase = all.find(dmk);
-  ceph_assert(to_erase != all.end());
+  stone_assert(to_erase != all.end());
   const auto dm = to_erase->second;
 
   for (auto& i : dm->devices) {
     auto d = _get_or_create_device(i.first);
-    ceph_assert(d->daemons.count(dmk));
+    stone_assert(d->daemons.count(dmk));
     d->daemons.erase(dmk);
     auto p = dm->devices_bypath.find(i.first);
     if (p != dm->devices_bypath.end()) {
@@ -339,7 +339,7 @@ void DaemonPerfCounters::update(const MMgrReport& report)
     session->declared_types.erase(t);
   }
 
-  const auto now = ceph_clock_now();
+  const auto now = stone_clock_now();
 
   // Parse packed data according to declared set of types
   auto p = report.packed.cbegin();

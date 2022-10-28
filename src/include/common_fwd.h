@@ -7,7 +7,7 @@
 #endif
 
 namespace TOPNSPC::common {
-  class CephContext;
+  class StoneContext;
   class PerfCounters;
   class PerfCountersBuilder;
   class PerfCountersCollection;
@@ -19,7 +19,7 @@ namespace TOPNSPC::common {
   class RefCountedWaitObject;
   class ConfigProxy;
 }
-using TOPNSPC::common::CephContext;
+using TOPNSPC::common::StoneContext;
 using TOPNSPC::common::PerfCounters;
 using TOPNSPC::common::PerfCountersBuilder;
 using TOPNSPC::common::PerfCountersCollection;

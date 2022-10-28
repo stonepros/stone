@@ -13,11 +13,11 @@
 #include "common/errno.h"
 #include "include/random.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 using namespace rgw_zone_defaults;
 
-RGWSI_Zone::RGWSI_Zone(CephContext *cct) : RGWServiceInstance(cct)
+RGWSI_Zone::RGWSI_Zone(StoneContext *cct) : RGWServiceInstance(cct)
 {
 }
 
@@ -432,14 +432,14 @@ int RGWSI_Zone::replace_region_with_zonegroup(const DoutPrefixProvider *dpp, opt
      realm id will be mds of its name */
   if (realm->get_id().empty() && !master_region.empty() && !master_zone.empty()) {
     string new_realm_name = master_region + "." + master_zone.id;
-    unsigned char md5[CEPH_CRYPTO_MD5_DIGESTSIZE];
-    char md5_str[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+    unsigned char md5[STONE_CRYPTO_MD5_DIGESTSIZE];
+    char md5_str[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
     MD5 hash;
     // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
     hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
     hash.Update((const unsigned char *)new_realm_name.c_str(), new_realm_name.length());
     hash.Final(md5);
-    buf_to_hex(md5, CEPH_CRYPTO_MD5_DIGESTSIZE, md5_str);
+    buf_to_hex(md5, STONE_CRYPTO_MD5_DIGESTSIZE, md5_str);
     string new_realm_id(md5_str);
     RGWRealm new_realm(new_realm_id,new_realm_name);
     ret = new_realm.init(dpp, cct, sysobj_svc, y, false);
@@ -1193,7 +1193,7 @@ read_omap:
   auto miter = m.begin();
   if (m.size() > 1) {
     // choose a pool at random
-    auto r = ceph::util::generate_random_number<size_t>(0, m.size() - 1);
+    auto r = stone::util::generate_random_number<size_t>(0, m.size() - 1);
     std::advance(miter, r);
   }
   pool_name = miter->first;

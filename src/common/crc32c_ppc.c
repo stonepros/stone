@@ -114,7 +114,7 @@ out:
 /* This wrapper function works around the fact that crc32_vpmsum 
  * does not gracefully handle the case where the data pointer is NULL.
  */
-uint32_t ceph_crc32c_ppc(uint32_t crc, unsigned char const *data, unsigned len)
+uint32_t stone_crc32c_ppc(uint32_t crc, unsigned char const *data, unsigned len)
 {
   if (!data) {
     /* Handle the NULL buffer case. */
@@ -140,7 +140,7 @@ uint32_t ceph_crc32c_ppc(uint32_t crc, unsigned char const *data, unsigned len)
  * ppc systems using power7 or below) in order to compile properly
  * there, even though it won't be called.
  */
-uint32_t ceph_crc32c_ppc(uint32_t crc, unsigned char const *data, unsigned len)
+uint32_t stone_crc32c_ppc(uint32_t crc, unsigned char const *data, unsigned len)
 {
   return 0;
 }

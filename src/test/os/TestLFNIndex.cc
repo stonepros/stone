@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -23,13 +23,13 @@
 #include <signal.h>
 #include "os/filestore/LFNIndex.h"
 #include "os/filestore/chain_xattr.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include <gtest/gtest.h>
 
 class TestWrapLFNIndex : public LFNIndex {
 public:
-  TestWrapLFNIndex(CephContext* cct,
+  TestWrapLFNIndex(StoneContext* cct,
 		   coll_t collection,
 		   const char *base_path,
 		   uint32_t index_version)
@@ -98,7 +98,7 @@ protected:
 class TestHASH_INDEX_TAG : public TestWrapLFNIndex, public ::testing::Test {
 public:
   TestHASH_INDEX_TAG()
-    : TestWrapLFNIndex(g_ceph_context, coll_t(), "PATH_1",
+    : TestWrapLFNIndex(g_stone_context, coll_t(), "PATH_1",
 		       CollectionIndex::HASH_INDEX_TAG) {
   }
 };
@@ -109,16 +109,16 @@ TEST_F(TestHASH_INDEX_TAG, generate_and_parse_name) {
   uint64_t hash = 0xABABABAB;
   uint64_t pool = -1;
 
-  test_generate_and_parse(ghobject_t(hobject_t(object_t(".A/B_\\C.D"), key, CEPH_NOSNAP, hash, pool, "")),
+  test_generate_and_parse(ghobject_t(hobject_t(object_t(".A/B_\\C.D"), key, STONE_NOSNAP, hash, pool, "")),
 			  "\\.A\\sB_\\\\C.D_head_ABABABAB");
-  test_generate_and_parse(ghobject_t(hobject_t(object_t("DIR_A"), key, CEPH_NOSNAP, hash, pool, "")),
+  test_generate_and_parse(ghobject_t(hobject_t(object_t("DIR_A"), key, STONE_NOSNAP, hash, pool, "")),
 			  "\\dA_head_ABABABAB");
 }
 
 class TestHASH_INDEX_TAG_2 : public TestWrapLFNIndex, public ::testing::Test {
 public:
   TestHASH_INDEX_TAG_2()
-    : TestWrapLFNIndex(g_ceph_context,
+    : TestWrapLFNIndex(g_stone_context,
 		       coll_t(), "PATH_1", CollectionIndex::HASH_INDEX_TAG_2) {
   }
 };
@@ -132,18 +132,18 @@ TEST_F(TestHASH_INDEX_TAG_2, generate_and_parse_name) {
   {
     std::string name(".XA/B_\\C.D");
     name[1] = '\0';
-    ghobject_t hoid(hobject_t(object_t(name), key, CEPH_NOSNAP, hash, pool, ""));
+    ghobject_t hoid(hobject_t(object_t(name), key, STONE_NOSNAP, hash, pool, ""));
 
     test_generate_and_parse(hoid, "\\.\\nA\\sB\\u\\\\C.D_KEY_head_ABABABAB");
   }
-  test_generate_and_parse(ghobject_t(hobject_t(object_t("DIR_A"), key, CEPH_NOSNAP, hash, pool, "")),
+  test_generate_and_parse(ghobject_t(hobject_t(object_t("DIR_A"), key, STONE_NOSNAP, hash, pool, "")),
 			  "\\dA_KEY_head_ABABABAB");
 }
 
 class TestHOBJECT_WITH_POOL : public TestWrapLFNIndex, public ::testing::Test {
 public:
   TestHOBJECT_WITH_POOL()
-    : TestWrapLFNIndex(g_ceph_context, coll_t(),
+    : TestWrapLFNIndex(g_stone_context, coll_t(),
 		       "PATH_1", CollectionIndex::HOBJECT_WITH_POOL) {
   }
 };
@@ -159,13 +159,13 @@ TEST_F(TestHOBJECT_WITH_POOL, generate_and_parse_name) {
   {
     std::string name(".XA/B_\\C.D");
     name[1] = '\0';
-    ghobject_t hoid(hobject_t(object_t(name), key, CEPH_NOSNAP, hash, pool, ""));
+    ghobject_t hoid(hobject_t(object_t(name), key, STONE_NOSNAP, hash, pool, ""));
     hoid.hobj.nspace = "NSPACE";
 
     test_generate_and_parse(hoid, "\\.\\nA\\sB\\u\\\\C.D_KEY_head_ABABABAB_NSPACE_cdcdcdcd");
   }
   {
-    ghobject_t hoid(hobject_t(object_t("DIR_A"), key, CEPH_NOSNAP, hash, pool, ""));
+    ghobject_t hoid(hobject_t(object_t("DIR_A"), key, STONE_NOSNAP, hash, pool, ""));
     hoid.hobj.nspace = "NSPACE";
 
     test_generate_and_parse(hoid, "\\dA_KEY_head_ABABABAB_NSPACE_cdcdcdcd");
@@ -173,13 +173,13 @@ TEST_F(TestHOBJECT_WITH_POOL, generate_and_parse_name) {
   {
     std::string name(".XA/B_\\C.D");
     name[1] = '\0';
-    ghobject_t hoid(hobject_t(object_t(name), key, CEPH_NOSNAP, hash, pool, ""), gen, shard_id);
+    ghobject_t hoid(hobject_t(object_t(name), key, STONE_NOSNAP, hash, pool, ""), gen, shard_id);
     hoid.hobj.nspace = "NSPACE";
 
     test_generate_and_parse(hoid, "\\.\\nA\\sB\\u\\\\C.D_KEY_head_ABABABAB_NSPACE_cdcdcdcd_efefefefef_b");
   }
   {
-    ghobject_t hoid(hobject_t(object_t("DIR_A"), key, CEPH_NOSNAP, hash, pool, ""), gen, shard_id);
+    ghobject_t hoid(hobject_t(object_t("DIR_A"), key, STONE_NOSNAP, hash, pool, ""), gen, shard_id);
     hoid.hobj.nspace = "NSPACE";
 
     test_generate_and_parse(hoid, "\\dA_KEY_head_ABABABAB_NSPACE_cdcdcdcd_efefefefef_b");
@@ -189,7 +189,7 @@ TEST_F(TestHOBJECT_WITH_POOL, generate_and_parse_name) {
 class TestLFNIndex : public TestWrapLFNIndex, public ::testing::Test {
 public:
   TestLFNIndex()
-    : TestWrapLFNIndex(g_ceph_context, coll_t(), "PATH_1",
+    : TestWrapLFNIndex(g_stone_context, coll_t(), "PATH_1",
 		       CollectionIndex::HOBJECT_WITH_POOL) {
   }
 
@@ -213,7 +213,7 @@ TEST_F(TestLFNIndex, remove_object) {
   {
     std::string mangled_name;
     int exists = 666;
-    ghobject_t hoid(hobject_t(sobject_t("ABC", CEPH_NOSNAP)));
+    ghobject_t hoid(hobject_t(sobject_t("ABC", STONE_NOSNAP)));
 
     EXPECT_EQ(0, ::chmod("PATH_1", 0000));
     if (getuid() != 0) {
@@ -235,7 +235,7 @@ TEST_F(TestLFNIndex, remove_object) {
     std::string mangled_name;
     int exists;
     const std::string object_name(1024, 'A');
-    ghobject_t hoid(hobject_t(sobject_t(object_name, CEPH_NOSNAP)));
+    ghobject_t hoid(hobject_t(sobject_t(object_name, STONE_NOSNAP)));
 
     EXPECT_EQ(0, get_mangled_name(path, hoid, &mangled_name, &exists));
     EXPECT_EQ(0, exists);
@@ -256,7 +256,7 @@ TEST_F(TestLFNIndex, remove_object) {
     std::string mangled_name;
     int exists;
     const std::string object_name(1024, 'A');
-    ghobject_t hoid(hobject_t(sobject_t(object_name, CEPH_NOSNAP)));
+    ghobject_t hoid(hobject_t(sobject_t(object_name, STONE_NOSNAP)));
 
     //
     //   PATH_1/AAA..._0_long => does not match long object name
@@ -267,7 +267,7 @@ TEST_F(TestLFNIndex, remove_object) {
     std::string pathname("PATH_1/" + mangled_name);
     EXPECT_EQ(0, ::close(::creat(pathname.c_str(), 0600)));
     EXPECT_EQ(0, created(hoid, pathname.c_str()));
-    string LFN_ATTR = "user.cephos.lfn";
+    string LFN_ATTR = "user.stoneos.lfn";
     if (index_version != HASH_INDEX_TAG) {
       char buf[100];
       snprintf(buf, sizeof(buf), "%d", index_version);
@@ -286,7 +286,7 @@ TEST_F(TestLFNIndex, remove_object) {
     EXPECT_EQ(0, exists);
     std::string pathname_1("PATH_1/" + mangled_name_1);
     auto retvalue = ::creat(pathname_1.c_str(), 0600);
-    ceph_assert(retvalue > 2);
+    stone_assert(retvalue > 2);
     EXPECT_EQ(0, ::close(retvalue));
     EXPECT_EQ(0, created(hoid, pathname_1.c_str()));
 
@@ -307,7 +307,7 @@ TEST_F(TestLFNIndex, remove_object) {
     std::string mangled_name;
     int exists;
     const std::string object_name(1024, 'A');
-    ghobject_t hoid(hobject_t(sobject_t(object_name, CEPH_NOSNAP)));
+    ghobject_t hoid(hobject_t(sobject_t(object_name, STONE_NOSNAP)));
 
     //
     //   PATH_1/AAA..._0_long => matches long object name
@@ -355,7 +355,7 @@ TEST_F(TestLFNIndex, get_mangled_name) {
   {
     std::string mangled_name;
     int exists = 666;
-    ghobject_t hoid(hobject_t(sobject_t("ABC", CEPH_NOSNAP)));
+    ghobject_t hoid(hobject_t(sobject_t("ABC", STONE_NOSNAP)));
 
     EXPECT_EQ(0, get_mangled_name(path, hoid, &mangled_name, &exists));
     EXPECT_NE(std::string::npos, mangled_name.find("ABC__head"));
@@ -375,7 +375,7 @@ TEST_F(TestLFNIndex, get_mangled_name) {
     std::string mangled_name;
     int exists;
     const std::string object_name(1024, 'A');
-    ghobject_t hoid(hobject_t(sobject_t(object_name, CEPH_NOSNAP)));
+    ghobject_t hoid(hobject_t(sobject_t(object_name, STONE_NOSNAP)));
 
     //
     // long version of the mangled name and no matching
@@ -426,7 +426,7 @@ TEST_F(TestLFNIndex, get_mangled_name) {
     mangled_name.clear();
     exists = 666;
     auto retvalue = ::creat(pathname.c_str(), 0600);
-    ceph_assert(retvalue > 2);
+    stone_assert(retvalue > 2);
     EXPECT_EQ(0, ::close(retvalue));
     EXPECT_EQ(0, created(hoid, pathname.c_str()));
     EXPECT_EQ(0, get_mangled_name(path, hoid, &mangled_name, &exists));
@@ -440,7 +440,7 @@ TEST_F(TestLFNIndex, get_mangled_name) {
     // are not identical and it so happens that their SHA1 is
     // identical : a collision number is used to differentiate them
     //
-    string LFN_ATTR = "user.cephos.lfn";
+    string LFN_ATTR = "user.stoneos.lfn";
     if (index_version != HASH_INDEX_TAG) {
       char buf[100];
       snprintf(buf, sizeof(buf), "%d", index_version);
@@ -473,10 +473,10 @@ int main(int argc, char **argv) {
     vector<const char*> args;
     argv_to_vec(argc, (const char **)argv, args);
 
-    auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+    auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			   CODE_ENVIRONMENT_UTILITY,
 			   CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-    common_init_finish(g_ceph_context);
+    common_init_finish(g_stone_context);
 
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

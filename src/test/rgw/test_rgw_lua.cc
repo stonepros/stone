@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "rgw/rgw_common.h"
 #include "rgw/rgw_auth.h"
 #include "rgw/rgw_process.h"
@@ -12,9 +12,9 @@ using rgw::auth::Identity;
 using rgw::auth::Principal;
 
 class CctCleaner {
-  CephContext* cct;
+  StoneContext* cct;
 public:
-  CctCleaner(CephContext* _cct) : cct(_cct) {}
+  CctCleaner(StoneContext* _cct) : cct(_cct) {}
   ~CctCleaner() { 
 #ifdef WITH_SEASTAR
     delete cct; 
@@ -71,7 +71,7 @@ public:
     return 0;
   }
 
-  virtual sal::RGWBucket* create_bucket(rgw_bucket& bucket, ceph::real_time creation_time) override {
+  virtual sal::RGWBucket* create_bucket(rgw_bucket& bucket, stone::real_time creation_time) override {
     return nullptr;
   }
 
@@ -86,7 +86,7 @@ class TestAccounter : public io::Accounter, public io::BasicClient {
   RGWEnv env;
 
 protected:
-  virtual int init_env(CephContext *cct) override {
+  virtual int init_env(StoneContext *cct) override {
     return 0;
   }
 
@@ -113,7 +113,7 @@ public:
   }
 };
 
-auto cct = new CephContext(CEPH_ENTITY_TYPE_CLIENT);
+auto cct = new StoneContext(STONE_ENTITY_TYPE_CLIENT);
 
 CctCleaner cleaner(cct);
 

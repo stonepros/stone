@@ -10,7 +10,7 @@
 #include "librbd/io/AioCompletion.h"
 #include "librbd/io/ImageDispatchSpec.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::WriteBlockImageDispatch: " << this \
                            << " " << __func__ << ": "
@@ -33,7 +33,7 @@ struct WriteBlockImageDispatch<I>::C_BlockedWrites : public Context {
 template <typename I>
 WriteBlockImageDispatch<I>::WriteBlockImageDispatch(I* image_ctx)
   : m_image_ctx(image_ctx),
-    m_lock(ceph::make_shared_mutex(
+    m_lock(stone::make_shared_mutex(
       util::unique_lock_name("librbd::io::WriteBlockImageDispatch::m_lock",
                              this))) {
   auto cct = m_image_ctx->cct;
@@ -54,7 +54,7 @@ int WriteBlockImageDispatch<I>::block_writes() {
 
 template <typename I>
 void WriteBlockImageDispatch<I>::block_writes(Context *on_blocked) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx->owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx->owner_lock));
   auto cct = m_image_ctx->cct;
 
   // ensure owner lock is not held after block_writes completes
@@ -85,7 +85,7 @@ void WriteBlockImageDispatch<I>::unblock_writes() {
   Contexts dispatch_contexts;
   {
     std::unique_lock locker{m_lock};
-    ceph_assert(m_write_blockers > 0);
+    stone_assert(m_write_blockers > 0);
     --m_write_blockers;
 
     ldout(cct, 5) << m_image_ctx << ", "
@@ -108,7 +108,7 @@ void WriteBlockImageDispatch<I>::unblock_writes() {
 template <typename I>
 void WriteBlockImageDispatch<I>::wait_on_writes_unblocked(
     Context *on_unblocked) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx->owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx->owner_lock));
   auto cct = m_image_ctx->cct;
 
   {
@@ -201,7 +201,7 @@ void WriteBlockImageDispatch<I>::handle_finished(int r, uint64_t tid) {
   ldout(cct, 20) << "r=" << r << ", tid=" << tid << dendl;
 
   std::unique_lock locker{m_lock};
-  ceph_assert(m_in_flight_writes > 0);
+  stone_assert(m_in_flight_writes > 0);
   --m_in_flight_writes;
 
   bool writes_blocked = false;

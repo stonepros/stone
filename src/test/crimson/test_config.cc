@@ -3,7 +3,7 @@
 #include <numeric>
 #include <seastar/core/app-template.hh>
 #include <seastar/core/sharded.hh>
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/config_obs.h"
 #include "crimson/common/config_proxy.h"
 
@@ -12,7 +12,7 @@ const std::string test_uint_option = "osd_max_pgls";
 const uint64_t INVALID_VALUE = (uint64_t)(-1);
 const uint64_t EXPECTED_VALUE = 42;
 
-class ConfigObs : public ceph::md_config_obs_impl<Config> {
+class ConfigObs : public stone::md_config_obs_impl<Config> {
   uint64_t last_change = INVALID_VALUE;
   uint64_t num_changes = 0;
 
@@ -47,12 +47,12 @@ seastar::sharded<ConfigObs> sharded_cobs;
 
 static seastar::future<> test_config()
 {
-  return crimson::common::sharded_conf().start(EntityName{}, string_view{"ceph"}).then([] {
+  return crimson::common::sharded_conf().start(EntityName{}, string_view{"stone"}).then([] {
     std::vector<const char*> args;
     std::string cluster;
     std::string conf_file_list;
-    auto init_params = ceph_argparse_early_args(args,
-                                                CEPH_ENTITY_TYPE_CLIENT,
+    auto init_params = stone_argparse_early_args(args,
+                                                STONE_ENTITY_TYPE_CLIENT,
                                                 &cluster,
                                                 &conf_file_list);
     auto& conf = crimson::common::local_conf();

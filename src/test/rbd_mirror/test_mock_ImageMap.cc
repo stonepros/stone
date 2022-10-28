@@ -34,7 +34,7 @@ namespace mirror {
 template <>
 struct Threads<librbd::MockTestImageCtx> {
   MockSafeTimer *timer;
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
 
   MockContextWQ *work_queue;
 
@@ -60,7 +60,7 @@ struct LoadRequest<librbd::MockTestImageCtx> {
   static LoadRequest *create(librados::IoCtx &ioctx,
                              std::map<std::string, cls::rbd::MirrorImageMap> *image_map,
                              Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->image_map = image_map;
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -81,7 +81,7 @@ struct UpdateRequest<librbd::MockTestImageCtx> {
                                std::map<std::string, cls::rbd::MirrorImageMap> &&update_mapping,
                                std::set<std::string> &&global_image_ids,
                                Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -200,7 +200,7 @@ public:
     EXPECT_CALL(*mock_threads.timer, add_event_after(_,_))
       .WillOnce(DoAll(WithArg<1>(Invoke([this](Context *ctx) {
                 // disable rebalance so as to not reschedule it again
-                CephContext *cct = reinterpret_cast<CephContext *>(m_local_io_ctx.cct());
+                StoneContext *cct = reinterpret_cast<StoneContext *>(m_local_io_ctx.cct());
                 cct->_conf.set_val("rbd_mirror_image_policy_rebalance_timeout", "0");
 
                 auto wrapped_ctx = new LambdaContext([this, ctx](int r) {
@@ -420,8 +420,8 @@ public:
     }
   }
 
-  ceph::mutex m_lock = ceph::make_mutex("TestMockImageMap::m_lock");
-  ceph::condition_variable m_cond;
+  stone::mutex m_lock = stone::make_mutex("TestMockImageMap::m_lock");
+  stone::condition_variable m_cond;
   uint32_t m_notify_update_count = 0;
   uint32_t m_map_update_count = 0;
   std::string m_local_instance_id;
@@ -1561,7 +1561,7 @@ TEST_F(TestMockImageMap, RebalanceImageMap) {
   ASSERT_TRUE(wait_for_listener_notify(new_global_image_ids_ack.size()));
 
   // set rebalance interval
-  CephContext *cct = reinterpret_cast<CephContext *>(m_local_io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(m_local_io_ctx.cct());
   cct->_conf.set_val("rbd_mirror_image_policy_rebalance_timeout", "5");
   remote_peer_ack_nowait(mock_image_map.get(), new_global_image_ids_ack, 0,
                          &peer_ack_ctxs);

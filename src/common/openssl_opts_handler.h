@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (c) 2020 Huawei Technologies Co., Ltd.
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OPENSSL_OPTS_HANDLER_H
-#define CEPH_OPENSSL_OPTS_HANDLER_H
+#ifndef STONE_OPENSSL_OPTS_HANDLER_H
+#define STONE_OPENSSL_OPTS_HANDLER_H
 
 namespace ceph {
   namespace crypto {

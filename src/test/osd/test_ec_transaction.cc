@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat
  *
@@ -20,11 +20,11 @@
 
 struct mydpp : public DoutPrefixProvider {
   std::ostream& gen_prefix(std::ostream& out) const override { return out << "foo"; }
-  CephContext *get_cct() const override { return g_ceph_context; }
-  unsigned get_subsys() const override { return ceph_subsys_osd; }
+  StoneContext *get_cct() const override { return g_stone_context; }
+  unsigned get_subsys() const override { return stone_subsys_osd; }
 } dpp;
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 TEST(ectransaction, two_writes_separated)
 {

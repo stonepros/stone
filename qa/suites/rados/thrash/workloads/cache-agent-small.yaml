@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - must scrub before tier agent can activate
     conf:
@@ -10,18 +10,18 @@ overrides:
 tasks:
 - exec:
     client.0:
-      - sudo ceph osd pool create base 4
-      - sudo ceph osd pool application enable base rados
-      - sudo ceph osd pool create cache 4
-      - sudo ceph osd tier add base cache
-      - sudo ceph osd tier cache-mode cache writeback
-      - sudo ceph osd tier set-overlay base cache
-      - sudo ceph osd pool set cache hit_set_type bloom
-      - sudo ceph osd pool set cache hit_set_count 8
-      - sudo ceph osd pool set cache hit_set_period 60
-      - sudo ceph osd pool set cache target_max_objects 250
-      - sudo ceph osd pool set cache min_read_recency_for_promote 2
-      - sudo ceph osd pool set cache min_write_recency_for_promote 2
+      - sudo stone osd pool create base 4
+      - sudo stone osd pool application enable base rados
+      - sudo stone osd pool create cache 4
+      - sudo stone osd tier add base cache
+      - sudo stone osd tier cache-mode cache writeback
+      - sudo stone osd tier set-overlay base cache
+      - sudo stone osd pool set cache hit_set_type bloom
+      - sudo stone osd pool set cache hit_set_count 8
+      - sudo stone osd pool set cache hit_set_period 60
+      - sudo stone osd pool set cache target_max_objects 250
+      - sudo stone osd pool set cache min_read_recency_for_promote 2
+      - sudo stone osd pool set cache min_write_recency_for_promote 2
 - rados:
     clients: [client.0]
     pools: [base]

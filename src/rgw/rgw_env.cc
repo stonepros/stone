@@ -6,13 +6,13 @@
 
 #include <string>
 #include <map>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "rgw_crypt_sanitize.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
-void RGWEnv::init(CephContext *cct)
+void RGWEnv::init(StoneContext *cct)
 {
   conf.init(cct);
 }
@@ -22,7 +22,7 @@ void RGWEnv::set(std::string name, std::string val)
   env_map[std::move(name)] = std::move(val);
 }
 
-void RGWEnv::init(CephContext *cct, char **envp)
+void RGWEnv::init(StoneContext *cct, char **envp)
 {
   const char *p;
 
@@ -127,7 +127,7 @@ void RGWEnv::remove(const char *name)
     env_map.erase(iter);
 }
 
-void RGWConf::init(CephContext *cct)
+void RGWConf::init(StoneContext *cct)
 {
   enable_ops_log = cct->_conf->rgw_enable_ops_log;
   enable_usage_log = cct->_conf->rgw_enable_usage_log;

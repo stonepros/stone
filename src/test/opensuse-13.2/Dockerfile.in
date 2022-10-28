@@ -21,7 +21,7 @@
 FROM opensuse:%%os_version%%
 
 COPY install-deps.sh /root/
-COPY ceph.spec.in /root/
+COPY stone.spec.in /root/
 # build dependencies
 RUN cd /root ; ./install-deps.sh
 # development tools

@@ -10,37 +10,37 @@
 #include "SessionMap.h"
 #include "MetricsHandler.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << __func__ << ": mds.metrics"
 
-MetricsHandler::MetricsHandler(CephContext *cct, MDSRank *mds)
+MetricsHandler::MetricsHandler(StoneContext *cct, MDSRank *mds)
   : Dispatcher(cct),
     mds(mds) {
 }
 
 bool MetricsHandler::ms_can_fast_dispatch2(const cref_t<Message> &m) const {
-  return m->get_type() == CEPH_MSG_CLIENT_METRICS || m->get_type() == MSG_MDS_PING;
+  return m->get_type() == STONE_MSG_CLIENT_METRICS || m->get_type() == MSG_MDS_PING;
 }
 
 void MetricsHandler::ms_fast_dispatch2(const ref_t<Message> &m) {
   bool handled = ms_dispatch2(m);
-  ceph_assert(handled);
+  stone_assert(handled);
 }
 
 bool MetricsHandler::ms_dispatch2(const ref_t<Message> &m) {
-  if (m->get_type() == CEPH_MSG_CLIENT_METRICS &&
-      m->get_connection()->get_peer_type() == CEPH_ENTITY_TYPE_CLIENT) {
+  if (m->get_type() == STONE_MSG_CLIENT_METRICS &&
+      m->get_connection()->get_peer_type() == STONE_ENTITY_TYPE_CLIENT) {
     handle_client_metrics(ref_cast<MClientMetrics>(m));
     return true;
   } else if (m->get_type() == MSG_MDS_PING &&
-             m->get_connection()->get_peer_type() == CEPH_ENTITY_TYPE_MDS) {
+             m->get_connection()->get_peer_type() == STONE_ENTITY_TYPE_MDS) {
     const Message *msg = m.get();
     const MMDSOp *op = dynamic_cast<const MMDSOp*>(msg);
     if (!op)
       dout(0) << typeid(*msg).name() << " is not an MMDSOp type" << dendl;
-    ceph_assert(op);
+    stone_assert(op);
     handle_mds_ping(ref_cast<MMDSPing>(m));
     return true;
   }
@@ -67,7 +67,7 @@ void MetricsHandler::shutdown() {
 
   {
     std::scoped_lock locker(lock);
-    ceph_assert(!stopping);
+    stone_assert(!stopping);
     stopping = true;
   }
 
@@ -78,7 +78,7 @@ void MetricsHandler::shutdown() {
 
 
 void MetricsHandler::add_session(Session *session) {
-  ceph_assert(session != nullptr);
+  stone_assert(session != nullptr);
 
   auto &client = session->info.inst;
   dout(10) << ": session=" << session << ", client=" << client << dendl;
@@ -92,7 +92,7 @@ void MetricsHandler::add_session(Session *session) {
 }
 
 void MetricsHandler::remove_session(Session *session) {
-  ceph_assert(session != nullptr);
+  stone_assert(session != nullptr);
 
   auto &client = session->info.inst;
   dout(10) << ": session=" << session << ", client=" << client << dendl;

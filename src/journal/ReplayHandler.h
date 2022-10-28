@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_JOURNAL_REPLAY_HANDLER_H
-#define CEPH_JOURNAL_REPLAY_HANDLER_H
+#ifndef STONE_JOURNAL_REPLAY_HANDLER_H
+#define STONE_JOURNAL_REPLAY_HANDLER_H
 
 namespace journal {
 
@@ -14,4 +14,4 @@ struct ReplayHandler {
 
 } // namespace journal
 
-#endif // CEPH_JOURNAL_REPLAY_HANDLER_H
+#endif // STONE_JOURNAL_REPLAY_HANDLER_H

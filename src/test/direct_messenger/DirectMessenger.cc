@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -30,7 +30,7 @@ class DirectConnection : public Connection {
 
  private:
   FRIEND_MAKE_REF(DirectConnection);
-  DirectConnection(CephContext *cct, DirectMessenger *m,
+  DirectConnection(StoneContext *cct, DirectMessenger *m,
                    DispatchStrategy *dispatchers)
     : Connection(cct, m),
       dispatchers(dispatchers)
@@ -102,15 +102,15 @@ static ConnectionRef create_loopback(DirectMessenger *m,
                                      entity_name_t name,
                                      DispatchStrategy *dispatchers)
 {
-  auto loopback = ceph::make_ref<DirectConnection>(m->cct, m, dispatchers);
+  auto loopback = stone::make_ref<DirectConnection>(m->cct, m, dispatchers);
   // loopback replies go to itself
   loopback->set_direct_reply_connection(loopback);
   loopback->set_peer_type(name.type());
-  loopback->set_features(CEPH_FEATURES_ALL);
+  loopback->set_features(STONE_FEATURES_ALL);
   return loopback;
 }
 
-DirectMessenger::DirectMessenger(CephContext *cct, entity_name_t name,
+DirectMessenger::DirectMessenger(StoneContext *cct, entity_name_t name,
                                  string mname, uint64_t nonce,
                                  DispatchStrategy *dispatchers)
   : SimplePolicyMessenger(cct, name, mname, nonce),
@@ -132,11 +132,11 @@ int DirectMessenger::set_direct_peer(DirectMessenger *peer)
   peer_inst = peer->get_myinst();
 
   // allocate a Connection that dispatches to the peer messenger
-  auto direct_connection = ceph::make_ref<DirectConnection>(cct, peer, peer->dispatchers.get());
+  auto direct_connection = stone::make_ref<DirectConnection>(cct, peer, peer->dispatchers.get());
 
   direct_connection->set_peer_addr(peer_inst.addr);
   direct_connection->set_peer_type(peer_inst.name.type());
-  direct_connection->set_features(CEPH_FEATURES_ALL);
+  direct_connection->set_features(STONE_FEATURES_ALL);
 
   // if set_direct_peer() was already called on the peer messenger, we can
   // finish by attaching their connections. if not, the later call to

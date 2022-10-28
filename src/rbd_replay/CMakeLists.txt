@@ -17,7 +17,7 @@ target_link_libraries(rbd_replay
 add_executable(rbd-replay
   rbd-replay.cc)
 target_link_libraries(rbd-replay
-  librbd librados global rbd_replay ceph-common)
+  librbd librados global rbd_replay stone-common)
 install(TARGETS rbd-replay DESTINATION bin)
 
 set(librbd_replay_ios_srcs
@@ -33,7 +33,7 @@ if(HAVE_BABELTRACE)
     rbd_replay_ios
     librbd
     librados
-    ceph-common
+    stone-common
     global
     babeltrace
     babeltrace-ctf

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2018 Indian Institute of Science <office.ece@iisc.ac.in>
  *
@@ -530,7 +530,7 @@ TEST(ErasureCodeClay, create_rule)
   for (int h=0; h<num_host; ++h) {
     loc["host"] = string("host-") + stringify(h);
     for (int o=0; o<num_osd; ++o, ++osd) {
-      c->insert_item(g_ceph_context, osd, 1.0, string("osd.") + stringify(osd), loc);
+      c->insert_item(g_stone_context, osd, 1.0, string("osd.") + stringify(osd), loc);
     }
   }
 

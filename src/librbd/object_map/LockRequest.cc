@@ -9,7 +9,7 @@
 #include "librbd/ObjectMap.h"
 #include "librbd/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::LockRequest: "
 
@@ -30,8 +30,8 @@ void LockRequest<I>::send() {
 
 template <typename I>
 void LockRequest<I>::send_lock() {
-  CephContext *cct = m_image_ctx.cct;
-  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, CEPH_NOSNAP));
+  StoneContext *cct = m_image_ctx.cct;
+  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, STONE_NOSNAP));
   ldout(cct, 10) << this << " " << __func__ << ": oid=" << oid << dendl;
 
   librados::ObjectWriteOperation op;
@@ -42,13 +42,13 @@ void LockRequest<I>::send_lock() {
   librados::AioCompletion *rados_completion =
     create_rados_callback<klass, &klass::handle_lock>(this);
   int r = m_image_ctx.md_ctx.aio_operate(oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 template <typename I>
 Context *LockRequest<I>::handle_lock(int *ret_val) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *ret_val << dendl;
 
   if (*ret_val == 0) {
@@ -70,8 +70,8 @@ Context *LockRequest<I>::handle_lock(int *ret_val) {
 
 template <typename I>
 void LockRequest<I>::send_get_lock_info() {
-  CephContext *cct = m_image_ctx.cct;
-  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, CEPH_NOSNAP));
+  StoneContext *cct = m_image_ctx.cct;
+  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, STONE_NOSNAP));
   ldout(cct, 10) << this << " " << __func__ << ": oid=" << oid << dendl;
 
   librados::ObjectReadOperation op;
@@ -81,13 +81,13 @@ void LockRequest<I>::send_get_lock_info() {
   librados::AioCompletion *rados_completion =
     create_rados_callback<klass, &klass::handle_get_lock_info>(this);
   int r = m_image_ctx.md_ctx.aio_operate(oid, rados_completion, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 template <typename I>
 Context *LockRequest<I>::handle_get_lock_info(int *ret_val) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *ret_val << dendl;
 
   if (*ret_val == -ENOENT) {
@@ -115,8 +115,8 @@ Context *LockRequest<I>::handle_get_lock_info(int *ret_val) {
 
 template <typename I>
 void LockRequest<I>::send_break_locks() {
-  CephContext *cct = m_image_ctx.cct;
-  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, CEPH_NOSNAP));
+  StoneContext *cct = m_image_ctx.cct;
+  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, STONE_NOSNAP));
   ldout(cct, 10) << this << " " << __func__ << ": oid=" << oid << ", "
                  << "num_lockers=" << m_lockers.size() << dendl;
 
@@ -130,13 +130,13 @@ void LockRequest<I>::send_break_locks() {
   librados::AioCompletion *rados_completion =
     create_rados_callback<klass, &klass::handle_break_locks>(this);
   int r = m_image_ctx.md_ctx.aio_operate(oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 template <typename I>
 Context *LockRequest<I>::handle_break_locks(int *ret_val) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *ret_val << dendl;
 
   m_broke_lock = true;

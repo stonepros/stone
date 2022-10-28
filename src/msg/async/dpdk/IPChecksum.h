@@ -20,8 +20,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_MSG_CHECKSUM_H_
-#define CEPH_MSG_CHECKSUM_H_
+#ifndef STONE_MSG_CHECKSUM_H_
+#define STONE_MSG_CHECKSUM_H_
 
 #include <cstdint>
 #include <cstddef>
@@ -69,4 +69,4 @@ struct checksummer {
   uint16_t get() const;
 };
 
-#endif /* CEPH_MSG_CHECKSUM_H_ */
+#endif /* STONE_MSG_CHECKSUM_H_ */

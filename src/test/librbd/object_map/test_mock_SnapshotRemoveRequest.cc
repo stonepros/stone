@@ -38,7 +38,7 @@ public:
   }
 
   void expect_remove_snapshot(librbd::ImageCtx *ictx, int r) {
-    std::string oid(ObjectMap<>::object_map_name(ictx->id, CEPH_NOSNAP));
+    std::string oid(ObjectMap<>::object_map_name(ictx->id, STONE_NOSNAP));
     if (r < 0) {
       EXPECT_CALL(get_mock_io_ctx(ictx->md_ctx),
                   exec(oid, _, StrEq("lock"), StrEq("assert_locked"), _, _, _,
@@ -90,8 +90,8 @@ TEST_F(TestMockObjectMapSnapshotRemoveRequest, Success) {
   }
   expect_remove_map(ictx, snap_id, 0);
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   C_SaferCond cond_ctx;
   AsyncRequest<> *request = new SnapshotRemoveRequest(
     *ictx, &object_map_lock, &object_map, snap_id, &cond_ctx);
@@ -120,8 +120,8 @@ TEST_F(TestMockObjectMapSnapshotRemoveRequest, LoadMapMissing) {
 
   expect_load_map(ictx, snap_id, -ENOENT);
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   C_SaferCond cond_ctx;
   AsyncRequest<> *request = new SnapshotRemoveRequest(
     *ictx, &object_map_lock, &object_map, snap_id, &cond_ctx);
@@ -137,7 +137,7 @@ TEST_F(TestMockObjectMapSnapshotRemoveRequest, LoadMapMissing) {
     // the already deleted snapshot
     std::shared_lock image_locker{ictx->image_lock};
     uint64_t flags;
-    ASSERT_EQ(0, ictx->get_flags(CEPH_NOSNAP, &flags));
+    ASSERT_EQ(0, ictx->get_flags(STONE_NOSNAP, &flags));
     ASSERT_EQ(0U, flags & RBD_FLAG_OBJECT_MAP_INVALID);
   }
 
@@ -157,8 +157,8 @@ TEST_F(TestMockObjectMapSnapshotRemoveRequest, LoadMapError) {
   expect_invalidate(ictx);
   expect_remove_map(ictx, snap_id, 0);
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   C_SaferCond cond_ctx;
   AsyncRequest<> *request = new SnapshotRemoveRequest(
     *ictx, &object_map_lock, &object_map, snap_id, &cond_ctx);
@@ -185,8 +185,8 @@ TEST_F(TestMockObjectMapSnapshotRemoveRequest, RemoveSnapshotMissing) {
   expect_remove_snapshot(ictx, -ENOENT);
   expect_remove_map(ictx, snap_id, 0);
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   C_SaferCond cond_ctx;
   AsyncRequest<> *request = new SnapshotRemoveRequest(
     *ictx, &object_map_lock, &object_map, snap_id, &cond_ctx);
@@ -214,8 +214,8 @@ TEST_F(TestMockObjectMapSnapshotRemoveRequest, RemoveSnapshotError) {
   expect_invalidate(ictx);
   expect_remove_map(ictx, snap_id, 0);
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   C_SaferCond cond_ctx;
   AsyncRequest<> *request = new SnapshotRemoveRequest(
     *ictx, &object_map_lock, &object_map, snap_id, &cond_ctx);
@@ -244,8 +244,8 @@ TEST_F(TestMockObjectMapSnapshotRemoveRequest, RemoveMapMissing) {
   }
   expect_remove_map(ictx, snap_id, -ENOENT);
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   C_SaferCond cond_ctx;
   AsyncRequest<> *request = new SnapshotRemoveRequest(
     *ictx, &object_map_lock, &object_map, snap_id, &cond_ctx);
@@ -274,8 +274,8 @@ TEST_F(TestMockObjectMapSnapshotRemoveRequest, RemoveMapError) {
   }
   expect_remove_map(ictx, snap_id, -EINVAL);
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   C_SaferCond cond_ctx;
   AsyncRequest<> *request = new SnapshotRemoveRequest(
     *ictx, &object_map_lock, &object_map, snap_id, &cond_ctx);
@@ -299,8 +299,8 @@ TEST_F(TestMockObjectMapSnapshotRemoveRequest, ScrubCleanObjects) {
   ASSERT_EQ(0, resize(ictx, size));
 
   // update image objectmap for snap inherit
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   object_map.resize(1024);
   for (uint64_t i = 512; i < object_map.size(); ++i) {
     object_map[i] = i % 2 == 0 ? OBJECT_EXISTS : OBJECT_NONEXISTENT;

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_MIRROR_INSTANCES_TYPES_H
-#define CEPH_RBD_MIRROR_INSTANCES_TYPES_H
+#ifndef STONE_RBD_MIRROR_INSTANCES_TYPES_H
+#define STONE_RBD_MIRROR_INSTANCES_TYPES_H
 
 #include <string>
 #include <vector>
@@ -25,4 +25,4 @@ struct Listener {
 } // namespace mirror
 } // namespace rbd
 
-#endif // CEPH_RBD_MIRROR_INSTANCES_TYPES_H
+#endif // STONE_RBD_MIRROR_INSTANCES_TYPES_H

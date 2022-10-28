@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MWATCHNOTIFY_H
-#define CEPH_MWATCHNOTIFY_H
+#ifndef STONE_MWATCHNOTIFY_H
+#define STONE_MWATCHNOTIFY_H
 
 #include "msg/Message.h"
 
@@ -28,15 +28,15 @@ private:
   uint64_t cookie;     ///< client unique id for this watch or notify
   uint64_t ver;        ///< unused
   uint64_t notify_id;  ///< osd unique id for a notify notification
-  uint8_t opcode;      ///< CEPH_WATCH_EVENT_*
+  uint8_t opcode;      ///< STONE_WATCH_EVENT_*
   ceph::buffer::list bl;       ///< notify payload (osd->client)
   errorcode32_t return_code; ///< notify result (osd->client)
   uint64_t notifier_gid; ///< who sent the notify
 
   MWatchNotify()
-    : Message{CEPH_MSG_WATCH_NOTIFY, HEAD_VERSION, COMPAT_VERSION} { }
+    : Message{STONE_MSG_WATCH_NOTIFY, HEAD_VERSION, COMPAT_VERSION} { }
   MWatchNotify(uint64_t c, uint64_t v, uint64_t i, uint8_t o, ceph::buffer::list b, uint64_t n=0)
-    : Message{CEPH_MSG_WATCH_NOTIFY, HEAD_VERSION, COMPAT_VERSION},
+    : Message{STONE_MSG_WATCH_NOTIFY, HEAD_VERSION, COMPAT_VERSION},
       cookie(c),
       ver(v),
       notify_id(i),

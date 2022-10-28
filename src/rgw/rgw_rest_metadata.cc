@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
  *
@@ -25,10 +25,10 @@
 #include "common/errno.h"
 #include "common/strtol.h"
 #include "rgw/rgw_b64.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 static inline void frame_metadata_key(req_state *s, string& out) {
   bool exists;
@@ -198,7 +198,7 @@ int RGWOp_Metadata_Put::get_data(bufferlist& bl) {
     }
     bl.append(data, read_len);
   } else {
-    int chunk_size = CEPH_PAGE_SIZE;
+    int chunk_size = STONE_PAGE_SIZE;
     const char *enc = s->info.env->get("HTTP_TRANSFER_ENCODING");
     if (!enc || strcmp(enc, "chunked")) {
       return -ERR_LENGTH_REQUIRED;

@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank, Inc
  *
@@ -18,7 +18,7 @@
 #include "common/lru_map.h"
 #include "common/RefCountedObj.h"
 #include "common/Thread.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 #include "rgw_common.h"
 #include "rgw_sal.h"
@@ -32,8 +32,8 @@
 
 #include <atomic>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 
 struct RGWQuotaCacheStats {
@@ -156,7 +156,7 @@ template<class T>
 void RGWQuotaCache<T>::set_stats(const rgw_user& user, const rgw_bucket& bucket, RGWQuotaCacheStats& qs, RGWStorageStats& stats)
 {
   qs.stats = stats;
-  qs.expiration = ceph_clock_now();
+  qs.expiration = stone_clock_now();
   qs.async_refresh_time = qs.expiration;
   qs.expiration += store->ctx()->_conf->rgw_bucket_quota_ttl;
   qs.async_refresh_time += store->ctx()->_conf->rgw_bucket_quota_ttl / 2;
@@ -167,7 +167,7 @@ void RGWQuotaCache<T>::set_stats(const rgw_user& user, const rgw_bucket& bucket,
 template<class T>
 int RGWQuotaCache<T>::get_stats(const rgw_user& user, const rgw_bucket& bucket, RGWStorageStats& stats, optional_yield y, const DoutPrefixProvider* dpp) {
   RGWQuotaCacheStats qs;
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   if (map_find(user, bucket, qs)) {
     if (qs.async_refresh_time.sec() > 0 && now >= qs.async_refresh_time) {
       int r = async_refresh(user, bucket, qs);
@@ -178,7 +178,7 @@ int RGWQuotaCache<T>::get_stats(const rgw_user& user, const rgw_bucket& bucket, 
       }
     }
 
-    if (qs.expiration > ceph_clock_now()) {
+    if (qs.expiration > stone_clock_now()) {
       stats = qs.stats;
       return 0;
     }
@@ -413,19 +413,19 @@ void UserAsyncRefreshHandler::handle_response(int r)
 class RGWUserStatsCache : public RGWQuotaCache<rgw_user> {
   const DoutPrefixProvider *dpp;
   std::atomic<bool> down_flag = { false };
-  ceph::shared_mutex mutex = ceph::make_shared_mutex("RGWUserStatsCache");
+  stone::shared_mutex mutex = stone::make_shared_mutex("RGWUserStatsCache");
   map<rgw_bucket, rgw_user> modified_buckets;
 
   /* thread, sync recent modified buckets info */
   class BucketsSyncThread : public Thread {
-    CephContext *cct;
+    StoneContext *cct;
     RGWUserStatsCache *stats;
 
-    ceph::mutex lock = ceph::make_mutex("RGWUserStatsCache::BucketsSyncThread");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("RGWUserStatsCache::BucketsSyncThread");
+    stone::condition_variable cond;
   public:
 
-    BucketsSyncThread(CephContext *_cct, RGWUserStatsCache *_s) : cct(_cct), stats(_s) {}
+    BucketsSyncThread(StoneContext *_cct, RGWUserStatsCache *_s) : cct(_cct), stats(_s) {}
 
     void *entry() override {
       ldout(cct, 20) << "BucketsSyncThread: start" << dendl;
@@ -472,14 +472,14 @@ class RGWUserStatsCache : public RGWQuotaCache<rgw_user> {
    * tracked stats) need to get their backend stats up to date.
    */
   class UserSyncThread : public Thread {
-    CephContext *cct;
+    StoneContext *cct;
     RGWUserStatsCache *stats;
 
-    ceph::mutex lock = ceph::make_mutex("RGWUserStatsCache::UserSyncThread");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("RGWUserStatsCache::UserSyncThread");
+    stone::condition_variable cond;
   public:
 
-    UserSyncThread(CephContext *_cct, RGWUserStatsCache *_s) : cct(_cct), stats(_s) {}
+    UserSyncThread(StoneContext *_cct, RGWUserStatsCache *_s) : cct(_cct), stats(_s) {}
 
     void *entry() override {
       ldout(cct, 20) << "UserSyncThread: start" << dendl;
@@ -621,8 +621,8 @@ int RGWUserStatsCache::sync_user(const DoutPrefixProvider *dpp, const rgw_user& 
 {
   string user_str = user.to_str();
   RGWStorageStats stats;
-  ceph::real_time last_stats_sync;
-  ceph::real_time last_stats_update;
+  stone::real_time last_stats_sync;
+  stone::real_time last_stats_update;
 
   int ret = store->ctl()->user->read_stats(dpp, rgw_user(user_str), &stats, y, &last_stats_sync, &last_stats_update);
   if (ret < 0) {

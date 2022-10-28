@@ -20,7 +20,7 @@ const std::string NAME_KEY{"name"};
 
 } // anonymous namespace
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::migration::RawSnapshot::OpenRequest " \
                            << this << " " << __func__ << ": "
@@ -133,7 +133,7 @@ void RawSnapshot<I>::open(SnapshotInterface* previous_snapshot,
   auto cct = m_image_ctx->cct;
 
   // special-case for treating the HEAD revision as a snapshot
-  if (m_index != CEPH_NOSNAP) {
+  if (m_index != STONE_NOSNAP) {
     auto& name_val = m_json_object[NAME_KEY];
     if (name_val.type() == json_spirit::str_type) {
       m_snap_info.name = name_val.get_str();

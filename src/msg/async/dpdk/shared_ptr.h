@@ -20,8 +20,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_LW_SHARED_PTR_H_
-#define CEPH_LW_SHARED_PTR_H_
+#ifndef STONE_LW_SHARED_PTR_H_
+#define STONE_LW_SHARED_PTR_H_
 
 #include <utility>
 #include <type_traits>
@@ -388,4 +388,4 @@ namespace std {
 
 }
 
-#endif /* CEPH_LW_SHARED_PTR_H_ */
+#endif /* STONE_LW_SHARED_PTR_H_ */

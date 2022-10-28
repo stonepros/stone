@@ -1,7 +1,7 @@
 #include "include/utime.h"
 #include "gtest/gtest.h"
 #include "include/stringify.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 TEST(utime_t, localtime)
 {

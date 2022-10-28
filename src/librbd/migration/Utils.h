@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_MIGRATION_UTILS_H
-#define CEPH_LIBRBD_MIGRATION_UTILS_H
+#ifndef STONE_LIBRBD_MIGRATION_UTILS_H
+#define STONE_LIBRBD_MIGRATION_UTILS_H
 
 #include "include/common_fwd.h"
 #include "librbd/io/Types.h"
@@ -14,9 +14,9 @@ namespace librbd {
 namespace migration {
 namespace util {
 
-int parse_url(CephContext* cct, const std::string& url, UrlSpec* url_spec);
+int parse_url(StoneContext* cct, const std::string& url, UrlSpec* url_spec);
 
-void zero_shrunk_snapshot(CephContext* cct, const io::Extents& image_extents,
+void zero_shrunk_snapshot(StoneContext* cct, const io::Extents& image_extents,
                           uint64_t snap_id, uint64_t new_size,
                           std::optional<uint64_t> *previous_size,
                           io::SparseExtents* sparse_extents);
@@ -27,4 +27,4 @@ void merge_snapshot_delta(const io::SnapIds& snap_ids,
 } // namespace migration
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_MIGRATION_UTILS_H
+#endif // STONE_LIBRBD_MIGRATION_UTILS_H

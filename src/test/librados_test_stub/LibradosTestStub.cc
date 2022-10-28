@@ -4,8 +4,8 @@
 #include "test/librados_test_stub/LibradosTestStub.h"
 #include "include/rados/librados.hpp"
 #include "include/stringify.h"
-#include "common/ceph_argparse.h"
-#include "common/ceph_context.h"
+#include "common/stone_argparse.h"
+#include "common/stone_context.h"
 #include "common/common_init.h"
 #include "common/config.h"
 #include "common/debug.h"
@@ -25,11 +25,11 @@
 #include <functional>
 #include <list>
 #include <vector>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/compat.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rados
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rados
 
 namespace librados {
 
@@ -102,8 +102,8 @@ void do_out_buffer(string& outbl, char **outbuf, size_t *outbuflen) {
 }
 
 librados::TestRadosClient *create_rados_client() {
-  CephInitParameters iparams(CEPH_ENTITY_TYPE_CLIENT);
-  CephContext *cct = common_preinit(iparams, CODE_ENVIRONMENT_LIBRARY, 0);
+  StoneInitParameters iparams(STONE_ENTITY_TYPE_CLIENT);
+  StoneContext *cct = common_preinit(iparams, CODE_ENVIRONMENT_LIBRARY, 0);
   cct->_conf.parse_env(cct->get_module_type());
   cct->_conf.apply_changes(nullptr);
   cct->_log->start();
@@ -143,7 +143,7 @@ extern "C" int rados_conf_set(rados_t cluster, const char *option,
                               const char *value) {
   librados::TestRadosClient *impl =
     reinterpret_cast<librados::TestRadosClient*>(cluster);
-  CephContext *cct = impl->cct();
+  StoneContext *cct = impl->cct();
   return cct->_conf.set_val(option, value);
 }
 
@@ -185,7 +185,7 @@ extern "C" int rados_create(rados_t *cluster, const char * const id) {
 
 extern "C" int rados_create_with_context(rados_t *cluster,
                                          rados_config_t cct_) {
-  auto cct = reinterpret_cast<CephContext*>(cct_);
+  auto cct = reinterpret_cast<StoneContext*>(cct_);
   *cluster = librados_test_stub::get_cluster()->create_rados_client(cct);
   return 0;
 }
@@ -1016,7 +1016,7 @@ Rados::Rados(IoCtx& ioctx) {
   impl->get();
 
   client = reinterpret_cast<RadosClient*>(impl);
-  ceph_assert(client != NULL);
+  stone_assert(client != NULL);
 }
 
 Rados::~Rados() {
@@ -1041,7 +1041,7 @@ AioCompletion *Rados::aio_create_completion(void *cb_arg,
   AioCompletionImpl *c;
   int r = rados_aio_create_completion2(cb_arg, cb_complete,
       reinterpret_cast<void**>(&c));
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   return new AioCompletion(c);
 }
 
@@ -1072,7 +1072,7 @@ int Rados::conf_set(const char *option, const char *value) {
 
 int Rados::conf_get(const char *option, std::string &val) {
   TestRadosClient *impl = reinterpret_cast<TestRadosClient*>(client);
-  CephContext *cct = impl->cct();
+  StoneContext *cct = impl->cct();
 
   char *str = NULL;
   int ret = cct->_conf.get_val(option, &str, -1);
@@ -1470,11 +1470,11 @@ int cls_cxx_list_watchers(cls_method_context_t hctx,
 }
 
 uint64_t cls_get_features(cls_method_context_t hctx) {
-  return CEPH_FEATURES_SUPPORTED_DEFAULT;
+  return STONE_FEATURES_SUPPORTED_DEFAULT;
 }
 
 uint64_t cls_get_client_features(cls_method_context_t hctx) {
-  return CEPH_FEATURES_SUPPORTED_DEFAULT;
+  return STONE_FEATURES_SUPPORTED_DEFAULT;
 }
 
 int cls_get_snapset_seq(cls_method_context_t hctx, uint64_t *snap_seq) {
@@ -1499,7 +1499,7 @@ int cls_log(int level, const char *format, ...) {
     int n = vsnprintf(buf, size, format, ap);
     va_end(ap);
     if ((n > -1 && n < size) || size > 8196) {
-      dout(ceph::dout::need_dynamic(level)) << buf << dendl;
+      dout(stone::dout::need_dynamic(level)) << buf << dendl;
       return n;
     }
     size *= 2;
@@ -1529,12 +1529,12 @@ int cls_register_cxx_filter(cls_handle_t hclass,
   return cls->create_filter(hclass, filter_name, fn);
 }
 
-ceph_release_t cls_get_required_osd_release(cls_handle_t hclass) {
-  return ceph_release_t::nautilus;
+stone_release_t cls_get_required_osd_release(cls_handle_t hclass) {
+  return stone_release_t::nautilus;
 }
 
-ceph_release_t cls_get_min_compatible_client(cls_handle_t hclass) {
-  return ceph_release_t::nautilus;
+stone_release_t cls_get_min_compatible_client(cls_handle_t hclass) {
+  return stone_release_t::nautilus;
 }
 
 // stubs to silence TestClassHandler::open_class()

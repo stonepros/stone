@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 CERN (Switzerland)
  *
@@ -29,8 +29,8 @@
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_osd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _tc_prefix(_dout)
 // -----------------------------------------------------------------------------
@@ -222,7 +222,7 @@ ErasureCodeIsaTableCache::setEncodingCoefficient(int matrix, int k, int m, unsig
 
 // -----------------------------------------------------------------------------
 
-ceph::mutex*
+stone::mutex*
 ErasureCodeIsaTableCache::getLock()
 {
   return &codec_tables_guard;
@@ -284,7 +284,7 @@ ErasureCodeIsaTableCache::putDecodingTableToCache(std::string &signature,
 
   // we store a new table to the cache
 
-  ceph::buffer::ptr cachetable;
+  stone::buffer::ptr cachetable;
 
   std::lock_guard lock{codec_tables_guard};
 
@@ -302,7 +302,7 @@ ErasureCodeIsaTableCache::putDecodingTableToCache(std::string &signature,
 
     if ((int) cachetable.length() != (k * (m + k)*32)) {
       // we need to replace this with a different size buffer
-      cachetable = ceph::buffer::create(k * (m + k)*32);
+      cachetable = stone::buffer::create(k * (m + k)*32);
     }
 
     // remove from map
@@ -316,7 +316,7 @@ ErasureCodeIsaTableCache::putDecodingTableToCache(std::string &signature,
   } else {
     dout(12) << "[ store table  ] = " << signature << dendl;
     // allocate a new buffer
-    cachetable = ceph::buffer::create(k * (m + k)*32);
+    cachetable = stone::buffer::create(k * (m + k)*32);
     decode_tbls_lru->push_front(signature);
     (*decode_tbls_map)[signature] = std::make_pair(decode_tbls_lru->begin(), cachetable);
     dout(12) << "[ cache size   ] = " << decode_tbls_lru->size() << dendl;

@@ -7,7 +7,7 @@
 
 #include "include/types.h"
 #include "include/uuid.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/dout.h"
 #include "common/errno.h"
 #include "common/Throttle.h"
@@ -60,9 +60,9 @@
 
 #include <boost/scope_exit.hpp>
 #include <boost/variant.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd: "
 
@@ -75,7 +75,7 @@ using std::string;
 using std::vector;
 // list binds to list() here, so std::list is explicitly used below
 
-using ceph::bufferlist;
+using stone::bufferlist;
 using librados::snap_t;
 using librados::IoCtx;
 using librados::Rados;
@@ -84,7 +84,7 @@ namespace librbd {
 
 namespace {
 
-int validate_pool(IoCtx &io_ctx, CephContext *cct) {
+int validate_pool(IoCtx &io_ctx, StoneContext *cct) {
   if (!cct->_conf.get_val<bool>("rbd_validate_pool")) {
     return 0;
   }
@@ -124,7 +124,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
   int detect_format(IoCtx &io_ctx, const string &name,
 		    bool *old_format, uint64_t *size)
   {
-    CephContext *cct = (CephContext *)io_ctx.cct();
+    StoneContext *cct = (StoneContext *)io_ctx.cct();
     if (old_format)
       *old_format = true;
     int r = io_ctx.stat(util::old_header_name(name), size, NULL);
@@ -207,8 +207,8 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 
   void trim_image(ImageCtx *ictx, uint64_t newsize, ProgressContext& prog_ctx)
   {
-    ceph_assert(ceph_mutex_is_locked(ictx->owner_lock));
-    ceph_assert(ictx->exclusive_lock == nullptr ||
+    stone_assert(stone_mutex_is_locked(ictx->owner_lock));
+    stone_assert(ictx->exclusive_lock == nullptr ||
                 ictx->exclusive_lock->is_lock_owner());
 
     C_SaferCond ctx;
@@ -248,7 +248,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
                 sizeof(RBD_HEADER_TEXT)) != 0 &&
          memcmp(RBD_MIGRATE_HEADER_TEXT, header.c_str(),
                 sizeof(RBD_MIGRATE_HEADER_TEXT)) != 0)) {
-      CephContext *cct = (CephContext *)io_ctx.cct();
+      StoneContext *cct = (StoneContext *)io_ctx.cct();
       lderr(cct) << "unrecognized header format" << dendl;
       return -ENXIO;
     }
@@ -276,7 +276,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
   int tmap_set(IoCtx& io_ctx, const string& imgname)
   {
     bufferlist cmdbl, emptybl;
-    __u8 c = CEPH_OSD_TMAP_SET;
+    __u8 c = STONE_OSD_TMAP_SET;
     encode(c, cmdbl);
     encode(imgname, cmdbl);
     encode(emptybl, cmdbl);
@@ -286,7 +286,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
   int tmap_rm(IoCtx& io_ctx, const string& imgname)
   {
     bufferlist cmdbl;
-    __u8 c = CEPH_OSD_TMAP_RM;
+    __u8 c = STONE_OSD_TMAP_RM;
     encode(c, cmdbl);
     encode(imgname, cmdbl);
     return io_ctx.tmap_update(RBD_DIRECTORY, cmdbl);
@@ -496,7 +496,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
       IMAGE_OPTIONS_TYPE_MAPPING.find(optname);
 
     if (i == IMAGE_OPTIONS_TYPE_MAPPING.end()) {
-      ceph_assert((*opts_)->find(optname) == (*opts_)->end());
+      stone_assert((*opts_)->find(optname) == (*opts_)->end());
       return -EINVAL;
     }
 
@@ -526,7 +526,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 
   int create_v1(IoCtx& io_ctx, const char *imgname, uint64_t size, int order)
   {
-    CephContext *cct = (CephContext *)io_ctx.cct();
+    StoneContext *cct = (StoneContext *)io_ctx.cct();
 
     ldout(cct, 20) << __func__ << " "  << &io_ctx << " name = " << imgname
 		   << " size = " << size << " order = " << order << dendl;
@@ -583,12 +583,12 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
     ImageOptions opts;
 
     int r = opts.set(RBD_IMAGE_OPTION_ORDER, order_);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
 
     r = create(io_ctx, imgname, "", size, opts, "", "", false);
 
     int r1 = opts.get(RBD_IMAGE_OPTION_ORDER, &order_);
-    ceph_assert(r1 == 0);
+    stone_assert(r1 == 0);
     *order = order_;
 
     return r;
@@ -607,20 +607,20 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
     int r;
 
     r = opts.set(RBD_IMAGE_OPTION_FORMAT, format);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     r = opts.set(RBD_IMAGE_OPTION_FEATURES, features);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     r = opts.set(RBD_IMAGE_OPTION_ORDER, order_);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     r = opts.set(RBD_IMAGE_OPTION_STRIPE_UNIT, stripe_unit);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     r = opts.set(RBD_IMAGE_OPTION_STRIPE_COUNT, stripe_count);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
 
     r = create(io_ctx, imgname, "", size, opts, "", "", false);
 
     int r1 = opts.get(RBD_IMAGE_OPTION_ORDER, &order_);
-    ceph_assert(r1 == 0);
+    stone_assert(r1 == 0);
     *order = order_;
 
     return r;
@@ -638,7 +638,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
       id = util::generate_image_id(io_ctx);
     }
 
-    CephContext *cct = (CephContext *)io_ctx.cct();
+    StoneContext *cct = (StoneContext *)io_ctx.cct();
     uint64_t option;
     if (opts.get(RBD_IMAGE_OPTION_FLATTEN, &option) == 0) {
       lderr(cct) << "create does not support 'flatten' image option" << dendl;
@@ -714,7 +714,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
     }
 
     int r1 = opts.set(RBD_IMAGE_OPTION_ORDER, order);
-    ceph_assert(r1 == 0);
+    stone_assert(r1 == 0);
 
     return r;
   }
@@ -748,9 +748,9 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
             const std::string &non_primary_global_image_id,
             const std::string &primary_mirror_uuid)
   {
-    ceph_assert((p_id == nullptr) ^ (p_name == nullptr));
+    stone_assert((p_id == nullptr) ^ (p_name == nullptr));
 
-    CephContext *cct = (CephContext *)p_ioctx.cct();
+    StoneContext *cct = (StoneContext *)p_ioctx.cct();
     if (p_snap_name == nullptr) {
       lderr(cct) << "image to be cloned must be a snapshot" << dendl;
       return -EINVAL;
@@ -790,7 +790,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 		   << "c_id= " << clone_id << ", "
 		   << "c_opts=" << c_opts << dendl;
 
-    ConfigProxy config{reinterpret_cast<CephContext *>(c_ioctx.cct())->_conf};
+    ConfigProxy config{reinterpret_cast<StoneContext *>(c_ioctx.cct())->_conf};
     api::Config<>::apply_pool_overrides(c_ioctx, &config);
 
     AsioEngine asio_engine(p_ioctx);
@@ -798,7 +798,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
     C_SaferCond cond;
     auto *req = image::CloneRequest<>::create(
       config, p_ioctx, parent_id, p_snap_name,
-      {cls::rbd::UserSnapshotNamespace{}}, CEPH_NOSNAP, c_ioctx, c_name,
+      {cls::rbd::UserSnapshotNamespace{}}, STONE_NOSNAP, c_ioctx, c_name,
       clone_id, c_opts, cls::rbd::MIRROR_IMAGE_MODE_JOURNAL,
       non_primary_global_image_id, primary_mirror_uuid,
       asio_engine.get_work_queue(), &cond);
@@ -814,7 +814,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 
   int rename(IoCtx& io_ctx, const char *srcname, const char *dstname)
   {
-    CephContext *cct = (CephContext *)io_ctx.cct();
+    StoneContext *cct = (StoneContext *)io_ctx.cct();
     ldout(cct, 20) << "rename " << &io_ctx << " " << srcname << " -> "
 		   << dstname << dendl;
 
@@ -894,7 +894,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 
   int set_image_notification(ImageCtx *ictx, int fd, int type)
   {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     ldout(cct, 20) << __func__ << " " << ictx << " fd " << fd << " type" << type << dendl;
 
     int r = ictx->state->refresh_if_required();
@@ -909,7 +909,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 
   int is_exclusive_lock_owner(ImageCtx *ictx, bool *is_owner)
   {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     ldout(cct, 20) << __func__ << ": ictx=" << ictx << dendl;
     *is_owner = false;
 
@@ -933,7 +933,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 
   int lock_acquire(ImageCtx *ictx, rbd_lock_mode_t lock_mode)
   {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     ldout(cct, 20) << __func__ << ": ictx=" << ictx << ", "
                    << "lock_mode=" << lock_mode << dendl;
 
@@ -982,7 +982,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 
   int lock_release(ImageCtx *ictx)
   {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     ldout(cct, 20) << __func__ << ": ictx=" << ictx << dendl;
 
     C_SaferCond lock_ctx;
@@ -1010,7 +1010,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
   int lock_get_owners(ImageCtx *ictx, rbd_lock_mode_t *lock_mode,
                       std::list<std::string> *lock_owners)
   {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     ldout(cct, 20) << __func__ << ": ictx=" << ictx << dendl;
 
     managed_lock::Locker locker;
@@ -1043,7 +1043,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 
   int lock_break(ImageCtx *ictx, rbd_lock_mode_t lock_mode,
                  const std::string &lock_owner) {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     ldout(cct, 20) << __func__ << ": ictx=" << ictx << ", "
                    << "lock_mode=" << lock_mode << ", "
                    << "lock_owner=" << lock_owner << dendl;
@@ -1105,7 +1105,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
   int copy(ImageCtx *src, IoCtx& dest_md_ctx, const char *destname,
 	   ImageOptions& opts, ProgressContext &prog_ctx, size_t sparse_size)
   {
-    CephContext *cct = (CephContext *)dest_md_ctx.cct();
+    StoneContext *cct = (StoneContext *)dest_md_ctx.cct();
     uint64_t option;
     if (opts.get(RBD_IMAGE_OPTION_FLATTEN, &option) == 0) {
       lderr(cct) << "copy does not support 'flatten' image option" << dendl;
@@ -1202,7 +1202,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 	m_throttle->end_op(r);
 	return;
       }
-      ceph_assert(m_bl->length() == (size_t)r);
+      stone_assert(m_bl->length() == (size_t)r);
 
       if (m_bl->is_zero()) {
 	delete m_bl;
@@ -1249,7 +1249,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 	}
       }
       delete m_bl;
-      ceph_assert(gather_ctx->get_sub_created_count() > 0);
+      stone_assert(gather_ctx->get_sub_created_count() > 0);
       gather_ctx->activate();
     }
 
@@ -1273,7 +1273,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
     uint64_t dest_size = dest->get_image_size(dest->snap_id);
     dest->image_lock.unlock_shared();
 
-    CephContext *cct = src->cct;
+    StoneContext *cct = src->cct;
     if (dest_size < src_size) {
       lderr(cct) << " src size " << src_size << " > dest size "
 		 << dest_size << dendl;
@@ -1522,7 +1522,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 		       void *arg)
   {
     coarse_mono_time start_time;
-    ceph::timespan elapsed;
+    stone::timespan elapsed;
 
     ldout(ictx->cct, 20) << "read_iterate " << ictx << " off = " << off
 			 << " len = " << len << dendl;
@@ -1589,9 +1589,9 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
   // validate extent against image size; clip to image size if necessary
   int clip_io(ImageCtx *ictx, uint64_t off, uint64_t *len)
   {
-    ceph_assert(ceph_mutex_is_locked(ictx->image_lock));
+    stone_assert(stone_mutex_is_locked(ictx->image_lock));
 
-    if (ictx->snap_id != CEPH_NOSNAP &&
+    if (ictx->snap_id != STONE_NOSNAP &&
         ictx->get_snap_info(ictx->snap_id) == nullptr) {
       return -ENOENT;
     }
@@ -1614,7 +1614,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 
   int invalidate_cache(ImageCtx *ictx)
   {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     ldout(cct, 20) << "invalidate_cache " << ictx << dendl;
 
     int r = ictx->state->refresh_if_required();
@@ -1650,7 +1650,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
   {
     if (numcomp <= 0)
       return -EINVAL;
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     ldout(cct, 20) << __func__ << " " << ictx << " numcomp = " << numcomp
                    << dendl;
     int i = 0;
@@ -1663,7 +1663,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 
   int metadata_get(ImageCtx *ictx, const string &key, string *value)
   {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     ldout(cct, 20) << "metadata_get " << ictx << " key=" << key << dendl;
 
     int r = ictx->state->refresh_if_required();
@@ -1676,7 +1676,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
 
   int metadata_list(ImageCtx *ictx, const string &start, uint64_t max, map<string, bufferlist> *pairs)
   {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     ldout(cct, 20) << "metadata_list " << ictx << dendl;
 
     int r = ictx->state->refresh_if_required();

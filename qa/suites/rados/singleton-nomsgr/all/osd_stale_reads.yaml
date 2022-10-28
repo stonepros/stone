@@ -5,7 +5,7 @@ openstack:
 roles:
 - [mon.a, mgr.x, osd.0, osd.1, osd.2, client.0]
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - \(OSD_DOWN\)
       - \(POOL_APP_NOT_ENABLED\)
@@ -21,9 +21,9 @@ overrides:
         osd deep scrub large omap object key threshold: 20000
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
 - exec:
     client.0:
-      - ceph_test_osd_stale_read
+      - stone_test_osd_stale_read

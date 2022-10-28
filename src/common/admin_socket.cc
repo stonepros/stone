@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -21,7 +21,7 @@
 #include "common/safe_io.h"
 #include "common/Thread.h"
 #include "common/version.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 #ifndef WITH_SEASTAR
 #include "common/Cond.h"
@@ -33,11 +33,11 @@
 #include "messages/MMonCommandAck.h"
 
 // re-include our assert to clobber the system one; fix dout:
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/compat.h"
 #include "include/sock_compat.h"
 
-#define dout_subsys ceph_subsys_asok
+#define dout_subsys stone_subsys_asok
 #undef dout_prefix
 #define dout_prefix *_dout << "asok(" << (void*)m_cct << ") "
 
@@ -49,9 +49,9 @@ using std::stringstream;
 
 using namespace TOPNSPC::common;
 
-using ceph::bufferlist;
-using ceph::cref_t;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::cref_t;
+using stone::Formatter;
 
 
 /*
@@ -104,7 +104,7 @@ static void add_cleanup_file(std::string file) {
   }
 }
 
-AdminSocket::AdminSocket(CephContext *cct)
+AdminSocket::AdminSocket(StoneContext *cct)
   : m_cct(cct)
 {}
 
@@ -131,7 +131,7 @@ std::string AdminSocket::create_wakeup_pipe(int *pipe_rd, int *pipe_wr)
   #else
   if (pipe_cloexec(pipefd, O_NONBLOCK) < 0) {
   #endif
-    int e = ceph_sock_errno();
+    int e = stone_sock_errno();
     ostringstream oss;
     oss << "AdminSocket::create_wakeup_pipe error: " << cpp_strerror(e);
     return oss.str();
@@ -184,7 +184,7 @@ std::string AdminSocket::bind_and_listen(const std::string &sock_path, int *fd)
   }
   int sock_fd = socket_cloexec(PF_UNIX, SOCK_STREAM, 0);
   if (sock_fd < 0) {
-    int err = ceph_sock_errno();
+    int err = stone_sock_errno();
     ostringstream oss;
     oss << "AdminSocket::bind_and_listen: "
 	<< "failed to create socket: " << cpp_strerror(err);
@@ -197,7 +197,7 @@ std::string AdminSocket::bind_and_listen(const std::string &sock_path, int *fd)
 	   "%s", sock_path.c_str());
   if (::bind(sock_fd, (struct sockaddr*)&address,
 	   sizeof(struct sockaddr_un)) != 0) {
-    int err = ceph_sock_errno();
+    int err = stone_sock_errno();
     if (err == EADDRINUSE) {
       AdminSocketClient client(sock_path);
       bool ok;
@@ -212,7 +212,7 @@ std::string AdminSocket::bind_and_listen(const std::string &sock_path, int *fd)
 		 sizeof(struct sockaddr_un)) == 0) {
 	  err = 0;
 	} else {
-	  err = ceph_sock_errno();
+	  err = stone_sock_errno();
 	}
       }
     }
@@ -226,7 +226,7 @@ std::string AdminSocket::bind_and_listen(const std::string &sock_path, int *fd)
     }
   }
   if (listen(sock_fd, 5) != 0) {
-    int err = ceph_sock_errno();
+    int err = stone_sock_errno();
     ostringstream oss;
     oss << "AdminSocket::bind_and_listen: "
 	  << "failed to listen to socket: " << cpp_strerror(err);
@@ -253,7 +253,7 @@ void AdminSocket::entry() noexcept
     ldout(m_cct,20) << __func__ << " waiting" << dendl;
     int ret = poll(fds, 2, -1);
     if (ret < 0) {
-      int err = ceph_sock_errno();
+      int err = stone_sock_errno();
       if (err == EINTR) {
 	continue;
       }
@@ -272,7 +272,7 @@ void AdminSocket::entry() noexcept
       char buf;
       auto s = safe_recv(m_wakeup_rd_fd, &buf, 1);
       if (s == -1) {
-        int e = ceph_sock_errno();
+        int e = stone_sock_errno();
         ldout(m_cct, 5) << "AdminSocket: (ignoring) read(2) error: '"
 		        << cpp_strerror(e) << dendl;
       }
@@ -318,7 +318,7 @@ void AdminSocket::do_accept()
   int connection_fd = accept_cloexec(m_sock_fd, (struct sockaddr*) &address,
 			     &address_length);
   if (connection_fd < 0) {
-    int err = ceph_sock_errno();
+    int err = stone_sock_errno();
     lderr(m_cct) << "AdminSocket: do_accept error: '"
 			   << cpp_strerror(err) << dendl;
     return;
@@ -462,8 +462,8 @@ int AdminSocket::execute_command(
 #else
   bool done = false;
   int rval = 0;
-  ceph::mutex mylock = ceph::make_mutex("admin_socket::excute_command::mylock");
-  ceph::condition_variable mycond;
+  stone::mutex mylock = stone::make_mutex("admin_socket::excute_command::mylock");
+  stone::condition_variable mycond;
   C_SafeCond fin(mylock, mycond, &done, &rval);
   execute_command(
     cmd,
@@ -627,13 +627,13 @@ public:
 	   std::ostream& errss,
 	   bufferlist& out) override {
     if (command == "0"sv) {
-      out.append(CEPH_ADMIN_SOCK_VERSION);
+      out.append(STONE_ADMIN_SOCK_VERSION);
     } else {
       f->open_object_section("version");
       if (command == "version") {
-	f->dump_string("version", ceph_version_to_str());
-	f->dump_string("release", ceph_release_to_str());
-	f->dump_string("release_type", ceph_release_type());
+	f->dump_string("version", stone_version_to_str());
+	f->dump_string("release", stone_release_to_str());
+	f->dump_string("release_type", stone_release_type());
       } else if (command == "git_version") {
 	f->dump_string("git_version", git_version_to_str());
       }
@@ -679,7 +679,7 @@ public:
       ostringstream secname;
       secname << "cmd" << std::setfill('0') << std::setw(3) << cmdnum;
       dump_cmd_and_help_to_json(f,
-                                CEPH_FEATURES_ALL,
+                                STONE_FEATURES_ALL,
 				secname.str().c_str(),
 				info.desc,
 				info.help);
@@ -732,7 +732,7 @@ bool AdminSocket::init(const std::string& path)
 
   version_hook = std::make_unique<VersionHook>();
   register_command("0", version_hook.get(), "");
-  register_command("version", version_hook.get(), "get ceph version");
+  register_command("version", version_hook.get(), "get stone version");
   register_command("git_version", version_hook.get(),
 		   "get git sha1");
   help_hook = std::make_unique<HelpHook>(this);

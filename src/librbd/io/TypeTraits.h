@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IO_TYPE_TRAITS_H
-#define CEPH_LIBRBD_IO_TYPE_TRAITS_H
+#ifndef STONE_LIBRBD_IO_TYPE_TRAITS_H
+#define STONE_LIBRBD_IO_TYPE_TRAITS_H
 
 #include "common/Timer.h"
 
@@ -17,4 +17,4 @@ struct TypeTraits {
 } // namespace io
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_IO_TYPE_TRAITS_H
+#endif // STONE_LIBRBD_IO_TYPE_TRAITS_H

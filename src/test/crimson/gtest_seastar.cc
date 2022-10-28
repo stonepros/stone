@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "gtest_seastar.h"
 
 SeastarRunner seastar_test_suite_t::seastar_env;

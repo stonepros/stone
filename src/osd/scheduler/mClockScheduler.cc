@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat Inc.
  *
@@ -23,14 +23,14 @@ namespace dmc = crimson::dmclock;
 using namespace std::placeholders;
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix *_dout << "mClockScheduler: "
 
 
-namespace ceph::osd::scheduler {
+namespace stone::osd::scheduler {
 
-mClockScheduler::mClockScheduler(CephContext *cct,
+mClockScheduler::mClockScheduler(StoneContext *cct,
   uint32_t num_shards,
   bool is_rotational)
   : cct(cct),
@@ -44,7 +44,7 @@ mClockScheduler::mClockScheduler(CephContext *cct,
       cct->_conf.get_val<double>("osd_mclock_scheduler_anticipation_timeout"))
 {
   cct->_conf.add_observer(this);
-  ceph_assert(num_shards > 0);
+  stone_assert(num_shards > 0);
   set_max_osd_capacity();
   set_osd_mclock_cost_per_io();
   set_osd_mclock_cost_per_byte();
@@ -87,12 +87,12 @@ const dmc::ClientInfo *mClockScheduler::ClientRegistry::get_info(
   const scheduler_id_t &id) const {
   switch (id.class_id) {
   case op_scheduler_class::immediate:
-    ceph_assert(0 == "Cannot schedule immediate");
+    stone_assert(0 == "Cannot schedule immediate");
     return (dmc::ClientInfo*)nullptr;
   case op_scheduler_class::client:
     return get_external_client(id.client_profile_id);
   default:
-    ceph_assert(static_cast<size_t>(id.class_id) < internal_client_infos.size());
+    stone_assert(static_cast<size_t>(id.class_id) < internal_client_infos.size());
     return &internal_client_infos[static_cast<size_t>(id.class_id)];
   }
 }
@@ -319,7 +319,7 @@ void mClockScheduler::enable_mclock_profile_settings()
     return;
   }
 
-  // Set mclock and ceph config options for the chosen profile
+  // Set mclock and stone config options for the chosen profile
   if (mclock_profile == "balanced") {
     set_balanced_profile_allocations();
   } else if (mclock_profile == "high_recovery_ops") {
@@ -327,7 +327,7 @@ void mClockScheduler::enable_mclock_profile_settings()
   } else if (mclock_profile == "high_client_ops") {
     set_high_client_ops_profile_allocations();
   } else {
-    ceph_assert("Invalid choice of mclock profile" == 0);
+    stone_assert("Invalid choice of mclock profile" == 0);
     return;
   }
 
@@ -385,7 +385,7 @@ void mClockScheduler::update_configuration()
   cct->_conf.apply_changes(nullptr);
 }
 
-void mClockScheduler::dump(ceph::Formatter &f) const
+void mClockScheduler::dump(stone::Formatter &f) const
 {
 }
 
@@ -424,11 +424,11 @@ WorkItem mClockScheduler::dequeue()
     if (result.is_future()) {
       return result.getTime();
     } else if (result.is_none()) {
-      ceph_assert(
+      stone_assert(
 	0 == "Impossible, must have checked empty() first");
       return {};
     } else {
-      ceph_assert(result.is_retn());
+      stone_assert(result.is_retn());
 
       auto &retn = result.get_retn();
       return std::move(*retn.request);

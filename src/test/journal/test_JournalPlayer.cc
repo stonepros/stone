@@ -6,7 +6,7 @@
 #include "journal/JournalMetadata.h"
 #include "journal/ReplayHandler.h"
 #include "include/stringify.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "gtest/gtest.h"
 #include "test/journal/RadosTestFixture.h"
 #include <list>
@@ -22,8 +22,8 @@ public:
   static const uint64_t max_fetch_bytes = T::max_fetch_bytes;
 
   struct ReplayHandler : public journal::ReplayHandler {
-    ceph::mutex lock = ceph::make_mutex("lock");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("lock");
+    stone::condition_variable cond;
     bool entries_available;
     bool complete;
     int complete_result;
@@ -72,7 +72,7 @@ public:
   }
 
   journal::JournalPlayer *create_player(const std::string &oid,
-                                        const ceph::ref_t<journal::JournalMetadata>& metadata) {
+                                        const stone::ref_t<journal::JournalMetadata>& metadata) {
     journal::JournalPlayer *player(new journal::JournalPlayer(
       m_ioctx, oid + ".", metadata, &m_replay_hander, nullptr));
     m_players.push_back(player);

@@ -13,8 +13,8 @@
  *
  */
 
-#ifndef CEPH_RGW_CORS_SWIFT3_H
-#define CEPH_RGW_CORS_SWIFT3_H
+#ifndef STONE_RGW_CORS_SWIFT3_H
+#define STONE_RGW_CORS_SWIFT3_H
 
 #include <map>
 #include <string>
@@ -82,4 +82,4 @@ class RGWCORSConfiguration_SWIFT : public RGWCORSConfiguration
       return 0;
     }
 };
-#endif /*CEPH_RGW_CORS_SWIFT3_H*/
+#endif /*STONE_RGW_CORS_SWIFT3_H*/

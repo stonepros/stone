@@ -14,7 +14,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -179,7 +179,7 @@ seastar::future<> ReplicatedRecoveryBackend::on_local_recover_persist(
   epoch_t epoch_frozen)
 {
   logger().debug("{}", __func__);
-  ceph::os::Transaction t;
+  stone::os::Transaction t;
   pg.get_recovery_handler()->on_local_recover(soid, _recovery_info, is_delete, t);
   return shard_services.get_store().do_transaction(coll, std::move(t)).then(
     [this, epoch_frozen, last_complete = pg.get_info().last_complete] {
@@ -197,7 +197,7 @@ seastar::future<> ReplicatedRecoveryBackend::local_recover_delete(
   return backend->load_metadata(soid).safe_then([this]
     (auto lomt) {
     if (lomt->os.exists) {
-      return seastar::do_with(ceph::os::Transaction(),
+      return seastar::do_with(stone::os::Transaction(),
 	[this, lomt = std::move(lomt)](auto& txn) {
 	return backend->remove(lomt->os, txn).then([this, &txn]() mutable {
 	  return shard_services.get_store().do_transaction(coll,
@@ -609,7 +609,7 @@ seastar::future<bool> ReplicatedRecoveryBackend::_handle_pull_response(
   pg_shard_t from,
   const PushOp& pop,
   PullOp* response,
-  ceph::os::Transaction* t)
+  stone::os::Transaction* t)
 {
   logger().debug("handle_pull_response {} {} data.size() is {} data_included: {}",
       pop.recovery_info, pop.after_progress, pop.data.length(), pop.data_included);
@@ -696,7 +696,7 @@ seastar::future<> ReplicatedRecoveryBackend::handle_pull_response(
 
   logger().debug("{}: {}", __func__, *m);
   return seastar::do_with(PullOp(), [this, m](auto& response) {
-    return seastar::do_with(ceph::os::Transaction(), m.get(),
+    return seastar::do_with(stone::os::Transaction(), m.get(),
       [this, &response](auto& t, auto& m) {
       pg_shard_t from = m->from;
       PushOp& pop = m->pushes[0]; // only one push per message for now
@@ -733,7 +733,7 @@ seastar::future<> ReplicatedRecoveryBackend::_handle_push(
   pg_shard_t from,
   const PushOp &pop,
   PushReplyOp *response,
-  ceph::os::Transaction *t)
+  stone::os::Transaction *t)
 {
   logger().debug("{}", __func__);
 
@@ -773,7 +773,7 @@ seastar::future<> ReplicatedRecoveryBackend::handle_push(
   logger().debug("{}: {}", __func__, *m);
   return seastar::do_with(PushReplyOp(), [this, m](auto& response) {
     const PushOp& pop = m->pushes[0]; //TODO: only one push per message for now
-    return seastar::do_with(ceph::os::Transaction(),
+    return seastar::do_with(stone::os::Transaction(),
       [this, m, &pop, &response](auto& t) {
       return _handle_push(m->from, pop, &response, &t).then(
 	[this, &t] {
@@ -864,7 +864,7 @@ std::pair<interval_set<uint64_t>,
 ReplicatedRecoveryBackend::trim_pushed_data(
   const interval_set<uint64_t> &copy_subset,
   const interval_set<uint64_t> &intervals_received,
-  ceph::bufferlist data_received)
+  stone::bufferlist data_received)
 {
   logger().debug("{}", __func__);
   // what i have is only a subset of what i want
@@ -981,7 +981,7 @@ seastar::future<> ReplicatedRecoveryBackend::submit_push_data(
   }().then([this, data_zeros=std::move(data_zeros),
 	    &recovery_info, &intervals_included, t, target_oid,
 	    &omap_entries, &attrs, data_included, complete, first]() mutable {
-    uint32_t fadvise_flags = CEPH_OSD_OP_FLAG_FADVISE_SEQUENTIAL;
+    uint32_t fadvise_flags = STONE_OSD_OP_FLAG_FADVISE_SEQUENTIAL;
     // Punch zeros for data, if fiemap indicates nothing but it is marked dirty
     if (!data_zeros.empty()) {
       data_zeros.intersection_of(recovery_info.copy_subset);

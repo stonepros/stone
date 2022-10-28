@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -28,7 +28,7 @@
 #include "common/config.h"
 #include "common/Formatter.h"
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "include/stringify.h"
 #include "global/global_context.h"
 #include "global/global_init.h"
@@ -36,10 +36,10 @@
 #include "crush/CrushWrapper.h"
 #include "crush/CrushCompiler.h"
 #include "crush/CrushTester.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_crush
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_crush
 
 
 const char *infn = "stdin";
@@ -61,7 +61,7 @@ static int get_fd_data(int fd, bufferlist &bl)
     total += bytes;
   } while(true);
 
-  ceph_assert(bl.length() == total);
+  stone_assert(bl.length() == total);
   return 0;
 }
 
@@ -262,7 +262,7 @@ bool argparse_withargs(std::vector<const char*> &args,
 		       const char* opt,
 		       Args*... opts)
 {
-  if (!ceph_argparse_flag(args, i, opt, nullptr)) {
+  if (!stone_argparse_flag(args, i, opt, nullptr)) {
     return false;
   }
   auto parse = [&](auto& opt) {
@@ -291,7 +291,7 @@ bool argparse_withargs(std::vector<const char*> &args,
   return true;
 }
 
-int do_add_bucket(CephContext* cct,
+int do_add_bucket(StoneContext* cct,
 		  const char* me,
 		  CrushWrapper& crush,
 		  const string& add_name,
@@ -328,7 +328,7 @@ int do_add_bucket(CephContext* cct,
 }
 
 // return 1 for no change, 0 for successful change, negative on error
-int do_move_item(CephContext* cct,
+int do_move_item(StoneContext* cct,
 		 const char *me,
 		 CrushWrapper& crush,
 		 const string& name,
@@ -370,7 +370,7 @@ int main(int argc, const char **argv)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
@@ -436,15 +436,15 @@ int main(int argc, const char **argv)
   CrushTester tester(crush, cout);
 
   // we use -c, don't confuse the generic arg parsing
-  // only parse arguments from CEPH_ARGS, if in the environment
+  // only parse arguments from STONE_ARGS, if in the environment
   vector<const char *> empty_args;
-  auto cct = global_init(NULL, empty_args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, empty_args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
   // crushtool times out occasionally when quits. so do not
-  // release the g_ceph_context.
+  // release the g_stone_context.
   cct->get();
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   int x;
   float y;
@@ -454,22 +454,22 @@ int main(int argc, const char **argv)
   std::ostringstream err;
   int tmp;
   for (std::vector<const char*>::iterator i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_double_dash(args, i)) {
+    if (stone_argparse_double_dash(args, i)) {
       break;
-    } else if (ceph_argparse_witharg(args, i, &val, "-d", "--decompile", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-d", "--decompile", (char*)NULL)) {
       infn = val;
       decompile = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "-i", "--infn", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-i", "--infn", (char*)NULL)) {
       infn = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-o", "--outfn", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-o", "--outfn", (char*)NULL)) {
       outfn = val;
-    } else if (ceph_argparse_flag(args, i, "-v", "--verbose", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "-v", "--verbose", (char*)NULL)) {
       verbose += 1;
-    } else if (ceph_argparse_witharg(args, i, &val, "--compare", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--compare", (char*)NULL)) {
       compare = val;
-    } else if (ceph_argparse_flag(args, i, "--reclassify", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--reclassify", (char*)NULL)) {
       reclassify = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--reclassify-bucket",
+    } else if (stone_argparse_witharg(args, i, &val, "--reclassify-bucket",
 				     (char*)NULL)) {
       if (i == args.end()) {
 	cerr << "expecting additional argument" << std::endl;
@@ -483,7 +483,7 @@ int main(int argc, const char **argv)
       }
       reclassify_bucket[val] = make_pair(c, *i);
       i = args.erase(i);
-    } else if (ceph_argparse_witharg(args, i, &val, "--reclassify-root",
+    } else if (stone_argparse_witharg(args, i, &val, "--reclassify-root",
 				     (char*)NULL)) {
       if (i == args.end()) {
 	cerr << "expecting additional argument" << std::endl;
@@ -491,7 +491,7 @@ int main(int argc, const char **argv)
       }
       reclassify_root[val] = *i;
       i = args.erase(i);
-    } else if (ceph_argparse_witharg(args, i, &val, "--set-subtree-class",
+    } else if (stone_argparse_witharg(args, i, &val, "--set-subtree-class",
 				     (char*)NULL)) {
       if (i == args.end()) {
 	cerr << "expecting additional argument" << std::endl;
@@ -499,75 +499,75 @@ int main(int argc, const char **argv)
       }
       set_subtree_class[val] = *i;
       i = args.erase(i);
-    } else if (ceph_argparse_flag(args, i, "--tree", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--tree", (char*)NULL)) {
       tree = true;
-    } else if (ceph_argparse_flag(args, i, "--bucket-tree", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--bucket-tree", (char*)NULL)) {
       bucket_tree = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "-b", "--bucket-name", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-b", "--bucket-name", (char*)NULL)) {
       bucket_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-f", "--format", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-f", "--format", (char*)NULL)) {
       dump_format = val;
-    } else if (ceph_argparse_flag(args, i, "--dump", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--dump", (char*)NULL)) {
       dump = true;
-    } else if (ceph_argparse_flag(args, i, "--show_utilization", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--show_utilization", (char*)NULL)) {
       display = true;
       tester.set_output_utilization(true);
-    } else if (ceph_argparse_flag(args, i, "--show_utilization_all", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--show_utilization_all", (char*)NULL)) {
       display = true;
       tester.set_output_utilization_all(true);
-    } else if (ceph_argparse_flag(args, i, "--show_statistics", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--show_statistics", (char*)NULL)) {
       display = true;
       tester.set_output_statistics(true);
-    } else if (ceph_argparse_flag(args, i, "--show_mappings", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--show_mappings", (char*)NULL)) {
       display = true;
       tester.set_output_mappings(true);
-    } else if (ceph_argparse_flag(args, i, "--show_bad_mappings", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--show_bad_mappings", (char*)NULL)) {
       display = true;
       tester.set_output_bad_mappings(true);
-    } else if (ceph_argparse_flag(args, i, "--show_choose_tries", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--show_choose_tries", (char*)NULL)) {
       display = true;
       tester.set_output_choose_tries(true);
-    } else if (ceph_argparse_witharg(args, i, &val, "-c", "--compile", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-c", "--compile", (char*)NULL)) {
       srcfn = val;
       compile = true;
-    } else if (ceph_argparse_witharg(args, i, &max_id, err, "--check", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &max_id, err, "--check", (char*)NULL)) {
       check = true;
-    } else if (ceph_argparse_flag(args, i, "-t", "--test", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "-t", "--test", (char*)NULL)) {
       test = true;
-    } else if (ceph_argparse_witharg(args, i, &full_location, err, "--show-location", (char*)NULL)) {
-    } else if (ceph_argparse_flag(args, i, "-s", "--simulate", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &full_location, err, "--show-location", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "-s", "--simulate", (char*)NULL)) {
       tester.set_random_placement();
-    } else if (ceph_argparse_flag(args, i, "--enable-unsafe-tunables", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--enable-unsafe-tunables", (char*)NULL)) {
       unsafe_tunables = true;
-    } else if (ceph_argparse_witharg(args, i, &choose_local_tries, err,
+    } else if (stone_argparse_witharg(args, i, &choose_local_tries, err,
 				     "--set_choose_local_tries", (char*)NULL)) {
       adjust = true;
-    } else if (ceph_argparse_witharg(args, i, &choose_local_fallback_tries, err,
+    } else if (stone_argparse_witharg(args, i, &choose_local_fallback_tries, err,
 				     "--set_choose_local_fallback_tries", (char*)NULL)) {
       adjust = true;
-    } else if (ceph_argparse_witharg(args, i, &choose_total_tries, err,
+    } else if (stone_argparse_witharg(args, i, &choose_total_tries, err,
 				     "--set_choose_total_tries", (char*)NULL)) {
       adjust = true;
-    } else if (ceph_argparse_witharg(args, i, &chooseleaf_descend_once, err,
+    } else if (stone_argparse_witharg(args, i, &chooseleaf_descend_once, err,
 				     "--set_chooseleaf_descend_once", (char*)NULL)) {
       adjust = true;
-    } else if (ceph_argparse_witharg(args, i, &chooseleaf_vary_r, err,
+    } else if (stone_argparse_witharg(args, i, &chooseleaf_vary_r, err,
 				     "--set_chooseleaf_vary_r", (char*)NULL)) {
       adjust = true;
-    } else if (ceph_argparse_witharg(args, i, &chooseleaf_stable, err,
+    } else if (stone_argparse_witharg(args, i, &chooseleaf_stable, err,
 				     "--set_chooseleaf_stable", (char*)NULL)) {
       adjust = true;
-    } else if (ceph_argparse_witharg(args, i, &straw_calc_version, err,
+    } else if (stone_argparse_witharg(args, i, &straw_calc_version, err,
 				     "--set_straw_calc_version", (char*)NULL)) {
       adjust = true;
-    } else if (ceph_argparse_witharg(args, i, &allowed_bucket_algs, err,
+    } else if (stone_argparse_witharg(args, i, &allowed_bucket_algs, err,
 				     "--set_allowed_bucket_algs", (char*)NULL)) {
       adjust = true;
-    } else if (ceph_argparse_flag(args, i, "--reweight", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--reweight", (char*)NULL)) {
       reweight = true;
-    } else if (ceph_argparse_flag(args, i, "--rebuild-class-roots", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--rebuild-class-roots", (char*)NULL)) {
       rebuild_class_roots = true;
-    } else if (ceph_argparse_witharg(args, i, &add_item, err, "--add_item", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &add_item, err, "--add_item", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
@@ -584,7 +584,7 @@ int main(int argc, const char **argv)
       }
       add_name.assign(*i);
       i = args.erase(i);
-    } else if (ceph_argparse_witharg(args, i, &add_item, err, "--update_item", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &add_item, err, "--update_item", (char*)NULL)) {
       update_item = true;
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
@@ -616,7 +616,7 @@ int main(int argc, const char **argv)
 	return EXIT_FAILURE;
       }
       move_item = true;
-    } else if (ceph_argparse_witharg(args, i, &val, err, "--create-simple-rule", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, err, "--create-simple-rule", (char*)NULL)) {
       rule_name.assign(val);
       if (!err.str().empty()) {
         cerr << err.str() << std::endl;
@@ -651,7 +651,7 @@ int main(int argc, const char **argv)
            << " mode=" << rule_mode
            << std::endl;
       add_rule = true;
-    } else if (ceph_argparse_witharg(args, i, &val, err, "--create-replicated-rule", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, err, "--create-replicated-rule", (char*)NULL)) {
       rule_name.assign(val);
       if (!err.str().empty()) {
         cerr << err.str() << std::endl;
@@ -680,20 +680,20 @@ int main(int argc, const char **argv)
            << std::endl;
       add_rule = true;
 
-    } else if (ceph_argparse_witharg(args, i, &val, "--device-class", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--device-class", (char*)NULL)) {
       rule_device_class.assign(val);
       if (!err.str().empty()) {
         cerr << err.str() << std::endl;
         return EXIT_FAILURE;
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--remove-rule", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--remove-rule", (char*)NULL)) {
       rule_name.assign(val);
       if (!err.str().empty()) {
         cerr << err.str() << std::endl;
         return EXIT_FAILURE;
       }
       del_rule = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--loc", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--loc", (char*)NULL)) {
       std::string type(val);
       if (i == args.end()) {
 	cerr << "expecting additional argument to --loc" << std::endl;
@@ -702,14 +702,14 @@ int main(int argc, const char **argv)
       std::string name(*i);
       i = args.erase(i);
       add_loc[type] = name;
-    } else if (ceph_argparse_flag(args, i, "--output-csv", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--output-csv", (char*)NULL)) {
       write_to_file = true;
       tester.set_output_data_file(true);
       tester.set_output_csv(true);
-    } else if (ceph_argparse_flag(args, i, "--help-output", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--help-output", (char*)NULL)) {
       data_analysis_usage();
       return EXIT_SUCCESS;
-    } else if (ceph_argparse_witharg(args, i, &val, "--output-name", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--output-name", (char*)NULL)) {
       std::string name(val);
       if (i == args.end()) {
 	cerr << "expecting additional argument to --output-name" << std::endl;
@@ -718,9 +718,9 @@ int main(int argc, const char **argv)
       else {
         tester.set_output_data_file_name(name + "-");
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--remove_item", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--remove_item", (char*)NULL)) {
       remove_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--reweight_item", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--reweight_item", (char*)NULL)) {
       reweight_name = val;
       if (i == args.end()) {
 	cerr << "expecting additional argument to --reweight-item" << std::endl;
@@ -728,86 +728,86 @@ int main(int argc, const char **argv)
       }
       reweight_weight = atof(*i);
       i = args.erase(i);
-    } else if (ceph_argparse_flag(args, i, "--build", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--build", (char*)NULL)) {
       build = true;
-    } else if (ceph_argparse_witharg(args, i, &num_osds, err, "--num_osds", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &num_osds, err, "--num_osds", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
-    } else if (ceph_argparse_witharg(args, i, &x, err, "--num_rep", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &x, err, "--num_rep", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
       tester.set_num_rep(x);
-    } else if (ceph_argparse_witharg(args, i, &x, err, "--max_x", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &x, err, "--max_x", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
       tester.set_max_x(x);
-    } else if (ceph_argparse_witharg(args, i, &x, err, "--min_x", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &x, err, "--min_x", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
       tester.set_min_x(x);
-    } else if (ceph_argparse_witharg(args, i, &z, err, "--pool_id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &z, err, "--pool_id", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
       tester.set_pool_id(z);
-    } else if (ceph_argparse_witharg(args, i, &x, err, "--x", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &x, err, "--x", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
       tester.set_x(x);
-    } else if (ceph_argparse_witharg(args, i, &x, err, "--max_rule", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &x, err, "--max_rule", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
       tester.set_max_rule(x);
-    } else if (ceph_argparse_witharg(args, i, &x, err, "--min_rule", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &x, err, "--min_rule", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
       tester.set_min_rule(x);
-    } else if (ceph_argparse_witharg(args, i, &x, err, "--rule", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &x, err, "--rule", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
       tester.set_rule(x);
-    } else if (ceph_argparse_witharg(args, i, &x, err, "--ruleset", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &x, err, "--ruleset", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
       tester.set_ruleset(x);
-    } else if (ceph_argparse_witharg(args, i, &x, err, "--batches", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &x, err, "--batches", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
       tester.set_batches(x);
-    } else if (ceph_argparse_witharg(args, i, &y, err, "--mark-down-ratio", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &y, err, "--mark-down-ratio", (char*)NULL)) {
       if (!err.str().empty()) {
         cerr << err.str() << std::endl;
         return EXIT_FAILURE;
       }
       tester.set_device_down_ratio(y);
-    } else if (ceph_argparse_witharg(args, i, &y, err, "--mark-down-bucket-ratio", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &y, err, "--mark-down-bucket-ratio", (char*)NULL)) {
       if (!err.str().empty()) {
         cerr << err.str() << std::endl;
         return EXIT_FAILURE;
       }
       tester.set_bucket_down_ratio(y);
-    } else if (ceph_argparse_witharg(args, i, &tmp, err, "--weight", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &tmp, err, "--weight", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	return EXIT_FAILURE;
@@ -1040,7 +1040,7 @@ int main(int argc, const char **argv)
       }
     }
     
-    if (OSDMap::build_simple_crush_rules(g_ceph_context, crush, root, &cerr))
+    if (OSDMap::build_simple_crush_rules(g_stone_context, crush, root, &cerr))
       return EXIT_FAILURE;
 
     modified = true;
@@ -1089,7 +1089,7 @@ int main(int argc, const char **argv)
       r = -ENOENT;
     } else {
       int item = crush.get_item_id(reweight_name);
-      r = crush.adjust_item_weightf(g_ceph_context, item, reweight_weight);
+      r = crush.adjust_item_weightf(g_stone_context, item, reweight_weight);
     }
     if (r >= 0)
       modified = true;
@@ -1107,7 +1107,7 @@ int main(int argc, const char **argv)
       r = -ENOENT;
     } else {
       int remove_item = crush.get_item_id(remove_name);
-      r = crush.remove_item(g_ceph_context, remove_item, false);
+      r = crush.remove_item(g_stone_context, remove_item, false);
     }
     if (r == 0)
       modified = true;
@@ -1120,9 +1120,9 @@ int main(int argc, const char **argv)
   if (add_item >= 0) {
     int r;
     if (update_item) {
-      r = crush.update_item(g_ceph_context, add_item, add_weight, add_name.c_str(), add_loc);
+      r = crush.update_item(g_stone_context, add_item, add_weight, add_name.c_str(), add_loc);
     } else {
-      r = crush.insert_item(g_ceph_context, add_item, add_weight, add_name.c_str(), add_loc);
+      r = crush.insert_item(g_stone_context, add_item, add_weight, add_name.c_str(), add_loc);
     }
     if (r >= 0) {
       modified = true;
@@ -1168,7 +1168,7 @@ int main(int argc, const char **argv)
       return 0;
     }
     int ruleno = crush.get_rule_id(rule_name);
-    ceph_assert(ruleno >= 0);
+    stone_assert(ruleno >= 0);
     int r = crush.remove_rule(ruleno);
     if (r < 0) {
       cerr << "fail to remove rule " << rule_name << std::endl;
@@ -1178,11 +1178,11 @@ int main(int argc, const char **argv)
   }
 
   if (reweight) {
-    crush.reweight(g_ceph_context);
+    crush.reweight(g_stone_context);
     modified = true;
   }
   if (rebuild_class_roots) {
-    int r = crush.rebuild_roots_with_classes(g_ceph_context);
+    int r = crush.rebuild_roots_with_classes(g_stone_context);
     if (r < 0) {
       cerr << "failed to rebuidl roots with classes" << std::endl;
       return EXIT_FAILURE;
@@ -1196,7 +1196,7 @@ int main(int argc, const char **argv)
   }
   if (reclassify) {
     int r = crush.reclassify(
-      g_ceph_context,
+      g_stone_context,
       cout,
       reclassify_root,
       reclassify_bucket);
@@ -1308,7 +1308,7 @@ int main(int argc, const char **argv)
       cout << me << " successfully built or modified map.  Use '-o <file>' to write it out." << std::endl;
     } else {
       bufferlist bl;
-      crush.encode(bl, CEPH_FEATURES_SUPPORTED_DEFAULT);
+      crush.encode(bl, STONE_FEATURES_SUPPORTED_DEFAULT);
       int r = bl.write_file(outfn.c_str());
       if (r < 0) {
 	cerr << me << ": error writing '" << outfn << "': " << cpp_strerror(r) << std::endl;

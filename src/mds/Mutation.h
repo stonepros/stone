@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MDS_MUTATION_H
-#define CEPH_MDS_MUTATION_H
+#ifndef STONE_MDS_MUTATION_H
+#define STONE_MDS_MUTATION_H
 
 #include "include/interval_set.h"
 #include "include/elist.h"
@@ -415,7 +415,7 @@ struct MDRequestImpl : public MutationImpl {
   std::vector<CDentry*> dn[2];
   CInode *in[2] = {};
   CDentry *straydn = nullptr;
-  snapid_t snapid = CEPH_NOSNAP;
+  snapid_t snapid = STONE_NOSNAP;
 
   CInode *tracei = nullptr;
   CDentry *tracedn = nullptr;

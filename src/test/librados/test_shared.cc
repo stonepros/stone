@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include "include/buffer.h"
 
-using namespace ceph;
+using namespace stone;
 
 std::string get_temp_pool_name(const std::string &prefix)
 {

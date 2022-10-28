@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MDS_PERF_METRIC_TYPES_H
-#define CEPH_MDS_PERF_METRIC_TYPES_H
+#ifndef STONE_MDS_PERF_METRIC_TYPES_H
+#define STONE_MDS_PERF_METRIC_TYPES_H
 
 #include <ostream>
 
@@ -379,4 +379,4 @@ struct metrics_message_t {
 
 WRITE_CLASS_ENCODER_FEATURES(metrics_message_t)
 
-#endif // CEPH_MDS_PERF_METRIC_TYPES_H
+#endif // STONE_MDS_PERF_METRIC_TYPES_H

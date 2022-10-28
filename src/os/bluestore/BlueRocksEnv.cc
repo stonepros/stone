@@ -25,7 +25,7 @@ rocksdb::Status err_to_status(int r)
     return rocksdb::Status::IOError(strerror(r));
   default:
     // FIXME :(
-    ceph_abort_msg("unrecognized error code");
+    stone_abort_msg("unrecognized error code");
     return rocksdb::Status::NotSupported(rocksdb::Status::kNone);
   }
 }
@@ -65,7 +65,7 @@ class BlueRocksSequentialFile : public rocksdb::SequentialFile {
   // REQUIRES: External synchronization
   rocksdb::Status Read(size_t n, rocksdb::Slice* result, char* scratch) override {
     int64_t r = fs->read(h, h->buf.pos, n, NULL, scratch);
-    ceph_assert(r >= 0);
+    stone_assert(r >= 0);
     *result = rocksdb::Slice(scratch, r);
     return rocksdb::Status::OK();
   }
@@ -114,7 +114,7 @@ class BlueRocksRandomAccessFile : public rocksdb::RandomAccessFile {
   rocksdb::Status Read(uint64_t offset, size_t n, rocksdb::Slice* result,
 		       char* scratch) const override {
     int64_t r = fs->read_random(h, offset, n, scratch);
-    ceph_assert(r >= 0);
+    stone_assert(r >= 0);
     *result = rocksdb::Slice(scratch, r);
     return rocksdb::Status::OK();
   }
@@ -519,7 +519,7 @@ rocksdb::Status BlueRocksEnv::LinkFile(
   const std::string& src,
   const std::string& target)
 {
-  ceph_abort();
+  stone_abort();
 }
 
 rocksdb::Status BlueRocksEnv::AreFilesSame(
@@ -582,7 +582,7 @@ rocksdb::Status BlueRocksEnv::NewLogger(
   std::shared_ptr<rocksdb::Logger>* result)
 {
   // ignore the filename :)
-  result->reset(create_rocksdb_ceph_logger());
+  result->reset(create_rocksdb_stone_logger());
   return rocksdb::Status::OK();
 }
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef CEPH_OSD_TYPES_H
-#define CEPH_OSD_TYPES_H
+#ifndef STONE_OSD_TYPES_H
+#define STONE_OSD_TYPES_H
 
 #include <atomic>
 #include <sstream>
@@ -52,25 +52,25 @@
 #include "compressor/Compressor.h"
 #include "osd_perf_counters.h"
 
-#define CEPH_OSD_ONDISK_MAGIC "ceph osd volume v026"
+#define STONE_OSD_ONDISK_MAGIC "ceph osd volume v026"
 
-#define CEPH_OSD_FEATURE_INCOMPAT_BASE CompatSet::Feature(1, "initial feature set(~v.18)")
-#define CEPH_OSD_FEATURE_INCOMPAT_PGINFO CompatSet::Feature(2, "pginfo object")
-#define CEPH_OSD_FEATURE_INCOMPAT_OLOC CompatSet::Feature(3, "object locator")
-#define CEPH_OSD_FEATURE_INCOMPAT_LEC  CompatSet::Feature(4, "last_epoch_clean")
-#define CEPH_OSD_FEATURE_INCOMPAT_CATEGORIES  CompatSet::Feature(5, "categories")
-#define CEPH_OSD_FEATURE_INCOMPAT_HOBJECTPOOL  CompatSet::Feature(6, "hobjectpool")
-#define CEPH_OSD_FEATURE_INCOMPAT_BIGINFO CompatSet::Feature(7, "biginfo")
-#define CEPH_OSD_FEATURE_INCOMPAT_LEVELDBINFO CompatSet::Feature(8, "leveldbinfo")
-#define CEPH_OSD_FEATURE_INCOMPAT_LEVELDBLOG CompatSet::Feature(9, "leveldblog")
-#define CEPH_OSD_FEATURE_INCOMPAT_SNAPMAPPER CompatSet::Feature(10, "snapmapper")
-#define CEPH_OSD_FEATURE_INCOMPAT_SHARDS CompatSet::Feature(11, "sharded objects")
-#define CEPH_OSD_FEATURE_INCOMPAT_HINTS CompatSet::Feature(12, "transaction hints")
-#define CEPH_OSD_FEATURE_INCOMPAT_PGMETA CompatSet::Feature(13, "pg meta object")
-#define CEPH_OSD_FEATURE_INCOMPAT_MISSING CompatSet::Feature(14, "explicit missing set")
-#define CEPH_OSD_FEATURE_INCOMPAT_FASTINFO CompatSet::Feature(15, "fastinfo pg attr")
-#define CEPH_OSD_FEATURE_INCOMPAT_RECOVERY_DELETES CompatSet::Feature(16, "deletes in missing set")
-#define CEPH_OSD_FEATURE_INCOMPAT_SNAPMAPPER2 CompatSet::Feature(17, "new snapmapper key structure")
+#define STONE_OSD_FEATURE_INCOMPAT_BASE CompatSet::Feature(1, "initial feature set(~v.18)")
+#define STONE_OSD_FEATURE_INCOMPAT_PGINFO CompatSet::Feature(2, "pginfo object")
+#define STONE_OSD_FEATURE_INCOMPAT_OLOC CompatSet::Feature(3, "object locator")
+#define STONE_OSD_FEATURE_INCOMPAT_LEC  CompatSet::Feature(4, "last_epoch_clean")
+#define STONE_OSD_FEATURE_INCOMPAT_CATEGORIES  CompatSet::Feature(5, "categories")
+#define STONE_OSD_FEATURE_INCOMPAT_HOBJECTPOOL  CompatSet::Feature(6, "hobjectpool")
+#define STONE_OSD_FEATURE_INCOMPAT_BIGINFO CompatSet::Feature(7, "biginfo")
+#define STONE_OSD_FEATURE_INCOMPAT_LEVELDBINFO CompatSet::Feature(8, "leveldbinfo")
+#define STONE_OSD_FEATURE_INCOMPAT_LEVELDBLOG CompatSet::Feature(9, "leveldblog")
+#define STONE_OSD_FEATURE_INCOMPAT_SNAPMAPPER CompatSet::Feature(10, "snapmapper")
+#define STONE_OSD_FEATURE_INCOMPAT_SHARDS CompatSet::Feature(11, "sharded objects")
+#define STONE_OSD_FEATURE_INCOMPAT_HINTS CompatSet::Feature(12, "transaction hints")
+#define STONE_OSD_FEATURE_INCOMPAT_PGMETA CompatSet::Feature(13, "pg meta object")
+#define STONE_OSD_FEATURE_INCOMPAT_MISSING CompatSet::Feature(14, "explicit missing set")
+#define STONE_OSD_FEATURE_INCOMPAT_FASTINFO CompatSet::Feature(15, "fastinfo pg attr")
+#define STONE_OSD_FEATURE_INCOMPAT_RECOVERY_DELETES CompatSet::Feature(16, "deletes in missing set")
+#define STONE_OSD_FEATURE_INCOMPAT_SNAPMAPPER2 CompatSet::Feature(17, "new snapmapper key structure")
 
 
 /// pool priority range set by user
@@ -125,14 +125,14 @@ typedef hobject_t collection_list_handle_t;
 
 /// convert a single CPEH_OSD_FLAG_* to a std::string
 const char *ceph_osd_flag_name(unsigned flag);
-/// convert a single CEPH_OSD_OF_FLAG_* to a std::string
+/// convert a single STONE_OSD_OF_FLAG_* to a std::string
 const char *ceph_osd_op_flag_name(unsigned flag);
 
-/// convert CEPH_OSD_FLAG_* op flags to a std::string
+/// convert STONE_OSD_FLAG_* op flags to a std::string
 std::string ceph_osd_flag_string(unsigned flags);
-/// conver CEPH_OSD_OP_FLAG_* op flags to a std::string
+/// conver STONE_OSD_OP_FLAG_* op flags to a std::string
 std::string ceph_osd_op_flag_string(unsigned flags);
-/// conver CEPH_OSD_ALLOC_HINT_FLAG_* op flags to a std::string
+/// conver STONE_OSD_ALLOC_HINT_FLAG_* op flags to a std::string
 std::string ceph_osd_alloc_hint_flag_string(unsigned flags);
 
 typedef std::map<std::string,std::string> osd_alert_list_t;
@@ -358,17 +358,17 @@ inline std::ostream& operator<<(std::ostream& out, const request_redirect_t& red
 
 // Internal OSD op flags - set by the OSD based on the op types
 enum {
-  CEPH_OSD_RMW_FLAG_READ        = (1 << 1),
-  CEPH_OSD_RMW_FLAG_WRITE       = (1 << 2),
-  CEPH_OSD_RMW_FLAG_CLASS_READ  = (1 << 3),
-  CEPH_OSD_RMW_FLAG_CLASS_WRITE = (1 << 4),
-  CEPH_OSD_RMW_FLAG_PGOP        = (1 << 5),
-  CEPH_OSD_RMW_FLAG_CACHE       = (1 << 6),
-  CEPH_OSD_RMW_FLAG_FORCE_PROMOTE   = (1 << 7),
-  CEPH_OSD_RMW_FLAG_SKIP_HANDLE_CACHE = (1 << 8),
-  CEPH_OSD_RMW_FLAG_SKIP_PROMOTE      = (1 << 9),
-  CEPH_OSD_RMW_FLAG_RWORDERED         = (1 << 10),
-  CEPH_OSD_RMW_FLAG_RETURNVEC = (1 << 11),
+  STONE_OSD_RMW_FLAG_READ        = (1 << 1),
+  STONE_OSD_RMW_FLAG_WRITE       = (1 << 2),
+  STONE_OSD_RMW_FLAG_CLASS_READ  = (1 << 3),
+  STONE_OSD_RMW_FLAG_CLASS_WRITE = (1 << 4),
+  STONE_OSD_RMW_FLAG_PGOP        = (1 << 5),
+  STONE_OSD_RMW_FLAG_CACHE       = (1 << 6),
+  STONE_OSD_RMW_FLAG_FORCE_PROMOTE   = (1 << 7),
+  STONE_OSD_RMW_FLAG_SKIP_HANDLE_CACHE = (1 << 8),
+  STONE_OSD_RMW_FLAG_SKIP_PROMOTE      = (1 << 9),
+  STONE_OSD_RMW_FLAG_RWORDERED         = (1 << 10),
+  STONE_OSD_RMW_FLAG_RETURNVEC = (1 << 11),
 };
 
 
@@ -624,7 +624,7 @@ struct spg_t {
 
   ghobject_t make_temp_ghobject(const std::string& name) const {
     return ghobject_t(
-      hobject_t(object_t(name), "", CEPH_NOSNAP,
+      hobject_t(object_t(name), "", STONE_NOSNAP,
 		pgid.ps(),
 		hobject_t::get_temp_pool(pgid.pool()),
 		""),
@@ -889,7 +889,7 @@ public:
   }
 
   void encode(ceph::buffer::list &bl) const {
-#if defined(CEPH_LITTLE_ENDIAN)
+#if defined(STONE_LITTLE_ENDIAN)
     bl.append((char *)this, sizeof(version_t) + sizeof(epoch_t));
 #else
     using ceph::encode;
@@ -898,7 +898,7 @@ public:
 #endif
   }
   void decode(ceph::buffer::list::const_iterator &bl) {
-#if defined(CEPH_LITTLE_ENDIAN)
+#if defined(STONE_LITTLE_ENDIAN)
     bl.copy(sizeof(version_t) + sizeof(epoch_t), (char *)this);
 #else
     using ceph::decode;
@@ -1185,7 +1185,7 @@ class OSDMap;
  * pg_pool
  */
 struct pg_pool_t {
-  static const char *APPLICATION_NAME_CEPHFS;
+  static const char *APPLICATION_NAME_STONEFS;
   static const char *APPLICATION_NAME_RBD;
   static const char *APPLICATION_NAME_RGW;
 
@@ -1441,7 +1441,7 @@ public:
   std::map<snapid_t, pool_snap_info_t> snaps;
   /*
    * Alternatively, if we are defining non-pool snaps (e.g. via the
-   * Ceph MDS), we must track @removed_snaps (since @snaps is not
+   * Stonee MDS), we must track @removed_snaps (since @snaps is not
    * used).  Snaps and removed_snaps are to be used exclusive of each
    * other!
    */
@@ -4556,7 +4556,7 @@ public:
    * @param other pg_log_t to copy from
    * @param from copy entries after this version
    */
-  void copy_after(CephContext* cct, const pg_log_t &other, eversion_t from);
+  void copy_after(StoneeContext* cct, const pg_log_t &other, eversion_t from);
 
   /**
    * copy up to N entries
@@ -4564,7 +4564,7 @@ public:
    * @param other source log
    * @param max max number of entries to copy
    */
-  void copy_up_to(CephContext* cct, const pg_log_t &other, int max);
+  void copy_up_to(StoneeContext* cct, const pg_log_t &other, int max);
 
   std::ostream& print(std::ostream& out) const;
 
@@ -5975,7 +5975,7 @@ struct PushReplyOp {
   std::ostream &print(std::ostream &out) const;
   void dump(ceph::Formatter *f) const;
 
-  uint64_t cost(CephContext *cct) const;
+  uint64_t cost(StoneeContext *cct) const;
 };
 WRITE_CLASS_ENCODER(PushReplyOp)
 std::ostream& operator<<(std::ostream& out, const PushReplyOp &op);
@@ -5992,7 +5992,7 @@ struct PullOp {
   std::ostream &print(std::ostream &out) const;
   void dump(ceph::Formatter *f) const;
 
-  uint64_t cost(CephContext *cct) const;
+  uint64_t cost(StoneeContext *cct) const;
 };
 WRITE_CLASS_ENCODER_FEATURES(PullOp)
 std::ostream& operator<<(std::ostream& out, const PullOp &op);
@@ -6016,7 +6016,7 @@ struct PushOp {
   std::ostream &print(std::ostream &out) const;
   void dump(ceph::Formatter *f) const;
 
-  uint64_t cost(CephContext *cct) const;
+  uint64_t cost(StoneeContext *cct) const;
 };
 WRITE_CLASS_ENCODER_FEATURES(PushOp)
 std::ostream& operator<<(std::ostream& out, const PushOp &op);
@@ -6250,7 +6250,7 @@ struct clone_info {
   std::vector< std::pair<uint64_t,uint64_t> > overlap;
   uint64_t size;
 
-  clone_info() : cloneid(CEPH_NOSNAP), size(0) {}
+  clone_info() : cloneid(STONE_NOSNAP), size(0) {}
 
   void encode(ceph::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
@@ -6269,7 +6269,7 @@ struct clone_info {
     DECODE_FINISH(bl);
   }
   void dump(ceph::Formatter *f) const {
-    if (cloneid == CEPH_NOSNAP)
+    if (cloneid == STONE_NOSNAP)
       f->dump_string("cloneid", "HEAD");
     else
       f->dump_unsigned("cloneid", cloneid.val);
@@ -6300,7 +6300,7 @@ struct clone_info {
     o.back()->overlap.push_back(std::pair<uint64_t,uint64_t>(8192,4096));
     o.back()->size = 16384;
     o.push_back(new clone_info);
-    o.back()->cloneid = CEPH_NOSNAP;
+    o.back()->cloneid = STONE_NOSNAP;
     o.back()->size = 32768;
   }
 };
@@ -6326,7 +6326,7 @@ struct obj_list_snap_response_t {
     if (struct_v >= 2)
       decode(seq, bl);
     else
-      seq = CEPH_NOSNAP;
+      seq = STONE_NOSNAP;
     DECODE_FINISH(bl);
   }
   void dump(ceph::Formatter *f) const {
@@ -6349,7 +6349,7 @@ struct obj_list_snap_response_t {
     cl.overlap.push_back(std::pair<uint64_t,uint64_t>(8192,4096));
     cl.size = 16384;
     o.back()->clones.push_back(cl);
-    cl.cloneid = CEPH_NOSNAP;
+    cl.cloneid = STONE_NOSNAP;
     cl.snaps.clear();
     cl.overlap.clear();
     cl.size = 32768;
@@ -6490,7 +6490,7 @@ static const __u8 pg_latest_struct_v = 10;
 static const __u8 pg_compat_struct_v = 10;
 
 int prepare_info_keymap(
-  CephContext* cct,
+  StoneeContext* cct,
   std::map<std::string,ceph::buffer::list> *km,
   std::string *key_to_remove,
   epoch_t epoch,
@@ -6522,7 +6522,7 @@ struct omap_stat_t {
 
 // filter for pg listings
 class PGLSFilter {
-  CephContext* cct;
+  StoneeContext* cct;
 protected:
   std::string xattr;
 public:

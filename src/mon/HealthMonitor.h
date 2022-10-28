@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_HEALTH_MONITOR_H
-#define CEPH_HEALTH_MONITOR_H
+#ifndef STONE_HEALTH_MONITOR_H
+#define STONE_HEALTH_MONITOR_H
 
 #include "mon/PaxosService.h"
 
@@ -72,4 +72,4 @@ private:
   bool check_mutes();
 };
 
-#endif // CEPH_HEALTH_MONITOR_H
+#endif // STONE_HEALTH_MONITOR_H

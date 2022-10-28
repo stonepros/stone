@@ -7,7 +7,7 @@
 #include "librbd/ImageCtx.h"
 #include "librbd/mirror/snapshot/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::snapshot::util: " \
@@ -56,13 +56,13 @@ template <typename I>
 bool can_create_primary_snapshot(I *image_ctx, bool demoted, bool force,
                                  bool* requires_orphan,
                                  uint64_t *rollback_snap_id) {
-  CephContext *cct = image_ctx->cct;
+  StoneContext *cct = image_ctx->cct;
 
   if (requires_orphan != nullptr) {
     *requires_orphan = false;
   }
   if (rollback_snap_id) {
-    *rollback_snap_id = CEPH_NOSNAP;
+    *rollback_snap_id = STONE_NOSNAP;
   }
 
   std::shared_lock image_locker{image_ctx->image_lock};
@@ -127,7 +127,7 @@ bool can_create_primary_snapshot(I *image_ctx, bool demoted, bool force,
 
 template <typename I>
 bool can_create_non_primary_snapshot(I *image_ctx) {
-  CephContext *cct = image_ctx->cct;
+  StoneContext *cct = image_ctx->cct;
 
   std::shared_lock image_locker{image_ctx->image_lock};
 

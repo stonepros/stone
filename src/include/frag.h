@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_FRAG_H
-#define CEPH_FRAG_H
+#ifndef STONE_FRAG_H
+#define STONE_FRAG_H
 
 #include <boost/container/small_vector.hpp>
 
@@ -406,7 +406,7 @@ public:
     _splits[x] += childbits;
   }
 
-  bool force_to_leaf(CephContext *cct, frag_t x) {
+  bool force_to_leaf(StoneeContext *cct, frag_t x) {
     if (is_leaf(x))
       return false;
 

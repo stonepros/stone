@@ -25,7 +25,7 @@ public:
 
   static SetImageStateRequest *create(MockImageCtx *image_ctx, uint64_t snap_id,
                                       Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -482,7 +482,7 @@ TEST_F(TestMockOperationSnapshotCreateRequest, SetImageState) {
   MockSnapshotCreateRequest *req = new MockSnapshotCreateRequest(
     mock_image_ctx, &cond_ctx,
     cls::rbd::MirrorSnapshotNamespace{
-      cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {}, "", CEPH_NOSNAP},
+      cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {}, "", STONE_NOSNAP},
     "snap1", 0, 0, prog_ctx);
   {
     std::shared_lock owner_locker{mock_image_ctx.owner_lock};

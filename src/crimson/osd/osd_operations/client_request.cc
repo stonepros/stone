@@ -15,7 +15,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -49,7 +49,7 @@ bool ClientRequest::is_pg_op() const
 {
   return std::any_of(
     begin(m->ops), end(m->ops),
-    [](auto& op) { return ceph_osd_op_type_pg(op.op.op); });
+    [](auto& op) { return stone_osd_op_type_pg(op.op.op); });
 }
 
 seastar::future<> ClientRequest::start()
@@ -155,8 +155,8 @@ seastar::future<> ClientRequest::process_op(
                      !pg.get_peering_state().can_serve_replica_read(hoid)) {
             auto reply = make_message<MOSDOpReply>(
               m.get(), -EAGAIN, pg.get_osdmap_epoch(),
-              m->get_flags() & (CEPH_OSD_FLAG_ACK|CEPH_OSD_FLAG_ONDISK),
-              !m->has_flag(CEPH_OSD_FLAG_RETURNVEC));
+              m->get_flags() & (STONE_OSD_FLAG_ACK|STONE_OSD_FLAG_ONDISK),
+              !m->has_flag(STONE_OSD_FLAG_RETURNVEC));
             return seastar::make_ready_future<Ref<MOSDOpReply>>(std::move(reply));
           }
         }
@@ -181,8 +181,8 @@ bool ClientRequest::is_misdirected(const PG& pg) const
 {
   // otherwise take a closer look
   if (const int flags = m->get_flags();
-      flags & CEPH_OSD_FLAG_BALANCE_READS ||
-      flags & CEPH_OSD_FLAG_LOCALIZE_READS) {
+      flags & STONE_OSD_FLAG_BALANCE_READS ||
+      flags & STONE_OSD_FLAG_LOCALIZE_READS) {
     if (!op_info.may_read()) {
       // no read found, so it can't be balanced read
       return true;

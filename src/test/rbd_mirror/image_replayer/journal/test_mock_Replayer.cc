@@ -98,7 +98,7 @@ namespace mirror {
 template <>
 struct Threads<librbd::MockTestImageCtx> {
   MockSafeTimer *timer;
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
 
   MockContextWQ *work_queue;
 
@@ -131,19 +131,19 @@ struct CloseImageRequest<librbd::MockTestImageCtx> {
 
   static CloseImageRequest* create(librbd::MockTestImageCtx **image_ctx,
                                    Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->image_ctx = image_ctx;
     s_instance->on_finish = on_finish;
     return s_instance;
   }
 
   CloseImageRequest() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
 
   ~CloseImageRequest() {
-    ceph_assert(s_instance == this);
+    stone_assert(s_instance == this);
     s_instance = nullptr;
   }
 
@@ -163,7 +163,7 @@ struct EventPreprocessor<librbd::MockTestImageCtx> {
                                    const std::string &local_mirror_uuid,
                                    librbd::journal::MirrorPeerClientMeta *client_meta,
                                    MockContextWQ *work_queue) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -171,12 +171,12 @@ struct EventPreprocessor<librbd::MockTestImageCtx> {
   }
 
   EventPreprocessor() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
 
   ~EventPreprocessor() {
-    ceph_assert(s_instance == this);
+    stone_assert(s_instance == this);
     s_instance = nullptr;
   }
 
@@ -190,7 +190,7 @@ struct ReplayStatusFormatter<librbd::MockTestImageCtx> {
 
   static ReplayStatusFormatter* create(::journal::MockJournaler *journaler,
                                        const std::string &mirror_uuid) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -198,12 +198,12 @@ struct ReplayStatusFormatter<librbd::MockTestImageCtx> {
   }
 
   ReplayStatusFormatter() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
 
   ~ReplayStatusFormatter() {
-    ceph_assert(s_instance == this);
+    stone_assert(s_instance == this);
     s_instance = nullptr;
   }
 
@@ -525,9 +525,9 @@ public:
 
   librbd::ImageCtx* m_local_image_ctx = nullptr;
 
-  ceph::mutex m_lock = ceph::make_mutex(
+  stone::mutex m_lock = stone::make_mutex(
     "TestMockImageReplayerJournalReplayer");
-  ceph::condition_variable m_cond;
+  stone::condition_variable m_cond;
   bool m_notified = false;
 };
 
@@ -1256,7 +1256,7 @@ TEST_F(TestMockImageReplayerJournalReplayer, DelayedReplay) {
   // process with delay
   EXPECT_CALL(mock_replay_entry, get_data());
   librbd::journal::EventEntry event_entry(
-    librbd::journal::AioDiscardEvent(123, 345, 0), ceph_clock_now());
+    librbd::journal::AioDiscardEvent(123, 345, 0), stone_clock_now());
   EXPECT_CALL(mock_local_journal_replay, decode(_, _))
     .WillOnce(DoAll(SetArgPointee<1>(event_entry),
                     Return(0)));

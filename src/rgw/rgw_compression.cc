@@ -3,7 +3,7 @@
 
 #include "rgw_compression.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 int rgw_compression_info_from_attr(const bufferlist& attr,
                                    bool& need_decompress,
@@ -78,7 +78,7 @@ int RGWPutObj_Compress::process(bufferlist&& in, uint64_t logical_offset)
 }
 
 //----------------RGWGetObj_Decompress---------------------
-RGWGetObj_Decompress::RGWGetObj_Decompress(CephContext* cct_, 
+RGWGetObj_Decompress::RGWGetObj_Decompress(StoneContext* cct_, 
                                            RGWCompressionInfo* cs_info_, 
                                            bool partial_content_,
                                            RGWGetObj_Filter* next): RGWGetObj_Filter(next),

@@ -3,7 +3,7 @@
 
 #include "include/neorados/RADOS.hpp"
 #include "include/rados/librados.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/hobject.h"
 #include "librados/AioCompletionImpl.h"
 #include "mon/error_code.h"
@@ -28,7 +28,7 @@ namespace neorados {
 namespace detail {
 
 struct Client {
-  ceph::mutex mutex = ceph::make_mutex("NeoradosTestStub::Client");
+  stone::mutex mutex = stone::make_mutex("NeoradosTestStub::Client");
 
   librados::TestRadosClient* test_rados_client;
   boost::asio::io_context& io_context;
@@ -141,7 +141,7 @@ Object::operator std::string_view() const {
 
 struct IOContextImpl {
   object_locator_t oloc;
-  snapid_t snap_seq = CEPH_NOSNAP;
+  snapid_t snap_seq = STONE_NOSNAP;
   SnapContext snapc;
 };
 
@@ -183,14 +183,14 @@ void IOContext::ns(std::string&& _ns) {
 
 std::optional<std::uint64_t> IOContext::read_snap() const {
   auto& snap_seq = reinterpret_cast<const IOContextImpl*>(&impl)->snap_seq;
-  if (snap_seq == CEPH_NOSNAP)
+  if (snap_seq == STONE_NOSNAP)
     return std::nullopt;
   else
     return snap_seq;
 }
 void IOContext::read_snap(std::optional<std::uint64_t> _snapid) {
   auto& snap_seq = reinterpret_cast<IOContextImpl*>(&impl)->snap_seq;
-  snap_seq = _snapid.value_or(CEPH_NOSNAP);
+  snap_seq = _snapid.value_or(STONE_NOSNAP);
 }
 
 std::optional<
@@ -266,7 +266,7 @@ void Op::assert_version(uint64_t ver) {
           &librados::TestIoCtxImpl::assert_version, _1, _2, ver));
 }
 
-void Op::cmpext(uint64_t off, ceph::buffer::list&& cmp_bl, std::size_t* s) {
+void Op::cmpext(uint64_t off, stone::buffer::list&& cmp_bl, std::size_t* s) {
   auto o = *reinterpret_cast<librados::TestObjectOperationImpl**>(&impl);
   librados::ObjectOperationTestImpl op = std::bind(
     &librados::TestIoCtxImpl::cmpext, _1, _2, off, cmp_bl, _4);
@@ -311,8 +311,8 @@ void Op::localize_reads() {
 }
 
 void Op::exec(std::string_view cls, std::string_view method,
-              const ceph::buffer::list& inbl,
-              ceph::buffer::list* out,
+              const stone::buffer::list& inbl,
+              stone::buffer::list* out,
               boost::system::error_code* ec) {
   auto o = *reinterpret_cast<librados::TestObjectOperationImpl**>(&impl);
 
@@ -334,7 +334,7 @@ void Op::exec(std::string_view cls, std::string_view method,
 }
 
 void Op::exec(std::string_view cls, std::string_view method,
-              const ceph::buffer::list& inbl,
+              const stone::buffer::list& inbl,
               boost::system::error_code* ec) {
   auto o = *reinterpret_cast<librados::TestObjectOperationImpl**>(&impl);
 
@@ -354,7 +354,7 @@ void Op::exec(std::string_view cls, std::string_view method,
   o->ops.push_back(op);
 }
 
-void ReadOp::read(size_t off, uint64_t len, ceph::buffer::list* out,
+void ReadOp::read(size_t off, uint64_t len, stone::buffer::list* out,
 	          boost::system::error_code* ec) {
   auto o = *reinterpret_cast<librados::TestObjectOperationImpl**>(&impl);
   librados::ObjectOperationTestImpl op;
@@ -374,7 +374,7 @@ void ReadOp::read(size_t off, uint64_t len, ceph::buffer::list* out,
 }
 
 void ReadOp::sparse_read(uint64_t off, uint64_t len,
-		         ceph::buffer::list* out,
+		         stone::buffer::list* out,
 		         std::vector<std::pair<std::uint64_t,
                                                std::uint64_t>>* extents,
 		         boost::system::error_code* ec) {
@@ -435,13 +435,13 @@ void WriteOp::create(bool exclusive) {
     &librados::TestIoCtxImpl::create, _1, _2, exclusive, _5));
 }
 
-void WriteOp::write(uint64_t off, ceph::buffer::list&& bl) {
+void WriteOp::write(uint64_t off, stone::buffer::list&& bl) {
   auto o = *reinterpret_cast<librados::TestObjectOperationImpl**>(&impl);
   o->ops.push_back(std::bind(
     &librados::TestIoCtxImpl::write, _1, _2, bl, bl.length(), off, _5));
 }
 
-void WriteOp::write_full(ceph::buffer::list&& bl) {
+void WriteOp::write_full(stone::buffer::list&& bl) {
   auto o = *reinterpret_cast<librados::TestObjectOperationImpl**>(&impl);
   o->ops.push_back(std::bind(
     &librados::TestIoCtxImpl::write_full, _1, _2, bl, _5));
@@ -466,7 +466,7 @@ void WriteOp::zero(uint64_t off, uint64_t len) {
 }
 
 void WriteOp::writesame(std::uint64_t off, std::uint64_t write_len,
-                        ceph::buffer::list&& bl) {
+                        stone::buffer::list&& bl) {
   auto o = *reinterpret_cast<librados::TestObjectOperationImpl**>(&impl);
   o->ops.push_back(std::bind(
     &librados::TestIoCtxImpl::writesame, _1, _2, bl, write_len, off, _5));
@@ -494,7 +494,7 @@ RADOS RADOS::make_with_librados(librados::Rados& rados) {
   return RADOS{std::make_unique<detail::Client>(test_rados_client)};
 }
 
-CephContext* neorados::RADOS::cct() {
+StoneContext* neorados::RADOS::cct() {
   return impl->test_rados_client->cct();
 }
 
@@ -507,7 +507,7 @@ boost::asio::io_context::executor_type neorados::RADOS::get_executor() const {
 }
 
 void RADOS::execute(const Object& o, const IOContext& ioc, ReadOp&& op,
-                    ceph::buffer::list* bl, std::unique_ptr<Op::Completion> c,
+                    stone::buffer::list* bl, std::unique_ptr<Op::Completion> c,
                     uint64_t* objver, const blkin_trace_info* trace_info) {
   auto io_ctx = impl->get_io_ctx(ioc);
   if (io_ctx == nullptr) {
@@ -517,7 +517,7 @@ void RADOS::execute(const Object& o, const IOContext& ioc, ReadOp&& op,
 
   auto ops = *reinterpret_cast<librados::TestObjectOperationImpl**>(&op.impl);
 
-  auto snap_id = CEPH_NOSNAP;
+  auto snap_id = STONE_NOSNAP;
   auto opt_snap_id = ioc.read_snap();
   if (opt_snap_id) {
     snap_id = *opt_snap_id;
@@ -526,7 +526,7 @@ void RADOS::execute(const Object& o, const IOContext& ioc, ReadOp&& op,
   auto completion = create_aio_completion(std::move(c));
   auto r = io_ctx->aio_operate_read(std::string{o}, *ops, completion, 0U, bl,
                                     snap_id, objver);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 }
 
 void RADOS::execute(const Object& o, const IOContext& ioc, WriteOp&& op,
@@ -549,7 +549,7 @@ void RADOS::execute(const Object& o, const IOContext& ioc, WriteOp&& op,
 
   auto completion = create_aio_completion(std::move(c));
   auto r = io_ctx->aio_operate(std::string{o}, *ops, completion, &snapc, 0U);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 }
 
 void RADOS::mon_command(std::vector<std::string> command,
@@ -586,7 +586,7 @@ MockTestMemIoCtxImpl& get_mock_io_ctx(neorados::RADOS& rados,
   auto& impl = *reinterpret_cast<std::unique_ptr<neorados::detail::Client>*>(
     &rados);
   auto io_ctx = impl->get_io_ctx(io_context);
-  ceph_assert(io_ctx != nullptr);
+  stone_assert(io_ctx != nullptr);
   return *reinterpret_cast<MockTestMemIoCtxImpl*>(io_ctx);
 }
 

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CLIENT_SNAPREALM_H
-#define CEPH_CLIENT_SNAPREALM_H
+#ifndef STONE_CLIENT_SNAPREALM_H
+#define STONE_CLIENT_SNAPREALM_H
 
 #include "include/types.h"
 #include "common/snap_types.h"

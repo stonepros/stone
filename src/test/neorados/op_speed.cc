@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -22,9 +22,9 @@ int main() {
     neorados::ReadOp op;
     bufferlist bl;
     std::uint64_t sz;
-    ceph::real_time tm;
-    boost::container::flat_map<std::string, ceph::buffer::list> xattrs;
-    boost::container::flat_map<std::string, ceph::buffer::list> omap;
+    stone::real_time tm;
+    boost::container::flat_map<std::string, stone::buffer::list> xattrs;
+    boost::container::flat_map<std::string, stone::buffer::list> omap;
     bool trunc;
     op.read(0, 0, &bl);
     op.stat(&sz, &tm);

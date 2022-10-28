@@ -7,8 +7,8 @@
 #include "rgw_asio_client.h"
 #include "rgw_perf_counters.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 using namespace rgw::asio;
 
@@ -24,7 +24,7 @@ ClientIO::ClientIO(parser_type& parser, bool is_ssl,
 
 ClientIO::~ClientIO() = default;
 
-int ClientIO::init_env(CephContext *cct)
+int ClientIO::init_env(StoneContext *cct)
 {
   env.init(cct);
 

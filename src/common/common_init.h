@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2009-2011 New Dream Network
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_COMMON_INIT_H
-#define CEPH_COMMON_INIT_H
+#ifndef STONE_COMMON_INIT_H
+#define STONE_COMMON_INIT_H
 
 #include <deque>
 
@@ -44,16 +44,16 @@ enum common_init_flags_t {
 };
 
 #ifndef WITH_SEASTAR
-class CephInitParameters;
+class StoneeInitParameters;
 
 /*
- * NOTE: If you are writing a Ceph daemon, ignore this function and call
+ * NOTE: If you are writing a Stonee daemon, ignore this function and call
  * global_init instead. It will call common_preinit for you.
  *
- * common_preinit creates the CephContext.
+ * common_preinit creates the StoneeContext.
  *
- * After this function gives you a CephContext, you need to set up the
- * Ceph configuration, which lives inside the CephContext as md_config_t.
+ * After this function gives you a StoneeContext, you need to set up the
+ * Stonee configuration, which lives inside theStoneneContext as md_config_t.
  * The initial settings are not very useful because they do not reflect what
  * the user asked for.
  *
@@ -63,12 +63,12 @@ class CephInitParameters;
  *
  * Your library may also supply functions to read a configuration file.
  */
-CephContext *common_preinit(const CephInitParameters &iparams,
+StoneeContext *common_preinit(constStoneneInitParameters &iparams,
 			    enum code_environment_t code_env, int flags);
 #endif // #ifndef WITH_SEASTAR
 
 /* Print out some parse error. */
-void complain_about_parse_error(CephContext *cct,
+void complain_about_parse_error(StoneeContext *cct,
 				const std::string& parse_error);
 
 /* This function is called after you have done your last
@@ -78,11 +78,11 @@ void complain_about_parse_error(CephContext *cct,
  * This includes things like starting threads, initializing libraries that
  * can't handle forking, and so forth.
  *
- * If you are writing a Ceph library, you can call this pretty much any time.
- * We do not allow our library users to fork and continue using the Ceph
+ * If you are writing a Stonee library, you can call this pretty much any time.
+ * We do not allow our library users to fork and continue using the Stonee
  * libraries. The most obvious reason for this is that the threads started by
- * the Ceph libraries would be destroyed by a fork().
+ * the Stonee libraries would be destroyed by a fork().
  */
-void common_init_finish(CephContext *cct);
+void common_init_finish(StoneeContext *cct);
 
 #endif

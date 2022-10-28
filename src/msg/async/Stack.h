@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 XSKY <haomai@xsky.com>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_MSG_ASYNC_STACK_H
-#define CEPH_MSG_ASYNC_STACK_H
+#ifndef STONE_MSG_ASYNC_STACK_H
+#define STONE_MSG_ASYNC_STACK_H
 
 #include "include/spinlock.h"
 #include "common/perf_counters.h"
@@ -214,7 +214,7 @@ class Worker {
  public:
   bool done = false;
 
-  CephContext *cct;
+  StoneeContext *cct;
   PerfCounters *perf_logger;
   unsigned id;
 
@@ -224,7 +224,7 @@ class Worker {
   Worker(const Worker&) = delete;
   Worker& operator=(const Worker&) = delete;
 
-  Worker(CephContext *c, unsigned worker_id)
+  Worker(StoneeContext *c, unsigned worker_id)
     : cct(c), perf_logger(NULL), id(worker_id), references(0), center(c) {
     char name[128];
     sprintf(name, "AsyncMessenger::Worker-%u", id);
@@ -299,13 +299,13 @@ class NetworkStack {
 
   std::function<void ()> add_thread(unsigned i);
 
-  virtual Worker* create_worker(CephContext *c, unsigned i) = 0;
+  virtual Worker* create_worker(StoneeContext *c, unsigned i) = 0;
 
  protected:
-  CephContext *cct;
+  StoneeContext *cct;
   std::vector<Worker*> workers;
 
-  explicit NetworkStack(CephContext *c);
+  explicit NetworkStack(StoneeContext *c);
  public:
   NetworkStack(const NetworkStack &) = delete;
   NetworkStack& operator=(const NetworkStack &) = delete;
@@ -315,7 +315,7 @@ class NetworkStack {
   }
 
   static std::shared_ptr<NetworkStack> create(
-    CephContext *c, const std::string &type);
+    StoneeContext *c, const std::string &type);
 
   // backend need to override this method if backend doesn't support shared
   // listen table.
@@ -345,4 +345,4 @@ class NetworkStack {
   virtual void ready() { };
 };
 
-#endif //CEPH_MSG_ASYNC_STACK_H
+#endif //STONE_MSG_ASYNC_STACK_H

@@ -12,7 +12,7 @@
 #include "cls/rgw/cls_rgw_client.h"
 #include "cls/lock/cls_lock_client.h"
 #include "common/errno.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "common/dout.h"
 
@@ -20,8 +20,8 @@
 #include "services/svc_sys_obj.h"
 #include "services/svc_tier_rados.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 const string reshard_oid_prefix = "reshard.";
 const string reshard_lock_name = "reshard_process";
@@ -827,7 +827,7 @@ void RGWReshard::get_bucket_logshard_oid(const string& tenant, const string& buc
 {
   string key = get_logshard_key(tenant, bucket_name);
 
-  uint32_t sid = ceph_str_hash_linux(key.c_str(), key.size());
+  uint32_t sid = stone_str_hash_linux(key.c_str(), key.size());
   uint32_t sid2 = sid ^ ((sid & 0xFF) << 24);
   sid = sid2 % MAX_RESHARD_LOGSHARDS_PRIME % num_logshards;
 
@@ -1171,13 +1171,13 @@ void RGWReshard::stop_processor()
 
 void *RGWReshard::ReshardWorker::entry() {
   do {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     reshard->process_all_logshards(this);
 
     if (reshard->going_down())
       break;
 
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     end -= start;
     int secs = cct->_conf.get_val<uint64_t>("rgw_reshard_thread_interval");
 
@@ -1199,7 +1199,7 @@ void RGWReshard::ReshardWorker::stop()
   cond.notify_all();
 }
 
-CephContext *RGWReshard::ReshardWorker::get_cct() const
+StoneContext *RGWReshard::ReshardWorker::get_cct() const
 {
   return cct;
 }

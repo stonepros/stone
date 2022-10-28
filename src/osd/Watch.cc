@@ -14,7 +14,7 @@
 #include "common/config.h"
 
 #define dout_context osd->cct
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, this)
 
@@ -24,9 +24,9 @@ using std::pair;
 using std::ostream;
 using std::set;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
 
 struct CancelableContext : public Context {
   virtual void cancel() = 0;
@@ -95,14 +95,14 @@ public:
     notif->osd->watch_lock.lock();
   }
   void cancel() override {
-    ceph_assert(ceph_mutex_is_locked(notif->lock));
+    stone_assert(stone_mutex_is_locked(notif->lock));
     canceled = true;
   }
 };
 
 void Notify::do_timeout()
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   dout(10) << "timeout" << dendl;
   cb = nullptr;
   if (is_discarded()) {
@@ -112,7 +112,7 @@ void Notify::do_timeout()
 
   timed_out = true;         // we will send the client an error code
   maybe_complete_notify();
-  ceph_assert(complete);
+  stone_assert(complete);
   set<WatchRef> _watchers;
   _watchers.swap(watchers);
   lock.unlock();
@@ -129,7 +129,7 @@ void Notify::do_timeout()
 
 void Notify::register_cb()
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   {
     std::lock_guard l{osd->watch_lock};
     cb = new NotifyTimeoutCB(self.lock());
@@ -141,7 +141,7 @@ void Notify::register_cb()
 
 void Notify::unregister_cb()
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   if (!cb)
     return;
   cb->cancel();
@@ -165,7 +165,7 @@ void Notify::complete_watcher(WatchRef watch, bufferlist& reply_bl)
   dout(10) << "complete_watcher" << dendl;
   if (is_discarded())
     return;
-  ceph_assert(watchers.count(watch));
+  stone_assert(watchers.count(watch));
   watchers.erase(watch);
   notify_replies.insert(make_pair(make_pair(watch->get_watcher_gid(),
 					    watch->get_cookie()),
@@ -179,7 +179,7 @@ void Notify::complete_watcher_remove(WatchRef watch)
   dout(10) << __func__ << dendl;
   if (is_discarded())
     return;
-  ceph_assert(watchers.count(watch));
+  stone_assert(watchers.count(watch));
   watchers.erase(watch);
   maybe_complete_notify();
 }
@@ -205,7 +205,7 @@ void Notify::maybe_complete_notify()
       cookie,
       version,
       notify_id,
-      CEPH_WATCH_EVENT_NOTIFY_COMPLETE,
+      STONE_WATCH_EVENT_NOTIFY_COMPLETE,
       empty,
       client_gid);
     reply->set_data(bl);
@@ -233,7 +233,7 @@ void Notify::init()
   maybe_complete_notify();
 }
 
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, watch.get())
 
@@ -251,7 +251,7 @@ public:
   void cancel() override {
     canceled = true;
   }
-  void finish(int) override { ceph_abort(); /* not used */ }
+  void finish(int) override { stone_abort(); /* not used */ }
   void complete(int) override {
     OSDService *osd(watch->osd);
     ldout(osd->cct, 10) << "HandleWatchTimeout" << dendl;
@@ -278,14 +278,14 @@ public:
   void finish(int) override {
     OSDService *osd(watch->osd);
     dout(10) << "HandleWatchTimeoutDelayed" << dendl;
-    ceph_assert(watch->pg->is_locked());
+    stone_assert(watch->pg->is_locked());
     watch->cb = nullptr;
     if (!watch->is_discarded() && !canceled)
       watch->pg->handle_watch_timeout(watch);
   }
 };
 
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, this)
 
@@ -318,13 +318,13 @@ Watch::Watch(
 Watch::~Watch() {
   dout(10) << "~Watch" << dendl;
   // users must have called remove() or discard() prior to this point
-  ceph_assert(!obc);
-  ceph_assert(!is_connected());
+  stone_assert(!obc);
+  stone_assert(!is_connected());
 }
 
 Context *Watch::get_delayed_cb()
 {
-  ceph_assert(!cb);
+  stone_assert(!cb);
   cb = new HandleDelayedWatchTimeout(self.lock());
   return cb;
 }
@@ -388,7 +388,7 @@ void Watch::connect(ConnectionRef con, bool _will_ping)
     }
   }
   if (will_ping) {
-    last_ping = ceph_clock_now();
+    last_ping = stone_clock_now();
     register_cb();
   } else {
     unregister_cb();
@@ -416,9 +416,9 @@ void Watch::discard()
 
 void Watch::discard_state()
 {
-  ceph_assert(pg->is_locked());
-  ceph_assert(!discarded);
-  ceph_assert(obc);
+  stone_assert(pg->is_locked());
+  stone_assert(!discarded);
+  stone_assert(obc);
   in_progress_notifies.clear();
   unregister_cb();
   discarded = true;
@@ -443,7 +443,7 @@ void Watch::remove(bool send_disconnect)
   if (send_disconnect && is_connected()) {
     bufferlist empty;
     MWatchNotify *reply(new MWatchNotify(cookie, 0, 0,
-					 CEPH_WATCH_EVENT_DISCONNECT, empty));
+					 STONE_WATCH_EVENT_DISCONNECT, empty));
     conn->send_message(reply);
   }
   for (auto i = in_progress_notifies.begin();
@@ -456,10 +456,10 @@ void Watch::remove(bool send_disconnect)
 
 void Watch::start_notify(NotifyRef notif)
 {
-  ceph_assert(in_progress_notifies.find(notif->notify_id) ==
+  stone_assert(in_progress_notifies.find(notif->notify_id) ==
 	 in_progress_notifies.end());
   if (will_ping) {
-    utime_t cutoff = ceph_clock_now();
+    utime_t cutoff = stone_clock_now();
     cutoff.sec_ref() -= timeout;
     if (last_ping < cutoff) {
       dout(10) << __func__ << " " << notif->notify_id
@@ -489,7 +489,7 @@ void Watch::send_notify(NotifyRef notif)
     cookie,
     notif->version,
     notif->notify_id,
-    CEPH_WATCH_EVENT_NOTIFY,
+    STONE_WATCH_EVENT_NOTIFY,
     notif->payload,
     notif->client_gid);
   conn->send_message(notify_msg);

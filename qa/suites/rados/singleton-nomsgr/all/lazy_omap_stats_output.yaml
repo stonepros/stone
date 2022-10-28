@@ -5,14 +5,14 @@ openstack:
 roles:
 - [mon.a, mgr.x, osd.0, osd.1, osd.2, client.0]
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - \(POOL_APP_NOT_ENABLED\)
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
 - exec:
     client.0:
-      - ceph_test_lazy_omap_stats
+      - stone_test_lazy_omap_stats

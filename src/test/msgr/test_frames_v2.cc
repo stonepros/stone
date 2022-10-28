@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat
  *
@@ -20,16 +20,16 @@
 #include <tuple>
 
 #include "auth/Auth.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "global/global_context.h"
 #include "include/Context.h"
 
 #include <gtest/gtest.h>
 
-namespace ceph::msgr::v2 {
+namespace stone::msgr::v2 {
 
-// MessageFrame with the first segment not fixed to ceph_msg_header2
+// MessageFrame with the first segment not fixed to stone_msg_header2
 struct TestFrame : Frame<TestFrame,
                          /* four segments */
                          segment_t::DEFAULT_ALIGNMENT,
@@ -169,16 +169,16 @@ protected:
     const auto& m = std::get<1>(GetParam());
     if (m.is_secure) {
       AuthConnectionMeta auth_meta;
-      auth_meta.con_mode = CEPH_CON_MODE_SECURE;
+      auth_meta.con_mode = STONE_CON_MODE_SECURE;
       // see AuthConnectionMeta::get_connection_secret_length()
       auth_meta.connection_secret.resize(64);
-      g_ceph_context->random()->get_bytes(auth_meta.connection_secret.data(),
+      g_stone_context->random()->get_bytes(auth_meta.connection_secret.data(),
                                           auth_meta.connection_secret.size());
-      m_tx_crypto = ceph::crypto::onwire::rxtx_t::create_handler_pair(
-          g_ceph_context, auth_meta, /*new_nonce_format=*/m.is_rev1,
+      m_tx_crypto = stone::crypto::onwire::rxtx_t::create_handler_pair(
+          g_stone_context, auth_meta, /*new_nonce_format=*/m.is_rev1,
           /*crossed=*/false);
-      m_rx_crypto = ceph::crypto::onwire::rxtx_t::create_handler_pair(
-          g_ceph_context, auth_meta, /*new_nonce_format=*/m.is_rev1,
+      m_rx_crypto = stone::crypto::onwire::rxtx_t::create_handler_pair(
+          g_stone_context, auth_meta, /*new_nonce_format=*/m.is_rev1,
           /*crossed=*/true);
     }
   }
@@ -222,8 +222,8 @@ protected:
     EXPECT_TRUE(m_data.contents_equal(rx_frame.data()));
   }
 
-  ceph::crypto::onwire::rxtx_t m_tx_crypto;
-  ceph::crypto::onwire::rxtx_t m_rx_crypto;
+  stone::crypto::onwire::rxtx_t m_tx_crypto;
+  stone::crypto::onwire::rxtx_t m_rx_crypto;
   FrameAssembler m_tx_frame_asm;
   FrameAssembler m_rx_frame_asm;
 
@@ -434,16 +434,16 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::ValuesIn(round_trip_perf_instances),
         ::testing::ValuesIn(modes)));
 
-}  // namespace ceph::msgr::v2
+}  // namespace stone::msgr::v2
 
 int main(int argc, char* argv[]) {
   vector<const char*> args;
   argv_to_vec(argc, (const char**)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY,
                          CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

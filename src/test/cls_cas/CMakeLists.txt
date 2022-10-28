@@ -1,6 +1,6 @@
-add_executable(ceph_test_cls_cas
+add_executable(stone_test_cls_cas
   test_cls_cas.cc)
-target_link_libraries(ceph_test_cls_cas
+target_link_libraries(stone_test_cls_cas
   librados
   cls_cas_client
   cls_cas_internal
@@ -13,5 +13,5 @@ target_link_libraries(ceph_test_cls_cas
   ${EXTRALIBS}
   )
 install(TARGETS
-  ceph_test_cls_cas
+  stone_test_cls_cas
   DESTINATION ${CMAKE_INSTALL_BINDIR})

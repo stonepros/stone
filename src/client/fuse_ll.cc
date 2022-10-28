@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -24,7 +24,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-// ceph
+// stone
 #include "common/errno.h"
 #include "common/safe_io.h"
 #include "include/types.h"
@@ -32,14 +32,14 @@
 #include "Fh.h"
 #include "ioctl.h"
 #include "common/config.h"
-#include "include/ceph_assert.h"
-#include "include/cephfs/ceph_ll_client.h"
-#include "include/ceph_fuse.h"
+#include "include/stone_assert.h"
+#include "include/stonefs/stone_ll_client.h"
+#include "include/stone_fuse.h"
 
 #include "fuse_ll.h"
 #include <fuse_lowlevel.h>
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 #define FINO_INO(x) ((x) & ((1ull<<48)-1ull))
 #define FINO_STAG(x) ((x) >> 48)
@@ -53,56 +53,56 @@
 #define MINOR(dev)	((unsigned int) ((dev) & MINORMASK))
 #define MKDEV(ma,mi)	(((ma) << MINORBITS) | (mi))
 
-static const ceph::unordered_map<int,int> cephfs_errno_to_system_errno = {
-  {CEPHFS_EBLOCKLISTED,    ESHUTDOWN},
-  {CEPHFS_EPERM,           EPERM},
-  {CEPHFS_ESTALE,          ESTALE},
-  {CEPHFS_ENOSPC,          ENOSPC},
-  {CEPHFS_ETIMEDOUT,       ETIMEDOUT},
-  {CEPHFS_EIO,             EIO},
-  {CEPHFS_ENOTCONN,        ENOTCONN},
-  {CEPHFS_EEXIST,          EEXIST},
-  {CEPHFS_EINTR,           EINTR},
-  {CEPHFS_EINVAL,          EINVAL},
-  {CEPHFS_EBADF,           EBADF},
-  {CEPHFS_EROFS,           EROFS},
-  {CEPHFS_EAGAIN,          EAGAIN},
-  {CEPHFS_EACCES,          EACCES},
-  {CEPHFS_ELOOP,           ELOOP},
-  {CEPHFS_EISDIR,          EISDIR},
-  {CEPHFS_ENOENT,          ENOENT},
-  {CEPHFS_ENOTDIR,         ENOTDIR},
-  {CEPHFS_ENAMETOOLONG,    ENAMETOOLONG},
-  {CEPHFS_EBUSY,           EBUSY},
-  {CEPHFS_EDQUOT,          EDQUOT},
-  {CEPHFS_EFBIG,           EFBIG},
-  {CEPHFS_ERANGE,          ERANGE},
-  {CEPHFS_ENXIO,           ENXIO},
-  {CEPHFS_ECANCELED,       ECANCELED},
-  {CEPHFS_ENODATA,         ENODATA},
-  {CEPHFS_EOPNOTSUPP,      EOPNOTSUPP},
-  {CEPHFS_EXDEV,           EXDEV},
-  {CEPHFS_ENOMEM,          ENOMEM},
-  {CEPHFS_ENOTRECOVERABLE, ENOTRECOVERABLE},
-  {CEPHFS_ENOSYS,          ENOSYS},
-  {CEPHFS_ENOTEMPTY,       ENOTEMPTY},
-  {CEPHFS_EDEADLK,         EDEADLK},
-  {CEPHFS_EDOM,            EDOM},
-  {CEPHFS_EMLINK,          EMLINK},
-  {CEPHFS_ETIME,           ETIME},
-  {CEPHFS_EOLDSNAPC,       EIO} // forcing to EIO for now
+static const stone::unordered_map<int,int> stonefs_errno_to_system_errno = {
+  {STONEFS_EBLOCKLISTED,    ESHUTDOWN},
+  {STONEFS_EPERM,           EPERM},
+  {STONEFS_ESTALE,          ESTALE},
+  {STONEFS_ENOSPC,          ENOSPC},
+  {STONEFS_ETIMEDOUT,       ETIMEDOUT},
+  {STONEFS_EIO,             EIO},
+  {STONEFS_ENOTCONN,        ENOTCONN},
+  {STONEFS_EEXIST,          EEXIST},
+  {STONEFS_EINTR,           EINTR},
+  {STONEFS_EINVAL,          EINVAL},
+  {STONEFS_EBADF,           EBADF},
+  {STONEFS_EROFS,           EROFS},
+  {STONEFS_EAGAIN,          EAGAIN},
+  {STONEFS_EACCES,          EACCES},
+  {STONEFS_ELOOP,           ELOOP},
+  {STONEFS_EISDIR,          EISDIR},
+  {STONEFS_ENOENT,          ENOENT},
+  {STONEFS_ENOTDIR,         ENOTDIR},
+  {STONEFS_ENAMETOOLONG,    ENAMETOOLONG},
+  {STONEFS_EBUSY,           EBUSY},
+  {STONEFS_EDQUOT,          EDQUOT},
+  {STONEFS_EFBIG,           EFBIG},
+  {STONEFS_ERANGE,          ERANGE},
+  {STONEFS_ENXIO,           ENXIO},
+  {STONEFS_ECANCELED,       ECANCELED},
+  {STONEFS_ENODATA,         ENODATA},
+  {STONEFS_EOPNOTSUPP,      EOPNOTSUPP},
+  {STONEFS_EXDEV,           EXDEV},
+  {STONEFS_ENOMEM,          ENOMEM},
+  {STONEFS_ENOTRECOVERABLE, ENOTRECOVERABLE},
+  {STONEFS_ENOSYS,          ENOSYS},
+  {STONEFS_ENOTEMPTY,       ENOTEMPTY},
+  {STONEFS_EDEADLK,         EDEADLK},
+  {STONEFS_EDOM,            EDOM},
+  {STONEFS_EMLINK,          EMLINK},
+  {STONEFS_ETIME,           ETIME},
+  {STONEFS_EOLDSNAPC,       EIO} // forcing to EIO for now
 };
 
 /* Requirements:
- * cephfs_errno >= 0
+ * stonefs_errno >= 0
  */
-static int get_sys_errno(int cephfs_errno)
+static int get_sys_errno(int stonefs_errno)
 {
-  if (cephfs_errno == 0)
+  if (stonefs_errno == 0)
     return 0;
 
-  auto it = cephfs_errno_to_system_errno.find(cephfs_errno);
-  if (it != cephfs_errno_to_system_errno.end())
+  auto it = stonefs_errno_to_system_errno.find(stonefs_errno);
+  if (it != stonefs_errno_to_system_errno.end())
     return it->second;
   return EIO;
 }
@@ -121,7 +121,7 @@ static dev_t new_decode_dev(uint32_t dev)
 	return MKDEV(major, minor);
 }
 
-class CephFuse::Handle {
+class StoneFuse::Handle {
 public:
   Handle(Client *c, int fd);
   ~Handle();
@@ -148,11 +148,11 @@ public:
   char *mountpoint;
 #endif
 
-  ceph::mutex stag_lock = ceph::make_mutex("fuse_ll.cc stag_lock");
+  stone::mutex stag_lock = stone::make_mutex("fuse_ll.cc stag_lock");
   int last_stag;
 
-  ceph::unordered_map<uint64_t,int> snap_stag_map;
-  ceph::unordered_map<int,uint64_t> stag_snap_map;
+  stone::unordered_map<uint64_t,int> snap_stag_map;
+  stone::unordered_map<int,uint64_t> stag_snap_map;
 
   pthread_key_t fuse_req_key = 0;
   void set_fuse_req(fuse_req_t);
@@ -164,7 +164,7 @@ public:
 static int getgroups(fuse_req_t req, gid_t **sgids)
 {
 #if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 8)
-  ceph_assert(sgids);
+  stone_assert(sgids);
   int c = fuse_req_getgroups(req, 0, NULL);
   if (c < 0) {
     return c;
@@ -175,7 +175,7 @@ static int getgroups(fuse_req_t req, gid_t **sgids)
 
   gid_t *gids = new (std::nothrow) gid_t[c];
   if (!gids) {
-    return -get_sys_errno(CEPHFS_ENOMEM);
+    return -get_sys_errno(STONEFS_ENOMEM);
   }
   c = fuse_req_getgroups(req, c, gids);
   if (c < 0) {
@@ -185,12 +185,12 @@ static int getgroups(fuse_req_t req, gid_t **sgids)
   }
   return c;
 #endif
-  return -get_sys_errno(CEPHFS_ENOSYS);
+  return -get_sys_errno(STONEFS_ENOSYS);
 }
 
 static void get_fuse_groups(UserPerm& perms, fuse_req_t req)
 {
-  CephFuse::Handle *cfuse = (CephFuse::Handle *)fuse_req_userdata(req);
+  StoneFuse::Handle *cfuse = (StoneFuse::Handle *)fuse_req_userdata(req);
   if (cfuse->client->cct->_conf.get_val<bool>("fuse_set_user_groups")) {
     gid_t *gids = NULL;
     int count = getgroups(req, &gids);
@@ -205,16 +205,16 @@ static void get_fuse_groups(UserPerm& perms, fuse_req_t req)
 }
 
 
-static CephFuse::Handle *fuse_ll_req_prepare(fuse_req_t req)
+static StoneFuse::Handle *fuse_ll_req_prepare(fuse_req_t req)
 {
-  CephFuse::Handle *cfuse = (CephFuse::Handle *)fuse_req_userdata(req);
+  StoneFuse::Handle *cfuse = (StoneFuse::Handle *)fuse_req_userdata(req);
   cfuse->set_fuse_req(req);
   return cfuse;
 }
 
 static void fuse_ll_lookup(fuse_req_t req, fuse_ino_t parent, const char *name)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   struct fuse_entry_param fe;
   Inode *i2, *i1 = cfuse->iget(parent); // see below
@@ -249,7 +249,7 @@ static void fuse_ll_lookup(fuse_req_t req, fuse_ino_t parent, const char *name)
 static void fuse_ll_forget(fuse_req_t req, fuse_ino_t ino,
 			   long unsigned nlookup)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   cfuse->client->ll_forget(cfuse->iget(ino), nlookup+1);
   fuse_reply_none(req);
 }
@@ -257,7 +257,7 @@ static void fuse_ll_forget(fuse_req_t req, fuse_ino_t ino,
 static void fuse_ll_getattr(fuse_req_t req, fuse_ino_t ino,
 			    struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(ino);
   struct stat stbuf;
@@ -280,22 +280,22 @@ static void fuse_ll_getattr(fuse_req_t req, fuse_ino_t ino,
 static void fuse_ll_setattr(fuse_req_t req, fuse_ino_t ino, struct stat *attr,
 			    int to_set, struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(ino);
   UserPerm perms(ctx->uid, ctx->gid);
   get_fuse_groups(perms, req);
 
   int mask = 0;
-  if (to_set & FUSE_SET_ATTR_MODE) mask |= CEPH_SETATTR_MODE;
-  if (to_set & FUSE_SET_ATTR_UID) mask |= CEPH_SETATTR_UID;
-  if (to_set & FUSE_SET_ATTR_GID) mask |= CEPH_SETATTR_GID;
-  if (to_set & FUSE_SET_ATTR_MTIME) mask |= CEPH_SETATTR_MTIME;
-  if (to_set & FUSE_SET_ATTR_ATIME) mask |= CEPH_SETATTR_ATIME;
-  if (to_set & FUSE_SET_ATTR_SIZE) mask |= CEPH_SETATTR_SIZE;
+  if (to_set & FUSE_SET_ATTR_MODE) mask |= STONE_SETATTR_MODE;
+  if (to_set & FUSE_SET_ATTR_UID) mask |= STONE_SETATTR_UID;
+  if (to_set & FUSE_SET_ATTR_GID) mask |= STONE_SETATTR_GID;
+  if (to_set & FUSE_SET_ATTR_MTIME) mask |= STONE_SETATTR_MTIME;
+  if (to_set & FUSE_SET_ATTR_ATIME) mask |= STONE_SETATTR_ATIME;
+  if (to_set & FUSE_SET_ATTR_SIZE) mask |= STONE_SETATTR_SIZE;
 #if !defined(__APPLE__)
-  if (to_set & FUSE_SET_ATTR_MTIME_NOW) mask |= CEPH_SETATTR_MTIME_NOW;
-  if (to_set & FUSE_SET_ATTR_ATIME_NOW) mask |= CEPH_SETATTR_ATIME_NOW;
+  if (to_set & FUSE_SET_ATTR_MTIME_NOW) mask |= STONE_SETATTR_MTIME_NOW;
+  if (to_set & FUSE_SET_ATTR_ATIME_NOW) mask |= STONE_SETATTR_ATIME_NOW;
 #endif
 
   int r = cfuse->client->ll_setattr(in, attr, mask, perms);
@@ -317,7 +317,7 @@ static void fuse_ll_setxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
 #endif
   )
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(ino);
   UserPerm perms(ctx->uid, ctx->gid);
@@ -331,7 +331,7 @@ static void fuse_ll_setxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
 
 static void fuse_ll_listxattr(fuse_req_t req, fuse_ino_t ino, size_t size)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(ino);
   char buf[size];
@@ -356,7 +356,7 @@ static void fuse_ll_getxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
 #endif
   )
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(ino);
   char buf[size];
@@ -377,7 +377,7 @@ static void fuse_ll_getxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
 static void fuse_ll_removexattr(fuse_req_t req, fuse_ino_t ino,
 				const char *name)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(ino);
   UserPerm perms(ctx->uid, ctx->gid);
@@ -392,7 +392,7 @@ static void fuse_ll_removexattr(fuse_req_t req, fuse_ino_t ino,
 static void fuse_ll_opendir(fuse_req_t req, fuse_ino_t ino,
 			    struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(ino);
   void *dirp;
@@ -414,7 +414,7 @@ static void fuse_ll_opendir(fuse_req_t req, fuse_ino_t ino,
 
 static void fuse_ll_readlink(fuse_req_t req, fuse_ino_t ino)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(ino);
   char buf[PATH_MAX + 1];  // leave room for a null terminator
@@ -435,7 +435,7 @@ static void fuse_ll_readlink(fuse_req_t req, fuse_ino_t ino)
 static void fuse_ll_mknod(fuse_req_t req, fuse_ino_t parent, const char *name,
 			  mode_t mode, dev_t rdev)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *i2, *i1 = cfuse->iget(parent);
   struct fuse_entry_param fe;
@@ -462,7 +462,7 @@ static void fuse_ll_mknod(fuse_req_t req, fuse_ino_t parent, const char *name,
 static void fuse_ll_mkdir(fuse_req_t req, fuse_ino_t parent, const char *name,
 			  mode_t mode)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *i2, *i1;
   struct fuse_entry_param fe;
@@ -475,7 +475,7 @@ static void fuse_ll_mkdir(fuse_req_t req, fuse_ino_t parent, const char *name,
     "fuse_multithreaded");
   auto fuse_syncfs_on_mksnap = cfuse->client->cct->_conf.get_val<bool>(
     "fuse_syncfs_on_mksnap");
-  if (cfuse->fino_snap(parent) == CEPH_SNAPDIR &&
+  if (cfuse->fino_snap(parent) == STONE_SNAPDIR &&
       fuse_multithreaded && fuse_syncfs_on_mksnap) {
     int err = 0;
 #if FUSE_VERSION >= FUSE_MAKE_VERSION(3, 0)
@@ -515,7 +515,7 @@ static void fuse_ll_mkdir(fuse_req_t req, fuse_ino_t parent, const char *name,
 
 static void fuse_ll_unlink(fuse_req_t req, fuse_ino_t parent, const char *name)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(parent);
   UserPerm perm(ctx->uid, ctx->gid);
@@ -529,7 +529,7 @@ static void fuse_ll_unlink(fuse_req_t req, fuse_ino_t parent, const char *name)
 
 static void fuse_ll_rmdir(fuse_req_t req, fuse_ino_t parent, const char *name)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(parent);
   UserPerm perms(ctx->uid, ctx->gid);
@@ -544,7 +544,7 @@ static void fuse_ll_rmdir(fuse_req_t req, fuse_ino_t parent, const char *name)
 static void fuse_ll_symlink(fuse_req_t req, const char *existing,
 			    fuse_ino_t parent, const char *name)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *i2, *i1 = cfuse->iget(parent);
   struct fuse_entry_param fe;
@@ -574,7 +574,7 @@ static void fuse_ll_rename(fuse_req_t req, fuse_ino_t parent, const char *name,
 #endif
                            )
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(parent);
   Inode *nin = cfuse->iget(newparent);
@@ -591,7 +591,7 @@ static void fuse_ll_rename(fuse_req_t req, fuse_ino_t parent, const char *name,
 static void fuse_ll_link(fuse_req_t req, fuse_ino_t ino, fuse_ino_t newparent,
 			 const char *newname)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(ino);
   Inode *nin = cfuse->iget(newparent);
@@ -618,7 +618,7 @@ static void fuse_ll_link(fuse_req_t req, fuse_ino_t ino, fuse_ino_t newparent,
 
   if (r != 0) {
     /*
-     * Many ll operations in libcephfs return an extra inode reference, but
+     * Many ll operations in libstonefs return an extra inode reference, but
      * ll_link currently does not. Still, FUSE needs one for the new dentry,
      * so we commandeer the reference taken earlier when ll_link is successful.
      * On error however, we must put that reference.
@@ -633,7 +633,7 @@ static void fuse_ll_link(fuse_req_t req, fuse_ino_t ino, fuse_ino_t newparent,
 static void fuse_ll_open(fuse_req_t req, fuse_ino_t ino,
 			 struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(ino);
   Fh *fh = NULL;
@@ -664,7 +664,7 @@ static void fuse_ll_open(fuse_req_t req, fuse_ino_t ino,
 static void fuse_ll_read(fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,
 			 struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   Fh *fh = reinterpret_cast<Fh*>(fi->fh);
   bufferlist bl;
   int r = cfuse->client->ll_read(fh, off, size, &bl);
@@ -699,7 +699,7 @@ static void fuse_ll_read(fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,
 static void fuse_ll_write(fuse_req_t req, fuse_ino_t ino, const char *buf,
 			   size_t size, off_t off, struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   Fh *fh = reinterpret_cast<Fh*>(fi->fh);
   int r = cfuse->client->ll_write(fh, off, size, buf);
   if (r >= 0)
@@ -711,7 +711,7 @@ static void fuse_ll_write(fuse_req_t req, fuse_ino_t ino, const char *buf,
 static void fuse_ll_flush(fuse_req_t req, fuse_ino_t ino,
 			  struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   Fh *fh = reinterpret_cast<Fh*>(fi->fh);
   int r = cfuse->client->ll_flush(fh);
   fuse_reply_err(req, get_sys_errno(-r));
@@ -727,7 +727,7 @@ static void fuse_ll_ioctl(fuse_req_t req, fuse_ino_t ino,
                           void *arg, struct fuse_file_info *fi,
 			  unsigned flags, const void *in_buf, size_t in_bufsz, size_t out_bufsz)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
 
   if (flags & FUSE_IOCTL_COMPAT) {
     fuse_reply_err(req, ENOSYS);
@@ -735,16 +735,16 @@ static void fuse_ll_ioctl(fuse_req_t req, fuse_ino_t ino,
   }
 
   switch (static_cast<unsigned>(cmd)) {
-    case CEPH_IOC_GET_LAYOUT: {
+    case STONE_IOC_GET_LAYOUT: {
       file_layout_t layout;
-      struct ceph_ioctl_layout l;
+      struct stone_ioctl_layout l;
       Fh *fh = (Fh*)fi->fh;
       cfuse->client->ll_file_layout(fh, &layout);
       l.stripe_unit = layout.stripe_unit;
       l.stripe_count = layout.stripe_count;
       l.object_size = layout.object_size;
       l.data_pool = layout.pool_id;
-      fuse_reply_ioctl(req, 0, &l, sizeof(struct ceph_ioctl_layout));
+      fuse_reply_ioctl(req, 0, &l, sizeof(struct stone_ioctl_layout));
     }
     break;
     default:
@@ -759,7 +759,7 @@ static void fuse_ll_fallocate(fuse_req_t req, fuse_ino_t ino, int mode,
                               off_t offset, off_t length,
                               struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   Fh *fh = (Fh*)fi->fh;
   int r = cfuse->client->ll_fallocate(fh, mode, offset, length);
   fuse_reply_err(req, get_sys_errno(-r));
@@ -770,7 +770,7 @@ static void fuse_ll_fallocate(fuse_req_t req, fuse_ino_t ino, int mode,
 static void fuse_ll_release(fuse_req_t req, fuse_ino_t ino,
 			    struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   Fh *fh = reinterpret_cast<Fh*>(fi->fh);
   int r = cfuse->client->ll_release(fh);
   fuse_reply_err(req, get_sys_errno(-r));
@@ -779,7 +779,7 @@ static void fuse_ll_release(fuse_req_t req, fuse_ino_t ino,
 static void fuse_ll_fsync(fuse_req_t req, fuse_ino_t ino, int datasync,
 			  struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   Fh *fh = reinterpret_cast<Fh*>(fi->fh);
   int r = cfuse->client->ll_fsync(fh, datasync);
   fuse_reply_err(req, get_sys_errno(-r));
@@ -797,11 +797,11 @@ struct readdir_context {
  * return 0 on success, -1 if out of space
  */
 static int fuse_ll_add_dirent(void *p, struct dirent *de,
-			      struct ceph_statx *stx, off_t next_off,
+			      struct stone_statx *stx, off_t next_off,
 			      Inode *in)
 {
   struct readdir_context *c = (struct readdir_context *)p;
-  CephFuse::Handle *cfuse = (CephFuse::Handle *)fuse_req_userdata(c->req);
+  StoneFuse::Handle *cfuse = (StoneFuse::Handle *)fuse_req_userdata(c->req);
 
   struct stat st;
   st.st_ino = cfuse->make_fake_ino(stx->stx_ino, c->snap);
@@ -822,7 +822,7 @@ static int fuse_ll_add_dirent(void *p, struct dirent *de,
 static void fuse_ll_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
 			    off_t off, struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
 
   dir_result_t *dirp = reinterpret_cast<dir_result_t*>(fi->fh);
   cfuse->client->seekdir(dirp, off);
@@ -835,7 +835,7 @@ static void fuse_ll_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
   rc.snap = cfuse->fino_snap(ino);
 
   int r = cfuse->client->readdir_r_cb(dirp, fuse_ll_add_dirent, &rc);
-  if (r == 0 || r == -CEPHFS_ENOSPC)  /* ignore ENOSPC from our callback */
+  if (r == 0 || r == -STONEFS_ENOSPC)  /* ignore ENOSPC from our callback */
     fuse_reply_buf(req, rc.buf, rc.pos);
   else
     fuse_reply_err(req, get_sys_errno(-r));
@@ -845,7 +845,7 @@ static void fuse_ll_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
 static void fuse_ll_releasedir(fuse_req_t req, fuse_ino_t ino,
 			       struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   dir_result_t *dirp = reinterpret_cast<dir_result_t*>(fi->fh);
   cfuse->client->ll_releasedir(dirp);
   fuse_reply_err(req, 0);
@@ -854,7 +854,7 @@ static void fuse_ll_releasedir(fuse_req_t req, fuse_ino_t ino,
 static void fuse_ll_fsyncdir(fuse_req_t req, fuse_ino_t ino, int datasync,
 			     struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   dir_result_t *dirp = reinterpret_cast<dir_result_t*>(fi->fh);
   int r = cfuse->client->ll_fsyncdir(dirp);
   fuse_reply_err(req, get_sys_errno(-r));
@@ -862,7 +862,7 @@ static void fuse_ll_fsyncdir(fuse_req_t req, fuse_ino_t ino, int datasync,
 
 static void fuse_ll_access(fuse_req_t req, fuse_ino_t ino, int mask)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *in = cfuse->iget(ino);
   UserPerm perms(ctx->uid, ctx->gid);
@@ -876,7 +876,7 @@ static void fuse_ll_access(fuse_req_t req, fuse_ino_t ino, int mask)
 static void fuse_ll_create(fuse_req_t req, fuse_ino_t parent, const char *name,
 			   mode_t mode, struct fuse_file_info *fi)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   Inode *i1 = cfuse->iget(parent), *i2;
   struct fuse_entry_param fe;
@@ -913,7 +913,7 @@ static void fuse_ll_create(fuse_req_t req, fuse_ino_t parent, const char *name,
 static void fuse_ll_statfs(fuse_req_t req, fuse_ino_t ino)
 {
   struct statvfs stbuf;
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   Inode *in = cfuse->iget(ino);
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   UserPerm perms(ctx->uid, ctx->gid);
@@ -931,7 +931,7 @@ static void fuse_ll_statfs(fuse_req_t req, fuse_ino_t ino)
 static void fuse_ll_getlk(fuse_req_t req, fuse_ino_t ino,
 			  struct fuse_file_info *fi, struct flock *lock)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   Fh *fh = reinterpret_cast<Fh*>(fi->fh);
 
   int r = cfuse->client->ll_getlk(fh, lock, fi->lock_owner);
@@ -944,7 +944,7 @@ static void fuse_ll_getlk(fuse_req_t req, fuse_ino_t ino,
 static void fuse_ll_setlk(fuse_req_t req, fuse_ino_t ino,
 		          struct fuse_file_info *fi, struct flock *lock, int sleep)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   Fh *fh = reinterpret_cast<Fh*>(fi->fh);
 
   // must use multithread if operation may block
@@ -961,13 +961,13 @@ static void fuse_ll_setlk(fuse_req_t req, fuse_ino_t ino,
 
 static void fuse_ll_interrupt(fuse_req_t req, void* data)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   cfuse->client->ll_interrupt(data);
 }
 
 static void switch_interrupt_cb(void *handle, void* data)
 {
-  CephFuse::Handle *cfuse = (CephFuse::Handle *)handle;
+  StoneFuse::Handle *cfuse = (StoneFuse::Handle *)handle;
   fuse_req_t req = cfuse->get_fuse_req();
 
   if (data)
@@ -980,7 +980,7 @@ static void switch_interrupt_cb(void *handle, void* data)
 static void fuse_ll_flock(fuse_req_t req, fuse_ino_t ino,
 		          struct fuse_file_info *fi, int cmd)
 {
-  CephFuse::Handle *cfuse = fuse_ll_req_prepare(req);
+  StoneFuse::Handle *cfuse = fuse_ll_req_prepare(req);
   Fh *fh = (Fh*)fi->fh;
 
   // must use multithread if operation may block
@@ -999,7 +999,7 @@ static void fuse_ll_flock(fuse_req_t req, fuse_ino_t ino,
 #if !defined(__APPLE__)
 static mode_t umask_cb(void *handle)
 {
-  CephFuse::Handle *cfuse = (CephFuse::Handle *)handle;
+  StoneFuse::Handle *cfuse = (StoneFuse::Handle *)handle;
   fuse_req_t req = cfuse->get_fuse_req();
   const struct fuse_ctx *ctx = fuse_req_ctx(req);
   return ctx->umask;
@@ -1010,7 +1010,7 @@ static void ino_invalidate_cb(void *handle, vinodeno_t vino, int64_t off,
 			      int64_t len)
 {
 #if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 8)
-  CephFuse::Handle *cfuse = (CephFuse::Handle *)handle;
+  StoneFuse::Handle *cfuse = (StoneFuse::Handle *)handle;
   fuse_ino_t fino = cfuse->make_fake_ino(vino.ino, vino.snapid);
 #if FUSE_VERSION >= FUSE_MAKE_VERSION(3, 0)
   fuse_lowlevel_notify_inval_inode(cfuse->se, fino, off, len);
@@ -1023,7 +1023,7 @@ static void ino_invalidate_cb(void *handle, vinodeno_t vino, int64_t off,
 static void dentry_invalidate_cb(void *handle, vinodeno_t dirino,
 				 vinodeno_t ino, const char *name, size_t len)
 {
-  CephFuse::Handle *cfuse = (CephFuse::Handle *)handle;
+  StoneFuse::Handle *cfuse = (StoneFuse::Handle *)handle;
   fuse_ino_t fdirino = cfuse->make_fake_ino(dirino.ino, dirino.snapid);
 #if FUSE_VERSION >= FUSE_MAKE_VERSION(2, 9)
   fuse_ino_t fino = 0;
@@ -1044,7 +1044,7 @@ static int remount_cb(void *handle)
   // used for trimming kernel dcache. when remounting a file system, linux kernel
   // trims all unused dentries in the file system
   char cmd[128+PATH_MAX];
-  CephFuse::Handle *cfuse = (CephFuse::Handle *)handle;
+  StoneFuse::Handle *cfuse = (StoneFuse::Handle *)handle;
   snprintf(cmd, sizeof(cmd), "LIBMOUNT_FSTAB=/dev/null mount -i -o remount %s",
 #if FUSE_VERSION >= FUSE_MAKE_VERSION(3, 0)
                   cfuse->opts.mountpoint);
@@ -1061,7 +1061,7 @@ static int remount_cb(void *handle)
 
 static void do_init(void *data, fuse_conn_info *conn)
 {
-  CephFuse::Handle *cfuse = (CephFuse::Handle *)data;
+  StoneFuse::Handle *cfuse = (StoneFuse::Handle *)data;
   Client *client = cfuse->client;
 
 #if FUSE_VERSION >= FUSE_MAKE_VERSION(3, 0)
@@ -1083,14 +1083,14 @@ static void do_init(void *data, fuse_conn_info *conn)
 
   if (cfuse->fd_on_success) {
     //cout << "fuse init signaling on fd " << fd_on_success << std::endl;
-    // see Preforker::daemonize(), ceph-fuse's parent process expects a `-1`
+    // see Preforker::daemonize(), stone-fuse's parent process expects a `-1`
     // from a daemonized child process.
     uint32_t r = -1;
     int err = safe_write(cfuse->fd_on_success, &r, sizeof(r));
     if (err) {
       derr << "fuse_ll: do_init: safe_write failed with error "
 	   << cpp_strerror(err) << dendl;
-      ceph_abort();
+      stone_abort();
     }
     //cout << "fuse init done signaling on fd " << fd_on_success << std::endl;
 
@@ -1156,7 +1156,7 @@ const static struct fuse_lowlevel_ops fuse_ll_oper = {
 };
 
 
-CephFuse::Handle::Handle(Client *c, int fd) :
+StoneFuse::Handle::Handle(Client *c, int fd) :
   fd_on_success(fd),
   client(c),
   se(NULL),
@@ -1166,20 +1166,20 @@ CephFuse::Handle::Handle(Client *c, int fd) :
 #endif
   last_stag(0)
 {
-  snap_stag_map[CEPH_NOSNAP] = 0;
-  stag_snap_map[0] = CEPH_NOSNAP;
+  snap_stag_map[STONE_NOSNAP] = 0;
+  stag_snap_map[0] = STONE_NOSNAP;
   memset(&args, 0, sizeof(args));
 #if FUSE_VERSION >= FUSE_MAKE_VERSION(3, 0)
   memset(&opts, 0, sizeof(opts));
 #endif
 }
 
-CephFuse::Handle::~Handle()
+StoneFuse::Handle::~Handle()
 {
   fuse_opt_free_args(&args);
 }
 
-void CephFuse::Handle::finalize()
+void StoneFuse::Handle::finalize()
 {
 #if FUSE_VERSION >= FUSE_MAKE_VERSION(3, 0)
   if (se) {
@@ -1205,7 +1205,7 @@ void CephFuse::Handle::finalize()
   pthread_key_delete(fuse_req_key);
 }
 
-int CephFuse::Handle::init(int argc, const char *argv[])
+int StoneFuse::Handle::init(int argc, const char *argv[])
 {
 
   int r = pthread_key_create(&fuse_req_key, NULL);
@@ -1314,12 +1314,12 @@ int CephFuse::Handle::init(int argc, const char *argv[])
   }
 #endif
 
-  ceph_assert(args.allocated);  // Checking fuse has realloc'd args so we can free newargv
+  stone_assert(args.allocated);  // Checking fuse has realloc'd args so we can free newargv
   free(newargv);
   return 0;
 }
 
-int CephFuse::Handle::start()
+int StoneFuse::Handle::start()
 {
 #if FUSE_VERSION >= FUSE_MAKE_VERSION(3, 0)
   se = fuse_session_new(&args, &fuse_ll_oper, sizeof(fuse_ll_oper), this);
@@ -1358,7 +1358,7 @@ int CephFuse::Handle::start()
 #endif
 
 
-  struct ceph_client_callback_args args = {
+  struct stone_client_callback_args args = {
     handle: this,
     ino_cb: client->cct->_conf.get_val<bool>("fuse_use_invalidate_cb") ?
       ino_invalidate_cb : NULL,
@@ -1376,7 +1376,7 @@ int CephFuse::Handle::start()
   return 0;
 }
 
-int CephFuse::Handle::loop()
+int StoneFuse::Handle::loop()
 {
   auto fuse_multithreaded = client->cct->_conf.get_val<bool>(
     "fuse_multithreaded");
@@ -1398,10 +1398,10 @@ int CephFuse::Handle::loop()
   }
 }
 
-uint64_t CephFuse::Handle::fino_snap(uint64_t fino)
+uint64_t StoneFuse::Handle::fino_snap(uint64_t fino)
 {
   if (fino == FUSE_ROOT_ID)
-    return CEPH_NOSNAP;
+    return STONE_NOSNAP;
 
   if (client->use_faked_inos()) {
     vinodeno_t vino  = client->map_faked_ino(fino);
@@ -1409,12 +1409,12 @@ uint64_t CephFuse::Handle::fino_snap(uint64_t fino)
   } else {
     std::lock_guard l(stag_lock);
     uint64_t stag = FINO_STAG(fino);
-    ceph_assert(stag_snap_map.count(stag));
+    stone_assert(stag_snap_map.count(stag));
     return stag_snap_map[stag];
   }
 }
 
-Inode * CephFuse::Handle::iget(fuse_ino_t fino)
+Inode * StoneFuse::Handle::iget(fuse_ino_t fino)
 {
   if (fino == FUSE_ROOT_ID)
     return client->get_root();
@@ -1427,21 +1427,21 @@ Inode * CephFuse::Handle::iget(fuse_ino_t fino)
   }
 }
 
-void CephFuse::Handle::iput(Inode *in)
+void StoneFuse::Handle::iput(Inode *in)
 {
     client->ll_put(in);
 }
 
-uint64_t CephFuse::Handle::make_fake_ino(inodeno_t ino, snapid_t snapid)
+uint64_t StoneFuse::Handle::make_fake_ino(inodeno_t ino, snapid_t snapid)
 {
   if (client->use_faked_inos()) {
-    // already faked by libcephfs
+    // already faked by libstonefs
     if (ino == client->get_root_ino())
       return FUSE_ROOT_ID;
 
     return ino;
   } else {
-    if (snapid == CEPH_NOSNAP && ino == client->get_root_ino())
+    if (snapid == STONE_NOSNAP && ino == client->get_root_ino())
       return FUSE_ROOT_ID;
 
     std::lock_guard l(stag_lock);
@@ -1472,7 +1472,7 @@ uint64_t CephFuse::Handle::make_fake_ino(inodeno_t ino, snapid_t snapid)
       }
     }
     if (stag == first)
-      ceph_abort_msg("run out of stag");
+      stone_abort_msg("run out of stag");
 
     inodeno_t fino = MAKE_FINO(ino, stag);
     //cout << "make_fake_ino " << ino << "." << snapid << " -> " << fino << std::endl;
@@ -1480,47 +1480,47 @@ uint64_t CephFuse::Handle::make_fake_ino(inodeno_t ino, snapid_t snapid)
   }
 }
 
-void CephFuse::Handle::set_fuse_req(fuse_req_t req)
+void StoneFuse::Handle::set_fuse_req(fuse_req_t req)
 {
   pthread_setspecific(fuse_req_key, (void*)req);
 }
 
-fuse_req_t CephFuse::Handle::get_fuse_req()
+fuse_req_t StoneFuse::Handle::get_fuse_req()
 {
   return (fuse_req_t) pthread_getspecific(fuse_req_key);
 }
 
 
-CephFuse::CephFuse(Client *c, int fd) : _handle(new CephFuse::Handle(c, fd))
+StoneFuse::StoneFuse(Client *c, int fd) : _handle(new StoneFuse::Handle(c, fd))
 {
 }
 
-CephFuse::~CephFuse()
+StoneFuse::~StoneFuse()
 {
   delete _handle;
 }
 
-int CephFuse::init(int argc, const char *argv[])
+int StoneFuse::init(int argc, const char *argv[])
 {
   return _handle->init(argc, argv);
 }
 
-int CephFuse::start()
+int StoneFuse::start()
 {
   return _handle->start();
 }
 
-int CephFuse::loop()
+int StoneFuse::loop()
 {
   return _handle->loop();
 }
 
-void CephFuse::finalize()
+void StoneFuse::finalize()
 {
   return _handle->finalize();
 }
 
-std::string CephFuse::get_mount_point() const
+std::string StoneFuse::get_mount_point() const
 {
 #if FUSE_VERSION >= FUSE_MAKE_VERSION(3, 0)
   if (_handle->opts.mountpoint) {

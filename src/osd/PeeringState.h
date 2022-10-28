@@ -566,7 +566,7 @@ public:
   public:
     PeeringState *state;
     PGStateHistory *state_history;
-    CephContext *cct;
+    StoneeContext *cct;
     spg_t spgid;
     DoutPrefixProvider *dpp;
     PeeringListener *pl;
@@ -583,7 +583,7 @@ public:
     void log_exit(const char *state_name, utime_t duration);
 
     PeeringMachine(
-      PeeringState *state, CephContext *cct,
+      PeeringState *state, StoneeContext *cct,
       spg_t spgid,
       DoutPrefixProvider *dpp,
       PeeringListener *pl,
@@ -1361,7 +1361,7 @@ public:
   };
 
   PGStateHistory state_history;
-  CephContext* cct;
+  StoneeContext* cct;
   spg_t spgid;
   DoutPrefixProvider *dpp;
   PeeringListener *pl;
@@ -1463,11 +1463,11 @@ public:
   std::set<pg_shard_t> peer_missing_requested; ///< missing sets requested
 
   /// features supported by all peers
-  uint64_t peer_features = CEPH_FEATURES_SUPPORTED_DEFAULT;
+  uint64_t peer_features = STONE_FEATURES_SUPPORTED_DEFAULT;
   /// features supported by acting set
-  uint64_t acting_features = CEPH_FEATURES_SUPPORTED_DEFAULT;
+  uint64_t acting_features = STONE_FEATURES_SUPPORTED_DEFAULT;
   /// features supported by up and acting
-  uint64_t upacting_features = CEPH_FEATURES_SUPPORTED_DEFAULT;
+  uint64_t upacting_features = STONE_FEATURES_SUPPORTED_DEFAULT;
 
   /// most recently consumed osdmap's require_osd_version
   ceph_release_t last_require_osd_release = ceph_release_t::unknown;
@@ -1692,7 +1692,7 @@ public:
 
 public:
   PeeringState(
-    CephContext *cct,
+    StoneeContext *cct,
     pg_shard_t pg_whoami,
     spg_t spgid,
     const PGPool &pool,
@@ -1886,7 +1886,7 @@ public:
 
   /// Update log trim boundary
   void update_trim_to() {
-    bool hard_limit = (get_osdmap()->test_flag(CEPH_OSDMAP_PGLOG_HARDLIMIT));
+    bool hard_limit = (get_osdmap()->test_flag(STONE_OSDMAP_PGLOG_HARDLIMIT));
     if (hard_limit)
       calc_trim_to_aggressive();
     else
@@ -2335,7 +2335,7 @@ public:
   }
 
   bool perform_deletes_during_peering() const {
-    return !(get_osdmap()->test_flag(CEPH_OSDMAP_RECOVERY_DELETES));
+    return !(get_osdmap()->test_flag(STONE_OSDMAP_RECOVERY_DELETES));
   }
 
 
@@ -2404,7 +2404,7 @@ private:
 
   /// Reset feature vector to default
   void reset_min_peer_features() {
-    peer_features = CEPH_FEATURES_SUPPORTED_DEFAULT;
+    peer_features = STONE_FEATURES_SUPPORTED_DEFAULT;
   }
 public:
   /// Get feature vector common to all known peers with this pg

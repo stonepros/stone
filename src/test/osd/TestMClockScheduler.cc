@@ -11,14 +11,14 @@
 #include "osd/scheduler/mClockScheduler.h"
 #include "osd/scheduler/OpSchedulerItem.h"
 
-using namespace ceph::osd::scheduler;
+using namespace stone::osd::scheduler;
 
 int main(int argc, char **argv) {
   std::vector<const char*> args(argv, argv+argc);
-  auto cct = global_init(nullptr, args, CEPH_ENTITY_TYPE_OSD,
+  auto cct = global_init(nullptr, args, STONE_ENTITY_TYPE_OSD,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
@@ -38,7 +38,7 @@ public:
   mClockSchedulerTest() :
     num_shards(1),
     is_rotational(false),
-    q(g_ceph_context, num_shards, is_rotational),
+    q(g_stone_context, num_shards, is_rotational),
     client1(1001),
     client2(9999),
     client3(100000001)

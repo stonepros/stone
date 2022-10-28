@@ -20,7 +20,7 @@
 
 #include "cls/user/cls_user_client.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #define RGW_BUCKETS_OBJ_SUFFIX ".buckets"
 
@@ -59,7 +59,7 @@ public:
   }
 };
 
-RGWSI_User_RADOS::RGWSI_User_RADOS(CephContext *cct): RGWSI_User(cct) {
+RGWSI_User_RADOS::RGWSI_User_RADOS(StoneContext *cct): RGWSI_User(cct) {
 }
 
 RGWSI_User_RADOS::~RGWSI_User_RADOS() {
@@ -653,7 +653,7 @@ int RGWSI_User_RADOS::add_bucket(const DoutPrefixProvider *dpp,
                                  RGWSI_MetaBackend::Context *ctx,
                                  const rgw_user& user,
                                  const rgw_bucket& bucket,
-                                 ceph::real_time creation_time,
+                                 stone::real_time creation_time,
 				 optional_yield y)
 {
   int ret;
@@ -840,7 +840,7 @@ int RGWSI_User_RADOS::cls_user_reset_stats(const DoutPrefixProvider *dpp, const 
     try {
       auto bliter = out.cbegin();
       decode(ret, bliter);
-    } catch (ceph::buffer::error& err) {
+    } catch (stone::buffer::error& err) {
       return -EINVAL;
     }
   } while (ret.truncated);
@@ -902,8 +902,8 @@ int RGWSI_User_RADOS::cls_user_get_header_async(const DoutPrefixProvider *dpp, c
 int RGWSI_User_RADOS::read_stats(const DoutPrefixProvider *dpp, 
                                  RGWSI_MetaBackend::Context *ctx,
                                  const rgw_user& user, RGWStorageStats *stats,
-                                 ceph::real_time *last_stats_sync,
-                                 ceph::real_time *last_stats_update,
+                                 stone::real_time *last_stats_sync,
+                                 stone::real_time *last_stats_update,
 				 optional_yield y)
 {
   string user_str = user.to_str();

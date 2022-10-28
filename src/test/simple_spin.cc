@@ -5,8 +5,8 @@
 
 #include "include/spinlock.h"
 
-using ceph::spin_lock;
-using ceph::spin_unlock;
+using stone::spin_lock;
+using stone::spin_unlock;
 
 static std::atomic_flag lock = ATOMIC_FLAG_INIT;
 static int64_t counter = 0;
@@ -94,10 +94,10 @@ TEST(SimpleSpin, Test2)
 {
  const auto n = 2000000U;
 
- // ceph::spinlock:
+ // stone::spinlock:
  {
  counter = 0;
- ceph::spinlock l;
+ stone::spinlock l;
 
  ASSERT_EQ(0, counter);
  auto result = check_lock_unlock(n, counter, l);
@@ -106,24 +106,24 @@ TEST(SimpleSpin, Test2)
  }
 }
 
-// ceph::spinlock should work with std::lock_guard<>:
+// stone::spinlock should work with std::lock_guard<>:
 TEST(SimpleSpin, spinlock_guard)
 {
   const auto n = 2000000U;
 
-  ceph::spinlock sl;
+  stone::spinlock sl;
 
   counter = 0;
   auto f = async(std::launch::async, [&sl]() {
         for(int i = 0; n != i; ++i) {
-            std::lock_guard<ceph::spinlock> g(sl);
+            std::lock_guard<stone::spinlock> g(sl);
             counter++;
         }
        });
 
   auto g = async(std::launch::async, [&sl]() {
         for(int i = 0; n != i; ++i) {
-            std::lock_guard<ceph::spinlock> g(sl);
+            std::lock_guard<stone::spinlock> g(sl);
             counter++;
         }
        });

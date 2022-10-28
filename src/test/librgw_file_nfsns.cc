@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat, Inc.
  *
@@ -24,11 +24,11 @@
 #include "rgw/rgw_lib_frontend.h" // direct requests
 
 #include "gtest/gtest.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace {
 
@@ -41,7 +41,7 @@ namespace {
   string access_key("");
   string secret_key("");
   struct rgw_fs *fs = nullptr;
-  CephContext* cct = nullptr;
+  StoneContext* cct = nullptr;
 
   uint32_t owner_uid = 867;
   uint32_t owner_gid = 5309;
@@ -960,7 +960,7 @@ TEST(LibRGW, HIER1) {
 	  obj_stack.pop();
 	  break;
 	default:
-	  ceph_abort();
+	  stone_abort();
 	};
       }
     }
@@ -1145,52 +1145,52 @@ int main(int argc, char *argv[])
   }
 
   for (auto arg_iter = args.begin(); arg_iter != args.end();) {
-    if (ceph_argparse_witharg(args, arg_iter, &val, "--access",
+    if (stone_argparse_witharg(args, arg_iter, &val, "--access",
 			      (char*) nullptr)) {
       access_key = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--secret",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--secret",
 				     (char*) nullptr)) {
       secret_key = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--userid",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--userid",
 				     (char*) nullptr)) {
       userid = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--bn",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--bn",
 				     (char*) nullptr)) {
       bucket_name = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--uid",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--uid",
 				     (char*) nullptr)) {
       owner_uid = std::stoi(val);
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--gid",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--gid",
 				     (char*) nullptr)) {
       owner_gid = std::stoi(val);
-    } else if (ceph_argparse_flag(args, arg_iter, "--hier1",
+    } else if (stone_argparse_flag(args, arg_iter, "--hier1",
 					    (char*) nullptr)) {
       do_hier1 = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--dirs1",
+    } else if (stone_argparse_flag(args, arg_iter, "--dirs1",
 					    (char*) nullptr)) {
       do_dirs1 = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--marker1",
+    } else if (stone_argparse_flag(args, arg_iter, "--marker1",
 					    (char*) nullptr)) {
       do_marker1 = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--setattr",
+    } else if (stone_argparse_flag(args, arg_iter, "--setattr",
 					    (char*) nullptr)) {
       do_setattr = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--create",
+    } else if (stone_argparse_flag(args, arg_iter, "--create",
 					    (char*) nullptr)) {
       do_create = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--delete",
+    } else if (stone_argparse_flag(args, arg_iter, "--delete",
 					    (char*) nullptr)) {
       do_delete = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--rename",
+    } else if (stone_argparse_flag(args, arg_iter, "--rename",
 					    (char*) nullptr)) {
       do_rename = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--readf",
+    } else if (stone_argparse_flag(args, arg_iter, "--readf",
 					    (char*) nullptr)) {
       do_readf = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--writef",
+    } else if (stone_argparse_flag(args, arg_iter, "--writef",
 					    (char*) nullptr)) {
       do_writef = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--verbose",
+    } else if (stone_argparse_flag(args, arg_iter, "--verbose",
 					    (char*) nullptr)) {
       verbose = true;
     } else {

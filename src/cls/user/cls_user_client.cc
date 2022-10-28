@@ -9,8 +9,8 @@
 using std::list;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::real_clock;
+using stone::bufferlist;
+using stone::real_clock;
 
 using librados::IoCtx;
 using librados::ObjectOperationCompletion;
@@ -65,7 +65,7 @@ public:
           *truncated = ret.truncated;
         if (marker)
           *marker = ret.marker;
-      } catch (ceph::buffer::error& err) {
+      } catch (stone::buffer::error& err) {
         r = -EIO;
       }
     }
@@ -114,7 +114,7 @@ public:
         decode(ret, iter);
         if (header)
 	  *header = ret.header;
-      } catch (ceph::buffer::error& err) {
+      } catch (stone::buffer::error& err) {
         r = -EIO;
       }
       if (ret_ctx) {

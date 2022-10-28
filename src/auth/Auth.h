@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_AUTHTYPES_H
-#define CEPH_AUTHTYPES_H
+#ifndef STONE_AUTHTYPES_H
+#define STONE_AUTHTYPES_H
 
 #include "Crypto.h"
 #include "common/entity_name.h"
@@ -39,7 +39,7 @@ struct EntityAuth {
     __u8 struct_v = 2;
     using ceph::encode;
     encode(struct_v, bl);
-    encode((uint64_t)CEPH_AUTH_UID_DEFAULT, bl);
+    encode((uint64_t)STONE_AUTH_UID_DEFAULT, bl);
     encode(key, bl);
     encode(caps, bl);
   }
@@ -115,7 +115,7 @@ struct AuthTicket {
     encode(struct_v, bl);
     encode(name, bl);
     encode(global_id, bl);
-    encode((uint64_t)CEPH_AUTH_UID_DEFAULT, bl);
+    encode((uint64_t)STONE_AUTH_UID_DEFAULT, bl);
     encode(created, bl);
     encode(expires, bl);
     encode(caps, bl);
@@ -152,7 +152,7 @@ struct AuthAuthorizer {
   virtual ~AuthAuthorizer() {}
   virtual bool verify_reply(ceph::buffer::list::const_iterator& reply,
 			    std::string *connection_secret) = 0;
-  virtual bool add_challenge(CephContext *cct,
+  virtual bool add_challenge(StoneContext *cct,
 			     const ceph::buffer::list& challenge) = 0;
 };
 
@@ -161,7 +161,7 @@ struct AuthAuthorizerChallenge {
 };
 
 struct AuthConnectionMeta {
-  uint32_t auth_method = CEPH_AUTH_UNKNOWN;  //< CEPH_AUTH_*
+  uint32_t auth_method = STONE_AUTH_UNKNOWN;  //< STONE_AUTH_*
 
   /// client: initial empty, but populated if server said bad method
   std::vector<uint32_t> allowed_methods;
@@ -171,19 +171,19 @@ struct AuthConnectionMeta {
   int con_mode = 0;  ///< negotiated mode
 
   bool is_mode_crc() const {
-    return con_mode == CEPH_CON_MODE_CRC;
+    return con_mode == STONE_CON_MODE_CRC;
   }
   bool is_mode_secure() const {
-    return con_mode == CEPH_CON_MODE_SECURE;
+    return con_mode == STONE_CON_MODE_SECURE;
   }
 
   CryptoKey session_key;           ///< per-ticket key
 
   size_t get_connection_secret_length() const {
     switch (con_mode) {
-    case CEPH_CON_MODE_CRC:
+    case STONE_CON_MODE_CRC:
       return 0;
-    case CEPH_CON_MODE_SECURE:
+    case STONE_CON_MODE_SECURE:
       return 16 * 4;
     }
     return 0;
@@ -193,7 +193,7 @@ struct AuthConnectionMeta {
   std::unique_ptr<AuthAuthorizer> authorizer;
   std::unique_ptr<AuthAuthorizerChallenge> authorizer_challenge;
 
-  ///< set if msgr1 peer doesn't support CEPHX_V2
+  ///< set if msgr1 peer doesn't support STONEX_V2
   bool skip_authorizer_challenge = false;
 };
 
@@ -300,9 +300,9 @@ public:
 inline bool auth_principal_needs_rotating_keys(EntityName& name)
 {
   uint32_t ty(name.get_type());
-  return ((ty == CEPH_ENTITY_TYPE_OSD)
-      || (ty == CEPH_ENTITY_TYPE_MDS)
-      || (ty == CEPH_ENTITY_TYPE_MGR));
+  return ((ty == STONE_ENTITY_TYPE_OSD)
+      || (ty == STONE_ENTITY_TYPE_MDS)
+      || (ty == STONE_ENTITY_TYPE_MGR));
 }
 
 #endif

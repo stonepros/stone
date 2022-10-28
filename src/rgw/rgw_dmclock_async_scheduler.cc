@@ -43,7 +43,7 @@ int AsyncScheduler::schedule_request_impl(const client_id& client,
                                           const Time& time, const Cost& cost,
                                           optional_yield yield_ctx)
 {
-    ceph_assert(yield_ctx);
+    stone_assert(yield_ctx);
 
     auto &yield = yield_ctx.get_yield_context();
     boost::system::error_code ec;

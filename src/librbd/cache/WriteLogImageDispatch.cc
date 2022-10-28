@@ -10,7 +10,7 @@
 #include "librbd/io/AioCompletion.h"
 #include "librbd/io/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::WriteLogImageDispatch: " << this << " " \
                            << __func__ << ": "
@@ -20,7 +20,7 @@ namespace cache {
 
 template <typename I>
 void WriteLogImageDispatch<I>::shut_down(Context* on_finish) {
-  ceph_assert(m_image_cache != nullptr);
+  stone_assert(m_image_cache != nullptr);
 
   Context* ctx = new LambdaContext(
       [this, on_finish](int r) {
@@ -45,7 +45,7 @@ bool WriteLogImageDispatch<I>::read(
   auto cct = m_image_ctx->cct;
   ldout(cct, 20) << "image_extents=" << image_extents << dendl;
 
-  if (io_context->read_snap().value_or(CEPH_NOSNAP) != CEPH_NOSNAP) {
+  if (io_context->read_snap().value_or(STONE_NOSNAP) != STONE_NOSNAP) {
     return false;
   }
 

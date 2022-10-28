@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -25,7 +25,7 @@
 #include "mdstypes.h"
 #include "include/ipaddr.h"
 
-#define dout_subsys ceph_subsys_mds
+#define dout_subsys stone_subsys_mds
 
 #undef dout_prefix
 #define dout_prefix *_dout << "MDSAuthCap "
@@ -339,7 +339,7 @@ void MDSAuthCaps::set_allow_all()
 				 {}));
 }
 
-bool MDSAuthCaps::parse(CephContext *c, std::string_view str, ostream *err)
+bool MDSAuthCaps::parse(StoneContext *c, std::string_view str, ostream *err)
 {
   // Special case for legacy caps
   if (str == "allow") {

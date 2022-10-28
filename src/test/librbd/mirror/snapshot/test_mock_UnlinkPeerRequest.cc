@@ -77,7 +77,7 @@ public:
 
   void expect_unlink_peer(MockTestImageCtx &mock_image_ctx, uint64_t snap_id,
                           const std::string &peer_uuid, int r) {
-    using ceph::encode;
+    using stone::encode;
     bufferlist bl;
     encode(snapid_t{snap_id}, bl);
     encode(peer_uuid, bl);
@@ -134,7 +134,7 @@ TEST_F(TestMockMirrorSnapshotUnlinkPeerRequest, Success) {
   MockTestImageCtx mock_image_ctx(*ictx);
   cls::rbd::MirrorSnapshotNamespace ns{
     cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {"peer1_uuid", "peer2_uuid"},
-    "", CEPH_NOSNAP};
+    "", STONE_NOSNAP};
   auto snap_id = snap_create(mock_image_ctx, ns, "mirror_snap");
 
   expect_get_snap_info(mock_image_ctx, snap_id);
@@ -163,7 +163,7 @@ TEST_F(TestMockMirrorSnapshotUnlinkPeerRequest, RemoveSnapshot) {
   MockTestImageCtx mock_image_ctx(*ictx);
   cls::rbd::MirrorSnapshotNamespace ns{
     cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {"peer_uuid"},
-    "", CEPH_NOSNAP};
+    "", STONE_NOSNAP};
   auto snap_id = snap_create(mock_image_ctx, ns, "mirror_snap");
   snap_create(mock_image_ctx, ns, "mirror_snap2");
 
@@ -191,7 +191,7 @@ TEST_F(TestMockMirrorSnapshotUnlinkPeerRequest, SnapshotRemoveEmptyPeers) {
   MockTestImageCtx mock_image_ctx(*ictx);
   cls::rbd::MirrorSnapshotNamespace ns{
     cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {},
-    "", CEPH_NOSNAP};
+    "", STONE_NOSNAP};
   auto snap_id = snap_create(mock_image_ctx, ns, "mirror_snap");
   ns.mirror_peer_uuids = {"peer_uuid"};
   snap_create(mock_image_ctx, ns, "mirror_snap2");
@@ -241,7 +241,7 @@ TEST_F(TestMockMirrorSnapshotUnlinkPeerRequest, PeerDNE) {
   MockTestImageCtx mock_image_ctx(*ictx);
   cls::rbd::MirrorSnapshotNamespace ns{
     cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {"peer_uuid"},
-    "", CEPH_NOSNAP};
+    "", STONE_NOSNAP};
   auto snap_id = snap_create(mock_image_ctx, ns, "mirror_snap");
 
   expect_get_snap_info(mock_image_ctx, snap_id);
@@ -309,7 +309,7 @@ TEST_F(TestMockMirrorSnapshotUnlinkPeerRequest, UnlinkError) {
   MockTestImageCtx mock_image_ctx(*ictx);
   cls::rbd::MirrorSnapshotNamespace ns{
     cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {"peer1_uuid", "peer2_uuid"},
-    "", CEPH_NOSNAP};
+    "", STONE_NOSNAP};
   auto snap_id = snap_create(mock_image_ctx, ns, "mirror_snap");
 
   expect_get_snap_info(mock_image_ctx, snap_id);
@@ -335,7 +335,7 @@ TEST_F(TestMockMirrorSnapshotUnlinkPeerRequest, NotifyError) {
   MockTestImageCtx mock_image_ctx(*ictx);
   cls::rbd::MirrorSnapshotNamespace ns{
     cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {"peer1_uuid", "peer2_uuid"},
-    "", CEPH_NOSNAP};
+    "", STONE_NOSNAP};
   auto snap_id = snap_create(mock_image_ctx, ns, "mirror_snap");
 
   expect_get_snap_info(mock_image_ctx, snap_id);
@@ -362,7 +362,7 @@ TEST_F(TestMockMirrorSnapshotUnlinkPeerRequest, RemoveSnapshotError) {
   MockTestImageCtx mock_image_ctx(*ictx);
   cls::rbd::MirrorSnapshotNamespace ns{
     cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {"peer_uuid"},
-    "", CEPH_NOSNAP};
+    "", STONE_NOSNAP};
   auto snap_id = snap_create(mock_image_ctx, ns, "mirror_snap");
   snap_create(mock_image_ctx, ns, "mirror_snap2");
 

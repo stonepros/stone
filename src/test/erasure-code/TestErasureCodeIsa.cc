@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 CERN (Switzerland)
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -57,7 +57,7 @@ void IsaErasureCodeTest::encode_decode(unsigned object_size)
 
   string payload(object_size, 'X');
   bufferlist in;
-  // may be multiple bufferptr if object_size is larger than CEPH_PAGE_SIZE
+  // may be multiple bufferptr if object_size is larger than STONE_PAGE_SIZE
   in.append(payload.c_str(), payload.length());
   int want_to_encode[] = {0, 1, 2, 3};
   map<int, bufferlist> encoded;
@@ -899,7 +899,7 @@ TEST_F(IsaErasureCodeTest, create_rule)
   for (int h=0; h<num_host; ++h) {
     loc["host"] = string("host-") + stringify(h);
     for (int o=0; o<num_osd; ++o, ++osd) {
-      c->insert_item(g_ceph_context, osd, 1.0, string("osd.") + stringify(osd), loc);
+      c->insert_item(g_stone_context, osd, 1.0, string("osd.") + stringify(osd), loc);
     }
   }
 

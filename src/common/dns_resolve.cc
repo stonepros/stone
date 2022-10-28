@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -18,12 +18,12 @@
 #include "dns_resolve.h"
 #include "common/debug.h"
 
-#define dout_subsys ceph_subsys_
+#define dout_subsys stone_subsys_
 
 using std::map;
 using std::string;
 
-namespace ceph {
+namespace stone {
 
 #ifdef HAVE_RES_NQUERY
 
@@ -63,7 +63,7 @@ DNSResolver::~DNSResolver()
 }
 
 #ifdef HAVE_RES_NQUERY
-int DNSResolver::get_state(CephContext *cct, res_state *ps)
+int DNSResolver::get_state(StoneContext *cct, res_state *ps)
 {
   lock.lock();
   if (!states.empty()) {
@@ -92,7 +92,7 @@ void DNSResolver::put_state(res_state s)
 }
 #endif
 
-int DNSResolver::resolve_cname(CephContext *cct, const string& hostname,
+int DNSResolver::resolve_cname(StoneContext *cct, const string& hostname,
     string *cname, bool *found)
 {
   *found = false;
@@ -188,7 +188,7 @@ int DNSResolver::resolve_cname(CephContext *cct, const string& hostname,
 }
 
 
-int DNSResolver::resolve_ip_addr(CephContext *cct, const string& hostname,
+int DNSResolver::resolve_ip_addr(StoneContext *cct, const string& hostname,
     entity_addr_t *addr) {
 
 #ifdef HAVE_RES_NQUERY
@@ -207,7 +207,7 @@ int DNSResolver::resolve_ip_addr(CephContext *cct, const string& hostname,
 
 }
 
-int DNSResolver::resolve_ip_addr(CephContext *cct, res_state *res, const string& hostname, 
+int DNSResolver::resolve_ip_addr(StoneContext *cct, res_state *res, const string& hostname, 
     entity_addr_t *addr) {
 
   u_char nsbuf[NS_PACKETSZ];
@@ -262,13 +262,13 @@ int DNSResolver::resolve_ip_addr(CephContext *cct, res_state *res, const string&
   return 0;
 }
 
-int DNSResolver::resolve_srv_hosts(CephContext *cct, const string& service_name, 
+int DNSResolver::resolve_srv_hosts(StoneContext *cct, const string& service_name, 
     const SRV_Protocol trans_protocol,
     map<string, DNSResolver::Record> *srv_hosts) {
   return this->resolve_srv_hosts(cct, service_name, trans_protocol, "", srv_hosts);
 }
 
-int DNSResolver::resolve_srv_hosts(CephContext *cct, const string& service_name, 
+int DNSResolver::resolve_srv_hosts(StoneContext *cct, const string& service_name, 
     const SRV_Protocol trans_protocol, const string& domain,
     map<string, DNSResolver::Record> *srv_hosts) {
 

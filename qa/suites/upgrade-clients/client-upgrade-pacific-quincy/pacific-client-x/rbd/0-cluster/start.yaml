@@ -1,6 +1,6 @@
 meta:
 - desc: |
-   Install and run ceph on one node,
+   Install and run stone on one node,
    with a separate client 1.
    Upgrade client 1 to quincy
    Run tests against old cluster
@@ -15,5 +15,5 @@ roles:
   - mgr.x
 - - client.1
 overrides:
-  ceph:
+  stone:
     fs: xfs

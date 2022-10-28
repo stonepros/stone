@@ -40,7 +40,7 @@ void StoreTestFixture::SetUp()
   }
   ASSERT_EQ(0, r);
 
-  store.reset(ObjectStore::create(g_ceph_context,
+  store.reset(ObjectStore::create(g_stone_context,
                                   type,
                                   data_dir,
                                   string("store_test_temp_journal")));
@@ -83,7 +83,7 @@ void StoreTestFixture::TearDown()
 
 void StoreTestFixture::SetVal(ConfigProxy& _conf, const char* key, const char* val)
 {
-  ceph_assert(!conf || conf == &_conf);
+  stone_assert(!conf || conf == &_conf);
   conf = &_conf;
   std::string skey(key);
   std::string prev_val;
@@ -95,7 +95,7 @@ void StoreTestFixture::SetVal(ConfigProxy& _conf, const char* key, const char* v
 void StoreTestFixture::PopSettings(size_t pos)
 {
   if (conf) {
-    ceph_assert(pos == 0 || pos <= saved_settings.size()); // for sanity
+    stone_assert(pos == 0 || pos <= saved_settings.size()); // for sanity
     while(pos < saved_settings.size())
     {
       auto& e = saved_settings.top();
@@ -107,13 +107,13 @@ void StoreTestFixture::PopSettings(size_t pos)
 }
 
 void StoreTestFixture::CloseAndReopen() {
-  ceph_assert(store != nullptr);
+  stone_assert(store != nullptr);
   g_conf()._clear_safe_to_start_threads();
   int r = store->umount();
   EXPECT_EQ(0, r);
   ch.reset(nullptr);
   store.reset(nullptr);
-  store.reset(ObjectStore::create(g_ceph_context,
+  store.reset(ObjectStore::create(g_stone_context,
                                   type,
                                   data_dir,
                                   string("store_test_temp_journal")));

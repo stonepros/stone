@@ -46,7 +46,7 @@ struct CreateRequest<librbd::MockTestImageCtx> {
                                const std::string &primary_mirror_uuid,
                                MockContextWQ *op_work_queue,
                                Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     EXPECT_FALSE(non_primary_global_image_id.empty());
     EXPECT_FALSE(primary_mirror_uuid.empty());
     EXPECT_FALSE(skip_mirror_enable);
@@ -87,7 +87,7 @@ struct CloneRequest<librbd::MockTestImageCtx> {
 			      const std::string &primary_mirror_uuid,
 			      MockContextWQ *op_work_queue,
                               Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     s_instance->construct();
     return s_instance;
@@ -116,7 +116,7 @@ namespace mirror {
 
 template <>
 struct Threads<librbd::MockTestImageCtx> {
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
   SafeTimer *timer;
   librbd::asio::ContextWQ *work_queue;
 
@@ -135,14 +135,14 @@ struct CloseImageRequest<librbd::MockTestImageCtx> {
 
   static CloseImageRequest* create(librbd::MockTestImageCtx **image_ctx,
                                    Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->construct(*image_ctx);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
 
   CloseImageRequest() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
   ~CloseImageRequest() {
@@ -163,7 +163,7 @@ struct OpenImageRequest<librbd::MockTestImageCtx> {
                                   librbd::MockTestImageCtx **image_ctx,
                                   const std::string &image_id,
                                   bool read_only, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->image_ctx = image_ctx;
     s_instance->on_finish = on_finish;
     s_instance->construct(io_ctx, image_id);
@@ -171,7 +171,7 @@ struct OpenImageRequest<librbd::MockTestImageCtx> {
   }
 
   OpenImageRequest() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
   ~OpenImageRequest() {
@@ -348,7 +348,7 @@ public:
                                       on_finish);
   }
 
-  PoolMetaCache m_pool_meta_cache{g_ceph_context};
+  PoolMetaCache m_pool_meta_cache{g_stone_context};
   librbd::ImageCtx *m_remote_image_ctx;
 };
 

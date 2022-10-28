@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 &smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -54,11 +54,11 @@ static void test_lock() {
 }
 
 TEST(MutexDebug, Lock) {
-  test_lock<ceph::mutex_debug>();
+  test_lock<stone::mutex_debug>();
 }
 
 TEST(MutexDebug, NotRecursive) {
-  ceph::mutex_debug m("foo");
+  stone::mutex_debug m("foo");
   auto ttl = &test_try_lock<mutex_debug>;
 
   ASSERT_NO_THROW(m.lock());
@@ -75,12 +75,12 @@ TEST(MutexDebug, NotRecursive) {
 }
 
 TEST(MutexRecursiveDebug, Lock) {
-  test_lock<ceph::mutex_recursive_debug>();
+  test_lock<stone::mutex_recursive_debug>();
 }
 
 
 TEST(MutexRecursiveDebug, Recursive) {
-  ceph::mutex_recursive_debug m("m");
+  stone::mutex_recursive_debug m("m");
   auto ttl = &test_try_lock<mutex_recursive_debug>;
 
   ASSERT_NO_THROW(m.lock());

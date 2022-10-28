@@ -62,7 +62,7 @@ public:
   void handle_error(uint64_t cookie, int err) override {
     std::cout << __func__ << " cookie " << cookie
 	      << " err " << err << std::endl;
-    ceph_assert(cookie > 1000);
+    stone_assert(cookie > 1000);
     notify->notify_err = err;
   }
 };

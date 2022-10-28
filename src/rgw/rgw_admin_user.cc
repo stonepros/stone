@@ -6,8 +6,8 @@
 #include "rgw_user.h"
 #include "common/errno.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 using namespace rgw;
 

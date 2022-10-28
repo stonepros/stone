@@ -50,7 +50,7 @@ struct Policy {
     : lossy(false), server(false), standby(false), resetcheck(true),
       throttler_bytes(NULL),
       throttler_messages(NULL),
-      features_supported(CEPH_FEATURES_SUPPORTED_DEFAULT),
+      features_supported(STONE_FEATURES_SUPPORTED_DEFAULT),
       features_required(0) {}
 private:
   Policy(bool l, bool s, bool st, bool r, bool rlc, uint64_t req)
@@ -58,7 +58,7 @@ private:
       register_lossy_clients(rlc),
       throttler_bytes(NULL),
       throttler_messages(NULL),
-      features_supported(CEPH_FEATURES_SUPPORTED_DEFAULT),
+      features_supported(STONE_FEATURES_SUPPORTED_DEFAULT),
       features_required(req) {}
   
 public:

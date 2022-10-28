@@ -1,5 +1,5 @@
 tasks:
-  - cephfs_test_runner:
+  - stonefs_test_runner:
       fail_on_skip: false
       modules:
-        - tasks.cephfs.test_readahead
+        - tasks.stonefs.test_readahead

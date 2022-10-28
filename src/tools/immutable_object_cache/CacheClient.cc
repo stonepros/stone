@@ -6,17 +6,17 @@
 #include "common/Cond.h"
 #include "common/version.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_immutable_obj_cache
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_immutable_obj_cache
 #undef dout_prefix
-#define dout_prefix *_dout << "ceph::cache::CacheClient: " << this << " " \
+#define dout_prefix *_dout << "stone::cache::CacheClient: " << this << " " \
                            << __func__ << ": "
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
-  CacheClient::CacheClient(const std::string& file, CephContext* ceph_ctx)
-    : m_cct(ceph_ctx), m_io_service_work(m_io_service),
+  CacheClient::CacheClient(const std::string& file, StoneContext* stone_ctx)
+    : m_cct(stone_ctx), m_io_service_work(m_io_service),
       m_dm_socket(m_io_service), m_ep(stream_protocol::endpoint(file)),
       m_io_thread(nullptr), m_session_work(false), m_writing(false),
       m_reading(false), m_sequence_id(0) {
@@ -126,7 +126,7 @@ namespace immutable_obj_cache {
     {
       std::lock_guard locker{m_lock};
       m_outcoming_bl.append(req->get_payload_bufferlist());
-      ceph_assert(m_seq_to_req.find(req->seq) == m_seq_to_req.end());
+      stone_assert(m_seq_to_req.find(req->seq) == m_seq_to_req.end());
       m_seq_to_req[req->seq] = req;
     }
 
@@ -151,7 +151,7 @@ namespace immutable_obj_cache {
     {
       std::lock_guard locker{m_lock};
       bl.swap(m_outcoming_bl);
-      ceph_assert(m_outcoming_bl.length() == 0);
+      stone_assert(m_outcoming_bl.length() == 0);
     }
 
     // send bytes as many as possible.
@@ -164,7 +164,7 @@ namespace immutable_obj_cache {
            return;
         }
 
-        ceph_assert(cb == bl.length());
+        stone_assert(cb == bl.length());
 
         {
 	  std::lock_guard locker{m_lock};
@@ -190,7 +190,7 @@ namespace immutable_obj_cache {
 
   void CacheClient::receive_message() {
     ldout(m_cct, 20) << dendl;
-    ceph_assert(m_reading.load());
+    stone_assert(m_reading.load());
     read_reply_header();
   }
 
@@ -218,7 +218,7 @@ namespace immutable_obj_cache {
       return;
     }
 
-    ceph_assert(bytes_transferred == bp_head.length());
+    stone_assert(bytes_transferred == bp_head.length());
 
     uint32_t data_len = get_data_len(bp_head.c_str());
 
@@ -249,7 +249,7 @@ namespace immutable_obj_cache {
       fault(ASIO_ERROR_WRITE, ec);
       return;
     }
-    ceph_assert(bp_data.length() == data_len);
+    stone_assert(bp_data.length() == data_len);
 
     bufferlist data_buffer;
     data_buffer.append(std::move(bp_head));
@@ -257,7 +257,7 @@ namespace immutable_obj_cache {
 
     ObjectCacheRequest* reply = decode_object_cache_request(data_buffer);
     data_buffer.clear();
-    ceph_assert(data_buffer.length() == 0);
+    stone_assert(data_buffer.length() == 0);
 
     process(reply, reply->seq);
 
@@ -278,12 +278,12 @@ namespace immutable_obj_cache {
     ObjectCacheRequest* current_request = nullptr;
     {
       std::lock_guard locker{m_lock};
-      ceph_assert(m_seq_to_req.find(seq_id) != m_seq_to_req.end());
+      stone_assert(m_seq_to_req.find(seq_id) != m_seq_to_req.end());
       current_request = m_seq_to_req[seq_id];
       m_seq_to_req.erase(seq_id);
     }
 
-    ceph_assert(current_request != nullptr);
+    stone_assert(current_request != nullptr);
     auto process_reply = new LambdaContext([current_request, reply]
       (bool dedicated) {
        if (dedicated) {
@@ -309,11 +309,11 @@ namespace immutable_obj_cache {
     ldout(m_cct, 20) << "fault." << ec.message() << dendl;
 
     if (err_type == ASIO_ERROR_CONNECT) {
-       ceph_assert(!m_session_work.load());
+       stone_assert(!m_session_work.load());
        if (ec == boost::asio::error::connection_refused) {
          ldout(m_cct, 20) << "Connecting RO daenmon fails : "<< ec.message()
                         << ". Immutable-object-cache daemon is down ? "
-                        << "Data will be read from ceph cluster " << dendl;
+                        << "Data will be read from stone cluster " << dendl;
        } else {
          ldout(m_cct, 20) << "Connecting RO daemon fails : "
                         << ec.message() << dendl;
@@ -345,7 +345,7 @@ namespace immutable_obj_cache {
 
     if (err_type == ASIO_ERROR_MSG_INCOMPLETE) {
        ldout(m_cct, 20) << "ASIO In-complete message." << ec.message() << dendl;
-       ceph_assert(0);
+       stone_assert(0);
     }
 
     if (err_type == ASIO_ERROR_READ) {
@@ -355,7 +355,7 @@ namespace immutable_obj_cache {
     if (err_type == ASIO_ERROR_WRITE) {
        ldout(m_cct, 20) << "ASIO asyn write fails : " << ec.message() << dendl;
        // CacheClient should not occur this error.
-       ceph_assert(0);
+       stone_assert(0);
     }
 
     // currently, for any asio error, just shutdown RO.
@@ -381,7 +381,7 @@ namespace immutable_obj_cache {
   int CacheClient::register_client(Context* on_finish) {
     ObjectCacheRequest* reg_req = new ObjectCacheRegData(RBDSC_REGISTER,
                                                          m_sequence_id++,
-                                                         ceph_version_to_str());
+                                                         stone_version_to_str());
     reg_req->encode();
 
     bufferlist bl;
@@ -432,4 +432,4 @@ namespace immutable_obj_cache {
   }
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone

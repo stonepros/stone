@@ -17,7 +17,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/construct.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::RebuildObjectMapRequest: "
 
@@ -33,7 +33,7 @@ void RebuildObjectMapRequest<I>::send() {
 
 template <typename I>
 bool RebuildObjectMapRequest<I>::should_complete(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " should_complete: " << " r=" << r << dendl;
 
   std::shared_lock owner_lock{m_image_ctx.owner_lock};
@@ -78,7 +78,7 @@ bool RebuildObjectMapRequest<I>::should_complete(int r) {
     break;
 
   default:
-    ceph_abort();
+    stone_abort();
     break;
   }
 
@@ -95,11 +95,11 @@ bool RebuildObjectMapRequest<I>::should_complete(int r) {
 
 template <typename I>
 void RebuildObjectMapRequest<I>::send_resize_object_map() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  CephContext *cct = m_image_ctx.cct;
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  StoneContext *cct = m_image_ctx.cct;
 
   m_image_ctx.image_lock.lock_shared();
-  ceph_assert(m_image_ctx.object_map != nullptr);
+  stone_assert(m_image_ctx.object_map != nullptr);
 
   uint64_t size = get_image_size();
   uint64_t num_objects = Striper::get_num_objects(m_image_ctx.layout, size);
@@ -114,7 +114,7 @@ void RebuildObjectMapRequest<I>::send_resize_object_map() {
   m_state = STATE_RESIZE_OBJECT_MAP;
 
   // should have been canceled prior to releasing lock
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
 
   m_image_ctx.object_map->aio_resize(size, OBJECT_NONEXISTENT,
@@ -124,12 +124,12 @@ void RebuildObjectMapRequest<I>::send_resize_object_map() {
 
 template <typename I>
 void RebuildObjectMapRequest<I>::send_trim_image() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   std::shared_lock l{m_image_ctx.owner_lock};
 
   // should have been canceled prior to releasing lock
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
   ldout(cct, 5) << this << " send_trim_image" << dendl;
   m_state = STATE_TRIM_IMAGE;
@@ -138,7 +138,7 @@ void RebuildObjectMapRequest<I>::send_trim_image() {
   uint64_t orig_size;
   {
     std::shared_lock l{m_image_ctx.image_lock};
-    ceph_assert(m_image_ctx.object_map != nullptr);
+    stone_assert(m_image_ctx.object_map != nullptr);
 
     new_size = get_image_size();
     orig_size = m_image_ctx.get_object_size() *
@@ -153,12 +153,12 @@ void RebuildObjectMapRequest<I>::send_trim_image() {
 template <typename I>
 bool update_object_map(I& image_ctx, uint64_t object_no, uint8_t current_state,
 		      uint8_t new_state) {
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   uint64_t snap_id = image_ctx.snap_id;
 
   current_state = (*image_ctx.object_map)[object_no];
   if (current_state == OBJECT_EXISTS && new_state == OBJECT_NONEXISTENT &&
-      snap_id == CEPH_NOSNAP) {
+      snap_id == STONE_NOSNAP) {
     // might be writing object to OSD concurrently
     new_state = current_state;
   }
@@ -175,8 +175,8 @@ bool update_object_map(I& image_ctx, uint64_t object_no, uint8_t current_state,
 
 template <typename I>
 void RebuildObjectMapRequest<I>::send_verify_objects() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  CephContext *cct = m_image_ctx.cct;
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  StoneContext *cct = m_image_ctx.cct;
 
   m_state = STATE_VERIFY_OBJECTS;
   ldout(cct, 5) << this << " send_verify_objects" << dendl;
@@ -191,27 +191,27 @@ void RebuildObjectMapRequest<I>::send_verify_objects() {
 
 template <typename I>
 void RebuildObjectMapRequest<I>::send_save_object_map() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  CephContext *cct = m_image_ctx.cct;
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  StoneContext *cct = m_image_ctx.cct;
 
   ldout(cct, 5) << this << " send_save_object_map" << dendl;
   m_state = STATE_SAVE_OBJECT_MAP;
 
   // should have been canceled prior to releasing lock
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
 
   std::shared_lock image_locker{m_image_ctx.image_lock};
-  ceph_assert(m_image_ctx.object_map != nullptr);
+  stone_assert(m_image_ctx.object_map != nullptr);
   m_image_ctx.object_map->aio_save(this->create_callback_context());
 }
 
 template <typename I>
 void RebuildObjectMapRequest<I>::send_update_header() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
 
   // should have been canceled prior to releasing lock
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
 
   ldout(m_image_ctx.cct, 5) << this << " send_update_header" << dendl;
@@ -224,7 +224,7 @@ void RebuildObjectMapRequest<I>::send_update_header() {
 
   librados::AioCompletion *comp = this->create_callback_completion();
   int r = m_image_ctx.md_ctx.aio_operate(m_image_ctx.header_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 
   std::unique_lock image_locker{m_image_ctx.image_lock};
@@ -233,8 +233,8 @@ void RebuildObjectMapRequest<I>::send_update_header() {
 
 template <typename I>
 uint64_t RebuildObjectMapRequest<I>::get_image_size() const {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.image_lock));
-  if (m_image_ctx.snap_id == CEPH_NOSNAP) {
+  stone_assert(stone_mutex_is_locked(m_image_ctx.image_lock));
+  if (m_image_ctx.snap_id == STONE_NOSNAP) {
     if (!m_image_ctx.resize_reqs.empty()) {
       return m_image_ctx.resize_reqs.front()->get_image_size();
     } else {

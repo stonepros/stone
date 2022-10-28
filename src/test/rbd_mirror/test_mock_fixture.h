@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_TEST_RBD_MIRROR_TEST_MOCK_FIXTURE_H
-#define CEPH_TEST_RBD_MIRROR_TEST_MOCK_FIXTURE_H
+#ifndef STONE_TEST_RBD_MIRROR_TEST_MOCK_FIXTURE_H
+#define STONE_TEST_RBD_MIRROR_TEST_MOCK_FIXTURE_H
 
 #include "test/rbd_mirror/test_fixture.h"
 #include "test/librados_test_stub/LibradosTestStub.h"
@@ -69,4 +69,4 @@ private:
 } // namespace mirror
 } // namespace rbd
 
-#endif // CEPH_TEST_RBD_MIRROR_TEST_MOCK_FIXTURE_H
+#endif // STONE_TEST_RBD_MIRROR_TEST_MOCK_FIXTURE_H

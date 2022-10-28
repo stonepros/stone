@@ -1,5 +1,5 @@
 
-add_executable(unittest_ceph_immutable_obj_cache
+add_executable(unittest_stone_immutable_obj_cache
   test_main.cc
   test_SimplePolicy.cc
   test_DomainSocket.cc
@@ -7,11 +7,11 @@ add_executable(unittest_ceph_immutable_obj_cache
   test_object_store.cc
   test_message.cc
   )
-add_ceph_unittest(unittest_ceph_immutable_obj_cache)
+add_stone_unittest(unittest_stone_immutable_obj_cache)
 
 
-target_link_libraries(unittest_ceph_immutable_obj_cache
-  ceph_immutable_object_cache_lib
+target_link_libraries(unittest_stone_immutable_obj_cache
+  stone_immutable_object_cache_lib
   rados_test_stub
   librados
   global
@@ -21,11 +21,11 @@ target_link_libraries(unittest_ceph_immutable_obj_cache
   )
 
 
-add_executable(ceph_test_immutable_obj_cache
+add_executable(stone_test_immutable_obj_cache
   test_main.cc
   )
 
-target_link_libraries(ceph_test_immutable_obj_cache
+target_link_libraries(stone_test_immutable_obj_cache
   librados
   radostest-cxx
   ${UNITTEST_LIBS}
@@ -33,5 +33,5 @@ target_link_libraries(ceph_test_immutable_obj_cache
 
 
 install(TARGETS
-  ceph_test_immutable_obj_cache
+  stone_test_immutable_obj_cache
   DESTINATION ${CMAKE_INSTALL_BINDIR})

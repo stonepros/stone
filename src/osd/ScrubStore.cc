@@ -10,7 +10,7 @@ using std::ostringstream;
 using std::string;
 using std::vector;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 namespace {
 ghobject_t make_scrub_object(const spg_t& pgid)
@@ -105,8 +105,8 @@ Store::create(ObjectStore* store,
 	      const spg_t& pgid,
 	      const coll_t& coll)
 {
-  ceph_assert(store);
-  ceph_assert(t);
+  stone_assert(store);
+  stone_assert(t);
   ghobject_t oid = make_scrub_object(pgid);
   t->touch(coll, oid);
   return new Store{coll, oid, store};
@@ -121,7 +121,7 @@ Store::Store(const coll_t& coll, const ghobject_t& oid, ObjectStore* store)
 
 Store::~Store()
 {
-  ceph_assert(results.empty());
+  stone_assert(results.empty());
 }
 
 void Store::add_object_error(int64_t pool, const inconsistent_obj_wrapper& e)

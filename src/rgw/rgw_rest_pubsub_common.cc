@@ -7,10 +7,10 @@
 #include "rgw_url.h"
 #include "rgw_sal_rados.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
-bool validate_and_update_endpoint_secret(rgw_pubsub_sub_dest& dest, CephContext *cct, const RGWEnv& env) {
+bool validate_and_update_endpoint_secret(rgw_pubsub_sub_dest& dest, StoneContext *cct, const RGWEnv& env) {
   if (dest.push_endpoint.empty()) {
       return true;
   }
@@ -21,7 +21,7 @@ bool validate_and_update_endpoint_secret(rgw_pubsub_sub_dest& dest, CephContext 
     return false;
   }
   // this should be verified inside parse_url()
-  ceph_assert(user.empty() == password.empty());
+  stone_assert(user.empty() == password.empty());
   if (!user.empty()) {
       dest.stored_secret = true;
       if (!rgw_transport_is_secure(cct, env)) {

@@ -215,7 +215,7 @@ struct [[gnu::packed]] variable_key_suffix {
 };
 
 static inline std::ostream& operator<<(std::ostream& os, const variable_key_suffix& k) {
-  if (k.snap != CEPH_NOSNAP) {
+  if (k.snap != STONE_NOSNAP) {
     os << "s" << k.snap << ",";
   }
   if (k.gen != ghobject_t::NO_GEN) {
@@ -436,7 +436,7 @@ struct fixed_key_3 {
 };
 
 static inline std::ostream& operator<<(std::ostream& os, const fixed_key_3& k) {
-  if (k.snap != CEPH_NOSNAP) {
+  if (k.snap != STONE_NOSNAP) {
     os << "s" << k.snap << ",";
   }
   if (k.gen != ghobject_t::NO_GEN) {

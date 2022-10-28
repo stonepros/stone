@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_XFSFILESTOREBACKEND_H
-#define CEPH_XFSFILESTOREBACKEND_H
+#ifndef STONE_XFSFILESTOREBACKEND_H
+#define STONE_XFSFILESTOREBACKEND_H
 
 #include "GenericFileStoreBackend.h"
 
@@ -33,4 +33,4 @@ public:
   int set_alloc_hint(int fd, uint64_t hint) override;
 };
 
-#endif /* CEPH_XFSFILESTOREBACKEND_H */
+#endif /* STONE_XFSFILESTOREBACKEND_H */

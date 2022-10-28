@@ -20,7 +20,7 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -40,7 +40,7 @@
 
 #include <tuple>
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "dpdk_rte.h"
 #include "DPDKStack.h"
 #include "DPDK.h"
@@ -48,10 +48,10 @@
 #include "TCP-Stack.h"
 
 #include "common/dout.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/Cond.h"
 
-#define dout_subsys ceph_subsys_dpdk
+#define dout_subsys stone_subsys_dpdk
 #undef dout_prefix
 #define dout_prefix *_dout << "dpdkstack "
 
@@ -68,8 +68,8 @@ void DPDKWorker::initialize()
     WAIT_PORT_FIN_STAGE,
     DONE
   } create_stage = WAIT_DEVICE_STAGE;
-  static ceph::mutex lock = ceph::make_mutex("DPDKStack::lock");
-  static ceph::condition_variable cond;
+  static stone::mutex lock = stone::make_mutex("DPDKStack::lock");
+  static stone::condition_variable cond;
   static unsigned queue_init_done = 0;
   static unsigned cores = 0;
   static std::shared_ptr<DPDKDevice> sdev;
@@ -94,7 +94,7 @@ void DPDKWorker::initialize()
     std::unique_lock l{lock};
     cond.wait(l, [] { return create_stage > WAIT_DEVICE_STAGE; });
   }
-  ceph_assert(sdev);
+  stone_assert(sdev);
   if (i < sdev->hw_queues_count()) {
     auto qp = sdev->init_local_queue(cct, &center, cct->_conf->ms_dpdk_hugepages, i);
     std::map<unsigned, float> cpu_weights;
@@ -110,7 +110,7 @@ void DPDKWorker::initialize()
   } else {
     // auto master = qid % sdev->hw_queues_count();
     // sdev->set_local_queue(create_proxy_net_device(master, sdev.get()));
-    ceph_abort();
+    stone_abort();
   }
   if (i == 0) {
     {
@@ -120,7 +120,7 @@ void DPDKWorker::initialize()
 
     if (sdev->init_port_fini() < 0) {
       lderr(cct) << __func__ << " init_port_fini failed " << dendl;
-      ceph_abort();
+      stone_abort();
     }
     std::lock_guard l{lock};
     create_stage = DONE;
@@ -175,7 +175,7 @@ static bool match_available_address(const vector<AvailableIPAddress> &avails,
   return false;
 }
 
-DPDKWorker::Impl::Impl(CephContext *cct, unsigned i, EventCenter *c, std::shared_ptr<DPDKDevice> dev)
+DPDKWorker::Impl::Impl(StoneContext *cct, unsigned i, EventCenter *c, std::shared_ptr<DPDKDevice> dev)
     : id(i), _netif(cct, dev, c), _dev(dev), _inet(cct, c, &_netif)
 {
   vector<AvailableIPAddress> tuples;
@@ -188,7 +188,7 @@ DPDKWorker::Impl::Impl(CephContext *cct, unsigned i, EventCenter *c, std::shared
                << cct->_conf.get_val<std::string>("ms_dpdk_gateway_ipv4_addr") << ", "
                << cct->_conf.get_val<std::string>("ms_dpdk_netmask_ipv4_addr") << ", "
                << dendl;
-    ceph_abort();
+    stone_abort();
   }
   _inet.set_host_address(ipv4_address(std::get<0>(tuples[0])));
   _inet.set_gw_address(ipv4_address(std::get<1>(tuples[0])));
@@ -205,8 +205,8 @@ int DPDKWorker::listen(entity_addr_t &sa,
 		       const SocketOptions &opt,
                        ServerSocket *sock)
 {
-  ceph_assert(sa.get_family() == AF_INET);
-  ceph_assert(sock);
+  stone_assert(sa.get_family() == AF_INET);
+  stone_assert(sock);
 
   ldout(cct, 10) << __func__ << " addr " << sa << dendl;
   // vector<AvailableIPAddress> tuples;
@@ -236,7 +236,7 @@ int DPDKWorker::listen(entity_addr_t &sa,
 
 int DPDKWorker::connect(const entity_addr_t &addr, const SocketOptions &opts, ConnectedSocket *socket)
 {
-  // ceph_assert(addr.get_family() == AF_INET);
+  // stone_assert(addr.get_family() == AF_INET);
   int r =  tcpv4_connect(_impl->_inet.get_tcp(), addr, socket);
   ldout(cct, 10) << __func__ << " addr " << addr << dendl;
   return r;
@@ -251,11 +251,11 @@ void DPDKStack::spawn_worker(unsigned i, std::function<void ()> &&func)
   r = dpdk::eal::init(cct);
   if (r < 0) {
     lderr(cct) << __func__ << " init dpdk rte failed, r=" << r << dendl;
-    ceph_abort();
+    stone_abort();
   }
   // if dpdk::eal::init already called by NVMEDevice, we will select 1..n
   // cores
-  ceph_assert(rte_lcore_count() >= i + 1);
+  stone_assert(rte_lcore_count() >= i + 1);
   unsigned core_id;
   int j = i;
   RTE_LCORE_FOREACH_SLAVE(core_id) {
@@ -267,7 +267,7 @@ void DPDKStack::spawn_worker(unsigned i, std::function<void ()> &&func)
     r = rte_eal_remote_launch(dpdk_thread_adaptor, static_cast<void*>(&funcs[j]), core_id);
     if (r < 0) {
       lderr(cct) << __func__ << " remote launch failed, r=" << r << dendl;
-      ceph_abort();
+      stone_abort();
     }
   });
 }

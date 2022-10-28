@@ -956,8 +956,8 @@ namespace rgw::auth::s3 {
 class AWSEngine : public rgw::auth::Engine {
 public:
   class VersionAbstractor {
-    static constexpr size_t DIGEST_SIZE_V2 = CEPH_CRYPTO_HMACSHA1_DIGESTSIZE;
-    static constexpr size_t DIGEST_SIZE_V4 = CEPH_CRYPTO_HMACSHA256_DIGESTSIZE;
+    static constexpr size_t DIGEST_SIZE_V2 = STONE_CRYPTO_HMACSHA1_DIGESTSIZE;
+    static constexpr size_t DIGEST_SIZE_V4 = STONE_CRYPTO_HMACSHA256_DIGESTSIZE;
 
     /* Knowing the signature max size allows us to employ the sstring, and thus
      * avoid dynamic allocations. The multiplier comes from representing digest

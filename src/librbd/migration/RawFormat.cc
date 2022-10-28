@@ -23,7 +23,7 @@ static const std::string SNAPSHOTS_KEY {"snapshots"};
 
 } // anonymous namespace
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::migration::RawFormat: " << this \
                            << " " << __func__ << ": "
@@ -46,8 +46,8 @@ void RawFormat<I>::open(Context* on_finish) {
 
   // treat the base image as a HEAD-revision snapshot
   Snapshots snapshots;
-  int r = m_source_spec_builder->build_snapshot(m_json_object, CEPH_NOSNAP,
-                                                &snapshots[CEPH_NOSNAP]);
+  int r = m_source_spec_builder->build_snapshot(m_json_object, STONE_NOSNAP,
+                                                &snapshots[STONE_NOSNAP]);
   if (r < 0) {
     lderr(cct) << "failed to build HEAD revision handler: " << cpp_strerror(r)
                << dendl;
@@ -138,7 +138,7 @@ void RawFormat<I>::get_snapshots(SnapInfos* snap_infos, Context* on_finish) {
 
   snap_infos->clear();
   for (auto& [snap_id, snapshot] : m_snapshots) {
-    if (snap_id == CEPH_NOSNAP) {
+    if (snap_id == STONE_NOSNAP) {
       continue;
     }
     snap_infos->emplace(snap_id, snapshot->get_snap_info());

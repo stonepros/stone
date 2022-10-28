@@ -13,7 +13,7 @@
 #include <seastar/core/semaphore.hh>
 #include <seastar/core/smp.hh>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "messages/MOSDOp.h"
 
 #include "crimson/auth/DummyAuth.h"
@@ -30,7 +30,7 @@ template<typename Message>
 using Ref = boost::intrusive_ptr<Message>;
 
 seastar::logger& logger() {
-  return crimson::get_logger(ceph_subsys_ms);
+  return crimson::get_logger(stone_subsys_ms);
 }
 
 template <typename T, typename... Args>
@@ -81,7 +81,7 @@ struct client_config {
   static client_config load(bpo::variables_map& options) {
     client_config conf;
     entity_addr_t addr;
-    ceph_assert(addr.parse(options["addr"].as<std::string>().c_str(), nullptr));
+    stone_assert(addr.parse(options["addr"].as<std::string>().c_str(), nullptr));
 
     conf.server_addr = addr;
     conf.block_size = options["cbs"].as<unsigned>();
@@ -89,7 +89,7 @@ struct client_config {
     conf.msgtime = options["msgtime"].as<unsigned>();
     conf.jobs = options["jobs"].as<unsigned>();
     conf.depth = options["depth"].as<unsigned>();
-    ceph_assert(conf.depth % conf.jobs == 0);
+    stone_assert(conf.depth % conf.jobs == 0);
     conf.v1_crc_enabled = options["v1-crc-enabled"].as<bool>();
     return conf;
   }
@@ -114,7 +114,7 @@ struct server_config {
   static server_config load(bpo::variables_map& options) {
     server_config conf;
     entity_addr_t addr;
-    ceph_assert(addr.parse(options["addr"].as<std::string>().c_str(), nullptr));
+    stone_assert(addr.parse(options["addr"].as<std::string>().c_str(), nullptr));
 
     conf.addr = addr;
     conf.block_size = options["sbs"].as<unsigned>();
@@ -154,12 +154,12 @@ static seastar::future<> run(
 
       std::optional<seastar::future<>> ms_dispatch(
           crimson::net::ConnectionRef c, MessageRef m) override {
-        ceph_assert(m->get_type() == CEPH_MSG_OSD_OP);
+        stone_assert(m->get_type() == STONE_MSG_OSD_OP);
 
         // server replies with MOSDOp to generate server-side write workload
         const static pg_t pgid;
         const static object_locator_t oloc;
-        const static hobject_t hobj(object_t(), oloc.key, CEPH_NOSNAP, pgid.ps(),
+        const static hobject_t hobj(object_t(), oloc.key, STONE_NOSNAP, pgid.ps(),
                                     pgid.pool(), oloc.nspace);
         static spg_t spgid(pgid);
         auto rep = make_message<MOSDOp>(0, 0, hobj, spgid, 0, 0, 0);
@@ -187,21 +187,21 @@ static seastar::future<> run(
               [addr] (const std::error_code& e) {
             logger().error("Server: "
                            "there is another instance running at {}", addr);
-            ceph_abort();
+            stone_abort();
           }));
         });
       }
       seastar::future<> shutdown() {
         logger().info("{} shutdown...", lname);
         return seastar::smp::submit_to(msgr_sid, [this] {
-          ceph_assert(msgr);
+          stone_assert(msgr);
           msgr->stop();
           return msgr->shutdown();
         });
       }
       seastar::future<> wait() {
         return seastar::smp::submit_to(msgr_sid, [this] {
-          ceph_assert(msgr);
+          stone_assert(msgr);
           return msgr->wait();
         });
       }
@@ -300,7 +300,7 @@ static seastar::future<> run(
       }
 
       unsigned get_current_depth() const {
-        ceph_assert(depth.available_units() >= 0);
+        stone_assert(depth.available_units() >= 0);
         return nr_depth - depth.current();
       }
 
@@ -310,12 +310,12 @@ static seastar::future<> run(
       std::optional<seastar::future<>> ms_dispatch(
           crimson::net::ConnectionRef, MessageRef m) override {
         // server replies with MOSDOp to generate server-side write workload
-        ceph_assert(m->get_type() == CEPH_MSG_OSD_OP);
+        stone_assert(m->get_type() == STONE_MSG_OSD_OP);
 
         auto msg_id = m->get_tid();
         if (msg_id % SAMPLE_RATE == 0) {
           auto index = msg_id % time_msgs_sent.size();
-          ceph_assert(time_msgs_sent[index] != mono_clock::zero());
+          stone_assert(time_msgs_sent[index] != mono_clock::zero());
           std::chrono::duration<double> cur_latency = mono_clock::now() - time_msgs_sent[index];
           conn_stats.total_lat_s += cur_latency.count();
           ++(conn_stats.sampled_count);
@@ -332,7 +332,7 @@ static seastar::future<> run(
 
       // should start messenger at this shard?
       bool is_active() {
-        ceph_assert(seastar::this_shard_id() == sid);
+        stone_assert(seastar::this_shard_id() == sid);
         return sid != 0 && sid <= jobs;
       }
 
@@ -358,7 +358,7 @@ static seastar::future<> run(
         return container().invoke_on_all([] (auto& client) {
           if (client.is_active()) {
             logger().info("{} shutdown...", client.lname);
-            ceph_assert(client.msgr);
+            stone_assert(client.msgr);
             client.msgr->stop();
             return client.msgr->shutdown().then([&client] {
               return client.stop_dispatch_messages();
@@ -378,7 +378,7 @@ static seastar::future<> run(
             return seastar::sleep(1s).then([&client, start_time] {
               if (client.conn_stats.connected_time == mono_clock::zero()) {
                 logger().error("\n{} not connected after 1s!\n", client.lname);
-                ceph_assert(false);
+                stone_assert(false);
               }
               client.conn_stats.connecting_time = start_time;
             });
@@ -411,12 +411,12 @@ static seastar::future<> run(
         unsigned get_elapsed() const { return elapsed; }
 
         PeriodStats& get_snap_by_job(seastar::shard_id sid) {
-          ceph_assert(sid >= 1 && sid <= jobs);
+          stone_assert(sid >= 1 && sid <= jobs);
           return snaps[sid - 1];
         }
 
         ConnStats& get_summary_by_job(seastar::shard_id sid) {
-          ceph_assert(sid >= 1 && sid <= jobs);
+          stone_assert(sid >= 1 && sid <= jobs);
           return summaries[sid - 1];
         }
 
@@ -576,11 +576,11 @@ static seastar::future<> run(
 
      private:
       seastar::future<> send_msg(crimson::net::Connection* conn) {
-        ceph_assert(seastar::this_shard_id() == sid);
+        stone_assert(seastar::this_shard_id() == sid);
         return depth.wait(1).then([this, conn] {
           const static pg_t pgid;
           const static object_locator_t oloc;
-          const static hobject_t hobj(object_t(), oloc.key, CEPH_NOSNAP, pgid.ps(),
+          const static hobject_t hobj(object_t(), oloc.key, STONE_NOSNAP, pgid.ps(),
                                       pgid.pool(), oloc.nspace);
           static spg_t spgid(pgid);
           auto m = make_message<MOSDOp>(0, 0, hobj, spgid, 0, 0, 0);
@@ -592,7 +592,7 @@ static seastar::future<> run(
           // sample message latency
           if (sent_count % SAMPLE_RATE == 0) {
             auto index = sent_count % time_msgs_sent.size();
-            ceph_assert(time_msgs_sent[index] == mono_clock::zero());
+            stone_assert(time_msgs_sent[index] == mono_clock::zero());
             time_msgs_sent[index] = mono_clock::now();
           }
 
@@ -609,8 +609,8 @@ static seastar::future<> run(
       }
 
       void do_dispatch_messages(crimson::net::Connection* conn) {
-        ceph_assert(seastar::this_shard_id() == sid);
-        ceph_assert(sent_count == 0);
+        stone_assert(seastar::this_shard_id() == sid);
+        stone_assert(sent_count == 0);
         conn_stats.start_time = mono_clock::now();
         // forwarded to stopped_send_promise
         (void) seastar::do_until(
@@ -658,10 +658,10 @@ static seastar::future<> run(
     if (mode == perf_mode_t::both) {
       logger().info("\nperf settings:\n  {}\n  {}\n",
                     client_conf.str(), server_conf.str());
-      ceph_assert(seastar::smp::count >= 1+client_conf.jobs);
-      ceph_assert(client_conf.jobs > 0);
-      ceph_assert(seastar::smp::count >= 1+server_conf.core);
-      ceph_assert(server_conf.core == 0 || server_conf.core > client_conf.jobs);
+      stone_assert(seastar::smp::count >= 1+client_conf.jobs);
+      stone_assert(client_conf.jobs > 0);
+      stone_assert(seastar::smp::count >= 1+server_conf.core);
+      stone_assert(server_conf.core == 0 || server_conf.core > client_conf.jobs);
       return seastar::when_all_succeed(
         server->init(server_conf.v1_crc_enabled, server_conf.addr),
         client->init(client_conf.v1_crc_enabled)
@@ -677,8 +677,8 @@ static seastar::future<> run(
       });
     } else if (mode == perf_mode_t::client) {
       logger().info("\nperf settings:\n  {}\n", client_conf.str());
-      ceph_assert(seastar::smp::count >= 1+client_conf.jobs);
-      ceph_assert(client_conf.jobs > 0);
+      stone_assert(seastar::smp::count >= 1+client_conf.jobs);
+      stone_assert(client_conf.jobs > 0);
       return client->init(client_conf.v1_crc_enabled
       ).then([client, addr = client_conf.server_addr] {
         return client->connect_wait_verify(addr);
@@ -689,7 +689,7 @@ static seastar::future<> run(
         return client->shutdown();
       });
     } else { // mode == perf_mode_t::server
-      ceph_assert(seastar::smp::count >= 1+server_conf.core);
+      stone_assert(seastar::smp::count >= 1+server_conf.core);
       logger().info("\nperf settings:\n  {}\n", server_conf.str());
       return server->init(server_conf.v1_crc_enabled, server_conf.addr
       // dispatch ops
@@ -732,7 +732,7 @@ int main(int argc, char** argv)
   return app.run(argc, argv, [&app] {
       auto&& config = app.configuration();
       auto mode = config["mode"].as<unsigned>();
-      ceph_assert(mode <= 2);
+      stone_assert(mode <= 2);
       auto _mode = static_cast<perf_mode_t>(mode);
       auto server_conf = server_config::load(config);
       auto client_conf = client_config::load(config);

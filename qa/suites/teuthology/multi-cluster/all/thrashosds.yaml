@@ -12,7 +12,7 @@ roles:
   - backup.client.0
 tasks:
 - install:
-- ceph:
+- stone:
     cluster: backup
 - thrashosds:
     cluster: backup

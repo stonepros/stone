@@ -1,4 +1,4 @@
 overrides:
-  ceph:
-    cephfs:
+  stone:
+    stonefs:
       max_mds: 1

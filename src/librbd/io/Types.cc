@@ -21,7 +21,7 @@ std::ostream& operator<<(std::ostream& os, SparseExtentState state) {
     os << "data";
     break;
   default:
-    ceph_abort();
+    stone_abort();
     break;
   }
   return os;

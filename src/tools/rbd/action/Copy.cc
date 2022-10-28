@@ -41,7 +41,7 @@ void get_arguments(po::options_description *positional,
 }
 
 int execute(const po::variables_map &vm,
-            const std::vector<std::string> &ceph_global_init_args) {
+            const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -130,7 +130,7 @@ void get_arguments_deep(po::options_description *positional,
 }
 
 int execute_deep(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;

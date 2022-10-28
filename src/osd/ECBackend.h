@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -638,7 +638,7 @@ public:
     const coll_t &coll,
     ObjectStore::CollectionHandle &ch,
     ObjectStore *store,
-    CephContext *cct,
+    StoneeContext *cct,
     ceph::ErasureCodeInterfaceRef ec_impl,
     uint64_t stripe_width);
 

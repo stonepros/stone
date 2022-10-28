@@ -12,7 +12,7 @@
 #include "librbd/asio/ContextWQ.h"
 #include "librbd/journal/OpenRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::journal::PromoteRequest: " << this \
                            << " " << __func__ << ": "
@@ -26,7 +26,7 @@ using librbd::util::create_context_callback;
 template <typename I>
 PromoteRequest<I>::PromoteRequest(I *image_ctx, bool force, Context *on_finish)
   : m_image_ctx(image_ctx), m_force(force), m_on_finish(on_finish),
-    m_lock(ceph::make_mutex("PromoteRequest::m_lock")) {
+    m_lock(stone::make_mutex("PromoteRequest::m_lock")) {
 }
 
 template <typename I>
@@ -36,7 +36,7 @@ void PromoteRequest<I>::send() {
 
 template <typename I>
 void PromoteRequest<I>::send_open() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << dendl;
 
   m_journaler = new Journaler(m_image_ctx->md_ctx, m_image_ctx->id,
@@ -52,7 +52,7 @@ void PromoteRequest<I>::send_open() {
 
 template <typename I>
 void PromoteRequest<I>::handle_open(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -67,7 +67,7 @@ void PromoteRequest<I>::handle_open(int r) {
 
 template <typename I>
 void PromoteRequest<I>::allocate_tag() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << dendl;
 
   journal::TagPredecessor predecessor;
@@ -96,7 +96,7 @@ void PromoteRequest<I>::allocate_tag() {
 
 template <typename I>
 void PromoteRequest<I>::handle_allocate_tag(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -112,7 +112,7 @@ void PromoteRequest<I>::handle_allocate_tag(int r) {
 
 template <typename I>
 void PromoteRequest<I>::append_event() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << dendl;
 
   EventEntry event_entry{DemotePromoteEvent{}, {}};
@@ -129,7 +129,7 @@ void PromoteRequest<I>::append_event() {
 
 template <typename I>
 void PromoteRequest<I>::handle_append_event(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -145,7 +145,7 @@ void PromoteRequest<I>::handle_append_event(int r) {
 
 template <typename I>
 void PromoteRequest<I>::commit_event() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << dendl;
 
   m_journaler->committed(m_future);
@@ -157,7 +157,7 @@ void PromoteRequest<I>::commit_event() {
 
 template <typename I>
 void PromoteRequest<I>::handle_commit_event(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -171,7 +171,7 @@ void PromoteRequest<I>::handle_commit_event(int r) {
 
 template <typename I>
 void PromoteRequest<I>::stop_append() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << dendl;
 
   auto ctx = create_context_callback<
@@ -181,7 +181,7 @@ void PromoteRequest<I>::stop_append() {
 
 template <typename I>
 void PromoteRequest<I>::handle_stop_append(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -196,7 +196,7 @@ void PromoteRequest<I>::handle_stop_append(int r) {
 
 template <typename I>
 void PromoteRequest<I>::shut_down() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << dendl;
 
   Context *ctx = create_async_context_callback(
@@ -207,7 +207,7 @@ void PromoteRequest<I>::shut_down() {
 
 template <typename I>
 void PromoteRequest<I>::handle_shut_down(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -224,7 +224,7 @@ void PromoteRequest<I>::finish(int r) {
     r = m_ret_val;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

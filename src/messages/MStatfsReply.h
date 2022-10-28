@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,16 +13,16 @@
  */
 
 
-#ifndef CEPH_MSTATFSREPLY_H
-#define CEPH_MSTATFSREPLY_H
+#ifndef STONE_MSTATFSREPLY_H
+#define STONE_MSTATFSREPLY_H
 
 class MStatfsReply : public Message {
 public:
   struct ceph_mon_statfs_reply h{};
 
-  MStatfsReply() : Message{CEPH_MSG_STATFS_REPLY} {}
+  MStatfsReply() : Message{STONE_MSG_STATFS_REPLY} {}
   MStatfsReply(uuid_d &f, ceph_tid_t t, epoch_t epoch)
-    : Message{CEPH_MSG_STATFS_REPLY} {
+    : Message{STONE_MSG_STATFS_REPLY} {
     memcpy(&h.fsid, f.bytes(), sizeof(h.fsid));
     header.tid = t;
     h.version = epoch;

@@ -53,9 +53,9 @@ void LibRadosWatchNotify::watch_notify2_test_cb(void *arg,
 {
   std::cout << __func__ << " from " << notifier_gid << " notify_id " << notify_id
 	    << " cookie " << cookie << std::endl;
-  ceph_assert(notifier_gid > 0);
+  stone_assert(notifier_gid > 0);
   auto thiz = reinterpret_cast<LibRadosWatchNotify*>(arg);
-  ceph_assert(thiz);
+  stone_assert(thiz);
   thiz->notify_cookies.insert(cookie);
   thiz->notify_bl.clear();
   thiz->notify_bl.append((char*)data, data_len);
@@ -70,9 +70,9 @@ void LibRadosWatchNotify::watch_notify2_test_errcb(void *arg,
                                                    int err)
 {
   std::cout << __func__ << " cookie " << cookie << " err " << err << std::endl;
-  ceph_assert(cookie > 1000);
+  stone_assert(cookie > 1000);
   auto thiz = reinterpret_cast<LibRadosWatchNotify*>(arg);
-  ceph_assert(thiz);
+  stone_assert(thiz);
   thiz->notify_err = err;
 }
 

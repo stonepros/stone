@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 FUJITSU LIMITED
  *
@@ -27,7 +27,7 @@
 #include "global/global_init.h"
 #include "erasure-code/shec/ErasureCodeShec.h"
 #include "erasure-code/ErasureCodePlugin.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_context.h"
 #include "gtest/gtest.h"
 
@@ -372,10 +372,10 @@ int main(int argc, char **argv)
   vector<const char*> args;
   argv_to_vec(argc, (const char **) argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_MON_CONFIG);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   ::testing::InitGoogleTest(&argc, argv);
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -23,8 +23,8 @@
 // For ::mgr_store_prefix
 #include "PyModuleRegistry.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr " << __func__ << " "
 
@@ -88,7 +88,7 @@ void StandbyPyModules::start_one(PyModuleRef py_module)
     } else {
       std::lock_guard l(lock);
       auto em = modules.emplace(name, standby_module);
-      ceph_assert(em.second); // actually inserted
+      stone_assert(em.second); // actually inserted
 
       dout(4) << "Starting thread for " << name << dendl;
       standby_module->thread.create(standby_module->get_thread_name());
@@ -103,9 +103,9 @@ int StandbyPyModule::load()
   // We tell the module how we name it, so that it can be consistent
   // with us in logging etc.
   auto pThisPtr = PyCapsule_New(this, nullptr, nullptr);
-  ceph_assert(pThisPtr != nullptr);
+  stone_assert(pThisPtr != nullptr);
   auto pModuleName = PyUnicode_FromString(get_name().c_str());
-  ceph_assert(pModuleName != nullptr);
+  stone_assert(pModuleName != nullptr);
   auto pArgs = PyTuple_Pack(2, pModuleName, pThisPtr);
   Py_DECREF(pThisPtr);
   Py_DECREF(pModuleName);

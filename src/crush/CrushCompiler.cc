@@ -55,7 +55,7 @@ static void print_bucket_class_ids(ostream& out, int t, CrushWrapper &crush)
     int c = i.first;
     int cid = i.second;
     const char* class_name = crush.get_class_name(c);
-    ceph_assert(class_name);
+    stone_assert(class_name);
     out << "\tid " << cid << " class " << class_name << "\t\t# do not change unnecessarily\n";
   }
 }
@@ -171,7 +171,7 @@ int CrushCompiler::decompile_bucket(int cur,
     std::map<int, dcb_state_t>::value_type val(cur, DCB_STATE_IN_PROGRESS);
     std::pair <std::map<int, dcb_state_t>::iterator, bool> rval
       (dcb_states.insert(val));
-    ceph_assert(rval.second);
+    stone_assert(rval.second);
     c = rval.first;
   }
   else if (c->second == DCB_STATE_DONE) {
@@ -366,10 +366,10 @@ int CrushCompiler::decompile(ostream &out)
     }
 
     switch (crush.get_rule_mask_type(i)) {
-    case CEPH_PG_TYPE_REPLICATED:
+    case STONE_PG_TYPE_REPLICATED:
       out << "\ttype replicated\n";
       break;
-    case CEPH_PG_TYPE_ERASURE:
+    case STONE_PG_TYPE_ERASURE:
       out << "\ttype erasure\n";
       break;
     default:
@@ -652,7 +652,7 @@ int CrushCompiler::parse_bucket(iter_t const& i)
 	}
       }
     }
-    else ceph_abort();
+    else stone_abort();
   }
 
   // now do the items.
@@ -699,7 +699,7 @@ int CrushCompiler::parse_bucket(iter_t const& i)
 	else if (tag == "pos") 
 	  pos = int_node(sub->children[q]);
 	else
-	  ceph_abort();
+	  stone_abort();
 
       }
       if (alg == CRUSH_BUCKET_UNIFORM) {
@@ -751,7 +751,7 @@ int CrushCompiler::parse_bucket(iter_t const& i)
   item_id[name] = id;
   item_weight[id] = bucketweight;
   
-  ceph_assert(id != 0);
+  stone_assert(id != 0);
   int idout;
   int r = crush.add_bucket(id, alg, hash, type, size,
                            items.data(), weights.data(), &idout);
@@ -787,11 +787,11 @@ int CrushCompiler::parse_rule(iter_t const& i)
   string tname = string_node(i->children[start+2]);
   int type;
   if (tname == "replicated")
-    type = CEPH_PG_TYPE_REPLICATED;
+    type = STONE_PG_TYPE_REPLICATED;
   else if (tname == "erasure")
-    type = CEPH_PG_TYPE_ERASURE;
+    type = STONE_PG_TYPE_ERASURE;
   else 
-    ceph_abort();
+    stone_abort();
 
   int minsize = int_node(i->children[start+4]);
   int maxsize = int_node(i->children[start+6]);
@@ -915,14 +915,14 @@ int CrushCompiler::parse_rule(iter_t const& i)
 	    crush.set_rule_step_choose_firstn(ruleno, step++, int_node(s->children[2]), type_id[type]);
 	  else if (mode == "indep")
 	    crush.set_rule_step_choose_indep(ruleno, step++, int_node(s->children[2]), type_id[type]);
-	  else ceph_abort();
+	  else stone_abort();
 	} else if (choose == "chooseleaf") {
 	  if (mode == "firstn") 
 	    crush.set_rule_step_choose_leaf_firstn(ruleno, step++, int_node(s->children[2]), type_id[type]);
 	  else if (mode == "indep")
 	    crush.set_rule_step_choose_leaf_indep(ruleno, step++, int_node(s->children[2]), type_id[type]);
-	  else ceph_abort();
-	} else ceph_abort();
+	  else stone_abort();
+	} else stone_abort();
       }
       break;
 
@@ -935,7 +935,7 @@ int CrushCompiler::parse_rule(iter_t const& i)
       return -1;
     }
   }
-  ceph_assert(step == steps);
+  stone_assert(step == steps);
   return 0;
 }
 
@@ -1112,7 +1112,7 @@ int CrushCompiler::parse_crush(iter_t const& i)
       r = parse_choose_args(p);
       break;
     default:
-      ceph_abort();
+      stone_abort();
     }
     if (r < 0) {
       return r;
@@ -1265,7 +1265,7 @@ int CrushCompiler::compile(istream& in, const char *infn)
     int cpos = info.stop - start;
     //out << "cpos " << cpos << std::endl;
     //out << " linemap " << line_pos << std::endl;
-    ceph_assert(!line_pos.empty());
+    stone_assert(!line_pos.empty());
     map<int,int>::iterator p = line_pos.upper_bound(cpos);
     if (p != line_pos.begin())
       --p;

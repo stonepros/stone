@@ -1,5 +1,5 @@
-#ifndef CEPH_CRUSH_COMPAT_H
-#define CEPH_CRUSH_COMPAT_H
+#ifndef STONE_CRUSH_COMPAT_H
+#define STONE_CRUSH_COMPAT_H
 
 #include "include/int_types.h"
 
@@ -36,4 +36,4 @@
 #define kmalloc(size, flags) malloc(size)
 #define kfree(x) do { if (x) free(x); } while (0)
 
-#endif /* CEPH_CRUSH_COMPAT_H */
+#endif /* STONE_CRUSH_COMPAT_H */

@@ -16,8 +16,8 @@
 #include "services/svc_zone.h"
 #include "rgw_sal_rados.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 // command: PUT /topics/<topic-name>[&push-endpoint=<endpoint>[&<arg1>=<value1>]]
 class RGWPSCreateTopic_ObjStore : public RGWPSCreateTopicOp {
@@ -117,7 +117,7 @@ public:
   }
 };
 
-// ceph specifc topics handler factory
+// stone specifc topics handler factory
 class RGWHandler_REST_PSTopic : public RGWHandler_REST_S3 {
 protected:
   int init_permissions(RGWOp* op, optional_yield) override {
@@ -316,7 +316,7 @@ public:
 };
 
 namespace {
-// extract bucket name from ceph specific notification command, with the format:
+// extract bucket name from stone specific notification command, with the format:
 // /notifications/<bucket-name>
 int notif_bucket_path(const string& path, std::string& bucket_name) {
   if (path.empty()) {
@@ -340,7 +340,7 @@ int notif_bucket_path(const string& path, std::string& bucket_name) {
 }
 }
 
-// command (ceph specific): PUT /notification/bucket/<bucket name>?topic=<topic name>
+// command (stone specific): PUT /notification/bucket/<bucket name>?topic=<topic name>
 class RGWPSCreateNotif_ObjStore : public RGWPSCreateNotifOp {
 private:
   std::string topic_name;
@@ -459,7 +459,7 @@ void RGWPSListNotifs_ObjStore::execute(optional_yield y)
   }
 }
 
-// ceph specific notification handler factory
+// stone specific notification handler factory
 class RGWHandler_REST_PSNotifs : public RGWHandler_REST_S3 {
 protected:
   int init_permissions(RGWOp* op, optional_yield) override {
@@ -495,7 +495,7 @@ public:
   virtual ~RGWHandler_REST_PSNotifs() = default;
 };
 
-// factory for ceph specific PubSub REST handlers 
+// factory for stone specific PubSub REST handlers 
 RGWHandler_REST* RGWRESTMgr_PubSub::get_handler(rgw::sal::RGWRadosStore *store,
 						struct req_state* const s,
 						const rgw::auth::StrategyRegistry& auth_registry,
@@ -507,7 +507,7 @@ RGWHandler_REST* RGWRESTMgr_PubSub::get_handler(rgw::sal::RGWRadosStore *store,
  
   RGWHandler_REST* handler{nullptr};
 
-  // ceph specific PubSub API: topics/subscriptions/notification are reserved bucket names
+  // stone specific PubSub API: topics/subscriptions/notification are reserved bucket names
   // this API is available only on RGW that belong to a pubsub zone
   if (s->init_state.url_bucket == "topics") {
     handler = new RGWHandler_REST_PSTopic(auth_registry);

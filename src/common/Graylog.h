@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef __CEPH_LOG_GRAYLOG_H
-#define __CEPH_LOG_GRAYLOG_H
+#ifndef __STONE_LOG_GRAYLOG_H
+#define __STONE_LOG_GRAYLOG_H
 
 #include <boost/asio.hpp>
 #include <boost/iostreams/filtering_stream.hpp>

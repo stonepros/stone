@@ -18,7 +18,7 @@
 
 #include <boost/asio/yield.hpp>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 #define DEFAULT_MULTIPART_SYNC_PART_SIZE (32 * 1024 * 1024)
@@ -148,7 +148,7 @@ struct ACLMapping {
     dest_id = config["dest_id"];
   }
 
-  void dump_conf(CephContext *cct, JSONFormatter& jf) const {
+  void dump_conf(StoneContext *cct, JSONFormatter& jf) const {
     Formatter::ObjectSection os(jf, "acl_mapping");
     string s;
     switch (type) {
@@ -179,7 +179,7 @@ struct ACLMappings {
       acl_mappings.emplace(std::make_pair(m.source_id, m));
     }
   }
-  void dump_conf(CephContext *cct, JSONFormatter& jf) const {
+  void dump_conf(StoneContext *cct, JSONFormatter& jf) const {
     Formatter::ArraySection os(jf, "acls");
 
     for (auto& i : acl_mappings) {
@@ -201,7 +201,7 @@ struct AWSSyncConfig_ACLProfiles {
       acl_profiles[profile_id] = ap;
     }
   }
-  void dump_conf(CephContext *cct, JSONFormatter& jf) const {
+  void dump_conf(StoneContext *cct, JSONFormatter& jf) const {
     Formatter::ArraySection section(jf, "acl_profiles");
 
     for (auto& p : acl_profiles) {
@@ -247,7 +247,7 @@ struct AWSSyncConfig_Connection {
       host_style = VirtualStyle;
     }
   }
-  void dump_conf(CephContext *cct, JSONFormatter& jf) const {
+  void dump_conf(StoneContext *cct, JSONFormatter& jf) const {
     Formatter::ObjectSection section(jf, "connection");
     encode_json("id", connection_id, &jf);
     encode_json("endpoint", endpoint, &jf);
@@ -263,7 +263,7 @@ struct AWSSyncConfig_Connection {
   }
 };
 
-static int conf_to_uint64(CephContext *cct, const JSONFormattable& config, const string& key, uint64_t *pval)
+static int conf_to_uint64(StoneContext *cct, const JSONFormattable& config, const string& key, uint64_t *pval)
 {
   string sval;
   if (config.find(key, &sval)) {
@@ -282,7 +282,7 @@ struct AWSSyncConfig_S3 {
   uint64_t multipart_sync_threshold{DEFAULT_MULTIPART_SYNC_PART_SIZE};
   uint64_t multipart_min_part_size{DEFAULT_MULTIPART_SYNC_PART_SIZE};
 
-  int init(CephContext *cct, const JSONFormattable& config) {
+  int init(StoneContext *cct, const JSONFormattable& config) {
     int r = conf_to_uint64(cct, config, "multipart_sync_threshold", &multipart_sync_threshold);
     if (r < 0) {
       return r;
@@ -299,7 +299,7 @@ struct AWSSyncConfig_S3 {
     return 0;
   }
 
-  void dump_conf(CephContext *cct, JSONFormatter& jf) const {
+  void dump_conf(StoneContext *cct, JSONFormatter& jf) const {
     Formatter::ObjectSection section(jf, "s3");
     encode_json("multipart_sync_threshold", multipart_sync_threshold, &jf);
     encode_json("multipart_min_part_size", multipart_min_part_size, &jf);
@@ -342,7 +342,7 @@ struct AWSSyncConfig_Profile {
     }
   }
 
-  void dump_conf(CephContext *cct, JSONFormatter& jf, const char *section = "config") const {
+  void dump_conf(StoneContext *cct, JSONFormatter& jf, const char *section = "config") const {
     Formatter::ObjectSection config(jf, section);
     string sb{source_bucket};
     if (prefix) {
@@ -393,7 +393,7 @@ struct AWSSyncConfig {
 
   AWSSyncConfig_S3 s3;
 
-  int init_profile(CephContext *cct, const JSONFormattable& profile_conf, AWSSyncConfig_Profile& profile,
+  int init_profile(StoneContext *cct, const JSONFormattable& profile_conf, AWSSyncConfig_Profile& profile,
                    bool connection_must_exist) {
     if (!profile.connection_id.empty()) {
       if (profile.conn_conf) {
@@ -455,7 +455,7 @@ struct AWSSyncConfig {
     return 0;
   }
 
-  int init_target(CephContext *cct, const JSONFormattable& profile_conf, std::shared_ptr<AWSSyncConfig_Profile> *ptarget) {
+  int init_target(StoneContext *cct, const JSONFormattable& profile_conf, std::shared_ptr<AWSSyncConfig_Profile> *ptarget) {
     std::shared_ptr<AWSSyncConfig_Profile> profile;
     profile.reset(new AWSSyncConfig_Profile);
     profile->init(profile_conf);
@@ -512,7 +512,7 @@ struct AWSSyncConfig {
 
   AWSSyncConfig() {}
 
-  int init(CephContext *cct, const JSONFormattable& config) {
+  int init(StoneContext *cct, const JSONFormattable& config) {
     auto& default_conf = config["default"];
 
     if (config.exists("default")) {
@@ -581,7 +581,7 @@ struct AWSSyncConfig {
     }
   }
 
-  void dump_conf(CephContext *cct, JSONFormatter& jf) const {
+  void dump_conf(StoneContext *cct, JSONFormatter& jf) const {
     Formatter::ObjectSection config(jf, "config");
     root_profile->dump_conf(cct, jf);
     jf.open_array_section("connections");
@@ -680,11 +680,11 @@ struct AWSSyncInstanceEnv {
 
   void get_profile(const rgw_bucket& bucket, std::shared_ptr<AWSSyncConfig_Profile> *ptarget) {
     conf.find_profile(bucket, ptarget);
-    ceph_assert(ptarget);
+    stone_assert(ptarget);
   }
 };
 
-static int do_decode_rest_obj(CephContext *cct, map<string, bufferlist>& attrs, map<string, string>& headers, rgw_rest_obj *info)
+static int do_decode_rest_obj(StoneContext *cct, map<string, bufferlist>& attrs, map<string, string>& headers, rgw_rest_obj *info)
 {
   for (auto header : headers) {
     const string& val = header.second;
@@ -722,7 +722,7 @@ class RGWRESTStreamGetCRF : public RGWStreamReadHTTPResourceCRF
 
   rgw_sync_aws_src_obj_properties src_properties;
 public:
-  RGWRESTStreamGetCRF(CephContext *_cct,
+  RGWRESTStreamGetCRF(StoneContext *_cct,
                                RGWCoroutinesEnv *_env,
                                RGWCoroutine *_caller,
                                RGWDataSyncCtx *_sc,
@@ -799,7 +799,7 @@ class RGWAWSStreamPutCRF : public RGWStreamWriteHTTPResourceCRF
   rgw::sal::RGWObject* dest_obj;
   string etag;
 public:
-  RGWAWSStreamPutCRF(CephContext *_cct,
+  RGWAWSStreamPutCRF(StoneContext *_cct,
                                RGWCoroutinesEnv *_env,
                                RGWCoroutine *_caller,
                                RGWDataSyncCtx *_sc,
@@ -834,7 +834,7 @@ public:
             boost::algorithm::starts_with(h, "X_AMZ_"));
   }
 
-  static void init_send_attrs(CephContext *cct,
+  static void init_send_attrs(StoneContext *cct,
                               const rgw_rest_obj& rest_obj,
                               const rgw_sync_aws_src_obj_properties& src_properties,
                               const AWSSyncConfig_Profile *target,
@@ -1727,12 +1727,12 @@ class RGWAWSRemoveRemoteObjCBCR : public RGWCoroutine {
   std::shared_ptr<AWSSyncConfig_Profile> target;
   rgw_bucket_sync_pipe sync_pipe;
   rgw_obj_key key;
-  ceph::real_time mtime;
+  stone::real_time mtime;
   AWSSyncInstanceEnv& instance;
   int ret{0};
 public:
   RGWAWSRemoveRemoteObjCBCR(RGWDataSyncCtx *_sc,
-                          rgw_bucket_sync_pipe& _sync_pipe, rgw_obj_key& _key, const ceph::real_time& _mtime,
+                          rgw_bucket_sync_pipe& _sync_pipe, rgw_obj_key& _key, const stone::real_time& _mtime,
                           AWSSyncInstanceEnv& _instance) : RGWCoroutine(_sc->cct), sc(_sc),
                                                         sync_pipe(_sync_pipe), key(_key),
                                                         mtime(_mtime), instance(_instance) {}
@@ -1761,10 +1761,10 @@ public:
 
 
 class RGWAWSDataSyncModule: public RGWDataSyncModule {
-  CephContext *cct;
+  StoneContext *cct;
   AWSSyncInstanceEnv instance;
 public:
-  RGWAWSDataSyncModule(CephContext *_cct, AWSSyncConfig& _conf) :
+  RGWAWSDataSyncModule(StoneContext *_cct, AWSSyncConfig& _conf) :
                   cct(_cct),
                   instance(_conf) {
   }
@@ -1798,13 +1798,13 @@ public:
 class RGWAWSSyncModuleInstance : public RGWSyncModuleInstance {
   RGWAWSDataSyncModule data_handler;
 public:
-  RGWAWSSyncModuleInstance(CephContext *cct, AWSSyncConfig& _conf) : data_handler(cct, _conf) {}
+  RGWAWSSyncModuleInstance(StoneContext *cct, AWSSyncConfig& _conf) : data_handler(cct, _conf) {}
   RGWDataSyncModule *get_data_handler() override {
     return &data_handler;
   }
 };
 
-int RGWAWSSyncModule::create_instance(CephContext *cct, const JSONFormattable& config,  RGWSyncModuleInstanceRef *instance){
+int RGWAWSSyncModule::create_instance(StoneContext *cct, const JSONFormattable& config,  RGWSyncModuleInstanceRef *instance){
   AWSSyncConfig conf;
 
   int r = conf.init(cct, config);

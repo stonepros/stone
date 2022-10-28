@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc
  *
@@ -36,9 +36,9 @@
 #include "services/svc_meta.h"
 
 #include <boost/asio/yield.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #undef dout_prefix
 #define dout_prefix (*_dout << "trim: ")
@@ -121,14 +121,14 @@ std::ostream& operator<<(std::ostream& out, const TrimCounters::BucketCounter& r
 
 void TrimCounters::BucketCounter::encode(bufferlist& bl) const
 {
-  using ceph::encode;
+  using stone::encode;
   // no versioning to save space
   encode(bucket, bl);
   encode(count, bl);
 }
 void TrimCounters::BucketCounter::decode(bufferlist::const_iterator& p)
 {
-  using ceph::decode;
+  using stone::decode;
   decode(bucket, p);
   decode(count, p);
 }
@@ -353,7 +353,7 @@ struct BucketTrimObserver {
 
 /// populate the status with the minimum stable marker of each shard
 template <typename Iter>
-int take_min_status(CephContext *cct, Iter first, Iter last,
+int take_min_status(StoneContext *cct, Iter first, Iter last,
                     std::vector<std::string> *status)
 {
   for (auto peer = first; peer != last; ++peer) {
@@ -633,7 +633,7 @@ using MetadataListCallback = std::function<bool(std::string&&, std::string&&)>;
 /// on reaching the end, it will restart at the beginning and list up to the
 /// initial marker
 class AsyncMetadataList : public RGWAsyncRadosRequest {
-  CephContext *const cct;
+  StoneContext *const cct;
   RGWMetadataManager *const mgr;
   const std::string section;
   const std::string start_marker;
@@ -641,7 +641,7 @@ class AsyncMetadataList : public RGWAsyncRadosRequest {
 
   int _send_request(const DoutPrefixProvider *dpp) override;
  public:
-  AsyncMetadataList(CephContext *cct, RGWCoroutine *caller,
+  AsyncMetadataList(StoneContext *cct, RGWCoroutine *caller,
                     RGWAioCompletionNotifier *cn, RGWMetadataManager *mgr,
                     const std::string& section, const std::string& start_marker,
                     const MetadataListCallback& callback)
@@ -682,7 +682,7 @@ int AsyncMetadataList::_send_request(const DoutPrefixProvider *dpp)
       marker = mgr->get_marker(handle);
 
       if (!keys.empty()) {
-        ceph_assert(keys.size() == 1);
+        stone_assert(keys.size() == 1);
         auto& key = keys.front();
         if (!callback(std::move(key), std::move(marker))) {
           return 0;
@@ -720,7 +720,7 @@ int AsyncMetadataList::_send_request(const DoutPrefixProvider *dpp)
     marker = mgr->get_marker(handle);
 
     if (!keys.empty()) {
-      ceph_assert(keys.size() == 1);
+      stone_assert(keys.size() == 1);
       auto& key = keys.front();
       // stop at original marker
       if (marker > start_marker) {
@@ -744,7 +744,7 @@ class MetadataListCR : public RGWSimpleCoroutine {
   MetadataListCallback callback;
   RGWAsyncRadosRequest *req{nullptr};
  public:
-  MetadataListCR(CephContext *cct, RGWAsyncRadosProcessor *async_rados,
+  MetadataListCR(StoneContext *cct, RGWAsyncRadosProcessor *async_rados,
                  RGWMetadataManager *mgr, const std::string& section,
                  const std::string& start_marker,
                  const MetadataListCallback& callback)
@@ -778,7 +778,7 @@ class BucketTrimCR : public RGWCoroutine {
   const BucketTrimConfig& config;
   BucketTrimObserver *const observer;
   const rgw_raw_obj& obj;
-  ceph::mono_time start_time;
+  stone::mono_time start_time;
   bufferlist notify_replies;
   BucketChangeCounter counter;
   std::vector<std::string> buckets; //< buckets selected for trim
@@ -804,7 +804,7 @@ const std::string BucketTrimCR::section{"bucket.instance"};
 int BucketTrimCR::operate(const DoutPrefixProvider *dpp)
 {
   reenter(this) {
-    start_time = ceph::mono_clock::now();
+    start_time = stone::mono_clock::now();
 
     if (config.buckets_per_interval) {
       // query watch/notify for hot buckets
@@ -930,7 +930,7 @@ int BucketTrimCR::operate(const DoutPrefixProvider *dpp)
     }
 
     ldpp_dout(dpp, 4) << "bucket index log processing completed in "
-        << ceph::mono_clock::now() - start_time << dendl;
+        << stone::mono_clock::now() - start_time << dendl;
     return set_cr_done();
   }
   return 0;
@@ -992,20 +992,20 @@ int BucketTrimPollCR::operate(const DoutPrefixProvider *dpp)
 /// tracks a bounded list of events with timestamps. old events can be expired,
 /// and recent events can be searched by key. expiration depends on events being
 /// inserted in temporal order
-template <typename T, typename Clock = ceph::coarse_mono_clock>
+template <typename T, typename Clock = stone::coarse_mono_clock>
 class RecentEventList {
  public:
   using clock_type = Clock;
   using time_point = typename clock_type::time_point;
 
-  RecentEventList(size_t max_size, const ceph::timespan& max_duration)
+  RecentEventList(size_t max_size, const stone::timespan& max_duration)
     : events(max_size), max_duration(max_duration)
   {}
 
   /// insert an event at the given point in time. this time must be at least as
   /// recent as the last inserted event
   void insert(T&& value, const time_point& now) {
-    // ceph_assert(events.empty() || now >= events.back().time)
+    // stone_assert(events.empty() || now >= events.back().time)
     events.push_back(Event{std::move(value), now});
   }
 
@@ -1035,13 +1035,13 @@ class RecentEventList {
     time_point time;
   };
   boost::circular_buffer<Event> events;
-  const ceph::timespan max_duration;
+  const stone::timespan max_duration;
 };
 
 namespace rgw {
 
-// read bucket trim configuration from ceph context
-void configure_bucket_trim(CephContext *cct, BucketTrimConfig& config)
+// read bucket trim configuration from stone context
+void configure_bucket_trim(StoneContext *cct, BucketTrimConfig& config)
 {
   const auto& conf = cct->_conf;
 
@@ -1154,7 +1154,7 @@ RGWCoroutine* BucketTrimManager::create_admin_bucket_trim_cr(RGWHTTPManager *htt
                           impl.get(), impl->status_obj, this);
 }
 
-CephContext* BucketTrimManager::get_cct() const
+StoneContext* BucketTrimManager::get_cct() const
 {
   return impl->store->ctx();
 }

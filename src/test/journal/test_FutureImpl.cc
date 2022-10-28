@@ -10,7 +10,7 @@ class TestFutureImpl : public RadosTestFixture {
 public:
   struct FlushHandler : public journal::FutureImpl::FlushHandler {
     uint64_t flushes = 0;
-    void flush(const ceph::ref_t<journal::FutureImpl>& future) override {
+    void flush(const stone::ref_t<journal::FutureImpl>& future) override {
       ++flushes;
     }
     FlushHandler() = default;
@@ -22,13 +22,13 @@ public:
 
   auto create_future(uint64_t tag_tid, uint64_t entry_tid,
                      uint64_t commit_tid,
-                     ceph::ref_t<journal::FutureImpl> prev = nullptr) {
-    auto future = ceph::make_ref<journal::FutureImpl>(tag_tid, entry_tid, commit_tid);
+                     stone::ref_t<journal::FutureImpl> prev = nullptr) {
+    auto future = stone::make_ref<journal::FutureImpl>(tag_tid, entry_tid, commit_tid);
     future->init(prev);
     return future;
   }
 
-  void flush(const ceph::ref_t<journal::FutureImpl>& future) {
+  void flush(const stone::ref_t<journal::FutureImpl>& future) {
   }
 
   std::shared_ptr<FlushHandler> m_flush_handler;

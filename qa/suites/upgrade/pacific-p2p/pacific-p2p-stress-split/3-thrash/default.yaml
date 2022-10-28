@@ -3,13 +3,13 @@ meta:
    randomly kill and revive osd
    small chance to increase the number of pgs
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
     - but it is still running
     - wrongly marked me down
     - objects unfound and apparently lost
     - log bound mismatch
-    ### ref: https://tracker.ceph.com/issues/40251
+    ### ref: https://tracker.stone.com/issues/40251
     - failed to encode map
 tasks:
 - parallel:

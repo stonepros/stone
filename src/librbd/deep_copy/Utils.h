@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_DEEP_COPY_UTILS_H
-#define CEPH_LIBRBD_DEEP_COPY_UTILS_H
+#ifndef STONE_LIBRBD_DEEP_COPY_UTILS_H
+#define STONE_LIBRBD_DEEP_COPY_UTILS_H
 
 #include "include/common_fwd.h"
 #include "include/rados/librados.hpp"
@@ -15,7 +15,7 @@ namespace librbd {
 namespace deep_copy {
 namespace util {
 
-void compute_snap_map(CephContext* cct,
+void compute_snap_map(StoneContext* cct,
                       librados::snap_t src_snap_id_start,
                       librados::snap_t src_snap_id_end,
                       const SnapIds& dst_snap_ids,
@@ -26,4 +26,4 @@ void compute_snap_map(CephContext* cct,
 } // namespace deep_copy
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_DEEP_COPY_UTILS_H
+#endif // STONE_LIBRBD_DEEP_COPY_UTILS_H

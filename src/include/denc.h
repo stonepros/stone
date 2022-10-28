@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 Allen Samuels <allen.samuels@sandisk.com>
  *
@@ -1702,7 +1702,7 @@ inline std::enable_if_t<traits::supported && !traits::need_contiguous> decode(
   const auto& bl = p.get_bl();
   const auto remaining = bl.length() - p.get_off();
   // it is expensive to rebuild a contigous buffer and drop it, so avoid this.
-  if (!p.is_pointing_same_raw(bl.back()) && remaining > CEPH_PAGE_SIZE) {
+  if (!p.is_pointing_same_raw(bl.back()) && remaining > STONE_PAGE_SIZE) {
     traits::decode(o, p);
   } else {
     // ensure we get a contigous buffer... until the end of the

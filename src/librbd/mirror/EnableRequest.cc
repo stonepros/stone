@@ -11,7 +11,7 @@
 #include "librbd/mirror/ImageStateUpdateRequest.h"
 #include "librbd/mirror/snapshot/CreatePrimaryRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::EnableRequest: " \
                            << this << " " << __func__ << ": "
@@ -35,7 +35,7 @@ EnableRequest<I>::EnableRequest(librados::IoCtx &io_ctx,
     m_mode(mode), m_non_primary_global_image_id(non_primary_global_image_id),
     m_image_clean(image_clean), m_op_work_queue(op_work_queue),
     m_on_finish(on_finish),
-    m_cct(reinterpret_cast<CephContext*>(io_ctx.cct())) {
+    m_cct(reinterpret_cast<StoneContext*>(io_ctx.cct())) {
 }
 
 template <typename I>
@@ -55,7 +55,7 @@ void EnableRequest<I>::get_mirror_image() {
     create_rados_callback<klass, &klass::handle_get_mirror_image>(this);
   m_out_bl.clear();
   int r = m_io_ctx.aio_operate(RBD_MIRRORING, comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -159,7 +159,7 @@ void EnableRequest<I>::open_image() {
   ldout(m_cct, 10) << dendl;
 
   m_close_image = true;
-  m_image_ctx = I::create("", m_image_id, CEPH_NOSNAP, m_io_ctx, false);
+  m_image_ctx = I::create("", m_image_id, STONE_NOSNAP, m_io_ctx, false);
 
   auto ctx = create_context_callback<
     EnableRequest<I>, &EnableRequest<I>::handle_open_image>(this);
@@ -185,18 +185,18 @@ template <typename I>
 void EnableRequest<I>::create_primary_snapshot() {
   ldout(m_cct, 10) << dendl;
 
-  ceph_assert(m_image_ctx != nullptr);
+  stone_assert(m_image_ctx != nullptr);
   uint64_t snap_create_flags;
   int r = util::snap_create_flags_api_to_internal(
       m_cct, util::get_default_snap_create_flags(m_image_ctx),
       &snap_create_flags);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   auto ctx = create_context_callback<
     EnableRequest<I>,
     &EnableRequest<I>::handle_create_primary_snapshot>(this);
   auto req = snapshot::CreatePrimaryRequest<I>::create(
     m_image_ctx, m_mirror_image.global_image_id,
-    (m_image_clean ? 0 : CEPH_NOSNAP), snap_create_flags,
+    (m_image_clean ? 0 : STONE_NOSNAP), snap_create_flags,
     snapshot::CREATE_PRIMARY_FLAG_IGNORE_EMPTY_PEERS, &m_snap_id, ctx);
   req->send();
 }
@@ -273,7 +273,7 @@ void EnableRequest<I>::enable_non_primary_feature() {
     EnableRequest<I>,
     &EnableRequest<I>::handle_enable_non_primary_feature>(this);
   int r = m_io_ctx.aio_operate(util::header_name(m_image_id), aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

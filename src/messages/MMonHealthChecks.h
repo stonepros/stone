@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MMON_HEALTH_CHECKS_H
-#define CEPH_MMON_HEALTH_CHECKS_H
+#ifndef STONE_MMON_HEALTH_CHECKS_H
+#define STONE_MMON_HEALTH_CHECKS_H
 
 #include "messages/PaxosServiceMessage.h"
 #include "mon/health_check.h"

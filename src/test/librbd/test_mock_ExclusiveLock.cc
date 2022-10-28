@@ -48,7 +48,7 @@ struct ManagedLock<MockExclusiveLockImageCtx> {
 
   virtual ~ManagedLock() = default;
 
-  mutable ceph::mutex m_lock = ceph::make_mutex("ManagedLock::m_lock");
+  mutable stone::mutex m_lock = stone::make_mutex("ManagedLock::m_lock");
 
   virtual void shutdown_handler(int r, Context *) = 0;
   virtual void pre_acquire_lock_handler(Context *) = 0;
@@ -95,7 +95,7 @@ struct BaseRequest {
 
   static T* create(MockExclusiveLockImageCtx &image_ctx,
                    Context *on_lock_unlock, Context *on_finish) {
-    ceph_assert(!s_requests.empty());
+    stone_assert(!s_requests.empty());
     T* req = s_requests.front();
     req->on_lock_unlock = on_lock_unlock;
     req->on_finish = on_finish;
@@ -116,7 +116,7 @@ struct ImageDispatch<MockExclusiveLockImageCtx>
   : public librbd::io::MockImageDispatch {
   static ImageDispatch* s_instance;
   static ImageDispatch* create(MockExclusiveLockImageCtx*) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -18,8 +18,8 @@
 #include "PyFormatter.h"
 
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 
 typedef struct {
   PyObject_HEAD
@@ -50,23 +50,23 @@ BaseMgrStandbyModule_init(BaseMgrStandbyModule *self, PyObject *args, PyObject *
 
     self->this_module = static_cast<StandbyPyModule*>(PyCapsule_GetPointer(
         this_module_capsule, nullptr));
-    ceph_assert(self->this_module);
+    stone_assert(self->this_module);
 
     return 0;
 }
 
 static PyObject*
-ceph_get_mgr_id(BaseMgrStandbyModule *self, PyObject *args)
+stone_get_mgr_id(BaseMgrStandbyModule *self, PyObject *args)
 {
   return PyUnicode_FromString(g_conf()->name.get_id().c_str());
 }
 
 static PyObject*
-ceph_get_module_option(BaseMgrStandbyModule *self, PyObject *args)
+stone_get_module_option(BaseMgrStandbyModule *self, PyObject *args)
 {
   char *what = nullptr;
   char *prefix = nullptr;
-  if (!PyArg_ParseTuple(args, "s|s:ceph_get_module_option", &what, &prefix)) {
+  if (!PyArg_ParseTuple(args, "s|s:stone_get_module_option", &what, &prefix)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -99,10 +99,10 @@ ceph_get_module_option(BaseMgrStandbyModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_option_get(BaseMgrStandbyModule *self, PyObject *args)
+stone_option_get(BaseMgrStandbyModule *self, PyObject *args)
 {
   char *what = nullptr;
-  if (!PyArg_ParseTuple(args, "s:ceph_option_get", &what)) {
+  if (!PyArg_ParseTuple(args, "s:stone_option_get", &what)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -110,19 +110,19 @@ ceph_option_get(BaseMgrStandbyModule *self, PyObject *args)
   std::string value;
   int r = g_conf().get_val(string(what), &value);
   if (r >= 0) {
-    dout(10) << "ceph_option_get " << what << " found: " << value << dendl;
+    dout(10) << "stone_option_get " << what << " found: " << value << dendl;
     return PyUnicode_FromString(value.c_str());
   } else {
-    dout(4) << "ceph_option_get " << what << " not found " << dendl;
+    dout(4) << "stone_option_get " << what << " not found " << dendl;
     Py_RETURN_NONE;
   }
 }
 
 static PyObject*
-ceph_store_get(BaseMgrStandbyModule *self, PyObject *args)
+stone_store_get(BaseMgrStandbyModule *self, PyObject *args)
 {
   char *what = nullptr;
-  if (!PyArg_ParseTuple(args, "s:ceph_store_get", &what)) {
+  if (!PyArg_ParseTuple(args, "s:stone_store_get", &what)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -136,29 +136,29 @@ ceph_store_get(BaseMgrStandbyModule *self, PyObject *args)
   PyEval_RestoreThread(tstate);
 
   if (found) {
-    dout(10) << "ceph_store_get " << what << " found: " << value.c_str() << dendl;
+    dout(10) << "stone_store_get " << what << " found: " << value.c_str() << dendl;
     return PyUnicode_FromString(value.c_str());
   } else {
-    dout(4) << "ceph_store_get " << what << " not found " << dendl;
+    dout(4) << "stone_store_get " << what << " not found " << dendl;
     Py_RETURN_NONE;
   }
 }
 
 static PyObject*
-ceph_get_active_uri(BaseMgrStandbyModule *self, PyObject *args)
+stone_get_active_uri(BaseMgrStandbyModule *self, PyObject *args)
 {
   return PyUnicode_FromString(self->this_module->get_active_uri().c_str());
 }
 
 static PyObject*
-ceph_log(BaseMgrStandbyModule *self, PyObject *args)
+stone_log(BaseMgrStandbyModule *self, PyObject *args)
 {
   char *record = nullptr;
   if (!PyArg_ParseTuple(args, "s:log", &record)) {
     return nullptr;
   }
 
-  ceph_assert(self->this_module);
+  stone_assert(self->this_module);
 
   self->this_module->log(record);
 
@@ -166,10 +166,10 @@ ceph_log(BaseMgrStandbyModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_standby_state_get(BaseMgrStandbyModule *self, PyObject *args)
+stone_standby_state_get(BaseMgrStandbyModule *self, PyObject *args)
 {
   char *whatc = NULL;
-  if (!PyArg_ParseTuple(args, "s:ceph_state_get", &whatc)) {
+  if (!PyArg_ParseTuple(args, "s:stone_state_get", &whatc)) {
     return NULL;
   }
   std::string what(whatc);
@@ -203,25 +203,25 @@ ceph_standby_state_get(BaseMgrStandbyModule *self, PyObject *args)
 
 
 PyMethodDef BaseMgrStandbyModule_methods[] = {
-  {"_ceph_get", (PyCFunction)ceph_standby_state_get, METH_VARARGS,
+  {"_stone_get", (PyCFunction)stone_standby_state_get, METH_VARARGS,
    "Get a cluster object (standby)"},
 
-  {"_ceph_get_mgr_id", (PyCFunction)ceph_get_mgr_id, METH_NOARGS,
+  {"_stone_get_mgr_id", (PyCFunction)stone_get_mgr_id, METH_NOARGS,
    "Get the name of the Mgr daemon where we are running"},
 
-  {"_ceph_get_module_option", (PyCFunction)ceph_get_module_option, METH_VARARGS,
+  {"_stone_get_module_option", (PyCFunction)stone_get_module_option, METH_VARARGS,
    "Get a module configuration option value"},
 
-  {"_ceph_get_option", (PyCFunction)ceph_option_get, METH_VARARGS,
+  {"_stone_get_option", (PyCFunction)stone_option_get, METH_VARARGS,
    "Get a native configuration option value"},
 
-  {"_ceph_get_store", (PyCFunction)ceph_store_get, METH_VARARGS,
+  {"_stone_get_store", (PyCFunction)stone_store_get, METH_VARARGS,
    "Get a KV store value"},
 
-  {"_ceph_get_active_uri", (PyCFunction)ceph_get_active_uri, METH_NOARGS,
+  {"_stone_get_active_uri", (PyCFunction)stone_get_active_uri, METH_NOARGS,
    "Get the URI of the active instance of this module, if any"},
 
-  {"_ceph_log", (PyCFunction)ceph_log, METH_VARARGS,
+  {"_stone_log", (PyCFunction)stone_log, METH_VARARGS,
    "Emit a log message"},
 
   {NULL, NULL, 0, NULL}
@@ -229,7 +229,7 @@ PyMethodDef BaseMgrStandbyModule_methods[] = {
 
 PyTypeObject BaseMgrStandbyModuleType = {
   PyVarObject_HEAD_INIT(NULL, 0)
-  "ceph_module.BaseMgrStandbyModule", /* tp_name */
+  "stone_module.BaseMgrStandbyModule", /* tp_name */
   sizeof(BaseMgrStandbyModule),     /* tp_basicsize */
   0,                         /* tp_itemsize */
   0,                         /* tp_dealloc */
@@ -248,7 +248,7 @@ PyTypeObject BaseMgrStandbyModuleType = {
   0,                         /* tp_setattro */
   0,                         /* tp_as_buffer */
   Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,        /* tp_flags */
-  "ceph-mgr Standby Python Plugin", /* tp_doc */
+  "stone-mgr Standby Python Plugin", /* tp_doc */
   0,                         /* tp_traverse */
   0,                         /* tp_clear */
   0,                         /* tp_richcompare */

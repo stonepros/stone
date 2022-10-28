@@ -1,7 +1,7 @@
 
 tasks:
   - install:
-  - ceph:
+  - stone:
       # tests may leave mgrs broken, so don't try and call into them
       # to invoke e.g. pg dump during teardown.
       wait-for-scrub: false
@@ -29,13 +29,13 @@ tasks:
         - evicting unresponsive client .+
         - MON_DOWN
   - rgw: [client.0]
-  - cephfs_test_runner:
+  - stonefs_test_runner:
       fail_on_skip: false
       modules:
         - tasks.mgr.test_dashboard
         - tasks.mgr.dashboard.test_api
         - tasks.mgr.dashboard.test_auth
-        - tasks.mgr.dashboard.test_cephfs
+        - tasks.mgr.dashboard.test_stonefs
         - tasks.mgr.dashboard.test_cluster
         - tasks.mgr.dashboard.test_cluster_configuration
         - tasks.mgr.dashboard.test_crush_rule

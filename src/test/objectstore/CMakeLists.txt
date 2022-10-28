@@ -1,49 +1,49 @@
-add_executable(ceph_perf_objectstore 
+add_executable(stone_perf_objectstore 
   ObjectStoreTransactionBenchmark.cc)
-target_link_libraries(ceph_perf_objectstore os osdc global ${UNITTEST_LIBS})
-install(TARGETS ceph_perf_objectstore
+target_link_libraries(stone_perf_objectstore os osdc global ${UNITTEST_LIBS})
+install(TARGETS stone_perf_objectstore
   DESTINATION bin)
 
 add_library(store_test_fixture OBJECT store_test_fixture.cc)
 target_include_directories(store_test_fixture PRIVATE
   $<TARGET_PROPERTY:GTest::GTest,INTERFACE_INCLUDE_DIRECTORIES>)
 
-add_executable(ceph_test_objectstore
+add_executable(stone_test_objectstore
   store_test.cc
   $<TARGET_OBJECTS:store_test_fixture>)
-target_link_libraries(ceph_test_objectstore
+target_link_libraries(stone_test_objectstore
   os
-  ceph-common
+  stone-common
   ${UNITTEST_LIBS}
   global
   ${EXTRALIBS}
   ${BLKID_LIBRARIES}
   ${CMAKE_DL_LIBS}
   )
-install(TARGETS ceph_test_objectstore
+install(TARGETS stone_test_objectstore
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-add_executable(ceph_test_keyvaluedb
+add_executable(stone_test_keyvaluedb
   test_kv.cc)
-target_link_libraries(ceph_test_keyvaluedb
+target_link_libraries(stone_test_keyvaluedb
   os
-  ceph-common
+  stone-common
   ${UNITTEST_LIBS}
   global
   ${EXTRALIBS}
   ${BLKID_LIBRARIES}
   ${CMAKE_DL_LIBS}
   )
-install(TARGETS ceph_test_keyvaluedb
+install(TARGETS stone_test_keyvaluedb
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-# ceph_test_filestore_idempotent
-add_executable(ceph_test_filestore_idempotent
+# stone_test_filestore_idempotent
+add_executable(stone_test_filestore_idempotent
   test_idempotent.cc
   FileStoreTracker.cc
   ${CMAKE_SOURCE_DIR}/src/test/common/ObjectContents.cc
   )
-target_link_libraries(ceph_test_filestore_idempotent
+target_link_libraries(stone_test_filestore_idempotent
   os
   global
   ${EXTRALIBS}
@@ -51,28 +51,28 @@ target_link_libraries(ceph_test_filestore_idempotent
   ${CMAKE_DL_LIBS}
   )
 
-# ceph_test_filestore_idempotent_sequence
-add_executable(ceph_test_filestore_idempotent_sequence
+# stone_test_filestore_idempotent_sequence
+add_executable(stone_test_filestore_idempotent_sequence
   test_idempotent_sequence.cc
   DeterministicOpSequence.cc
   TestObjectStoreState.cc
   FileStoreDiff.cc
   )
-target_link_libraries(ceph_test_filestore_idempotent_sequence
+target_link_libraries(stone_test_filestore_idempotent_sequence
   os
   global
   ${EXTRALIBS}
   ${BLKID_LIBRARIES}
   ${CMAKE_DL_LIBS}
   )
-install(TARGETS ceph_test_filestore_idempotent_sequence
+install(TARGETS stone_test_filestore_idempotent_sequence
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # unittest_chain_xattr
 add_executable(unittest_chain_xattr
   chain_xattr.cc
   )
-add_ceph_unittest(unittest_chain_xattr)
+add_stone_unittest(unittest_chain_xattr)
 target_link_libraries(unittest_chain_xattr os global)
 
 # unittest_rocksdb_option
@@ -80,7 +80,7 @@ add_executable(unittest_rocksdb_option
   TestRocksdbOptionParse.cc
   $<TARGET_OBJECTS:unit-main>
   )
-add_ceph_unittest(unittest_rocksdb_option)
+add_stone_unittest(unittest_rocksdb_option)
 target_link_libraries(unittest_rocksdb_option global os ${BLKID_LIBRARIES})
 
 if(WITH_EVENTTRACE)
@@ -93,7 +93,7 @@ if(WITH_BLUESTORE)
     Allocator_test.cc
     $<TARGET_OBJECTS:unit-main>
     )
-  add_ceph_unittest(unittest_alloc)
+  add_stone_unittest(unittest_alloc)
   target_link_libraries(unittest_alloc os global)
 
   add_executable(unittest_alloc_bench
@@ -106,7 +106,7 @@ if(WITH_BLUESTORE)
     fastbmap_allocator_test.cc
     $<TARGET_OBJECTS:unit-main>
     )
-  add_ceph_unittest(unittest_fastbmap_allocator)
+  add_stone_unittest(unittest_fastbmap_allocator)
   target_link_libraries(unittest_fastbmap_allocator os global)
 
   set_target_properties(unittest_fastbmap_allocator PROPERTIES COMPILE_FLAGS
@@ -116,7 +116,7 @@ if(WITH_BLUESTORE)
     hybrid_allocator_test.cc
     $<TARGET_OBJECTS:unit-main>
     )
-  add_ceph_unittest(unittest_hybrid_allocator)
+  add_stone_unittest(unittest_hybrid_allocator)
   target_link_libraries(unittest_hybrid_allocator os global)
 
   set_target_properties(unittest_hybrid_allocator PROPERTIES COMPILE_FLAGS
@@ -130,21 +130,21 @@ if(WITH_BLUESTORE)
   add_executable(unittest_bluefs
     test_bluefs.cc
     )
-  add_ceph_unittest(unittest_bluefs)
+  add_stone_unittest(unittest_bluefs)
   target_link_libraries(unittest_bluefs os global)
 
   # unittest_bluestore_types
   add_executable(unittest_bluestore_types
     test_bluestore_types.cc
     )
-  add_ceph_unittest(unittest_bluestore_types)
+  add_stone_unittest(unittest_bluestore_types)
   target_link_libraries(unittest_bluestore_types os global)
 
   # unittest_bdev
   add_executable(unittest_bdev
     test_bdev.cc
     )
-  add_ceph_unittest(unittest_bdev)
+  add_stone_unittest(unittest_bdev)
   target_link_libraries(unittest_bdev os global)
 
 endif(WITH_BLUESTORE)
@@ -152,20 +152,20 @@ endif(WITH_BLUESTORE)
 # unittest_transaction
 add_executable(unittest_transaction
   test_transaction.cc)
-add_ceph_unittest(unittest_transaction)
-target_link_libraries(unittest_transaction os ceph-common)
+add_stone_unittest(unittest_transaction)
+target_link_libraries(unittest_transaction os stone-common)
 
 # unittest_memstore_clone
 add_executable(unittest_memstore_clone
   test_memstore_clone.cc
   $<TARGET_OBJECTS:store_test_fixture>)
-add_ceph_unittest(unittest_memstore_clone)
+add_stone_unittest(unittest_memstore_clone)
 target_link_libraries(unittest_memstore_clone os global)
 
 if(WITH_BLUESTORE)
-  add_executable(ceph_test_alloc_replay
+  add_executable(stone_test_alloc_replay
     allocator_replay_test.cc)
-  target_link_libraries(ceph_test_alloc_replay os global ${UNITTEST_LIBS})
-  install(TARGETS ceph_test_alloc_replay
+  target_link_libraries(stone_test_alloc_replay os global ${UNITTEST_LIBS})
+  install(TARGETS stone_test_alloc_replay
     DESTINATION bin)
 endif()

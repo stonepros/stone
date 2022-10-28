@@ -6,8 +6,8 @@ tasks:
     clients:
       cluster1.client.mirror: [rbd/rbd_mirror_fsx_prepare.sh]
     env:
-      # override workunit setting of CEPH_ARGS='--cluster'
-      CEPH_ARGS: ''
+      # override workunit setting of STONE_ARGS='--cluster'
+      STONE_ARGS: ''
       RBD_MIRROR_NOCLEANUP: '1'
       RBD_MIRROR_USE_EXISTING_CLUSTER: '1'
       RBD_MIRROR_USE_RBD_MIRROR: '1'
@@ -26,8 +26,8 @@ tasks:
     clients:
       cluster1.client.mirror: [rbd/rbd_mirror_fsx_compare.sh]
     env:
-      # override workunit setting of CEPH_ARGS='--cluster'
-      CEPH_ARGS: ''
+      # override workunit setting of STONE_ARGS='--cluster'
+      STONE_ARGS: ''
       RBD_MIRROR_USE_EXISTING_CLUSTER: '1'
       RBD_MIRROR_USE_RBD_MIRROR: '1'
     timeout: 6h

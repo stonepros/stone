@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "Types.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/stringify.h"
 #include "common/Formatter.h"
 
@@ -18,7 +18,7 @@ public:
 
   template <typename Payload>
   inline void operator()(const Payload &payload) const {
-    using ceph::encode;
+    using stone::encode;
     encode(static_cast<uint32_t>(Payload::NOTIFY_OP), m_bl);
     payload.encode(m_bl);
   }
@@ -54,18 +54,18 @@ public:
   }
 
 private:
-  ceph::Formatter *m_formatter;
+  stone::Formatter *m_formatter;
 };
 
 } // anonymous namespace
 
 void PayloadBase::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(request_id, bl);
 }
 
 void PayloadBase::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(request_id, iter);
 }
 
@@ -74,13 +74,13 @@ void PayloadBase::dump(Formatter *f) const {
 }
 
 void ImagePayloadBase::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   PayloadBase::encode(bl);
   encode(global_image_id, bl);
 }
 
 void ImagePayloadBase::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   PayloadBase::decode(version, iter);
   decode(global_image_id, iter);
 }
@@ -91,14 +91,14 @@ void ImagePayloadBase::dump(Formatter *f) const {
 }
 
 void PeerImageRemovedPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   PayloadBase::encode(bl);
   encode(global_image_id, bl);
   encode(peer_mirror_uuid, bl);
 }
 
 void PeerImageRemovedPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   PayloadBase::decode(version, iter);
   decode(global_image_id, iter);
   decode(peer_mirror_uuid, iter);
@@ -111,13 +111,13 @@ void PeerImageRemovedPayload::dump(Formatter *f) const {
 }
 
 void SyncPayloadBase::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   PayloadBase::encode(bl);
   encode(sync_id, bl);
 }
 
 void SyncPayloadBase::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   PayloadBase::decode(version, iter);
   decode(sync_id, iter);
 }
@@ -128,7 +128,7 @@ void SyncPayloadBase::dump(Formatter *f) const {
 }
 
 void UnknownPayload::encode(bufferlist &bl) const {
-  ceph_abort();
+  stone_abort();
 }
 
 void UnknownPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
@@ -221,14 +221,14 @@ std::ostream &operator<<(std::ostream &out, const NotifyOp &op) {
 }
 
 void NotifyAckPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(instance_id, bl);
   encode(request_id, bl);
   encode(ret_val, bl);
 }
 
 void NotifyAckPayload::decode(bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(instance_id, iter);
   decode(request_id, iter);
   decode(ret_val, iter);

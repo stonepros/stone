@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_CLIENT_H
-#define CEPH_CLIENT_H
+#ifndef STONE_CLIENT_H
+#define STONE_CLIENT_H
 
 #include "common/CommandTable.h"
 #include "common/Finisher.h"
@@ -90,8 +90,8 @@ class MDSCommandOp : public CommandOp
 };
 
 /* error code for ceph_fuse */
-#define CEPH_FUSE_NO_MDS_UP    -((1<<16)+0) /* no mds up deteced in ceph_fuse */
-#define CEPH_FUSE_LAST         -((1<<16)+1) /* (unused) */
+#define STONE_FUSE_NO_MDS_UP    -((1<<16)+0) /* no mds up deteced in ceph_fuse */
+#define STONE_FUSE_LAST         -((1<<16)+1) /* (unused) */
 
 // ============================================
 // types for my local metadata cache
@@ -277,7 +277,7 @@ public:
   Client(const Client&&) = delete;
   virtual ~Client() override;
 
-  static UserPerm pick_my_perms(CephContext *c) {
+  static UserPerm pick_my_perms(StoneeContext *c) {
     uid_t uid = c->_conf->client_mount_uid >= 0 ? c->_conf->client_mount_uid : -1;
     gid_t gid = c->_conf->client_mount_gid >= 0 ? c->_conf->client_mount_gid : -1;
     return UserPerm(uid, gid);
@@ -355,7 +355,7 @@ public:
 
   /**
    * Returns the length of the buffer that got filled in, or -errno.
-   * If it returns -CEPHFS_ERANGE you just need to increase the size of the
+   * If it returns -STONEFS_ERANGE you just need to increase the size of the
    * buffer and try again.
    */
   int _getdents(dir_result_t *dirp, char *buf, int buflen, bool ful);  // get a bunch of dentries at once
@@ -397,12 +397,12 @@ public:
   // inode stuff
   unsigned statx_to_mask(unsigned int flags, unsigned int want);
   int stat(const char *path, struct stat *stbuf, const UserPerm& perms,
-	   frag_info_t *dirstat=0, int mask=CEPH_STAT_CAP_INODE_ALL);
+	   frag_info_t *dirstat=0, int mask=STONE_STAT_CAP_INODE_ALL);
   int statx(const char *path, struct ceph_statx *stx,
 	    const UserPerm& perms,
 	    unsigned int want, unsigned int flags);
   int lstat(const char *path, struct stat *stbuf, const UserPerm& perms,
-	    frag_info_t *dirstat=0, int mask=CEPH_STAT_CAP_INODE_ALL);
+	    frag_info_t *dirstat=0, int mask=STONE_STAT_CAP_INODE_ALL);
 
   int setattr(const char *relpath, struct stat *attr, int mask,
 	      const UserPerm& perms);
@@ -470,7 +470,7 @@ public:
   int ftruncate(int fd, loff_t size, const UserPerm& perms);
   int fsync(int fd, bool syncdataonly);
   int fstat(int fd, struct stat *stbuf, const UserPerm& perms,
-	    int mask=CEPH_STAT_CAP_INODE_ALL);
+	    int mask=STONE_STAT_CAP_INODE_ALL);
   int fstatx(int fd, struct ceph_statx *stx, const UserPerm& perms,
 	     unsigned int want, unsigned int flags);
   int statxat(int dirfd, const char *relpath,
@@ -1255,7 +1255,7 @@ private:
     MAY_READ = 4,
   };
 
-  std::unique_ptr<CephContext, std::function<void(CephContext*)>> cct_deleter;
+  std::unique_ptr<StoneeContext, std::function<voidStoneneContext*)>> cct_deleter;
 
   /* Flags for VXattr */
   static const unsigned VXATTR_RSTAT = 0x1;
@@ -1518,7 +1518,7 @@ private:
   ino_t last_used_faked_ino;
   ino_t last_used_faked_root;
 
-  int local_osd = -CEPHFS_ENXIO;
+  int local_osd = -STONEFS_ENXIO;
   epoch_t local_osd_epoch = 0;
 
   // mds requests

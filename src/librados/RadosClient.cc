@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Sage Weil <sage@newdream.net>
  *
@@ -22,12 +22,12 @@
 #include <pthread.h>
 #include <errno.h>
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "common/common_init.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/errno.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/async/blocked_completion.h"
 #include "include/buffer.h"
 #include "include/stringify.h"
@@ -43,21 +43,21 @@
 #include "PoolAsyncCompletionImpl.h"
 #include "RadosClient.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/EventTrace.h"
 
-#define dout_subsys ceph_subsys_rados
+#define dout_subsys stone_subsys_rados
 #undef dout_prefix
 #define dout_prefix *_dout << "librados: "
 
 namespace bc = boost::container;
 namespace bs = boost::system;
-namespace ca = ceph::async;
-namespace cb = ceph::buffer;
+namespace ca = stone::async;
+namespace cb = stone::buffer;
 
-librados::RadosClient::RadosClient(CephContext *cct_)
+librados::RadosClient::RadosClient(StoneContext *cct_)
   : Dispatcher(cct_->get()),
-    cct_deleter{cct, [](CephContext *p) {p->put();}}
+    cct_deleter{cct, [](StoneContext *p) {p->put();}}
 {
   auto& conf = cct->_conf;
   conf.add_observer(this);
@@ -246,7 +246,7 @@ int librados::RadosClient::connect()
   // require OSDREPLYMUX feature.  this means we will fail to talk to
   // old servers.  this is necessary because otherwise we won't know
   // how to decompose the reply data into its constituent pieces.
-  messenger->set_default_policy(Messenger::Policy::lossy_client(CEPH_FEATURE_OSDREPLYMUX));
+  messenger->set_default_policy(Messenger::Policy::lossy_client(STONE_FEATURE_OSDREPLYMUX));
 
   ldout(cct, 1) << "starting msgr at " << messenger->get_myaddrs() << dendl;
 
@@ -269,7 +269,7 @@ int librados::RadosClient::connect()
 
   ldout(cct, 1) << "setting wanted keys" << dendl;
   monclient.set_want_keys(
-      CEPH_ENTITY_TYPE_MON | CEPH_ENTITY_TYPE_OSD | CEPH_ENTITY_TYPE_MGR);
+      STONE_ENTITY_TYPE_MON | STONE_ENTITY_TYPE_OSD | STONE_ENTITY_TYPE_MGR);
   ldout(cct, 1) << "calling monclient init" << dendl;
   err = monclient.init();
   if (err) {
@@ -289,7 +289,7 @@ int librados::RadosClient::connect()
   // Detect older cluster, put mgrclient into compatible mode
   mgrclient.set_mgr_optional(
       !get_required_monitor_features().contains_all(
-        ceph::features::mon::FEATURE_LUMINOUS));
+        stone::features::mon::FEATURE_LUMINOUS));
 
   // MgrClient needs this (it doesn't have MonClient reference itself)
   monclient.sub_want("mgrmap", 0, 0);
@@ -472,7 +472,7 @@ int librados::RadosClient::create_ioctx(const char *name, IoCtxImpl **io)
     return (int)poolid;
   }
 
-  *io = new librados::IoCtxImpl(this, objecter, poolid, CEPH_NOSNAP);
+  *io = new librados::IoCtxImpl(this, objecter, poolid, STONE_NOSNAP);
   return 0;
 }
 
@@ -482,7 +482,7 @@ int librados::RadosClient::create_ioctx(int64_t pool_id, IoCtxImpl **io)
   int r = pool_get_name(pool_id, &pool_name, true);
   if (r < 0)
     return r;
-  *io = new librados::IoCtxImpl(this, objecter, pool_id, CEPH_NOSNAP);
+  *io = new librados::IoCtxImpl(this, objecter, pool_id, STONE_NOSNAP);
   return 0;
 }
 
@@ -521,15 +521,15 @@ bool librados::RadosClient::ms_handle_refused(Connection *con)
 
 bool librados::RadosClient::_dispatch(Message *m)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   switch (m->get_type()) {
   // OSD
-  case CEPH_MSG_OSD_MAP:
+  case STONE_MSG_OSD_MAP:
     cond.notify_all();
     m->put();
     break;
 
-  case CEPH_MSG_MDS_MAP:
+  case STONE_MSG_MDS_MAP:
     m->put();
     break;
 
@@ -547,7 +547,7 @@ bool librados::RadosClient::_dispatch(Message *m)
 
 int librados::RadosClient::wait_for_osdmap()
 {
-  ceph_assert(ceph_mutex_is_not_locked_by_me(lock));
+  stone_assert(stone_mutex_is_not_locked_by_me(lock));
 
   if (state != CONNECTED) {
     return -ENOTCONN;
@@ -563,7 +563,7 @@ int librados::RadosClient::wait_for_osdmap()
   if (need_map) {
     std::unique_lock l(lock);
 
-    ceph::timespan timeout = rados_mon_op_timeout;
+    stone::timespan timeout = rados_mon_op_timeout;
     if (objecter->with_osdmap(std::mem_fn(&OSDMap::get_epoch)) == 0) {
       ldout(cct, 10) << __func__ << " waiting" << dendl;
       while (objecter->with_osdmap(std::mem_fn(&OSDMap::get_epoch)) == 0) {
@@ -590,7 +590,7 @@ int librados::RadosClient::wait_for_latest_osdmap()
 {
   bs::error_code ec;
   objecter->wait_for_latest_osdmap(ca::use_blocked[ec]);
-  return ceph::from_error_code(ec);
+  return stone::from_error_code(ec);
 }
 
 int librados::RadosClient::pool_list(std::list<std::pair<int64_t, string> >& v)
@@ -616,7 +616,7 @@ int librados::RadosClient::get_pool_stats(std::list<string>& pools,
 
   auto [res, per_pool] = objecter->get_pool_stats(v, ca::use_blocked[ec]);
   if (ec)
-    return ceph::from_error_code(ec);
+    return stone::from_error_code(ec);
 
   if (per_pool)
     *pper_pool = per_pool;
@@ -638,10 +638,10 @@ bool librados::RadosClient::get_pool_is_selfmanaged_snaps_mode(
   return ret;
 }
 
-int librados::RadosClient::get_fs_stats(ceph_statfs& stats)
+int librados::RadosClient::get_fs_stats(stone_statfs& stats)
 {
-  ceph::mutex mylock = ceph::make_mutex("RadosClient::get_fs_stats::mylock");
-  ceph::condition_variable cond;
+  stone::mutex mylock = stone::make_mutex("RadosClient::get_fs_stats::mylock");
+  stone::condition_variable cond;
   bool done;
   int ret = 0;
   {
@@ -658,13 +658,13 @@ int librados::RadosClient::get_fs_stats(ceph_statfs& stats)
 
 void librados::RadosClient::get() {
   std::lock_guard l(lock);
-  ceph_assert(refcnt > 0);
+  stone_assert(refcnt > 0);
   refcnt++;
 }
 
 bool librados::RadosClient::put() {
   std::lock_guard l(lock);
-  ceph_assert(refcnt > 0);
+  stone_assert(refcnt > 0);
   refcnt--;
   return (refcnt == 0);
 }
@@ -680,9 +680,9 @@ int librados::RadosClient::pool_create(string& name,
     return r;
   }
 
-  ceph::mutex mylock = ceph::make_mutex("RadosClient::pool_create::mylock");
+  stone::mutex mylock = stone::make_mutex("RadosClient::pool_create::mylock");
   int reply;
-  ceph::condition_variable cond;
+  stone::condition_variable cond;
   bool done;
   Context *onfinish = new C_SafeCond(mylock, cond, &done, &reply);
   objecter->create_pool(name, onfinish, crush_rule);
@@ -735,8 +735,8 @@ int librados::RadosClient::pool_delete(const char *name)
     return r;
   }
 
-  ceph::mutex mylock = ceph::make_mutex("RadosClient::pool_delete::mylock");
-  ceph::condition_variable cond;
+  stone::mutex mylock = stone::make_mutex("RadosClient::pool_delete::mylock");
+  stone::condition_variable cond;
   bool done;
   int ret;
   Context *onfinish = new C_SafeCond(mylock, cond, &done, &ret);
@@ -836,14 +836,14 @@ void librados::RadosClient::mon_command_async(const vector<string>& cmd,
 			       on_finish = std::unique_ptr<Context>(on_finish)]
 			      (bs::error_code e,
 			       std::string&& s,
-			       ceph::bufferlist&& b) mutable {
+			       stone::bufferlist&& b) mutable {
 				if (outs)
 				  *outs = std::move(s);
 				if (outbl)
 				  *outbl = std::move(b);
 				if (on_finish)
 				  on_finish.release()->complete(
-				    ceph::from_error_code(e));
+				    stone::from_error_code(e));
 			      });
 }
 
@@ -906,7 +906,7 @@ int librados::RadosClient::mon_command(int rank, const vector<string>& cmd,
   if (outbl)
     *outbl = std::move(bl);
 
-  return ceph::from_error_code(ec);
+  return stone::from_error_code(ec);
 }
 
 int librados::RadosClient::mon_command(string name, const vector<string>& cmd,
@@ -921,14 +921,14 @@ int librados::RadosClient::mon_command(string name, const vector<string>& cmd,
   if (outbl)
     *outbl = std::move(bl);
 
-  return ceph::from_error_code(ec);
+  return stone::from_error_code(ec);
 }
 
 int librados::RadosClient::osd_command(int osd, vector<string>& cmd,
 				       const bufferlist& inbl,
 				       bufferlist *poutbl, string *prs)
 {
-  ceph_tid_t tid;
+  stone_tid_t tid;
 
   if (osd < 0)
     return -EINVAL;
@@ -942,14 +942,14 @@ int librados::RadosClient::osd_command(int osd, vector<string>& cmd,
     *poutbl = std::move(bl);
   if (prs)
     *prs = std::move(s);
-  return ceph::from_error_code(ec);
+  return stone::from_error_code(ec);
 }
 
 int librados::RadosClient::pg_command(pg_t pgid, vector<string>& cmd,
 				      const bufferlist& inbl,
 				      bufferlist *poutbl, string *prs)
 {
-  ceph_tid_t tid;
+  stone_tid_t tid;
   bs::error_code ec;
   auto [s, bl] = objecter->pg_command(pgid, std::move(cmd), inbl, &tid,
 				      ca::use_blocked[ec]);
@@ -957,7 +957,7 @@ int librados::RadosClient::pg_command(pg_t pgid, vector<string>& cmd,
     *poutbl = std::move(bl);
   if (prs)
     *prs = std::move(s);
-  return ceph::from_error_code(ec);
+  return stone::from_error_code(ec);
 }
 
 int librados::RadosClient::monitor_log(const string& level,
@@ -1017,7 +1017,7 @@ int librados::RadosClient::monitor_log(const string& level,
 
 void librados::RadosClient::handle_log(MLog *m)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   ldout(cct, 10) << __func__ << " version " << m->version << dendl;
 
   if (log_last_version < m->version) {
@@ -1068,7 +1068,7 @@ int librados::RadosClient::service_daemon_register(
       service == "client" ||
       service == "mon" ||
       service == "mgr") {
-    // normal ceph entity types are not allowed!
+    // normal stone entity types are not allowed!
     return -EINVAL;
   }
   if (service.empty() || name.empty()) {

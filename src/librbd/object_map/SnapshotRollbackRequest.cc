@@ -9,7 +9,7 @@
 #include "cls/lock/cls_lock_client.h"
 #include <iostream>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::SnapshotRollbackRequest: "
 
@@ -44,7 +44,7 @@ void SnapshotRollbackRequest::send() {
 }
 
 bool SnapshotRollbackRequest::should_complete(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": state=" << m_state << ", "
                 << "r=" << r << dendl;
   if (r < 0 && m_ret_val == 0) {
@@ -69,7 +69,7 @@ bool SnapshotRollbackRequest::should_complete(int r) {
     finished = Request::should_complete(r);
     break;
   default:
-    ceph_abort();
+    stone_abort();
     break;
   }
   return finished;
@@ -78,7 +78,7 @@ bool SnapshotRollbackRequest::should_complete(int r) {
 void SnapshotRollbackRequest::send_read_map() {
   std::string snap_oid(ObjectMap<>::object_map_name(m_image_ctx.id, m_snap_id));
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": snap_oid=" << snap_oid
                 << dendl;
   m_state = STATE_READ_MAP;
@@ -89,16 +89,16 @@ void SnapshotRollbackRequest::send_read_map() {
   librados::AioCompletion *rados_completion = create_callback_completion();
   int r = m_image_ctx.md_ctx.aio_operate(snap_oid, rados_completion, &op,
                                          &m_read_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 void SnapshotRollbackRequest::send_write_map() {
   std::shared_lock owner_locker{m_image_ctx.owner_lock};
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   std::string snap_oid(ObjectMap<>::object_map_name(m_image_ctx.id,
-                                                    CEPH_NOSNAP));
+                                                    STONE_NOSNAP));
   ldout(cct, 5) << this << " " << __func__ << ": snap_oid=" << snap_oid
                 << dendl;
   m_state = STATE_WRITE_MAP;
@@ -109,7 +109,7 @@ void SnapshotRollbackRequest::send_write_map() {
 
   librados::AioCompletion *rados_completion = create_callback_completion();
   int r = m_image_ctx.md_ctx.aio_operate(snap_oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
@@ -117,7 +117,7 @@ void SnapshotRollbackRequest::send_invalidate_map() {
   std::shared_lock owner_locker{m_image_ctx.owner_lock};
   std::unique_lock image_locker{m_image_ctx.image_lock};
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
   m_state = STATE_INVALIDATE_MAP;
 

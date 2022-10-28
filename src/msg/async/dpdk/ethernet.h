@@ -20,8 +20,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_MSG_ETHERNET_H_
-#define CEPH_MSG_ETHERNET_H_
+#ifndef STONE_MSG_ETHERNET_H_
+#define STONE_MSG_ETHERNET_H_
 
 #include <array>
 #include <sstream>
@@ -81,4 +81,4 @@ struct eth_hdr {
 
 ethernet_address parse_ethernet_address(std::string addr);
 
-#endif /* CEPH_MSG_ETHERNET_H_ */
+#endif /* STONE_MSG_ETHERNET_H_ */

@@ -42,7 +42,7 @@
 
 #include <boost/scope_exit.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::Migration: " << __func__ << ": "
 
@@ -69,11 +69,11 @@ public:
                            cls::rbd::MigrationState state,
                            ProgressContext *prog_ctx)
     : m_io_ctx(io_ctx), m_header_oid(header_oid), m_state(state),
-      m_prog_ctx(prog_ctx), m_cct(reinterpret_cast<CephContext*>(io_ctx.cct())),
-      m_lock(ceph::make_mutex(
+      m_prog_ctx(prog_ctx), m_cct(reinterpret_cast<StoneContext*>(io_ctx.cct())),
+      m_lock(stone::make_mutex(
 	util::unique_lock_name("librbd::api::MigrationProgressContext",
 			       this))) {
-    ceph_assert(m_prog_ctx != nullptr);
+    stone_assert(m_prog_ctx != nullptr);
   }
 
   ~MigrationProgressContext() {
@@ -98,9 +98,9 @@ private:
   cls::rbd::MigrationState m_state;
   ProgressContext *m_prog_ctx;
 
-  CephContext* m_cct;
-  mutable ceph::mutex m_lock;
-  ceph::condition_variable m_cond;
+  StoneContext* m_cct;
+  mutable stone::mutex m_lock;
+  stone::condition_variable m_cond;
   std::string m_state_description;
   bool m_pending_update = false;
   int m_in_flight_state_updates = 0;
@@ -125,7 +125,7 @@ private:
   void set_state_description() {
     ldout(m_cct, 20) << "state_description=" << m_state_description << dendl;
 
-    ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone_assert(stone_mutex_is_locked(m_lock));
 
     librados::ObjectWriteOperation op;
     cls_client::migration_set_state(&op, m_state, m_state_description);
@@ -134,7 +134,7 @@ private:
     librados::AioCompletion *comp =
       create_rados_callback<klass, &klass::handle_set_state_description>(this);
     int r = m_io_ctx.aio_operate(m_header_oid, comp, &op);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
 
     m_in_flight_state_updates++;
@@ -193,7 +193,7 @@ int open_images(librados::IoCtx& io_ctx, const std::string &image_name,
                 cls::rbd::MigrationSpec* src_migration_spec,
                 cls::rbd::MigrationSpec* dst_migration_spec,
                 bool skip_open_dst_image) {
-  CephContext* cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext* cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
 
   *src_image_ctx = nullptr;
   *dst_image_ctx = nullptr;
@@ -387,7 +387,7 @@ public:
   }
 
   void next_step() {
-    ceph_assert(m_current_step < m_total_steps);
+    stone_assert(m_current_step < m_total_steps);
     ++m_current_step;
   }
 
@@ -412,7 +412,7 @@ int Migration<I>::prepare(librados::IoCtx& io_ctx,
                           librados::IoCtx& dest_io_ctx,
                           const std::string &dest_image_name_,
                           ImageOptions& opts) {
-  CephContext* cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext* cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
 
   std::string dest_image_name = dest_image_name_.empty() ? image_name :
     dest_image_name_;
@@ -522,7 +522,7 @@ int Migration<I>::prepare_import(
     return -EINVAL;
   }
 
-  auto cct = reinterpret_cast<CephContext *>(dest_io_ctx.cct());
+  auto cct = reinterpret_cast<StoneContext *>(dest_io_ctx.cct());
   ldout(cct, 10) << source_spec << " -> "
                  << dest_io_ctx.get_pool_name() << "/"
                  << dest_image_name << ", opts=" << opts << dendl;
@@ -530,7 +530,7 @@ int Migration<I>::prepare_import(
   I* src_image_ctx = nullptr;
   C_SaferCond open_ctx;
   auto req = migration::OpenSourceImageRequest<I>::create(
-    dest_io_ctx, nullptr, CEPH_NOSNAP,
+    dest_io_ctx, nullptr, STONE_NOSNAP,
     {-1, "", "", "", source_spec, {}, 0, false}, &src_image_ctx, &open_ctx);
   req->send();
 
@@ -592,7 +592,7 @@ template <typename I>
 int Migration<I>::execute(librados::IoCtx& io_ctx,
                           const std::string &image_name,
                           ProgressContext &prog_ctx) {
-  CephContext* cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext* cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
 
   ldout(cct, 10) << io_ctx.get_pool_name() << "/" << image_name << dendl;
 
@@ -653,7 +653,7 @@ int Migration<I>::execute(librados::IoCtx& io_ctx,
 template <typename I>
 int Migration<I>::abort(librados::IoCtx& io_ctx, const std::string &image_name,
                         ProgressContext &prog_ctx) {
-  CephContext* cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext* cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
 
   ldout(cct, 10) << io_ctx.get_pool_name() << "/" << image_name << dendl;
 
@@ -697,7 +697,7 @@ template <typename I>
 int Migration<I>::commit(librados::IoCtx& io_ctx,
                          const std::string &image_name,
                          ProgressContext &prog_ctx) {
-  CephContext* cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext* cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
 
   ldout(cct, 10) << io_ctx.get_pool_name() << "/" << image_name << dendl;
 
@@ -757,7 +757,7 @@ template <typename I>
 int Migration<I>::status(librados::IoCtx& io_ctx,
                          const std::string &image_name,
                          image_migration_status_t *status) {
-  CephContext* cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext* cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
 
   ldout(cct, 10) << io_ctx.get_pool_name() << "/" << image_name << dendl;
 
@@ -1082,7 +1082,7 @@ int Migration<I>::abort() {
 
     ldout(m_cct, 10) << "removing dst image" << dendl;
 
-    ceph_assert(m_dst_image_ctx->ignore_migrating);
+    stone_assert(m_dst_image_ctx->ignore_migrating);
 
     auto asio_engine = m_dst_image_ctx->asio_engine;
     librados::IoCtx dst_io_ctx(m_dst_image_ctx->md_ctx);
@@ -1287,7 +1287,7 @@ int Migration<I>::validate_src_snaps(I* image_ctx) {
 
   uint64_t dst_features = 0;
   r = m_image_options.get(RBD_IMAGE_OPTION_FEATURES, &dst_features);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   if (!image_ctx->test_features(RBD_FEATURE_LAYERING)) {
     return 0;
@@ -1552,7 +1552,7 @@ int Migration<I>::create_dst_image(I** image_ctx) {
 
   C_SaferCond on_snapshot_copy;
   auto snapshot_copy_req = librbd::deep_copy::SnapshotCopyRequest<I>::create(
-      m_src_image_ctx, dst_image_ctx, 0, CEPH_NOSNAP, 0, m_flatten,
+      m_src_image_ctx, dst_image_ctx, 0, STONE_NOSNAP, 0, m_flatten,
       m_src_image_ctx->op_work_queue, &snap_seqs, &on_snapshot_copy);
   snapshot_copy_req->send();
   r = on_snapshot_copy.wait();
@@ -1634,7 +1634,7 @@ int Migration<I>::remove_group(I *image_ctx, group_info_t *group_info) {
     return -ENOENT;
   }
 
-  ceph_assert(!image_ctx->id.empty());
+  stone_assert(!image_ctx->id.empty());
 
   ldout(m_cct, 10) << dendl;
 
@@ -1822,7 +1822,7 @@ int Migration<I>::relink_children(I *from_image_ctx, I *to_image_ctx) {
     std::vector<librbd::linked_image_spec_t> src_child_images;
 
     if (from_image_ctx != m_src_image_ctx) {
-      ceph_assert(migration_abort);
+      stone_assert(migration_abort);
 
       // We run list snaps against the src image to get only those snapshots
       // that are migrated. If the "from" image is not the src image
@@ -1845,7 +1845,7 @@ int Migration<I>::relink_children(I *from_image_ctx, I *to_image_ctx) {
       std::shared_lock image_locker{from_image_ctx->image_lock};
       snap.id = from_image_ctx->get_snap_id(cls::rbd::UserSnapshotNamespace(),
                                             snap.name);
-      if (snap.id == CEPH_NOSNAP) {
+      if (snap.id == STONE_NOSNAP) {
         ldout(m_cct, 5) << "skipping snapshot " << snap.name << dendl;
         continue;
       }
@@ -1906,7 +1906,7 @@ int Migration<I>::relink_child(I *from_image_ctx, I *to_image_ctx,
     std::shared_lock image_locker{to_image_ctx->image_lock};
     to_snap_id = to_image_ctx->get_snap_id(cls::rbd::UserSnapshotNamespace(),
                                              from_snap.name);
-    if (to_snap_id == CEPH_NOSNAP) {
+    if (to_snap_id == STONE_NOSNAP) {
       lderr(m_cct) << "no snapshot " << from_snap.name << " on destination image"
                    << dendl;
       return -ENOENT;
@@ -2030,7 +2030,7 @@ int Migration<I>::remove_src_image(I** image_ctx) {
     }
   }
 
-  ceph_assert(src_image_ctx->ignore_migrating);
+  stone_assert(src_image_ctx->ignore_migrating);
 
   auto asio_engine = src_image_ctx->asio_engine;
   auto src_image_id = src_image_ctx->id;
@@ -2087,7 +2087,7 @@ int Migration<I>::revert_data(I* src_image_ctx, I* dst_image_ctx,
   }
 
   uint64_t src_snap_id_start = 0;
-  uint64_t src_snap_id_end = CEPH_NOSNAP;
+  uint64_t src_snap_id_end = STONE_NOSNAP;
   uint64_t dst_snap_id_start = 0;
   if (!migration_spec.snap_seqs.empty()) {
     src_snap_id_start = migration_spec.snap_seqs.rbegin()->second;
@@ -2096,7 +2096,7 @@ int Migration<I>::revert_data(I* src_image_ctx, I* dst_image_ctx,
   // we only care about the HEAD revision so only add a single mapping to
   // represent the most recent state
   SnapSeqs snap_seqs;
-  snap_seqs[CEPH_NOSNAP] = CEPH_NOSNAP;
+  snap_seqs[STONE_NOSNAP] = STONE_NOSNAP;
 
   ldout(m_cct, 20) << "src_snap_id_start=" << src_snap_id_start << ", "
                    << "src_snap_id_end=" << src_snap_id_end << ", "

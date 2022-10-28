@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <gtest/gtest.h>
 
-namespace ceph {
+namespace stone {
 
 using string_list = std::initializer_list<std::string_view>;
 
@@ -116,4 +116,4 @@ TEST(split, iterator_multipass)
   EXPECT_EQ(i, j);
 }
 
-} // namespace ceph
+} // namespace stone

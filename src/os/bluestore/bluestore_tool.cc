@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "include/stringify.h"
 #include "common/errno.h"
 #include "common/safe_io.h"
@@ -28,7 +28,7 @@ void usage(po::options_description &desc)
   cout << desc << std::endl;
 }
 
-void validate_path(CephContext *cct, const string& path, bool bluefs)
+void validate_path(StoneContext *cct, const string& path, bool bluefs)
 {
   BlueStore bluestore(cct, path);
   string type;
@@ -70,7 +70,7 @@ void validate_path(CephContext *cct, const string& path, bool bluefs)
 
 const char* find_device_path(
   int id,
-  CephContext *cct,
+  StoneContext *cct,
   const vector<string>& devs)
 {
   for (auto& i : devs) {
@@ -91,7 +91,7 @@ const char* find_device_path(
 }
 
 void parse_devices(
-  CephContext *cct,
+  StoneContext *cct,
   const vector<string>& devs,
   map<string, int>* got,
   bool* has_db,
@@ -141,7 +141,7 @@ void parse_devices(
 
 void add_devices(
   BlueFS *fs,
-  CephContext *cct,
+  StoneContext *cct,
   const vector<string>& devs)
 {
   map<string, int> got;
@@ -173,7 +173,7 @@ void add_devices(
 }
 
 BlueFS *open_bluefs_readonly(
-  CephContext *cct,
+  StoneContext *cct,
   const string& path,
   const vector<string>& devs)
 {
@@ -192,7 +192,7 @@ BlueFS *open_bluefs_readonly(
 }
 
 void log_dump(
-  CephContext *cct,
+  StoneContext *cct,
   const string& path,
   const vector<string>& devs)
 {
@@ -283,14 +283,14 @@ int main(int argc, char **argv)
   po::positional_options_description pd;
   pd.add("command", 1);
 
-  vector<string> ceph_option_strings;
+  vector<string> stone_option_strings;
   po::variables_map vm;
   try {
     po::parsed_options parsed =
       po::command_line_parser(argc, argv).options(po_all).allow_unregistered().positional(pd).run();
     po::store( parsed, vm);
     po::notify(vm);
-    ceph_option_strings = po::collect_unrecognized(parsed.options,
+    stone_option_strings = po::collect_unrecognized(parsed.options,
 						   po::include_positional);
   } catch(po::error &e) {
     std::cerr << e.what() << std::endl;
@@ -435,10 +435,10 @@ int main(int argc, char **argv)
   args.push_back("--no-log-to-stderr");
   args.push_back("--err-to-stderr");
 
-  for (auto& i : ceph_option_strings) {
+  for (auto& i : stone_option_strings) {
     args.push_back(i.c_str());
   }
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
 
@@ -485,7 +485,7 @@ int main(int argc, char **argv)
     for (auto kk : {
 	"whoami",
 	  "osd_key",
-	  "ceph_fsid",
+	  "stone_fsid",
 	  "fsid",
 	  "type",
 	  "ready" }) {
@@ -734,12 +734,12 @@ int main(int argc, char **argv)
       r = 0;
       if (need_db && cct->_conf->bluestore_block_db_size == 0) {
 	cerr << "Might need DB size specification, "
-		"please set Ceph bluestore-block-db-size config parameter "
+		"please set Stone bluestore-block-db-size config parameter "
 	     << std::endl;
 	r = EXIT_FAILURE;
       } else if (!need_db && cct->_conf->bluestore_block_wal_size == 0) {
 	cerr << "Might need WAL size specification, "
-		"please set Ceph bluestore-block-wal-size config parameter "
+		"please set Stone bluestore-block-wal-size config parameter "
 	     << std::endl;
 	r = EXIT_FAILURE;
       }
@@ -870,8 +870,8 @@ int main(int argc, char **argv)
       return r;
     }
   } else  if (action == "free-dump" || action == "free-score") {
-    AdminSocket *admin_socket = g_ceph_context->get_admin_socket();
-    ceph_assert(admin_socket);
+    AdminSocket *admin_socket = g_stone_context->get_admin_socket();
+    stone_assert(admin_socket);
     std::string action_name = action == "free-dump" ? "dump" : "score";
     validate_path(cct.get(), path, false);
     BlueStore bluestore(cct.get(), path);
@@ -882,7 +882,7 @@ int main(int argc, char **argv)
     }
 
     for (auto alloc_name : allocs_name) {
-      ceph::bufferlist in, out;
+      stone::bufferlist in, out;
       ostringstream err;
       int r = admin_socket->execute_command(
 	{"{\"prefix\": \"bluestore allocator " + action_name + " " + alloc_name + "\"}"},
@@ -897,8 +897,8 @@ int main(int argc, char **argv)
 
     bluestore.cold_close();
   } else  if (action == "bluefs-stats") {
-    AdminSocket* admin_socket = g_ceph_context->get_admin_socket();
-    ceph_assert(admin_socket);
+    AdminSocket* admin_socket = g_stone_context->get_admin_socket();
+    stone_assert(admin_socket);
     validate_path(cct.get(), path, false);
     BlueStore bluestore(cct.get(), path);
     int r = bluestore.cold_open();
@@ -907,7 +907,7 @@ int main(int argc, char **argv)
       exit(EXIT_FAILURE);
     }
 
-    ceph::bufferlist in, out;
+    stone::bufferlist in, out;
     ostringstream err;
     r = admin_socket->execute_command(
       { "{\"prefix\": \"bluefs stats\"}" },
@@ -955,9 +955,9 @@ int main(int argc, char **argv)
       cerr << "error preparing db environment: " << cpp_strerror(r) << std::endl;
       exit(EXIT_FAILURE);
     }
-    ceph_assert(db_ptr);
+    stone_assert(db_ptr);
     RocksDBStore* rocks_db = dynamic_cast<RocksDBStore*>(db_ptr);
-    ceph_assert(rocks_db);
+    stone_assert(rocks_db);
     r = rocks_db->reshard(new_sharding, &ctrl);
     if (r < 0) {
       cerr << "error resharding: " << cpp_strerror(r) << std::endl;
@@ -973,9 +973,9 @@ int main(int argc, char **argv)
       cerr << "error preparing db environment: " << cpp_strerror(r) << std::endl;
       exit(EXIT_FAILURE);
     }
-    ceph_assert(db_ptr);
+    stone_assert(db_ptr);
     RocksDBStore* rocks_db = dynamic_cast<RocksDBStore*>(db_ptr);
-    ceph_assert(rocks_db);
+    stone_assert(rocks_db);
     std::string sharding;
     bool res = rocks_db->get_sharding(sharding);
     bluestore.close_db_environment();

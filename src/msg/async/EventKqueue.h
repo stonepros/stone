@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_MSG_EVENTKQUEUE_H
-#define CEPH_MSG_EVENTKQUEUE_H
+#ifndef STONE_MSG_EVENTKQUEUE_H
+#define STONE_MSG_EVENTKQUEUE_H
 
 #include <sys/types.h>
 #include <sys/event.h>
@@ -27,7 +27,7 @@ class KqueueDriver : public EventDriver {
   int kqfd;
   pthread_t mythread;
   struct kevent *res_events;
-  CephContext *cct;
+  StoneeContext *cct;
   int size;
 
   // Keep what we set on the kqfd
@@ -42,7 +42,7 @@ class KqueueDriver : public EventDriver {
   int test_thread_change(const char* funcname);
 
  public:
-  explicit KqueueDriver(CephContext *c): kqfd(-1), res_events(NULL), cct(c), 
+  explicit KqueueDriver(StoneeContext *c): kqfd(-1), res_events(NULL), cct(c), 
 		size(0), sav_max(0) {}
   virtual ~KqueueDriver() {
     if (kqfd != -1)

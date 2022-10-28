@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_UTILS_H
-#define CEPH_RBD_UTILS_H
+#ifndef STONE_RBD_UTILS_H
+#define STONE_RBD_UTILS_H
 
 #include "include/int_types.h"
 #include "include/rados/librados.hpp"
@@ -234,4 +234,4 @@ int mgr_command(librados::Rados& rados, const std::string& cmd,
 } // namespace utils
 } // namespace rbd
 
-#endif // CEPH_RBD_UTILS_H
+#endif // STONE_RBD_UTILS_H

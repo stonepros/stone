@@ -17,8 +17,8 @@
 #include "tools/rbd_mirror/image_replayer/Utils.h"
 #include "tools/rbd_mirror/image_replayer/journal/StateBuilder.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::journal::" \
                            << "CreateLocalImageRequest: " << this << " " \
@@ -65,7 +65,7 @@ void CreateLocalImageRequest<I>::handle_unregister_client(int r) {
 
 template <typename I>
 void CreateLocalImageRequest<I>::register_client() {
-  ceph_assert(m_state_builder->local_image_id.empty());
+  stone_assert(m_state_builder->local_image_id.empty());
   m_state_builder->local_image_id =
     librbd::util::generate_image_id<I>(m_local_io_ctx);
   dout(10) << "local_image_id=" << m_state_builder->local_image_id << dendl;

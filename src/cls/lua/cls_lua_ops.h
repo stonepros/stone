@@ -1,5 +1,5 @@
-#ifndef CEPH_CLS_LUA_OPS_H
-#define CEPH_CLS_LUA_OPS_H
+#ifndef STONE_CLS_LUA_OPS_H
+#define STONE_CLS_LUA_OPS_H
 
 #include <string>
 

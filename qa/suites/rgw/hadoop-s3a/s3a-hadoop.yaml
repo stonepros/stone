@@ -1,6 +1,6 @@
 tasks:
 - install:
-- ceph:
+- stone:
 - ssh-keys:
 - dnsmasq:
     client.0: [s3.]

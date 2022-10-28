@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 Greg Farnum <gregory.farnum@dreamhost.com>
  *
@@ -24,13 +24,13 @@ public:
 };
 
 TEST(ContextGather, Constructor) {
-  C_GatherBuilder gather(g_ceph_context);
+  C_GatherBuilder gather(g_stone_context);
   EXPECT_FALSE(gather.has_subs());
   EXPECT_TRUE(gather.get() == NULL);
 }
 
 TEST(ContextGather, OneSub) {
-  C_GatherBuilder gather(g_ceph_context);
+  C_GatherBuilder gather(g_stone_context);
   Context *sub = gather.new_sub();
   EXPECT_EQ(1, gather.num_subs_created());
   EXPECT_EQ(1, gather.num_subs_remaining());
@@ -48,7 +48,7 @@ TEST(ContextGather, OneSub) {
 TEST(ContextGather, ManySubs) {
   bool finish_called = false;
   int result = 0;
-  C_GatherBuilder gather(g_ceph_context, new C_Checker(&finish_called, &result));
+  C_GatherBuilder gather(g_stone_context, new C_Checker(&finish_called, &result));
   int sub_count = 8;
   Context* subs[sub_count];
   //create subs and test
@@ -72,7 +72,7 @@ TEST(ContextGather, ManySubs) {
 }
 
 TEST(ContextGather, AlternatingSubCreateFinish) {
-  C_GatherBuilder gather(g_ceph_context);
+  C_GatherBuilder gather(g_stone_context);
   int sub_count = 8;
   bool finish_called = false;
   int result = 0;

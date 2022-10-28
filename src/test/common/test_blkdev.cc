@@ -35,8 +35,8 @@ protected:
   virtual void SetUp() {
     const char *sda_name = "sda";
     const char *sdb_name = "sdb";
-    const char* env = getenv("CEPH_ROOT");
-    ASSERT_NE(env, nullptr) << "Environment Variable CEPH_ROOT not found!";
+    const char* env = getenv("STONE_ROOT");
+    ASSERT_NE(env, nullptr) << "Environment Variable STONE_ROOT not found!";
     root = new string(env);
     *root += "/src/test/common/test_blkdev_sys_block/sys";
 

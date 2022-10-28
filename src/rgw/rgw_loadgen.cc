@@ -9,7 +9,7 @@
 #include "rgw_auth_s3.h"
 
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 void RGWLoadGenRequestEnv::set_date(utime_t& tm)
 {
@@ -37,9 +37,9 @@ int RGWLoadGenRequestEnv::sign(const DoutPrefixProvider *dpp, RGWAccessKey& acce
 
   headers["HTTP_DATE"] = date_str;
   try {
-    /* FIXME(rzarzynski): kill the dependency on g_ceph_context. */
+    /* FIXME(rzarzynski): kill the dependency on g_stone_context. */
     const auto signature = static_cast<std::string>(
-      rgw::auth::s3::get_v2_signature(g_ceph_context, canonical_header,
+      rgw::auth::s3::get_v2_signature(g_stone_context, canonical_header,
                                       access_key.key));
     headers["HTTP_AUTHORIZATION"] = \
       std::string("AWS ") + access_key.id + ":" + signature;
@@ -73,7 +73,7 @@ size_t RGWLoadGenIO::complete_request()
   return 0;
 }
 
-int RGWLoadGenIO::init_env(CephContext *cct)
+int RGWLoadGenIO::init_env(StoneContext *cct)
 {
   env.init(cct);
 

@@ -1,0 +1,8 @@
+tasks:
+- stoneadm.shell:
+    host.a:
+      - stone orch status
+      - stone orch ps
+      - stone orch ls
+      - stone orch host ls
+      - stone orch device ls

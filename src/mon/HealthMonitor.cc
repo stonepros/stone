@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank, Inc
  *
@@ -19,7 +19,7 @@
 #include <time.h>
 #include <iterator>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/common_fwd.h"
 #include "include/stringify.h"
 
@@ -30,7 +30,7 @@
 
 #include "common/Formatter.h"
 
-#define dout_subsys ceph_subsys_mon
+#define dout_subsys stone_subsys_mon
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, mon, this)
 using namespace TOPNSPC::common;
@@ -54,15 +54,15 @@ using std::to_string;
 using std::vector;
 using std::unique_ptr;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::Formatter;
-using ceph::JSONFormatter;
-using ceph::mono_clock;
-using ceph::mono_time;
-using ceph::parse_timespan;
-using ceph::timespan_str;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::Formatter;
+using stone::JSONFormatter;
+using stone::mono_clock;
+using stone::mono_time;
+using stone::parse_timespan;
+using stone::timespan_str;
 static ostream& _prefix(std::ostream *_dout, const Monitor &mon,
                         const HealthMonitor *hmon) {
   return *_dout << "mon." << mon.name << "@" << mon.rank
@@ -308,7 +308,7 @@ bool HealthMonitor::prepare_command(MonOpRequestRef op)
 	ss << "not a valid duration: " << ttl_str;
 	goto out;
       }
-      ttl = ceph_clock_now();
+      ttl = stone_clock_now();
       ttl += std::chrono::duration<double>(secs).count();
     }
     health_check_map_t all;
@@ -396,7 +396,7 @@ void HealthMonitor::tick()
 bool HealthMonitor::check_mutes()
 {
   bool changed = true;
-  auto now = ceph_clock_now();
+  auto now = stone_clock_now();
   health_check_map_t all;
   gather_all_health_checks(&all);
   auto p = pending_mutes.begin();
@@ -494,7 +494,7 @@ health_status_t HealthMonitor::get_health_status(
     f->close_section();
     f->close_section();
   } else {
-    auto now = ceph_clock_now();
+    auto now = stone_clock_now();
     // one-liner: HEALTH_FOO[ thing1[; thing2 ...]]
     string summary;
     for (auto& p : all.checks) {
@@ -578,12 +578,12 @@ bool HealthMonitor::check_member_health()
   get_fs_stats(stats.fs_stats, g_conf()->mon_data.c_str());
   map<string,uint64_t> extra;
   uint64_t store_size = mon.store->get_estimated_size(extra);
-  ceph_assert(store_size > 0);
+  stone_assert(store_size > 0);
   stats.store_stats.bytes_total = store_size;
   stats.store_stats.bytes_sst = extra["sst"];
   stats.store_stats.bytes_log = extra["log"];
   stats.store_stats.bytes_misc = extra["misc"];
-  stats.last_update = ceph_clock_now();
+  stats.last_update = stone_clock_now();
   dout(10) << __func__ << " avail " << stats.fs_stats.avail_percent << "%"
 	   << " total " << byte_u_t(stats.fs_stats.byte_total)
 	   << ", used " << byte_u_t(stats.fs_stats.byte_used)
@@ -745,11 +745,11 @@ bool HealthMonitor::check_leader_health()
 
 void HealthMonitor::check_for_older_version(health_check_map_t *checks)
 {
-  static ceph::coarse_mono_time old_version_first_time =
-    ceph::coarse_mono_clock::zero();
+  static stone::coarse_mono_time old_version_first_time =
+    stone::coarse_mono_clock::zero();
 
-  auto now = ceph::coarse_mono_clock::now();
-  if (ceph::coarse_mono_clock::is_zero(old_version_first_time)) {
+  auto now = stone::coarse_mono_clock::now();
+  if (stone::coarse_mono_clock::is_zero(old_version_first_time)) {
     old_version_first_time = now;
   }
   const auto warn_delay = g_conf().get_val<std::chrono::seconds>("mon_warn_older_version_delay");
@@ -763,16 +763,16 @@ void HealthMonitor::check_for_older_version(health_check_map_t *checks)
 	       << all_versions.rbegin()->second.size() << dendl;
       // Erase last element (the highest version running)
       all_versions.erase(all_versions.rbegin()->first);
-      ceph_assert(all_versions.size() > 0);
+      stone_assert(all_versions.size() > 0);
       ostringstream ss;
       unsigned daemon_count = 0;
       for (auto& g : all_versions) {
 	daemon_count += g.second.size();
       }
       int ver_count = all_versions.size();
-      ceph_assert(!(daemon_count == 1 && ver_count != 1));
+      stone_assert(!(daemon_count == 1 && ver_count != 1));
       ss << "There " << (daemon_count == 1 ? "is a daemon" : "are daemons")
-	 << " running " << (ver_count > 1 ? "multiple old versions" : "an older version")  << " of ceph";
+	 << " running " << (ver_count > 1 ? "multiple old versions" : "an older version")  << " of stone";
       health_status_t status;
       if (ver_count > 1)
 	status = HEALTH_ERR;
@@ -785,11 +785,11 @@ void HealthMonitor::check_for_older_version(health_check_map_t *checks)
 	  ds << i << " ";
 	}
 	ds << (g.second.size() == 1 ? "is" : "are")
-	   << " running an older version of ceph: " << g.first;
+	   << " running an older version of stone: " << g.first;
 	d.detail.push_back(ds.str());
       }
     } else {
-      old_version_first_time = ceph::coarse_mono_clock::zero();
+      old_version_first_time = stone::coarse_mono_clock::zero();
     }
   }
 }
@@ -854,7 +854,7 @@ void HealthMonitor::check_if_msgr2_enabled(health_check_map_t *checks)
 {
   if (g_conf().get_val<bool>("ms_bind_msgr2") &&
       mon.monmap->get_required_features().contains_all(
-	ceph::features::mon::FEATURE_NAUTILUS)) {
+	stone::features::mon::FEATURE_NAUTILUS)) {
     list<string> details;
     for (auto& i : mon.monmap->mon_info) {
       if (!i.second.public_addrs.has_msgr2()) {

@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc
  *
@@ -16,26 +16,26 @@
 
 #include <string>
 #include <boost/container/flat_map.hpp>
-#include "include/rados.h" // CEPH_OSD_CMPXATTR_*
+#include "include/rados.h" // STONE_OSD_CMPXATTR_*
 #include "include/encoding.h"
 
 namespace cls::cmpomap {
 
 /// comparison operand type
 enum class Mode : uint8_t {
-  String = CEPH_OSD_CMPXATTR_MODE_STRING,
-  U64    = CEPH_OSD_CMPXATTR_MODE_U64,
+  String = STONE_OSD_CMPXATTR_MODE_STRING,
+  U64    = STONE_OSD_CMPXATTR_MODE_U64,
 };
 
 /// comparison operation, where the left-hand operand is the input value and
 /// the right-hand operand is the stored value (or the optional default)
 enum class Op : uint8_t {
-  EQ  = CEPH_OSD_CMPXATTR_OP_EQ,
-  NE  = CEPH_OSD_CMPXATTR_OP_NE,
-  GT  = CEPH_OSD_CMPXATTR_OP_GT,
-  GTE = CEPH_OSD_CMPXATTR_OP_GTE,
-  LT  = CEPH_OSD_CMPXATTR_OP_LT,
-  LTE = CEPH_OSD_CMPXATTR_OP_LTE,
+  EQ  = STONE_OSD_CMPXATTR_OP_EQ,
+  NE  = STONE_OSD_CMPXATTR_OP_NE,
+  GT  = STONE_OSD_CMPXATTR_OP_GT,
+  GTE = STONE_OSD_CMPXATTR_OP_GTE,
+  LT  = STONE_OSD_CMPXATTR_OP_LT,
+  LTE = STONE_OSD_CMPXATTR_OP_LTE,
 };
 
 /// mapping of omap keys to value comparisons

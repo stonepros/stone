@@ -1,5 +1,5 @@
-#ifndef FS_CEPH_IOCTL_H
-#define FS_CEPH_IOCTL_H
+#ifndef FS_STONE_IOCTL_H
+#define FS_STONE_IOCTL_H
 
 #include "include/int_types.h"
 
@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #endif
 
-#define CEPH_IOCTL_MAGIC 0x97
+#define STONE_IOCTL_MAGIC 0x97
 
 /* just use u64 to align sanely on all archs */
 struct ceph_ioctl_layout {
@@ -20,11 +20,11 @@ struct ceph_ioctl_layout {
 	__s64 unused;
 };
 
-#define CEPH_IOC_GET_LAYOUT _IOR(CEPH_IOCTL_MAGIC, 1,		\
+#define STONE_IOC_GET_LAYOUT _IOR(STONE_IOCTL_MAGIC, 1,		\
 				   struct ceph_ioctl_layout)
-#define CEPH_IOC_SET_LAYOUT _IOW(CEPH_IOCTL_MAGIC, 2,		\
+#define STONE_IOC_SET_LAYOUT _IOW(STONE_IOCTL_MAGIC, 2,		\
 				   struct ceph_ioctl_layout)
-#define CEPH_IOC_SET_LAYOUT_POLICY _IOW(CEPH_IOCTL_MAGIC, 5,	\
+#define STONE_IOC_SET_LAYOUT_POLICY _IOW(STONE_IOCTL_MAGIC, 5,	\
 				   struct ceph_ioctl_layout)
 
 /*
@@ -43,9 +43,9 @@ struct ceph_ioctl_dataloc {
 	struct sockaddr_storage osd_addr; /* out: osd address */
 };
 
-#define CEPH_IOC_GET_DATALOC _IOWR(CEPH_IOCTL_MAGIC, 3,	\
+#define STONE_IOC_GET_DATALOC _IOWR(STONE_IOCTL_MAGIC, 3,	\
 				   struct ceph_ioctl_dataloc)
 
-#define CEPH_IOC_LAZYIO _IO(CEPH_IOCTL_MAGIC, 4)
+#define STONE_IOC_LAZYIO _IO(STONE_IOCTL_MAGIC, 4)
 
 #endif

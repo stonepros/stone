@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  g_ceph_context = reinterpret_cast<CephContext*>(rados.cct());
+  g_stone_context = reinterpret_cast<StoneContext*>(rados.cct());
 
   int r = rados.conf_set("lockdep", "true");
   if (r < 0) {

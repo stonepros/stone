@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_MMONGETOSDMAP_H
-#define CEPH_MMONGETOSDMAP_H
+#ifndef STONE_MMONGETOSDMAP_H
+#define STONE_MMONGETOSDMAP_H
 
 #include <iostream>
 #include <string>
@@ -30,7 +30,7 @@ private:
 
 public:
   MMonGetOSDMap()
-    : PaxosServiceMessage{CEPH_MSG_MON_GET_OSDMAP, 0},
+    : PaxosServiceMessage{STONE_MSG_MON_GET_OSDMAP, 0},
       full_first(0),
       full_last(0),
       inc_first(0),

@@ -36,7 +36,7 @@ public:
     encode(current_state, bl);
 
     std::string oid(ObjectMap<>::object_map_name(ictx->id, snap_id));
-    if (snap_id == CEPH_NOSNAP) {
+    if (snap_id == STONE_NOSNAP) {
       EXPECT_CALL(get_mock_io_ctx(ictx->md_ctx),
                   exec(oid, _, StrEq("lock"), StrEq("assert_locked"), _, _, _,
                        _))
@@ -74,8 +74,8 @@ TEST_F(TestMockObjectMapUpdateRequest, UpdateInMemory) {
   ASSERT_EQ(0, ictx->operations->resize(4 << ictx->order, true, no_progress));
   ASSERT_EQ(0, acquire_exclusive_lock(*ictx));
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   object_map.resize(4);
   for (uint64_t i = 0; i < object_map.size(); ++i) {
     object_map[i] = i % 4;
@@ -83,7 +83,7 @@ TEST_F(TestMockObjectMapUpdateRequest, UpdateInMemory) {
 
   C_SaferCond cond_ctx;
   AsyncRequest<> *req = new UpdateRequest<>(
-    *ictx, &object_map_lock, &object_map, CEPH_NOSNAP, 0, object_map.size(),
+    *ictx, &object_map_lock, &object_map, STONE_NOSNAP, 0, object_map.size(),
     OBJECT_NONEXISTENT, OBJECT_EXISTS, {}, false, &cond_ctx);
   {
     std::shared_lock image_locker{ictx->image_lock};
@@ -108,16 +108,16 @@ TEST_F(TestMockObjectMapUpdateRequest, UpdateHeadOnDisk) {
   ASSERT_EQ(0, open_image(m_image_name, &ictx));
   ASSERT_EQ(0, acquire_exclusive_lock(*ictx));
 
-  expect_update(ictx, CEPH_NOSNAP, 0, 1, OBJECT_NONEXISTENT, OBJECT_EXISTS, 0);
+  expect_update(ictx, STONE_NOSNAP, 0, 1, OBJECT_NONEXISTENT, OBJECT_EXISTS, 0);
 
-  ceph::shared_mutex object_map_lock =
-    ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock =
+    stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   object_map.resize(1);
 
   C_SaferCond cond_ctx;
   AsyncRequest<> *req = new UpdateRequest<>(
-    *ictx, &object_map_lock, &object_map, CEPH_NOSNAP, 0, object_map.size(),
+    *ictx, &object_map_lock, &object_map, STONE_NOSNAP, 0, object_map.size(),
     OBJECT_NONEXISTENT, OBJECT_EXISTS, {}, false, &cond_ctx);
   {
     std::shared_lock image_locker{ictx->image_lock};
@@ -142,9 +142,9 @@ TEST_F(TestMockObjectMapUpdateRequest, UpdateSnapOnDisk) {
   uint64_t snap_id = ictx->snap_id;
   expect_update(ictx, snap_id, 0, 1, OBJECT_NONEXISTENT, OBJECT_EXISTS, 0);
 
-  ceph::shared_mutex object_map_lock =
-    ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock =
+    stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   object_map.resize(1);
 
   C_SaferCond cond_ctx;
@@ -168,17 +168,17 @@ TEST_F(TestMockObjectMapUpdateRequest, UpdateOnDiskError) {
   ASSERT_EQ(0, open_image(m_image_name, &ictx));
   ASSERT_EQ(0, acquire_exclusive_lock(*ictx));
 
-  expect_update(ictx, CEPH_NOSNAP, 0, 1, OBJECT_NONEXISTENT, OBJECT_EXISTS,
+  expect_update(ictx, STONE_NOSNAP, 0, 1, OBJECT_NONEXISTENT, OBJECT_EXISTS,
                 -EINVAL);
   expect_invalidate(ictx);
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   object_map.resize(1);
 
   C_SaferCond cond_ctx;
   AsyncRequest<> *req = new UpdateRequest<>(
-    *ictx, &object_map_lock, &object_map, CEPH_NOSNAP, 0, object_map.size(),
+    *ictx, &object_map_lock, &object_map, STONE_NOSNAP, 0, object_map.size(),
     OBJECT_NONEXISTENT, OBJECT_EXISTS, {}, false, &cond_ctx);
   {
     std::shared_lock image_locker{ictx->image_lock};
@@ -197,15 +197,15 @@ TEST_F(TestMockObjectMapUpdateRequest, RebuildSnapOnDisk) {
   ASSERT_EQ(0, open_image(m_image_name, &ictx));
   ASSERT_EQ(0, snap_create(*ictx, "snap1"));
   ASSERT_EQ(0, ictx->state->refresh_if_required());
-  ASSERT_EQ(CEPH_NOSNAP, ictx->snap_id);
+  ASSERT_EQ(STONE_NOSNAP, ictx->snap_id);
 
   uint64_t snap_id = ictx->snap_info.rbegin()->first;
   expect_update(ictx, snap_id, 0, 1, OBJECT_EXISTS_CLEAN,
                 boost::optional<uint8_t>(), 0);
   expect_unlock_exclusive_lock(*ictx);
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   object_map.resize(1);
 
   C_SaferCond cond_ctx;
@@ -236,20 +236,20 @@ TEST_F(TestMockObjectMapUpdateRequest, BatchUpdate) {
 
   expect_unlock_exclusive_lock(*ictx);
   InSequence seq;
-  expect_update(ictx, CEPH_NOSNAP, 0, 262144, OBJECT_NONEXISTENT, OBJECT_EXISTS,
+  expect_update(ictx, STONE_NOSNAP, 0, 262144, OBJECT_NONEXISTENT, OBJECT_EXISTS,
                 0);
-  expect_update(ictx, CEPH_NOSNAP, 262144, 524288, OBJECT_NONEXISTENT,
+  expect_update(ictx, STONE_NOSNAP, 262144, 524288, OBJECT_NONEXISTENT,
                 OBJECT_EXISTS, 0);
-  expect_update(ictx, CEPH_NOSNAP, 524288, 712312, OBJECT_NONEXISTENT,
+  expect_update(ictx, STONE_NOSNAP, 524288, 712312, OBJECT_NONEXISTENT,
                 OBJECT_EXISTS, 0);
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   object_map.resize(712312);
 
   C_SaferCond cond_ctx;
   AsyncRequest<> *req = new UpdateRequest<>(
-    *ictx, &object_map_lock, &object_map, CEPH_NOSNAP, 0, object_map.size(),
+    *ictx, &object_map_lock, &object_map, STONE_NOSNAP, 0, object_map.size(),
     OBJECT_NONEXISTENT, OBJECT_EXISTS, {}, false, &cond_ctx);
   {
     std::shared_lock image_locker{ictx->image_lock};
@@ -266,16 +266,16 @@ TEST_F(TestMockObjectMapUpdateRequest, IgnoreMissingObjectMap) {
   ASSERT_EQ(0, open_image(m_image_name, &ictx));
   ASSERT_EQ(0, acquire_exclusive_lock(*ictx));
 
-  expect_update(ictx, CEPH_NOSNAP, 0, 1, OBJECT_NONEXISTENT, OBJECT_EXISTS,
+  expect_update(ictx, STONE_NOSNAP, 0, 1, OBJECT_NONEXISTENT, OBJECT_EXISTS,
                 -ENOENT);
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   object_map.resize(1);
 
   C_SaferCond cond_ctx;
   AsyncRequest<> *req = new UpdateRequest<>(
-    *ictx, &object_map_lock, &object_map, CEPH_NOSNAP, 0, object_map.size(),
+    *ictx, &object_map_lock, &object_map, STONE_NOSNAP, 0, object_map.size(),
     OBJECT_NONEXISTENT, OBJECT_EXISTS, {}, true, &cond_ctx);
   {
     std::shared_lock image_locker{ictx->image_lock};

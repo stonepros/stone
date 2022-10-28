@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank <info@inktank.com>
  *
@@ -17,7 +17,7 @@
 
 using std::ostream;
 using std::list;
-using ceph::Formatter;
+using stone::Formatter;
 
 // -- HitSet --
 
@@ -46,7 +46,7 @@ HitSet::HitSet(const HitSet::Params& params)
   }
 }
 
-void HitSet::encode(ceph::buffer::list &bl) const
+void HitSet::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(1, 1, bl);
   encode(sealed, bl);
@@ -59,7 +59,7 @@ void HitSet::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void HitSet::decode(ceph::buffer::list::const_iterator& bl)
+void HitSet::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START(1, bl);
   decode(sealed, bl);
@@ -79,7 +79,7 @@ void HitSet::decode(ceph::buffer::list::const_iterator& bl)
     impl.reset(NULL);
     break;
   default:
-    throw ceph::buffer::malformed_input("unrecognized HitMap type");
+    throw stone::buffer::malformed_input("unrecognized HitMap type");
   }
   if (impl)
     impl->decode(bl);
@@ -99,16 +99,16 @@ void HitSet::generate_test_instances(list<HitSet*>& o)
   o.push_back(new HitSet);
   o.push_back(new HitSet(new BloomHitSet(10, .1, 1)));
   o.back()->insert(hobject_t());
-  o.back()->insert(hobject_t("asdf", "", CEPH_NOSNAP, 123, 1, ""));
-  o.back()->insert(hobject_t("qwer", "", CEPH_NOSNAP, 456, 1, ""));
+  o.back()->insert(hobject_t("asdf", "", STONE_NOSNAP, 123, 1, ""));
+  o.back()->insert(hobject_t("qwer", "", STONE_NOSNAP, 456, 1, ""));
   o.push_back(new HitSet(new ExplicitHashHitSet));
   o.back()->insert(hobject_t());
-  o.back()->insert(hobject_t("asdf", "", CEPH_NOSNAP, 123, 1, ""));
-  o.back()->insert(hobject_t("qwer", "", CEPH_NOSNAP, 456, 1, ""));
+  o.back()->insert(hobject_t("asdf", "", STONE_NOSNAP, 123, 1, ""));
+  o.back()->insert(hobject_t("qwer", "", STONE_NOSNAP, 456, 1, ""));
   o.push_back(new HitSet(new ExplicitObjectHitSet));
   o.back()->insert(hobject_t());
-  o.back()->insert(hobject_t("asdf", "", CEPH_NOSNAP, 123, 1, ""));
-  o.back()->insert(hobject_t("qwer", "", CEPH_NOSNAP, 456, 1, ""));
+  o.back()->insert(hobject_t("asdf", "", STONE_NOSNAP, 123, 1, ""));
+  o.back()->insert(hobject_t("qwer", "", STONE_NOSNAP, 456, 1, ""));
 }
 
 HitSet::Params::Params(const Params& o) noexcept
@@ -117,7 +117,7 @@ HitSet::Params::Params(const Params& o) noexcept
     create_impl(o.get_type());
     // it's annoying to write virtual operator= methods; use encode/decode
     // instead.
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     o.impl->encode(bl);
     auto p = bl.cbegin();
     impl->decode(p);
@@ -130,7 +130,7 @@ const HitSet::Params& HitSet::Params::operator=(const Params& o)
   if (o.impl) {
     // it's annoying to write virtual operator= methods; use encode/decode
     // instead.
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     o.impl->encode(bl);
     auto p = bl.cbegin();
     impl->decode(p);
@@ -138,7 +138,7 @@ const HitSet::Params& HitSet::Params::operator=(const Params& o)
   return *this;
 }
 
-void HitSet::Params::encode(ceph::buffer::list &bl) const
+void HitSet::Params::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(1, 1, bl);
   if (impl) {
@@ -171,13 +171,13 @@ bool HitSet::Params::create_impl(impl_type_t type)
   return true;
 }
 
-void HitSet::Params::decode(ceph::buffer::list::const_iterator& bl)
+void HitSet::Params::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START(1, bl);
   __u8 type;
   decode(type, bl);
   if (!create_impl((impl_type_t)type))
-    throw ceph::buffer::malformed_input("unrecognized HitMap type");
+    throw stone::buffer::malformed_input("unrecognized HitMap type");
   if (impl)
     impl->decode(bl);
   DECODE_FINISH(bl);
@@ -223,7 +223,7 @@ ostream& operator<<(ostream& out, const HitSet::Params& p) {
 void ExplicitHashHitSet::dump(Formatter *f) const {
   f->dump_unsigned("insert_count", count);
   f->open_array_section("hash_set");
-  for (ceph::unordered_set<uint32_t>::const_iterator p = hits.begin();
+  for (stone::unordered_set<uint32_t>::const_iterator p = hits.begin();
        p != hits.end();
        ++p)
     f->dump_unsigned("hash", *p);
@@ -233,7 +233,7 @@ void ExplicitHashHitSet::dump(Formatter *f) const {
 void ExplicitObjectHitSet::dump(Formatter *f) const {
   f->dump_unsigned("insert_count", count);
   f->open_array_section("set");
-  for (ceph::unordered_set<hobject_t>::const_iterator p = hits.begin();
+  for (stone::unordered_set<hobject_t>::const_iterator p = hits.begin();
        p != hits.end();
        ++p) {
     f->open_object_section("object");

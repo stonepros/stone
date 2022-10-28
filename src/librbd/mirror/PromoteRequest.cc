@@ -12,7 +12,7 @@
 #include "librbd/mirror/GetInfoRequest.h"
 #include "librbd/mirror/snapshot/PromoteRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::PromoteRequest: " << this \
                            << " " << __func__ << ": "
@@ -29,7 +29,7 @@ void PromoteRequest<I>::send() {
 
 template <typename I>
 void PromoteRequest<I>::get_info() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   auto ctx = create_context_callback<
@@ -42,7 +42,7 @@ void PromoteRequest<I>::get_info() {
 
 template <typename I>
 void PromoteRequest<I>::handle_get_info(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -69,7 +69,7 @@ void PromoteRequest<I>::handle_get_info(int r) {
 
 template <typename I>
 void PromoteRequest<I>::promote() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   auto ctx = create_context_callback<
@@ -88,7 +88,7 @@ void PromoteRequest<I>::promote() {
 
 template <typename I>
 void PromoteRequest<I>::handle_promote(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -101,7 +101,7 @@ void PromoteRequest<I>::handle_promote(int r) {
 
 template <typename I>
 void PromoteRequest<I>::finish(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

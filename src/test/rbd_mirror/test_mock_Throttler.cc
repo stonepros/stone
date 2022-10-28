@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -42,7 +42,7 @@ public:
 };
 
 TEST_F(TestMockThrottler, Single_Sync) {
-  MockThrottler throttler(g_ceph_context, "rbd_mirror_concurrent_image_syncs");
+  MockThrottler throttler(g_stone_context, "rbd_mirror_concurrent_image_syncs");
   C_SaferCond on_start;
   throttler.start_op("ns", "id", &on_start);
   ASSERT_EQ(0, on_start.wait());
@@ -50,7 +50,7 @@ TEST_F(TestMockThrottler, Single_Sync) {
 }
 
 TEST_F(TestMockThrottler, Multiple_Syncs) {
-  MockThrottler throttler(g_ceph_context, "rbd_mirror_concurrent_image_syncs");
+  MockThrottler throttler(g_stone_context, "rbd_mirror_concurrent_image_syncs");
   throttler.set_max_concurrent_ops(2);
 
   C_SaferCond on_start1;
@@ -73,7 +73,7 @@ TEST_F(TestMockThrottler, Multiple_Syncs) {
 }
 
 TEST_F(TestMockThrottler, Cancel_Running_Sync) {
-  MockThrottler throttler(g_ceph_context, "rbd_mirror_concurrent_image_syncs");
+  MockThrottler throttler(g_stone_context, "rbd_mirror_concurrent_image_syncs");
   C_SaferCond on_start;
   throttler.start_op("ns", "id", &on_start);
   ASSERT_EQ(0, on_start.wait());
@@ -82,7 +82,7 @@ TEST_F(TestMockThrottler, Cancel_Running_Sync) {
 }
 
 TEST_F(TestMockThrottler, Cancel_Waiting_Sync) {
-  MockThrottler throttler(g_ceph_context, "rbd_mirror_concurrent_image_syncs");
+  MockThrottler throttler(g_stone_context, "rbd_mirror_concurrent_image_syncs");
   throttler.set_max_concurrent_ops(1);
 
   C_SaferCond on_start1;
@@ -97,7 +97,7 @@ TEST_F(TestMockThrottler, Cancel_Waiting_Sync) {
 }
 
 TEST_F(TestMockThrottler, Cancel_Running_Sync_Start_Waiting) {
-  MockThrottler throttler(g_ceph_context, "rbd_mirror_concurrent_image_syncs");
+  MockThrottler throttler(g_stone_context, "rbd_mirror_concurrent_image_syncs");
   throttler.set_max_concurrent_ops(1);
 
   C_SaferCond on_start1;
@@ -113,7 +113,7 @@ TEST_F(TestMockThrottler, Cancel_Running_Sync_Start_Waiting) {
 }
 
 TEST_F(TestMockThrottler, Duplicate) {
-  MockThrottler throttler(g_ceph_context, "rbd_mirror_concurrent_image_syncs");
+  MockThrottler throttler(g_stone_context, "rbd_mirror_concurrent_image_syncs");
   throttler.set_max_concurrent_ops(1);
 
   C_SaferCond on_start1;
@@ -136,7 +136,7 @@ TEST_F(TestMockThrottler, Duplicate) {
 }
 
 TEST_F(TestMockThrottler, Duplicate2) {
-  MockThrottler throttler(g_ceph_context, "rbd_mirror_concurrent_image_syncs");
+  MockThrottler throttler(g_stone_context, "rbd_mirror_concurrent_image_syncs");
   throttler.set_max_concurrent_ops(2);
 
   C_SaferCond on_start1;
@@ -172,7 +172,7 @@ TEST_F(TestMockThrottler, Duplicate2) {
 }
 
 TEST_F(TestMockThrottler, Increase_Max_Concurrent_Syncs) {
-  MockThrottler throttler(g_ceph_context, "rbd_mirror_concurrent_image_syncs");
+  MockThrottler throttler(g_stone_context, "rbd_mirror_concurrent_image_syncs");
   throttler.set_max_concurrent_ops(2);
 
   C_SaferCond on_start1;
@@ -204,7 +204,7 @@ TEST_F(TestMockThrottler, Increase_Max_Concurrent_Syncs) {
 }
 
 TEST_F(TestMockThrottler, Decrease_Max_Concurrent_Syncs) {
-  MockThrottler throttler(g_ceph_context, "rbd_mirror_concurrent_image_syncs");
+  MockThrottler throttler(g_stone_context, "rbd_mirror_concurrent_image_syncs");
   throttler.set_max_concurrent_ops(4);
 
   C_SaferCond on_start1;
@@ -236,7 +236,7 @@ TEST_F(TestMockThrottler, Decrease_Max_Concurrent_Syncs) {
 }
 
 TEST_F(TestMockThrottler, Drain) {
-  MockThrottler throttler(g_ceph_context, "rbd_mirror_concurrent_image_syncs");
+  MockThrottler throttler(g_stone_context, "rbd_mirror_concurrent_image_syncs");
   throttler.set_max_concurrent_ops(1);
 
   C_SaferCond on_start1;

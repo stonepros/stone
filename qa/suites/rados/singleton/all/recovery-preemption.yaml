@@ -13,9 +13,9 @@ openstack:
       size: 20 # GB
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     conf:
       osd:
         osd recovery sleep: .1
@@ -34,27 +34,27 @@ tasks:
       - slow request
 - exec:
     osd.0:
-      - ceph osd pool create foo 128
-      - ceph osd pool application enable foo foo
+      - stone osd pool create foo 128
+      - stone osd pool application enable foo foo
       - sleep 5
-- ceph.healthy:
+- stone.healthy:
 - exec:
     osd.0:
       - rados -p foo bench 30 write -b 4096 --no-cleanup
-      - ceph osd out 0
+      - stone osd out 0
       - sleep 5
-      - ceph osd set noup
-- ceph.restart:
+      - stone osd set noup
+- stone.restart:
     daemons: [osd.1]
     wait-for-up: false
     wait-for-healthy: false
 - exec:
     osd.0:
       - rados -p foo bench 3 write -b 4096 --no-cleanup
-      - ceph osd unset noup
+      - stone osd unset noup
       - sleep 10
-      - for f in 0 1 2 3 ; do sudo ceph daemon osd.$f config set osd_recovery_sleep 0 ; sudo ceph daemon osd.$f config set osd_recovery_max_active 20 ; done
-- ceph.healthy:
+      - for f in 0 1 2 3 ; do sudo stone daemon osd.$f config set osd_recovery_sleep 0 ; sudo stone daemon osd.$f config set osd_recovery_max_active 20 ; done
+- stone.healthy:
 - exec:
     osd.0:
-      - egrep '(defer backfill|defer recovery)' /var/log/ceph/ceph-osd.*.log
+      - egrep '(defer backfill|defer recovery)' /var/log/stone/stone-osd.*.log

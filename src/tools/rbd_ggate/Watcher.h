@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_GGATE_WATCHER_H
-#define CEPH_RBD_GGATE_WATCHER_H
+#ifndef STONE_RBD_GGATE_WATCHER_H
+#define STONE_RBD_GGATE_WATCHER_H
 
 #include "include/rbd/librbd.hpp"
 
@@ -30,5 +30,5 @@ private:
 } // namespace ggate
 } // namespace rbd
 
-#endif // CEPH_RBD_GGATE_WATCHER_H
+#endif // STONE_RBD_GGATE_WATCHER_H
 

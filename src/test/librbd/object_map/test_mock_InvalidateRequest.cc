@@ -28,12 +28,12 @@ TEST_F(TestMockObjectMapInvalidateRequest, UpdatesInMemoryFlag) {
   librbd::ImageCtx *ictx;
   ASSERT_EQ(0, open_image(m_image_name, &ictx));
   bool flags_set;
-  ASSERT_EQ(0, ictx->test_flags(CEPH_NOSNAP,
+  ASSERT_EQ(0, ictx->test_flags(STONE_NOSNAP,
                                 RBD_FLAG_OBJECT_MAP_INVALID, &flags_set));
   ASSERT_FALSE(flags_set);
 
   C_SaferCond cond_ctx;
-  AsyncRequest<> *request = new InvalidateRequest<>(*ictx, CEPH_NOSNAP, true, &cond_ctx);
+  AsyncRequest<> *request = new InvalidateRequest<>(*ictx, STONE_NOSNAP, true, &cond_ctx);
 
   EXPECT_CALL(get_mock_io_ctx(ictx->md_ctx),
               exec(ictx->header_oid, _, StrEq("rbd"), StrEq("set_flags"), _, _,
@@ -47,7 +47,7 @@ TEST_F(TestMockObjectMapInvalidateRequest, UpdatesInMemoryFlag) {
   }
   ASSERT_EQ(0, cond_ctx.wait());
 
-  ASSERT_EQ(0, ictx->test_flags(CEPH_NOSNAP,
+  ASSERT_EQ(0, ictx->test_flags(STONE_NOSNAP,
                                 RBD_FLAG_OBJECT_MAP_INVALID, &flags_set));
   ASSERT_TRUE(flags_set);
 }
@@ -60,7 +60,7 @@ TEST_F(TestMockObjectMapInvalidateRequest, UpdatesHeadOnDiskFlag) {
   ASSERT_EQ(0, acquire_exclusive_lock(*ictx));
 
   C_SaferCond cond_ctx;
-  AsyncRequest<> *request = new InvalidateRequest<>(*ictx, CEPH_NOSNAP, false, &cond_ctx);
+  AsyncRequest<> *request = new InvalidateRequest<>(*ictx, STONE_NOSNAP, false, &cond_ctx);
 
   EXPECT_CALL(get_mock_io_ctx(ictx->md_ctx),
               exec(ictx->header_oid, _, StrEq("rbd"), StrEq("set_flags"), _, _,
@@ -112,7 +112,7 @@ TEST_F(TestMockObjectMapInvalidateRequest, ErrorOnDiskUpdateWithoutLock) {
   ASSERT_EQ(0, open_image(m_image_name, &ictx));
 
   C_SaferCond cond_ctx;
-  AsyncRequest<> *request = new InvalidateRequest<>(*ictx, CEPH_NOSNAP, false, &cond_ctx);
+  AsyncRequest<> *request = new InvalidateRequest<>(*ictx, STONE_NOSNAP, false, &cond_ctx);
 
   EXPECT_CALL(get_mock_io_ctx(ictx->md_ctx),
               exec(ictx->header_oid, _, StrEq("rbd"), StrEq("set_flags"), _, _,
@@ -137,7 +137,7 @@ TEST_F(TestMockObjectMapInvalidateRequest, ErrorOnDiskUpdateFailure) {
   ASSERT_EQ(0, acquire_exclusive_lock(*ictx));
 
   C_SaferCond cond_ctx;
-  AsyncRequest<> *request = new InvalidateRequest<>(*ictx, CEPH_NOSNAP, false, &cond_ctx);
+  AsyncRequest<> *request = new InvalidateRequest<>(*ictx, STONE_NOSNAP, false, &cond_ctx);
 
   EXPECT_CALL(get_mock_io_ctx(ictx->md_ctx),
               exec(ictx->header_oid, _, StrEq("rbd"), StrEq("set_flags"), _, _,

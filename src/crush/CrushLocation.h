@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CRUSH_LOCATION_H
-#define CEPH_CRUSH_LOCATION_H
+#ifndef STONE_CRUSH_LOCATION_H
+#define STONE_CRUSH_LOCATION_H
 
 #include <iosfwd>
 #include <map>

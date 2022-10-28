@@ -1,5 +1,5 @@
-#ifndef CEPH_INTTYPES_H
-#define CEPH_INTTYPES_H
+#ifndef STONE_INTTYPES_H
+#define STONE_INTTYPES_H
 
 #include "acconfig.h"
 

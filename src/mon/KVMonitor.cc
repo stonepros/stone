@@ -6,7 +6,7 @@
 #include "include/stringify.h"
 #include "messages/MKVData.h"
 
-#define dout_subsys ceph_subsys_mon
+#define dout_subsys stone_subsys_mon
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, mon, this)
 
@@ -410,7 +410,7 @@ void KVMonitor::do_osd_new(
   const uuid_d& uuid,
   const string& dmcrypt_key)
 {
-  ceph_assert(paxos.is_plugged());
+  stone_assert(paxos.is_plugged());
 
   string dmcrypt_key_prefix = _get_dmcrypt_prefix(uuid, "luks");
   bufferlist dmcrypt_key_value;
@@ -487,11 +487,11 @@ bool KVMonitor::maybe_send_update(Subscription *sub)
     for (version_t cur = sub->next; cur <= version; ++cur) {
       bufferlist bl;
       int err = get_version(cur, bl);
-      ceph_assert(err == 0);
+      stone_assert(err == 0);
 
-      std::map<std::string,boost::optional<ceph::buffer::list>> pending;
+      std::map<std::string,boost::optional<stone::buffer::list>> pending;
       auto p = bl.cbegin();
-      ceph::decode(pending, p);
+      stone::decode(pending, p);
 
       for (auto& i : pending) {
 	if (i.first.find(m->prefix) == 0) {

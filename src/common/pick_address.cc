@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Inktank
  *
@@ -25,7 +25,7 @@
 
 #include "include/ipaddr.h"
 #include "include/str_list.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #ifndef WITH_SEASTAR
 #include "common/config.h"
 #include "common/config_obs.h"
@@ -42,7 +42,7 @@ typedef uint32_t in_addr_t;
 #define IN_LOOPBACKNET 127
 #endif
 
-#define dout_subsys ceph_subsys_
+#define dout_subsys stone_subsys_
 
 using std::string;
 using std::vector;
@@ -99,12 +99,12 @@ bool matches_with_net(const ifaddrs& ifa,
 {
   switch (net->sa_family) {
   case AF_INET:
-    if (ipv & CEPH_PICK_ADDRESS_IPV4) {
+    if (ipv & STONE_PICK_ADDRESS_IPV4) {
       return matches_ipv4_in_subnet(ifa, (struct sockaddr_in*)net, prefix_len);
     }
     break;
   case AF_INET6:
-    if (ipv & CEPH_PICK_ADDRESS_IPV6) {
+    if (ipv & STONE_PICK_ADDRESS_IPV6) {
       return matches_ipv6_in_subnet(ifa, (struct sockaddr_in6*)net, prefix_len);
     }
     break;
@@ -112,7 +112,7 @@ bool matches_with_net(const ifaddrs& ifa,
   return false;
 }
 
-bool matches_with_net(CephContext *cct,
+bool matches_with_net(StoneContext *cct,
                       const ifaddrs& ifa,
                       const std::string& s,
                       unsigned ipv)
@@ -145,7 +145,7 @@ int grade_with_numa_node(const ifaddrs& ifa, int numa_node)
 }
 
 const struct sockaddr *find_ip_in_subnet_list(
-  CephContext *cct,
+  StoneContext *cct,
   const struct ifaddrs *ifa,
   unsigned ipv,
   const std::string &networks,
@@ -207,7 +207,7 @@ struct Observer : public md_config_obs_t {
   }
 };
 
-static void fill_in_one_address(CephContext *cct,
+static void fill_in_one_address(StoneContext *cct,
 				const struct ifaddrs *ifa,
 				const string &networks,
 				const string &interfaces,
@@ -217,7 +217,7 @@ static void fill_in_one_address(CephContext *cct,
   const struct sockaddr *found = find_ip_in_subnet_list(
     cct,
     ifa,
-    CEPH_PICK_ADDRESS_IPV4|CEPH_PICK_ADDRESS_IPV6,
+    STONE_PICK_ADDRESS_IPV4|STONE_PICK_ADDRESS_IPV6,
     networks,
     interfaces,
     numa_node);
@@ -253,7 +253,7 @@ static void fill_in_one_address(CephContext *cct,
   cct->_conf.remove_observer(&obs);
 }
 
-void pick_addresses(CephContext *cct, int needs)
+void pick_addresses(StoneContext *cct, int needs)
 {
   auto public_addr = cct->_conf.get_val<entity_addr_t>("public_addr");
   auto public_network = cct->_conf.get_val<std::string>("public_network");
@@ -272,13 +272,13 @@ void pick_addresses(CephContext *cct, int needs)
     exit(1);
   }
   auto free_ifa = make_scope_guard([ifa] { freeifaddrs(ifa); });
-  if ((needs & CEPH_PICK_ADDRESS_PUBLIC) &&
+  if ((needs & STONE_PICK_ADDRESS_PUBLIC) &&
     public_addr.is_blank_ip() && !public_network.empty()) {
     fill_in_one_address(cct, ifa, public_network, public_network_interface,
 			"public_addr");
   }
 
-  if ((needs & CEPH_PICK_ADDRESS_CLUSTER) && cluster_addr.is_blank_ip()) {
+  if ((needs & STONE_PICK_ADDRESS_CLUSTER) && cluster_addr.is_blank_ip()) {
     if (!cluster_network.empty()) {
       fill_in_one_address(cct, ifa, cluster_network, cluster_network_interface,
 			  "cluster_addr");
@@ -295,7 +295,7 @@ void pick_addresses(CephContext *cct, int needs)
 #endif	// !WITH_SEASTAR
 
 static int fill_in_one_address(
-  CephContext *cct,
+  StoneContext *cct,
   const struct ifaddrs *ifa,
   unsigned ipv,
   const string &networks,
@@ -309,9 +309,9 @@ static int fill_in_one_address(
 							numa_node);
   if (!found) {
     std::string ip_type = "";
-    if ((ipv & CEPH_PICK_ADDRESS_IPV4) && (ipv & CEPH_PICK_ADDRESS_IPV6)) {
+    if ((ipv & STONE_PICK_ADDRESS_IPV4) && (ipv & STONE_PICK_ADDRESS_IPV6)) {
       ip_type = "IPv4 or IPv6";
-    } else if (ipv & CEPH_PICK_ADDRESS_IPV4) {
+    } else if (ipv & STONE_PICK_ADDRESS_IPV4) {
       ip_type = "IPv4";
     } else {
       ip_type = "IPv6";
@@ -348,7 +348,7 @@ static int fill_in_one_address(
 }
 
 int pick_addresses(
-  CephContext *cct,
+  StoneContext *cct,
   unsigned flags,
   struct ifaddrs *ifa,
   entity_addrvec_t *addrs,
@@ -356,49 +356,49 @@ int pick_addresses(
 {
   addrs->v.clear();
 
-  unsigned addrt = (flags & (CEPH_PICK_ADDRESS_PUBLIC |
-			     CEPH_PICK_ADDRESS_CLUSTER));
+  unsigned addrt = (flags & (STONE_PICK_ADDRESS_PUBLIC |
+			     STONE_PICK_ADDRESS_CLUSTER));
   if (addrt == 0 ||
-      addrt == (CEPH_PICK_ADDRESS_PUBLIC |
-		CEPH_PICK_ADDRESS_CLUSTER)) {
+      addrt == (STONE_PICK_ADDRESS_PUBLIC |
+		STONE_PICK_ADDRESS_CLUSTER)) {
     return -EINVAL;
   }
-  unsigned msgrv = flags & (CEPH_PICK_ADDRESS_MSGR1 |
-			    CEPH_PICK_ADDRESS_MSGR2);
+  unsigned msgrv = flags & (STONE_PICK_ADDRESS_MSGR1 |
+			    STONE_PICK_ADDRESS_MSGR2);
   if (msgrv == 0) {
     if (cct->_conf.get_val<bool>("ms_bind_msgr1")) {
-      msgrv |= CEPH_PICK_ADDRESS_MSGR1;
+      msgrv |= STONE_PICK_ADDRESS_MSGR1;
     }
     if (cct->_conf.get_val<bool>("ms_bind_msgr2")) {
-      msgrv |= CEPH_PICK_ADDRESS_MSGR2;
+      msgrv |= STONE_PICK_ADDRESS_MSGR2;
     }
     if (msgrv == 0) {
       return -EINVAL;
     }
   }
-  unsigned ipv = flags & (CEPH_PICK_ADDRESS_IPV4 |
-			  CEPH_PICK_ADDRESS_IPV6);
+  unsigned ipv = flags & (STONE_PICK_ADDRESS_IPV4 |
+			  STONE_PICK_ADDRESS_IPV6);
   if (ipv == 0) {
     if (cct->_conf.get_val<bool>("ms_bind_ipv4")) {
-      ipv |= CEPH_PICK_ADDRESS_IPV4;
+      ipv |= STONE_PICK_ADDRESS_IPV4;
     }
     if (cct->_conf.get_val<bool>("ms_bind_ipv6")) {
-      ipv |= CEPH_PICK_ADDRESS_IPV6;
+      ipv |= STONE_PICK_ADDRESS_IPV6;
     }
     if (ipv == 0) {
       return -EINVAL;
     }
     if (cct->_conf.get_val<bool>("ms_bind_prefer_ipv4")) {
-      flags |= CEPH_PICK_ADDRESS_PREFER_IPV4;
+      flags |= STONE_PICK_ADDRESS_PREFER_IPV4;
     } else {
-      flags &= ~CEPH_PICK_ADDRESS_PREFER_IPV4;
+      flags &= ~STONE_PICK_ADDRESS_PREFER_IPV4;
     }
   }
 
   entity_addr_t addr;
   string networks;
   string interfaces;
-  if (addrt & CEPH_PICK_ADDRESS_PUBLIC) {
+  if (addrt & STONE_PICK_ADDRESS_PUBLIC) {
     addr = cct->_conf.get_val<entity_addr_t>("public_addr");
     networks = cct->_conf.get_val<std::string>("public_network");
     interfaces =
@@ -418,25 +418,25 @@ int pick_addresses(
   }
   if (addr.is_blank_ip() &&
       !networks.empty()) {
-    int ipv4_r = !(ipv & CEPH_PICK_ADDRESS_IPV4) ? 0 : -1;
-    int ipv6_r = !(ipv & CEPH_PICK_ADDRESS_IPV6) ? 0 : -1;
+    int ipv4_r = !(ipv & STONE_PICK_ADDRESS_IPV4) ? 0 : -1;
+    int ipv6_r = !(ipv & STONE_PICK_ADDRESS_IPV6) ? 0 : -1;
     // note: pass in ipv to filter the matching addresses
-    if ((ipv & CEPH_PICK_ADDRESS_IPV4) &&
-	(flags & CEPH_PICK_ADDRESS_PREFER_IPV4)) {
-      ipv4_r = fill_in_one_address(cct, ifa, CEPH_PICK_ADDRESS_IPV4,
+    if ((ipv & STONE_PICK_ADDRESS_IPV4) &&
+	(flags & STONE_PICK_ADDRESS_PREFER_IPV4)) {
+      ipv4_r = fill_in_one_address(cct, ifa, STONE_PICK_ADDRESS_IPV4,
 				   networks, interfaces,
 				   addrs,
 				   preferred_numa_node);
     }
-    if (ipv & CEPH_PICK_ADDRESS_IPV6) {
-      ipv6_r = fill_in_one_address(cct, ifa, CEPH_PICK_ADDRESS_IPV6,
+    if (ipv & STONE_PICK_ADDRESS_IPV6) {
+      ipv6_r = fill_in_one_address(cct, ifa, STONE_PICK_ADDRESS_IPV6,
 				   networks, interfaces,
 				   addrs,
 				   preferred_numa_node);
     }
-    if ((ipv & CEPH_PICK_ADDRESS_IPV4) &&
-	!(flags & CEPH_PICK_ADDRESS_PREFER_IPV4)) {
-      ipv4_r = fill_in_one_address(cct, ifa, CEPH_PICK_ADDRESS_IPV4,
+    if ((ipv & STONE_PICK_ADDRESS_IPV4) &&
+	!(flags & STONE_PICK_ADDRESS_PREFER_IPV4)) {
+      ipv4_r = fill_in_one_address(cct, ifa, STONE_PICK_ADDRESS_IPV4,
 				   networks, interfaces,
 				   addrs,
 				   preferred_numa_node);
@@ -451,39 +451,39 @@ int pick_addresses(
   // ipv4 and/or ipv6?
   if (addrs->v.empty()) {
     addr.set_type(entity_addr_t::TYPE_MSGR2);
-    if ((ipv & CEPH_PICK_ADDRESS_IPV4) &&
-	(flags & CEPH_PICK_ADDRESS_PREFER_IPV4)) {
+    if ((ipv & STONE_PICK_ADDRESS_IPV4) &&
+	(flags & STONE_PICK_ADDRESS_PREFER_IPV4)) {
       addr.set_family(AF_INET);
       addrs->v.push_back(addr);
     }
-    if (ipv & CEPH_PICK_ADDRESS_IPV6) {
+    if (ipv & STONE_PICK_ADDRESS_IPV6) {
       addr.set_family(AF_INET6);
       addrs->v.push_back(addr);
     }
-    if ((ipv & CEPH_PICK_ADDRESS_IPV4) &&
-	!(flags & CEPH_PICK_ADDRESS_PREFER_IPV4)) {
+    if ((ipv & STONE_PICK_ADDRESS_IPV4) &&
+	!(flags & STONE_PICK_ADDRESS_PREFER_IPV4)) {
       addr.set_family(AF_INET);
       addrs->v.push_back(addr);
     }
   }
 
   // msgr2 or legacy or both?
-  if (msgrv == (CEPH_PICK_ADDRESS_MSGR1 | CEPH_PICK_ADDRESS_MSGR2)) {
+  if (msgrv == (STONE_PICK_ADDRESS_MSGR1 | STONE_PICK_ADDRESS_MSGR2)) {
     vector<entity_addr_t> v;
     v.swap(addrs->v);
     for (auto a : v) {
       a.set_type(entity_addr_t::TYPE_MSGR2);
-      if (flags & CEPH_PICK_ADDRESS_DEFAULT_MON_PORTS) {
-	a.set_port(CEPH_MON_PORT_IANA);
+      if (flags & STONE_PICK_ADDRESS_DEFAULT_MON_PORTS) {
+	a.set_port(STONE_MON_PORT_IANA);
       }
       addrs->v.push_back(a);
       a.set_type(entity_addr_t::TYPE_LEGACY);
-      if (flags & CEPH_PICK_ADDRESS_DEFAULT_MON_PORTS) {
-	a.set_port(CEPH_MON_PORT_LEGACY);
+      if (flags & STONE_PICK_ADDRESS_DEFAULT_MON_PORTS) {
+	a.set_port(STONE_MON_PORT_LEGACY);
       }
       addrs->v.push_back(a);
     }
-  } else if (msgrv == CEPH_PICK_ADDRESS_MSGR1) {
+  } else if (msgrv == STONE_PICK_ADDRESS_MSGR1) {
     for (auto& a : addrs->v) {
       a.set_type(entity_addr_t::TYPE_LEGACY);
     }
@@ -497,7 +497,7 @@ int pick_addresses(
 }
 
 int pick_addresses(
-  CephContext *cct,
+  StoneContext *cct,
   unsigned flags,
   entity_addrvec_t *addrs,
   int preferred_numa_node)
@@ -516,7 +516,7 @@ int pick_addresses(
   return r;
 }
 
-std::string pick_iface(CephContext *cct, const struct sockaddr_storage &network)
+std::string pick_iface(StoneContext *cct, const struct sockaddr_storage &network)
 {
   struct ifaddrs *ifa;
   int r = getifaddrs(&ifa);
@@ -529,7 +529,7 @@ std::string pick_iface(CephContext *cct, const struct sockaddr_storage &network)
   const unsigned int prefix_len = std::max(sizeof(in_addr::s_addr), sizeof(in6_addr::s6_addr)) * CHAR_BIT;
   for (auto addr = ifa; addr != nullptr; addr = addr->ifa_next) {
     if (matches_with_net(*ifa, (const struct sockaddr *) &network, prefix_len,
-			 CEPH_PICK_ADDRESS_IPV4 | CEPH_PICK_ADDRESS_IPV6)) {
+			 STONE_PICK_ADDRESS_IPV4 | STONE_PICK_ADDRESS_IPV6)) {
       return addr->ifa_name;
     }
   }
@@ -537,7 +537,7 @@ std::string pick_iface(CephContext *cct, const struct sockaddr_storage &network)
 }
 
 
-bool have_local_addr(CephContext *cct, const std::list<entity_addr_t>& ls, entity_addr_t *match)
+bool have_local_addr(StoneContext *cct, const std::list<entity_addr_t>& ls, entity_addr_t *match)
 {
   struct ifaddrs *ifa;
   int r = getifaddrs(&ifa);

@@ -92,7 +92,7 @@ endif (WITH_RADOSGW)
 set(cls_refcount_srcs
   refcount/cls_refcount.cc
   refcount/cls_refcount_ops.cc
-  ${CMAKE_SOURCE_DIR}/src/common/ceph_json.cc)
+  ${CMAKE_SOURCE_DIR}/src/common/stone_json.cc)
 add_library(cls_refcount SHARED ${cls_refcount_srcs})
 target_link_libraries(cls_refcount json_spirit)
 set_target_properties(cls_refcount PROPERTIES
@@ -195,7 +195,7 @@ if (WITH_RADOSGW)
     rgw/cls_rgw.cc
     rgw/cls_rgw_ops.cc
     rgw/cls_rgw_types.cc
-    ${CMAKE_SOURCE_DIR}/src/common/ceph_json.cc)
+    ${CMAKE_SOURCE_DIR}/src/common/stone_json.cc)
   add_library(cls_rgw SHARED ${cls_rgw_srcs})
   target_link_libraries(cls_rgw json_spirit)
   set_target_properties(cls_rgw PROPERTIES
@@ -213,23 +213,23 @@ if (WITH_RADOSGW)
 
 endif (WITH_RADOSGW)
 
-# cls_cephfs
-if (WITH_CEPHFS)
-  set(cls_cephfs_srcs
-    cephfs/cls_cephfs.cc)
-  add_library(cls_cephfs SHARED ${cls_cephfs_srcs})
-  set_target_properties(cls_cephfs PROPERTIES
+# cls_stonefs
+if (WITH_STONEFS)
+  set(cls_stonefs_srcs
+    stonefs/cls_stonefs.cc)
+  add_library(cls_stonefs SHARED ${cls_stonefs_srcs})
+  set_target_properties(cls_stonefs PROPERTIES
     VERSION "1.0.0"
     SOVERSION "1"
     INSTALL_RPATH ""
     CXX_VISIBILITY_PRESET hidden)
-  install(TARGETS cls_cephfs DESTINATION ${cls_dir})
+  install(TARGETS cls_stonefs DESTINATION ${cls_dir})
 
-  set(cls_cephfs_client_srcs
-    cephfs/cls_cephfs_client.cc)
-  add_library(cls_cephfs_client STATIC ${cls_cephfs_client_srcs})
+  set(cls_stonefs_client_srcs
+    stonefs/cls_stonefs_client.cc)
+  add_library(cls_stonefs_client STATIC ${cls_stonefs_client_srcs})
 
-endif (WITH_CEPHFS)
+endif (WITH_STONEFS)
 
 if (NOT WIN32)
   # cls_lua
@@ -279,7 +279,7 @@ install(TARGETS cls_cas DESTINATION ${cls_dir})
 set(cls_queue_srcs
   queue/cls_queue.cc
   queue/cls_queue_src.cc
-  ${CMAKE_SOURCE_DIR}/src/common/ceph_json.cc)
+  ${CMAKE_SOURCE_DIR}/src/common/stone_json.cc)
 add_library(cls_queue SHARED ${cls_queue_srcs})
 set_target_properties(cls_queue PROPERTIES
   VERSION "1.0.0"
@@ -297,7 +297,7 @@ if (WITH_RADOSGW)
   set(cls_rgw_gc_srcs
     rgw_gc/cls_rgw_gc.cc
     queue/cls_queue_src.cc
-    ${CMAKE_SOURCE_DIR}/src/common/ceph_json.cc)
+    ${CMAKE_SOURCE_DIR}/src/common/stone_json.cc)
   add_library(cls_rgw_gc SHARED ${cls_rgw_gc_srcs})
   set_target_properties(cls_rgw_gc PROPERTIES
     VERSION "1.0.0"
@@ -316,7 +316,7 @@ endif (WITH_RADOSGW)
 set(cls_2pc_queue_srcs
   2pc_queue/cls_2pc_queue.cc
   queue/cls_queue_src.cc
-  ${CMAKE_SOURCE_DIR}/src/common/ceph_json.cc)
+  ${CMAKE_SOURCE_DIR}/src/common/stone_json.cc)
 add_library(cls_2pc_queue SHARED ${cls_2pc_queue_srcs})
 set_target_properties(cls_2pc_queue PROPERTIES
   VERSION "1.0.0"

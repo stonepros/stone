@@ -33,12 +33,12 @@ struct TestMockCryptoLuksLoadRequest : public TestMockFixture {
   std::string passphrase = passphrase_cstr;
 
   MockImageCtx* mock_image_ctx;
-  ceph::ref_t<CryptoInterface> crypto;
+  stone::ref_t<CryptoInterface> crypto;
   MockLoadRequest* mock_load_request;
   C_SaferCond finished_cond;
   Context *on_finish = &finished_cond;
   Context* image_read_request;
-  ceph::bufferlist header_bl;
+  stone::bufferlist header_bl;
   uint64_t data_offset;
 
   void SetUp() override {

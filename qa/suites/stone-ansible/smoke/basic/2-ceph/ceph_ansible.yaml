@@ -1,0 +1,36 @@
+meta:
+- desc: "Build the stone cluster using stone-ansible"
+
+overrides:
+   stone_ansible:
+     ansible-version: '2.9'
+     vars:
+        stone_conf_overrides:
+          global:
+            osd default pool size: 2
+            mon pg warn min per osd: 2
+            osd pool default pg num: 64
+            osd pool default pgp num: 64
+            mon_max_pg_per_osd: 1024
+        stone_test: true
+        stone_stable_release: nautilus
+        osd_scenario: lvm
+        journal_size: 1024
+        osd_auto_discovery: false
+        stone_origin: repository
+        stone_repository: dev
+        stone_mgr_modules:
+          - status
+          - restful
+        stonefs_pools:
+          - name: "stonefs_data"
+            pg_num: "64"
+            rule_name: "replicated_rule"
+          - name: "stonefs_metadata"
+            pg_num: "64"
+            rule_name: "replicated_rule"
+        dashboard_enabled: false
+tasks:
+- ssh-keys:
+- stone_ansible:
+- install.ship_utilities:

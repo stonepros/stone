@@ -20,8 +20,8 @@
 #include "librbd/trash/MoveRequest.h"
 #include "tools/rbd_mirror/image_deleter/Types.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_deleter::TrashMoveRequest: " \
                            << this << " " << __func__ << ": "
@@ -49,7 +49,7 @@ void TrashMoveRequest<I>::get_mirror_image_id() {
     &TrashMoveRequest<I>::handle_get_mirror_image_id>(this);
   m_out_bl.clear();
   int r = m_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -130,7 +130,7 @@ void TrashMoveRequest<I>::disable_mirror_image() {
     TrashMoveRequest<I>,
     &TrashMoveRequest<I>::handle_disable_mirror_image>(this);
   int r = m_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -219,7 +219,7 @@ void TrashMoveRequest<I>::reset_journal() {
   // TODO use Journal thread pool for journal ops until converted to ASIO
   ContextWQ* context_wq;
   librbd::Journal<>::get_work_queue(
-    reinterpret_cast<CephContext*>(m_io_ctx.cct()), &context_wq);
+    reinterpret_cast<StoneContext*>(m_io_ctx.cct()), &context_wq);
 
   // ensure that if the image is recovered any peers will split-brain
   auto ctx = create_context_callback<
@@ -288,7 +288,7 @@ template <typename I>
 void TrashMoveRequest<I>::trash_move() {
   dout(10) << dendl;
 
-  utime_t delete_time{ceph_clock_now()};
+  utime_t delete_time{stone_clock_now()};
   utime_t deferment_end_time{delete_time};
   deferment_end_time +=
     m_image_ctx->config.template get_val<uint64_t>("rbd_mirroring_delete_delay");

@@ -13,8 +13,8 @@
 #include "librbd/journal/Types.h"
 #include <boost/variant.hpp>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::journal::" \
@@ -41,7 +41,7 @@ EventPreprocessor<I>::EventPreprocessor(I &local_image_ctx,
 
 template <typename I>
 EventPreprocessor<I>::~EventPreprocessor() {
-  ceph_assert(!m_in_progress);
+  stone_assert(!m_in_progress);
 }
 
 template <typename I>
@@ -55,7 +55,7 @@ bool EventPreprocessor<I>::is_required(const EventEntry &event_entry) {
 template <typename I>
 void EventPreprocessor<I>::preprocess(EventEntry *event_entry,
                                       Context *on_finish) {
-  ceph_assert(!m_in_progress);
+  stone_assert(!m_in_progress);
   m_in_progress = true;
   m_event_entry = event_entry;
   m_on_finish = on_finish;
@@ -123,7 +123,7 @@ int EventPreprocessor<I>::preprocess_snap_rename(
   if (snap_id_it == m_local_image_ctx.snap_ids.end()) {
     dout(20) << "cannot map remote snapshot '" << event.src_snap_name << "' "
              << "to local snapshot" << dendl;
-    event.snap_id = CEPH_NOSNAP;
+    event.snap_id = STONE_NOSNAP;
     return -ENOENT;
   }
 

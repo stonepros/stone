@@ -169,7 +169,7 @@ TEST_F(TestMockImageSyncSyncPointPruneRequest, SyncInProgressMissingSnapSuccess)
   expect_get_sync_points(mock_sync_point_handler);
 
   InSequence seq;
-  expect_get_snap_id(mock_remote_image_ctx, "snap1", CEPH_NOSNAP);
+  expect_get_snap_id(mock_remote_image_ctx, "snap1", STONE_NOSNAP);
   expect_snap_remove(mock_remote_image_ctx, "snap2", 0);
   expect_snap_remove(mock_remote_image_ctx, "snap1", 0);
   expect_image_refresh(mock_remote_image_ctx, 0);

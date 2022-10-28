@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 XSky <haomai@xsky.com>
  *
@@ -71,21 +71,21 @@ class NetworkWorkerTest : public ::testing::TestWithParam<const char*> {
   void SetUp() override {
     cerr << __func__ << " start set up " << GetParam() << std::endl;
     if (strncmp(GetParam(), "dpdk", 4)) {
-      g_ceph_context->_conf.set_val("ms_type", "async+posix");
+      g_stone_context->_conf.set_val("ms_type", "async+posix");
       addr = "127.0.0.1:15000";
       port_addr = "127.0.0.1:15001";
     } else {
-      g_ceph_context->_conf.set_val_or_die("ms_type", "async+dpdk");
-      g_ceph_context->_conf.set_val_or_die("ms_dpdk_debug_allow_loopback", "true");
-      g_ceph_context->_conf.set_val_or_die("ms_async_op_threads", "2");
-      g_ceph_context->_conf.set_val_or_die("ms_dpdk_coremask", "0x7");
-      g_ceph_context->_conf.set_val_or_die("ms_dpdk_host_ipv4_addr", "172.16.218.3");
-      g_ceph_context->_conf.set_val_or_die("ms_dpdk_gateway_ipv4_addr", "172.16.218.2");
-      g_ceph_context->_conf.set_val_or_die("ms_dpdk_netmask_ipv4_addr", "255.255.255.0");
+      g_stone_context->_conf.set_val_or_die("ms_type", "async+dpdk");
+      g_stone_context->_conf.set_val_or_die("ms_dpdk_debug_allow_loopback", "true");
+      g_stone_context->_conf.set_val_or_die("ms_async_op_threads", "2");
+      g_stone_context->_conf.set_val_or_die("ms_dpdk_coremask", "0x7");
+      g_stone_context->_conf.set_val_or_die("ms_dpdk_host_ipv4_addr", "172.16.218.3");
+      g_stone_context->_conf.set_val_or_die("ms_dpdk_gateway_ipv4_addr", "172.16.218.2");
+      g_stone_context->_conf.set_val_or_die("ms_dpdk_netmask_ipv4_addr", "255.255.255.0");
       addr = "172.16.218.3:15000";
       port_addr = "172.16.218.3:15001";
     }
-    stack = NetworkStack::create(g_ceph_context, GetParam());
+    stack = NetworkStack::create(g_stone_context, GetParam());
     stack->start();
   }
   void TearDown() override {
@@ -154,12 +154,12 @@ class C_poll : public EventCallback {
     woken = true;
   }
   bool poll(int milliseconds) {
-    auto start = ceph::coarse_real_clock::now();
+    auto start = stone::coarse_real_clock::now();
     while (!woken) {
       center->process_events(sleepus);
       usleep(sleepus);
       auto r = std::chrono::duration_cast<std::chrono::milliseconds>(
-              ceph::coarse_real_clock::now() - start);
+              stone::coarse_real_clock::now() - start);
       if (r >= std::chrono::milliseconds(milliseconds))
         break;
     }
@@ -968,7 +968,7 @@ class StressFactory {
   }
 
   void add_client(ThreadData *t_data) {
-    static ceph::mutex lock = ceph::make_mutex("add_client_lock");
+    static stone::mutex lock = stone::make_mutex("add_client_lock");
     std::lock_guard l{lock};
     ConnectedSocket sock;
     int r = t_data->worker->connect(bind_addr, options, &sock);
@@ -1068,8 +1068,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 /*
  * Local Variables:
- * compile-command: "cd ../.. ; make ceph_test_async_networkstack &&
- *    ./ceph_test_async_networkstack
+ * compile-command: "cd ../.. ; make stone_test_async_networkstack &&
+ *    ./stone_test_async_networkstack
  *
  * End:
  */

@@ -21,7 +21,7 @@ std::ostream& operator<<(std::ostream& os, const MDSPerfMetricSubKeyDescriptor &
 
 void MDSPerformanceCounterDescriptor::pack_counter(
     const PerformanceCounter &c, bufferlist *bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(c.first, *bl);
   encode(c.second, *bl);
   switch(type) {
@@ -37,13 +37,13 @@ void MDSPerformanceCounterDescriptor::pack_counter(
   case MDSPerformanceCounterType::WRITE_IO_SIZES_METRIC:
     break;
   default:
-    ceph_abort_msg("unknown counter type");
+    stone_abort_msg("unknown counter type");
   }
 }
 
 void MDSPerformanceCounterDescriptor::unpack_counter(
     bufferlist::const_iterator& bl, PerformanceCounter *c) const {
-  using ceph::decode;
+  using stone::decode;
   decode(c->first, bl);
   decode(c->second, bl);
   switch(type) {
@@ -59,7 +59,7 @@ void MDSPerformanceCounterDescriptor::unpack_counter(
   case MDSPerformanceCounterType::WRITE_IO_SIZES_METRIC:
     break;
   default:
-    ceph_abort_msg("unknown counter type");
+    stone_abort_msg("unknown counter type");
   }
 }
 

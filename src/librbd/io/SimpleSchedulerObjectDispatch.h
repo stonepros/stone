@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IO_SIMPLE_SCHEDULER_OBJECT_DISPATCH_H
-#define CEPH_LIBRBD_IO_SIMPLE_SCHEDULER_OBJECT_DISPATCH_H
+#ifndef STONE_LIBRBD_IO_SIMPLE_SCHEDULER_OBJECT_DISPATCH_H
+#define STONE_LIBRBD_IO_SIMPLE_SCHEDULER_OBJECT_DISPATCH_H
 
 #include "common/ceph_mutex.h"
 #include "include/interval_set.h"
@@ -224,4 +224,4 @@ private:
 
 extern template class librbd::io::SimpleSchedulerObjectDispatch<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_CACHE_SIMPLE_SCHEDULER_OBJECT_DISPATCH_H
+#endif // STONE_LIBRBD_CACHE_SIMPLE_SCHEDULER_OBJECT_DISPATCH_H

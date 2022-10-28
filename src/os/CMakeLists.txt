@@ -102,10 +102,10 @@ add_dependencies(os crypto_plugins)
 
 
 if(WITH_BLUESTORE)
-  add_executable(ceph-bluestore-tool
+  add_executable(stone-bluestore-tool
     bluestore/bluestore_tool.cc)
-  target_link_libraries(ceph-bluestore-tool
+  target_link_libraries(stone-bluestore-tool
     os global)
-  install(TARGETS ceph-bluestore-tool
+  install(TARGETS stone-bluestore-tool
     DESTINATION bin)
 endif()

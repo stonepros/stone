@@ -4,7 +4,7 @@
 #include "rgw_kafka.h"
 #include "rgw_url.h"
 #include <librdkafka/rdkafka.h>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include <sstream>
 #include <cstring>
 #include <unordered_map>
@@ -16,7 +16,7 @@
 #include <boost/lockfree/queue.hpp>
 #include "common/dout.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 // TODO investigation, not necessarily issues:
 // (1) in case of single threaded writer context use spsc_queue
@@ -66,7 +66,7 @@ struct connection_t {
   uint64_t delivery_tag = 1;
   int status = STATUS_OK;
   mutable std::atomic<int> ref_count = 0;
-  CephContext* const cct;
+  StoneContext* const cct;
   CallbackList callbacks;
   const std::string broker;
   const bool use_ssl;
@@ -105,7 +105,7 @@ struct connection_t {
   }
 
   // ctor for setting immutable values
-  connection_t(CephContext* _cct, const std::string& _broker, bool _use_ssl, bool _verify_ssl, 
+  connection_t(StoneContext* _cct, const std::string& _broker, bool _use_ssl, bool _verify_ssl, 
           const boost::optional<const std::string&>& _ca_location,
           const std::string& _user, const std::string& _password) :
       cct(_cct), broker(_broker), use_ssl(_use_ssl), verify_ssl(_verify_ssl), ca_location(_ca_location), user(_user), password(_password) {}
@@ -156,7 +156,7 @@ std::string status_to_string(int s) {
 }
 
 void message_callback(rd_kafka_t* rk, const rd_kafka_message_t* rkmessage, void* opaque) {
-  ceph_assert(opaque);
+  stone_assert(opaque);
 
   const auto conn = reinterpret_cast<connection_t*>(opaque);
   const auto result = rkmessage->err;
@@ -187,7 +187,7 @@ void message_callback(rd_kafka_t* rk, const rd_kafka_message_t* rkmessage, void*
 // utility function to create a connection, when the connection object already exists
 connection_ptr_t& create_connection(connection_ptr_t& conn) {
   // pointer must be valid and not marked for deletion
-  ceph_assert(conn && !conn->marked_for_deletion);
+  stone_assert(conn && !conn->marked_for_deletion);
   
   // reset all status codes
   conn->status = STATUS_OK; 
@@ -253,7 +253,7 @@ conf_error:
 }
 
 // utility function to create a new connection
-connection_ptr_t create_new_connection(const std::string& broker, CephContext* cct,
+connection_ptr_t create_new_connection(const std::string& broker, StoneContext* cct,
         bool use_ssl,
         bool verify_ssl,
         boost::optional<const std::string&> ca_location, 
@@ -303,7 +303,7 @@ private:
   MessageQueue messages;
   std::atomic<size_t> queued;
   std::atomic<size_t> dequeued;
-  CephContext* const cct;
+  StoneContext* const cct;
   mutable std::mutex connections_lock;
   std::thread runner;
 
@@ -464,7 +464,7 @@ public:
       size_t _max_inflight,
       size_t _max_queue, 
       int _read_timeout_ms,
-      CephContext* _cct) : 
+      StoneContext* _cct) : 
     max_connections(_max_connections),
     max_inflight(_max_inflight),
     max_queue(_max_queue),
@@ -483,8 +483,8 @@ public:
       // when a new connection is added.
       connections.max_load_factor(10.0);
       // give the runner thread a name for easier debugging
-      const auto rc = ceph_pthread_setname(runner.native_handle(), "kafka_manager");
-      ceph_assert(rc==0);
+      const auto rc = stone_pthread_setname(runner.native_handle(), "kafka_manager");
+      stone_assert(rc==0);
   }
 
   // non copyable
@@ -526,7 +526,7 @@ public:
     }
 
     // this should be validated by the regex in parse_url()
-    ceph_assert(user.empty() == password.empty());
+    stone_assert(user.empty() == password.empty());
 
 	if (!user.empty() && !use_ssl) {
       ldout(cct, 1) << "Kafka connect: user/password are only allowed over secure connection" << dendl;
@@ -557,7 +557,7 @@ public:
     // create_new_connection must always return a connection object
     // even if error occurred during creation. 
     // in such a case the creation will be retried in the main thread
-    ceph_assert(conn);
+    stone_assert(conn);
     ++connection_count;
     ldout(cct, 10) << "Kafka connect: new connection is created. Total connections: " << connection_count << dendl;
     return connections.emplace(broker, conn).first->second;
@@ -641,11 +641,11 @@ static const size_t MAX_INFLIGHT_DEFAULT = 8192;
 static const size_t MAX_QUEUE_DEFAULT = 8192;
 static const int READ_TIMEOUT_MS_DEFAULT = 500;
 
-bool init(CephContext* cct) {
+bool init(StoneContext* cct) {
   if (s_manager) {
     return false;
   }
-  // TODO: take conf from CephContext
+  // TODO: take conf from StoneContext
   s_manager = new Manager(MAX_CONNECTIONS_DEFAULT, MAX_INFLIGHT_DEFAULT, MAX_QUEUE_DEFAULT, READ_TIMEOUT_MS_DEFAULT, cct);
   return true;
 }

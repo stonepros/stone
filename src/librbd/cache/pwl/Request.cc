@@ -6,7 +6,7 @@
 #include "librbd/cache/pwl/LogEntry.h"
 #include "librbd/cache/pwl/AbstractWriteLog.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::Request: " << this << " " \
                            <<  __func__ << ": "
@@ -27,7 +27,7 @@ C_BlockIORequest<T>::C_BlockIORequest(T &pwl, const utime_t arrived, io::Extents
 template <typename T>
 C_BlockIORequest<T>::~C_BlockIORequest() {
   ldout(pwl.get_context(), 99) << this << dendl;
-  ceph_assert(m_cell_released || !m_cell);
+  stone_assert(m_cell_released || !m_cell);
 }
 
 template <typename T>
@@ -49,8 +49,8 @@ std::ostream &operator<<(std::ostream &os,
 template <typename T>
 void C_BlockIORequest<T>::set_cell(BlockGuardCell *cell) {
   ldout(pwl.get_context(), 20) << this << " cell=" << cell << dendl;
-  ceph_assert(cell);
-  ceph_assert(!m_cell);
+  stone_assert(cell);
+  stone_assert(!m_cell);
   m_cell = cell;
 }
 
@@ -63,7 +63,7 @@ BlockGuardCell *C_BlockIORequest<T>::get_cell(void) {
 template <typename T>
 void C_BlockIORequest<T>::release_cell() {
   ldout(pwl.get_context(), 20) << this << " cell=" << m_cell << dendl;
-  ceph_assert(m_cell);
+  stone_assert(m_cell);
   bool initial = false;
   if (m_cell_released.compare_exchange_strong(initial, true)) {
     pwl.release_guarded_request(m_cell);
@@ -77,7 +77,7 @@ void C_BlockIORequest<T>::complete_user_request(int r) {
   bool initial = false;
   if (m_user_req_completed.compare_exchange_strong(initial, true)) {
     ldout(pwl.get_context(), 15) << this << " completing user req" << dendl;
-    m_user_req_completed_time = ceph_clock_now();
+    m_user_req_completed_time = stone_clock_now();
     pwl.complete_user_request(user_req, r);
   } else {
     ldout(pwl.get_context(), 20) << this << " user req already completed" << dendl;
@@ -95,7 +95,7 @@ void C_BlockIORequest<T>::finish(int r) {
     finish_req(0);
   } else {
     ldout(pwl.get_context(), 20) << this << " already finished" << dendl;
-    ceph_assert(0);
+    stone_assert(0);
   }
 }
 
@@ -109,7 +109,7 @@ void C_BlockIORequest<T>::deferred() {
 
 template <typename T>
 C_WriteRequest<T>::C_WriteRequest(T &pwl, const utime_t arrived, io::Extents &&image_extents,
-                                  bufferlist&& bl, const int fadvise_flags, ceph::mutex &lock,
+                                  bufferlist&& bl, const int fadvise_flags, stone::mutex &lock,
                                   PerfCounters *perfcounter, Context *user_req)
   : C_BlockIORequest<T>(pwl, arrived, std::move(image_extents), std::move(bl), fadvise_flags, user_req),
     m_perfcounter(perfcounter), m_lock(lock) {
@@ -119,7 +119,7 @@ C_WriteRequest<T>::C_WriteRequest(T &pwl, const utime_t arrived, io::Extents &&i
 template <typename T>
 C_WriteRequest<T>::C_WriteRequest(T &pwl, const utime_t arrived, io::Extents &&image_extents,
                                   bufferlist&& cmp_bl, bufferlist&& bl, uint64_t *mismatch_offset,
-                                  int fadvise_flags, ceph::mutex &lock, PerfCounters *perfcounter,
+                                  int fadvise_flags, stone::mutex &lock, PerfCounters *perfcounter,
                                   Context *user_req)
   : C_BlockIORequest<T>(pwl, arrived, std::move(image_extents), std::move(bl), fadvise_flags, user_req),
   mismatch_offset(mismatch_offset), cmp_bl(std::move(cmp_bl)),
@@ -148,7 +148,7 @@ template <typename T>
 void C_WriteRequest<T>::blockguard_acquired(GuardedRequestFunctionContext &guard_ctx) {
   ldout(pwl.get_context(), 20) << __func__ << " write_req=" << this << " cell=" << guard_ctx.cell << dendl;
 
-  ceph_assert(guard_ctx.cell);
+  stone_assert(guard_ctx.cell);
   this->detained = guard_ctx.state.detained; /* overlapped */
   this->m_queued = guard_ctx.state.queued; /* queued behind at least one barrier */
   this->set_cell(guard_ctx.cell);
@@ -159,13 +159,13 @@ void C_WriteRequest<T>::finish_req(int r) {
   ldout(pwl.get_context(), 15) << "write_req=" << this << " cell=" << this->get_cell() << dendl;
 
   /* Completed to caller by here (in finish(), which calls this) */
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   if(is_comp_and_write && !compare_succeeded) {
     update_req_stats(now);
     return;
   }
   pwl.release_write_lanes(this);
-  ceph_assert(m_resources.allocated);
+  stone_assert(m_resources.allocated);
   m_resources.allocated = false;
   this->release_cell(); /* TODO: Consider doing this in appending state */
   update_req_stats(now);
@@ -210,7 +210,7 @@ void C_WriteRequest<T>::setup_log_operations(DeferredContexts &on_exit) {
                                         pwl.get_persist_on_flush(),
                                         pwl.get_context(), this);
     ldout(pwl.get_context(), 20) << "write_req=" << *this << " op_set=" << op_set.get() << dendl;
-    ceph_assert(m_resources.allocated);
+    stone_assert(m_resources.allocated);
     /* op_set->operations initialized differently for plain write or write same */
     auto allocation = m_resources.buffers.begin();
     uint64_t buffer_offset = 0;
@@ -261,7 +261,7 @@ bool C_WriteRequest<T>::append_write_request(std::shared_ptr<SyncPoint> sync_poi
 
 template <typename T>
 void C_WriteRequest<T>::schedule_append() {
-  ceph_assert(++m_appended == 1);
+  stone_assert(++m_appended == 1);
   pwl.setup_schedule_append(this->op_set->operations, m_do_early_flush, this);
 }
 
@@ -275,7 +275,7 @@ void C_WriteRequest<T>::schedule_append() {
  */
 template <typename T>
 bool C_WriteRequest<T>::alloc_resources() {
-  this->allocated_time = ceph_clock_now();
+  this->allocated_time = stone_clock_now();
   return pwl.alloc_resources(this);
 }
 
@@ -288,9 +288,9 @@ bool C_WriteRequest<T>::alloc_resources() {
 template <typename T>
 void C_WriteRequest<T>::dispatch()
 {
-  CephContext *cct = pwl.get_context();
+  StoneContext *cct = pwl.get_context();
   DeferredContexts on_exit;
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   this->m_dispatched_time = now;
 
   ldout(cct, 15) << "write_req=" << this << " cell=" << this->get_cell() << dendl;
@@ -328,7 +328,7 @@ template <typename T>
 C_FlushRequest<T>::C_FlushRequest(T &pwl, const utime_t arrived,
                                   io::Extents &&image_extents,
                                   bufferlist&& bl, const int fadvise_flags,
-                                  ceph::mutex &lock, PerfCounters *perfcounter,
+                                  stone::mutex &lock, PerfCounters *perfcounter,
                                   Context *user_req)
   : C_BlockIORequest<T>(pwl, arrived, std::move(image_extents), std::move(bl),
                         fadvise_flags, user_req),
@@ -341,10 +341,10 @@ void C_FlushRequest<T>::finish_req(int r) {
   ldout(pwl.get_context(), 20) << "flush_req=" << this
                                << " cell=" << this->get_cell() << dendl;
   /* Block guard already released */
-  ceph_assert(!this->get_cell());
+  stone_assert(!this->get_cell());
 
   /* Completed to caller by here */
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   m_perfcounter->tinc(l_librbd_pwl_aio_flush_latency, now - this->m_arrived_time);
 }
 
@@ -357,10 +357,10 @@ bool C_FlushRequest<T>::alloc_resources() {
 
 template <typename T>
 void C_FlushRequest<T>::dispatch() {
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   ldout(pwl.get_context(), 20) << "req type=" << get_name() << " "
                                << "req=[" << *this << "]" << dendl;
-  ceph_assert(this->m_resources.allocated);
+  stone_assert(this->m_resources.allocated);
   this->m_dispatched_time = now;
 
   op = std::make_shared<SyncPointLogOperation>(m_lock,
@@ -391,7 +391,7 @@ std::ostream &operator<<(std::ostream &os,
 
 template <typename T>
 C_DiscardRequest<T>::C_DiscardRequest(T &pwl, const utime_t arrived, io::Extents &&image_extents,
-                                      uint32_t discard_granularity_bytes, ceph::mutex &lock,
+                                      uint32_t discard_granularity_bytes, stone::mutex &lock,
                                       PerfCounters *perfcounter, Context *user_req)
   : C_BlockIORequest<T>(pwl, arrived, std::move(image_extents), bufferlist(), 0, user_req),
   m_discard_granularity_bytes(discard_granularity_bytes),
@@ -436,7 +436,7 @@ void C_DiscardRequest<T>::setup_log_operations() {
     [this, discard_req](int r) {
       ldout(pwl.get_context(), 20) << "discard_req=" << discard_req
                                    << " cell=" << discard_req->get_cell() << dendl;
-      ceph_assert(discard_req->get_cell());
+      stone_assert(discard_req->get_cell());
       discard_req->complete_user_request(r);
       discard_req->release_cell();
     });
@@ -447,10 +447,10 @@ void C_DiscardRequest<T>::setup_log_operations() {
 
 template <typename T>
 void C_DiscardRequest<T>::dispatch() {
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   ldout(pwl.get_context(), 20) << "req type=" << get_name() << " "
                                << "req=[" << *this << "]" << dendl;
-  ceph_assert(this->m_resources.allocated);
+  stone_assert(this->m_resources.allocated);
   this->m_dispatched_time = now;
   setup_log_operations();
   m_perfcounter->inc(l_librbd_pwl_log_ops, 1);
@@ -476,7 +476,7 @@ template <typename T>
 void C_DiscardRequest<T>::blockguard_acquired(GuardedRequestFunctionContext &guard_ctx) {
   ldout(pwl.get_context(), 20) << " cell=" << guard_ctx.cell << dendl;
 
-  ceph_assert(guard_ctx.cell);
+  stone_assert(guard_ctx.cell);
   this->detained = guard_ctx.state.detained; /* overlapped */
   this->set_cell(guard_ctx.cell);
 }
@@ -496,7 +496,7 @@ std::ostream &operator<<(std::ostream &os,
 template <typename T>
 C_WriteSameRequest<T>::C_WriteSameRequest(
     T &pwl, const utime_t arrived, io::Extents &&image_extents,
-    bufferlist&& bl, const int fadvise_flags, ceph::mutex &lock,
+    bufferlist&& bl, const int fadvise_flags, stone::mutex &lock,
     PerfCounters *perfcounter, Context *user_req)
   : C_WriteRequest<T>(pwl, arrived, std::move(image_extents), std::move(bl),
       fadvise_flags, lock, perfcounter, user_req) {
@@ -521,7 +521,7 @@ void C_WriteSameRequest<T>::update_req_stats(utime_t &now) {
 template <typename T>
 std::shared_ptr<WriteLogOperation> C_WriteSameRequest<T>::create_operation(
     uint64_t offset, uint64_t len) {
-  ceph_assert(this->image_extents.size() == 1);
+  stone_assert(this->image_extents.size() == 1);
   WriteLogOperationSet &set = *this->op_set.get();
   return pwl.m_builder->create_write_log_operation(
       *this->op_set.get(), offset, len, this->bl.length(), pwl.get_context(),

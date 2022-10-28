@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "Types.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/stringify.h"
 #include "common/Formatter.h"
 
@@ -18,7 +18,7 @@ public:
 
   template <typename Payload>
   inline void operator()(const Payload &payload) const {
-    using ceph::encode;
+    using stone::encode;
     encode(static_cast<uint32_t>(Payload::NOTIFY_OP), m_bl);
     payload.encode(m_bl);
   }
@@ -54,7 +54,7 @@ public:
   }
 
 private:
-  ceph::Formatter *m_formatter;
+  stone::Formatter *m_formatter;
 };
 
 } // anonymous namespace
@@ -87,7 +87,7 @@ void LockReleasedPayload::dump(Formatter *f) const {
 }
 
 void UnknownPayload::encode(bufferlist &bl) const {
-  ceph_abort();
+  stone_abort();
 }
 
 void UnknownPayload::decode(__u8 version, bufferlist::const_iterator &iter) {

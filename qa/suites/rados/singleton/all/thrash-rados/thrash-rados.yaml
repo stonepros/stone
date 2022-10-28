@@ -14,7 +14,7 @@ openstack:
       size: 10 # GB
 tasks:
 - install:
-- ceph:
+- stone:
     log-ignorelist:
       - but it is still running
 - thrashosds:

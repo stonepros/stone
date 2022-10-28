@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_JOURNAL_OBJECT_PLAYER_H
-#define CEPH_JOURNAL_OBJECT_PLAYER_H
+#ifndef STONE_JOURNAL_OBJECT_PLAYER_H
+#define STONE_JOURNAL_OBJECT_PLAYER_H
 
 #include "include/Context.h"
 #include "include/interval_set.h"
@@ -100,7 +100,7 @@ private:
   librados::IoCtx m_ioctx;
   uint64_t m_object_num;
   std::string m_oid;
-  CephContext *m_cct = nullptr;
+  StoneeContext *m_cct = nullptr;
 
   SafeTimer &m_timer;
   ceph::mutex &m_timer_lock;
@@ -138,4 +138,4 @@ private:
 
 } // namespace journal
 
-#endif // CEPH_JOURNAL_OBJECT_PLAYER_H
+#endif // STONE_JOURNAL_OBJECT_PLAYER_H

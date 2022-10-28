@@ -1,22 +1,22 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 
-#ifndef CEPH_RGW_SYNC_TRACE_H
-#define CEPH_RGW_SYNC_TRACE_H
+#ifndef STONE_RGW_SYNC_TRACE_H
+#define STONE_RGW_SYNC_TRACE_H
 
 #include <regex>
 
 #include "common/debug.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "rgw_sync_trace.h"
 #include "rgw_rados.h"
 #include "rgw_worker.h"
 
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
-RGWSyncTraceNode::RGWSyncTraceNode(CephContext *_cct, uint64_t _handle,
+RGWSyncTraceNode::RGWSyncTraceNode(StoneContext *_cct, uint64_t _handle,
                                    const RGWSyncTraceNodeRef& _parent,
                                    const string& _type, const string& _id) : cct(_cct),
                                                                              parent(_parent),
@@ -43,12 +43,12 @@ void RGWSyncTraceNode::log(int level, const string& s)
   status = s;
   history.push_back(status);
   /* dump output on either rgw_sync, or rgw -- but only once */
-  if (cct->_conf->subsys.should_gather(ceph_subsys_rgw_sync, level)) {
+  if (cct->_conf->subsys.should_gather(stone_subsys_rgw_sync, level)) {
     lsubdout(cct, rgw_sync,
-      ceph::dout::need_dynamic(level)) << "RGW-SYNC:" << to_str() << dendl;
+      stone::dout::need_dynamic(level)) << "RGW-SYNC:" << to_str() << dendl;
   } else {
     lsubdout(cct, rgw,
-      ceph::dout::need_dynamic(level)) << "RGW-SYNC:" << to_str() << dendl;
+      stone::dout::need_dynamic(level)) << "RGW-SYNC:" << to_str() << dendl;
   }
 }
 
@@ -82,7 +82,7 @@ RGWSyncTraceNodeRef RGWSyncTraceManager::add_node(const RGWSyncTraceNodeRef& par
                                                   const std::string& type,
                                                   const std::string& id)
 {
-  shunique_lock wl(lock, ceph::acquire_unique);
+  shunique_lock wl(lock, stone::acquire_unique);
   auto handle = alloc_handle();
   RGWSyncTraceNodeRef& ref = nodes[handle];
   ref.reset(new RGWSyncTraceNode(cct, handle, parent, type, id));
@@ -139,10 +139,10 @@ int RGWSyncTraceManager::hook_to_admin_command()
 {
   AdminSocket *admin_socket = cct->get_admin_socket();
 
-  admin_commands = { { "sync trace show name=search,type=CephString,req=false", "sync trace show [filter_str]: show current multisite tracing information" },
-                     { "sync trace history name=search,type=CephString,req=false", "sync trace history [filter_str]: show history of multisite tracing information" },
-                     { "sync trace active name=search,type=CephString,req=false", "show active multisite sync entities information" },
-                     { "sync trace active_short name=search,type=CephString,req=false", "show active multisite sync entities entries" } };
+  admin_commands = { { "sync trace show name=search,type=StoneString,req=false", "sync trace show [filter_str]: show current multisite tracing information" },
+                     { "sync trace history name=search,type=StoneString,req=false", "sync trace history [filter_str]: show history of multisite tracing information" },
+                     { "sync trace active name=search,type=StoneString,req=false", "show active multisite sync entities information" },
+                     { "sync trace active_short name=search,type=StoneString,req=false", "show active multisite sync entities entries" } };
   for (auto cmd : admin_commands) {
     int r = admin_socket->register_command(cmd[0], this,
                                            cmd[1]);
@@ -170,7 +170,7 @@ static void dump_node(RGWSyncTraceNode *entry, bool show_history, Formatter *f)
 
 string RGWSyncTraceManager::get_active_names()
 {
-  shunique_lock rl(lock, ceph::acquire_shared);
+  shunique_lock rl(lock, stone::acquire_shared);
 
   stringstream ss;
   JSONFormatter f;
@@ -210,7 +210,7 @@ int RGWSyncTraceManager::call(std::string_view command, const cmdmap_t& cmdmap,
     search = boost::get<string>(si->second);
   }
 
-  shunique_lock rl(lock, ceph::acquire_shared);
+  shunique_lock rl(lock, stone::acquire_shared);
 
   f->open_object_section("result");
   f->open_array_section("running");
@@ -258,7 +258,7 @@ void RGWSyncTraceManager::finish_node(RGWSyncTraceNode *node)
   RGWSyncTraceNodeRef old_node;
 
   {
-    shunique_lock wl(lock, ceph::acquire_unique);
+    shunique_lock wl(lock, stone::acquire_unique);
     if (!node) {
       return;
     }

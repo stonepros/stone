@@ -2,6 +2,6 @@ tasks:
 - mds_thrash:
 
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - Replacing daemon mds

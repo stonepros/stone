@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "rgw/rgw_common.h"
 #define FORTEST_VIRTUAL virtual
 #include "rgw/rgw_kms.cc"
@@ -18,7 +18,7 @@ using ::testing::StrEq;
 class MockTransitSecretEngine : public TransitSecretEngine {
 
 public:
-  MockTransitSecretEngine(CephContext *cct, EngineParmMap parms) : TransitSecretEngine(cct, parms){}
+  MockTransitSecretEngine(StoneContext *cct, EngineParmMap parms) : TransitSecretEngine(cct, parms){}
 
   MOCK_METHOD(int, send_request, (const char *method, std::string_view infix, std::string_view key_id, const std::string& postdata, bufferlist &bl), (override));
 
@@ -27,7 +27,7 @@ public:
 class MockKvSecretEngine : public KvSecretEngine {
 
 public:
-  MockKvSecretEngine(CephContext *cct, EngineParmMap parms) : KvSecretEngine(cct, parms){}
+  MockKvSecretEngine(StoneContext *cct, EngineParmMap parms) : KvSecretEngine(cct, parms){}
 
   MOCK_METHOD(int, send_request, (const char *method, std::string_view infix, std::string_view key_id, const std::string& postdata, bufferlist &bl), (override));
 
@@ -36,14 +36,14 @@ public:
 class TestSSEKMS : public ::testing::Test {
 
 protected:
-  CephContext *cct;
+  StoneContext *cct;
   MockTransitSecretEngine* old_engine;
   MockKvSecretEngine* kv_engine;
   MockTransitSecretEngine* transit_engine;
 
   void SetUp() override {
     EngineParmMap old_parms, kv_parms, new_parms;
-    cct = (new CephContext(CEPH_ENTITY_TYPE_ANY))->get();
+    cct = (new StoneContext(STONE_ENTITY_TYPE_ANY))->get();
     old_parms["compat"] = "2";
     old_engine = new MockTransitSecretEngine(cct, std::move(old_parms));
     kv_engine = new MockKvSecretEngine(cct, std::move(kv_parms));

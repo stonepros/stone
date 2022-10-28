@@ -1,6 +1,6 @@
 meta:
 - desc: |
-   install upgrade ceph/-x on 2/3 of cluster
+   install upgrade stone/-x on 2/3 of cluster
    restart : mons, osd.0-7
 tasks:
 - install.upgrade:
@@ -8,7 +8,7 @@ tasks:
     mon.b:
     mon.c:
 - print: "**** done install.upgrade of first 3 nodes"
-- ceph.restart:
+- stone.restart:
     daemons: [mon.a,mon.b,mgr.x,osd.0,osd.1,osd.2,osd.3,osd.4,osd.5,osd.6,osd.7]
     mon-health-to-clog: false
-- print: "**** done ceph.restart of all mons and 2/3 of osds"
+- print: "**** done stone.restart of all mons and 2/3 of osds"

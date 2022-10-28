@@ -6,12 +6,12 @@
 #include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
-#include "include/ceph_assert.h"
-#include "ceph_ver.h"
+#include "include/stone_assert.h"
+#include "stone_ver.h"
 
 #include "common/Formatter.h"
 #include "common/utf8.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "rgw_rest_swift.h"
 #include "rgw_acl_swift.h"
@@ -36,8 +36,8 @@
 #include <sstream>
 #include <memory>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 int RGWListBuckets_ObjStore_SWIFT::get_params(optional_yield y)
 {
@@ -91,7 +91,7 @@ static void dump_account_metadata(struct req_state * const s,
                                   const RGWAccessControlPolicy_SWIFTAcct &policy)
 {
   /* Adding X-Timestamp to keep align with Swift API */
-  dump_header(s, "X-Timestamp", ceph_clock_now());
+  dump_header(s, "X-Timestamp", stone_clock_now());
 
   dump_header(s, "X-Account-Container-Count", global_stats.buckets_count);
   dump_header(s, "X-Account-Object-Count", global_stats.objects_count);
@@ -1194,7 +1194,7 @@ static void bulkdelete_respond(const unsigned num_deleted,
                                const unsigned int num_unfound,
                                const std::list<RGWBulkDelete::fail_desc_t>& failures,
                                const int prot_flags,                  /* in  */
-                               ceph::Formatter& formatter)            /* out */
+                               stone::Formatter& formatter)            /* out */
 {
   formatter.open_object_section("delete");
 
@@ -1680,7 +1680,7 @@ RGWBulkUploadOp_ObjStore_SWIFT::create_stream()
         s(s) {
     }
 
-    ssize_t get_at_most(size_t want, ceph::bufferlist& dst) override {
+    ssize_t get_at_most(size_t want, stone::bufferlist& dst) override {
       /* maximum requested by a caller */
       /* data provided by client */
       /* RadosGW's limit. */
@@ -1705,7 +1705,7 @@ RGWBulkUploadOp_ObjStore_SWIFT::create_stream()
                                                       : read_len;
     }
 
-    ssize_t get_exactly(size_t want, ceph::bufferlist& dst) override {
+    ssize_t get_exactly(size_t want, stone::bufferlist& dst) override {
       ldpp_dout(dpp, 20) << "bulk_upload: get_exactly want=" << want << dendl;
 
       /* FIXME: do this in a loop. */
@@ -1886,8 +1886,8 @@ void RGWInfo_ObjStore_SWIFT::list_swift_data(Formatter& formatter,
   formatter.dump_int("max_file_size", config->rgw_max_put_size);
   formatter.dump_int("container_listing_limit", RGW_LIST_BUCKETS_LIMIT_MAX);
 
-  string ceph_version(CEPH_GIT_NICE_VER);
-  formatter.dump_string("version", ceph_version);
+  string stone_version(STONE_GIT_NICE_VER);
+  formatter.dump_string("version", stone_version);
 
   const size_t max_attr_name_len = \
     g_conf().get_val<Option::size_t>("rgw_max_attr_name_len");
@@ -1961,7 +1961,7 @@ void RGWInfo_ObjStore_SWIFT::list_slo_data(Formatter& formatter,
 bool RGWInfo_ObjStore_SWIFT::is_expired(const std::string& expires, const DoutPrefixProvider *dpp)
 {
   string err;
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
   const uint64_t expiration = (uint64_t)strict_strtoll(expires.c_str(),
                                                        10, &err);
   if (!err.empty()) {
@@ -2018,7 +2018,7 @@ bool RGWFormPost::is_non_expired()
     return false;
   }
 
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
   if (expires_timestamp <= static_cast<uint64_t>(now.sec())) {
     ldpp_dout(this, 5) << "FormPost form expired: "
             << expires_timestamp << " <= " << now.sec() << dendl;
@@ -2145,7 +2145,7 @@ int RGWFormPost::get_params(optional_yield y)
       return ret;
     }
 
-    if (s->cct->_conf->subsys.should_gather<ceph_subsys_rgw, 20>()) {
+    if (s->cct->_conf->subsys.should_gather<stone_subsys_rgw, 20>()) {
       ldpp_dout(this, 20) << "read part header -- part.name="
                         << part.name << dendl;
 
@@ -2267,7 +2267,7 @@ bool RGWFormPost::is_next_file_to_upload()
   return false;
 }
 
-int RGWFormPost::get_data(ceph::bufferlist& bl, bool& again)
+int RGWFormPost::get_data(stone::bufferlist& bl, bool& again)
 {
   bool boundary;
 

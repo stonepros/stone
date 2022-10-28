@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include "mon/Monitor.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 
 static void usage(ostream &out)
@@ -31,7 +31,7 @@ static void usage(ostream &out)
   out << "print on stdout the result of JSON formatted options\n";
   out << "found in mon/MonCommands.h as produced by the\n";
   out << "Monitor.cc::get_command_descriptions function.\n";
-  out << "Designed as a helper for ceph_argparse.py unit tests.\n";
+  out << "Designed as a helper for stone_argparse.py unit tests.\n";
   out << "\n";
   out << "  --all               all of mon/MonCommands.h \n";
   out << "  --pull585           reproduce the bug fixed by #585\n";
@@ -46,7 +46,7 @@ static void json_print(const std::vector<MonCommand> &mon_commands)
   bufferlist rdata;
   Formatter *f = Formatter::create("json");
   Monitor::format_command_descriptions(mon_commands, f,
-                                       CEPH_FEATURES_ALL, &rdata);
+                                       STONE_FEATURES_ALL, &rdata);
   delete f;
   string data(rdata.c_str(), rdata.length());
   cout << data << std::endl;
@@ -79,15 +79,15 @@ static void all()
   json_print(mon_commands);
 }
 
-// syntax error https://github.com/ceph/ceph/pull/585
+// syntax error https://github.com/stone/stone/pull/585
 static void pull585()
 {
   std::vector<MonCommand> mon_commands = {
     { "osd pool create "		       
-      "name=pool,type=CephPoolname " 
-      "name=pg_num,type=CephInt,range=0,req=false "
-      "name=pgp_num,type=CephInt,range=0,req=false" // !!! missing trailing space
-      "name=properties,type=CephString,n=N,req=false,goodchars=[A-Za-z0-9-_.=]", 
+      "name=pool,type=StonePoolname " 
+      "name=pg_num,type=StoneInt,range=0,req=false "
+      "name=pgp_num,type=StoneInt,range=0,req=false" // !!! missing trailing space
+      "name=properties,type=StoneString,n=N,req=false,goodchars=[A-Za-z0-9-_.=]", 
       "create pool", "osd", "rw" }
   };
 
@@ -98,10 +98,10 @@ int main(int argc, char **argv) {
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   if (args.empty()) {
     usage(cerr);

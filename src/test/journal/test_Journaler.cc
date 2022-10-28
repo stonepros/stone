@@ -12,7 +12,7 @@
 #include "gtest/gtest.h"
 
 // reinclude our assert to clobber the system one
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 class TestJournaler : public RadosTestFixture {
 public:

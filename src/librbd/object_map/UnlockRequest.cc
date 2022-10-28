@@ -9,7 +9,7 @@
 #include "librbd/ObjectMap.h"
 #include "librbd/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::UnlockRequest: "
 
@@ -30,8 +30,8 @@ void UnlockRequest<I>::send() {
 
 template <typename I>
 void UnlockRequest<I>::send_unlock() {
-  CephContext *cct = m_image_ctx.cct;
-  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, CEPH_NOSNAP));
+  StoneContext *cct = m_image_ctx.cct;
+  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, STONE_NOSNAP));
   ldout(cct, 10) << this << " " << __func__ << ": oid=" << oid << dendl;
 
   librados::ObjectWriteOperation op;
@@ -41,13 +41,13 @@ void UnlockRequest<I>::send_unlock() {
   librados::AioCompletion *rados_completion =
     create_rados_callback<klass, &klass::handle_unlock>(this);
   int r = m_image_ctx.md_ctx.aio_operate(oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 template <typename I>
 Context *UnlockRequest<I>::handle_unlock(int *ret_val) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *ret_val << dendl;
 
   if (*ret_val < 0 && *ret_val != -ENOENT) {

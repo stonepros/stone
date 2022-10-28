@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -23,7 +23,7 @@
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-class osd_error_category : public ceph::converting_category {
+class osd_error_category : public stone::converting_category {
 public:
   osd_error_category(){}
   const char* name() const noexcept override;
@@ -33,7 +33,7 @@ public:
     override;
   bool equivalent(int ev, const boost::system::error_condition& c) const
     noexcept override;
-  using ceph::converting_category::equivalent;
+  using stone::converting_category::equivalent;
   int from_code(int ev) const noexcept override;
 };
 #pragma GCC diagnostic pop

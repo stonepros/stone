@@ -13,8 +13,8 @@
 #include "ServiceDaemon.h"
 #include "Threads.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::NamespaceReplayer: " \
                            << this << " " << __func__ << ": "
@@ -56,7 +56,7 @@ NamespaceReplayer<I>::NamespaceReplayer(
   m_service_daemon(service_daemon),
   m_cache_manager_handler(cache_manager_handler),
   m_pool_meta_cache(pool_meta_cache),
-  m_lock(ceph::make_mutex(librbd::util::unique_lock_name(
+  m_lock(stone::make_mutex(librbd::util::unique_lock_name(
       "rbd::mirror::NamespaceReplayer " + name, this))),
   m_local_pool_watcher_listener(this, true),
   m_remote_pool_watcher_listener(this, false),
@@ -85,7 +85,7 @@ void NamespaceReplayer<I>::init(Context *on_finish) {
 
   std::lock_guard locker{m_lock};
 
-  ceph_assert(m_on_finish == nullptr);
+  stone_assert(m_on_finish == nullptr);
   m_on_finish = on_finish;
 
   init_local_status_updater();
@@ -99,7 +99,7 @@ void NamespaceReplayer<I>::shut_down(Context *on_finish) {
   {
     std::lock_guard locker{m_lock};
 
-    ceph_assert(m_on_finish == nullptr);
+    stone_assert(m_on_finish == nullptr);
     m_on_finish = on_finish;
 
     if (!m_image_map) {
@@ -121,7 +121,7 @@ void NamespaceReplayer<I>::print_status(Formatter *f)
 {
   dout(20) << dendl;
 
-  ceph_assert(f);
+  stone_assert(f);
 
   std::lock_guard locker{m_lock};
 
@@ -271,8 +271,8 @@ template <typename I>
 void NamespaceReplayer<I>::init_local_status_updater() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(!m_local_status_updater);
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(!m_local_status_updater);
 
   m_local_status_updater.reset(MirrorStatusUpdater<I>::create(
     m_local_io_ctx, m_threads, ""));
@@ -294,7 +294,7 @@ void NamespaceReplayer<I>::handle_init_local_status_updater(int r) {
          << cpp_strerror(r) << dendl;
 
     m_local_status_updater.reset();
-    ceph_assert(m_on_finish != nullptr);
+    stone_assert(m_on_finish != nullptr);
     m_threads->work_queue->queue(m_on_finish, r);
     m_on_finish = nullptr;
     return;
@@ -307,8 +307,8 @@ template <typename I>
 void NamespaceReplayer<I>::init_remote_status_updater() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(!m_remote_status_updater);
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(!m_remote_status_updater);
 
   m_remote_status_updater.reset(MirrorStatusUpdater<I>::create(
     m_remote_io_ctx, m_threads, m_local_mirror_uuid));
@@ -341,8 +341,8 @@ template <typename I>
 void NamespaceReplayer<I>::init_instance_replayer() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(!m_instance_replayer);
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(!m_instance_replayer);
 
   m_instance_replayer.reset(InstanceReplayer<I>::create(
       m_local_io_ctx, m_local_mirror_uuid, m_threads, m_service_daemon,
@@ -381,8 +381,8 @@ template <typename I>
 void NamespaceReplayer<I>::init_instance_watcher() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(!m_instance_watcher);
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(!m_instance_watcher);
 
   m_instance_watcher.reset(InstanceWatcher<I>::create(
       m_local_io_ctx, *m_threads->asio_engine, m_instance_replayer.get(),
@@ -409,7 +409,7 @@ void NamespaceReplayer<I>::handle_init_instance_watcher(int r) {
     return;
   }
 
-  ceph_assert(m_on_finish != nullptr);
+  stone_assert(m_on_finish != nullptr);
   m_threads->work_queue->queue(m_on_finish);
   m_on_finish = nullptr;
 }
@@ -418,7 +418,7 @@ template <typename I>
 void NamespaceReplayer<I>::stop_instance_replayer() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   Context *ctx = create_async_context_callback(
     m_threads->work_queue, create_context_callback<NamespaceReplayer<I>,
@@ -444,8 +444,8 @@ template <typename I>
 void NamespaceReplayer<I>::shut_down_instance_watcher() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(m_instance_watcher);
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(m_instance_watcher);
 
   Context *ctx = create_async_context_callback(
     m_threads->work_queue, create_context_callback<NamespaceReplayer<I>,
@@ -474,8 +474,8 @@ template <typename I>
 void NamespaceReplayer<I>::shut_down_instance_replayer() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(m_instance_replayer);
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(m_instance_replayer);
 
   Context *ctx = create_async_context_callback(
     m_threads->work_queue, create_context_callback<NamespaceReplayer<I>,
@@ -504,8 +504,8 @@ template <typename I>
 void NamespaceReplayer<I>::shut_down_remote_status_updater() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(m_remote_status_updater);
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(m_remote_status_updater);
 
   auto ctx = create_async_context_callback(
     m_threads->work_queue, create_context_callback<
@@ -533,8 +533,8 @@ template <typename I>
 void NamespaceReplayer<I>::shut_down_local_status_updater() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(m_local_status_updater);
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(m_local_status_updater);
 
   auto ctx = create_async_context_callback(
     m_threads->work_queue, create_context_callback<
@@ -557,14 +557,14 @@ void NamespaceReplayer<I>::handle_shut_down_local_status_updater(int r) {
 
   m_local_status_updater.reset();
 
-  ceph_assert(!m_image_map);
-  ceph_assert(!m_image_deleter);
-  ceph_assert(!m_local_pool_watcher);
-  ceph_assert(!m_remote_pool_watcher);
-  ceph_assert(!m_instance_watcher);
-  ceph_assert(!m_instance_replayer);
+  stone_assert(!m_image_map);
+  stone_assert(!m_image_deleter);
+  stone_assert(!m_local_pool_watcher);
+  stone_assert(!m_remote_pool_watcher);
+  stone_assert(!m_instance_watcher);
+  stone_assert(!m_instance_replayer);
 
-  ceph_assert(m_on_finish != nullptr);
+  stone_assert(m_on_finish != nullptr);
   m_threads->work_queue->queue(m_on_finish, m_ret_val);
   m_on_finish = nullptr;
   m_ret_val = 0;
@@ -600,7 +600,7 @@ void NamespaceReplayer<I>::handle_init_image_map(int r, ImageMap<I> *image_map,
     return;
   }
 
-  ceph_assert(!m_image_map);
+  stone_assert(!m_image_map);
   m_image_map.reset(image_map);
 
   init_local_pool_watcher(on_finish);
@@ -611,7 +611,7 @@ void NamespaceReplayer<I>::init_local_pool_watcher(Context *on_finish) {
   dout(10) << dendl;
 
   std::lock_guard locker{m_lock};
-  ceph_assert(!m_local_pool_watcher);
+  stone_assert(!m_local_pool_watcher);
   m_local_pool_watcher.reset(PoolWatcher<I>::create(
       m_threads, m_local_io_ctx, m_local_mirror_uuid,
       m_local_pool_watcher_listener));
@@ -646,7 +646,7 @@ void NamespaceReplayer<I>::init_remote_pool_watcher(Context *on_finish) {
   dout(10) << dendl;
 
   std::lock_guard locker{m_lock};
-  ceph_assert(!m_remote_pool_watcher);
+  stone_assert(!m_remote_pool_watcher);
   m_remote_pool_watcher.reset(PoolWatcher<I>::create(
       m_threads, m_remote_io_ctx, m_remote_pool_meta.mirror_uuid,
       m_remote_pool_watcher_listener));
@@ -685,7 +685,7 @@ void NamespaceReplayer<I>::init_image_deleter(Context *on_finish) {
   dout(10) << dendl;
 
   std::lock_guard locker{m_lock};
-  ceph_assert(!m_image_deleter);
+  stone_assert(!m_image_deleter);
 
   on_finish = new LambdaContext([this, on_finish](int r) {
       handle_init_image_deleter(r, on_finish);
@@ -738,7 +738,7 @@ void NamespaceReplayer<I>::handle_shut_down_image_deleter(
 
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_image_deleter);
+    stone_assert(m_image_deleter);
     m_image_deleter.reset();
   }
 
@@ -757,7 +757,7 @@ void NamespaceReplayer<I>::shut_down_pool_watchers(Context *on_finish) {
 	});
       ctx = create_async_context_callback(m_threads->work_queue, ctx);
 
-      auto gather_ctx = new C_Gather(g_ceph_context, ctx);
+      auto gather_ctx = new C_Gather(g_stone_context, ctx);
       m_local_pool_watcher->shut_down(gather_ctx->new_sub());
       if (m_remote_pool_watcher) {
 	m_remote_pool_watcher->shut_down(gather_ctx->new_sub());
@@ -777,7 +777,7 @@ void NamespaceReplayer<I>::handle_shut_down_pool_watchers(
 
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_local_pool_watcher);
+    stone_assert(m_local_pool_watcher);
     m_local_pool_watcher.reset();
 
     if (m_remote_pool_watcher) {
@@ -813,7 +813,7 @@ void NamespaceReplayer<I>::handle_shut_down_image_map(int r, Context *on_finish)
   }
 
   std::lock_guard locker{m_lock};
-  ceph_assert(m_image_map);
+  stone_assert(m_image_map);
   m_image_map.reset();
 
   m_instance_replayer->release_all(create_async_context_callback(
@@ -847,7 +847,7 @@ void NamespaceReplayer<I>::handle_remove_image(const std::string &mirror_uuid,
                                           const std::string &global_image_id,
                                           const std::string &instance_id,
                                           Context* on_finish) {
-  ceph_assert(!mirror_uuid.empty());
+  stone_assert(!mirror_uuid.empty());
   dout(5) << "mirror_uuid=" << mirror_uuid << ", "
           << "global_image_id=" << global_image_id << ", "
           << "instance_id=" << instance_id << dendl;

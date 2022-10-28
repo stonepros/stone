@@ -6,11 +6,11 @@
 #include "rgw_frontend.h"
 #include "include/str_list.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 int RGWFrontendConfig::parse_config(const string& config,
 				    std::multimap<string, string>& config_map)

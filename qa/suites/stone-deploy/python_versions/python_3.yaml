@@ -1,0 +1,3 @@
+overrides:
+  stone-deploy:
+    python_version: "3"

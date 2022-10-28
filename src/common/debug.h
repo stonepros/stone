@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2011 New Dream Network
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_DEBUG_H
-#define CEPH_DEBUG_H
+#ifndef STONE_DEBUG_H
+#define STONE_DEBUG_H
 
 #include "common/dout.h"
 

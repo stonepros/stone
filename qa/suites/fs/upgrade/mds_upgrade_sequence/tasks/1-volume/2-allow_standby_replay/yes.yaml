@@ -1,4 +1,4 @@
 tasks:
-- cephadm.shell:
+- stoneadm.shell:
     host.a:
-      - ceph fs set cephfs allow_standby_replay true
+      - stone fs set stonefs allow_standby_replay true

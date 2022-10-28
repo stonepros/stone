@@ -1,13 +1,13 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - missing required features
 tasks:
 - exec:
     mon.a:
-      - ceph fs dump --format=json-pretty
-      - ceph fs volume ls
-      - ceph fs subvolume ls cephfs
+      - stone fs dump --format=json-pretty
+      - stone fs volume ls
+      - stone fs subvolume ls stonefs
 - workunit:
    clients:
      client.0:

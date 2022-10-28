@@ -16,7 +16,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/construct.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::MigrateRequest: " << this << " " \
                            << __func__ << ": "
@@ -40,8 +40,8 @@ public:
 
   int send() override {
     I &image_ctx = this->m_image_ctx;
-    ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
-    CephContext *cct = image_ctx.cct;
+    stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
+    StoneContext *cct = image_ctx.cct;
 
     if (image_ctx.exclusive_lock != nullptr &&
         !image_ctx.exclusive_lock->is_lock_owner()) {
@@ -61,11 +61,11 @@ private:
 
   void start_async_op() {
     I &image_ctx = this->m_image_ctx;
-    ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
-    CephContext *cct = image_ctx.cct;
+    stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 10) << dendl;
 
-    ceph_assert(m_async_op == nullptr);
+    stone_assert(m_async_op == nullptr);
     m_async_op = new io::AsyncOperation();
     m_async_op->start_op(image_ctx);
 
@@ -85,7 +85,7 @@ private:
 
   void handle_start_async_op(int r) {
     I &image_ctx = this->m_image_ctx;
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 10) << "r=" << r << dendl;
 
     if (r < 0) {
@@ -109,8 +109,8 @@ private:
 
   void migrate_object() {
     I &image_ctx = this->m_image_ctx;
-    ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
-    CephContext *cct = image_ctx.cct;
+    stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
+    StoneContext *cct = image_ctx.cct;
 
     auto ctx = create_context_callback<
       C_MigrateObject<I>, &C_MigrateObject<I>::handle_migrate_object>(this);
@@ -126,7 +126,7 @@ private:
 
       req->send();
     } else {
-      ceph_assert(image_ctx.parent != nullptr);
+      stone_assert(image_ctx.parent != nullptr);
 
       uint32_t flags = deep_copy::OBJECT_COPY_REQUEST_FLAG_MIGRATION;
       if (image_ctx.migration_info.flatten) {
@@ -144,7 +144,7 @@ private:
   }
 
   void handle_migrate_object(int r) {
-    CephContext *cct = this->m_image_ctx.cct;
+    StoneContext *cct = this->m_image_ctx.cct;
     ldout(cct, 10) << "r=" << r << dendl;
 
     if (r == -ENOENT) {
@@ -162,8 +162,8 @@ private:
 template <typename I>
 void MigrateRequest<I>::send_op() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
-  CephContext *cct = image_ctx.cct;
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   migrate_objects();
@@ -172,7 +172,7 @@ void MigrateRequest<I>::send_op() {
 template <typename I>
 bool MigrateRequest<I>::should_complete(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -185,8 +185,8 @@ bool MigrateRequest<I>::should_complete(int r) {
 template <typename I>
 void MigrateRequest<I>::migrate_objects() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  StoneContext *cct = image_ctx.cct;
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
   uint64_t overlap_objects = get_num_overlap_objects();
 
@@ -208,7 +208,7 @@ void MigrateRequest<I>::migrate_objects() {
 template <typename I>
 void MigrateRequest<I>::handle_migrate_objects(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -221,7 +221,7 @@ void MigrateRequest<I>::handle_migrate_objects(int r) {
 template <typename I>
 uint64_t MigrateRequest<I>::get_num_overlap_objects() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   std::shared_lock image_locker{image_ctx.image_lock};

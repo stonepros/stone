@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
  *
@@ -13,7 +13,7 @@
  */
 #include <iostream>
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "rgw/rgw_common.h"
 #include "rgw/rgw_rados.h"
 #include "test_rgw_common.h"
@@ -21,7 +21,7 @@
 
 using namespace std;
 
-auto cct = new CephContext(CEPH_ENTITY_TYPE_CLIENT);
+auto cct = new StoneContext(STONE_ENTITY_TYPE_CLIENT);
 const DoutPrefix dp(cct, 1, "test rgw manifest: ");
 
 struct OldObjManifestPart {
@@ -129,7 +129,7 @@ static void gen_obj(test_rgw_env& env, uint64_t obj_size, uint64_t head_max_size
   test_rgw_init_bucket(bucket, "buck");
 
   *head = rgw_obj(*bucket, "oid");
-  gen->create_begin(g_ceph_context, manifest, placement_rule, nullptr, *bucket, *head);
+  gen->create_begin(g_stone_context, manifest, placement_rule, nullptr, *bucket, *head);
 
   append_head(test_objs, *head);
   cout << "test_objs.size()=" << test_objs->size() << std::endl;
@@ -188,7 +188,7 @@ static void gen_old_obj(test_rgw_env& env, uint64_t obj_size, uint64_t head_max_
   test_objs->push_back(part.loc);
 
   string prefix;
-  append_rand_alpha(g_ceph_context, prefix, prefix, 16);
+  append_rand_alpha(g_stone_context, prefix, prefix, 16);
 
   int i = 0;
   for (uint64_t ofs = head_max_size; ofs < obj_size; ofs += stripe_size, i++) {
@@ -307,7 +307,7 @@ TEST(TestRGWManifest, multipart) {
     for (ofs = 0; ofs < part_size; ofs += stripe_size) {
       if (ofs == 0) {
         rgw_placement_rule rule(env.zonegroup.default_placement.name, RGW_STORAGE_CLASS_STANDARD);
-        int r = gen.create_begin(g_ceph_context, &manifest, rule, nullptr, bucket, head);
+        int r = gen.create_begin(g_stone_context, &manifest, rule, nullptr, bucket, head);
         ASSERT_EQ(r, 0);
         continue;
       }
@@ -389,10 +389,10 @@ int main(int argc, char **argv) {
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2016 Mirantis Inc
  *
@@ -66,8 +66,8 @@ public:
   struct C_WatchCtx : public librados::WatchCtx2 {
     TestImageReplayer *test;
     std::string oid;
-    ceph::mutex lock = ceph::make_mutex("C_WatchCtx::lock");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("C_WatchCtx::lock");
+    stone::condition_variable cond;
     bool notified;
 
     C_WatchCtx(TestImageReplayer *test, const std::string &oid)
@@ -169,7 +169,7 @@ public:
     m_remote_image_id = get_image_id(m_remote_ioctx, m_image_name);
     m_global_image_id = get_global_image_id(m_remote_ioctx, m_remote_image_id);
 
-    auto cct = reinterpret_cast<CephContext*>(m_local_ioctx.cct());
+    auto cct = reinterpret_cast<StoneContext*>(m_local_ioctx.cct());
     m_threads.reset(new Threads<>(m_local_cluster));
 
     m_image_sync_throttler.reset(new Throttler<>(
@@ -420,7 +420,7 @@ public:
   }
 
   void wait_for_snapshot_synced() {
-    uint64_t remote_snap_id = CEPH_NOSNAP;
+    uint64_t remote_snap_id = STONE_NOSNAP;
     cls::rbd::MirrorSnapshotNamespace remote_mirror_ns;
     ASSERT_EQ(0, get_last_mirror_snapshot(m_remote_ioctx, m_remote_image_id,
                                           &remote_snap_id, &remote_mirror_ns));
@@ -431,7 +431,7 @@ public:
     ASSERT_EQ(0, librbd::cls_client::mirror_image_get_image_id(
                    &m_local_ioctx, m_global_image_id, &local_image_id));
 
-    uint64_t local_snap_id = CEPH_NOSNAP;
+    uint64_t local_snap_id = STONE_NOSNAP;
     cls::rbd::MirrorSnapshotNamespace local_mirror_ns;
     for (int i = 0; i < 100; i++) {
       int r = get_last_mirror_snapshot(m_local_ioctx, local_image_id,
@@ -534,7 +534,7 @@ public:
       ictx->journal->flush_commit_position(&journal_flush_ctx);
       ASSERT_EQ(0, journal_flush_ctx.wait());
     } else {
-      uint64_t snap_id = CEPH_NOSNAP;
+      uint64_t snap_id = STONE_NOSNAP;
       ASSERT_EQ(0, librbd::api::Mirror<>::image_snapshot_create(
                   ictx, 0, &snap_id));
     }
@@ -544,7 +544,7 @@ public:
 
   static int _image_number;
 
-  PoolMetaCache m_pool_meta_cache{g_ceph_context};
+  PoolMetaCache m_pool_meta_cache{g_stone_context};
 
   std::shared_ptr<librados::Rados> m_local_cluster;
   std::unique_ptr<Threads<>> m_threads;
@@ -1362,7 +1362,7 @@ TEST_F(TestImageReplayerJournal, MirroringDelay)
 
   this->generate_test_data();
   this->open_remote_image(&ictx);
-  start_time = ceph_clock_now();
+  start_time = stone_clock_now();
   for (int i = 0; i < TEST_IO_COUNT; ++i) {
     this->write_test_data(ictx, this->m_test_data, TEST_IO_SIZE * i,
                           TEST_IO_SIZE);
@@ -1371,13 +1371,13 @@ TEST_F(TestImageReplayerJournal, MirroringDelay)
   this->close_image(ictx);
 
   this->wait_for_replay_complete();
-  delay = ceph_clock_now() - start_time;
+  delay = stone_clock_now() - start_time;
   ASSERT_GE(delay, DELAY);
 
   // Test stop when delaying replay
 
   this->open_remote_image(&ictx);
-  start_time = ceph_clock_now();
+  start_time = stone_clock_now();
   for (int i = 0; i < TEST_IO_COUNT; ++i) {
     this->write_test_data(ictx, this->m_test_data, TEST_IO_SIZE * i,
                           TEST_IO_SIZE);
@@ -1389,7 +1389,7 @@ TEST_F(TestImageReplayerJournal, MirroringDelay)
   this->start();
 
   this->wait_for_replay_complete();
-  delay = ceph_clock_now() - start_time;
+  delay = stone_clock_now() - start_time;
   ASSERT_GE(delay, DELAY);
 
   this->stop();

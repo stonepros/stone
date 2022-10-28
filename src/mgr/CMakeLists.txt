@@ -3,7 +3,7 @@ add_library(mgr_cap_obj OBJECT
 
 if(WITH_MGR)
   set(mgr_srcs
-    ${CMAKE_SOURCE_DIR}/src/ceph_mgr.cc
+    ${CMAKE_SOURCE_DIR}/src/stone_mgr.cc
     ${CMAKE_SOURCE_DIR}/src/mon/PGMap.cc
     ${CMAKE_SOURCE_DIR}/src/mon/ConfigMap.cc
     ActivePyModule.cc
@@ -33,13 +33,13 @@ if(WITH_MGR)
     StandbyPyModules.cc
     mgr_commands.cc
     $<TARGET_OBJECTS:mgr_cap_obj>)
-  add_executable(ceph-mgr ${mgr_srcs})
-  target_link_libraries(ceph-mgr
+  add_executable(stone-mgr ${mgr_srcs})
+  target_link_libraries(stone-mgr
     osdc client heap_profiler
-    global-static ceph-common
+    global-static stone-common
     Boost::python${MGR_PYTHON_VERSION_MAJOR}${MGR_PYTHON_VERSION_MINOR}
     Python3::Python ${CMAKE_DL_LIBS} ${GSSAPI_LIBRARIES})
-  set_target_properties(ceph-mgr PROPERTIES
+  set_target_properties(stone-mgr PROPERTIES
     POSITION_INDEPENDENT_CODE ${EXE_LINKER_USE_PIE})
-  install(TARGETS ceph-mgr DESTINATION bin)
+  install(TARGETS stone-mgr DESTINATION bin)
 endif()

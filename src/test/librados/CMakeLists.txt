@@ -10,7 +10,7 @@ add_library(radostest STATIC
   $<TARGET_OBJECTS:radostest_shared>)
 target_link_libraries(radostest PUBLIC
   GTest::GTest
-  ceph-common
+  stone-common
   json_spirit
   ${GSSAPI_LIBRARIES} ${OPENLDAP_LIBRARIES} ${EXTRALIBS})
 add_library(radostest-cxx STATIC
@@ -19,160 +19,160 @@ add_library(radostest-cxx STATIC
   $<TARGET_OBJECTS:radostest_shared>)
 target_link_libraries(radostest-cxx PUBLIC
   GTest::GTest
-  ceph-common)
+  stone-common)
 
-add_executable(ceph_test_rados_api_cmd
+add_executable(stone_test_rados_api_cmd
   cmd.cc)
-target_link_libraries(ceph_test_rados_api_cmd
+target_link_libraries(stone_test_rados_api_cmd
   librados ${UNITTEST_LIBS} radostest)
-add_executable(ceph_test_rados_api_cmd_pp
+add_executable(stone_test_rados_api_cmd_pp
   cmd_cxx.cc)
-target_link_libraries(ceph_test_rados_api_cmd_pp
+target_link_libraries(stone_test_rados_api_cmd_pp
   librados ${UNITTEST_LIBS} radostest-cxx)
 
-add_executable(ceph_test_rados_api_io
+add_executable(stone_test_rados_api_io
   io.cc)
-target_link_libraries(ceph_test_rados_api_io
+target_link_libraries(stone_test_rados_api_io
   librados ${UNITTEST_LIBS} radostest)
-add_executable(ceph_test_rados_api_io_pp
+add_executable(stone_test_rados_api_io_pp
   io_cxx.cc)
-target_link_libraries(ceph_test_rados_api_io_pp
+target_link_libraries(stone_test_rados_api_io_pp
   librados ${UNITTEST_LIBS} radostest-cxx)
 
-add_executable(ceph_test_rados_api_c_write_operations
+add_executable(stone_test_rados_api_c_write_operations
   c_write_operations.cc)
-target_link_libraries(ceph_test_rados_api_c_write_operations
+target_link_libraries(stone_test_rados_api_c_write_operations
   librados ${UNITTEST_LIBS} radostest)
 
-add_executable(ceph_test_rados_api_c_read_operations
+add_executable(stone_test_rados_api_c_read_operations
   c_read_operations.cc)
-target_link_libraries(ceph_test_rados_api_c_read_operations
+target_link_libraries(stone_test_rados_api_c_read_operations
   librados ${UNITTEST_LIBS} radostest)
 
-add_executable(ceph_test_rados_api_aio
+add_executable(stone_test_rados_api_aio
   aio.cc)
-target_link_libraries(ceph_test_rados_api_aio
+target_link_libraries(stone_test_rados_api_aio
   librados ${UNITTEST_LIBS} radostest)
-add_executable(ceph_test_rados_api_aio_pp
+add_executable(stone_test_rados_api_aio_pp
   aio_cxx.cc)
-target_link_libraries(ceph_test_rados_api_aio_pp
+target_link_libraries(stone_test_rados_api_aio_pp
   librados ${UNITTEST_LIBS} radostest-cxx)
 
-add_executable(ceph_test_rados_api_asio asio.cc)
-target_link_libraries(ceph_test_rados_api_asio global
+add_executable(stone_test_rados_api_asio asio.cc)
+target_link_libraries(stone_test_rados_api_asio global
   librados ${UNITTEST_LIBS} Boost::coroutine Boost::context)
 
-add_executable(ceph_test_rados_api_list
+add_executable(stone_test_rados_api_list
   list.cc
   $<TARGET_OBJECTS:unit-main>)
-target_link_libraries(ceph_test_rados_api_list
+target_link_libraries(stone_test_rados_api_list
   librados global ${UNITTEST_LIBS} radostest)
 
-add_executable(ceph_test_rados_api_pool
+add_executable(stone_test_rados_api_pool
   pool.cc)
-target_link_libraries(ceph_test_rados_api_pool
+target_link_libraries(stone_test_rados_api_pool
   librados ${UNITTEST_LIBS} radostest)
 
-add_executable(ceph_test_rados_api_stat
+add_executable(stone_test_rados_api_stat
   stat.cc)
-target_link_libraries(ceph_test_rados_api_stat
+target_link_libraries(stone_test_rados_api_stat
   librados ${UNITTEST_LIBS} radostest)
-add_executable(ceph_test_rados_api_stat_pp
+add_executable(stone_test_rados_api_stat_pp
   stat_cxx.cc)
-target_link_libraries(ceph_test_rados_api_stat_pp
+target_link_libraries(stone_test_rados_api_stat_pp
   librados ${UNITTEST_LIBS} radostest-cxx)
 
-add_executable(ceph_test_rados_api_watch_notify
+add_executable(stone_test_rados_api_watch_notify
   watch_notify.cc)
-target_link_libraries(ceph_test_rados_api_watch_notify
+target_link_libraries(stone_test_rados_api_watch_notify
   librados ${UNITTEST_LIBS} radostest)
-add_executable(ceph_test_rados_api_watch_notify_pp
+add_executable(stone_test_rados_api_watch_notify_pp
   watch_notify_cxx.cc)
-target_link_libraries(ceph_test_rados_api_watch_notify_pp
+target_link_libraries(stone_test_rados_api_watch_notify_pp
   librados ${UNITTEST_LIBS} radostest-cxx)
 
-add_executable(ceph_test_rados_api_cls
+add_executable(stone_test_rados_api_cls
   cls.cc)
-target_link_libraries(ceph_test_rados_api_cls
+target_link_libraries(stone_test_rados_api_cls
   librados ${UNITTEST_LIBS} radostest-cxx)
 
-add_executable(ceph_test_rados_api_misc
+add_executable(stone_test_rados_api_misc
   misc.cc
   $<TARGET_OBJECTS:unit-main>)
-target_link_libraries(ceph_test_rados_api_misc
+target_link_libraries(stone_test_rados_api_misc
   librados global ${UNITTEST_LIBS} radostest)
-add_executable(ceph_test_rados_api_misc_pp
+add_executable(stone_test_rados_api_misc_pp
   misc_cxx.cc
   $<TARGET_OBJECTS:unit-main>)
-target_link_libraries(ceph_test_rados_api_misc_pp
+target_link_libraries(stone_test_rados_api_misc_pp
   librados global ${UNITTEST_LIBS} radostest-cxx)
 
-add_executable(ceph_test_rados_api_lock
+add_executable(stone_test_rados_api_lock
   lock.cc)
-target_link_libraries(ceph_test_rados_api_lock
+target_link_libraries(stone_test_rados_api_lock
   librados ${UNITTEST_LIBS} radostest)
-add_executable(ceph_test_rados_api_lock_pp
+add_executable(stone_test_rados_api_lock_pp
   lock_cxx.cc)
-target_link_libraries(ceph_test_rados_api_lock_pp
+target_link_libraries(stone_test_rados_api_lock_pp
   librados ${UNITTEST_LIBS} radostest-cxx)
 
-add_executable(ceph_test_rados_api_service
+add_executable(stone_test_rados_api_service
   service.cc)
-target_link_libraries(ceph_test_rados_api_service
+target_link_libraries(stone_test_rados_api_service
   librados global ${UNITTEST_LIBS} radostest)
-add_executable(ceph_test_rados_api_service_pp
+add_executable(stone_test_rados_api_service_pp
   service_cxx.cc)
-target_link_libraries(ceph_test_rados_api_service_pp
+target_link_libraries(stone_test_rados_api_service_pp
   librados global ${UNITTEST_LIBS} radostest-cxx)
 
-add_executable(ceph_test_rados_api_tier_pp
+add_executable(stone_test_rados_api_tier_pp
   tier_cxx.cc
   $<TARGET_OBJECTS:unit-main>)
-target_link_libraries(ceph_test_rados_api_tier_pp
+target_link_libraries(stone_test_rados_api_tier_pp
   librados global ${UNITTEST_LIBS} Boost::system radostest-cxx cls_cas_internal
   cls_cas_client spawn)
 
-add_executable(ceph_test_rados_api_snapshots
+add_executable(stone_test_rados_api_snapshots
   snapshots.cc)
-target_link_libraries(ceph_test_rados_api_snapshots
+target_link_libraries(stone_test_rados_api_snapshots
   librados ${UNITTEST_LIBS} radostest)
-add_executable(ceph_test_rados_api_snapshots_pp
+add_executable(stone_test_rados_api_snapshots_pp
   snapshots_cxx.cc)
-target_link_libraries(ceph_test_rados_api_snapshots_pp
+target_link_libraries(stone_test_rados_api_snapshots_pp
   librados ${UNITTEST_LIBS} radostest-cxx)
 
 install(TARGETS
-  ceph_test_rados_api_aio
-  ceph_test_rados_api_aio_pp
-  ceph_test_rados_api_asio
-  ceph_test_rados_api_c_read_operations
-  ceph_test_rados_api_c_write_operations
-  ceph_test_rados_api_cmd
-  ceph_test_rados_api_cmd_pp
-  ceph_test_rados_api_io
-  ceph_test_rados_api_io_pp
-  ceph_test_rados_api_list
-  ceph_test_rados_api_lock
-  ceph_test_rados_api_lock_pp
-  ceph_test_rados_api_misc
-  ceph_test_rados_api_misc_pp
-  ceph_test_rados_api_pool
-  ceph_test_rados_api_service
-  ceph_test_rados_api_service_pp
-  ceph_test_rados_api_snapshots
-  ceph_test_rados_api_snapshots_pp
-  ceph_test_rados_api_stat
-  ceph_test_rados_api_stat_pp
-  ceph_test_rados_api_tier_pp
-  ceph_test_rados_api_watch_notify
-  ceph_test_rados_api_watch_notify_pp
+  stone_test_rados_api_aio
+  stone_test_rados_api_aio_pp
+  stone_test_rados_api_asio
+  stone_test_rados_api_c_read_operations
+  stone_test_rados_api_c_write_operations
+  stone_test_rados_api_cmd
+  stone_test_rados_api_cmd_pp
+  stone_test_rados_api_io
+  stone_test_rados_api_io_pp
+  stone_test_rados_api_list
+  stone_test_rados_api_lock
+  stone_test_rados_api_lock_pp
+  stone_test_rados_api_misc
+  stone_test_rados_api_misc_pp
+  stone_test_rados_api_pool
+  stone_test_rados_api_service
+  stone_test_rados_api_service_pp
+  stone_test_rados_api_snapshots
+  stone_test_rados_api_snapshots_pp
+  stone_test_rados_api_stat
+  stone_test_rados_api_stat_pp
+  stone_test_rados_api_tier_pp
+  stone_test_rados_api_watch_notify
+  stone_test_rados_api_watch_notify_pp
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # unittest_librados
 add_executable(unittest_librados
   librados.cc
   )
-add_ceph_unittest(unittest_librados)
+add_stone_unittest(unittest_librados)
 target_link_libraries(unittest_librados librados ${BLKID_LIBRARIES}
 	${GSSAPI_LIBRARIES} ${OPENLDAP_LIBRARIES})
 
@@ -180,7 +180,7 @@ target_link_libraries(unittest_librados librados ${BLKID_LIBRARIES}
 add_executable(unittest_librados_config
   librados_config.cc
   )
-add_ceph_unittest(unittest_librados_config)
+add_stone_unittest(unittest_librados_config)
 target_link_libraries(unittest_librados_config
   librados
   ${BLKID_LIBRARIES} ${GSSAPI_LIBRARIES} ${OPENLDAP_LIBRARIES})
@@ -188,12 +188,12 @@ target_link_libraries(unittest_librados_config
 # Removing this test. We can't shove it into Finisher as it's not a
 # Context any more, and wrapping it to adapt it would be less fair.
 
-#add_executable(ceph_test_rados_completion_speed
+#add_executable(stone_test_rados_completion_speed
 #  completion_speed.cc)
-#target_link_libraries(ceph_test_rados_completion_speed
+#target_link_libraries(stone_test_rados_completion_speed
 #  librados ${UNITTEST_LIBS} radostest-cxx)
 
-add_executable(ceph_test_rados_op_speed
+add_executable(stone_test_rados_op_speed
   op_speed.cc)
-target_link_libraries(ceph_test_rados_op_speed
+target_link_libraries(stone_test_rados_op_speed
   librados ${UNITTEST_LIBS} radostest-cxx)

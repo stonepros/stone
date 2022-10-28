@@ -11,11 +11,11 @@ namespace librbd {
 namespace migration {
 namespace util {
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::migration::util::" << __func__ << ": "
 
-int parse_url(CephContext* cct, const std::string& url, UrlSpec* url_spec) {
+int parse_url(StoneContext* cct, const std::string& url, UrlSpec* url_spec) {
   ldout(cct, 10) << "url=" << url << dendl;
   *url_spec = UrlSpec{};
 
@@ -60,7 +60,7 @@ int parse_url(CephContext* cct, const std::string& url, UrlSpec* url_spec) {
   return 0;
 }
 
-void zero_shrunk_snapshot(CephContext* cct, const io::Extents& image_extents,
+void zero_shrunk_snapshot(StoneContext* cct, const io::Extents& image_extents,
                           uint64_t snap_id, uint64_t new_size,
                           std::optional<uint64_t> *previous_size,
                           io::SparseExtents* sparse_extents) {
@@ -92,7 +92,7 @@ void merge_snapshot_delta(const io::SnapIds& snap_ids,
   snapshot_delta->clear();
 
   auto snap_id_it = snap_ids.begin();
-  ceph_assert(snap_id_it != snap_ids.end());
+  stone_assert(snap_id_it != snap_ids.end());
 
   // merge any snapshot intervals that were not requested
   std::list<io::SparseExtents*> pending_sparse_extents;

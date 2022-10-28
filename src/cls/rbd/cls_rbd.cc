@@ -14,7 +14,7 @@
  * interactions with non-data objects should go through this
  * class. The OSD class interface leaves the class to implement its
  * own argument and payload serialization/deserialization, so for ease
- * of implementation we use the existing ceph encoding/decoding
+ * of implementation we use the existing stone encoding/decoding
  * methods. Something like json might be preferable, but the rbd
  * kernel module has to be able to understand format as well. The
  * datatypes exposed to the clients are strings, unsigned integers,
@@ -51,11 +51,11 @@ using std::set;
 using std::string;
 using std::vector;
 
-using ceph::BitVector;
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::encode;
-using ceph::decode;
+using stone::BitVector;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::encode;
+using stone::decode;
 
 /*
  * Object keys:
@@ -84,9 +84,9 @@ namespace {
 
 uint64_t get_encode_features(cls_method_context_t hctx) {
   uint64_t features = 0;
-  ceph_release_t require_osd_release = cls_get_required_osd_release(hctx);
-  if (require_osd_release >= ceph_release_t::nautilus) {
-    features |= CEPH_FEATURE_SERVER_NAUTILUS;
+  stone_release_t require_osd_release = cls_get_required_osd_release(hctx);
+  if (require_osd_release >= stone_release_t::nautilus) {
+    features |= STONE_FEATURE_SERVER_NAUTILUS;
   }
   return features;
 }
@@ -141,7 +141,7 @@ static int snap_read_header(cls_method_context_t hctx, bufferlist& bl)
       return -EINVAL;
 
     header = (struct rbd_obj_header_ondisk *)bl.c_str();
-    ceph_assert(header);
+    stone_assert(header);
 
     if ((snap_count != header->snap_count) ||
         (snap_names_len != header->snap_names_len)) {
@@ -186,7 +186,7 @@ static int read_key(cls_method_context_t hctx, const string &key, T *out)
   try {
     auto it = bl.cbegin();
     decode(*out, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("error decoding %s", key.c_str());
     return -EIO;
   }
@@ -541,7 +541,7 @@ int iterate(cls_method_context_t hctx, L& lambda) {
       auto iter = val.second.cbegin();
       try {
 	decode(snap_meta, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
 	CLS_ERR("error decoding snapshot metadata for snap : %s",
 	        val.first.c_str());
 	return -EIO;
@@ -718,8 +718,8 @@ int detach(cls_method_context_t hctx, bool legacy_api) {
     return r;
   }
 
-  ceph_release_t require_osd_release = cls_get_required_osd_release(hctx);
-  if (has_child_snaps && require_osd_release >= ceph_release_t::nautilus) {
+  stone_release_t require_osd_release = cls_get_required_osd_release(hctx);
+  if (has_child_snaps && require_osd_release >= stone_release_t::nautilus) {
     // remove overlap from HEAD revision but keep spec for snapshots
     on_disk_parent.head_overlap = std::nullopt;
     r = write_key(hctx, "parent", on_disk_parent, get_encode_features(hctx));
@@ -780,7 +780,7 @@ int create(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     if (!iter.end()) {
       decode(data_pool_id, iter);
     }
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -810,7 +810,7 @@ int create(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   bufferlist snap_seqbl;
   bufferlist timestampbl;
   uint64_t snap_seq = 0;
-  utime_t timestamp = ceph_clock_now();
+  utime_t timestamp = stone_clock_now();
   encode(size, sizebl);
   encode(order, orderbl);
   encode(features, featuresbl);
@@ -856,7 +856,7 @@ int create(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
 
 /**
  * Input:
- * @param snap_id which snapshot to query, or CEPH_NOSNAP (uint64_t) (deprecated)
+ * @param snap_id which snapshot to query, or STONE_NOSNAP (uint64_t) (deprecated)
  * @param read_only true if the image will be used read-only (bool)
  *
  * Output:
@@ -875,7 +875,7 @@ int get_features(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     if (!iter.end()) {
       decode(read_only, iter);
     }
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -915,7 +915,7 @@ int set_features(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     decode(features, iter);
     decode(mask, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -969,7 +969,7 @@ int set_features(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
 
 /**
  * Input:
- * @param snap_id which snapshot to query, or CEPH_NOSNAP (uint64_t)
+ * @param snap_id which snapshot to query, or STONE_NOSNAP (uint64_t)
  *
  * Output:
  * @param order bits to shift to get the size of data objects (uint8_t)
@@ -984,7 +984,7 @@ int get_size(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   auto iter = in->cbegin();
   try {
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -996,7 +996,7 @@ int get_size(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     return r;
   }
 
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     r = read_key(hctx, "size", &size);
     if (r < 0) {
       CLS_ERR("failed to read the image's size off of disk: %s", cpp_strerror(r).c_str());
@@ -1033,7 +1033,7 @@ int set_size(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   auto iter = in->cbegin();
   try {
     decode(size, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -1089,7 +1089,7 @@ int set_size(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
  * RBD_PROTECTION_STATUS_{PROTECTED, UNPROTECTED, UNPROTECTING}
  *
  * @returns 0 on success, negative error code on failure
- * @returns -EINVAL if snapid is CEPH_NOSNAP
+ * @returns -EINVAL if snapid is STONE_NOSNAP
  */
 int get_protection_status(cls_method_context_t hctx, bufferlist *in,
 			  bufferlist *out)
@@ -1099,7 +1099,7 @@ int get_protection_status(cls_method_context_t hctx, bufferlist *in,
   auto iter = in->cbegin();
   try {
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_LOG(20, "get_protection_status: invalid decode");
     return -EINVAL;
   }
@@ -1111,7 +1111,7 @@ int get_protection_status(cls_method_context_t hctx, bufferlist *in,
   CLS_LOG(20, "get_protection_status snap_id=%llu",
          (unsigned long long)snap_id.val);
 
-  if (snap_id == CEPH_NOSNAP)
+  if (snap_id == STONE_NOSNAP)
     return -EINVAL;
 
   cls_rbd_snap snap;
@@ -1142,7 +1142,7 @@ int get_protection_status(cls_method_context_t hctx, bufferlist *in,
  * RBD_PROTECTION_STATUS_{PROTECTED, UNPROTECTED, UNPROTECTING}
  *
  * @returns 0 on success, negative error code on failure
- * @returns -EINVAL if snapid is CEPH_NOSNAP
+ * @returns -EINVAL if snapid is STONE_NOSNAP
  */
 int set_protection_status(cls_method_context_t hctx, bufferlist *in,
 			  bufferlist *out)
@@ -1154,7 +1154,7 @@ int set_protection_status(cls_method_context_t hctx, bufferlist *in,
   try {
     decode(snap_id, iter);
     decode(status, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_LOG(20, "set_protection_status: invalid decode");
     return -EINVAL;
   }
@@ -1172,7 +1172,7 @@ int set_protection_status(cls_method_context_t hctx, bufferlist *in,
   CLS_LOG(20, "set_protection_status snapid=%llu status=%u",
 	  (unsigned long long)snap_id.val, status);
 
-  if (snap_id == CEPH_NOSNAP)
+  if (snap_id == STONE_NOSNAP)
     return -EINVAL;
 
   if (status >= RBD_PROTECTION_STATUS_LAST) {
@@ -1268,7 +1268,7 @@ int set_stripe_unit_count(cls_method_context_t hctx, bufferlist *in, bufferlist 
   try {
     decode(stripe_unit, iter);
     decode(stripe_count, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_LOG(20, "set_stripe_unit_count: invalid decode");
     return -EINVAL;
   }
@@ -1332,7 +1332,7 @@ int get_create_timestamp(cls_method_context_t hctx, bufferlist *in, bufferlist *
     try {
       auto it = bl.cbegin();
       decode(timestamp, it);
-    } catch (const ceph::buffer::error &err) {
+    } catch (const stone::buffer::error &err) {
       CLS_ERR("could not decode create_timestamp");
       return -EIO;
     }
@@ -1369,7 +1369,7 @@ int get_access_timestamp(cls_method_context_t hctx, bufferlist *in, bufferlist *
     try {
       auto it = bl.cbegin();
       decode(timestamp, it);
-    } catch (const ceph::buffer::error &err) {
+    } catch (const stone::buffer::error &err) {
       CLS_ERR("could not decode access_timestamp");
       return -EIO;
     }
@@ -1406,7 +1406,7 @@ int get_modify_timestamp(cls_method_context_t hctx, bufferlist *in, bufferlist *
     try {
       auto it = bl.cbegin();
       decode(timestamp, it);
-    } catch (const ceph::buffer::error &err) {
+    } catch (const stone::buffer::error &err) {
       CLS_ERR("could not decode modify_timestamp");
       return -EIO;
     }
@@ -1421,7 +1421,7 @@ int get_modify_timestamp(cls_method_context_t hctx, bufferlist *in, bufferlist *
  * get the image flags
  *
  * Input:
- * @param snap_id which snapshot to query, to CEPH_NOSNAP (uint64_t)
+ * @param snap_id which snapshot to query, to STONE_NOSNAP (uint64_t)
  *
  * Output:
  * @param flags image flags
@@ -1434,14 +1434,14 @@ int get_flags(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   auto iter = in->cbegin();
   try {
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
   CLS_LOG(20, "get_flags snap_id=%llu", (unsigned long long)snap_id);
 
   uint64_t flags = 0;
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     int r = read_key(hctx, "flags", &flags);
     if (r < 0 && r != -ENOENT) {
       CLS_ERR("failed to read flags off disk: %s", cpp_strerror(r).c_str());
@@ -1468,7 +1468,7 @@ int get_flags(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
  * Input:
  * @param flags image flags
  * @param mask image flag mask
- * @param snap_id which snapshot to update, or CEPH_NOSNAP (uint64_t)
+ * @param snap_id which snapshot to update, or STONE_NOSNAP (uint64_t)
  *
  * Output:
  * none
@@ -1479,7 +1479,7 @@ int set_flags(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
 {
   uint64_t flags;
   uint64_t mask;
-  uint64_t snap_id = CEPH_NOSNAP;
+  uint64_t snap_id = STONE_NOSNAP;
   auto iter = in->cbegin();
   try {
     decode(flags, iter);
@@ -1487,7 +1487,7 @@ int set_flags(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     if (!iter.end()) {
       decode(snap_id, iter);
     }
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -1497,7 +1497,7 @@ int set_flags(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   uint64_t orig_flags = 0;
   cls_rbd_snap snap_meta;
   string snap_meta_key;
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     r = read_key(hctx, "flags", &orig_flags);
     if (r < 0 && r != -ENOENT) {
       CLS_ERR("Could not read image's flags off disk: %s",
@@ -1520,7 +1520,7 @@ int set_flags(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
               "new_flags=%" PRIu64 ", mask=%" PRIu64, snap_id, orig_flags,
               flags, mask);
 
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     r = write_key(hctx, "flags", flags);
   } else {
     snap_meta.flags = flags;
@@ -1577,7 +1577,7 @@ int op_features_set(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     decode(op_features, iter);
     decode(mask, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -1594,7 +1594,7 @@ int op_features_set(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
  * get the current parent, if any
  *
  * Input:
- * @param snap_id which snapshot to query, or CEPH_NOSNAP (uint64_t)
+ * @param snap_id which snapshot to query, or STONE_NOSNAP (uint64_t)
  *
  * Output:
  * @param pool parent pool id (-1 if parent does not exist)
@@ -1611,7 +1611,7 @@ int get_parent(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   auto iter = in->cbegin();
   try {
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -1632,7 +1632,7 @@ int get_parent(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
       return -EXDEV;
     }
 
-    if (snap_id != CEPH_NOSNAP) {
+    if (snap_id != STONE_NOSNAP) {
       cls_rbd_snap snap;
       std::string snapshot_key;
       key_from_snap_id(snap_id, &snapshot_key);
@@ -1690,7 +1690,7 @@ int set_parent(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     uint64_t overlap;
     decode(overlap, iter);
     parent.head_overlap = overlap;
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_LOG(20, "cls_rbd::set_parent: invalid decode");
     return -EINVAL;
   }
@@ -1780,7 +1780,7 @@ int parent_overlap_get(cls_method_context_t hctx, bufferlist *in,
   auto iter = in->cbegin();
   try {
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -1790,7 +1790,7 @@ int parent_overlap_get(cls_method_context_t hctx, bufferlist *in,
   std::optional<uint64_t> parent_overlap = std::nullopt;
   r = image::require_feature(hctx, RBD_FEATURE_LAYERING);
   if (r == 0) {
-    if (snap_id == CEPH_NOSNAP) {
+    if (snap_id == STONE_NOSNAP) {
       cls_rbd_parent parent;
       r = read_key(hctx, "parent", &parent);
       if (r < 0 && r != -ENOENT) {
@@ -1841,7 +1841,7 @@ int parent_attach(cls_method_context_t hctx, bufferlist *in, bufferlist *out) {
     if (!iter.end()) {
       decode(reattach, iter);
     }
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_LOG(20, "cls_rbd::parent_attach: invalid decode");
     return -EINVAL;
   }
@@ -1883,7 +1883,7 @@ static int decode_parent_common(bufferlist::const_iterator& it, uint64_t *pool_i
     decode(*pool_id, it);
     decode(*image_id, it);
     decode(*snap_id, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("error decoding parent spec");
     return -EINVAL;
   }
@@ -1907,7 +1907,7 @@ static int decode_parent_and_child(bufferlist *in, uint64_t *pool_id,
     return r;
   try {
     decode(*c_image_id, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("error decoding child image id");
     return -EINVAL;
   }
@@ -2197,13 +2197,13 @@ int get_snapshot_name(cls_method_context_t hctx, bufferlist *in, bufferlist *out
   auto iter = in->cbegin();
   try {
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
   CLS_LOG(20, "get_snapshot_name snap_id=%llu", (unsigned long long)snap_id);
 
-  if (snap_id == CEPH_NOSNAP)
+  if (snap_id == STONE_NOSNAP)
     return -EINVAL;
 
   cls_rbd_snap snap;
@@ -2235,13 +2235,13 @@ int get_snapshot_timestamp(cls_method_context_t hctx, bufferlist *in, bufferlist
   auto iter = in->cbegin();
   try {
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
   CLS_LOG(20, "get_snapshot_timestamp snap_id=%llu", (unsigned long long)snap_id);
 
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     return -EINVAL;
   }
 
@@ -2272,12 +2272,12 @@ int snapshot_get(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   auto iter = in->cbegin();
   try {
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
   CLS_LOG(20, "snapshot_get snap_id=%llu", (unsigned long long)snap_id);
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     return -EINVAL;
   }
 
@@ -2322,7 +2322,7 @@ int snapshot_add(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     if (!iter.end()) {
       decode(snap_meta.snapshot_namespace, iter);
     }
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -2335,7 +2335,7 @@ int snapshot_add(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   CLS_LOG(20, "snapshot_add name=%s id=%llu", snap_meta.name.c_str(),
 	 (unsigned long long)snap_meta.id.val);
 
-  if (snap_meta.id > CEPH_MAXSNAP)
+  if (snap_meta.id > STONE_MAXSNAP)
     return -EINVAL;
 
   uint64_t cur_snap_seq;
@@ -2369,7 +2369,7 @@ int snapshot_add(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     return r;
   }
 
-  snap_meta.timestamp = ceph_clock_now();
+  snap_meta.timestamp = stone_clock_now();
 
   uint64_t total_read = 0;
   auto pre_check_lambda =
@@ -2455,7 +2455,7 @@ int snapshot_rename(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(src_snap_id, iter);
     decode(dst_snap_name, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -2517,7 +2517,7 @@ int snapshot_remove(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -2579,9 +2579,9 @@ int snapshot_remove(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
 
   bool has_parent = (r >= 0 && parent.exists());
   bool is_head_child = (has_parent && parent.head_overlap);
-  ceph_release_t require_osd_release = cls_get_required_osd_release(hctx);
+  stone_release_t require_osd_release = cls_get_required_osd_release(hctx);
   if (has_parent && !is_head_child && !has_child_snaps &&
-      require_osd_release >= ceph_release_t::nautilus) {
+      require_osd_release >= stone_release_t::nautilus) {
     // remove the unused parent image spec
     r = remove_key(hctx, "parent");
     if (r < 0 && r != -ENOENT) {
@@ -2626,7 +2626,7 @@ int snapshot_trash_add(cls_method_context_t hctx, bufferlist *in,
   try {
     auto iter = in->cbegin();
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -2726,7 +2726,7 @@ int sparse_copyup(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(extent_map, iter);
     decode(data, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_LOG(20, "sparse_copyup: invalid decode");
     return -EINVAL;
   }
@@ -2750,7 +2750,7 @@ int sparse_copyup(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     bufferlist tmpbl;
     try {
       tmpbl.substr_of(data, data_offset, len);
-    } catch (const ceph::buffer::error &err) {
+    } catch (const stone::buffer::error &err) {
       CLS_LOG(20, "sparse_copyup: invalid data");
       return -EINVAL;
     }
@@ -2800,7 +2800,7 @@ int get_id(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = read_bl.cbegin();
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EIO;
   }
 
@@ -2828,7 +2828,7 @@ int set_id(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -2866,7 +2866,7 @@ int set_access_timestamp(cls_method_context_t hctx, bufferlist *in, bufferlist *
    if(r < 0)
      return r;
    
-   utime_t timestamp = ceph_clock_now();
+   utime_t timestamp = stone_clock_now();
    r = write_key(hctx, "access_timestamp", timestamp);
    if(r < 0) {
      CLS_ERR("error setting access_timestamp");
@@ -2892,7 +2892,7 @@ int set_modify_timestamp(cls_method_context_t hctx, bufferlist *in, bufferlist *
    if(r < 0)
      return r;
    
-   utime_t timestamp = ceph_clock_now();
+   utime_t timestamp = stone_clock_now();
    r = write_key(hctx, "modify_timestamp", timestamp);
    if(r < 0) {
      CLS_ERR("error setting modify_timestamp");
@@ -3023,7 +3023,7 @@ int dir_rename_image(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     decode(src, iter);
     decode(dest, iter);
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3052,7 +3052,7 @@ int dir_get_id(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(name, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3086,7 +3086,7 @@ int dir_get_name(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3127,7 +3127,7 @@ int dir_list(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(start_after, iter);
     decode(max_return, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3153,7 +3153,7 @@ int dir_list(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
       auto iter = it->second.cbegin();
       try {
 	decode(id, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
 	CLS_ERR("could not decode id of image '%s'", it->first.c_str());
 	return -EIO;
       }
@@ -3198,7 +3198,7 @@ int dir_add_image(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(name, iter);
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3223,7 +3223,7 @@ int dir_remove_image(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(name, iter);
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3246,7 +3246,7 @@ int dir_state_assert(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(directory_state, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3278,7 +3278,7 @@ int dir_state_set(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(directory_state, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3340,7 +3340,7 @@ int object_map_read(cls_method_context_t hctx, BitVector<2> &object_map)
   try {
     auto iter = bl.cbegin();
     decode(object_map, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode object map: %s", err.what());
     return -EINVAL;
   }
@@ -3385,7 +3385,7 @@ int object_map_save(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(object_map, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3416,7 +3416,7 @@ int object_map_resize(cls_method_context_t hctx, bufferlist *in, bufferlist *out
     auto iter = in->cbegin();
     decode(object_count, iter);
     decode(default_state, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3484,7 +3484,7 @@ int object_map_update(cls_method_context_t hctx, bufferlist *in, bufferlist *out
     decode(end_object_no, iter);
     decode(new_object_state, iter);
     decode(current_object_state, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode message");
     return -EINVAL;
   }
@@ -3498,7 +3498,7 @@ int object_map_update(cls_method_context_t hctx, bufferlist *in, bufferlist *out
   BitVector<2> object_map;
   bufferlist header_bl;
   r = cls_cxx_read2(hctx, 0, object_map.get_header_length(), &header_bl,
-                    CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+                    STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
   if (r < 0) {
     CLS_ERR("object map header read failed");
     return r;
@@ -3507,7 +3507,7 @@ int object_map_update(cls_method_context_t hctx, bufferlist *in, bufferlist *out
   try {
     auto it = header_bl.cbegin();
     object_map.decode_header(it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode object map header: %s", err.what());
     return -EINVAL;
   }
@@ -3518,7 +3518,7 @@ int object_map_update(cls_method_context_t hctx, bufferlist *in, bufferlist *out
 
   bufferlist footer_bl;
   r = cls_cxx_read2(hctx, object_byte_offset, byte_length, &footer_bl,
-                    CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+                    STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
   if (r < 0) {
     CLS_ERR("object map footer read header CRC failed");
     return r;
@@ -3527,7 +3527,7 @@ int object_map_update(cls_method_context_t hctx, bufferlist *in, bufferlist *out
   try {
     auto it = footer_bl.cbegin();
     object_map.decode_header_crc(it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode object map header CRC: %s", err.what());
   }
 
@@ -3542,7 +3542,7 @@ int object_map_update(cls_method_context_t hctx, bufferlist *in, bufferlist *out
 
   footer_bl.clear();
   r = cls_cxx_read2(hctx, object_byte_offset, byte_length, &footer_bl,
-                    CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+                    STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
   if (r < 0) {
     CLS_ERR("object map footer read data CRCs failed");
     return r;
@@ -3551,7 +3551,7 @@ int object_map_update(cls_method_context_t hctx, bufferlist *in, bufferlist *out
   try {
     auto it = footer_bl.cbegin();
     object_map.decode_data_crcs(it, start_object_no);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode object map data CRCs: %s", err.what());
   }
 
@@ -3562,7 +3562,7 @@ int object_map_update(cls_method_context_t hctx, bufferlist *in, bufferlist *out
 
   bufferlist data_bl;
   r = cls_cxx_read2(hctx, object_byte_offset, byte_length, &data_bl,
-                    CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+                    STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
   if (r < 0) {
     CLS_ERR("object map data read failed");
     return r;
@@ -3571,7 +3571,7 @@ int object_map_update(cls_method_context_t hctx, bufferlist *in, bufferlist *out
   try {
     auto it = data_bl.cbegin();
     object_map.decode_data(it, data_byte_offset);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode data chunk [%" PRIu64 "]: %s",
 	    data_byte_offset, err.what());
     return -EINVAL;
@@ -3597,7 +3597,7 @@ int object_map_update(cls_method_context_t hctx, bufferlist *in, bufferlist *out
     bufferlist data_bl;
     object_map.encode_data(data_bl, data_byte_offset, byte_length);
     r = cls_cxx_write2(hctx, object_byte_offset, data_bl.length(), &data_bl,
-                       CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+                       STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
     if (r < 0) {
       CLS_ERR("failed to write object map header: %s", cpp_strerror(r).c_str());
       return r;
@@ -3606,7 +3606,7 @@ int object_map_update(cls_method_context_t hctx, bufferlist *in, bufferlist *out
     footer_bl.clear();
     object_map.encode_data_crcs(footer_bl, start_object_no, object_count);
     r = cls_cxx_write2(hctx, footer_object_offset, footer_bl.length(),
-		       &footer_bl, CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+		       &footer_bl, STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
     if (r < 0) {
       CLS_ERR("failed to write object map footer: %s", cpp_strerror(r).c_str());
       return r;
@@ -3672,7 +3672,7 @@ int object_map_snap_remove(cls_method_context_t hctx, bufferlist *in,
   try {
     auto iter = in->cbegin();
     decode(src_object_map, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3735,7 +3735,7 @@ int metadata_list(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(start_after, iter);
     decode(max_return, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3788,7 +3788,7 @@ int metadata_set(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   auto iter = in->cbegin();
   try {
     decode(data, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3820,7 +3820,7 @@ int metadata_remove(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   auto iter = in->cbegin();
   try {
     decode(key, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3851,7 +3851,7 @@ int metadata_get(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   auto iter = in->cbegin();
   try {
     decode(key, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3897,7 +3897,7 @@ int snapshot_set_limit(cls_method_context_t hctx, bufferlist *in,
   try {
     auto iter = in->cbegin();
     decode(new_limit, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -3971,7 +3971,7 @@ int child_attach(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto it = in->cbegin();
     decode(snap_id, it);
     decode(child_image, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -4044,7 +4044,7 @@ int child_detach(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto it = in->cbegin();
     decode(snap_id, it);
     decode(child_image, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -4134,7 +4134,7 @@ int children_list(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto it = in->cbegin();
     decode(snap_id, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -4177,7 +4177,7 @@ int migration_set(cls_method_context_t hctx, bufferlist *in, bufferlist *out) {
   try {
     auto it = in->cbegin();
     decode(migration_spec, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -4208,7 +4208,7 @@ int migration_set_state(cls_method_context_t hctx, bufferlist *in,
     auto it = in->cbegin();
     decode(state, it);
     decode(description, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -4290,7 +4290,7 @@ int assert_snapc_seq(cls_method_context_t hctx, bufferlist *in,
     auto it = in->cbegin();
     decode(snapc_seq, it);
     decode(state, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -4372,7 +4372,7 @@ int old_snapshot_add(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     decode(s, iter);
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
   snap_name = s.c_str();
@@ -4460,7 +4460,7 @@ int old_snapshot_remove(cls_method_context_t hctx, bufferlist *in, bufferlist *o
 
   try {
     decode(s, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
   snap_name = s.c_str();
@@ -4554,7 +4554,7 @@ int old_snapshot_rename(cls_method_context_t hctx, bufferlist *in, bufferlist *o
   try {
     decode(src_snap_id, iter);
     decode(dst, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
   dst_snap_name = dst.c_str();
@@ -4714,7 +4714,7 @@ int read_peers(cls_method_context_t hctx,
         cls::rbd::MirrorPeer peer;
 	decode(peer, bl_it);
         peers->push_back(peer);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
 	CLS_ERR("could not decode peer '%s'", it.first.c_str());
 	return -EIO;
       }
@@ -4740,7 +4740,7 @@ int read_peer(cls_method_context_t hctx, const std::string &id,
   try {
     auto bl_it = bl.cbegin();
     decode(*peer, bl_it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("could not decode peer '%s'", id.c_str());
     return -EIO;
   }
@@ -4853,7 +4853,7 @@ int peer_ping(cls_method_context_t hctx, const std::string& site_name,
     }
   }
 
-  mirror_peer.last_seen = ceph_clock_now();
+  mirror_peer.last_seen = stone_clock_now();
 
   if (!mirror_peer.is_valid()) {
     CLS_ERR("attempting to update invalid peer: %s", site_name.c_str());
@@ -4949,7 +4949,7 @@ int image_get(cls_method_context_t hctx, const string &image_id,
   try {
     auto it = bl.cbegin();
     decode(*mirror_image, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("could not decode mirrored image '%s'", image_id.c_str());
     return -EIO;
   }
@@ -5057,7 +5057,7 @@ int image_status_set(cls_method_context_t hctx, const string &global_image_id,
   cls::rbd::MirrorImageSiteStatusOnDisk ondisk_status(status);
   ondisk_status.mirror_uuid = ""; // mirror_uuid stored in key
   ondisk_status.up = false;
-  ondisk_status.last_update = ceph_clock_now();
+  ondisk_status.last_update = stone_clock_now();
 
   std::string global_id_key = global_key(global_image_id);
   std::string image_id;
@@ -5075,7 +5075,7 @@ int image_status_set(cls_method_context_t hctx, const string &global_image_id,
   }
 
   r = cls_get_request_origin(hctx, &ondisk_status.origin);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   bufferlist bl;
   encode(ondisk_status, bl, cls_get_features(hctx));
@@ -5158,7 +5158,7 @@ int image_status_get(cls_method_context_t hctx, const string &global_image_id,
   try {
     auto it = bl.cbegin();
     decode(ondisk_status, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("could not decode status for mirrored image, global id '%s', "
             "site '%s'",
             global_image_id.c_str(), mirror_uuid.c_str());
@@ -5294,7 +5294,7 @@ int image_status_list(cls_method_context_t hctx,
       auto iter = it->second.cbegin();
       try {
 	decode(mirror_image, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
 	CLS_ERR("could not decode mirror image payload of image '%s'",
                 image_id.c_str());
 	return -EIO;
@@ -5415,7 +5415,7 @@ int image_status_get_summary(
       auto iter = list_it.second.cbegin();
       try {
 	decode(mirror_image, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
 	CLS_ERR("could not decode mirror image payload for key '%s'",
                 key.c_str());
 	return -EIO;
@@ -5475,7 +5475,7 @@ int image_status_remove_down(cls_method_context_t hctx) {
         try {
           auto it = list_it.second.cbegin();
           status.decode_meta(it);
-        } catch (const ceph::buffer::error &err) {
+        } catch (const stone::buffer::error &err) {
           CLS_ERR("could not decode status metadata for mirrored image '%s'",
                   key.c_str());
           return -EIO;
@@ -5524,7 +5524,7 @@ int image_instance_get(cls_method_context_t hctx,
   try {
     auto it = bl.cbegin();
     decode(ondisk_status, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("could not decode status for mirrored image, global id '%s'",
             global_image_id.c_str());
     return -EIO;
@@ -5572,7 +5572,7 @@ int image_instance_list(cls_method_context_t hctx,
       auto iter = it->second.cbegin();
       try {
         decode(mirror_image, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
         CLS_ERR("could not decode mirror image payload of image '%s'",
                 image_id.c_str());
         return -EIO;
@@ -5676,7 +5676,7 @@ int mirror_image_map_list(cls_method_context_t hctx,
       auto iter = it->second.cbegin();
       try {
         decode(mirror_image_map, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
         CLS_ERR("could not decode image map payload: %s",
                 cpp_strerror(r).c_str());
         return -EINVAL;
@@ -5820,7 +5820,7 @@ int mirror_uuid_set(cls_method_context_t hctx, bufferlist *in,
   try {
     auto bl_it = in->cbegin();
     decode(mirror_uuid, bl_it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -5881,7 +5881,7 @@ int mirror_mode_set(cls_method_context_t hctx, bufferlist *in,
   try {
     auto bl_it = in->cbegin();
     decode(mirror_mode_decode, bl_it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -5965,7 +5965,7 @@ int mirror_peer_ping(cls_method_context_t hctx, bufferlist *in,
     decode(direction, it);
     mirror_peer_direction = static_cast<cls::rbd::MirrorPeerDirection>(
       direction);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6014,7 +6014,7 @@ int mirror_peer_add(cls_method_context_t hctx, bufferlist *in,
   try {
     auto it = in->cbegin();
     decode(mirror_peer, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6039,7 +6039,7 @@ int mirror_peer_remove(cls_method_context_t hctx, bufferlist *in,
   try {
     auto it = in->cbegin();
     decode(uuid, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6066,7 +6066,7 @@ int mirror_peer_set_client(cls_method_context_t hctx, bufferlist *in,
     auto it = in->cbegin();
     decode(uuid, it);
     decode(client_name, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6100,7 +6100,7 @@ int mirror_peer_set_cluster(cls_method_context_t hctx, bufferlist *in,
     auto it = in->cbegin();
     decode(uuid, it);
     decode(site_name, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6150,7 +6150,7 @@ int mirror_peer_set_direction(cls_method_context_t hctx, bufferlist *in,
     decode(direction, it);
     mirror_peer_direction = static_cast<cls::rbd::MirrorPeerDirection>(
       direction);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6186,7 +6186,7 @@ int mirror_image_list(cls_method_context_t hctx, bufferlist *in,
     auto iter = in->cbegin();
     decode(start_after, iter);
     decode(max_return, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6215,7 +6215,7 @@ int mirror_image_list(cls_method_context_t hctx, bufferlist *in,
       auto iter = it->second.cbegin();
       try {
 	decode(mirror_image, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
 	CLS_ERR("could not decode mirror image payload of image '%s'",
                 image_id.c_str());
 	return -EIO;
@@ -6249,7 +6249,7 @@ int mirror_image_get_image_id(cls_method_context_t hctx, bufferlist *in,
   try {
     auto it = in->cbegin();
     decode(global_id, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6281,7 +6281,7 @@ int mirror_image_get(cls_method_context_t hctx, bufferlist *in,
   try {
     auto it = in->cbegin();
     decode(image_id, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6312,7 +6312,7 @@ int mirror_image_set(cls_method_context_t hctx, bufferlist *in,
     auto it = in->cbegin();
     decode(image_id, it);
     decode(mirror_image, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6336,7 +6336,7 @@ int mirror_image_remove(cls_method_context_t hctx, bufferlist *in,
   try {
     auto it = in->cbegin();
     decode(image_id, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6363,7 +6363,7 @@ int mirror_image_status_set(cls_method_context_t hctx, bufferlist *in,
     auto it = in->cbegin();
     decode(global_image_id, it);
     decode(status, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6388,7 +6388,7 @@ int mirror_image_status_remove(cls_method_context_t hctx, bufferlist *in,
   try {
     auto it = in->cbegin();
     decode(global_image_id, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6413,7 +6413,7 @@ int mirror_image_status_get(cls_method_context_t hctx, bufferlist *in,
   try {
     auto it = in->cbegin();
     decode(global_image_id, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6452,7 +6452,7 @@ int mirror_image_status_list(cls_method_context_t hctx, bufferlist *in,
     auto iter = in->cbegin();
     decode(start_after, iter);
     decode(max_return, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6485,7 +6485,7 @@ int mirror_image_status_get_summary(cls_method_context_t hctx, bufferlist *in,
     if (!iter.end()) {
       decode(peers, iter);
     }
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6548,7 +6548,7 @@ int mirror_image_instance_get(cls_method_context_t hctx, bufferlist *in,
   try {
     auto it = in->cbegin();
     decode(global_image_id, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6586,7 +6586,7 @@ int mirror_image_instance_list(cls_method_context_t hctx, bufferlist *in,
     auto iter = in->cbegin();
     decode(start_after, iter);
     decode(max_return, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6635,7 +6635,7 @@ int mirror_instances_add(cls_method_context_t hctx, bufferlist *in,
   try {
     auto iter = in->cbegin();
     decode(instance_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6659,7 +6659,7 @@ int mirror_instances_remove(cls_method_context_t hctx, bufferlist *in,
   try {
     auto iter = in->cbegin();
     decode(instance_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6687,7 +6687,7 @@ int mirror_image_map_list(cls_method_context_t hctx, bufferlist *in,
     auto it = in->cbegin();
     decode(start_after, it);
     decode(max_return, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6718,7 +6718,7 @@ int mirror_image_map_update(cls_method_context_t hctx, bufferlist *in,
     auto it = in->cbegin();
     decode(global_image_id, it);
     decode(image_map, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6750,7 +6750,7 @@ int mirror_image_map_remove(cls_method_context_t hctx, bufferlist *in,
   try {
     auto it = in->cbegin();
     decode(global_image_id, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6782,7 +6782,7 @@ int mirror_image_snapshot_unlink_peer(cls_method_context_t hctx, bufferlist *in,
     auto iter = in->cbegin();
     decode(snap_id, iter);
     decode(mirror_peer_uuid, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6817,7 +6817,7 @@ int mirror_image_snapshot_set_copy_progress(cls_method_context_t hctx,
     decode(snap_id, iter);
     decode(complete, iter);
     decode(last_copied_object_number, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -6947,7 +6947,7 @@ int snap_list(cls_method_context_t hctx, cls::rbd::GroupSnapshot start_after,
       cls::rbd::GroupSnapshot snap;
       try {
 	decode(snap, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
 	CLS_ERR("error decoding snapshot: %s", it->first.c_str());
 	return -EIO;
       }
@@ -7013,7 +7013,7 @@ int group_dir_list(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(start_after, iter);
     decode(max_return, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7039,7 +7039,7 @@ int group_dir_list(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
       auto iter = val.second.cbegin();
       try {
 	decode(id, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
 	CLS_ERR("could not decode id of group '%s'", val.first.c_str());
 	return -EIO;
       }
@@ -7083,7 +7083,7 @@ int group_dir_add(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(name, iter);
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7109,7 +7109,7 @@ int group_dir_rename(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     decode(src, iter);
     decode(dest, iter);
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7137,7 +7137,7 @@ int group_dir_remove(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(name, iter);
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7161,7 +7161,7 @@ int group_image_set(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(st, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7194,7 +7194,7 @@ int group_image_remove(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(spec, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7231,7 +7231,7 @@ int group_image_list(cls_method_context_t hctx,
     auto iter = in->cbegin();
     decode(start_after, iter);
     decode(max_return, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7253,7 +7253,7 @@ int group_image_list(cls_method_context_t hctx,
       cls::rbd::GroupImageLinkState state;
       try {
 	decode(state, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
 	CLS_ERR("error decoding state for image: %s", it->first.c_str());
 	return -EIO;
       }
@@ -7295,7 +7295,7 @@ int image_group_add(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(new_group, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7309,7 +7309,7 @@ int image_group_add(cls_method_context_t hctx,
     try {
       auto iter = existing_refbl.cbegin();
       decode(old_group, iter);
-    } catch (const ceph::buffer::error &err) {
+    } catch (const stone::buffer::error &err) {
       return -EINVAL;
     }
 
@@ -7359,7 +7359,7 @@ int image_group_remove(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(spec, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7373,7 +7373,7 @@ int image_group_remove(cls_method_context_t hctx,
   auto iter = refbl.cbegin();
   try {
     decode(ref_spec, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7420,7 +7420,7 @@ int image_group_get(cls_method_context_t hctx,
     auto iter = refbl.cbegin();
     try {
       decode(spec, iter);
-    } catch (const ceph::buffer::error &err) {
+    } catch (const stone::buffer::error &err) {
       return -EINVAL;
     }
   }
@@ -7446,7 +7446,7 @@ int group_snap_set(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(group_snap, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7499,7 +7499,7 @@ int group_snap_remove(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7529,7 +7529,7 @@ int group_snap_get_by_id(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(snap_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7544,7 +7544,7 @@ int group_snap_get_by_id(cls_method_context_t hctx,
   auto iter = snapbl.cbegin();
   try {
     decode(group_snap, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("error decoding snapshot: %s", snap_id.c_str());
     return -EIO;
   }
@@ -7577,7 +7577,7 @@ int group_snap_list(cls_method_context_t hctx,
     auto iter = in->cbegin();
     decode(start_after, iter);
     decode(max_return, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
   std::vector<cls::rbd::GroupSnapshot> group_snaps;
@@ -7628,7 +7628,7 @@ int trash_add(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(id, iter);
     decode(trash_spec, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7673,7 +7673,7 @@ int trash_remove(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7721,7 +7721,7 @@ int trash_list(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(start_after, iter);
     decode(max_return, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7780,7 +7780,7 @@ int trash_get(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7818,7 +7818,7 @@ int trash_state_set(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     decode(id, iter);
     decode(trash_state, iter);
     decode(expect_state, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7883,7 +7883,7 @@ int namespace_add(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(name, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7920,7 +7920,7 @@ int namespace_remove(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(name, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -7959,7 +7959,7 @@ int namespace_list(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(start_after, iter);
     decode(max_return, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -8016,7 +8016,7 @@ int sparsify(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     auto iter = in->cbegin();
     decode(sparse_size, iter);
     decode(remove_empty, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -8054,7 +8054,7 @@ int sparsify(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
     return 0;
   }
 
-  bl.rebuild(ceph::buffer::ptr_node::create(bl.length()));
+  bl.rebuild(stone::buffer::ptr_node::create(bl.length()));
   size_t write_offset = 0;
   size_t write_length = 0;
   size_t offset = 0;
@@ -8071,7 +8071,7 @@ int sparsify(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
       CLS_LOG(20, "write%s %" PRIu64 "~%" PRIu64, (replace ? "(replace)" : ""),
               write_offset, write_length);
       bufferlist write_bl;
-      write_bl.push_back(ceph::buffer::ptr_node::create(ptr, write_offset,
+      write_bl.push_back(stone::buffer::ptr_node::create(ptr, write_offset,
 							write_length));
       if (replace) {
 	r = cls_cxx_replace(hctx, write_offset, write_length, &write_bl);

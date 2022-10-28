@@ -3,7 +3,7 @@
 
 #include "Finisher.h"
 
-#define dout_subsys ceph_subsys_finisher
+#define dout_subsys stone_subsys_finisher
 #undef dout_prefix
 #define dout_prefix *_dout << "finisher(" << this << ") "
 
@@ -57,7 +57,7 @@ void *Finisher::finisher_thread_entry()
       ldout(cct, 10) << "finisher_thread doing " << in_progress_queue << dendl;
 
       if (logger) {
-	start = ceph_clock_now();
+	start = stone_clock_now();
 	count = in_progress_queue.size();
       }
 
@@ -70,7 +70,7 @@ void *Finisher::finisher_thread_entry()
       in_progress_queue.clear();
       if (logger) {
 	logger->dec(l_finisher_queue_len, count);
-	logger->tinc(l_finisher_complete_lat, ceph_clock_now() - start);
+	logger->tinc(l_finisher_complete_lat, stone_clock_now() - start);
       }
 
       ul.lock();

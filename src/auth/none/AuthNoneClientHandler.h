@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_AUTHNONECLIENTHANDLER_H
-#define CEPH_AUTHNONECLIENTHANDLER_H
+#ifndef STONE_AUTHNONECLIENTHANDLER_H
+#define STONE_AUTHNONECLIENTHANDLER_H
 
 #include "auth/AuthClientHandler.h"
 #include "AuthNoneProtocol.h"
@@ -23,7 +23,7 @@
 class AuthNoneClientHandler : public AuthClientHandler {
 
 public:
-  AuthNoneClientHandler(CephContext *cct_)
+  AuthNoneClientHandler(StoneContext *cct_)
     : AuthClientHandler(cct_) {}
 
   AuthNoneClientHandler* clone() const override {
@@ -39,7 +39,7 @@ public:
 		      std::string *connection_secret) override { return 0; }
   bool build_rotating_request(ceph::buffer::list& bl) const override { return false; }
 
-  int get_protocol() const override { return CEPH_AUTH_NONE; }
+  int get_protocol() const override { return STONE_AUTH_NONE; }
   
   AuthAuthorizer *build_authorizer(uint32_t service_id) const override {
     AuthNoneAuthorizer *auth = new AuthNoneAuthorizer();

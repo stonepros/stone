@@ -15,12 +15,12 @@
 
 #include <vector>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::ParentCacheObjectDispatch: " \
                            << this << " " << __func__ << ": "
 
-using namespace ceph::immutable_obj_cache;
+using namespace stone::immutable_obj_cache;
 using librbd::util::data_object_name;
 
 namespace librbd {
@@ -30,9 +30,9 @@ template <typename I>
 ParentCacheObjectDispatch<I>::ParentCacheObjectDispatch(
     I* image_ctx, plugin::Api<I>& plugin_api)
   : m_image_ctx(image_ctx), m_plugin_api(plugin_api),
-    m_lock(ceph::make_mutex(
+    m_lock(stone::make_mutex(
       "librbd::cache::ParentCacheObjectDispatch::lock", true, false)) {
-  ceph_assert(m_image_ctx->data_ctx.is_valid());
+  stone_assert(m_image_ctx->data_ctx.is_valid());
   auto controller_path = image_ctx->cct->_conf.template get_val<std::string>(
     "immutable_object_cache_sock");
   m_cache_client = new CacheClient(controller_path.c_str(), m_image_ctx->cct);
@@ -101,7 +101,7 @@ bool ParentCacheObjectDispatch<I>::read(
 
   m_cache_client->lookup_object(m_image_ctx->data_ctx.get_namespace(),
                                 m_image_ctx->data_ctx.get_id(),
-                                io_context->read_snap().value_or(CEPH_NOSNAP),
+                                io_context->read_snap().value_or(STONE_NOSNAP),
                                 m_image_ctx->layout.object_size,
                                 oid, std::move(ctx));
   return true;
@@ -122,7 +122,7 @@ void ParentCacheObjectDispatch<I>::handle_read_cache(
     return;
   }
 
-  ceph_assert(ack->type == RBDSC_READ_REPLY);
+  stone_assert(ack->type == RBDSC_READ_REPLY);
   std::string file_path = ((ObjectCacheReadReplyData*)ack)->cache_path;
   if (file_path.empty()) {
     auto ctx = new LambdaContext(
@@ -135,7 +135,7 @@ void ParentCacheObjectDispatch<I>::handle_read_cache(
         on_dispatched->complete(r);
       });
     m_plugin_api.read_parent(m_image_ctx, object_no, extents,
-                             io_context->read_snap().value_or(CEPH_NOSNAP),
+                             io_context->read_snap().value_or(STONE_NOSNAP),
                              parent_trace, ctx);
     return;
   }
@@ -180,7 +180,7 @@ int ParentCacheObjectDispatch<I>::handle_register_client(bool reg) {
 template <typename I>
 void ParentCacheObjectDispatch<I>::create_cache_session(Context* on_finish,
                                                        bool is_reconnect) {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
   if (m_connecting) {
     return;
   }
@@ -195,7 +195,7 @@ void ParentCacheObjectDispatch<I>::create_cache_session(Context* on_finish,
     }
     handle_register_client(ret < 0 ? false : true);
 
-    ceph_assert(m_connecting);
+    stone_assert(m_connecting);
     m_connecting = false;
 
     if (on_finish != nullptr) {
@@ -232,7 +232,7 @@ void ParentCacheObjectDispatch<I>::create_cache_session(Context* on_finish,
 
 template <typename I>
 int ParentCacheObjectDispatch<I>::read_object(
-    std::string file_path, ceph::bufferlist* read_data, uint64_t offset,
+    std::string file_path, stone::bufferlist* read_data, uint64_t offset,
     uint64_t length, Context *on_finish) {
 
   auto *cct = m_image_ctx->cct;

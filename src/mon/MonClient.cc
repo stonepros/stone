@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -57,7 +57,7 @@
 #include "auth/AuthRegistry.h"
 #include "auth/RotatingKeyRing.h"
 
-#define dout_subsys ceph_subsys_monc
+#define dout_subsys stone_subsys_monc
 #undef dout_prefix
 #define dout_prefix *_dout << "monclient" << (_hunting() ? "(hunting)":"") << ": "
 
@@ -65,7 +65,7 @@ namespace bs = boost::system;
 using std::string;
 using namespace std::literals;
 
-MonClient::MonClient(CephContext *cct_, boost::asio::io_context& service) :
+MonClient::MonClient(StoneContext *cct_, boost::asio::io_context& service) :
   Dispatcher(cct_),
   AuthServer(cct_),
   messenger(NULL),
@@ -112,7 +112,7 @@ int MonClient::get_monmap()
 int MonClient::get_monmap_and_config()
 {
   ldout(cct, 10) << __func__ << dendl;
-  ceph_assert(!messenger);
+  stone_assert(!messenger);
 
   int tries = 10;
 
@@ -129,7 +129,7 @@ int MonClient::get_monmap_and_config()
 
   messenger = Messenger::create_client_messenger(
     cct, "temp_mon_client");
-  ceph_assert(messenger);
+  stone_assert(messenger);
   messenger->add_dispatcher_head(this);
   messenger->start();
   auto shutdown_msgr = make_scope_guard([this] {
@@ -149,7 +149,7 @@ int MonClient::get_monmap_and_config()
     bootstrap_config.reset();
   });
 
-  ceph::ref_t<MConfig> config;
+  stone::ref_t<MConfig> config;
   while (tries-- > 0) {
     r = init();
     if (r < 0) {
@@ -167,7 +167,7 @@ int MonClient::get_monmap_and_config()
       std::unique_lock l(monc_lock);
       if (monmap.get_epoch() &&
 	  !monmap.persistent_features.contains_all(
-	    ceph::features::mon::FEATURE_MIMIC)) {
+	    stone::features::mon::FEATURE_MIMIC)) {
 	ldout(cct,10) << __func__ << " pre-mimic monitor, no config to fetch"
 		      << dendl;
 	r = 0;
@@ -175,7 +175,7 @@ int MonClient::get_monmap_and_config()
       }
       while ((!bootstrap_config || monmap.get_epoch() == 0) && r == 0) {
 	ldout(cct,20) << __func__ << " waiting for monmap|config" << dendl;
-	auto status = map_cond.wait_for(l, ceph::make_timespan(
+	auto status = map_cond.wait_for(l, stone::make_timespan(
 	    cct->_conf->mon_client_hunt_interval));
 	if (status == std::cv_status::timeout) {
 	  r = -ETIMEDOUT;
@@ -259,7 +259,7 @@ int MonClient::ping_monitor(const string &mon_id, string *result_reply)
   auth_registry.refresh_config();
 
   KeyRing keyring;
-  keyring.from_ceph_context(cct);
+  keyring.from_stone_context(cct);
   RotatingKeyRing rkeyring(cct, cct->get_module_type(), &keyring);
 
   MonClientPinger *pinger = new MonClientPinger(cct,
@@ -299,16 +299,16 @@ bool MonClient::ms_dispatch(Message *m)
 {
   // we only care about these message types
   switch (m->get_type()) {
-  case CEPH_MSG_MON_MAP:
-  case CEPH_MSG_AUTH_REPLY:
-  case CEPH_MSG_MON_SUBSCRIBE_ACK:
-  case CEPH_MSG_MON_GET_VERSION_REPLY:
+  case STONE_MSG_MON_MAP:
+  case STONE_MSG_AUTH_REPLY:
+  case STONE_MSG_MON_SUBSCRIBE_ACK:
+  case STONE_MSG_MON_GET_VERSION_REPLY:
   case MSG_MON_COMMAND_ACK:
   case MSG_COMMAND_REPLY:
   case MSG_LOGACK:
   case MSG_CONFIG:
     break;
-  case CEPH_MSG_PING:
+  case STONE_MSG_PING:
     m->put();
     return true;
   default:
@@ -318,7 +318,7 @@ bool MonClient::ms_dispatch(Message *m)
   std::lock_guard lock(monc_lock);
 
   if (!m->get_connection()->is_anon() &&
-      m->get_source().type() == CEPH_ENTITY_TYPE_MON) {
+      m->get_source().type() == STONE_ENTITY_TYPE_MON) {
     if (_hunting()) {
       auto p = _find_pending_con(m->get_connection());
       if (p == pending_cons.end()) {
@@ -336,7 +336,7 @@ bool MonClient::ms_dispatch(Message *m)
   }
 
   switch (m->get_type()) {
-  case CEPH_MSG_MON_MAP:
+  case STONE_MSG_MON_MAP:
     handle_monmap(static_cast<MMonMap*>(m));
     if (passthrough_monmap) {
       return false;
@@ -344,13 +344,13 @@ bool MonClient::ms_dispatch(Message *m)
       m->put();
     }
     break;
-  case CEPH_MSG_AUTH_REPLY:
+  case STONE_MSG_AUTH_REPLY:
     handle_auth(static_cast<MAuthReply*>(m));
     break;
-  case CEPH_MSG_MON_SUBSCRIBE_ACK:
+  case STONE_MSG_MON_SUBSCRIBE_ACK:
     handle_subscribe_ack(static_cast<MMonSubscribeAck*>(m));
     break;
-  case CEPH_MSG_MON_GET_VERSION_REPLY:
+  case STONE_MSG_MON_GET_VERSION_REPLY:
     handle_get_version_reply(static_cast<MMonGetVersionReply*>(m));
     break;
   case MSG_MON_COMMAND_ACK:
@@ -358,7 +358,7 @@ bool MonClient::ms_dispatch(Message *m)
     break;
   case MSG_COMMAND_REPLY:
     if (m->get_connection()->is_anon() &&
-        m->get_source().type() == CEPH_ENTITY_TYPE_MON) {
+        m->get_source().type() == STONE_ENTITY_TYPE_MON) {
       // this connection is from 'tell'... ignore everything except our command
       // reply.  (we'll get misc other message because we authenticated, but we
       // don't need them.)
@@ -462,7 +462,7 @@ void MonClient::handle_config(MConfig *m)
   if (want_bootstrap_config) {
     // get_monmap_and_config is waiting for config which it will apply
     // synchronously
-    bootstrap_config = ceph::ref_t<MConfig>(m, false);
+    bootstrap_config = stone::ref_t<MConfig>(m, false);
     map_cond.notify_all();
     return;
   }
@@ -470,7 +470,7 @@ void MonClient::handle_config(MConfig *m)
   // Take the sledgehammer approach to ensuring we don't depend on
   // anything in MonClient.
   boost::asio::post(finish_strand,
-		    [m, cct = boost::intrusive_ptr<CephContext>(cct),
+		    [m, cct = boost::intrusive_ptr<StoneContext>(cct),
 		     config_notify_cb = config_notify_cb,
 		     config_cb = config_cb]() {
 		      cct->_conf.set_mon_vals(cct.get(), m->config, config_cb);
@@ -494,9 +494,9 @@ int MonClient::init()
   std::lock_guard l(monc_lock);
   keyring.reset(new KeyRing);
   if (auth_registry.is_supported_method(messenger->get_mytype(),
-					CEPH_AUTH_CEPHX)) {
+					STONE_AUTH_STONEX)) {
     // this should succeed, because auth_registry just checked!
-    int r = keyring->from_ceph_context(cct);
+    int r = keyring->from_stone_context(cct);
     if (r != 0) {
       // but be somewhat graceful in case there was a race condition
       lderr(cct) << "keyring not found" << dendl;
@@ -527,7 +527,7 @@ void MonClient::shutdown()
   monc_lock.lock();
   stopping = true;
   while (!version_requests.empty()) {
-    ceph::async::post(std::move(version_requests.begin()->second),
+    stone::async::post(std::move(version_requests.begin()->second),
 		      monc_errc::shutting_down, 0, 0);
     ldout(cct, 20) << __func__ << " canceling and discarding version request "
 		   << version_requests.begin()->first << dendl;
@@ -573,8 +573,8 @@ int MonClient::authenticate(double timeout)
   if (!_opened())
     _reopen_session();
 
-  auto until = ceph::real_clock::now();
-  until += ceph::make_timespan(timeout);
+  auto until = stone::real_clock::now();
+  until += stone::make_timespan(timeout);
   if (timeout > 0.0)
     ldout(cct, 10) << "authenticate will time out at " << until << dendl;
   while (!active_con && authenticate_err >= 0) {
@@ -593,12 +593,12 @@ int MonClient::authenticate(double timeout)
     ldout(cct, 5) << __func__ << " success, global_id "
 		  << active_con->get_global_id() << dendl;
     // active_con should not have been set if there was an error
-    ceph_assert(authenticate_err >= 0);
+    stone_assert(authenticate_err >= 0);
     authenticated = true;
   }
 
-  if (authenticate_err < 0 && auth_registry.no_keyring_disabled_cephx()) {
-    lderr(cct) << __func__ << " NOTE: no keyring found; disabled cephx authentication" << dendl;
+  if (authenticate_err < 0 && auth_registry.no_keyring_disabled_stonex()) {
+    lderr(cct) << __func__ << " NOTE: no keyring found; disabled stonex authentication" << dendl;
   }
 
   return authenticate_err;
@@ -606,7 +606,7 @@ int MonClient::authenticate(double timeout)
 
 void MonClient::handle_auth(MAuthReply *m)
 {
-  ceph_assert(ceph_mutex_is_locked(monc_lock));
+  stone_assert(stone_mutex_is_locked(monc_lock));
 
   if (m->get_connection()->is_anon()) {
     // anon connection, used for mon tell commands
@@ -614,7 +614,7 @@ void MonClient::handle_auth(MAuthReply *m)
       if (p.second->target_con == m->get_connection()) {
 	auto& mc = p.second->target_session;
 	int ret = mc->handle_auth(m, entity_name,
-				  CEPH_ENTITY_TYPE_MON,
+				  STONE_ENTITY_TYPE_MON,
 				  rotating_secrets.get());
 	(void)ret; // we don't care
 	break;
@@ -641,7 +641,7 @@ void MonClient::handle_auth(MAuthReply *m)
 
   // hunting
   auto found = _find_pending_con(m->get_connection());
-  ceph_assert(found != pending_cons.end());
+  stone_assert(found != pending_cons.end());
   int auth_err = found->second.handle_auth(m, entity_name, want_keys,
 					   rotating_secrets.get());
   m->put();
@@ -657,7 +657,7 @@ void MonClient::handle_auth(MAuthReply *m)
     // the last try just failed, give up.
   } else {
     auto& mc = found->second;
-    ceph_assert(mc.have_session());
+    stone_assert(mc.have_session());
     active_con.reset(new MonConnection(std::move(mc)));
     pending_cons.clear();
   }
@@ -673,7 +673,7 @@ void MonClient::_finish_auth(int auth_err)
   // _resend_mon_commands() could _reopen_session() if the connected mon is not
   // the one the MonCommand is targeting.
   if (!auth_err && active_con) {
-    ceph_assert(auth);
+    stone_assert(auth);
     _check_auth_tickets();
   }
   auth_cond.notify_all();
@@ -689,7 +689,7 @@ void MonClient::send_mon_message(MessageRef m)
 
 void MonClient::_send_mon_message(MessageRef m)
 {
-  ceph_assert(ceph_mutex_is_locked(monc_lock));
+  stone_assert(stone_mutex_is_locked(monc_lock));
   if (active_con) {
     auto cur_con = active_con->get_con();
     ldout(cct, 10) << "_send_mon_message to mon."
@@ -703,7 +703,7 @@ void MonClient::_send_mon_message(MessageRef m)
 
 void MonClient::_reopen_session(int rank)
 {
-  ceph_assert(ceph_mutex_is_locked(monc_lock));
+  stone_assert(stone_mutex_is_locked(monc_lock));
   ldout(cct, 10) << __func__ << " rank " << rank << dendl;
 
   active_con.reset();
@@ -724,7 +724,7 @@ void MonClient::_reopen_session(int rank)
 
   // throw out version check requests
   while (!version_requests.empty()) {
-    ceph::async::post(std::move(version_requests.begin()->second),
+    stone::async::post(std::move(version_requests.begin()->second),
 		      monc_errc::session_reset, 0, 0);
     version_requests.erase(version_requests.begin());
   }
@@ -785,7 +785,7 @@ void MonClient::_add_conns()
     tried.clear();  // start over
     ranks = get_next_batch();
   }
-  ceph_assert(!ranks.empty());
+  stone_assert(!ranks.empty());
   if (ranks.size() > 1) {
     std::vector<uint16_t> weights;
     for (auto i : ranks) {
@@ -815,7 +815,7 @@ bool MonClient::ms_handle_reset(Connection *con)
 {
   std::lock_guard lock(monc_lock);
 
-  if (con->get_peer_type() != CEPH_ENTITY_TYPE_MON)
+  if (con->get_peer_type() != STONE_ENTITY_TYPE_MON)
     return false;
 
   if (con->is_anon()) {
@@ -856,7 +856,7 @@ bool MonClient::ms_handle_reset(Connection *con)
 
 bool MonClient::_opened() const
 {
-  ceph_assert(ceph_mutex_is_locked(monc_lock));
+  stone_assert(stone_mutex_is_locked(monc_lock));
   return active_con || _hunting();
 }
 
@@ -867,7 +867,7 @@ bool MonClient::_hunting() const
 
 void MonClient::_start_hunting()
 {
-  ceph_assert(!_hunting());
+  stone_assert(!_hunting());
   // adjust timeouts if necessary
   if (!had_a_connection)
     return;
@@ -882,9 +882,9 @@ void MonClient::_start_hunting()
 void MonClient::_finish_hunting(int auth_err)
 {
   ldout(cct,10) << __func__ << " " << auth_err << dendl;
-  ceph_assert(ceph_mutex_is_locked(monc_lock));
+  stone_assert(stone_mutex_is_locked(monc_lock));
   // the pending conns have been cleaned.
-  ceph_assert(!_hunting());
+  stone_assert(!_hunting());
   if (active_con) {
     auto con = active_con->get_con();
     ldout(cct, 1) << "found mon."
@@ -920,7 +920,7 @@ void MonClient::tick()
 {
   ldout(cct, 10) << __func__ << dendl;
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
 
   auto reschedule_tick = make_scope_guard([this] {
       schedule_tick();
@@ -935,7 +935,7 @@ void MonClient::tick()
   } else if (active_con) {
     // just renew as needed
     auto cur_con = active_con->get_con();
-    if (!cur_con->has_feature(CEPH_FEATURE_MON_STATEFUL_SUB)) {
+    if (!cur_con->has_feature(STONE_FEATURE_MON_STATEFUL_SUB)) {
       const bool maybe_renew = sub.need_renew();
       ldout(cct, 10) << "renew subs? -- " << (maybe_renew ? "yes" : "no")
 		     << dendl;
@@ -949,7 +949,7 @@ void MonClient::tick()
       last_keepalive = now;
 
       if (cct->_conf->mon_client_ping_timeout > 0 &&
-	  cur_con->has_feature(CEPH_FEATURE_MSGR_KEEPALIVE2)) {
+	  cur_con->has_feature(STONE_FEATURE_MSGR_KEEPALIVE2)) {
 	utime_t lk = cur_con->get_last_keepalive_ack();
 	utime_t interval = now - lk;
 	if (interval > cct->_conf->mon_client_ping_timeout) {
@@ -1000,7 +1000,7 @@ void MonClient::schedule_tick()
 
 void MonClient::_renew_subs()
 {
-  ceph_assert(ceph_mutex_is_locked(monc_lock));
+  stone_assert(stone_mutex_is_locked(monc_lock));
   if (!sub.have_new()) {
     ldout(cct, 10) << __func__ << " - empty" << dendl;
     return;
@@ -1010,9 +1010,9 @@ void MonClient::_renew_subs()
   if (!_opened())
     _reopen_session();
   else {
-    auto m = ceph::make_message<MMonSubscribe>();
+    auto m = stone::make_message<MMonSubscribe>();
     m->what = sub.get_subs();
-    m->hostname = ceph_get_short_hostname();
+    m->hostname = stone_get_short_hostname();
     _send_mon_message(std::move(m));
     sub.renewed();
   }
@@ -1026,11 +1026,11 @@ void MonClient::handle_subscribe_ack(MMonSubscribeAck *m)
 
 int MonClient::_check_auth_tickets()
 {
-  ceph_assert(ceph_mutex_is_locked(monc_lock));
+  stone_assert(stone_mutex_is_locked(monc_lock));
   if (active_con && auth) {
     if (auth->need_tickets()) {
       ldout(cct, 10) << __func__ << " getting new tickets!" << dendl;
-      auto m = ceph::make_message<MAuth>();
+      auto m = stone::make_message<MAuth>();
       m->protocol = auth->get_protocol();
       auth->prepare_build_request();
       auth->build_request(m->auth_payload);
@@ -1044,7 +1044,7 @@ int MonClient::_check_auth_tickets()
 
 int MonClient::_check_auth_rotating()
 {
-  ceph_assert(ceph_mutex_is_locked(monc_lock));
+  stone_assert(stone_mutex_is_locked(monc_lock));
   if (!rotating_secrets ||
       !auth_principal_needs_rotating_keys(entity_name)) {
     ldout(cct, 20) << "_check_auth_rotating not needed by " << entity_name << dendl;
@@ -1056,7 +1056,7 @@ int MonClient::_check_auth_rotating()
     return 0;
   }
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   utime_t cutoff = now;
   cutoff -= std::min(30.0, cct->_conf->auth_service_ticket_ttl / 4.0);
   utime_t issued_at_lower_bound = now;
@@ -1080,7 +1080,7 @@ int MonClient::_check_auth_rotating()
                    << last_rotating_renew_sent << "), skipping refresh" << dendl;
     return 0;
   }
-  auto m = ceph::make_message<MAuth>();
+  auto m = stone::make_message<MAuth>();
   m->protocol = auth->get_protocol();
   if (auth->build_rotating_request(m->auth_payload)) {
     last_rotating_renew_sent = now;
@@ -1094,18 +1094,18 @@ int MonClient::wait_auth_rotating(double timeout)
   std::unique_lock l(monc_lock);
 
   // Must be initialized
-  ceph_assert(auth != nullptr);
+  stone_assert(auth != nullptr);
 
-  if (auth->get_protocol() == CEPH_AUTH_NONE)
+  if (auth->get_protocol() == STONE_AUTH_NONE)
     return 0;
   
   if (!rotating_secrets)
     return 0;
 
   ldout(cct, 10) << __func__ << " waiting for " << timeout << dendl;
-  utime_t cutoff = ceph_clock_now();
+  utime_t cutoff = stone_clock_now();
   cutoff -= std::min(30.0, cct->_conf->auth_service_ticket_ttl / 4.0);
-  if (auth_cond.wait_for(l, ceph::make_timespan(timeout), [this, cutoff] {
+  if (auth_cond.wait_for(l, stone::make_timespan(timeout), [this, cutoff] {
     return (!auth_principal_needs_rotating_keys(entity_name) ||
 	    !rotating_secrets->need_new_secrets(cutoff));
   })) {
@@ -1128,7 +1128,7 @@ void MonClient::_send_command(MonCommand *r)
       return;
     }
     // tell-style command
-    if (monmap.min_mon_release >= ceph_release_t::octopus) {
+    if (monmap.min_mon_release >= stone_release_t::octopus) {
       if (r->target_con) {
 	r->target_con->mark_down();
       }
@@ -1155,7 +1155,7 @@ void MonClient::_send_command(MonCommand *r)
       r->target_session.reset(new MonConnection(cct, r->target_con, 0,
 						&auth_registry));
       r->target_session->start(monmap.get_epoch(), entity_name);
-      r->last_send_attempt = ceph_clock_now();
+      r->last_send_attempt = stone_clock_now();
 
       MCommand *m = new MCommand(monmap.fsid);
       m->set_tid(r->tid);
@@ -1206,7 +1206,7 @@ void MonClient::_send_command(MonCommand *r)
 
   // normal CLI command
   ldout(cct, 10) << __func__ << " " << r->tid << " " << r->cmd << dendl;
-  auto m = ceph::make_message<MMonCommand>(monmap.fsid);
+  auto m = stone::make_message<MMonCommand>(monmap.fsid);
   m->set_tid(r->tid);
   m->cmd = r->cmd;
   m->set_data(r->inbl);
@@ -1217,7 +1217,7 @@ void MonClient::_send_command(MonCommand *r)
 void MonClient::_check_tell_commands()
 {
   // resend any requests
-  auto now = ceph_clock_now();
+  auto now = stone_clock_now();
   auto p = mon_commands.begin();
   while (p != mon_commands.end()) {
     auto cmd = p->second;
@@ -1238,7 +1238,7 @@ void MonClient::_resend_mon_commands()
   while (p != mon_commands.end()) {
     auto cmd = p->second;
     ++p;
-    if (cmd->is_tell() && monmap.min_mon_release >= ceph_release_t::octopus) {
+    if (cmd->is_tell() && monmap.min_mon_release >= stone_release_t::octopus) {
       // starting with octopus, tell commands use their own connetion and need no
       // special resend when we finish hunting.
     } else {
@@ -1302,7 +1302,7 @@ void MonClient::handle_command_reply(MCommandReply *reply)
 
 int MonClient::_cancel_mon_command(uint64_t tid)
 {
-  ceph_assert(ceph_mutex_is_locked(monc_lock));
+  stone_assert(stone_mutex_is_locked(monc_lock));
 
   auto it = mon_commands.find(tid);
   if (it == mon_commands.end()) {
@@ -1318,11 +1318,11 @@ int MonClient::_cancel_mon_command(uint64_t tid)
 }
 
 void MonClient::_finish_command(MonCommand *r, bs::error_code ret,
-				std::string_view rs, ceph::buffer::list&& bl)
+				std::string_view rs, stone::buffer::list&& bl)
 {
   ldout(cct, 10) << __func__ << " " << r->tid << " = " << ret << " " << rs
 		 << dendl;
-  ceph::async::post(std::move(r->onfinish), ret, std::string(rs),
+  stone::async::post(std::move(r->onfinish), ret, std::string(rs),
 		    std::move(bl));
   if (r->target_con) {
     r->target_con->mark_down();
@@ -1335,7 +1335,7 @@ void MonClient::_finish_command(MonCommand *r, bs::error_code ret,
 
 void MonClient::handle_get_version_reply(MMonGetVersionReply* m)
 {
-  ceph_assert(ceph_mutex_is_locked(monc_lock));
+  stone_assert(stone_mutex_is_locked(monc_lock));
   auto iter = version_requests.find(m->handle);
   if (iter == version_requests.end()) {
     ldout(cct, 0) << __func__ << " version request with handle " << m->handle
@@ -1345,7 +1345,7 @@ void MonClient::handle_get_version_reply(MMonGetVersionReply* m)
     ldout(cct, 10) << __func__ << " finishing " << iter->first << " version "
 		   << m->version << dendl;
     version_requests.erase(iter);
-    ceph::async::post(std::move(req), bs::error_code(),
+    stone::async::post(std::move(req), bs::error_code(),
 		      m->version, m->oldest_version);
   }
   m->put();
@@ -1356,15 +1356,15 @@ int MonClient::get_auth_request(
   AuthConnectionMeta *auth_meta,
   uint32_t *auth_method,
   std::vector<uint32_t> *preferred_modes,
-  ceph::buffer::list *bl)
+  stone::buffer::list *bl)
 {
   std::lock_guard l(monc_lock);
   ldout(cct,10) << __func__ << " con " << con << " auth_method " << *auth_method
 		<< dendl;
 
   // connection to mon?
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
-    ceph_assert(!auth_meta->authorizer);
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_MON) {
+    stone_assert(!auth_meta->authorizer);
     if (con->is_anon()) {
       for (auto& i : mon_commands) {
 	if (i.second->target_con == con) {
@@ -1392,7 +1392,7 @@ int MonClient::get_auth_request(
   auth_meta->authorizer.reset(auth->build_authorizer(con->get_peer_type()));
   if (!auth_meta->authorizer) {
     lderr(cct) << __func__ << " failed to build_authorizer for type "
-	       << ceph_entity_type_name(con->get_peer_type()) << dendl;
+	       << stone_entity_type_name(con->get_peer_type()) << dendl;
     return -EACCES;
   }
   auth_meta->auth_method = auth_meta->authorizer->protocol;
@@ -1406,12 +1406,12 @@ int MonClient::get_auth_request(
 int MonClient::handle_auth_reply_more(
   Connection *con,
   AuthConnectionMeta *auth_meta,
-  const ceph::buffer::list& bl,
-  ceph::buffer::list *reply)
+  const stone::buffer::list& bl,
+  stone::buffer::list *reply)
 {
   std::lock_guard l(monc_lock);
 
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_MON) {
     if (con->is_anon()) {
       for (auto& i : mon_commands) {
 	if (i.second->target_con == con) {
@@ -1443,11 +1443,11 @@ int MonClient::handle_auth_done(
   AuthConnectionMeta *auth_meta,
   uint64_t global_id,
   uint32_t con_mode,
-  const ceph::buffer::list& bl,
+  const stone::buffer::list& bl,
   CryptoKey *session_key,
   std::string *connection_secret)
 {
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_MON) {
     std::lock_guard l(monc_lock);
     if (con->is_anon()) {
       for (auto& i : mon_commands) {
@@ -1471,7 +1471,7 @@ int MonClient::handle_auth_done(
 	} else {
 	  active_con.reset(new MonConnection(std::move(i.second)));
 	  pending_cons.clear();
-	  ceph_assert(active_con->have_session());
+	  stone_assert(active_con->have_session());
 	}
 
 	_finish_hunting(r);
@@ -1506,7 +1506,7 @@ int MonClient::handle_auth_bad_method(
   auth_meta->allowed_methods = allowed_methods;
 
   std::lock_guard l(monc_lock);
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_MON) {
     if (con->is_anon()) {
       for (auto& i : mon_commands) {
 	if (i.second->target_con == con) {
@@ -1558,8 +1558,8 @@ int MonClient::handle_auth_request(
   AuthConnectionMeta *auth_meta,
   bool more,
   uint32_t auth_method,
-  const ceph::buffer::list& payload,
-  ceph::buffer::list *reply)
+  const stone::buffer::list& payload,
+  stone::buffer::list *reply)
 {
   if (payload.length() == 0) {
     // for some channels prior to nautilus (osd heartbeat), we
@@ -1621,18 +1621,18 @@ AuthAuthorizer* MonClient::build_authorizer(int service_id) const {
   if (auth) {
     return auth->build_authorizer(service_id);
   } else {
-    ldout(cct, 0) << __func__ << " for " << ceph_entity_type_name(service_id)
+    ldout(cct, 0) << __func__ << " for " << stone_entity_type_name(service_id)
 		  << ", but no auth is available now" << dendl;
     return nullptr;
   }
 }
 
-#define dout_subsys ceph_subsys_monc
+#define dout_subsys stone_subsys_monc
 #undef dout_prefix
 #define dout_prefix *_dout << "monclient" << (have_session() ? ": " : "(hunting): ")
 
 MonConnection::MonConnection(
-  CephContext *cct, ConnectionRef con, uint64_t global_id,
+  StoneContext *cct, ConnectionRef con, uint64_t global_id,
   AuthRegistry *ar)
   : cct(cct), con(con), global_id(global_id), auth_registry(ar)
 {}
@@ -1653,8 +1653,8 @@ bool MonConnection::have_session() const
 void MonConnection::start(epoch_t epoch,
 			  const EntityName& entity_name)
 {
-  using ceph::encode;
-  auth_start = ceph_clock_now();
+  using stone::encode;
+  auth_start = stone_clock_now();
 
   if (con->get_peer_addr().is_msgr2()) {
     ldout(cct, 10) << __func__ << " opening mon connection" << dendl;
@@ -1672,7 +1672,7 @@ void MonConnection::start(epoch_t epoch,
   con->send_keepalive();
 
   auto m = new MAuth;
-  m->protocol = CEPH_AUTH_UNKNOWN;
+  m->protocol = STONE_AUTH_UNKNOWN;
   m->monmap_epoch = epoch;
   __u8 struct_v = 1;
   encode(struct_v, m->auth_payload);
@@ -1687,12 +1687,12 @@ void MonConnection::start(epoch_t epoch,
 int MonConnection::get_auth_request(
   uint32_t *method,
   std::vector<uint32_t> *preferred_modes,
-  ceph::buffer::list *bl,
+  stone::buffer::list *bl,
   const EntityName& entity_name,
   uint32_t want_keys,
   RotatingKeyRing* keyring)
 {
-  using ceph::encode;
+  using stone::encode;
   // choose method
   if (auth_method < 0) {
     std::vector<uint32_t> as;
@@ -1712,7 +1712,7 @@ int MonConnection::get_auth_request(
   }
 
   int r = _init_auth(*method, entity_name, want_keys, keyring, true);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   // initial requset includes some boilerplate...
   encode((char)AUTH_MODE_MON, *bl);
@@ -1727,8 +1727,8 @@ int MonConnection::get_auth_request(
 
 int MonConnection::handle_auth_reply_more(
   AuthConnectionMeta *auth_meta,
-  const ceph::buffer::list& bl,
-  ceph::buffer::list *reply)
+  const stone::buffer::list& bl,
+  stone::buffer::list *reply)
 {
   ldout(cct, 10) << __func__ << " payload " << bl.length() << dendl;
   ldout(cct, 30) << __func__ << " got\n";
@@ -1750,7 +1750,7 @@ int MonConnection::handle_auth_reply_more(
   } else {
     ldout(cct, 10) << __func__ << " authenticated!" << dendl;
     // FIXME
-    ceph_abort(cct, "write me");
+    stone_abort(cct, "write me");
   }
   return r;
 }
@@ -1758,7 +1758,7 @@ int MonConnection::handle_auth_reply_more(
 int MonConnection::handle_auth_done(
   AuthConnectionMeta *auth_meta,
   uint64_t new_global_id,
-  const ceph::buffer::list& bl,
+  const stone::buffer::list& bl,
   CryptoKey *session_key,
   std::string *connection_secret)
 {
@@ -1868,12 +1868,12 @@ int MonConnection::_init_auth(
   // we have to use the FEATUREMASK because pre-jewel the kraken
   // feature bit was used for something else.
   if (!msgr2 &&
-      (want_keys & CEPH_ENTITY_TYPE_MGR) &&
-      !(con->has_features(CEPH_FEATUREMASK_SERVER_KRAKEN))) {
+      (want_keys & STONE_ENTITY_TYPE_MGR) &&
+      !(con->has_features(STONE_FEATUREMASK_SERVER_KRAKEN))) {
     ldout(cct, 1) << __func__
 		  << " not requesting MGR keys from pre-kraken monitor"
 		  << dendl;
-    want_keys &= ~CEPH_ENTITY_TYPE_MGR;
+    want_keys &= ~STONE_ENTITY_TYPE_MGR;
   }
   auth->set_want_keys(want_keys);
   auth->init(entity_name);
@@ -1883,7 +1883,7 @@ int MonConnection::_init_auth(
 
 int MonConnection::authenticate(MAuthReply *m)
 {
-  ceph_assert(auth);
+  stone_assert(auth);
   if (!m->global_id) {
     ldout(cct, 1) << "peer sent an invalid global_id" << dendl;
   }
@@ -1911,7 +1911,7 @@ int MonConnection::authenticate(MAuthReply *m)
 }
 
 void MonClient::register_config_callback(md_config_t::config_callback fn) {
-  ceph_assert(!config_cb);
+  stone_assert(!config_cb);
   config_cb = fn;
 }
 
@@ -1923,7 +1923,7 @@ md_config_t::config_callback MonClient::get_config_callback() {
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-class monc_error_category : public ceph::converting_category {
+class monc_error_category : public stone::converting_category {
 public:
   monc_error_category(){}
   const char* name() const noexcept override;
@@ -1933,7 +1933,7 @@ public:
     override;
   bool equivalent(int ev, const bs::error_condition& c) const
     noexcept override;
-  using ceph::converting_category::equivalent;
+  using stone::converting_category::equivalent;
   int from_code(int ev) const noexcept override;
 };
 #pragma GCC diagnostic pop
@@ -1978,7 +1978,7 @@ bs::error_condition monc_error_category::default_error_condition(int ev) const n
   case monc_errc::rank_dne:
     [[fallthrough]];
   case monc_errc::mon_dne:
-    return ceph::errc::not_in_map;
+    return stone::errc::not_in_map;
   case monc_errc::timed_out:
     return bs::errc::timed_out;
   case monc_errc::mon_unavailable:

@@ -6,7 +6,7 @@
 #define dout_context cct
 #undef dout_prefix
 #define dout_prefix (gen_prefix(*_dout))
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 
 using std::set;
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Inktank
  *
@@ -17,7 +17,7 @@
 #include "errno.h"
 
 #ifndef _WIN32
-void dump_open_fds(CephContext *cct)
+void dump_open_fds(StoneContext *cct)
 {
 #ifdef __APPLE__
   const char *fn = "/dev/fd";
@@ -53,7 +53,7 @@ void dump_open_fds(CephContext *cct)
   closedir(d);
 }
 #else
-void dump_open_fds(CephContext *cct)
+void dump_open_fds(StoneContext *cct)
 {
 }
 #endif

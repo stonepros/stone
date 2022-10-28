@@ -2,7 +2,7 @@ overrides:
   thrashosds:
     bdev_inject_crash: 2
     bdev_inject_crash_probability: .5
-  ceph:
+  stone:
     fs: xfs
     conf:
       osd:
@@ -22,7 +22,7 @@ overrides:
 #        bluestore bluefs env mirror: true
         bdev enable discard: true
         bdev async discard: true
-  ceph-deploy:
+  stone-deploy:
     fs: xfs
     bluestore: yes
     conf:

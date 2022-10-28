@@ -24,7 +24,7 @@ namespace {
   constexpr bool IS_DUMMY_SYNC = false;
 
   [[maybe_unused]] seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_test);
+    return crimson::get_logger(stone_subsys_test);
   }
 
   ghobject_t make_ghobj(
@@ -56,7 +56,7 @@ namespace {
 
     auto sg = snap_gen_t::from_key<KeyT::HOBJ>(key_hobj);
     p_fill -= sizeof(snap_gen_t);
-    ceph_assert(p_fill == (char*)p_mem);
+    stone_assert(p_fill == (char*)p_mem);
     std::memcpy(p_fill, &sg, sizeof(snap_gen_t));
     key_view.set(*reinterpret_cast<const snap_gen_t*>(p_fill));
 
@@ -207,12 +207,12 @@ TEST_F(b_dummy_tree_test_t, 3_random_insert_leaf_node)
     auto f_validate_insert_new = [this, &insert_history] (
         const ghobject_t& key, const onode_t& value) {
       auto [cursor, success] = tree.insert(t, key, value).unsafe_get0();
-      ceph_assert(success);
+      stone_assert(success);
       insert_history.emplace_back(key, &value, cursor);
       Onodes::validate_cursor(cursor, key, value);
       auto cursor_ = tree.lower_bound(t, key).unsafe_get0();
-      ceph_assert(cursor_.get_ghobj() == key);
-      ceph_assert(cursor_.value() == cursor.value());
+      stone_assert(cursor_.get_ghobj() == key);
+      stone_assert(cursor_.value() == cursor.value());
       return cursor.value();
     };
     auto onodes = Onodes(15);
@@ -347,7 +347,7 @@ static std::set<ghobject_t> build_key_set(
     std::pair<unsigned, unsigned> range_0,
     std::string padding = "",
     bool is_internal = false) {
-  ceph_assert(range_1.second <= 10);
+  stone_assert(range_1.second <= 10);
   std::set<ghobject_t> ret;
   ghobject_t key;
   for (unsigned i = range_2.first; i < range_2.second; ++i) {
@@ -675,27 +675,27 @@ class DummyChildPool {
     level_t level() const override { return 0u; }
     key_view_t get_largest_key_view() const override { return key_view; }
     void prepare_mutate(context_t) override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     bool is_empty() const override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     node_offset_t free_size() const override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     key_view_t get_key_view(const search_position_t&) const override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     void next_position(search_position_t&) const override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     node_stats_t get_stats() const override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     std::ostream& dump(std::ostream&) const override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     std::ostream& dump_brief(std::ostream&) const override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     void validate_layout() const override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     void test_copy_to(NodeExtentMutable&) const override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     void test_set_tail(NodeExtentMutable&) override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
 
    private:
     std::set<ghobject_t> keys;
@@ -712,8 +712,8 @@ class DummyChildPool {
 
     node_future<> populate_split(
         context_t c, std::set<Ref<DummyChild>>& splitable_nodes) {
-      ceph_assert(can_split());
-      ceph_assert(splitable_nodes.find(this) != splitable_nodes.end());
+      stone_assert(can_split());
+      stone_assert(splitable_nodes.find(this) != splitable_nodes.end());
 
       size_t index;
       const auto& keys = impl->get_keys();
@@ -743,9 +743,9 @@ class DummyChildPool {
         context_t c, const ghobject_t& insert_key,
         std::set<Ref<DummyChild>>& splitable_nodes) {
       const auto& keys = impl->get_keys();
-      ceph_assert(keys.size() == 1);
+      stone_assert(keys.size() == 1);
       auto& key = *keys.begin();
-      ceph_assert(insert_key < key);
+      stone_assert(insert_key < key);
 
       std::set<ghobject_t> new_keys;
       new_keys.insert(insert_key);
@@ -755,12 +755,12 @@ class DummyChildPool {
       splitable_nodes.clear();
       splitable_nodes.insert(this);
       auto fut = populate_split(c, splitable_nodes);
-      ceph_assert(splitable_nodes.size() == 0);
+      stone_assert(splitable_nodes.size() == 0);
       return fut;
     }
 
     bool match_pos(const search_position_t& pos) const {
-      ceph_assert(!is_root());
+      stone_assert(!is_root());
       return pos == parent_info().position;
     }
 
@@ -793,25 +793,25 @@ class DummyChildPool {
    protected:
     node_future<> test_clone_non_root(
         context_t, Ref<InternalNode> new_parent) const override {
-      ceph_assert(!is_root());
+      stone_assert(!is_root());
       auto p_pool_clone = pool.pool_clone_in_progress;
-      ceph_assert(p_pool_clone != nullptr);
+      stone_assert(p_pool_clone != nullptr);
       auto clone = create(
           impl->get_keys(), impl->is_level_tail(), impl->laddr(), *p_pool_clone);
       clone->as_child(parent_info().position, new_parent);
       return node_ertr::now();
     }
     node_future<Ref<tree_cursor_t>> lookup_smallest(context_t) override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     node_future<Ref<tree_cursor_t>> lookup_largest(context_t) override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     node_future<> test_clone_root(context_t, RootNodeTracker&) const override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     node_future<search_result_t> lower_bound_tracked(
         context_t, const key_hobj_t&, MatchHistory&) override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
     node_future<> do_get_tree_stats(context_t, tree_stats_t&) override {
-      ceph_abort("impossible path"); }
+      stone_abort("impossible path"); }
 
    private:
     DummyChild(DummyChildImpl* impl, DummyChildImpl::URef&& ref, DummyChildPool& pool)
@@ -864,7 +864,7 @@ class DummyChildPool {
       //logger().info("\n{}\n", oss.str());
       return p_btree->height(t());
     }).safe_then([](auto height) {
-      ceph_assert(height == 2);
+      stone_assert(height == 2);
     });
   }
 
@@ -893,21 +893,21 @@ class DummyChildPool {
 
  private:
   void reset() {
-    ceph_assert(pool_clone_in_progress == nullptr);
+    stone_assert(pool_clone_in_progress == nullptr);
     if (tracked_children.size()) {
-      ceph_assert(!p_btree->test_is_clean());
+      stone_assert(!p_btree->test_is_clean());
       tracked_children.clear();
-      ceph_assert(p_btree->test_is_clean());
+      stone_assert(p_btree->test_is_clean());
       p_nm = nullptr;
       p_btree.reset();
     } else {
-      ceph_assert(!p_btree.has_value());
+      stone_assert(!p_btree.has_value());
     }
     splitable_nodes.clear();
   }
 
   void track_node(Ref<DummyChild> node) {
-    ceph_assert(tracked_children.find(node) == tracked_children.end());
+    stone_assert(tracked_children.find(node) == tracked_children.end());
     tracked_children.insert(node);
   }
 
@@ -916,12 +916,12 @@ class DummyChildPool {
         tracked_children.begin(), tracked_children.end(), [&pos](auto& child) {
       return child->match_pos(pos);
     });
-    ceph_assert(iter != tracked_children.end());
+    stone_assert(iter != tracked_children.end());
     return *iter;
   }
 
   context_t get_context() {
-    ceph_assert(p_nm != nullptr);
+    stone_assert(p_nm != nullptr);
     return {*p_nm, t()};
   }
 

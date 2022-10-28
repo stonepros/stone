@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -18,10 +18,10 @@
 #include "msg/Messenger.h"
 #include "osdc/Journaler.h"
 #include "common/errno.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/Finisher.h"
 
-#define dout_subsys ceph_subsys_journaler
+#define dout_subsys stone_subsys_journaler
 #undef dout_prefix
 #define dout_prefix *_dout << objecter->messenger->get_myname() \
   << ".journaler." << name << (readonly ? "(ro) ":"(rw) ")
@@ -58,7 +58,7 @@ void Journaler::create(file_layout_t *l, stream_format_t const sf)
 {
   lock_guard lk(lock);
 
-  ceph_assert(!readonly);
+  stone_assert(!readonly);
   state = STATE_ACTIVE;
 
   stream_format = sf;
@@ -85,9 +85,9 @@ void Journaler::_set_layout(file_layout_t const *l)
   layout = *l;
 
   if (layout.pool_id != pg_pool) {
-    // user can reset pool id through cephfs-journal-tool
+    // user can reset pool id through stonefs-journal-tool
     lderr(cct) << "may got older pool id from header layout" << dendl;
-    ceph_abort();
+    stone_abort();
   }
   last_written.layout = layout;
   last_committed.layout = layout;
@@ -163,8 +163,8 @@ void Journaler::recover(Context *onread)
   }
 
   ldout(cct, 1) << "recover start" << dendl;
-  ceph_assert(state != STATE_ACTIVE);
-  ceph_assert(readonly);
+  stone_assert(state != STATE_ACTIVE);
+  stone_assert(readonly);
 
   if (onread)
     waitfor_recover.push_back(wrap_finisher(onread));
@@ -183,11 +183,11 @@ void Journaler::recover(Context *onread)
 void Journaler::_read_head(Context *on_finish, bufferlist *bl)
 {
   // lock is locked
-  ceph_assert(state == STATE_READHEAD || state == STATE_REREADHEAD);
+  stone_assert(state == STATE_READHEAD || state == STATE_REREADHEAD);
 
   object_t oid = file_object_t(ino, 0);
   object_locator_t oloc(pg_pool);
-  objecter->read_full(oid, oloc, CEPH_NOSNAP, bl, 0, wrap_finisher(on_finish));
+  objecter->read_full(oid, oloc, STONE_NOSNAP, bl, 0, wrap_finisher(on_finish));
 }
 
 void Journaler::reread_head(Context *onfinish)
@@ -207,7 +207,7 @@ void Journaler::reread_head(Context *onfinish)
 void Journaler::_reread_head(Context *onfinish)
 {
   ldout(cct, 10) << "reread_head" << dendl;
-  ceph_assert(state == STATE_ACTIVE);
+  stone_assert(state == STATE_ACTIVE);
 
   state = STATE_REREADHEAD;
   C_RereadHead *fin = new C_RereadHead(this, onfinish);
@@ -223,7 +223,7 @@ void Journaler::_finish_reread_head(int r, bufferlist& bl, Context *finish)
   }
 
   //read on-disk header into
-  ceph_assert(bl.length() || r < 0 );
+  stone_assert(bl.length() || r < 0 );
 
   // unpack header
   if (r == 0) {
@@ -252,7 +252,7 @@ void Journaler::_finish_read_head(int r, bufferlist& bl)
   if (is_stopping())
     return;
 
-  ceph_assert(state == STATE_READHEAD);
+  stone_assert(state == STATE_READHEAD);
 
   if (r!=0) {
     ldout(cct, 0) << "error getting journal off disk" << dendl;
@@ -320,16 +320,16 @@ void Journaler::_probe(Context *finish, uint64_t *end)
 {
   // lock is locked
   ldout(cct, 1) << "probing for end of the log" << dendl;
-  ceph_assert(state == STATE_PROBING || state == STATE_REPROBING);
+  stone_assert(state == STATE_PROBING || state == STATE_REPROBING);
   // probe the log
-  filer.probe(ino, &layout, CEPH_NOSNAP,
+  filer.probe(ino, &layout, STONE_NOSNAP,
 	      write_pos, end, true, 0, wrap_finisher(finish));
 }
 
 void Journaler::_reprobe(C_OnFinisher *finish)
 {
   ldout(cct, 10) << "reprobe" << dendl;
-  ceph_assert(state == STATE_ACTIVE);
+  stone_assert(state == STATE_ACTIVE);
 
   state = STATE_REPROBING;
   C_ReProbe *fin = new C_ReProbe(this, finish);
@@ -346,7 +346,7 @@ void Journaler::_finish_reprobe(int r, uint64_t new_end,
     return;
   }
 
-  ceph_assert(new_end >= write_pos || r < 0);
+  stone_assert(new_end >= write_pos || r < 0);
   ldout(cct, 1) << "_finish_reprobe new_end = " << new_end
 	  << " (header had " << write_pos << ")."
 	  << dendl;
@@ -361,7 +361,7 @@ void Journaler::_finish_probe_end(int r, uint64_t end)
   if (is_stopping())
     return;
 
-  ceph_assert(state == STATE_PROBING);
+  stone_assert(state == STATE_PROBING);
   if (r < 0) { // error in probing
     goto out;
   }
@@ -369,9 +369,9 @@ void Journaler::_finish_probe_end(int r, uint64_t end)
     end = write_pos;
     ldout(cct, 1) << "_finish_probe_end write_pos = " << end << " (header had "
 		  << write_pos << "). log was empty. recovered." << dendl;
-    ceph_abort(); // hrm.
+    stone_abort(); // hrm.
   } else {
-    ceph_assert(end >= write_pos);
+    stone_assert(end >= write_pos);
     ldout(cct, 1) << "_finish_probe_end write_pos = " << end
 		  << " (header had " << write_pos << "). recovered."
 		  << dendl;
@@ -404,7 +404,7 @@ void Journaler::reread_head_and_probe(Context *onfinish)
 {
   lock_guard l(lock);
 
-  ceph_assert(state == STATE_ACTIVE);
+  stone_assert(state == STATE_ACTIVE);
   _reread_head(new C_RereadHeadProbe(this, wrap_finisher(onfinish)));
 }
 
@@ -424,7 +424,7 @@ void Journaler::_finish_reread_head_and_probe(int r, C_OnFinisher *onfinish)
     return;
   }
 
-  ceph_assert(!r); //if we get an error, we're boned
+  stone_assert(!r); //if we get an error, we're boned
   _reprobe(onfinish);
 }
 
@@ -452,8 +452,8 @@ void Journaler::write_head(Context *oncommit)
 
 void Journaler::_write_head(Context *oncommit)
 {
-  ceph_assert(!readonly);
-  ceph_assert(state == STATE_ACTIVE);
+  stone_assert(!readonly);
+  stone_assert(state == STATE_ACTIVE);
   last_written.trimmed_pos = trimmed_pos;
   last_written.expire_pos = expire_pos;
   last_written.unused_field = expire_pos;
@@ -462,10 +462,10 @@ void Journaler::_write_head(Context *oncommit)
   ldout(cct, 10) << "write_head " << last_written << dendl;
 
   // Avoid persisting bad pointers in case of bugs
-  ceph_assert(last_written.write_pos >= last_written.expire_pos);
-  ceph_assert(last_written.expire_pos >= last_written.trimmed_pos);
+  stone_assert(last_written.write_pos >= last_written.expire_pos);
+  stone_assert(last_written.expire_pos >= last_written.trimmed_pos);
 
-  last_wrote_head = ceph::real_clock::now();
+  last_wrote_head = stone::real_clock::now();
 
   bufferlist bl;
   encode(last_written, bl);
@@ -473,7 +473,7 @@ void Journaler::_write_head(Context *oncommit)
 
   object_t oid = file_object_t(ino, 0);
   object_locator_t oloc(pg_pool);
-  objecter->write_full(oid, oloc, snapc, bl, ceph::real_clock::now(), 0,
+  objecter->write_full(oid, oloc, snapc, bl, stone::real_clock::now(), 0,
 		       wrap_finisher(new C_WriteHead(
 					     this, last_written,
 					     wrap_finisher(oncommit))),
@@ -490,7 +490,7 @@ void Journaler::_finish_write_head(int r, Header &wrote,
     handle_write_error(r);
     return;
   }
-  ceph_assert(!readonly);
+  stone_assert(!readonly);
   ldout(cct, 10) << "_finish_write_head " << wrote << dendl;
   last_committed = wrote;
   if (oncommit) {
@@ -506,19 +506,19 @@ void Journaler::_finish_write_head(int r, Header &wrote,
 class Journaler::C_Flush : public Context {
   Journaler *ls;
   uint64_t start;
-  ceph::real_time stamp;
+  stone::real_time stamp;
 public:
-  C_Flush(Journaler *l, int64_t s, ceph::real_time st)
+  C_Flush(Journaler *l, int64_t s, stone::real_time st)
     : ls(l), start(s), stamp(st) {}
   void finish(int r) override {
     ls->_finish_flush(r, start, stamp);
   }
 };
 
-void Journaler::_finish_flush(int r, uint64_t start, ceph::real_time stamp)
+void Journaler::_finish_flush(int r, uint64_t start, stone::real_time stamp)
 {
   lock_guard l(lock);
-  ceph_assert(!readonly);
+  stone_assert(!readonly);
 
   if (r < 0) {
     lderr(cct) << "_finish_flush got " << cpp_strerror(r) << dendl;
@@ -526,17 +526,17 @@ void Journaler::_finish_flush(int r, uint64_t start, ceph::real_time stamp)
     return;
   }
 
-  ceph_assert(start < flush_pos);
+  stone_assert(start < flush_pos);
 
   // calc latency?
   if (logger) {
-    ceph::timespan lat = ceph::real_clock::now() - stamp;
+    stone::timespan lat = stone::real_clock::now() - stamp;
     logger->tinc(logger_key_lat, lat);
   }
 
   // adjust safe_pos
   auto it = pending_safe.find(start);
-  ceph_assert(it != pending_safe.end());
+  stone_assert(it != pending_safe.end());
   uint64_t min_next_safe_pos = pending_safe.begin()->second;
   pending_safe.erase(it);
   if (pending_safe.empty())
@@ -571,7 +571,7 @@ uint64_t Journaler::append_entry(bufferlist& bl)
 {
   unique_lock l(lock);
 
-  ceph_assert(!readonly);
+  stone_assert(!readonly);
   uint32_t s = bl.length();
 
   // append
@@ -591,7 +591,7 @@ uint64_t Journaler::append_entry(bufferlist& bl)
 
   // flush previous object?
   uint64_t su = get_layout_period();
-  ceph_assert(su > 0);
+  stone_assert(su > 0);
   uint64_t write_off = write_pos % su;
   uint64_t write_obj = write_pos / su;
   uint64_t flush_obj = flush_pos / su;
@@ -619,12 +619,12 @@ void Journaler::_do_flush(unsigned amount)
     return;
   if (write_pos == flush_pos)
     return;
-  ceph_assert(write_pos > flush_pos);
-  ceph_assert(!readonly);
+  stone_assert(write_pos > flush_pos);
+  stone_assert(!readonly);
 
   // flush
   uint64_t len = write_pos - flush_pos;
-  ceph_assert(len == write_buf.length());
+  stone_assert(len == write_buf.length());
   if (amount && amount < len)
     len = amount;
 
@@ -654,7 +654,7 @@ void Journaler::_do_flush(unsigned amount)
 
   // submit write for anything pending
   // flush _start_ pos to _finish_flush
-  ceph::real_time now = ceph::real_clock::now();
+  stone::real_time now = stone::real_clock::now();
   SnapContext snapc;
 
   Context *onsafe = new C_Flush(this, flush_pos, now);  // on COMMIT
@@ -682,12 +682,12 @@ void Journaler::_do_flush(unsigned amount)
   }
 
   filer.write(ino, &layout, snapc,
-	      flush_pos, len, write_bl, ceph::real_clock::now(),
+	      flush_pos, len, write_bl, stone::real_clock::now(),
 	      0,
 	      wrap_finisher(onsafe), write_iohint);
 
   flush_pos += len;
-  ceph_assert(write_buf.length() == write_pos - flush_pos);
+  stone_assert(write_buf.length() == write_pos - flush_pos);
   write_buf_throttle.put(len);
   ldout(cct, 20) << "write_buf_throttle put, len " << len << dendl;
  
@@ -713,11 +713,11 @@ void Journaler::wait_for_flush(Context *onsafe)
 
 void Journaler::_wait_for_flush(Context *onsafe)
 {
-  ceph_assert(!readonly);
+  stone_assert(!readonly);
 
   // all flushed and safe?
   if (write_pos == safe_pos) {
-    ceph_assert(write_buf.length() == 0);
+    stone_assert(write_buf.length() == 0);
     ldout(cct, 10)
       << "flush nothing to flush, (prezeroing/prezero)/write/flush/safe "
       "pointers at " << "(" << prezeroing_pos << "/" << prezero_pos << ")/"
@@ -747,10 +747,10 @@ void Journaler::flush(Context *onsafe)
 
 void Journaler::_flush(C_OnFinisher *onsafe)
 {
-  ceph_assert(!readonly);
+  stone_assert(!readonly);
 
   if (write_pos == flush_pos) {
-    ceph_assert(write_buf.length() == 0);
+    stone_assert(write_buf.length() == 0);
     ldout(cct, 10) << "flush nothing to flush, (prezeroing/prezero)/write/"
       "flush/safe pointers at " << "(" << prezeroing_pos << "/" << prezero_pos
 		   << ")/" << write_pos << "/" << flush_pos << "/" << safe_pos
@@ -772,7 +772,7 @@ void Journaler::_flush(C_OnFinisher *onsafe)
 bool Journaler::_write_head_needed()
 {
   return last_wrote_head + seconds(cct->_conf.get_val<int64_t>("journaler_write_head_interval"))
-      < ceph::real_clock::now();
+      < stone::real_clock::now();
 }
 
 
@@ -790,7 +790,7 @@ struct C_Journaler_Prezero : public Context {
 
 void Journaler::_issue_prezero()
 {
-  ceph_assert(prezeroing_pos >= flush_pos);
+  stone_assert(prezeroing_pos >= flush_pos);
 
   uint64_t num_periods = cct->_conf.get_val<uint64_t>("journaler_prezero_periods");
   /*
@@ -822,7 +822,7 @@ void Journaler::_issue_prezero()
     Context *c = wrap_finisher(new C_Journaler_Prezero(this, prezeroing_pos,
 						       len));
     filer.zero(ino, &layout, snapc, prezeroing_pos, len,
-	       ceph::real_clock::now(), 0, c);
+	       stone::real_clock::now(), 0, c);
     prezeroing_pos += len;
   }
 }
@@ -844,7 +844,7 @@ void Journaler::_finish_prezero(int r, uint64_t start, uint64_t len)
     return;
   }
 
-  ceph_assert(r == 0 || r == -ENOENT);
+  stone_assert(r == 0 || r == -ENOENT);
 
   if (start == prezero_pos) {
     prezero_pos += len;
@@ -876,7 +876,7 @@ void Journaler::_finish_prezero(int r, uint64_t start, uint64_t len)
 
 void Journaler::wait_for_prezero(Context *onfinish)
 {
-  ceph_assert(onfinish);
+  stone_assert(onfinish);
   lock_guard l(lock);
 
   if (prezero_pos == prezeroing_pos) {
@@ -977,7 +977,7 @@ void Journaler::_assimilate_prefetch()
 		   << p->second.length() << dendl;
     received_pos += p->second.length();
     read_buf.claim_append(p->second);
-    ceph_assert(received_pos <= requested_pos);
+    stone_assert(received_pos <= requested_pos);
     prefetch_buf.erase(p);
     got_any = true;
   }
@@ -1010,11 +1010,11 @@ void Journaler::_issue_read(uint64_t len)
 {
   // stuck at safe_pos?  (this is needed if we are reading the tail of
   // a journal we are also writing to)
-  ceph_assert(requested_pos <= safe_pos);
+  stone_assert(requested_pos <= safe_pos);
   if (requested_pos == safe_pos) {
     ldout(cct, 10) << "_issue_read requested_pos = safe_pos = " << safe_pos
 		   << ", waiting" << dendl;
-    ceph_assert(write_pos > requested_pos);
+    stone_assert(write_pos > requested_pos);
     if (pending_safe.empty()) {
       _flush(NULL);
     }
@@ -1055,8 +1055,8 @@ void Journaler::_issue_read(uint64_t len)
     if (l > len)
       l = len;
     C_Read *c = new C_Read(this, requested_pos, l);
-    filer.read(ino, &layout, CEPH_NOSNAP, requested_pos, l, &c->bl, 0,
-	       wrap_finisher(c), CEPH_OSD_OP_FLAG_FADVISE_DONTNEED);
+    filer.read(ino, &layout, STONE_NOSNAP, requested_pos, l, &c->bl, 0,
+	       wrap_finisher(c), STONE_OSD_OP_FLAG_FADVISE_DONTNEED);
     requested_pos += l;
     len -= l;
   }
@@ -1139,8 +1139,8 @@ bool Journaler::_is_readable()
 
     // adjust write_pos
     prezeroing_pos = prezero_pos = write_pos = flush_pos = safe_pos = next_safe_pos = read_pos;
-    ceph_assert(write_buf.length() == 0);
-    ceph_assert(waitfor_safe.empty());
+    stone_assert(write_buf.length() == 0);
+    stone_assert(waitfor_safe.empty());
 
     // reset read state
     requested_pos = received_pos = read_pos;
@@ -1199,7 +1199,7 @@ void Journaler::erase(Context *completion)
   uint64_t first = trimmed_pos / get_layout_period();
   uint64_t num = (write_pos - trimmed_pos) / get_layout_period() + 2;
   filer.purge_range(ino, &layout, SnapContext(), first, num,
-		    ceph::real_clock::now(), 0,
+		    stone::real_clock::now(), 0,
 		    wrap_finisher(new C_EraseFinish(
 				    this, wrap_finisher(completion))));
 
@@ -1220,7 +1220,7 @@ void Journaler::_finish_erase(int data_result, C_OnFinisher *completion)
   if (data_result == 0) {
     // Async delete the journal header
     filer.purge_range(ino, &layout, SnapContext(), 0, 1,
-		      ceph::real_clock::now(),
+		      stone::real_clock::now(),
 		      0, wrap_finisher(completion));
   } else {
     lderr(cct) << "Failed to delete journal " << ino << " data: "
@@ -1248,7 +1248,7 @@ bool Journaler::try_read_entry(bufferlist& bl)
   try {
     consumed = journal_stream.read(read_buf, &bl, &start_ptr);
     if (stream_format >= JOURNAL_FORMAT_RESILIENT) {
-      ceph_assert(start_ptr == read_pos);
+      stone_assert(start_ptr == read_pos);
     }
   } catch (const buffer::error &e) {
     lderr(cct) << __func__ << ": decode error from journal_stream" << dendl;
@@ -1290,7 +1290,7 @@ void Journaler::wait_for_readable(Context *onreadable)
     return;
   }
 
-  ceph_assert(on_readable == 0);
+  stone_assert(on_readable == 0);
   if (!readable) {
     ldout(cct, 10) << "wait_for_readable at " << read_pos << " onreadable "
 		   << onreadable << dendl;
@@ -1333,7 +1333,7 @@ void Journaler::_trim()
   if (is_stopping())
     return;
 
-  ceph_assert(!readonly);
+  stone_assert(!readonly);
   uint64_t period = get_layout_period();
   uint64_t trim_to = last_committed.expire_pos;
   trim_to -= trim_to % period;
@@ -1353,9 +1353,9 @@ void Journaler::_trim()
   }
 
   // trim
-  ceph_assert(trim_to <= write_pos);
-  ceph_assert(trim_to <= expire_pos);
-  ceph_assert(trim_to > trimming_pos);
+  stone_assert(trim_to <= write_pos);
+  stone_assert(trim_to <= expire_pos);
+  stone_assert(trim_to > trimming_pos);
   ldout(cct, 10) << "trim trimming to " << trim_to
 		 << ", trimmed/trimming/expire are "
 		 << trimmed_pos << "/" << trimming_pos << "/" << expire_pos
@@ -1366,7 +1366,7 @@ void Journaler::_trim()
   uint64_t num = (trim_to - trimming_pos) / period;
   SnapContext snapc;
   filer.purge_range(ino, &layout, snapc, first, num,
-		    ceph::real_clock::now(), 0,
+		    stone::real_clock::now(), 0,
 		    wrap_finisher(new C_Trim(this, trim_to)));
   trimming_pos = trim_to;
 }
@@ -1375,7 +1375,7 @@ void Journaler::_finish_trim(int r, uint64_t to)
 {
   lock_guard l(lock);
 
-  ceph_assert(!readonly);
+  stone_assert(!readonly);
   ldout(cct, 10) << "_finish_trim trimmed_pos was " << trimmed_pos
 	   << ", trimmed/trimming/expire now "
 	   << to << "/" << trimming_pos << "/" << expire_pos
@@ -1386,10 +1386,10 @@ void Journaler::_finish_trim(int r, uint64_t to)
     return;
   }
 
-  ceph_assert(r >= 0 || r == -ENOENT);
+  stone_assert(r >= 0 || r == -ENOENT);
 
-  ceph_assert(to <= trimming_pos);
-  ceph_assert(to > trimmed_pos);
+  stone_assert(to <= trimming_pos);
+  stone_assert(to > trimmed_pos);
   trimmed_pos = to;
 }
 
@@ -1409,7 +1409,7 @@ void Journaler::handle_write_error(int r)
     lderr(cct) << __func__ << ": multiple write errors, handler already called"
 	       << dendl;
   } else {
-    ceph_abort_msg("unhandled write error");
+    stone_abort_msg("unhandled write error");
   }
 }
 
@@ -1424,7 +1424,7 @@ void Journaler::handle_write_error(int r)
  */
 bool JournalStream::readable(bufferlist &read_buf, uint64_t *need) const
 {
-  ceph_assert(need != NULL);
+  stone_assert(need != NULL);
 
   uint32_t entry_size = 0;
   uint64_t entry_sentinel = 0;
@@ -1481,9 +1481,9 @@ bool JournalStream::readable(bufferlist &read_buf, uint64_t *need) const
 size_t JournalStream::read(bufferlist &from, bufferlist *entry,
 			   uint64_t *start_ptr)
 {
-  ceph_assert(start_ptr != NULL);
-  ceph_assert(entry != NULL);
-  ceph_assert(entry->length() == 0);
+  stone_assert(start_ptr != NULL);
+  stone_assert(entry != NULL);
+  stone_assert(entry->length() == 0);
 
   uint32_t entry_size = 0;
 
@@ -1494,7 +1494,7 @@ size_t JournalStream::read(bufferlist &from, bufferlist *entry,
     decode(entry_sentinel, from_ptr);
     // Assertion instead of clean check because of precondition of this
     // fn is that readable() already passed
-    ceph_assert(entry_sentinel == sentinel);
+    stone_assert(entry_sentinel == sentinel);
   }
   decode(entry_size, from_ptr);
 
@@ -1521,7 +1521,7 @@ size_t JournalStream::read(bufferlist &from, bufferlist *entry,
 size_t JournalStream::write(bufferlist &entry, bufferlist *to,
 			    uint64_t const &start_ptr)
 {
-  ceph_assert(to != NULL);
+  stone_assert(to != NULL);
 
   uint32_t const entry_size = entry.length();
   if (format >= JOURNAL_FORMAT_RESILIENT) {
@@ -1556,7 +1556,7 @@ size_t JournalStream::write(bufferlist &entry, bufferlist *to,
  */
 void Journaler::set_write_error_handler(Context *c) {
   lock_guard l(lock);
-  ceph_assert(!on_write_error);
+  stone_assert(!on_write_error);
   on_write_error = wrap_finisher(c);
   called_write_error = false;
 }

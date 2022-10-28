@@ -12,7 +12,7 @@
 #include "librbd/Utils.h"
 #include "osdc/Striper.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::deep_copy::SnapshotCreateRequest: " \
                            << this << " " << __func__ << ": "
@@ -146,7 +146,7 @@ void SnapshotCreateRequest<I>::send_create_object_map() {
     });
   librados::AioCompletion *comp = create_rados_callback(ctx);
   r = m_dst_image_ctx->md_ctx.aio_operate(object_map_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 

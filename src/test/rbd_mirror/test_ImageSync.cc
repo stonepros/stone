@@ -75,7 +75,7 @@ public:
     create_and_open(m_local_io_ctx, &m_local_image_ctx);
     create_and_open(m_remote_io_ctx, &m_remote_image_ctx);
 
-    auto cct = reinterpret_cast<CephContext*>(m_local_io_ctx.cct());
+    auto cct = reinterpret_cast<StoneContext*>(m_local_io_ctx.cct());
     m_image_sync_throttler = rbd::mirror::Throttler<>::create(
         cct, "rbd_mirror_concurrent_image_syncs");
 

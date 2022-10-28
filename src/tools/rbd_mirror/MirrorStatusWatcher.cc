@@ -7,8 +7,8 @@
 #include "cls/rbd/cls_rbd_client.h"
 #include "librbd/Utils.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::MirrorStatusWatcher: " \
                            << this << " " << __func__ << ": "
@@ -47,7 +47,7 @@ void MirrorStatusWatcher<I>::init(Context *on_finish) {
   librados::AioCompletion *aio_comp = create_rados_callback(on_finish);
 
   int r = m_ioctx.aio_operate(RBD_MIRRORING, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

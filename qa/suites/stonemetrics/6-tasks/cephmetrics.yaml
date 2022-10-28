@@ -1,0 +1,4 @@
+meta:
+- desc: "Deploy stonemetrics and run integration tests"
+tasks:
+- stonemetrics:

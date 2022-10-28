@@ -37,7 +37,7 @@ class ProgressContext;
 
 template <>
 struct Threads<librbd::MockTestImageCtx> {
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
   SafeTimer *timer;
   librbd::asio::ContextWQ *work_queue;
 
@@ -60,13 +60,13 @@ struct ImageSync<librbd::MockTestImageCtx> {
       image_sync::SyncPointHandler* sync_point_handler,
       InstanceWatcher<librbd::MockTestImageCtx> *instance_watcher,
       ProgressContext *progress_ctx, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
 
   ImageSync() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
   ~ImageSync() {
@@ -98,7 +98,7 @@ struct OpenImageRequest<librbd::MockTestImageCtx> {
                                   librbd::MockTestImageCtx **image_ctx,
                                   const std::string &image_id,
                                   bool read_only, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->image_ctx = image_ctx;
     s_instance->on_finish = on_finish;
     s_instance->construct(io_ctx, image_id);
@@ -106,7 +106,7 @@ struct OpenImageRequest<librbd::MockTestImageCtx> {
   }
 
   OpenImageRequest() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
   ~OpenImageRequest() {
@@ -129,7 +129,7 @@ struct OpenLocalImageRequest<librbd::MockTestImageCtx> {
                                        const std::string &local_image_id,
                                        librbd::asio::ContextWQ *work_queue,
                                        Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->image_ctx = local_image_ctx;
     s_instance->on_finish = on_finish;
     s_instance->construct(local_io_ctx, local_image_id);
@@ -137,7 +137,7 @@ struct OpenLocalImageRequest<librbd::MockTestImageCtx> {
   }
 
   OpenLocalImageRequest() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
   ~OpenLocalImageRequest() {
@@ -162,7 +162,7 @@ struct PrepareLocalImageRequest<librbd::MockTestImageCtx> {
                                           StateBuilder<librbd::MockTestImageCtx>** state_builder,
                                           librbd::asio::ContextWQ *work_queue,
                                           Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->local_image_name = local_image_name;
     s_instance->state_builder = state_builder;
     s_instance->on_finish = on_finish;
@@ -191,7 +191,7 @@ struct PrepareRemoteImageRequest<librbd::MockTestImageCtx> {
                                            ::journal::CacheManagerHandler *cache_manager_handler,
                                            StateBuilder<librbd::MockTestImageCtx>** state_builder,
                                            Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->state_builder = state_builder;
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -218,7 +218,7 @@ struct StateBuilder<librbd::MockTestImageCtx> {
   std::string remote_image_id;
 
   static StateBuilder* create(const std::string&) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 

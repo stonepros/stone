@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_CDIR_H
-#define CEPH_CDIR_H
+#ifndef STONE_CDIR_H
+#define STONE_CDIR_H
 
 #include <iosfwd>
 #include <list>
@@ -366,15 +366,15 @@ public:
 
   // -- dentries and inodes --
   CDentry* lookup_exact_snap(std::string_view dname, snapid_t last);
-  CDentry* lookup(std::string_view n, snapid_t snap=CEPH_NOSNAP);
+  CDentry* lookup(std::string_view n, snapid_t snap=STONE_NOSNAP);
 
   CDentry* add_null_dentry(std::string_view dname,
-			   snapid_t first=2, snapid_t last=CEPH_NOSNAP);
+			   snapid_t first=2, snapid_t last=STONE_NOSNAP);
   CDentry* add_primary_dentry(std::string_view dname, CInode *in, mempool::mds_co::string alternate_name,
-			      snapid_t first=2, snapid_t last=CEPH_NOSNAP);
+			      snapid_t first=2, snapid_t last=STONE_NOSNAP);
   CDentry* add_remote_dentry(std::string_view dname, inodeno_t ino, unsigned char d_type,
                              mempool::mds_co::string alternate_name,
-			     snapid_t first=2, snapid_t last=CEPH_NOSNAP);
+			     snapid_t first=2, snapid_t last=STONE_NOSNAP);
   void remove_dentry( CDentry *dn );         // delete dentry
   void link_remote_inode( CDentry *dn, inodeno_t ino, unsigned char d_type);
   void link_remote_inode( CDentry *dn, CInode *in );

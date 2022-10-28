@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CACHE_RWL_LOG_OPERATION_H
-#define CEPH_LIBRBD_CACHE_RWL_LOG_OPERATION_H
+#ifndef STONE_LIBRBD_CACHE_RWL_LOG_OPERATION_H
+#define STONE_LIBRBD_CACHE_RWL_LOG_OPERATION_H
 
 #include "include/utime.h"
 #include "librbd/cache/pwl/LogEntry.h"
@@ -66,7 +66,7 @@ public:
 
 class SyncPointLogOperation : public GenericLogOperation {
 private:
-  CephContext *m_cct;
+  StoneContext *m_cct;
   ceph::mutex &m_lock;
   std::vector<Context*> append_sync_point();
   void clear_earlier_sync_point();
@@ -77,7 +77,7 @@ public:
                         std::shared_ptr<SyncPoint> sync_point,
                         utime_t dispatch_time,
                         PerfCounters *perfcounter,
-                        CephContext *cct);
+                        StoneContext *cct);
   ~SyncPointLogOperation() override;
   SyncPointLogOperation(const SyncPointLogOperation&) = delete;
   SyncPointLogOperation &operator=(const SyncPointLogOperation&) = delete;
@@ -94,7 +94,7 @@ public:
 class GenericWriteLogOperation : public GenericLogOperation {
 protected:
   ceph::mutex m_lock;
-  CephContext *m_cct;
+  StoneContext *m_cct;
 public:
   std::shared_ptr<SyncPoint> sync_point;
   Context *on_write_append = nullptr;  /* Completion for things waiting on this
@@ -105,7 +105,7 @@ public:
   GenericWriteLogOperation(std::shared_ptr<SyncPoint> sync_point,
                            utime_t dispatch_time,
                            PerfCounters *perfcounter,
-                           CephContext *cct);
+                           StoneContext *cct);
   ~GenericWriteLogOperation() override;
   GenericWriteLogOperation(const GenericWriteLogOperation&) = delete;
   GenericWriteLogOperation &operator=(const GenericWriteLogOperation&) = delete;
@@ -137,12 +137,12 @@ public:
   WriteBufferAllocation *buffer_alloc = nullptr;
   WriteLogOperation(WriteLogOperationSet &set,
                     uint64_t image_offset_bytes,
-                    uint64_t write_bytes, CephContext *cct,
+                    uint64_t write_bytes, StoneContext *cct,
                     std::shared_ptr<WriteLogEntry> write_log_entry);
   WriteLogOperation(WriteLogOperationSet &set,
                     uint64_t image_offset_bytes,
                     uint64_t write_bytes, uint32_t data_len,
-                    CephContext *cct,
+                    StoneContext *cct,
                     std::shared_ptr<WriteLogEntry> writesame_log_entry);
  ~WriteLogOperation() override;
   WriteLogOperation(const WriteLogOperation&) = delete;
@@ -165,7 +165,7 @@ public:
 
 class WriteLogOperationSet {
 private:
-  CephContext *m_cct;
+  StoneContext *m_cct;
   Context *m_on_finish;
 public:
   bool persist_on_flush;
@@ -180,7 +180,7 @@ public:
   std::shared_ptr<SyncPoint> sync_point;
   WriteLogOperationSet(utime_t dispatched, PerfCounters *perfcounter,
                        std::shared_ptr<SyncPoint> sync_point,
-                       const bool persist_on_flush, CephContext *cct,
+                       const bool persist_on_flush, StoneContext *cct,
                        Context *on_finish);
   ~WriteLogOperationSet();
   WriteLogOperationSet(const WriteLogOperationSet&) = delete;
@@ -202,7 +202,7 @@ public:
                       uint32_t discard_granularity_bytes,
                       utime_t dispatch_time,
                       PerfCounters *perfcounter,
-                      CephContext *cct);
+                      StoneContext *cct);
   ~DiscardLogOperation() override;
   DiscardLogOperation(const DiscardLogOperation&) = delete;
   DiscardLogOperation &operator=(const DiscardLogOperation&) = delete;
@@ -221,4 +221,4 @@ public:
 } // namespace cache
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_CACHE_RWL_LOG_OPERATION_H
+#endif // STONE_LIBRBD_CACHE_RWL_LOG_OPERATION_H

@@ -52,9 +52,9 @@ void RGWObjectLock::dump_xml(Formatter *f) const {
   }
 }
 
-ceph::real_time RGWObjectLock::get_lock_until_date(const ceph::real_time& mtime) const {
+stone::real_time RGWObjectLock::get_lock_until_date(const stone::real_time& mtime) const {
   if (!rule_exist) {
-    return ceph::real_time();
+    return stone::real_time();
   }
   int days = get_days();
   if (days <= 0) {
@@ -70,7 +70,7 @@ void RGWObjectRetention::decode_xml(XMLObj *obj) {
   }
   string date_str;
   RGWXMLDecoder::decode_xml("RetainUntilDate", date_str, obj, true);
-  boost::optional<ceph::real_time> date = ceph::from_iso_8601(date_str);
+  boost::optional<stone::real_time> date = stone::from_iso_8601(date_str);
   if (boost::none == date) {
     throw RGWXMLDecoder::err("invalid RetainUntilDate value");
   }
@@ -79,7 +79,7 @@ void RGWObjectRetention::decode_xml(XMLObj *obj) {
 
 void RGWObjectRetention::dump_xml(Formatter *f) const {
   encode_xml("Mode", mode, f);
-  string date = ceph::to_iso_8601(retain_until_date);
+  string date = stone::to_iso_8601(retain_until_date);
   encode_xml("RetainUntilDate", date, f);
 }
 

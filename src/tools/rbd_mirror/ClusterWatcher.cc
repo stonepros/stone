@@ -3,7 +3,7 @@
 
 #include "ClusterWatcher.h"
 #include "include/stringify.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/debug.h"
 #include "common/errno.h"
 #include "cls/rbd/cls_rbd_client.h"
@@ -12,8 +12,8 @@
 #include "tools/rbd_mirror/ServiceDaemon.h"
 #include "json_spirit/json_spirit.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::ClusterWatcher:" << this << " " \
                            << __func__ << ": "
@@ -31,7 +31,7 @@ using librados::IoCtx;
 namespace rbd {
 namespace mirror {
 
-ClusterWatcher::ClusterWatcher(RadosRef cluster, ceph::mutex &lock,
+ClusterWatcher::ClusterWatcher(RadosRef cluster, stone::mutex &lock,
                                ServiceDaemon<librbd::ImageCtx>* service_daemon)
   : m_cluster(cluster), m_lock(lock), m_service_daemon(service_daemon)
 {
@@ -39,12 +39,12 @@ ClusterWatcher::ClusterWatcher(RadosRef cluster, ceph::mutex &lock,
 
 const ClusterWatcher::PoolPeers& ClusterWatcher::get_pool_peers() const
 {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   return m_pool_peers;
 }
 
 std::string ClusterWatcher::get_site_name() const {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   return m_site_name;
 }
 

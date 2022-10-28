@@ -8,8 +8,8 @@
 #include <vector>
 #include <boost/scoped_ptr.hpp>
 
-#include "common/ceph_argparse.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_argparse.h"
+#include "common/stone_mutex.h"
 #include "common/common_init.h"
 #include "common/config.h"
 #include "common/snap_types.h"
@@ -35,7 +35,7 @@ struct op_data {
 
   ObjectExtent extent;
   bool is_read;
-  ceph::bufferlist result;
+  stone::bufferlist result;
   std::atomic<unsigned> done = { 0 };
 };
 
@@ -47,7 +47,7 @@ public:
     : m_op(op), m_outstanding(outstanding) {}
   void finish(int r) override {
     m_op->done++;
-    ceph_assert(*m_outstanding > 0);
+    stone_assert(*m_outstanding > 0);
     (*m_outstanding)--;
   }
 };
@@ -56,10 +56,10 @@ int stress_test(uint64_t num_ops, uint64_t num_objs,
 		uint64_t max_obj_size, uint64_t delay_ns,
 		uint64_t max_op_len, float percent_reads)
 {
-  ceph::mutex lock = ceph::make_mutex("object_cacher_stress::object_cacher");
-  FakeWriteback writeback(g_ceph_context, &lock, delay_ns);
+  stone::mutex lock = stone::make_mutex("object_cacher_stress::object_cacher");
+  FakeWriteback writeback(g_stone_context, &lock, delay_ns);
 
-  ObjectCacher obc(g_ceph_context, "test", writeback, lock, NULL, NULL,
+  ObjectCacher obc(g_stone_context, "test", writeback, lock, NULL, NULL,
 		   g_conf()->client_oc_size,
 		   g_conf()->client_oc_max_objects,
 		   g_conf()->client_oc_max_dirty,
@@ -72,8 +72,8 @@ int stress_test(uint64_t num_ops, uint64_t num_objs,
   vector<std::shared_ptr<op_data> > ops;
   ObjectCacher::ObjectSet object_set(NULL, 0, 0);
   SnapContext snapc;
-  ceph::buffer::ptr bp(max_op_len);
-  ceph::bufferlist bl;
+  stone::buffer::ptr bp(max_op_len);
+  stone::bufferlist bl;
   uint64_t journal_tid = 0;
   bp.zero();
   bl.append(bp);
@@ -99,21 +99,21 @@ int stress_test(uint64_t num_ops, uint64_t num_objs,
     std::cout << "op " << i << " " << (is_read ? "read" : "write")
 	      << " " << op->extent << "\n";
     if (op->is_read) {
-      ObjectCacher::OSDRead *rd = obc.prepare_read(CEPH_NOSNAP, &op->result, 0);
+      ObjectCacher::OSDRead *rd = obc.prepare_read(STONE_NOSNAP, &op->result, 0);
       rd->extents.push_back(op->extent);
       outstanding_reads++;
       Context *completion = new C_Count(op.get(), &outstanding_reads);
       lock.lock();
       int r = obc.readx(rd, &object_set, completion);
       lock.unlock();
-      ceph_assert(r >= 0);
+      stone_assert(r >= 0);
       if ((uint64_t)r == length)
 	completion->complete(r);
       else
-	ceph_assert(r == 0);
+	stone_assert(r == 0);
     } else {
       ObjectCacher::OSDWrite *wr = obc.prepare_write(snapc, bl,
-						     ceph::real_time::min(), 0,
+						     stone::real_time::min(), 0,
 						     ++journal_tid);
       wr->extents.push_back(op->extent);
       lock.lock();
@@ -145,8 +145,8 @@ int stress_test(uint64_t num_ops, uint64_t num_objs,
   lock.unlock();
 
   int r = 0;
-  ceph::mutex mylock = ceph::make_mutex("librbd::ImageCtx::flush_cache");
-  ceph::condition_variable cond;
+  stone::mutex mylock = stone::make_mutex("librbd::ImageCtx::flush_cache");
+  stone::condition_variable cond;
   bool done;
   Context *onfinish = new C_SafeCond(mylock, cond, &done, &r);
   lock.lock();
@@ -176,10 +176,10 @@ int stress_test(uint64_t num_ops, uint64_t num_objs,
 int correctness_test(uint64_t delay_ns)
 {
   std::cerr << "starting correctness test" << std::endl;
-  ceph::mutex lock = ceph::make_mutex("object_cacher_stress::object_cacher");
-  MemWriteback writeback(g_ceph_context, &lock, delay_ns);
+  stone::mutex lock = stone::make_mutex("object_cacher_stress::object_cacher");
+  MemWriteback writeback(g_stone_context, &lock, delay_ns);
 
-  ObjectCacher obc(g_ceph_context, "test", writeback, lock, NULL, NULL,
+  ObjectCacher obc(g_stone_context, "test", writeback, lock, NULL, NULL,
 		   1<<21, // max cache size, 2MB
 		   1, // max objects, just one
 		   1<<18, // max dirty, 256KB
@@ -190,10 +190,10 @@ int correctness_test(uint64_t delay_ns)
   std::cerr << "just start()ed ObjectCacher" << std::endl;
 
   SnapContext snapc;
-  ceph_tid_t journal_tid = 0;
+  stone_tid_t journal_tid = 0;
   std::string oid("correctness_test_obj");
   ObjectCacher::ObjectSet object_set(NULL, 0, 0);
-  ceph::bufferlist zeroes_bl;
+  stone::bufferlist zeroes_bl;
   zeroes_bl.append_zero(1<<20);
 
   // set up a 4MB all-zero object
@@ -201,7 +201,7 @@ int correctness_test(uint64_t delay_ns)
   std::map<int, C_SaferCond> create_finishers;
   for (int i = 0; i < 4; ++i) {
     ObjectCacher::OSDWrite *wr = obc.prepare_write(snapc, zeroes_bl,
-						   ceph::real_time::min(), 0,
+						   stone::real_time::min(), 0,
 						   ++journal_tid);
     ObjectExtent extent(oid, 0, zeroes_bl.length()*i, zeroes_bl.length(), 0);
     extent.oloc.pool = 0;
@@ -214,13 +214,13 @@ int correctness_test(uint64_t delay_ns)
 
   // write some 1-valued bits at 256-KB intervals for checking consistency
   std::cerr << "Writing some 0xff values" << std::endl;
-  ceph::buffer::ptr ones(1<<16);
+  stone::buffer::ptr ones(1<<16);
   memset(ones.c_str(), 0xff, ones.length());
-  ceph::bufferlist ones_bl;
+  stone::bufferlist ones_bl;
   ones_bl.append(ones);
   for (int i = 1<<18; i < 1<<22; i+=1<<18) {
     ObjectCacher::OSDWrite *wr = obc.prepare_write(snapc, ones_bl,
-						   ceph::real_time::min(), 0,
+						   stone::real_time::min(), 0,
 						   ++journal_tid);
     ObjectExtent extent(oid, 0, i, ones_bl.length(), 0);
     extent.oloc.pool = 0;
@@ -251,7 +251,7 @@ int correctness_test(uint64_t delay_ns)
   std::cout << "Reading back half of object (1<<21~1<<21)" << std::endl;
   bufferlist readbl;
   C_SaferCond backreadcond;
-  ObjectCacher::OSDRead *back_half_rd = obc.prepare_read(CEPH_NOSNAP, &readbl, 0);
+  ObjectCacher::OSDRead *back_half_rd = obc.prepare_read(STONE_NOSNAP, &readbl, 0);
   ObjectExtent back_half_extent(oid, 0, 1<<21, 1<<21, 0);
   back_half_extent.oloc.pool = 0;
   back_half_extent.buffer_extents.push_back(make_pair(0, 1<<21));
@@ -259,23 +259,23 @@ int correctness_test(uint64_t delay_ns)
   lock.lock();
   int r = obc.readx(back_half_rd, &object_set, &backreadcond);
   lock.unlock();
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
   if (r == 0) {
     std::cout << "Waiting to read data into cache" << std::endl;
     r = backreadcond.wait();
   }
 
-  ceph_assert(r == 1<<21);
+  stone_assert(r == 1<<21);
 
   /* Read the whole object in,
    * verify we have to wait for it to complete,
-   * overwrite a small piece, (http://tracker.ceph.com/issues/16002),
+   * overwrite a small piece, (http://tracker.stone.com/issues/16002),
    * and check consistency */
 
   readbl.clear();
   std::cout<< "Reading whole object (0~1<<22)" << std::endl;
   C_SaferCond frontreadcond;
-  ObjectCacher::OSDRead *whole_rd = obc.prepare_read(CEPH_NOSNAP, &readbl, 0);
+  ObjectCacher::OSDRead *whole_rd = obc.prepare_read(STONE_NOSNAP, &readbl, 0);
   ObjectExtent whole_extent(oid, 0, 0, 1<<22, 0);
   whole_extent.oloc.pool = 0;
   whole_extent.buffer_extents.push_back(make_pair(0, 1<<22));
@@ -283,11 +283,11 @@ int correctness_test(uint64_t delay_ns)
   lock.lock();
   r = obc.readx(whole_rd, &object_set, &frontreadcond);
   // we cleared out the cache by reading back half, it shouldn't pass immediately!
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   std::cout << "Data (correctly) not available without fetching" << std::endl;
 
   ObjectCacher::OSDWrite *verify_wr = obc.prepare_write(snapc, ones_bl,
-							ceph::real_time::min(), 0,
+							stone::real_time::min(), 0,
 							++journal_tid);
   ObjectExtent verify_extent(oid, 0, (1<<18)+(1<<16), ones_bl.length(), 0);
   verify_extent.oloc.pool = 0;
@@ -307,11 +307,11 @@ int correctness_test(uint64_t delay_ns)
   for (int i = 1<<18; i < 1<<22; i+=1<<18) {
     bufferlist ones_maybe;
     ones_maybe.substr_of(readbl, i, ones_bl.length());
-    ceph_assert(0 == memcmp(ones_maybe.c_str(), ones_bl.c_str(), ones_bl.length()));
+    stone_assert(0 == memcmp(ones_maybe.c_str(), ones_bl.c_str(), ones_bl.length()));
   }
   bufferlist ones_maybe;
   ones_maybe.substr_of(readbl, (1<<18)+(1<<16), ones_bl.length());
-  ceph_assert(0 == memcmp(ones_maybe.c_str(), ones_bl.c_str(), ones_bl.length()));
+  stone_assert(0 == memcmp(ones_maybe.c_str(), ones_bl.c_str(), ones_bl.length()));
 
   std::cout << "validated that data is 0xff where it should be" << std::endl;
   
@@ -353,7 +353,7 @@ int main(int argc, const char **argv)
 {
   std::vector<const char*> args;
   argv_to_vec(argc, argv, args);
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
 
@@ -369,44 +369,44 @@ int main(int argc, const char **argv)
   std::ostringstream err;
   std::vector<const char*>::iterator i;
   for (i = args.begin(); i != args.end();) {
-    if (ceph_argparse_witharg(args, i, &delay_ns, err, "--delay-ns", (char*)NULL)) {
+    if (stone_argparse_witharg(args, i, &delay_ns, err, "--delay-ns", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << argv[0] << ": " << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
-    } else if (ceph_argparse_witharg(args, i, &num_ops, err, "--ops", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &num_ops, err, "--ops", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << argv[0] << ": " << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
-    } else if (ceph_argparse_witharg(args, i, &num_objs, err, "--objects", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &num_objs, err, "--objects", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << argv[0] << ": " << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
-    } else if (ceph_argparse_witharg(args, i, &obj_bytes, err, "--obj-size", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &obj_bytes, err, "--obj-size", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << argv[0] << ": " << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
-    } else if (ceph_argparse_witharg(args, i, &max_len, err, "--max-op-size", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &max_len, err, "--max-op-size", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << argv[0] << ": " << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
-    } else if (ceph_argparse_witharg(args, i, &percent_reads, err, "--percent-read", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &percent_reads, err, "--percent-read", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << argv[0] << ": " << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
-    } else if (ceph_argparse_witharg(args, i, &seed, err, "--seed", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &seed, err, "--seed", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << argv[0] << ": " << err.str() << std::endl;
 	return EXIT_FAILURE;
       }
-    } else if (ceph_argparse_flag(args, i, "--stress-test", NULL)) {
+    } else if (stone_argparse_flag(args, i, "--stress-test", NULL)) {
       stress = true;
-    } else if (ceph_argparse_flag(args, i, "--correctness-test", NULL)) {
+    } else if (stone_argparse_flag(args, i, "--correctness-test", NULL)) {
       correctness = true;
     } else {
       cerr << "unknown option " << *i << std::endl;

@@ -381,7 +381,7 @@ TEST_F(CReadOpsTest, Checksum) {
 
   {
     rados_read_op_t op = rados_create_read_op();
-    ceph_le64 init_value = init_le64(-1);
+    stone_le64 init_value = init_le64(-1);
     rados_read_op_checksum(op, LIBRADOS_CHECKSUM_TYPE_XXHASH64,
 			   reinterpret_cast<char *>(&init_value),
 			   sizeof(init_value), 0, len, 0, NULL, 0, NULL);
@@ -390,8 +390,8 @@ TEST_F(CReadOpsTest, Checksum) {
   }
 
   {
-    ceph_le32 init_value = init_le32(-1);
-    ceph_le32 crc[2];
+    stone_le32 init_value = init_le32(-1);
+    stone_le32 crc[2];
     rados_read_op_t op = rados_create_read_op();
     rados_read_op_checksum(op, LIBRADOS_CHECKSUM_TYPE_CRC32C,
 			   reinterpret_cast<char *>(&init_value),
@@ -400,14 +400,14 @@ TEST_F(CReadOpsTest, Checksum) {
 			   nullptr);
     ASSERT_EQ(0, rados_read_op_operate(op, ioctx, obj, 0));
     ASSERT_EQ(1U, crc[0]);
-    uint32_t expected_crc = ceph_crc32c(
+    uint32_t expected_crc = stone_crc32c(
       -1, reinterpret_cast<const uint8_t*>(data), static_cast<uint32_t>(len));
     ASSERT_EQ(expected_crc, crc[1]);
     rados_release_read_op(op);
   }
 
   {
-    ceph_le32 init_value = init_le32(-1);
+    stone_le32 init_value = init_le32(-1);
     int rval;
     rados_read_op_t op = rados_create_read_op();
     rados_read_op_checksum(op, LIBRADOS_CHECKSUM_TYPE_XXHASH32,
@@ -419,8 +419,8 @@ TEST_F(CReadOpsTest, Checksum) {
   }
 
   {
-    ceph_le32 init_value = init_le32(-1);
-    ceph_le32 crc[3];
+    stone_le32 init_value = init_le32(-1);
+    stone_le32 crc[3];
     int rval;
     rados_read_op_t op = rados_create_read_op();
     rados_read_op_checksum(op, LIBRADOS_CHECKSUM_TYPE_CRC32C,
@@ -430,9 +430,9 @@ TEST_F(CReadOpsTest, Checksum) {
     ASSERT_EQ(0, rados_read_op_operate(op, ioctx, obj, 0));
     ASSERT_EQ(2U, crc[0]);
     uint32_t expected_crc[2];
-    expected_crc[0] = ceph_crc32c(
+    expected_crc[0] = stone_crc32c(
       -1, reinterpret_cast<const uint8_t*>(data), 4U);
-    expected_crc[1] = ceph_crc32c(
+    expected_crc[1] = stone_crc32c(
       -1, reinterpret_cast<const uint8_t*>(data + 4), 4U);
     ASSERT_EQ(expected_crc[0], crc[1]);
     ASSERT_EQ(expected_crc[1], crc[2]);
@@ -532,7 +532,7 @@ TEST_F(CReadOpsTest, Exec) {
   bufferlist bl;
   bl.append(out, bytes_read);
   auto it = bl.cbegin();
-  ceph::decode(features, it);
+  stone::decode(features, it);
   ASSERT_EQ(RBD_FEATURES_ALL, features);
   rados_buffer_free(out);
 
@@ -673,7 +673,7 @@ TEST_F(CReadOpsTest, Omap) {
   EXPECT_EQ(-ECANCELED, rados_write_op_operate(op, ioctx, obj, NULL, 0));
   rados_release_write_op(op);
 
-  // see http://tracker.ceph.com/issues/19518
+  // see http://tracker.stone.com/issues/19518
   //ASSERT_EQ(-ECANCELED, r_vals);
 
   // verifying the keys are still there, and then remove them

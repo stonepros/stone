@@ -4,8 +4,8 @@ tasks:
 - install:
 - exec:
     client.0:
-          - ceph_test_async_driver
-          - ceph_test_msgr
+          - stone_test_async_driver
+          - stone_test_msgr
 openstack:
   - machine:
       disk: 40 # GB
@@ -15,9 +15,9 @@ openstack:
       count: 0
       size: 1 # GB
 overrides:
-  ceph:
+  stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     conf:
       client:
         debug ms: 20

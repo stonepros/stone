@@ -26,7 +26,7 @@ namespace crypto {
 namespace util {
 
 template <> void set_crypto(
-        MockImageCtx *image_ctx, ceph::ref_t<CryptoInterface> crypto) {
+        MockImageCtx *image_ctx, stone::ref_t<CryptoInterface> crypto) {
   image_ctx->crypto = crypto.get();
 }
 
@@ -43,7 +43,7 @@ struct ShutDownCryptoRequest<MockImageCtx> {
   static ShutDownCryptoRequest *s_instance;
   static ShutDownCryptoRequest *create(
           MockImageCtx* image_ctx, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }

@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 CERN (Switzerland)
  *
@@ -24,15 +24,15 @@
  */
 
 // -----------------------------------------------------------------------------
-#include "ceph_ver.h"
+#include "stone_ver.h"
 #include "include/buffer.h"
 #include "ErasureCodePluginIsa.h"
 #include "ErasureCodeIsa.h"
 // -----------------------------------------------------------------------------
 
 int ErasureCodePluginIsa::factory(const std::string &directory,
-                                  ceph::ErasureCodeProfile &profile,
-                                  ceph::ErasureCodeInterfaceRef *erasure_code,
+                                  stone::ErasureCodeProfile &profile,
+                                  stone::ErasureCodeInterfaceRef *erasure_code,
                                   std::ostream *ss)
 {
   ErasureCodeIsa *interface;
@@ -61,7 +61,7 @@ int ErasureCodePluginIsa::factory(const std::string &directory,
       delete interface;
       return r;
     }
-    *erasure_code = ceph::ErasureCodeInterfaceRef(interface);
+    *erasure_code = stone::ErasureCodeInterfaceRef(interface);
     return 0;
 }
 
@@ -69,14 +69,14 @@ int ErasureCodePluginIsa::factory(const std::string &directory,
 
 const char *__erasure_code_version()
 {
-  return CEPH_GIT_NICE_VER;
+  return STONE_GIT_NICE_VER;
 }
 
 // -----------------------------------------------------------------------------
 
 int __erasure_code_init(char *plugin_name, char *directory)
 {
-  auto& instance = ceph::ErasureCodePluginRegistry::instance();
+  auto& instance = stone::ErasureCodePluginRegistry::instance();
 
   return instance.add(plugin_name, new ErasureCodePluginIsa());
 }

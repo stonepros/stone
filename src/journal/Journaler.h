@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_JOURNAL_JOURNALER_H
-#define CEPH_JOURNAL_JOURNALER_H
+#ifndef STONE_JOURNAL_JOURNALER_H
+#define STONE_JOURNAL_JOURNALER_H
 
 #include "include/int_types.h"
 #include "include/buffer_fwd.h"
@@ -32,7 +32,7 @@ class Settings;
 class Journaler {
 public:
   struct Threads {
-    Threads(CephContext *cct);
+    Threads(StoneeContext *cct);
     ~Threads();
 
     ThreadPool *thread_pool = nullptr;
@@ -138,7 +138,7 @@ private:
 
   mutable librados::IoCtx m_header_ioctx;
   librados::IoCtx m_data_ioctx;
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   std::string m_client_id;
   CacheManagerHandler *m_cache_manager_handler;
 
@@ -167,4 +167,4 @@ std::ostream &operator<<(std::ostream &os,
 
 } // namespace journal
 
-#endif // CEPH_JOURNAL_JOURNALER_H
+#endif // STONE_JOURNAL_JOURNALER_H

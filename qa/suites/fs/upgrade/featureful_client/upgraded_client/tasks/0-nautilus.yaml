@@ -1,24 +1,24 @@
 meta:
 - desc: |
-   install ceph/nautilus latest
+   install stone/nautilus latest
 tasks:
 - install:
     branch: nautilus
     exclude_packages:
       - librados3
-      - ceph-mgr-dashboard
-      - ceph-mgr-diskprediction-local
-      - ceph-mgr-rook
-      - ceph-mgr-cephadm
-      - cephadm
-      - ceph-immutable-object-cache
+      - stone-mgr-dashboard
+      - stone-mgr-diskprediction-local
+      - stone-mgr-rook
+      - stone-mgr-stoneadm
+      - stoneadm
+      - stone-immutable-object-cache
       - python3-rados
       - python3-rgw
       - python3-rbd
-      - python3-cephfs
+      - python3-stonefs
     extra_packages: ['librados2']
 - print: "**** done installing nautilus"
-- ceph:
+- stone:
     log-ignorelist:
       - overall HEALTH_
       - \(FS_
@@ -39,5 +39,5 @@ tasks:
         ms bind msgr2: false
 - exec:
     osd.0:
-      - ceph osd set-require-min-compat-client nautilus
-- print: "**** done ceph"
+      - stone osd set-require-min-compat-client nautilus
+- print: "**** done stone"

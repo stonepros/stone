@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -57,14 +57,14 @@
 #define tracepoint(...)
 #endif
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd: "
 
 using std::string;
 using std::vector;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 using librados::snap_t;
 using librados::IoCtx;
 
@@ -73,10 +73,10 @@ namespace {
 TracepointProvider::Traits tracepoint_traits("librbd_tp.so", "rbd_tracing");
 
 struct UserBufferDeleter : public deleter::impl {
-  CephContext* cct;
+  StoneContext* cct;
   librbd::io::AioCompletion* aio_completion;
 
-  UserBufferDeleter(CephContext* cct, librbd::io::AioCompletion* aio_completion)
+  UserBufferDeleter(StoneContext* cct, librbd::io::AioCompletion* aio_completion)
     : deleter::impl(deleter()), cct(cct), aio_completion(aio_completion) {
    aio_completion->block(cct);
   }
@@ -97,7 +97,7 @@ static auto create_write_raw(librbd::ImageCtx *ictx, const char *buf,
 
   // avoid copying memory for AIO operations, but possibly delay completions
   // until the last reference to the user's memory has been released
-  return ceph::unique_leakable_ptr<ceph::buffer::raw>(
+  return stone::unique_leakable_ptr<stone::buffer::raw>(
     buffer::claim_buffer(
       len, const_cast<char*>(buf),
       deleter(new UserBufferDeleter(ictx->cct, aio_completion))));
@@ -137,8 +137,8 @@ static bufferlist iovec_to_bufferlist(librbd::ImageCtx *ictx,
   return bl;
 }
 
-CephContext* get_cct(IoCtx &io_ctx) {
-  return reinterpret_cast<CephContext*>(io_ctx.cct());
+StoneContext* get_cct(IoCtx &io_ctx) {
+  return reinterpret_cast<StoneContext*>(io_ctx.cct());
 }
 
 librbd::io::AioCompletion* get_aio_completion(librbd::RBD::AioCompletion *comp) {
@@ -146,7 +146,7 @@ librbd::io::AioCompletion* get_aio_completion(librbd::RBD::AioCompletion *comp) 
 }
 
 struct C_AioCompletion : public Context {
-  CephContext *cct;
+  StoneContext *cct;
   librbd::io::aio_type_t aio_type;
   librbd::io::AioCompletion* aio_comp;
 
@@ -2665,7 +2665,7 @@ namespace librbd {
   }
 
   ssize_t Image::compare_and_write(uint64_t ofs, size_t len,
-                                   ceph::bufferlist &cmp_bl, ceph::bufferlist& bl,
+                                   stone::bufferlist &cmp_bl, stone::bufferlist& bl,
                                    uint64_t *mismatch_off, int op_flags)
   {
     ImageCtx *ictx = (ImageCtx *)ctx;
@@ -2815,7 +2815,7 @@ namespace librbd {
   }
 
   int Image::aio_compare_and_write(uint64_t off, size_t len,
-                                   ceph::bufferlist& cmp_bl, ceph::bufferlist& bl,
+                                   stone::bufferlist& cmp_bl, stone::bufferlist& bl,
                                    RBD::AioCompletion *c, uint64_t *mismatch_off,
                                    int op_flags)
   {
@@ -3508,7 +3508,7 @@ extern "C" int rbd_mirror_image_global_status_list(rados_ioctx_t p,
 
   size_t i = 0;
   for (auto &it : cpp_images) {
-    ceph_assert(i < max);
+    stone_assert(i < max);
     const std::string &image_id = it.first;
     image_ids[i] = strdup(image_id.c_str());
     mirror_image_global_status_cpp_to_c(it.second, &images[i]);
@@ -3626,7 +3626,7 @@ extern "C" int rbd_mirror_image_status_list(rados_ioctx_t p,
 
   size_t i = 0;
   for (auto &it : cpp_images) {
-    ceph_assert(i < max);
+    stone_assert(i < max);
     const std::string &image_id = it.first;
     image_ids[i] = strdup(image_id.c_str());
     mirror_image_global_status_cpp_to_c(it.second, &images[i]);
@@ -3688,7 +3688,7 @@ extern "C" int rbd_mirror_image_instance_id_list(
 
   size_t i = 0;
   for (auto &it : cpp_instance_ids) {
-    ceph_assert(i < max);
+    stone_assert(i < max);
     image_ids[i] = strdup(it.first.c_str());
     instance_ids[i] = strdup(it.second.c_str());
     i++;
@@ -3721,7 +3721,7 @@ extern "C" int rbd_mirror_image_info_list(
     return r;
   }
 
-  ceph_assert(cpp_entries.size() <= max);
+  stone_assert(cpp_entries.size() <= max);
 
   for (auto &it : cpp_entries) {
     *(image_ids++) = strdup(it.first.c_str());

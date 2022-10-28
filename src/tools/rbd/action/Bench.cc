@@ -6,7 +6,7 @@
 #include "tools/rbd/Utils.h"
 #include "common/errno.h"
 #include "common/strtol.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/types.h"
 #include "global/signal_handler.h"
 #include <atomic>
@@ -22,7 +22,7 @@ using namespace std::chrono;
 static std::atomic<bool> terminating;
 static void handle_signal(int signum)
 {
-  ceph_assert(signum == SIGINT || signum == SIGTERM);
+  stone_assert(signum == SIGINT || signum == SIGTERM);
   terminating = true;
 }
 
@@ -126,8 +126,8 @@ public:
 
 struct rbd_bencher {
   librbd::Image *image;
-  ceph::mutex lock = ceph::make_mutex("rbd_bencher::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("rbd_bencher::lock");
+  stone::condition_variable cond;
   int in_flight;
   io_type_t io_type;
   uint64_t io_size;
@@ -255,7 +255,7 @@ int do_bench(librbd::Image& image, io_type_t io_type,
     std::cout << "full sequential";
     break;
   default:
-    ceph_assert(false);
+    stone_assert(false);
     break;
   }
   std::cout << std::endl;
@@ -558,13 +558,13 @@ int bench_execute(const po::variables_map &vm, io_type_t bench_io_type) {
 }
 
 int execute_for_write(const po::variables_map &vm,
-                      const std::vector<std::string> &ceph_global_init_args) {
+                      const std::vector<std::string> &stone_global_init_args) {
   std::cerr << "rbd: bench-write is deprecated, use rbd bench --io-type write ..." << std::endl;
   return bench_execute(vm, IO_TYPE_WRITE);
 }
 
 int execute_for_bench(const po::variables_map &vm,
-                      const std::vector<std::string> &ceph_global_init_args) {
+                      const std::vector<std::string> &stone_global_init_args) {
   io_type_t bench_io_type;
   if (vm.count("io-type")) {
     bench_io_type = vm["io-type"].as<io_type_t>();

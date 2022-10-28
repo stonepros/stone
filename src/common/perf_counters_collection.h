@@ -7,13 +7,13 @@
 namespace ceph::common {
 class PerfCountersCollection
 {
-  CephContext *m_cct;
+  StoneeContext *m_cct;
 
   /** Protects perf_impl->m_loggers */
   mutable ceph::mutex m_lock;
   PerfCountersCollectionImpl perf_impl;
 public:
-  PerfCountersCollection(CephContext *cct);
+  PerfCountersCollection(StoneeContext *cct);
   ~PerfCountersCollection();
   void add(PerfCounters *l);
   void remove(PerfCounters *l);
@@ -33,11 +33,11 @@ public:
 };
 
 class PerfCountersDeleter {
-  CephContext* cct;
+  StoneeContext* cct;
 
 public:
   PerfCountersDeleter() noexcept : cct(nullptr) {}
-  PerfCountersDeleter(CephContext* cct) noexcept : cct(cct) {}
+  PerfCountersDeleter(StoneeContext* cct) noexcept : cct(cct) {}
   void operator()(PerfCounters* p) noexcept;
 };
 }

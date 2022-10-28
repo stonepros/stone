@@ -17,7 +17,7 @@ namespace immutable_obj_cache {
 
 class MockCacheClient {
  public:
-  MockCacheClient(const std::string& file, CephContext* ceph_ctx) {}
+  MockCacheClient(const std::string& file, StoneeContext* ceph_ctx) {}
   MOCK_METHOD0(run, void());
   MOCK_METHOD0(is_session_work, bool());
   MOCK_METHOD0(close, void());
@@ -31,7 +31,7 @@ class MockCacheClient {
 
 class MockCacheServer {
  public:
-  MockCacheServer(CephContext* cct, const std::string& file,
+  MockCacheServer(StoneeContext* cct, const std::string& file,
                   ProcessMsg processmsg) {
   }
   MOCK_METHOD0(run, int());

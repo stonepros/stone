@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -13,8 +13,8 @@
  *
  */
 
-#ifndef CEPH_MSG_DPDK_CAPTURE_H
-#define CEPH_MSG_DPDK_CAPTURE_H
+#ifndef STONE_MSG_DPDK_CAPTURE_H
+#define STONE_MSG_DPDK_CAPTURE_H
 
 #include <utility>
 
@@ -47,4 +47,4 @@ capture_impl<T,F> capture( T && x, F && f ) {
       std::forward<T>(x), std::forward<F>(f) );
 }
 
-#endif //CEPH_MSG_DPDK_CAPTURE_H
+#endif //STONE_MSG_DPDK_CAPTURE_H

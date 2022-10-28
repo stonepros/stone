@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MCLIENTRECLAIMREPLY_H
-#define CEPH_MCLIENTRECLAIMREPLY_H
+#ifndef STONE_MCLIENTRECLAIMREPLY_H
+#define STONE_MCLIENTRECLAIMREPLY_H
 
 #include "msg/Message.h"
 
@@ -55,7 +55,7 @@ protected:
     MClientReclaimReply{0, 0}
   {}
   MClientReclaimReply(int r, epoch_t e=0) :
-    SafeMessage{CEPH_MSG_CLIENT_RECLAIM_REPLY, HEAD_VERSION, COMPAT_VERSION},
+    SafeMessage{STONE_MSG_CLIENT_RECLAIM_REPLY, HEAD_VERSION, COMPAT_VERSION},
     result(r), epoch(e) {}
 
 private:

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -24,8 +24,8 @@
  * SnapRealm
  */
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, mdcache->mds->get_nodeid(), inode, srnode.seq, this)
 static ostream& _prefix(std::ostream *_dout, int whoami, const CInode *inode,
@@ -55,7 +55,7 @@ ostream& operator<<(ostream& out, const SnapRealm& realm)
 SnapRealm::SnapRealm(MDCache *c, CInode *in) :
     mdcache(c), inode(in), inodes_with_caps(member_offset(CInode, item_caps))
 {
-  global = (inode->ino() == CEPH_INO_GLOBAL_SNAPREALM);
+  global = (inode->ino() == STONE_INO_GLOBAL_SNAPREALM);
 }
 
 /*
@@ -216,8 +216,8 @@ std::string_view SnapRealm::get_snapname(snapid_t snapid, inodeno_t atino)
     }
   }
 
-  ceph_assert(srnode.current_parent_since <= snapid);
-  ceph_assert(parent);
+  stone_assert(srnode.current_parent_since <= snapid);
+  stone_assert(parent);
   return parent->get_snapname(snapid, atino);
 }
 
@@ -311,7 +311,7 @@ void SnapRealm::split_at(SnapRealm *child)
     } else {
       // no caps, nothing to move/split.
       dout(20) << " split no-op, no caps to move on file " << *child->inode << dendl;
-      ceph_assert(!child->inode->is_any_caps());
+      stone_assert(!child->inode->is_any_caps());
     }
     return;
   }
@@ -368,7 +368,7 @@ void SnapRealm::merge_to(SnapRealm *newparent)
     ++p;
     in->move_to_realm(newparent);
   }
-  ceph_assert(inodes_with_caps.empty());
+  stone_assert(inodes_with_caps.empty());
 
   // delete this
   inode->close_snaprealm();

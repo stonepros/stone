@@ -9,7 +9,7 @@
 namespace {
 
 seastar::logger& logger() {
-  return crimson::get_logger(ceph_subsys_filestore);
+  return crimson::get_logger(stone_subsys_filestore);
 }
 
 }
@@ -28,7 +28,7 @@ static DeltaRecorderURef create_recorder(
     } else if (field_type == field_type_t::N3) {
       return DeltaRecorderT<leaf_fields_3_t, node_type_t::LEAF>::create();
     } else {
-      ceph_abort("impossible path");
+      stone_abort("impossible path");
     }
   } else if (node_type == node_type_t::INTERNAL) {
     if (field_type == field_type_t::N0) {
@@ -40,10 +40,10 @@ static DeltaRecorderURef create_recorder(
     } else if (field_type == field_type_t::N3) {
       return DeltaRecorderT<internal_fields_3_t, node_type_t::INTERNAL>::create();
     } else {
-      ceph_abort("impossible path");
+      stone_abort("impossible path");
     }
   } else {
-    ceph_abort("impossible path");
+    stone_abort("impossible path");
   }
 }
 
@@ -65,7 +65,7 @@ NodeExtentRef SeastoreNodeExtent::mutate(
   return ret;
 }
 
-void SeastoreNodeExtent::apply_delta(const ceph::bufferlist& bl) {
+void SeastoreNodeExtent::apply_delta(const stone::bufferlist& bl) {
   logger().debug("OTree::Seastore: replay {:#x} ...", get_laddr());
   if (!recorder) {
     auto [node_type, field_type] = get_types();

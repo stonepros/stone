@@ -1,16 +1,16 @@
 meta:
 - desc: |
-   Run ceph on two nodes,
+   Run stone on two nodes,
    with a separate client-only node.
    Use xfs beneath the osds.
 overrides:
-  ceph:
+  stone:
     fs: xfs
     log-ignorelist:
       - overall HEALTH_
       - \(MON_DOWN\)
       - \(MGR_DOWN\)
-      ### ref: https://tracker.ceph.com/issues/40251
+      ### ref: https://tracker.stone.com/issues/40251
       #removed see ^ - failed to encode map
     conf:
       global:

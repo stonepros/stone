@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -30,7 +30,7 @@
 
 using std::string;
 
-ObjectStore *ObjectStore::create(CephContext *cct,
+ObjectStore *ObjectStore::create(StoneContext *cct,
 				 const string& type,
 				 const string& data,
 				 const string& journal,
@@ -74,7 +74,7 @@ ObjectStore *ObjectStore::create(CephContext *cct,
 }
 
 int ObjectStore::probe_block_device_fsid(
-  CephContext *cct,
+  StoneContext *cct,
   const string& path,
   uuid_d *fsid)
 {

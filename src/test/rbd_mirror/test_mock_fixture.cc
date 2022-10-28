@@ -55,7 +55,7 @@ void TestMockFixture::expect_test_features(librbd::MockImageCtx &mock_image_ctx)
 librados::MockTestMemCluster& TestMockFixture::get_mock_cluster() {
   librados::MockTestMemCluster* mock_cluster = dynamic_cast<
     librados::MockTestMemCluster*>(librados_test_stub::get_cluster().get());
-  ceph_assert(mock_cluster != nullptr);
+  stone_assert(mock_cluster != nullptr);
   return *mock_cluster;
 }
 

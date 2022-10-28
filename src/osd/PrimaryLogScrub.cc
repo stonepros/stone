@@ -10,7 +10,7 @@
 #include "scrub_machine.h"
 
 #define dout_context (m_osds->cct)
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, this)
 
@@ -156,7 +156,7 @@ void PrimaryLogScrub::log_missing(int missing,
 				  const char* func,
 				  bool allow_incomplete_clones)
 {
-  ceph_assert(head);
+  stone_assert(head);
   if (allow_incomplete_clones) {
     dout(20) << func << " " << m_mode_desc << " " << pgid << " " << *head << " skipped "
 	     << missing << " clone(s) in cache tier" << dendl;
@@ -175,8 +175,8 @@ int PrimaryLogScrub::process_clones_to(const std::optional<hobject_t>& head,
 				       vector<snapid_t>::reverse_iterator* curclone,
 				       inconsistent_snapset_wrapper& e)
 {
-  ceph_assert(head);
-  ceph_assert(snapset);
+  stone_assert(head);
+  stone_assert(snapset);
   int missing_count = 0;
 
   // NOTE: clones are in descending order, thus **curclone > target test here
@@ -247,7 +247,7 @@ void PrimaryLogScrub::scrub_snapshot_metadata(ScrubMap& scrubmap,
   for (auto p = scrubmap.objects.rbegin(); p != scrubmap.objects.rend(); ++p) {
 
     const hobject_t& soid = p->first;
-    ceph_assert(!soid.is_snapdir());
+    stone_assert(!soid.is_snapdir());
     soid_error = inconsistent_snapset_wrapper{soid};
     object_stat_sum_t stat;
     std::optional<object_info_t> oi;
@@ -275,7 +275,7 @@ void PrimaryLogScrub::scrub_snapshot_metadata(ScrubMap& scrubmap,
       try {
 	oi = object_info_t();  // Initialize optional<> before decode into it
 	oi->decode(bv);
-      } catch (ceph::buffer::error& e) {
+      } catch (stone::buffer::error& e) {
 	oi = std::nullopt;
 	m_osds->clog->error() << m_mode_desc << " " << info.pgid << " " << soid
 			      << " : can't decode '" << OI_ATTR << "' attr " << e.what();
@@ -328,7 +328,7 @@ void PrimaryLogScrub::scrub_snapshot_metadata(ScrubMap& scrubmap,
 
 	target = all_clones;
       } else {
-	ceph_assert(soid.is_snap());
+	stone_assert(soid.is_snap());
 	target = soid.snap;
       }
 
@@ -344,7 +344,7 @@ void PrimaryLogScrub::scrub_snapshot_metadata(ScrubMap& scrubmap,
     if (doing_clones(snapset, curclone)) {
       // A head would have processed all clones above
       // or all greater than *curclone.
-      ceph_assert(soid.is_snap() && *curclone <= soid.snap);
+      stone_assert(soid.is_snap() && *curclone <= soid.snap);
 
       // After processing above clone snap should match the expected curclone
       expected = (*curclone == soid.snap);
@@ -403,7 +403,7 @@ void PrimaryLogScrub::scrub_snapshot_metadata(ScrubMap& scrubmap,
 	  snapset = SnapSet();	// Initialize optional<> before decoding into it
 	  decode(*snapset, blp);
 	  head_error.ss_bl.push_back(p->second.attrs[SS_ATTR]);
-	} catch (ceph::buffer::error& e) {
+	} catch (stone::buffer::error& e) {
 	  snapset = std::nullopt;
 	  m_osds->clog->error()
 	    << m_mode_desc << " " << info.pgid << " " << soid << " : can't decode '" << SS_ATTR
@@ -428,10 +428,10 @@ void PrimaryLogScrub::scrub_snapshot_metadata(ScrubMap& scrubmap,
 	}
       }
     } else {
-      ceph_assert(soid.is_snap());
-      ceph_assert(head);
-      ceph_assert(snapset);
-      ceph_assert(soid.snap == *curclone);
+      stone_assert(soid.is_snap());
+      stone_assert(head);
+      stone_assert(snapset);
+      stone_assert(soid.snap == *curclone);
 
       dout(20) << __func__ << " " << m_mode_desc << " matched clone " << soid << dendl;
 
@@ -515,7 +515,7 @@ void PrimaryLogScrub::scrub_snapshot_metadata(ScrubMap& scrubmap,
 	   << dendl;
   for (auto p = missing_digest.begin(); p != missing_digest.end(); ++p) {
 
-    ceph_assert(!p->first.is_snapdir());
+    stone_assert(!p->first.is_snapdir());
     dout(10) << __func__ << " recording digests for " << p->first << dendl;
 
     ObjectContextRef obc = m_pl_pg->get_object_context(p->first, false);

@@ -70,8 +70,8 @@ static clslua_hctx *__clslua_get_hctx(lua_State *L)
   lua_gettable(L, LUA_REGISTRYINDEX);
 
   /* check cls_lua assumptions */
-  ceph_assert(!lua_isnil(L, -1));
-  ceph_assert(lua_type(L, -1) == LUA_TLIGHTUSERDATA);
+  stone_assert(!lua_isnil(L, -1));
+  stone_assert(lua_type(L, -1) == LUA_TLIGHTUSERDATA);
 
   /* cast and cleanup stack */
   clslua_hctx *hctx = (struct clslua_hctx *)lua_touserdata(L, -1);
@@ -118,7 +118,7 @@ static int clslua_pcall(lua_State *L)
   lua_insert(L, 1);
   lua_call(L, nargs, LUA_MULTRET);
   struct clslua_err *err = clslua_checkerr(L);
-  ceph_assert(err);
+  stone_assert(err);
   if (err->error) {
     err->error = false;
     lua_pushinteger(L, err->ret);
@@ -167,7 +167,7 @@ static int clslua_log(lua_State *L)
       lua_pushstring(L, " ");
   }
 
-  /* join string parts and send to Ceph/reply log */
+  /* join string parts and send to Stone/reply log */
   lua_concat(L, nelems);
   CLS_LOG(loglevel, "%s", lua_tostring(L, -1));
 
@@ -187,7 +187,7 @@ static int clslua_register(lua_State *L)
   /* get table of registered handlers */
   lua_pushlightuserdata(L, &clslua_registered_handle_reg_key);
   lua_gettable(L, LUA_REGISTRYINDEX);
-  ceph_assert(lua_type(L, -1) == LUA_TTABLE);
+  stone_assert(lua_type(L, -1) == LUA_TTABLE);
 
   /* lookup function argument */
   lua_pushvalue(L, 1);
@@ -215,7 +215,7 @@ static void clslua_check_registered_handler(lua_State *L)
   /* get table of registered handlers */
   lua_pushlightuserdata(L, &clslua_registered_handle_reg_key);
   lua_gettable(L, LUA_REGISTRYINDEX);
-  ceph_assert(lua_type(L, -1) == LUA_TTABLE);
+  stone_assert(lua_type(L, -1) == LUA_TTABLE);
 
   /* lookup function argument */
   lua_pushvalue(L, -2);
@@ -239,10 +239,10 @@ static int clslua_opresult(lua_State *L, int ok, int ret, int nargs,
 {
   struct clslua_err *err = clslua_checkerr(L);
 
-  ceph_assert(err);
+  stone_assert(err);
   if (err->error) {
     CLS_ERR("error: cls_lua state machine: unexpected error");
-    ceph_abort();
+    stone_abort();
   }
 
   /* everything is cherry */
@@ -868,7 +868,7 @@ static int clslua_eval(lua_State *L)
           auto it = ctx->inbl->cbegin();
           decode(op, it);
         } catch (const buffer::error &err) {
-          CLS_ERR("error: could not decode ceph encoded input");
+          CLS_ERR("error: could not decode stone encoded input");
           ctx->ret = -EINVAL;
           return 0;
         }
@@ -882,7 +882,7 @@ static int clslua_eval(lua_State *L)
     default:
       CLS_ERR("error: unknown encoding type");
       ctx->ret = -EFAULT;
-      ceph_abort();
+      stone_abort();
       return 0;
   }
 
@@ -987,7 +987,7 @@ static int eval_generic(cls_method_context_t hctx, bufferlist *in, bufferlist *o
       struct clslua_err *err = clslua_checkerr(L);
       if (!err) {
         CLS_ERR("error: cls_lua state machine: unexpected error");
-        ceph_abort();
+        stone_abort();
       }
 
       /* Error origin a cls_cxx_* method? */

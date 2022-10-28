@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_PAXOS_FSMAP_H
-#define CEPH_PAXOS_FSMAP_H
+#ifndef STONE_PAXOS_FSMAP_H
+#define STONE_PAXOS_FSMAP_H
 
 #include "mds/FSMap.h"
 #include "mds/MDSMap.h"

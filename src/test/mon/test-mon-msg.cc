@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stone - scalable distributed file system
 *
 * Copyright (C) 2014 Red Hat
 *
@@ -21,11 +21,11 @@
 #include "global/global_init.h"
 #include "global/global_context.h"
 #include "common/async/context_pool.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/version.h"
 #include "common/dout.h"
 #include "common/debug.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include "common/errno.h"
 #include "mon/MonClient.h"
@@ -36,33 +36,33 @@
 #include "gtest/gtest.h"
 
 #include "common/config.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "messages/MMonProbe.h"
 #include "messages/MRoute.h"
 #include "messages/MGenericMessage.h"
 #include "messages/MMonJoin.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_
 #undef dout_prefix
 #define dout_prefix *_dout << "test-mon-msg "
 
 class MonClientHelper : public Dispatcher
 {
 protected:
-  CephContext *cct;
-  ceph::async::io_context_pool poolctx;
+  StoneContext *cct;
+  stone::async::io_context_pool poolctx;
   Messenger *msg;
   MonClient monc;
 
-  ceph::mutex lock = ceph::make_mutex("mon-msg-test::lock");
+  stone::mutex lock = stone::make_mutex("mon-msg-test::lock");
 
   set<int> wanted;
 
 public:
 
-  explicit MonClientHelper(CephContext *cct_)
+  explicit MonClientHelper(StoneContext *cct_)
     : Dispatcher(cct_),
       cct(cct_),
       poolctx(1),
@@ -85,7 +85,7 @@ public:
     std::string public_msgr_type = cct->_conf->ms_public_type.empty() ? cct->_conf.get_val<std::string>("ms_type") : cct->_conf->ms_public_type;
     msg = Messenger::create(cct, public_msgr_type, entity_name_t::CLIENT(-1),
                             "test-mon-msg", 0);
-    ceph_assert(msg != NULL);
+    stone_assert(msg != NULL);
     msg->set_default_policy(Messenger::Policy::lossy_client(0));
     dout(0) << __func__ << " starting messenger at "
             << msg->get_myaddrs() << dendl;
@@ -95,7 +95,7 @@ public:
 
   int init_monc() {
     dout(1) << __func__ << dendl;
-    ceph_assert(msg != NULL);
+    stone_assert(msg != NULL);
     int err = monc.build_initial_monmap();
     if (err < 0) {
       derr << __func__ << " error building monmap: "
@@ -106,7 +106,7 @@ public:
     monc.set_messenger(msg);
     msg->add_dispatcher_head(&monc);
 
-    monc.set_want_keys(CEPH_ENTITY_TYPE_MON);
+    monc.set_want_keys(STONE_ENTITY_TYPE_MON);
     err = monc.init();
     if (err < 0) {
       derr << __func__ << " monc init failed: "
@@ -223,11 +223,11 @@ class MonMsgTest : public MonClientHelper,
 protected:
   int reply_type = 0;
   Message *reply_msg = nullptr;
-  ceph::mutex lock = ceph::make_mutex("lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("lock");
+  stone::condition_variable cond;
 
   MonMsgTest() :
-    MonClientHelper(g_ceph_context) { }
+    MonClientHelper(g_stone_context) { }
 
 public:
   void SetUp() override {
@@ -263,9 +263,9 @@ public:
 
     std::cv_status status = std::cv_status::no_timeout;
     if (timeout > 0) {
-      utime_t s = ceph_clock_now();
-      status = cond.wait_for(l, ceph::make_timespan(timeout));
-      utime_t e = ceph_clock_now();
+      utime_t s = stone_clock_now();
+      status = cond.wait_for(l, stone::make_timespan(timeout));
+      utime_t e = stone_clock_now();
       dout(20) << __func__ << " took " << (e-s) << " seconds" << dendl;
     } else {
       cond.wait(l);
@@ -289,7 +289,7 @@ TEST_F(MonMsgTest, MMonProbeTest)
 {
   Message *m = new MMonProbe(get_monmap()->fsid,
 			     MMonProbe::OP_PROBE, "b", false,
-			     ceph_release());
+			     stone_release());
   Message *r = send_wait_reply(m, MSG_MON_PROBE);
   ASSERT_NE(IS_ERR(r), 0);
   ASSERT_EQ(PTR_ERR(r), -ETIMEDOUT);
@@ -297,10 +297,10 @@ TEST_F(MonMsgTest, MMonProbeTest)
 
 TEST_F(MonMsgTest, MRouteTest)
 {
-  Message *payload = new MGenericMessage(CEPH_MSG_SHUTDOWN);
+  Message *payload = new MGenericMessage(STONE_MSG_SHUTDOWN);
   MRoute *m = new MRoute;
   m->msg = payload;
-  Message *r = send_wait_reply(m, CEPH_MSG_SHUTDOWN);
+  Message *r = send_wait_reply(m, STONE_MSG_SHUTDOWN);
   // we want an error
   ASSERT_NE(IS_ERR(r), 0);
   ASSERT_EQ(PTR_ERR(r), -ETIMEDOUT);
@@ -327,10 +327,10 @@ int main(int argc, char *argv[])
   argv_to_vec(argc, (const char **)argv, args);
 
   auto cct = global_init(nullptr, args,
-			 CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY,
+			 STONE_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.apply_changes(nullptr);
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.apply_changes(nullptr);
   ::testing::InitGoogleTest(&argc, argv);
 
   return RUN_ALL_TESTS();

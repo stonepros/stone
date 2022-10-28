@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_REPLAY_BUFFER_READER_H
-#define CEPH_RBD_REPLAY_BUFFER_READER_H
+#ifndef STONE_RBD_REPLAY_BUFFER_READER_H
+#define STONE_RBD_REPLAY_BUFFER_READER_H
 
 #include "include/int_types.h"
 #include "include/buffer.h"
@@ -31,4 +31,4 @@ private:
 
 } // namespace rbd_replay
 
-#endif // CEPH_RBD_REPLAY_BUFFER_READER_H
+#endif // STONE_RBD_REPLAY_BUFFER_READER_H

@@ -15,7 +15,7 @@ using namespace crimson::os::seastore;
 
 namespace {
   [[maybe_unused]] seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_test);
+    return crimson::get_logger(stone_subsys_test);
   }
 }
 
@@ -42,7 +42,7 @@ struct cache_test_t : public seastar_test_suite_t {
       bl.append(block.bl);
     }
 
-    ceph_assert((segment_off_t)bl.length() <
+    stone_assert((segment_off_t)bl.length() <
 		segment_manager->get_segment_size());
     if (current.offset + (segment_off_t)bl.length() >
 	segment_manager->get_segment_size())

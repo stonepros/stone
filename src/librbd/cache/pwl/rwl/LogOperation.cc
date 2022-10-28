@@ -3,7 +3,7 @@
 
 #include "LogOperation.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::rwl::LogOperation: " \
                            << this << " " <<  __func__ << ": "

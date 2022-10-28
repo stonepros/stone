@@ -2,7 +2,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -60,7 +60,7 @@ class MgrCommand : public CommandOp
 class MgrClient : public Dispatcher
 {
 protected:
-  CephContext *cct;
+  StoneeContext *cct;
   MgrMap map;
   Messenger *msgr;
   MonMap *monmap;
@@ -108,7 +108,7 @@ protected:
   bool mgr_optional = false;
 
 public:
-  MgrClient(CephContext *cct_, Messenger *msgr_, MonMap *monmap);
+  MgrClient(StoneeContext *cct_, Messenger *msgr_, MonMap *monmap);
 
   void set_messenger(Messenger *msgr_) { msgr = msgr_; }
 

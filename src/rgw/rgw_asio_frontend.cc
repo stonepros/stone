@@ -34,7 +34,7 @@
 #include "rgw_asio_frontend_timer.h"
 #include "rgw_dmclock_async_scheduler.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace {
 
@@ -52,7 +52,7 @@ using executor_type = boost::asio::io_context::executor_type;
 using tcp_socket = boost::asio::basic_stream_socket<tcp, executor_type>;
 using tcp_stream = boost::beast::basic_stream<tcp, executor_type>;
 
-using timeout_timer = rgw::basic_timeout_timer<ceph::coarse_mono_clock,
+using timeout_timer = rgw::basic_timeout_timer<stone::coarse_mono_clock,
       executor_type, Connection>;
 
 using parse_buffer = boost::beast::flat_static_buffer<65536>;
@@ -64,13 +64,13 @@ auto make_stack_allocator() {
 
 template <typename Stream>
 class StreamIO : public rgw::asio::ClientIO {
-  CephContext* const cct;
+  StoneContext* const cct;
   Stream& stream;
   timeout_timer& timeout;
   yield_context yield;
   parse_buffer& buffer;
  public:
-  StreamIO(CephContext *cct, Stream& stream, timeout_timer& timeout,
+  StreamIO(StoneContext *cct, Stream& stream, timeout_timer& timeout,
            rgw::asio::parser_type& parser, yield_context yield,
            parse_buffer& buffer, bool is_ssl,
            const tcp::endpoint& local_endpoint,
@@ -150,8 +150,8 @@ std::ostream& operator<<(std::ostream& out, const log_header& h) {
 
 // log fractional seconds in milliseconds
 struct log_ms_remainder {
-  ceph::coarse_real_time t;
-  log_ms_remainder(ceph::coarse_real_time t) : t(t) {}
+  stone::coarse_real_time t;
+  log_ms_remainder(stone::coarse_real_time t) : t(t) {}
 };
 std::ostream& operator<<(std::ostream& out, const log_ms_remainder& m) {
   using namespace std::chrono;
@@ -161,17 +161,17 @@ std::ostream& operator<<(std::ostream& out, const log_ms_remainder& m) {
 
 // log time in apache format: day/month/year:hour:minute:second zone
 struct log_apache_time {
-  ceph::coarse_real_time t;
-  log_apache_time(ceph::coarse_real_time t) : t(t) {}
+  stone::coarse_real_time t;
+  log_apache_time(stone::coarse_real_time t) : t(t) {}
 };
 std::ostream& operator<<(std::ostream& out, const log_apache_time& a) {
-  const auto t = ceph::coarse_real_clock::to_time_t(a.t);
+  const auto t = stone::coarse_real_clock::to_time_t(a.t);
   const auto local = std::localtime(&t);
   return out << std::put_time(local, "%d/%b/%Y:%T.") << log_ms_remainder{a.t}
       << std::put_time(local, " %z");
 };
 
-using SharedMutex = ceph::async::SharedMutex<boost::asio::io_context::executor_type>;
+using SharedMutex = stone::async::SharedMutex<boost::asio::io_context::executor_type>;
 
 template <typename Stream>
 void handle_connection(boost::asio::io_context& context,
@@ -259,8 +259,8 @@ void handle_connection(boost::asio::io_context& context,
       auto y = optional_yield{context, yield};
       int http_ret = 0;
       string user = "-";
-      const auto started = ceph::coarse_real_clock::now();
-      ceph::coarse_real_clock::duration latency{};
+      const auto started = stone::coarse_real_clock::now();
+      stone::coarse_real_clock::duration latency{};
 
       process_request(env.store, env.rest, &req, env.uri_prefix,
                       *env.auth_registry, &client, env.olog, y,
@@ -365,7 +365,7 @@ class AsioFrontend {
   RGWProcessEnv env;
   RGWFrontendConfig* conf;
   boost::asio::io_context context;
-  ceph::timespan request_timeout = std::chrono::milliseconds(REQUEST_TIMEOUT);
+  stone::timespan request_timeout = std::chrono::milliseconds(REQUEST_TIMEOUT);
 #ifdef WITH_RADOSGW_BEAST_OPENSSL
   boost::optional<ssl::context> ssl_context;
   int get_config_key_val(string name,
@@ -399,7 +399,7 @@ class AsioFrontend {
   std::vector<std::thread> threads;
   std::atomic<bool> going_down{false};
 
-  CephContext* ctx() const { return env.store->ctx(); }
+  StoneContext* ctx() const { return env.store->ctx(); }
   std::optional<dmc::ClientCounters> client_counters;
   std::unique_ptr<dmc::ClientConfig> client_config;
   void accept(Listener& listener, boost::system::error_code ec);
@@ -497,7 +497,7 @@ tcp::endpoint parse_endpoint(boost::asio::string_view input,
   return endpoint;
 }
 
-static int drop_privileges(CephContext *ctx)
+static int drop_privileges(StoneContext *ctx)
 {
   uid_t uid = ctx->get_set_uid();
   gid_t gid = ctx->get_set_gid();
@@ -528,7 +528,7 @@ int AsioFrontend::init()
 // Setting global timeout
   auto timeout = config.find("request_timeout_ms");
   if (timeout != config.end()) {
-    auto timeout_number = ceph::parse<uint64_t>(timeout->second.data());
+    auto timeout_number = stone::parse<uint64_t>(timeout->second.data());
     if (timeout_number) {
       request_timeout =  std::chrono::milliseconds(*timeout_number);
     } else {
@@ -826,7 +826,7 @@ int AsioFrontend::init_ssl()
   }
 
   if (options) {
-    for (auto &option : ceph::split(*options, ":")) {
+    for (auto &option : stone::split(*options, ":")) {
       if (option == "default_workarounds") {
         ssl_context->set_options(ssl::context::default_workarounds);
       } else if (option == "no_compression") {

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -18,7 +18,7 @@
 #include <fcntl.h>
 #include "EventEpoll.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 
 #undef dout_prefix
 #define dout_prefix *_dout << "EpollDriver."

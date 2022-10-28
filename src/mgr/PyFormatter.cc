@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat Inc
  *
@@ -40,14 +40,14 @@ void PyFormatter::open_object_section(std::string_view name)
 void PyFormatter::dump_unsigned(std::string_view name, uint64_t u)
 {
   PyObject *p = PyLong_FromUnsignedLong(u);
-  ceph_assert(p);
+  stone_assert(p);
   dump_pyobject(name, p);
 }
 
 void PyFormatter::dump_int(std::string_view name, int64_t u)
 {
   PyObject *p = PyLong_FromLongLong(u);
-  ceph_assert(p);
+  stone_assert(p);
   dump_pyobject(name, p);
 }
 
@@ -108,7 +108,7 @@ void PyFormatter::dump_pyobject(std::string_view name, PyObject *p)
     Py_DECREF(key);
     Py_DECREF(p);
   } else {
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -131,7 +131,7 @@ PyObject* PyJSONFormatter::get()
   if(json_formatter::stack_size()) {
     close_section();
   }
-  ceph_assert(!json_formatter::stack_size());
+  stone_assert(!json_formatter::stack_size());
   std::ostringstream ss;
   flush(ss);
   std::string s = ss.str();

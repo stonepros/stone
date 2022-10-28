@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -25,10 +25,10 @@
 #include "msg/Messenger.h"
 
 #include "common/config.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << rank << ".snap "
 
@@ -73,8 +73,8 @@ void SnapServer::reset_state()
 
 void SnapServer::_prepare(const bufferlist& bl, uint64_t reqid, mds_rank_t bymds, bufferlist& out)
 {
-  using ceph::decode;
-  using ceph::encode;
+  using stone::decode;
+  using stone::encode;
   auto p = bl.cbegin();
   __u32 op;
   decode(op, p);
@@ -130,14 +130,14 @@ void SnapServer::_prepare(const bufferlist& bl, uint64_t reqid, mds_rank_t bymds
     break;
 
   default:
-    ceph_abort();
+    stone_abort();
   }
   //dump();
 }
 
 void SnapServer::_get_reply_buffer(version_t tid, bufferlist *pbl) const
 {
-  using ceph::encode;
+  using stone::encode;
   auto p = pending_update.find(tid);
   if (p != pending_update.end()) {
     if (pbl && !snaps.count(p->second.snapid)) // create
@@ -198,7 +198,7 @@ void SnapServer::_commit(version_t tid, cref_t<MMDSTableRequest> req)
     pending_noop.erase(tid);
   }
   else
-    ceph_abort();
+    stone_abort();
 
   //dump();
 }
@@ -227,14 +227,14 @@ void SnapServer::_rollback(version_t tid)
   }    
 
   else
-    ceph_abort();
+    stone_abort();
 
   //dump();
 }
 
 void SnapServer::_server_update(bufferlist& bl)
 {
-  using ceph::decode;
+  using stone::decode;
   auto p = bl.cbegin();
   map<int, vector<snapid_t> > purge;
   decode(purge, p);
@@ -254,7 +254,7 @@ void SnapServer::_server_update(bufferlist& bl)
 
 bool SnapServer::_notify_prep(version_t tid)
 {
-  using ceph::encode;
+  using stone::encode;
   bufferlist bl;
   char type = 'F';
   encode(type, bl);
@@ -263,7 +263,7 @@ bool SnapServer::_notify_prep(version_t tid)
   encode(pending_destroy, bl);
   encode(last_created, bl);
   encode(last_destroyed, bl);
-  ceph_assert(version == tid);
+  stone_assert(version == tid);
 
   for (auto &p : active_clients) {
     auto m = make_message<MMDSTableRequest>(table, TABLESERVER_OP_NOTIFY_PREP, 0, version);
@@ -275,8 +275,8 @@ bool SnapServer::_notify_prep(version_t tid)
 
 void SnapServer::handle_query(const cref_t<MMDSTableRequest> &req)
 {
-  using ceph::encode;
-  using ceph::decode;
+  using stone::encode;
+  using stone::decode;
   char op;
   auto p = req->bl.cbegin();
   decode(op, p);
@@ -287,7 +287,7 @@ void SnapServer::handle_query(const cref_t<MMDSTableRequest> &req)
     case 'F': // full
       version_t have_version;
       decode(have_version, p);
-      ceph_assert(have_version <= version);
+      stone_assert(have_version <= version);
       if (have_version == version) {
 	char type = 'U';
 	encode(type, reply->bl);
@@ -303,7 +303,7 @@ void SnapServer::handle_query(const cref_t<MMDSTableRequest> &req)
       // FIXME: implement incremental change
       break;
     default:
-      ceph_abort();
+      stone_abort();
   };
 
   mds->send_message(reply, req->get_connection());
@@ -349,7 +349,7 @@ void SnapServer::check_osd_map(bool force)
   if (!all_purged.empty()) {
     // prepare to remove from need_to_purge list
     bufferlist bl;
-    using ceph::encode;
+    using stone::encode;
     encode(all_purged, bl);
     do_server_update(bl);
   }
@@ -387,7 +387,7 @@ void SnapServer::handle_remove_snaps(const cref_t<MRemoveSnaps> &m)
   dout(10) << __func__ << " " << num << " now removed" << dendl;
   if (num) {
     bufferlist bl;
-    using ceph::encode;
+    using stone::encode;
     encode(all_purged, bl);
     do_server_update(bl);
   }

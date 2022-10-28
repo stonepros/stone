@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MEMSTORE_H
-#define CEPH_MEMSTORE_H
+#ifndef STONE_MEMSTORE_H
+#define STONE_MEMSTORE_H
 
 #include <mutex>
 #include <boost/intrusive_ptr.hpp>

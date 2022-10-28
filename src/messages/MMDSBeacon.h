@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MMDSBEACON_H
-#define CEPH_MMDSBEACON_H
+#ifndef STONE_MMDSBEACON_H
+#define STONE_MMDSBEACON_H
 
 #include <string_view>
 
@@ -209,14 +209,14 @@ private:
 protected:
   MMDSBeacon() : PaxosServiceMessage(MSG_MDS_BEACON, 0, HEAD_VERSION, COMPAT_VERSION)
   {
-    set_priority(CEPH_MSG_PRIO_HIGH);
+    set_priority(STONE_MSG_PRIO_HIGH);
   }
   MMDSBeacon(const uuid_d &f, mds_gid_t g, const std::string& n, epoch_t les,
 	     MDSMap::DaemonState st, version_t se, uint64_t feat) :
     PaxosServiceMessage(MSG_MDS_BEACON, les, HEAD_VERSION, COMPAT_VERSION),
     fsid(f), global_id(g), name(n), state(st), seq(se),
     mds_features(feat) {
-    set_priority(CEPH_MSG_PRIO_HIGH);
+    set_priority(STONE_MSG_PRIO_HIGH);
   }
   ~MMDSBeacon() final {}
 

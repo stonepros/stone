@@ -3,7 +3,7 @@
 
 #include "cls/rbd/cls_rbd_types.h"
 #include "common/Formatter.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/stringify.h"
 #include "librbd/WatchNotifyTypes.h"
 
@@ -11,13 +11,13 @@ namespace librbd {
 namespace watch_notify {
 
 void AsyncRequestId::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(client_id, bl);
   encode(request_id, bl);
 }
 
 void AsyncRequestId::decode(bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(client_id, iter);
   decode(request_id, iter);
 }
@@ -30,12 +30,12 @@ void AsyncRequestId::dump(Formatter *f) const {
 }
 
 void AcquiredLockPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(client_id, bl);
 }
 
 void AcquiredLockPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   if (version >= 2) {
     decode(client_id, iter);
   }
@@ -48,12 +48,12 @@ void AcquiredLockPayload::dump(Formatter *f) const {
 }
 
 void ReleasedLockPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(client_id, bl);
 }
 
 void ReleasedLockPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   if (version >= 2) {
     decode(client_id, iter);
   }
@@ -66,13 +66,13 @@ void ReleasedLockPayload::dump(Formatter *f) const {
 }
 
 void RequestLockPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(client_id, bl);
   encode(force, bl);
 }
 
 void RequestLockPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   if (version >= 2) {
     decode(client_id, iter);
   }
@@ -98,12 +98,12 @@ void HeaderUpdatePayload::dump(Formatter *f) const {
 }
 
 void AsyncRequestPayloadBase::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(async_request_id, bl);
 }
 
 void AsyncRequestPayloadBase::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(async_request_id, iter);
 }
 
@@ -114,14 +114,14 @@ void AsyncRequestPayloadBase::dump(Formatter *f) const {
 }
 
 void AsyncProgressPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   AsyncRequestPayloadBase::encode(bl);
   encode(offset, bl);
   encode(total, bl);
 }
 
 void AsyncProgressPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   AsyncRequestPayloadBase::decode(version, iter);
   decode(offset, iter);
   decode(total, iter);
@@ -134,13 +134,13 @@ void AsyncProgressPayload::dump(Formatter *f) const {
 }
 
 void AsyncCompletePayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   AsyncRequestPayloadBase::encode(bl);
   encode(result, bl);
 }
 
 void AsyncCompletePayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   AsyncRequestPayloadBase::decode(version, iter);
   decode(result, iter);
 }
@@ -151,14 +151,14 @@ void AsyncCompletePayload::dump(Formatter *f) const {
 }
 
 void ResizePayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(size, bl);
   AsyncRequestPayloadBase::encode(bl);
   encode(allow_shrink, bl);
 }
 
 void ResizePayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(size, iter);
   AsyncRequestPayloadBase::decode(version, iter);
 
@@ -174,14 +174,14 @@ void ResizePayload::dump(Formatter *f) const {
 }
 
 void SnapPayloadBase::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(snap_name, bl);
   encode(snap_namespace, bl);
   encode(async_request_id, bl);
 }
 
 void SnapPayloadBase::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(snap_name, iter);
   if (version >= 6) {
     decode(snap_namespace, iter);
@@ -198,13 +198,13 @@ void SnapPayloadBase::dump(Formatter *f) const {
 }
 
 void SnapCreatePayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   SnapPayloadBase::encode(bl);
   encode(flags, bl);
 }
 
 void SnapCreatePayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   SnapPayloadBase::decode(version, iter);
   if (version == 5) {
     decode(snap_namespace, iter);
@@ -220,13 +220,13 @@ void SnapCreatePayload::dump(Formatter *f) const {
 }
 
 void SnapRenamePayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(snap_id, bl);
   SnapPayloadBase::encode(bl);
 }
 
 void SnapRenamePayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(snap_id, iter);
   SnapPayloadBase::decode(version, iter);
 }
@@ -237,13 +237,13 @@ void SnapRenamePayload::dump(Formatter *f) const {
 }
 
 void RenamePayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(image_name, bl);
   encode(async_request_id, bl);
 }
 
 void RenamePayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(image_name, iter);
   if (version >= 7) {
     decode(async_request_id, iter);
@@ -256,14 +256,14 @@ void RenamePayload::dump(Formatter *f) const {
 }
 
 void UpdateFeaturesPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(features, bl);
   encode(enabled, bl);
   encode(async_request_id, bl);
 }
 
 void UpdateFeaturesPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(features, iter);
   decode(enabled, iter);
   if (version >= 7) {
@@ -278,13 +278,13 @@ void UpdateFeaturesPayload::dump(Formatter *f) const {
 }
 
 void SparsifyPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   AsyncRequestPayloadBase::encode(bl);
   encode(sparse_size, bl);
 }
 
 void SparsifyPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   AsyncRequestPayloadBase::decode(version, iter);
   decode(sparse_size, iter);
 }
@@ -295,14 +295,14 @@ void SparsifyPayload::dump(Formatter *f) const {
 }
 
 void MetadataUpdatePayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(key, bl);
   encode(value, bl);
   encode(async_request_id, bl);
 }
 
 void MetadataUpdatePayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(key, iter);
   decode(value, iter);
   if (version >= 7) {
@@ -317,7 +317,7 @@ void MetadataUpdatePayload::dump(Formatter *f) const {
 }
 
 void UnknownPayload::encode(bufferlist &bl) const {
-  ceph_abort();
+  stone_abort();
 }
 
 void UnknownPayload::decode(__u8 version, bufferlist::const_iterator &iter) {

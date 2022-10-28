@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2009 Sage Weil <sage@newdream.net>
  *
@@ -17,7 +17,7 @@
  */
 #include "include/compat.h"
 #include <pthread.h>
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Clock.h"
 #include "obj_bencher.h"
 
@@ -65,7 +65,7 @@ static std::string generate_object_name_fast(int objnum, int pid = 0)
 
   char name[512];
   int n = snprintf(&name[0], sizeof(name),  BENCH_OBJ_NAME.c_str(), cached_hostname, cached_pid, objnum);
-  ceph_assert(n > 0 && n < (int)sizeof(name));
+  stone_assert(n > 0 && n < (int)sizeof(name));
   return std::string(&name[0], (size_t)n);
 }
 
@@ -84,7 +84,7 @@ ostream& ObjBencher::out(ostream& os, utime_t& t)
 
 ostream& ObjBencher::out(ostream& os)
 {
-  utime_t cur_time = ceph_clock_now();
+  utime_t cur_time = stone_clock_now();
   return out(os, cur_time);
 }
 
@@ -93,7 +93,7 @@ void *ObjBencher::status_printer(void *_bencher) {
   bench_data& data = bencher->data;
   Formatter *formatter = bencher->formatter;
   ostream *outstream = bencher->outstream;
-  ceph::condition_variable cond;
+  stone::condition_variable cond;
   int i = 0;
   int previous_writes = 0;
   int cycleSinceChange = 0;
@@ -105,7 +105,7 @@ void *ObjBencher::status_printer(void *_bencher) {
     formatter->open_array_section("datas");
   while(!data.done) {
     mono_time cur_time = mono_clock::now();
-    utime_t t = ceph_clock_now();
+    utime_t t = stone_clock_now();
 
     if (i % 20 == 0 && !formatter) {
       if (i > 0)
@@ -341,9 +341,9 @@ int ObjBencher::aio_bench(
 }
 
 struct lock_cond {
-  explicit lock_cond(ceph::mutex *_lock) : lock(_lock) {}
-  ceph::mutex *lock;
-  ceph::condition_variable cond;
+  explicit lock_cond(stone::mutex *_lock) : lock(_lock) {}
+  stone::mutex *lock;
+  stone::condition_variable cond;
 };
 
 void _aio_cb(void *cb, void *arg) {
@@ -443,7 +443,7 @@ int ObjBencher::write_bench(int secondsToRun,
   pthread_t print_thread;
 
   pthread_create(&print_thread, NULL, ObjBencher::status_printer, (void *)this);
-  ceph_pthread_setname(print_thread, "write_stat");
+  stone_pthread_setname(print_thread, "write_stat");
   std::unique_lock locker{lock};
   data.finished = 0;
   data.start_time = mono_clock::now();
@@ -681,7 +681,7 @@ int ObjBencher::seq_read_bench(
 
   pthread_t print_thread;
   pthread_create(&print_thread, NULL, status_printer, (void *)this);
-  ceph_pthread_setname(print_thread, "seq_read_stat");
+  stone_pthread_setname(print_thread, "seq_read_stat");
 
   mono_time finish_time = data.start_time + time_to_run;
   //start initial reads
@@ -893,7 +893,7 @@ int ObjBencher::rand_read_bench(
 
   pthread_t print_thread;
   pthread_create(&print_thread, NULL, status_printer, (void *)this);
-  ceph_pthread_setname(print_thread, "rand_read_stat");
+  stone_pthread_setname(print_thread, "rand_read_stat");
 
   mono_time finish_time = data.start_time + time_to_run;
   //start initial reads

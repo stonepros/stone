@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_LOGEVENT_H
-#define CEPH_LOGEVENT_H
+#ifndef STONE_LOGEVENT_H
+#define STONE_LOGEVENT_H
 
 #define EVENT_NEW_ENCODING 0 // indicates that the encoding is versioned
 #define EVENT_UNUSED       1 // was previously EVENT_STRING

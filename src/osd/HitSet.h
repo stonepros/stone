@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank <info@inktank.com>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OSD_HITSET_H
-#define CEPH_OSD_HITSET_H
+#ifndef STONE_OSD_HITSET_H
+#define STONE_OSD_HITSET_H
 
 #include <string_view>
 
@@ -240,8 +240,8 @@ public:
     o.push_back(new ExplicitHashHitSet);
     o.push_back(new ExplicitHashHitSet);
     o.back()->insert(hobject_t());
-    o.back()->insert(hobject_t("asdf", "", CEPH_NOSNAP, 123, 1, ""));
-    o.back()->insert(hobject_t("qwer", "", CEPH_NOSNAP, 456, 1, ""));
+    o.back()->insert(hobject_t("asdf", "", STONE_NOSNAP, 123, 1, ""));
+    o.back()->insert(hobject_t("qwer", "", STONE_NOSNAP, 456, 1, ""));
   }
 };
 WRITE_CLASS_ENCODER(ExplicitHashHitSet)
@@ -311,8 +311,8 @@ public:
     o.push_back(new ExplicitObjectHitSet);
     o.push_back(new ExplicitObjectHitSet);
     o.back()->insert(hobject_t());
-    o.back()->insert(hobject_t("asdf", "", CEPH_NOSNAP, 123, 1, ""));
-    o.back()->insert(hobject_t("qwer", "", CEPH_NOSNAP, 456, 1, ""));
+    o.back()->insert(hobject_t("asdf", "", STONE_NOSNAP, 123, 1, ""));
+    o.back()->insert(hobject_t("qwer", "", STONE_NOSNAP, 456, 1, ""));
   }
 };
 WRITE_CLASS_ENCODER(ExplicitObjectHitSet)
@@ -446,8 +446,8 @@ public:
     o.push_back(new BloomHitSet);
     o.push_back(new BloomHitSet(10, .1, 1));
     o.back()->insert(hobject_t());
-    o.back()->insert(hobject_t("asdf", "", CEPH_NOSNAP, 123, 1, ""));
-    o.back()->insert(hobject_t("qwer", "", CEPH_NOSNAP, 456, 1, ""));
+    o.back()->insert(hobject_t("asdf", "", STONE_NOSNAP, 123, 1, ""));
+    o.back()->insert(hobject_t("qwer", "", STONE_NOSNAP, 456, 1, ""));
   }
 };
 WRITE_CLASS_ENCODER(BloomHitSet)

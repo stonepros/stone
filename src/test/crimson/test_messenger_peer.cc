@@ -18,13 +18,13 @@
 
 namespace {
 
-#define dout_subsys ceph_subsys_test
+#define dout_subsys stone_subsys_test
 
-using ceph::net::test::cmd_t;
-using ceph::net::test::policy_t;
+using stone::net::test::cmd_t;
+using stone::net::test::policy_t;
 using SocketPolicy = Messenger::Policy;
 
-constexpr int CEPH_OSD_PROTOCOL = 10;
+constexpr int STONE_OSD_PROTOCOL = 10;
 
 class FailoverSuitePeer : public Dispatcher {
   using cb_t = std::function<void()>;
@@ -47,13 +47,13 @@ class FailoverSuitePeer : public Dispatcher {
       lderr(cct) << "[TestPeer] got op from Test: conn(" << conn
                  << ") != tracked_conn(" << tracked_conn
                  << ")" << dendl;
-      ceph_abort();
+      stone_abort();
     } else {
       ldout(cct, 0) << "[TestPeer] got op from Test" << dendl;
     }
     op_callback();
   }
-  bool ms_dispatch(Message* m) override { ceph_abort(); }
+  bool ms_dispatch(Message* m) override { stone_abort(); }
   void ms_handle_fast_connect(Connection* conn) override {
     if (tracked_conn == conn) {
       ldout(cct, 0) << "[TestPeer] connected: " << conn << dendl;
@@ -61,7 +61,7 @@ class FailoverSuitePeer : public Dispatcher {
       lderr(cct) << "[TestPeer] connected: conn(" << conn
                  << ") != tracked_conn(" << tracked_conn
                  << ")" << dendl;
-      ceph_abort();
+      stone_abort();
     }
   }
   void ms_handle_fast_accept(Connection* conn) override {
@@ -72,7 +72,7 @@ class FailoverSuitePeer : public Dispatcher {
       lderr(cct) << "[TestPeer] accepted: conn(" << conn
                  << ") != tracked_conn(" << tracked_conn
                  << ")" << dendl;
-      ceph_abort();
+      stone_abort();
     } else {
       ldout(cct, 0) << "[!TestPeer] accepted(stale event): " << conn << dendl;
     }
@@ -107,7 +107,7 @@ class FailoverSuitePeer : public Dispatcher {
   void init(entity_addr_t test_peer_addr, SocketPolicy policy) {
     peer_msgr.reset(Messenger::create(cct, "async", entity_name_t::OSD(4), "TestPeer", 4));
     dummy_auth.auth_registry.refresh_config();
-    peer_msgr->set_cluster_protocol(CEPH_OSD_PROTOCOL);
+    peer_msgr->set_cluster_protocol(STONE_OSD_PROTOCOL);
     peer_msgr->set_default_policy(policy);
     peer_msgr->set_auth_client(&dummy_auth);
     peer_msgr->set_auth_server(&dummy_auth);
@@ -118,10 +118,10 @@ class FailoverSuitePeer : public Dispatcher {
   }
 
   void send_op() {
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     pg_t pgid;
     object_locator_t oloc;
-    hobject_t hobj(object_t(), oloc.key, CEPH_NOSNAP, pgid.ps(),
+    hobject_t hobj(object_t(), oloc.key, STONE_NOSNAP, pgid.ps(),
                    pgid.pool(), oloc.nspace);
     spg_t spgid(pgid);
     tracked_conn->send_message2(make_message<MOSDOp>(0, 0, hobj, spgid, 0, 0, 0));
@@ -132,7 +132,7 @@ class FailoverSuitePeer : public Dispatcher {
       ldout(cct, 0) << "[TestPeer] flush sending "
                     << pending_send << " ops" << dendl;
     }
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     while (pending_send) {
       send_op();
       --pending_send;
@@ -140,7 +140,7 @@ class FailoverSuitePeer : public Dispatcher {
   }
 
  public:
-  FailoverSuitePeer(CephContext* cct, cb_t op_callback)
+  FailoverSuitePeer(StoneContext* cct, cb_t op_callback)
     : Dispatcher(cct), dummy_auth(cct), op_callback(op_callback) { }
 
   void shutdown() {
@@ -177,19 +177,19 @@ class FailoverSuitePeer : public Dispatcher {
 
   void keepalive_peer() {
     ldout(cct, 0) << "[TestPeer] keepalive_peer()" << dendl;
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     tracked_conn->send_keepalive();
   }
 
   void markdown() {
     ldout(cct, 0) << "[TestPeer] markdown()" << dendl;
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     tracked_conn->mark_down();
     tracked_conn = nullptr;
   }
 
   static std::unique_ptr<FailoverSuitePeer>
-  create(CephContext* cct, entity_addr_t test_peer_addr,
+  create(StoneContext* cct, entity_addr_t test_peer_addr,
          SocketPolicy policy, cb_t op_callback) {
     auto suite = std::make_unique<FailoverSuitePeer>(cct, op_callback);
     suite->init(test_peer_addr, policy);
@@ -197,7 +197,7 @@ class FailoverSuitePeer : public Dispatcher {
   }
 };
 
-SocketPolicy to_socket_policy(CephContext* cct, policy_t policy) {
+SocketPolicy to_socket_policy(StoneContext* cct, policy_t policy) {
   switch (policy) {
    case policy_t::stateful_server:
     return SocketPolicy::stateful_server(0);
@@ -213,7 +213,7 @@ SocketPolicy to_socket_policy(CephContext* cct, policy_t policy) {
     return SocketPolicy::lossless_client(0);
    default:
     lderr(cct) << "[CmdSrv] unexpected policy type" << dendl;
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -227,7 +227,7 @@ class FailoverTestPeer : public Dispatcher {
 
   bool ms_can_fast_dispatch_any() const override { return false; }
   bool ms_can_fast_dispatch(const Message* m) const override { return false; }
-  void ms_fast_dispatch(Message* m) override { ceph_abort(); }
+  void ms_fast_dispatch(Message* m) override { stone_abort(); }
   bool ms_dispatch(Message* m) override {
     auto conn = m->get_connection().get();
     if (cmd_conn == nullptr) {
@@ -238,12 +238,12 @@ class FailoverTestPeer : public Dispatcher {
       lderr(cct) << "[CmdSrv] got msg from CmdCli: conn(" << conn
                  << ") != cmd_conn(" << cmd_conn
                  << ")" << dendl;
-      ceph_abort();
+      stone_abort();
     } else {
       // good!
     }
     switch (m->get_type()) {
-     case CEPH_MSG_PING: {
+     case STONE_MSG_PING: {
        ldout(cct, 0) << "[CmdSrv] got PING, sending PONG ..." << dendl;
        cmd_conn->send_message2(make_message<MPing>());
        break;
@@ -271,12 +271,12 @@ class FailoverTestPeer : public Dispatcher {
       lderr(cct) << "[CmdSrv] " << __func__ << " " << cmd_conn
                  << " got unexpected msg from CmdCli: "
                  << m << dendl;
-      ceph_abort();
+      stone_abort();
     }
     m->put();
     return true;
   }
-  void ms_handle_fast_connect(Connection*) override { ceph_abort(); }
+  void ms_handle_fast_connect(Connection*) override { stone_abort(); }
   void ms_handle_fast_accept(Connection *conn) override {
     if (cmd_conn == nullptr) {
       ldout(cct, 0) << "[CmdSrv] accepted: " << conn << dendl;
@@ -285,7 +285,7 @@ class FailoverTestPeer : public Dispatcher {
       lderr(cct) << "[CmdSrv] accepted: conn(" << conn
                  << ") != cmd_conn(" << cmd_conn
                  << ")" << dendl;
-      ceph_abort();
+      stone_abort();
     } else {
       ldout(cct, 0) << "[!CmdSrv] accepted(stale event): " << conn << dendl;
     }
@@ -301,12 +301,12 @@ class FailoverTestPeer : public Dispatcher {
     }
     return true;
   }
-  void ms_handle_remote_reset(Connection*) override { ceph_abort(); }
-  bool ms_handle_refused(Connection*) override { ceph_abort(); }
+  void ms_handle_remote_reset(Connection*) override { stone_abort(); }
+  bool ms_handle_refused(Connection*) override { stone_abort(); }
 
  private:
   void notify_recv_op() {
-    ceph_assert(cmd_conn);
+    stone_assert(cmd_conn);
     auto m = make_message<MCommand>();
     m->cmd.emplace_back(1, static_cast<char>(cmd_t::suite_recv_op));
     cmd_conn->send_message2(m);
@@ -330,41 +330,41 @@ class FailoverTestPeer : public Dispatcher {
       return;
      }
      case cmd_t::suite_stop:
-      ceph_assert(test_suite);
+      stone_assert(test_suite);
       test_suite->shutdown();
       test_suite.reset();
       ldout(cct, 0) << "--------  suite stopped  --------\n\n" << dendl;
       return;
      case cmd_t::suite_connect_me: {
-      ceph_assert(test_suite);
+      stone_assert(test_suite);
       entity_addr_t test_addr = entity_addr_t();
       test_addr.parse(m_cmd->cmd[1].c_str(), nullptr);
       test_suite->connect_peer(test_addr);
       return;
      }
      case cmd_t::suite_send_me:
-      ceph_assert(test_suite);
+      stone_assert(test_suite);
       test_suite->send_peer();
       return;
      case cmd_t::suite_keepalive_me:
-      ceph_assert(test_suite);
+      stone_assert(test_suite);
       test_suite->keepalive_peer();
       return;
      case cmd_t::suite_markdown:
-      ceph_assert(test_suite);
+      stone_assert(test_suite);
       test_suite->markdown();
       return;
      default:
       lderr(cct) << "[CmdSrv] got unexpected command " << m_cmd
                  << " from CmdCli" << dendl;
-      ceph_abort();
+      stone_abort();
     }
   }
 
   void init(entity_addr_t cmd_peer_addr) {
     cmd_msgr.reset(Messenger::create(cct, "async", entity_name_t::OSD(3), "CmdSrv", 3));
     dummy_auth.auth_registry.refresh_config();
-    cmd_msgr->set_cluster_protocol(CEPH_OSD_PROTOCOL);
+    cmd_msgr->set_cluster_protocol(STONE_OSD_PROTOCOL);
     cmd_msgr->set_default_policy(Messenger::Policy::stateless_server(0));
     cmd_msgr->set_auth_client(&dummy_auth);
     cmd_msgr->set_auth_server(&dummy_auth);
@@ -375,7 +375,7 @@ class FailoverTestPeer : public Dispatcher {
   }
 
  public:
-  FailoverTestPeer(CephContext* cct,
+  FailoverTestPeer(StoneContext* cct,
                    entity_addr_t test_peer_addr,
                    bool nonstop)
     : Dispatcher(cct),
@@ -386,7 +386,7 @@ class FailoverTestPeer : public Dispatcher {
   void wait() { cmd_msgr->wait(); }
 
   static std::unique_ptr<FailoverTestPeer>
-  create(CephContext* cct, entity_addr_t cmd_peer_addr, bool nonstop) {
+  create(StoneContext* cct, entity_addr_t cmd_peer_addr, bool nonstop) {
     // suite bind to cmd_peer_addr, with port + 1
     entity_addr_t test_peer_addr = cmd_peer_addr;
     test_peer_addr.set_port(cmd_peer_addr.get_port() + 1);
@@ -435,7 +435,7 @@ int main(int argc, char** argv)
 
   std::vector<const char*> args(argv, argv + argc);
   auto cct = global_init(nullptr, args,
-                         CEPH_ENTITY_TYPE_CLIENT,
+                         STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY,
                          CINIT_FLAG_NO_MON_CONFIG);
   common_init_finish(cct.get());

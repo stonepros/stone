@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_TEST_OSDC_FAKEWRITEBACK_H
-#define CEPH_TEST_OSDC_FAKEWRITEBACK_H
+#ifndef STONE_TEST_OSDC_FAKEWRITEBACK_H
+#define STONE_TEST_OSDC_FAKEWRITEBACK_H
 
 #include "include/Context.h"
 #include "include/types.h"
@@ -14,7 +14,7 @@ class Finisher;
 
 class FakeWriteback : public WritebackHandler {
 public:
-  FakeWriteback(CephContext *cct, ceph::mutex *lock, uint64_t delay_ns);
+  FakeWriteback(StoneeContext *cct, ceph::mutex *lock, uint64_t delay_ns);
   ~FakeWriteback() override;
 
   void read(const object_t& oid, uint64_t object_no,
@@ -37,7 +37,7 @@ public:
   bool may_copy_on_write(const object_t&, uint64_t, uint64_t,
 				 snapid_t) override;
 private:
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   ceph::mutex *m_lock;
   uint64_t m_delay_ns;
   std::atomic<unsigned> m_tid = { 0 };

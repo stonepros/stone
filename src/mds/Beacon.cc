@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 Red Hat
  *
@@ -29,14 +29,14 @@
 
 #include <chrono>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds.beacon." << name << ' '
 
 using namespace std::chrono_literals;
 
-Beacon::Beacon(CephContext *cct, MonClient *monc, std::string_view name)
+Beacon::Beacon(StoneContext *cct, MonClient *monc, std::string_view name)
   :
     Dispatcher(cct),
     beacon_interval(g_conf()->mds_beacon_interval),
@@ -96,13 +96,13 @@ bool Beacon::ms_can_fast_dispatch2(const cref_t<Message>& m) const
 void Beacon::ms_fast_dispatch2(const ref_t<Message>& m)
 {
   bool handled = ms_dispatch2(m);
-  ceph_assert(handled);
+  stone_assert(handled);
 }
 
 bool Beacon::ms_dispatch2(const ref_t<Message>& m)
 {
   if (m->get_type() == MSG_MDS_BEACON) {
-    if (m->get_connection()->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
+    if (m->get_connection()->get_peer_type() == STONE_ENTITY_TYPE_MON) {
       handle_mds_beacon(ref_cast<MMDSBeacon>(m));
     }
     return true;
@@ -131,7 +131,7 @@ void Beacon::handle_mds_beacon(const cref_t<MMDSBeacon> &m)
     last_acked_stamp = it->second;
     auto rtt = std::chrono::duration<double>(now - last_acked_stamp).count();
 
-    dout(5) << "received beacon reply " << ceph_mds_state_name(m->get_state()) << " seq " << m->get_seq() << " rtt " << rtt << dendl;
+    dout(5) << "received beacon reply " << stone_mds_state_name(m->get_state()) << " seq " << m->get_seq() << " rtt " << rtt << dendl;
 
     if (laggy && rtt < g_conf()->mds_beacon_grace) {
       dout(0) << " MDS is no longer laggy" << dendl;
@@ -145,7 +145,7 @@ void Beacon::handle_mds_beacon(const cref_t<MMDSBeacon> &m)
     // Wake a waiter up if present
     cvar.notify_all();
   } else {
-    dout(1) << "discarding unexpected beacon reply " << ceph_mds_state_name(m->get_state())
+    dout(1) << "discarding unexpected beacon reply " << stone_mds_state_name(m->get_state())
 	    << " seq " << m->get_seq() << " dne" << dendl;
   }
 }
@@ -192,11 +192,11 @@ bool Beacon::_send()
   }
 
   ++last_seq;
-  dout(5) << "Sending beacon " << ceph_mds_state_name(want_state) << " seq " << last_seq << dendl;
+  dout(5) << "Sending beacon " << stone_mds_state_name(want_state) << " seq " << last_seq << dendl;
 
   seq_stamp[last_seq] = now;
 
-  ceph_assert(want_state != MDSMap::STATE_NULL);
+  stone_assert(want_state != MDSMap::STATE_NULL);
   
   auto beacon = make_message<MMDSBeacon>(
       monc->get_fsid(), mds_gid_t(monc->get_global_id()),
@@ -204,7 +204,7 @@ bool Beacon::_send()
       epoch,
       want_state,
       last_seq,
-      CEPH_FEATURES_SUPPORTED_DEFAULT);
+      STONE_FEATURES_SUPPORTED_DEFAULT);
   beacon->set_health(health);
   beacon->set_compat(compat);
   beacon->set_fs(g_conf().get_val<std::string>("mds_join_fs"));
@@ -232,7 +232,7 @@ void Beacon::notify_mdsmap(const MDSMap &mdsmap)
 
 void Beacon::_notify_mdsmap(const MDSMap &mdsmap)
 {
-  ceph_assert(mdsmap.get_epoch() >= epoch);
+  stone_assert(mdsmap.get_epoch() >= epoch);
 
   if (mdsmap.get_epoch() >= epoch) {
     epoch = mdsmap.get_epoch();
@@ -270,8 +270,8 @@ void Beacon::set_want_state(const MDSMap &mdsmap, MDSMap::DaemonState newstate)
 
   if (want_state != newstate) {
     dout(5) << __func__ << ": "
-      << ceph_mds_state_name(want_state) << " -> "
-      << ceph_mds_state_name(newstate) << dendl;
+      << stone_mds_state_name(want_state) << " -> "
+      << stone_mds_state_name(newstate) << dendl;
     want_state = newstate;
   }
 }
@@ -291,7 +291,7 @@ void Beacon::notify_health(MDSRank const *mds)
   }
 
   // I'm going to touch this MDS, so it must be locked
-  ceph_assert(ceph_mutex_is_locked_by_me(mds->mds_lock));
+  stone_assert(stone_mutex_is_locked_by_me(mds->mds_lock));
 
   health.metrics.clear();
 
@@ -326,7 +326,7 @@ void Beacon::notify_health(MDSRank const *mds)
     for (const auto& client : late_clients) {
       // client_t is equivalent to session.info.inst.name.num
       // Construct an entity_name_t to lookup into SessionMap
-      entity_name_t ename(CEPH_ENTITY_TYPE_CLIENT, client.v);
+      entity_name_t ename(STONE_ENTITY_TYPE_CLIENT, client.v);
       Session const *s = mds->sessionmap.get_session(ename);
       if (s == NULL) {
         // Shouldn't happen, but not worth crashing if it does as this is
@@ -355,7 +355,7 @@ void Beacon::notify_health(MDSRank const *mds)
     }
   }
 
-  // Detect clients failing to generate cap releases from CEPH_SESSION_RECALL_STATE
+  // Detect clients failing to generate cap releases from STONE_SESSION_RECALL_STATE
   // messages. May be due to buggy client or resource-hogging application.
   //
   // Detect clients failing to advance their old_client_tid
@@ -437,10 +437,10 @@ void Beacon::notify_health(MDSRank const *mds)
   {
     auto complaint_time = g_conf()->osd_op_complaint_time;
     auto now = clock::now();
-    auto cutoff = now - ceph::make_timespan(complaint_time);
+    auto cutoff = now - stone::make_timespan(complaint_time);
 
     std::string count;
-    ceph::coarse_mono_time oldest;
+    stone::coarse_mono_time oldest;
     if (MDSIOContextBase::check_ios_in_flight(cutoff, count, oldest)) {
       dout(20) << count << " slow metadata IOs found" << dendl;
 

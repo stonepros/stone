@@ -3,7 +3,7 @@
 #include <chrono>
 #include <pthread.h>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "crimson/common/config_proxy.h"
 
 using crimson::common::local_conf;
@@ -41,7 +41,7 @@ void ThreadPool::pin(unsigned cpu_id)
   CPU_SET(cpu_id, &cs);
   [[maybe_unused]] auto r = pthread_setaffinity_np(pthread_self(),
                                                    sizeof(cs), &cs);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 }
 
 void ThreadPool::loop(std::chrono::milliseconds queue_max_wait)

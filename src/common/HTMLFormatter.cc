@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -27,7 +27,7 @@
 #include "common/escape.h"
 
 // -----------------------
-namespace ceph {
+namespace stone {
 
 HTMLFormatter::HTMLFormatter(bool pretty)
 : XMLFormatter(pretty), m_status(0), m_status_name(NULL)
@@ -155,4 +155,4 @@ void HTMLFormatter::dump_format_va(std::string_view name, const char *ns, bool q
     m_ss << "\n";
 }
 
-} // namespace ceph
+} // namespace stone

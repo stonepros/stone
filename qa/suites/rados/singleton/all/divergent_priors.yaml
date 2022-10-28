@@ -11,7 +11,7 @@ openstack:
       size: 10 # GB
 
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - overall HEALTH_
       - \(OSDMAP_FLAGS\)
@@ -22,7 +22,7 @@ overrides:
 
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
 - divergent_priors:

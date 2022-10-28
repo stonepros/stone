@@ -35,7 +35,7 @@ struct AttachParentRequest<MockTestImageCtx> {
                                      const cls::rbd::ParentImageSpec& pspec,
                                      uint64_t parent_overlap, bool reattach,
                                      Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -55,7 +55,7 @@ public:
   static DetachParentRequest *s_instance;
   static DetachParentRequest *create(MockTestImageCtx &image_ctx,
                                      Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }

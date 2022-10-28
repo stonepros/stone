@@ -6,7 +6,7 @@ add_library(librados_impl STATIC
   librados_tp.cc)
 
 # C/C++ API
-add_library(librados ${CEPH_SHARED}
+add_library(librados ${STONE_SHARED}
   librados_c.cc
   librados_cxx.cc
   $<TARGET_OBJECTS:common_buffer_obj>)
@@ -30,7 +30,7 @@ if(ENABLE_SHARED)
   endif()
 endif()
 target_link_libraries(librados PRIVATE
-  librados_impl osdc ceph-common cls_lock_client
+  librados_impl osdc stone-common cls_lock_client
   ${BLKID_LIBRARIES} ${CRYPTO_LIBS} ${EXTRALIBS} ${GSSAPI_LIBRARIES})
 install(TARGETS librados DESTINATION ${CMAKE_INSTALL_LIBDIR})
 

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CLS_RBD_TYPES_H
-#define CEPH_CLS_RBD_TYPES_H
+#ifndef STONE_CLS_RBD_TYPES_H
+#define STONE_CLS_RBD_TYPES_H
 
 #include <boost/variant.hpp>
 #include "include/int_types.h"
@@ -281,7 +281,7 @@ struct ParentImageSpec {
   int64_t pool_id = -1;
   std::string pool_namespace;
   std::string image_id;
-  snapid_t snap_id = CEPH_NOSNAP;
+  snapid_t snap_id = STONE_NOSNAP;
 
   ParentImageSpec() {
   }
@@ -292,7 +292,7 @@ struct ParentImageSpec {
   }
 
   bool exists() const {
-    return (pool_id >= 0 && !image_id.empty() && snap_id != CEPH_NOSNAP);
+    return (pool_id >= 0 && !image_id.empty() && snap_id != STONE_NOSNAP);
   }
 
   bool operator==(const ParentImageSpec& rhs) const {
@@ -545,7 +545,7 @@ struct MirrorSnapshotNamespace {
 
   std::string primary_mirror_uuid;
   union {
-    snapid_t primary_snap_id = CEPH_NOSNAP;
+    snapid_t primary_snap_id = STONE_NOSNAP;
     snapid_t clean_since_snap_id;
   };
   uint64_t last_copied_object_number = 0;
@@ -593,7 +593,7 @@ struct MirrorSnapshotNamespace {
   inline bool is_orphan() const {
     return (is_non_primary() &&
             primary_mirror_uuid.empty() &&
-            primary_snap_id == CEPH_NOSNAP);
+            primary_snap_id == STONE_NOSNAP);
   }
 
   void encode(ceph::buffer::list& bl) const;
@@ -692,7 +692,7 @@ SnapshotNamespaceType get_snap_namespace_type(
     const SnapshotNamespace& snapshot_namespace);
 
 struct SnapshotInfo {
-  snapid_t id = CEPH_NOSNAP;
+  snapid_t id = STONE_NOSNAP;
   cls::rbd::SnapshotNamespace snapshot_namespace = {UserSnapshotNamespace{}};
   std::string name;
   uint64_t image_size = 0;
@@ -1020,4 +1020,4 @@ void sanitize_entity_inst(entity_inst_t* entity_inst);
 } // namespace rbd
 } // namespace cls
 
-#endif // CEPH_CLS_RBD_TYPES_H
+#endif // STONE_CLS_RBD_TYPES_H

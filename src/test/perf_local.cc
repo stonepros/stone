@@ -18,7 +18,7 @@
  */
 
 // This program contains a collection of low-level performance measurements
-// for Ceph, which can be run either individually or altogether.  These
+// for Stone, which can be run either individually or altogether.  These
 // tests measure performance in a single stand-alone process, not in a cluster
 // with multiple servers.  Invoke the program like this:
 //
@@ -43,12 +43,12 @@
 
 #include "include/buffer.h"
 #include "include/encoding.h"
-#include "include/ceph_hash.h"
+#include "include/stone_hash.h"
 #include "include/spinlock.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/Cycles.h"
 #include "common/Cond.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Thread.h"
 #include "common/Timer.h"
 #include "msg/async/Event.h"
@@ -58,7 +58,7 @@
 
 #include <atomic>
 
-using namespace ceph;
+using namespace stone;
 
 /**
  * Ask the operating system to pin the current thread to a given CPU.
@@ -159,7 +159,7 @@ double atomic_int_set()
 double mutex_nonblock()
 {
   int count = 1000000;
-  ceph::mutex m = ceph::make_mutex("mutex_nonblock::m");
+  stone::mutex m = stone::make_mutex("mutex_nonblock::m");
   uint64_t start = Cycles::rdtsc();
   for (int i = 0; i < count; i++) {
     m.lock();
@@ -305,8 +305,8 @@ double buffer_iterator()
 
 // Implements the CondPingPong test.
 class CondPingPong {
-  ceph::mutex mutex = ceph::make_mutex("CondPingPong::mutex");
-  ceph::condition_variable cond;
+  stone::mutex mutex = stone::make_mutex("CondPingPong::mutex");
+  stone::condition_variable cond;
   int prod = 0;
   int cons = 0;
   const int count = 10000;
@@ -444,7 +444,7 @@ double function_call()
 double eventcenter_poll()
 {
   int count = 1000000;
-  EventCenter center(g_ceph_context);
+  EventCenter center(g_stone_context);
   center.init(1000, 0, "posix");
   center.set_owner();
   uint64_t start = Cycles::rdtsc();
@@ -456,12 +456,12 @@ double eventcenter_poll()
 }
 
 class CenterWorker : public Thread {
-  CephContext *cct;
+  StoneContext *cct;
   bool done;
 
  public:
   EventCenter center;
-  explicit CenterWorker(CephContext *c): cct(c), done(false), center(c) {
+  explicit CenterWorker(StoneContext *c): cct(c), done(false), center(c) {
     center.init(100, 0, "posix");
   }
   void stop() {
@@ -491,7 +491,7 @@ double eventcenter_dispatch()
 {
   int count = 100000;
 
-  CenterWorker worker(g_ceph_context);
+  CenterWorker worker(g_stone_context);
   std::atomic<int64_t> flag = { 1 };
   worker.create("evt_center_disp");
   EventCallbackRef count_event(new CountEvent(&flag));
@@ -547,14 +547,14 @@ double memcpy10000()
 
 // Benchmark rjenkins hashing performance on cached data.
 template <int key_length>
-double ceph_str_hash_rjenkins()
+double stone_str_hash_rjenkins()
 {
   int count = 100000;
   char buf[key_length];
 
   uint64_t start = Cycles::rdtsc();
   for (int i = 0; i < count; i++)
-    ceph_str_hash(CEPH_STR_HASH_RJENKINS, buf, sizeof(buf));
+    stone_str_hash(STONE_STR_HASH_RJENKINS, buf, sizeof(buf));
   uint64_t stop = Cycles::rdtsc();
 
   return Cycles::to_seconds(stop - start)/count;
@@ -754,7 +754,7 @@ double sfence()
 double test_spinlock()
 {
   int count = 1000000;
-  ceph::spinlock lock;
+  stone::spinlock lock;
   uint64_t start = Cycles::rdtsc();
   for (int i = 0; i < count; i++) {
     lock.lock();
@@ -793,8 +793,8 @@ class FakeContext : public Context {
 double perf_timer()
 {
   int count = 1000000;
-  ceph::mutex lock = ceph::make_mutex("perf_timer::lock");
-  SafeTimer timer(g_ceph_context, lock);
+  stone::mutex lock = stone::make_mutex("perf_timer::lock");
+  SafeTimer timer(g_stone_context, lock);
   FakeContext **c = new FakeContext*[count];
   for (int i = 0; i < count; i++) {
     c[i] = new FakeContext();
@@ -902,13 +902,13 @@ double vector_push_pop()
   return Cycles::to_seconds(stop - start)/(count*3);
 }
 
-// Measure the cost of ceph_clock_now
-double perf_ceph_clock_now()
+// Measure the cost of stone_clock_now
+double perf_stone_clock_now()
 {
   int count = 100000;
   uint64_t start = Cycles::rdtsc();
   for (int i = 0; i < count; i++) {
-    ceph_clock_now();
+    stone_clock_now();
   }
   uint64_t stop = Cycles::rdtsc();
   return Cycles::to_seconds(stop - start)/count;
@@ -968,9 +968,9 @@ TestInfo tests[] = {
     "Copy 1000 bytes with memcpy"},
   {"memcpy10000", memcpy10000,
     "Copy 10000 bytes with memcpy"},
-  {"ceph_str_hash_rjenkins", ceph_str_hash_rjenkins<16>,
+  {"stone_str_hash_rjenkins", stone_str_hash_rjenkins<16>,
     "rjenkins hash on 16 byte of data"},
-  {"ceph_str_hash_rjenkins", ceph_str_hash_rjenkins<256>,
+  {"stone_str_hash_rjenkins", stone_str_hash_rjenkins<256>,
     "rjenkins hash on 256 bytes of data"},
   {"rdtsc", rdtsc_test,
     "Read the fine-grain cycle counter"},
@@ -1002,8 +1002,8 @@ TestInfo tests[] = {
     "Throw an Exception in a function call"},
   {"vector_push_pop", vector_push_pop,
     "Push and pop a std::vector"},
-  {"ceph_clock_now", perf_ceph_clock_now,
-   "ceph_clock_now function"},
+  {"stone_clock_now", perf_stone_clock_now,
+   "stone_clock_now function"},
 };
 
 /**
@@ -1035,10 +1035,10 @@ int main(int argc, char *argv[])
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
   Cycles::init();
 
   bind_thread_to_cpu(3);

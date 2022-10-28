@@ -21,8 +21,8 @@
 #include "tools/rbd_mirror/image_replayer/journal/ReplayStatusFormatter.h"
 #include "tools/rbd_mirror/image_replayer/journal/StateBuilder.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::journal::" \
                            << "Replayer: " << this << " " << __func__ << ": "
@@ -42,7 +42,7 @@ uint32_t calculate_replay_delay(const utime_t &event_time,
     return 0;
   }
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   if (event_time + mirroring_replay_delay <= now) {
     return 0;
   }
@@ -145,7 +145,7 @@ Replayer<I>::Replayer(
     m_local_mirror_uuid(local_mirror_uuid),
     m_state_builder(state_builder),
     m_replayer_listener(replayer_listener),
-    m_lock(ceph::make_mutex(librbd::util::unique_lock_name(
+    m_lock(stone::make_mutex(librbd::util::unique_lock_name(
       "rbd::mirror::image_replayer::journal::Replayer", this))) {
   dout(10) << dendl;
 }
@@ -159,15 +159,15 @@ Replayer<I>::~Replayer() {
     unregister_perf_counters();
   }
 
-  ceph_assert(m_remote_listener == nullptr);
-  ceph_assert(m_local_journal_listener == nullptr);
-  ceph_assert(m_local_journal_replay == nullptr);
-  ceph_assert(m_remote_replay_handler == nullptr);
-  ceph_assert(m_event_preprocessor == nullptr);
-  ceph_assert(m_replay_status_formatter == nullptr);
-  ceph_assert(m_delayed_preprocess_task == nullptr);
-  ceph_assert(m_flush_local_replay_task == nullptr);
-  ceph_assert(m_state_builder->local_image_ctx == nullptr);
+  stone_assert(m_remote_listener == nullptr);
+  stone_assert(m_local_journal_listener == nullptr);
+  stone_assert(m_local_journal_replay == nullptr);
+  stone_assert(m_remote_replay_handler == nullptr);
+  stone_assert(m_event_preprocessor == nullptr);
+  stone_assert(m_replay_status_formatter == nullptr);
+  stone_assert(m_delayed_preprocess_task == nullptr);
+  stone_assert(m_flush_local_replay_task == nullptr);
+  stone_assert(m_state_builder->local_image_ctx == nullptr);
 }
 
 template <typename I>
@@ -186,7 +186,7 @@ void Replayer<I>::init(Context* on_finish) {
     register_perf_counters();
   }
 
-  ceph_assert(m_on_init_shutdown == nullptr);
+  stone_assert(m_on_init_shutdown == nullptr);
   m_on_init_shutdown = on_finish;
 
   init_remote_journaler();
@@ -197,7 +197,7 @@ void Replayer<I>::shut_down(Context* on_finish) {
   dout(10) << dendl;
 
   std::unique_lock locker{m_lock};
-  ceph_assert(m_on_init_shutdown == nullptr);
+  stone_assert(m_on_init_shutdown == nullptr);
   m_on_init_shutdown = on_finish;
 
   if (m_state == STATE_INIT) {
@@ -265,7 +265,7 @@ void Replayer<I>::handle_init_remote_journaler(int r) {
   }
 
   // listen for metadata updates to check for disconnect events
-  ceph_assert(m_remote_listener == nullptr);
+  stone_assert(m_remote_listener == nullptr);
   m_remote_listener = new RemoteJournalerListener(this);
   m_state_builder->remote_journaler->add_listener(m_remote_listener);
 
@@ -294,13 +294,13 @@ void Replayer<I>::handle_init_remote_journaler(int r) {
 }
 
 template <typename I>
-void Replayer<I>::start_external_replay(std::unique_lock<ceph::mutex>& locker) {
+void Replayer<I>::start_external_replay(std::unique_lock<stone::mutex>& locker) {
   dout(10) << dendl;
 
   auto local_image_ctx = m_state_builder->local_image_ctx;
   std::shared_lock local_image_locker{local_image_ctx->image_lock};
 
-  ceph_assert(m_local_journal == nullptr);
+  stone_assert(m_local_journal == nullptr);
   m_local_journal = local_image_ctx->journal;
   if (m_local_journal == nullptr) {
     local_image_locker.unlock();
@@ -323,7 +323,7 @@ void Replayer<I>::handle_start_external_replay(int r) {
 
   std::unique_lock locker{m_lock};
   if (r < 0) {
-    ceph_assert(m_local_journal_replay == nullptr);
+    stone_assert(m_local_journal_replay == nullptr);
     derr << "error starting external replay on local image "
          << m_state_builder->local_image_ctx->id << ": "
          << cpp_strerror(r) << dendl;
@@ -352,7 +352,7 @@ void Replayer<I>::handle_start_external_replay(int r) {
   m_replay_status_formatter = ReplayStatusFormatter<I>::create(
     m_state_builder->remote_journaler, m_local_mirror_uuid);
 
-  auto cct = static_cast<CephContext *>(m_state_builder->local_image_ctx->cct);
+  auto cct = static_cast<StoneContext *>(m_state_builder->local_image_ctx->cct);
   double poll_seconds = cct->_conf.get_val<double>(
     "rbd_mirror_journal_poll_age");
   m_remote_replay_handler = new RemoteReplayHandler(this);
@@ -364,11 +364,11 @@ void Replayer<I>::handle_start_external_replay(int r) {
 
 template <typename I>
 bool Replayer<I>::add_local_journal_listener(
-    std::unique_lock<ceph::mutex>& locker) {
+    std::unique_lock<stone::mutex>& locker) {
   dout(10) << dendl;
 
   // listen for promotion and resync requests against local journal
-  ceph_assert(m_local_journal_listener == nullptr);
+  stone_assert(m_local_journal_listener == nullptr);
   m_local_journal_listener = new LocalJournalListener(this);
   m_local_journal->add_listener(m_local_journal_listener);
 
@@ -397,11 +397,11 @@ bool Replayer<I>::add_local_journal_listener(
 }
 
 template <typename I>
-bool Replayer<I>::notify_init_complete(std::unique_lock<ceph::mutex>& locker) {
+bool Replayer<I>::notify_init_complete(std::unique_lock<stone::mutex>& locker) {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
-  ceph_assert(m_state == STATE_INIT);
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
+  stone_assert(m_state == STATE_INIT);
 
   // notify that init has completed
   Context *on_finish = nullptr;
@@ -423,7 +423,7 @@ bool Replayer<I>::notify_init_complete(std::unique_lock<ceph::mutex>& locker) {
 
 template <typename I>
 void Replayer<I>::wait_for_flush() {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   // ensure that we don't have two concurrent local journal replay shut downs
   dout(10) << dendl;
@@ -474,7 +474,7 @@ void Replayer<I>::handle_shut_down_local_journal_replay(int r) {
 
 template <typename I>
 void Replayer<I>::wait_for_event_replay() {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   dout(10) << dendl;
   auto ctx = create_async_context_callback(
@@ -493,7 +493,7 @@ void Replayer<I>::handle_wait_for_event_replay(int r) {
 
 template <typename I>
 void Replayer<I>::close_local_image() {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
   if (m_state_builder->local_image_ctx == nullptr) {
     stop_remote_journaler_replay();
     return;
@@ -523,7 +523,7 @@ void Replayer<I>::close_local_image() {
   // NOTE: it's important to ensure that the local image is fully
   // closed before attempting to close the remote journal in
   // case the remote cluster is unreachable
-  ceph_assert(m_state_builder->local_image_ctx != nullptr);
+  stone_assert(m_state_builder->local_image_ctx != nullptr);
   auto ctx = create_context_callback<
     Replayer<I>, &Replayer<I>::handle_close_local_image>(this);
   auto request = image_replayer::CloseImageRequest<I>::create(
@@ -542,13 +542,13 @@ void Replayer<I>::handle_close_local_image(int r) {
     handle_replay_error(r, "failed to close local image");
   }
 
-  ceph_assert(m_state_builder->local_image_ctx == nullptr);
+  stone_assert(m_state_builder->local_image_ctx == nullptr);
   stop_remote_journaler_replay();
 }
 
 template <typename I>
 void Replayer<I>::stop_remote_journaler_replay() {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   if (m_state_builder->remote_journaler == nullptr) {
     wait_for_in_flight_ops();
@@ -607,7 +607,7 @@ void Replayer<I>::handle_wait_for_in_flight_ops(int r) {
   Context* on_init_shutdown = nullptr;
   {
     std::unique_lock locker{m_lock};
-    ceph_assert(m_on_init_shutdown != nullptr);
+    stone_assert(m_on_init_shutdown != nullptr);
     std::swap(m_on_init_shutdown, on_init_shutdown);
     m_state = STATE_COMPLETE;
   }
@@ -643,7 +643,7 @@ void Replayer<I>::handle_remote_journal_metadata_updated() {
 
 template <typename I>
 void Replayer<I>::schedule_flush_local_replay_task() {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   std::unique_lock timer_locker{m_threads->timer_lock};
   if (m_state != STATE_REPLAYING || m_flush_local_replay_task != nullptr) {
@@ -659,7 +659,7 @@ void Replayer<I>::schedule_flush_local_replay_task() {
 
 template <typename I>
 void Replayer<I>::cancel_flush_local_replay_task() {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   std::unique_lock timer_locker{m_threads->timer_lock};
   if (m_flush_local_replay_task != nullptr) {
@@ -753,7 +753,7 @@ void Replayer<I>::handle_flush_commit_position(Context* on_flush, int r) {
 
 template <typename I>
 void Replayer<I>::handle_replay_error(int r, const std::string &error) {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   if (m_error_code == 0) {
     m_error_code = r;
@@ -769,8 +769,8 @@ bool Replayer<I>::is_replay_complete() const {
 
 template <typename I>
 bool Replayer<I>::is_replay_complete(
-    const std::unique_lock<ceph::mutex>&) const {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+    const std::unique_lock<stone::mutex>&) const {
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
   return (m_state == STATE_COMPLETE);
 }
 
@@ -782,8 +782,8 @@ void Replayer<I>::handle_replay_complete(int r, const std::string &error) {
 
 template <typename I>
 void Replayer<I>::handle_replay_complete(
-    const std::unique_lock<ceph::mutex>&, int r, const std::string &error) {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+    const std::unique_lock<stone::mutex>&, int r, const std::string &error) {
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   dout(10) << "r=" << r << ", error=" << error << dendl;
   if (r < 0) {
@@ -807,8 +807,8 @@ void Replayer<I>::handle_replay_ready() {
 
 template <typename I>
 void Replayer<I>::handle_replay_ready(
-    std::unique_lock<ceph::mutex>& locker) {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+    std::unique_lock<stone::mutex>& locker) {
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   dout(20) << dendl;
   if (is_replay_complete(locker)) {
@@ -845,7 +845,7 @@ void Replayer<I>::replay_flush() {
   // replayer to handle the new tag epoch
   auto ctx = create_context_callback<
     Replayer<I>, &Replayer<I>::handle_replay_flush_shut_down>(this);
-  ceph_assert(m_local_journal_replay != nullptr);
+  stone_assert(m_local_journal_replay != nullptr);
   m_local_journal_replay->shut_down(false, ctx);
 }
 
@@ -854,8 +854,8 @@ void Replayer<I>::handle_replay_flush_shut_down(int r) {
   std::unique_lock locker{m_lock};
   dout(10) << "r=" << r << dendl;
 
-  ceph_assert(m_local_journal != nullptr);
-  ceph_assert(m_local_journal_listener != nullptr);
+  stone_assert(m_local_journal != nullptr);
+  stone_assert(m_local_journal_listener != nullptr);
 
   // blocks if listener notification is in-progress
   m_local_journal->remove_listener(m_local_journal_listener);
@@ -1045,7 +1045,7 @@ void Replayer<I>::preprocess_entry() {
 
   dout(20) << "delaying replay by " << delay << " sec" << dendl;
   std::unique_lock timer_locker{m_threads->timer_lock};
-  ceph_assert(m_delayed_preprocess_task == nullptr);
+  stone_assert(m_delayed_preprocess_task == nullptr);
   m_delayed_preprocess_task = create_context_callback<
     Replayer<I>, &Replayer<I>::handle_delayed_preprocess_task>(this);
   m_threads->timer->add_event_after(delay, m_delayed_preprocess_task);
@@ -1055,7 +1055,7 @@ template <typename I>
 void Replayer<I>::handle_delayed_preprocess_task(int r) {
   dout(20) << "r=" << r << dendl;
 
-  ceph_assert(ceph_mutex_is_locked_by_me(m_threads->timer_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_threads->timer_lock));
   m_delayed_preprocess_task = nullptr;
 
   m_threads->work_queue->queue(create_context_callback<
@@ -1065,9 +1065,9 @@ void Replayer<I>::handle_delayed_preprocess_task(int r) {
 template <typename I>
 void Replayer<I>::handle_preprocess_entry_ready(int r) {
   dout(20) << "r=" << r << dendl;
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
-  m_replay_start_time = ceph_clock_now();
+  m_replay_start_time = stone_clock_now();
   if (!m_event_preprocessor->is_required(m_event_entry)) {
     process_entry();
     return;
@@ -1116,7 +1116,7 @@ void Replayer<I>::handle_process_entry_ready(int r) {
   std::unique_lock locker{m_lock};
 
   dout(20) << dendl;
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   bool update_status = false;
   {
@@ -1153,11 +1153,11 @@ void Replayer<I>::handle_process_entry_safe(
     derr << "failed to commit journal event: " << cpp_strerror(r) << dendl;
     handle_replay_complete(r, "failed to commit journal event");
   } else {
-    ceph_assert(m_state_builder->remote_journaler != nullptr);
+    stone_assert(m_state_builder->remote_journaler != nullptr);
     m_state_builder->remote_journaler->committed(replay_entry);
   }
 
-  auto latency = ceph_clock_now() - replay_start_time;
+  auto latency = stone_clock_now() - replay_start_time;
   if (g_journal_perf_counters) {
     g_journal_perf_counters->inc(l_rbd_mirror_replay);
     g_journal_perf_counters->inc(l_rbd_mirror_replay_bytes, replay_bytes);
@@ -1191,7 +1191,7 @@ void Replayer<I>::handle_resync_image() {
 
 template <typename I>
 void Replayer<I>::notify_status_updated() {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   dout(10) << dendl;
 
@@ -1204,7 +1204,7 @@ void Replayer<I>::notify_status_updated() {
 
 template <typename I>
 void Replayer<I>::cancel_delayed_preprocess_task() {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   bool canceled_delayed_preprocess_task = false;
   {
@@ -1213,7 +1213,7 @@ void Replayer<I>::cancel_delayed_preprocess_task() {
       dout(10) << dendl;
       canceled_delayed_preprocess_task = m_threads->timer->cancel_event(
         m_delayed_preprocess_task);
-      ceph_assert(canceled_delayed_preprocess_task);
+      stone_assert(canceled_delayed_preprocess_task);
       m_delayed_preprocess_task = nullptr;
     }
   }
@@ -1229,7 +1229,7 @@ int Replayer<I>::validate_remote_client_state(
     const cls::journal::Client& remote_client,
     librbd::journal::MirrorPeerClientMeta* remote_client_meta,
     bool* resync_requested, std::string* error) {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   if (!util::decode_client_meta(remote_client, remote_client_meta)) {
     // require operator intervention since the data is corrupt
@@ -1265,12 +1265,12 @@ template <typename I>
 void Replayer<I>::register_perf_counters() {
   dout(5) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
-  ceph_assert(m_perf_counters == nullptr);
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
+  stone_assert(m_perf_counters == nullptr);
 
-  auto cct = static_cast<CephContext *>(m_state_builder->local_image_ctx->cct);
+  auto cct = static_cast<StoneContext *>(m_state_builder->local_image_ctx->cct);
   auto prio = cct->_conf.get_val<int64_t>("rbd_mirror_image_perf_stats_prio");
-  PerfCountersBuilder plb(g_ceph_context, "rbd_mirror_image_" + m_image_spec,
+  PerfCountersBuilder plb(g_stone_context, "rbd_mirror_image_" + m_image_spec,
                           l_rbd_mirror_journal_first, l_rbd_mirror_journal_last);
   plb.add_u64_counter(l_rbd_mirror_replay, "replay", "Replays", "r", prio);
   plb.add_u64_counter(l_rbd_mirror_replay_bytes, "replay_bytes",
@@ -1278,19 +1278,19 @@ void Replayer<I>::register_perf_counters() {
   plb.add_time_avg(l_rbd_mirror_replay_latency, "replay_latency",
                    "Replay latency", "rl", prio);
   m_perf_counters = plb.create_perf_counters();
-  g_ceph_context->get_perfcounters_collection()->add(m_perf_counters);
+  g_stone_context->get_perfcounters_collection()->add(m_perf_counters);
 }
 
 template <typename I>
 void Replayer<I>::unregister_perf_counters() {
   dout(5) << dendl;
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   PerfCounters *perf_counters = nullptr;
   std::swap(perf_counters, m_perf_counters);
 
   if (perf_counters != nullptr) {
-    g_ceph_context->get_perfcounters_collection()->remove(perf_counters);
+    g_stone_context->get_perfcounters_collection()->remove(perf_counters);
     delete perf_counters;
   }
 }

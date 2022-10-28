@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "common/Formatter.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/stringify.h"
 #include "librbd/trash_watcher/Types.h"
 #include "librbd/watcher/Utils.h"
@@ -24,19 +24,19 @@ public:
   }
 
 private:
-  ceph::Formatter *m_formatter;
+  stone::Formatter *m_formatter;
 };
 
 } // anonymous namespace
 
 void ImageAddedPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(image_id, bl);
   encode(trash_image_spec, bl);
 }
 
 void ImageAddedPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(image_id, iter);
   decode(trash_image_spec, iter);
 }
@@ -49,12 +49,12 @@ void ImageAddedPayload::dump(Formatter *f) const {
 }
 
 void ImageRemovedPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(image_id, bl);
 }
 
 void ImageRemovedPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(image_id, iter);
 }
 
@@ -63,7 +63,7 @@ void ImageRemovedPayload::dump(Formatter *f) const {
 }
 
 void UnknownPayload::encode(bufferlist &bl) const {
-  ceph_abort();
+  stone_abort();
 }
 
 void UnknownPayload::decode(__u8 version, bufferlist::const_iterator &iter) {

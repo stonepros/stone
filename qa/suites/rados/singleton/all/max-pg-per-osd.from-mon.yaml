@@ -8,10 +8,10 @@ openstack:
       count: 2
       size: 10 # GB
 overrides:
-  ceph:
+  stone:
     create_rbd_pool: False
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     conf:
       mon:
         osd pool default size: 2
@@ -23,7 +23,7 @@ overrides:
       - \(PENDING_CREATING_PGS\)
 tasks:
 - install:
-- ceph:
+- stone:
 - osd_max_pg_per_osd:
     test_create_from_mon: True
     pg_num: 2

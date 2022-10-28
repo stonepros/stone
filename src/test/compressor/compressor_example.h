@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stonee distributed storage system
  *
  * Copyright (C) 2015 Mirantis, Inc.
  *
@@ -15,8 +15,8 @@
  * 
  */
 
-#ifndef CEPH_COMPRESSOR_EXAMPLE_H
-#define CEPH_COMPRESSOR_EXAMPLE_H
+#ifndef STONE_COMPRESSOR_EXAMPLE_H
+#define STONE_COMPRESSOR_EXAMPLE_H
 
 #include <unistd.h>
 #include <errno.h>

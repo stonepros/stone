@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MMDSCACHEREJOIN_H
-#define CEPH_MMDSCACHEREJOIN_H
+#ifndef STONE_MMDSCACHEREJOIN_H
+#define STONE_MMDSCACHEREJOIN_H
 
 #include <string_view>
 #include "include/types.h"
@@ -219,9 +219,9 @@ public:
   void add_scatterlock_state(CInode *in) {
     if (inode_scatterlocks.count(in->ino()))
       return;  // already added this one
-    in->encode_lock_state(CEPH_LOCK_IFILE, inode_scatterlocks[in->ino()].file);
-    in->encode_lock_state(CEPH_LOCK_INEST, inode_scatterlocks[in->ino()].nest);
-    in->encode_lock_state(CEPH_LOCK_IDFT, inode_scatterlocks[in->ino()].dft);
+    in->encode_lock_state(STONE_LOCK_IFILE, inode_scatterlocks[in->ino()].file);
+    in->encode_lock_state(STONE_LOCK_INEST, inode_scatterlocks[in->ino()].nest);
+    in->encode_lock_state(STONE_LOCK_IDFT, inode_scatterlocks[in->ino()].dft);
   }
 
   // dirfrags

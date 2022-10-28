@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MMONSUBSCRIBEACK_H
-#define CEPH_MMONSUBSCRIBEACK_H
+#ifndef STONE_MMONSUBSCRIBEACK_H
+#define STONE_MMONSUBSCRIBEACK_H
 
 #include "msg/Message.h"
 
@@ -22,10 +22,10 @@ public:
   __u32 interval;
   uuid_d fsid;
   
-  MMonSubscribeAck() : Message{CEPH_MSG_MON_SUBSCRIBE_ACK},
+  MMonSubscribeAck() : Message{STONE_MSG_MON_SUBSCRIBE_ACK},
 		       interval(0) {
   }
-  MMonSubscribeAck(uuid_d& f, int i) : Message{CEPH_MSG_MON_SUBSCRIBE_ACK},
+  MMonSubscribeAck(uuid_d& f, int i) : Message{STONE_MSG_MON_SUBSCRIBE_ACK},
 				       interval(i), fsid(f) { }
 private:
   ~MMonSubscribeAck() final {}

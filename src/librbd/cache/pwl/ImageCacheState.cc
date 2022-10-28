@@ -12,7 +12,7 @@
 #include "librbd/plugin/Api.h"
 
 #undef dout_subsys
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::ImageCacheState: " \
                            <<  __func__ << ": "
@@ -59,7 +59,7 @@ bool ImageCacheState<I>::init_from_metadata(json_spirit::mValue& json_root) {
 
 template <typename I>
 void ImageCacheState<I>::write_image_cache_state(Context *on_finish) {
-  stats_timestamp = ceph_clock_now();
+  stats_timestamp = stone_clock_now();
   std::shared_lock owner_lock{m_image_ctx->owner_lock};
   json_spirit::mObject o;
   o["present"] = present;
@@ -127,7 +127,7 @@ ImageCacheState<I>* ImageCacheState<I>::create_image_cache_state(
     cache_state = new ImageCacheState<I>(image_ctx, plugin_api);
     cache_state->init_from_config();
   } else {
-    ceph_assert(!cache_state_str.empty());
+    stone_assert(!cache_state_str.empty());
     json_spirit::mValue json_root;
     if (!json_spirit::read(cache_state_str.c_str(), json_root)) {
       lderr(image_ctx->cct) << "failed to parse cache state" << dendl;
@@ -170,7 +170,7 @@ ImageCacheState<I>* ImageCacheState<I>::get_image_cache_state(
 template <typename I>
 bool ImageCacheState<I>::is_valid() {
   if (this->present &&
-      (host.compare(ceph_get_short_hostname()) != 0)) {
+      (host.compare(stone_get_short_hostname()) != 0)) {
     auto cleanstring = "dirty";
     if (this->clean) {
       cleanstring = "clean";

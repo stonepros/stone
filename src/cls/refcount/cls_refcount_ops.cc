@@ -3,11 +3,11 @@
 
 #include "cls_refcount_ops.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 using std::list;
 
-void cls_refcount_get_op::dump(ceph::Formatter *f) const
+void cls_refcount_get_op::dump(stone::Formatter *f) const
 {
   f->dump_string("tag", tag);
   f->dump_int("implicit_ref", (int)implicit_ref);
@@ -22,7 +22,7 @@ void cls_refcount_get_op::generate_test_instances(list<cls_refcount_get_op*>& ls
 }
 
 
-void cls_refcount_put_op::dump(ceph::Formatter *f) const
+void cls_refcount_put_op::dump(stone::Formatter *f) const
 {
   f->dump_string("tag", tag);
   f->dump_int("implicit_ref", (int)implicit_ref);
@@ -38,7 +38,7 @@ void cls_refcount_put_op::generate_test_instances(list<cls_refcount_put_op*>& ls
 
 
 
-void cls_refcount_set_op::dump(ceph::Formatter *f) const
+void cls_refcount_set_op::dump(stone::Formatter *f) const
 {
   encode_json("refs", refs, f);
 }
@@ -52,7 +52,7 @@ void cls_refcount_set_op::generate_test_instances(list<cls_refcount_set_op*>& ls
 }
 
 
-void cls_refcount_read_op::dump(ceph::Formatter *f) const
+void cls_refcount_read_op::dump(stone::Formatter *f) const
 {
   f->dump_int("implicit_ref", (int)implicit_ref);
 }
@@ -65,7 +65,7 @@ void cls_refcount_read_op::generate_test_instances(list<cls_refcount_read_op*>& 
 }
 
 
-void cls_refcount_read_ret::dump(ceph::Formatter *f) const
+void cls_refcount_read_ret::dump(stone::Formatter *f) const
 {
   f->open_array_section("refs");
   for (auto p = refs.begin(); p != refs.end(); ++p)
@@ -81,7 +81,7 @@ void cls_refcount_read_ret::generate_test_instances(list<cls_refcount_read_ret*>
   ls.back()->refs.push_back("bar");
 }
 
-void obj_refcount::dump(ceph::Formatter *f) const
+void obj_refcount::dump(stone::Formatter *f) const
 {
   f->open_array_section("refs");
   for (const auto &kv: refs) {

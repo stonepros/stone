@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - slow metadata IO
       - SLOW_OPS

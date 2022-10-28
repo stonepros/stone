@@ -8,7 +8,7 @@ tasks:
       - qemu-kvm-block-rbd
       deb:
       - qemu-block-extra
-- ceph:
+- stone:
     fs: xfs
     conf:
       client:

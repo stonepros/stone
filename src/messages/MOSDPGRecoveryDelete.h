@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MOSDPGRECOVERYDELETE_H
-#define CEPH_MOSDPGRECOVERYDELETE_H
+#ifndef STONE_MOSDPGRECOVERYDELETE_H
+#define STONE_MOSDPGRECOVERYDELETE_H
 
 #include "MOSDFastDispatchOp.h"
 

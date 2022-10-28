@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  * 
  */
-#ifndef CEPH_MDCACHE_H
-#define CEPH_MDCACHE_H
+#ifndef STONE_MDCACHE_H
+#define STONE_MDCACHE_H
 
 #include <atomic>
 #include <string_view>
@@ -151,7 +151,7 @@ class MDCache {
     mds_rank_t mds = -1;
     inodeno_t ino;
     frag_t frag;
-    snapid_t snap = CEPH_NOSNAP;
+    snapid_t snap = STONE_NOSNAP;
     filepath want_path;
     CInode *basei = nullptr;
     bool want_base_dir = false;
@@ -404,9 +404,9 @@ class MDCache {
   CInode *pick_inode_snap(CInode *in, snapid_t follows);
   CInode *cow_inode(CInode *in, snapid_t last);
   void journal_cow_dentry(MutationImpl *mut, EMetaBlob *metablob, CDentry *dn,
-                          snapid_t follows=CEPH_NOSNAP,
+                          snapid_t follows=STONE_NOSNAP,
 			  CInode **pcow_inode=0, CDentry::linkage_t *dnl=0);
-  void journal_dirty_inode(MutationImpl *mut, EMetaBlob *metablob, CInode *in, snapid_t follows=CEPH_NOSNAP);
+  void journal_dirty_inode(MutationImpl *mut, EMetaBlob *metablob, CInode *in, snapid_t follows=STONE_NOSNAP);
 
   void project_rstat_inode_to_frag(const MutationRef& mut,
 				   CInode *cur, CDir *parent, snapid_t first,
@@ -419,7 +419,7 @@ class MDCache {
   void predirty_journal_parents(MutationRef mut, EMetaBlob *blob,
 				CInode *in, CDir *parent,
 				int flags, int linkunlink=0,
-				snapid_t follows=CEPH_NOSNAP);
+				snapid_t follows=STONE_NOSNAP);
 
   // peers
   void add_uncommitted_leader(metareqid_t reqid, LogSegment *ls, set<mds_rank_t> &peers, bool safe=false) {
@@ -650,16 +650,16 @@ class MDCache {
 
   // inode_map
   bool have_inode(vinodeno_t vino) {
-    if (vino.snapid == CEPH_NOSNAP)
+    if (vino.snapid == STONE_NOSNAP)
       return inode_map.count(vino.ino) ? true : false;
     else
       return snap_inode_map.count(vino) ? true : false;
   }
-  bool have_inode(inodeno_t ino, snapid_t snap=CEPH_NOSNAP) {
+  bool have_inode(inodeno_t ino, snapid_t snap=STONE_NOSNAP) {
     return have_inode(vinodeno_t(ino, snap));
   }
   CInode* get_inode(vinodeno_t vino) {
-    if (vino.snapid == CEPH_NOSNAP) {
+    if (vino.snapid == STONE_NOSNAP) {
       auto p = inode_map.find(vino.ino);
       if (p != inode_map.end())
 	return p->second;
@@ -670,7 +670,7 @@ class MDCache {
     }
     return NULL;
   }
-  CInode* get_inode(inodeno_t ino, snapid_t s=CEPH_NOSNAP) {
+  CInode* get_inode(inodeno_t ino, snapid_t s=STONE_NOSNAP) {
     return get_inode(vinodeno_t(ino, s));
   }
   CInode* lookup_snap_inode(vinodeno_t vino) {

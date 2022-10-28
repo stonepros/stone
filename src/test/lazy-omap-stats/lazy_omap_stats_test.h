@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_LAZY_OMAP_STATS_TEST_H
-#define CEPH_LAZY_OMAP_STATS_TEST_H
+#ifndef STONE_LAZY_OMAP_STATS_TEST_H
+#define STONE_LAZY_OMAP_STATS_TEST_H
 
 #include <map>
 #include <regex>
@@ -77,4 +77,4 @@ class LazyOmapStatsTest
   const int run(const int argc, const char** argv);
 };
 
-#endif // CEPH_LAZY_OMAP_STATS_TEST_H
+#endif // STONE_LAZY_OMAP_STATS_TEST_H

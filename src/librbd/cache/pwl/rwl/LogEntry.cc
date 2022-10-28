@@ -4,7 +4,7 @@
 #include "librbd/cache/ImageWriteback.h"
 #include "LogEntry.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::rwl::WriteLogEntry: " \
                            << this << " " <<  __func__ << ": "
@@ -28,7 +28,7 @@ void WriteLogEntry::writeback(
 }
 
 void WriteLogEntry::init_cache_bp() {
-  ceph_assert(!this->cache_bp.have_raw());
+  stone_assert(!this->cache_bp.have_raw());
   cache_bp = buffer::ptr(buffer::create_static(this->write_bytes(),
                                                (char*)this->cache_buffer));
 }
@@ -50,7 +50,7 @@ void WriteLogEntry::init_bl(buffer::ptr &bp, buffer::list &bl) {
 void WriteLogEntry::init_cache_buffer(
     std::vector<WriteBufferAllocation>::iterator allocation) {
   this->ram_entry.write_data = allocation->buffer_oid;
-  ceph_assert(!TOID_IS_NULL(this->ram_entry.write_data));
+  stone_assert(!TOID_IS_NULL(this->ram_entry.write_data));
   cache_buffer = D_RW(this->ram_entry.write_data);
 }
 
@@ -61,13 +61,13 @@ buffer::list& WriteLogEntry::get_cache_bl() {
       //init pmem bufferlist
       cache_bl.clear();
       init_cache_bp();
-      ceph_assert(cache_bp.have_raw());
+      stone_assert(cache_bp.have_raw());
       int before_bl = cache_bp.raw_nref();
       this->init_bl(cache_bp, cache_bl);
       int after_bl = cache_bp.raw_nref();
       bl_refs = after_bl - before_bl;
     }
-    ceph_assert(0 != bl_refs);
+    stone_assert(0 != bl_refs);
   }
   return cache_bl;
 }

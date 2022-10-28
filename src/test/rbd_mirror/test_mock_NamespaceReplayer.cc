@@ -41,7 +41,7 @@ struct ImageDeleter<librbd::MockTestImageCtx> {
       librados::IoCtx &ioctx, Threads<librbd::MockTestImageCtx> *threads,
       Throttler<librbd::MockTestImageCtx> *image_deletion_throttler,
       ServiceDaemon<librbd::MockTestImageCtx> *service_daemon) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -64,7 +64,7 @@ struct ImageMap<librbd::MockTestImageCtx> {
                           Threads<librbd::MockTestImageCtx> *threads,
                           const std::string& instance_id,
                           image_map::Listener &listener) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -101,7 +101,7 @@ struct InstanceReplayer<librbd::MockTestImageCtx> {
       MirrorStatusUpdater<librbd::MockTestImageCtx>* local_status_updater,
       journal::CacheManagerHandler *cache_manager_handler,
       PoolMetaCache* pool_meta_cache) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -135,7 +135,7 @@ struct InstanceWatcher<librbd::MockTestImageCtx> {
       librados::IoCtx &ioctx, librbd::AsioEngine& asio_engine,
       InstanceReplayer<librbd::MockTestImageCtx>* instance_replayer,
       Throttler<librbd::MockTestImageCtx> *image_sync_throttler) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -179,7 +179,7 @@ struct MirrorStatusUpdater<librbd::MockTestImageCtx> {
   static MirrorStatusUpdater *create(librados::IoCtx &io_ctx,
                                      Threads<librbd::MockTestImageCtx> *threads,
                                      const std::string& local_mirror_uuid) {
-    ceph_assert(s_instance[local_mirror_uuid] != nullptr);
+    stone_assert(s_instance[local_mirror_uuid] != nullptr);
     return s_instance[local_mirror_uuid];
   }
 
@@ -209,7 +209,7 @@ struct PoolWatcher<librbd::MockTestImageCtx> {
                              const std::string& mirror_uuid,
                              pool_watcher::Listener& listener) {
     auto pool_id = ioctx.get_id();
-    ceph_assert(s_instances.count(pool_id));
+    stone_assert(s_instances.count(pool_id));
     return s_instances[pool_id];
   }
 
@@ -221,7 +221,7 @@ struct PoolWatcher<librbd::MockTestImageCtx> {
   MOCK_METHOD1(shut_down, void(Context*));
 
   PoolWatcher(int64_t pool_id) : pool_id(pool_id) {
-    ceph_assert(!s_instances.count(pool_id));
+    stone_assert(!s_instances.count(pool_id));
     s_instances[pool_id] = this;
   }
   ~PoolWatcher() {
@@ -247,7 +247,7 @@ struct ServiceDaemon<librbd::MockTestImageCtx> {
 
 template <>
 struct Threads<librbd::MockTestImageCtx> {
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
   SafeTimer *timer;
   librbd::asio::ContextWQ *work_queue;
   librbd::AsioEngine* asio_engine;

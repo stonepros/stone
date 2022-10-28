@@ -1,5 +1,5 @@
 tasks:
-- cephadm.shell:
+- stoneadm.shell:
     host.a:
-      - ceph fs volume create cephfs --placement=4
-      - ceph fs dump
+      - stone fs volume create stonefs --placement=4
+      - stone fs dump

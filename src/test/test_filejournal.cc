@@ -3,19 +3,19 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/common_init.h"
 #include "global/global_init.h"
 #include "common/config.h"
 #include "common/Finisher.h"
 #include "os/filestore/FileJournal.h"
 #include "include/Context.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/safe_io.h"
 #include "os/filestore/JournalingObjectStore.h"
 
 Finisher *finisher;
-ceph::condition_variable sync_cond;
+stone::condition_variable sync_cond;
 char path[200];
 uuid_d fsid;
 struct test_info {
@@ -28,8 +28,8 @@ struct test_info {
 };
 
 // ----
-ceph::condition_variable cond;
-ceph::mutex wait_lock = ceph::make_mutex("lock");
+stone::condition_variable cond;
+stone::mutex wait_lock = stone::make_mutex("lock");
 bool done;
 
 void wait()
@@ -41,8 +41,8 @@ void wait()
 // ----
 class C_Sync {
 public:
-  ceph::condition_variable cond;
-  ceph::mutex lock = ceph::make_mutex("C_Sync::lock");
+  stone::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("C_Sync::lock");
   bool done = false;
   C_SafeCond *c;
 
@@ -65,17 +65,17 @@ int main(int argc, char **argv) {
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   char mb[10];
   sprintf(mb, "%u", size_mb);
-  g_ceph_context->_conf.set_val("osd_journal_size", mb);
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("osd_journal_size", mb);
+  g_stone_context->_conf.apply_changes(nullptr);
 
-  finisher = new Finisher(g_ceph_context);
+  finisher = new Finisher(g_stone_context);
   
   path[0] = '\0';
   if (!args.empty()) {
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   }
   if ( path[0] == '\0') {
     srand(getpid() + time(0));
-    snprintf(path, sizeof(path), "/var/tmp/ceph_test_filejournal.tmp.%d", rand());
+    snprintf(path, sizeof(path), "/var/tmp/stone_test_filejournal.tmp.%d", rand());
   }
   cout << "path " << path << std::endl;
 
@@ -109,28 +109,28 @@ int main(int argc, char **argv) {
 }
 
 TEST(TestFileJournal, Create) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "false");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "0");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "false");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "0");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
   }
 }
 
 TEST(TestFileJournal, WriteSmall) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "false");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "0");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "false");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "0");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
     ASSERT_EQ(0, fj.make_writeable());
@@ -148,14 +148,14 @@ TEST(TestFileJournal, WriteSmall) {
 }
 
 TEST(TestFileJournal, WriteBig) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "false");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "0");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "false");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "0");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
     ASSERT_EQ(0, fj.make_writeable());
@@ -176,19 +176,19 @@ TEST(TestFileJournal, WriteBig) {
 }
 
 TEST(TestFileJournal, WriteMany) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "false");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "0");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "false");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "0");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
     ASSERT_EQ(0, fj.make_writeable());
 
-    C_GatherBuilder gb(g_ceph_context, new C_SafeCond(wait_lock, cond, &done));
+    C_GatherBuilder gb(g_stone_context, new C_SafeCond(wait_lock, cond, &done));
 
     vector<ObjectStore::Transaction> tls;
     bufferlist bl;
@@ -209,19 +209,19 @@ TEST(TestFileJournal, WriteMany) {
 }
 
 TEST(TestFileJournal, WriteManyVecs) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "false");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "0");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "false");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "0");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
     ASSERT_EQ(0, fj.make_writeable());
 
-    C_GatherBuilder gb(g_ceph_context, new C_SafeCond(wait_lock, cond, &done));
+    C_GatherBuilder gb(g_stone_context, new C_SafeCond(wait_lock, cond, &done));
 
     bufferlist first;
     first.append("small");
@@ -259,21 +259,21 @@ TEST(TestFileJournal, WriteManyVecs) {
 }
 
 TEST(TestFileJournal, ReplaySmall) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "false");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "0");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "false");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "0");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   vector<ObjectStore::Transaction> tls;
 
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
     ASSERT_EQ(0, fj.make_writeable());
 
-    C_GatherBuilder gb(g_ceph_context, new C_SafeCond(wait_lock, cond, &done));
+    C_GatherBuilder gb(g_stone_context, new C_SafeCond(wait_lock, cond, &done));
 
     bufferlist bl;
     bl.append("small");
@@ -320,20 +320,20 @@ TEST(TestFileJournal, ReplaySmall) {
 }
 
 TEST(TestFileJournal, ReplayCorrupt) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "true");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "0");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "true");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "0");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   vector<ObjectStore::Transaction> tls;
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
     ASSERT_EQ(0, fj.make_writeable());
 
-    C_GatherBuilder gb(g_ceph_context, new C_SafeCond(wait_lock, cond, &done));
+    C_GatherBuilder gb(g_stone_context, new C_SafeCond(wait_lock, cond, &done));
 
     const char *needle =    "i am a needle";
     const char *newneedle = "in a haystack";
@@ -406,14 +406,14 @@ TEST(TestFileJournal, ReplayCorrupt) {
 }
 
 TEST(TestFileJournal, WriteTrim) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "false");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "0");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "false");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "0");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
     ASSERT_EQ(0, fj.make_writeable());
@@ -457,15 +457,15 @@ TEST(TestFileJournal, WriteTrim) {
 }
 
 TEST(TestFileJournal, WriteTrimSmall) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "false");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "0");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "false");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "0");
+  g_stone_context->_conf.apply_changes(nullptr);
   vector<ObjectStore::Transaction> tls;
 
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
     ASSERT_EQ(0, fj.make_writeable());
@@ -507,20 +507,20 @@ TEST(TestFileJournal, WriteTrimSmall) {
 }
 
 TEST(TestFileJournal, ReplayDetectCorruptFooterMagic) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "true");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "1");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "true");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "1");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   vector<ObjectStore::Transaction> tls;
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
     ASSERT_EQ(0, fj.make_writeable());
 
-    C_GatherBuilder gb(g_ceph_context, new C_SafeCond(wait_lock, cond, &done));
+    C_GatherBuilder gb(g_stone_context, new C_SafeCond(wait_lock, cond, &done));
 
     const char *needle =    "i am a needle";
     for (unsigned i = 1; i <= 4; ++i) {
@@ -566,20 +566,20 @@ TEST(TestFileJournal, ReplayDetectCorruptFooterMagic) {
 }
 
 TEST(TestFileJournal, ReplayDetectCorruptPayload) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "true");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "1");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "true");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "1");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   vector<ObjectStore::Transaction> tls;
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
     ASSERT_EQ(0, fj.make_writeable());
 
-    C_GatherBuilder gb(g_ceph_context, new C_SafeCond(wait_lock, cond, &done));
+    C_GatherBuilder gb(g_stone_context, new C_SafeCond(wait_lock, cond, &done));
 
     const char *needle =    "i am a needle";
     for (unsigned i = 1; i <= 4; ++i) {
@@ -625,20 +625,20 @@ TEST(TestFileJournal, ReplayDetectCorruptPayload) {
 }
 
 TEST(TestFileJournal, ReplayDetectCorruptHeader) {
-  g_ceph_context->_conf.set_val("journal_ignore_corruption", "true");
-  g_ceph_context->_conf.set_val("journal_write_header_frequency", "1");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("journal_ignore_corruption", "true");
+  g_stone_context->_conf.set_val("journal_write_header_frequency", "1");
+  g_stone_context->_conf.apply_changes(nullptr);
 
   vector<ObjectStore::Transaction> tls;
   for (unsigned i = 0 ; i < 3; ++i) {
     SCOPED_TRACE(subtests[i].description);
     fsid.generate_random();
-    FileJournal fj(g_ceph_context, fsid, finisher, &sync_cond, path,
+    FileJournal fj(g_stone_context, fsid, finisher, &sync_cond, path,
 		  subtests[i].directio, subtests[i].aio, subtests[i].faio);
     ASSERT_EQ(0, fj.create());
     ASSERT_EQ(0, fj.make_writeable());
 
-    C_GatherBuilder gb(g_ceph_context, new C_SafeCond(wait_lock, cond, &done));
+    C_GatherBuilder gb(g_stone_context, new C_SafeCond(wait_lock, cond, &done));
 
     const char *needle =    "i am a needle";
     for (unsigned i = 1; i <= 4; ++i) {

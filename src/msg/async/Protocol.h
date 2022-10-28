@@ -105,7 +105,7 @@ public:
 protected:
   AsyncConnection *connection;
   AsyncMessenger *messenger;
-  CephContext *cct;
+  StoneeContext *cct;
 public:
   std::shared_ptr<AuthConnectionMeta> auth_meta;
 

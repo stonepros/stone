@@ -14,7 +14,7 @@
 
 #include "common/errno.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #undef dout_prefix
 #define dout_prefix (*_dout << "rgw realm reloader: ")
@@ -32,7 +32,7 @@ RGWRealmReloader::RGWRealmReloader(rgw::sal::RGWRadosStore*& store, std::map<std
     service_map_meta(service_map_meta),
     frontends(frontends),
     timer(store->ctx(), mutex, USE_SAFE_TIMER_CALLBACKS),
-    mutex(ceph::make_mutex("RGWRealmReloader")),
+    mutex(stone::make_mutex("RGWRealmReloader")),
     reload_scheduled(nullptr)
 {
   timer.init();
@@ -59,7 +59,7 @@ void RGWRealmReloader::handle_notify(RGWRealmNotify type,
     return;
   }
 
-  CephContext *const cct = store->ctx();
+  StoneContext *const cct = store->ctx();
 
   std::lock_guard lock{mutex};
   if (reload_scheduled) {
@@ -79,7 +79,7 @@ void RGWRealmReloader::handle_notify(RGWRealmNotify type,
 
 void RGWRealmReloader::reload()
 {
-  CephContext *const cct = store->ctx();
+  StoneContext *const cct = store->ctx();
   const DoutPrefix dp(cct, dout_subsys, "rgw realm reloader: ");
   ldpp_dout(&dp, 1) << "Pausing frontends for realm update..." << dendl;
 

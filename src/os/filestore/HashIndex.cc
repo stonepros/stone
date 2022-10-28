@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -23,7 +23,7 @@
 #include "common/errno.h"
 #include "common/debug.h"
 #define dout_context cct
-#define dout_subsys ceph_subsys_filestore
+#define dout_subsys stone_subsys_filestore
 
 using std::map;
 using std::pair;
@@ -31,8 +31,8 @@ using std::set;
 using std::string;
 using std::vector;
 
-using ceph::bufferptr;
-using ceph::bufferlist;
+using stone::bufferptr;
+using stone::bufferlist;
 
 const string HashIndex::SUBDIR_ATTR = "contents";
 const string HashIndex::SETTINGS_ATTR = "settings";
@@ -45,13 +45,13 @@ int hex_to_int(char c)
     return c - '0';
   if (c >= 'A' && c <= 'F')
     return c - 'A' + 10;
-  ceph_abort();
+  stone_abort();
 }
 
 /// int value to hex digit
 char int_to_hex(int v)
 {
-  ceph_assert(v < 16);
+  stone_assert(v < 16);
   if (v < 10)
     return '0' + v;
   return 'A' + v - 10;
@@ -60,7 +60,7 @@ char int_to_hex(int v)
 /// reverse bits in a nibble (0..15)
 int reverse_nibble_bits(int in)
 {
-  ceph_assert(in < 16);
+  stone_assert(in < 16);
   return
     ((in & 8) >> 3) |
     ((in & 4) >> 1) |
@@ -85,11 +85,11 @@ string reverse_hexdigit_bits_string(string s)
 /// compare hex digit (as length 1 string) bitwise
 bool cmp_hexdigit_bitwise(const string& l, const string& r)
 {
-  ceph_assert(l.length() == 1 && r.length() == 1);
+  stone_assert(l.length() == 1 && r.length() == 1);
   int lv = hex_to_int(l[0]);
   int rv = hex_to_int(r[0]);
-  ceph_assert(lv < 16);
-  ceph_assert(rv < 16);
+  stone_assert(lv < 16);
+  stone_assert(rv < 16);
   return reverse_nibble_bits(lv) < reverse_nibble_bits(rv);
 }
 
@@ -305,7 +305,7 @@ int HashIndex::_merge(
   uint32_t bits,
   CollectionIndex* dest) {
   dout(20) << __func__ << " bits " << bits << dendl;
-  ceph_assert(collection_version() == dest->collection_version());
+  stone_assert(collection_version() == dest->collection_version());
 
   vector<string> emptypath;
 
@@ -336,7 +336,7 @@ int HashIndex::_merge_dirs(
   vector<string> src_subs, dst_subs;
   r = from.list_subdirs(path, &src_subs);
   if (r < 0) {
-    lgeneric_subdout(g_ceph_context,filestore,20) << __func__
+    lgeneric_subdout(g_stone_context,filestore,20) << __func__
 						  << " r " << r << " from "
 						  << "from.list_subdirs"
 						  << dendl;
@@ -344,7 +344,7 @@ int HashIndex::_merge_dirs(
   }
   r = to.list_subdirs(path, &dst_subs);
   if (r < 0) {
-    lgeneric_subdout(g_ceph_context,filestore,20) << __func__
+    lgeneric_subdout(g_stone_context,filestore,20) << __func__
 						  << " r " << r << " from "
 						  << "to.list_subdirs"
 						  << dendl;
@@ -356,7 +356,7 @@ int HashIndex::_merge_dirs(
       // move it
       r = move_subdir(from, to, path, i);
       if (r < 0) {
-	lgeneric_subdout(g_ceph_context,filestore,20) << __func__
+	lgeneric_subdout(g_stone_context,filestore,20) << __func__
 						      << " r " << r << " from "
 						      << "move_subdir(...,"
 						      << path << "," << i << ")"
@@ -369,7 +369,7 @@ int HashIndex::_merge_dirs(
       nested.push_back(i);
       r = _merge_dirs(from, to, nested);
       if (r < 0) {
-	lgeneric_subdout(g_ceph_context,filestore,20) << __func__
+	lgeneric_subdout(g_stone_context,filestore,20) << __func__
 						      << " r " << r << " from "
 						      << "rec _merge_dirs"
 						      << dendl;
@@ -379,7 +379,7 @@ int HashIndex::_merge_dirs(
       // now remove it
       r = remove_path(nested);
       if (r < 0) {
-	lgeneric_subdout(g_ceph_context,filestore,20) << __func__
+	lgeneric_subdout(g_stone_context,filestore,20) << __func__
 						      << " r " << r << " from "
 						      << "remove_path "
 						      << nested
@@ -393,7 +393,7 @@ int HashIndex::_merge_dirs(
   map<string, ghobject_t> objects;
   r = from.list_objects(path, 0, 0, &objects);
   if (r < 0) {
-    lgeneric_subdout(g_ceph_context,filestore,20) << __func__
+    lgeneric_subdout(g_stone_context,filestore,20) << __func__
 						  << " r " << r << " from "
 						  << "from.list_objects"
 						  << dendl;
@@ -403,7 +403,7 @@ int HashIndex::_merge_dirs(
   for (auto& i : objects) {
     r = move_object(from, to, path, i);
     if (r < 0) {
-      lgeneric_subdout(g_ceph_context,filestore,20) << __func__
+      lgeneric_subdout(g_stone_context,filestore,20) << __func__
 						    << " r " << r << " from "
 						    << "move_object(...,"
 						    << path << "," << i << ")"
@@ -420,7 +420,7 @@ int HashIndex::_split(
   uint32_t match,
   uint32_t bits,
   CollectionIndex* dest) {
-  ceph_assert(collection_version() == dest->collection_version());
+  stone_assert(collection_version() == dest->collection_version());
   unsigned mkdirred = 0;
 
   return col_split_level(
@@ -555,13 +555,13 @@ int HashIndex::_created(const vector<string> &path,
     if (r < 0) {
       derr << __func__ << " error starting split " << path << " in pg "
            << coll() << ": " << cpp_strerror(r) << dendl;
-      ceph_assert(!cct->_conf->filestore_fail_eio);
+      stone_assert(!cct->_conf->filestore_fail_eio);
     } else {
       r = complete_split(path, info);
       if (r < 0) {
         derr << __func__ << " error completing split " << path << " in pg "
              << coll() << ": " << cpp_strerror(r) << dendl;
-        ceph_assert(!cct->_conf->filestore_fail_eio);
+        stone_assert(!cct->_conf->filestore_fail_eio);
       }
       dout(1) << __func__ << " " << path << " split completed in pg " << coll()
               << "." << dendl;
@@ -594,13 +594,13 @@ int HashIndex::_remove(const vector<string> &path,
     if (r < 0) {
       derr << __func__ << " error starting merge " << path << " in pg "
            << coll() << ": " << cpp_strerror(r) << dendl;
-      ceph_assert(!cct->_conf->filestore_fail_eio);
+      stone_assert(!cct->_conf->filestore_fail_eio);
     } else {
       r = complete_merge(path, info);
       if (r < 0) {
         derr << __func__ << " error completing merge " << path << " in pg "
              << coll() << ": " << cpp_strerror(r) << dendl;
-        ceph_assert(!cct->_conf->filestore_fail_eio);
+        stone_assert(!cct->_conf->filestore_fail_eio);
       }
       dout(1) << __func__ << " " << path << " merge completed in pg " << coll()
               << "." << dendl;
@@ -724,10 +724,10 @@ int HashIndex::pre_split_folder(uint32_t pg_num, uint64_t expected_num_objs)
   // this variable denotes how many bits (for this level) that can be
   // used for sub folder splitting
   int split_bits = 4 - left_bits;
-  // the below logic is inspired by rados.h#ceph_stable_mod,
+  // the below logic is inspired by rados.h#stone_stable_mod,
   // it basically determines how many sub-folders should we
   // create for splitting
-  ceph_assert(pg_num_bits > 0); // otherwise BAD_SHIFT
+  stone_assert(pg_num_bits > 0); // otherwise BAD_SHIFT
   if (((1 << (pg_num_bits - 1)) | ps) >= pg_num) {
     ++split_bits;
   }
@@ -741,7 +741,7 @@ int HashIndex::pre_split_folder(uint32_t pg_num, uint64_t expected_num_objs)
     actual_leaves <<= 4;
   }
   for (uint32_t i = 0; i < subs; ++i) {
-    ceph_assert(split_bits <= 4); // otherwise BAD_SHIFT
+    stone_assert(split_bits <= 4); // otherwise BAD_SHIFT
     int v = tmp_id | (i << ((4 - split_bits) % 4));
     paths.push_back(to_hex(v));
     ret = create_path(paths);
@@ -874,13 +874,13 @@ int HashIndex::get_info(const vector<string> &path, subdir_info_s *info) {
     return r;
   auto bufiter = buf.cbegin();
   info->decode(bufiter);
-  ceph_assert(path.size() == (unsigned)info->hash_level);
+  stone_assert(path.size() == (unsigned)info->hash_level);
   return 0;
 }
 
 int HashIndex::set_info(const vector<string> &path, const subdir_info_s &info) {
   bufferlist buf;
-  ceph_assert(path.size() == (unsigned)info.hash_level);
+  stone_assert(path.size() == (unsigned)info.hash_level);
   info.encode(buf);
   return add_attr_path(path, SUBDIR_ATTR, buf);
 }
@@ -893,7 +893,7 @@ bool HashIndex::must_merge(const subdir_info_s &info) {
 }
 
 bool HashIndex::must_split(const subdir_info_s &info, int target_level) {
-  // target_level is used for ceph-objectstore-tool to split dirs offline.
+  // target_level is used for stone-objectstore-tool to split dirs offline.
   // if it is set (defalult is 0) and current hash level < target_level, 
   // this dir would be split no matters how many objects it has.
   return (info.hash_level < (unsigned)MAX_HASH_LEVEL &&
@@ -1072,7 +1072,7 @@ string HashIndex::get_hash_str(uint32_t hash) {
 }
 
 string HashIndex::get_path_str(const ghobject_t &oid) {
-  ceph_assert(!oid.is_max());
+  stone_assert(!oid.is_max());
   return get_hash_str(oid.hobj.get_hash());
 }
 
@@ -1153,7 +1153,7 @@ int HashIndex::list_by_hash(const vector<string> &path,
 			    ghobject_t *next,
 			    vector<ghobject_t> *out)
 {
-  ceph_assert(out);
+  stone_assert(out);
   return list_by_hash_bitwise(path, end, max_count, next, out);
 }
 

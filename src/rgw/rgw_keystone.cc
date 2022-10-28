@@ -9,7 +9,7 @@
 #include <fstream>
 
 #include "common/errno.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "include/types.h"
 #include "include/str_list.h"
 
@@ -19,8 +19,8 @@
 #include "common/Cond.h"
 #include "rgw_perf_counters.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 #define PKI_ANS1_PREFIX "MII"
 
 bool rgw_is_pki_token(const string& token)
@@ -35,7 +35,7 @@ void rgw_get_token_id(const string& token, string& token_id)
     return;
   }
 
-  unsigned char m[CEPH_CRYPTO_MD5_DIGESTSIZE];
+  unsigned char m[STONE_CRYPTO_MD5_DIGESTSIZE];
 
   MD5 hash;
   // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
@@ -43,8 +43,8 @@ void rgw_get_token_id(const string& token, string& token_id)
   hash.Update((const unsigned char *)token.c_str(), token.size());
   hash.Final(m);
 
-  char calc_md5[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
-  buf_to_hex(m, CEPH_CRYPTO_MD5_DIGESTSIZE, calc_md5);
+  char calc_md5[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+  buf_to_hex(m, STONE_CRYPTO_MD5_DIGESTSIZE, calc_md5);
   token_id = calc_md5;
 }
 
@@ -52,24 +52,24 @@ void rgw_get_token_id(const string& token, string& token_id)
 namespace rgw {
 namespace keystone {
 
-ApiVersion CephCtxConfig::get_api_version() const noexcept
+ApiVersion StoneCtxConfig::get_api_version() const noexcept
 {
-  switch (g_ceph_context->_conf->rgw_keystone_api_version) {
+  switch (g_stone_context->_conf->rgw_keystone_api_version) {
   case 3:
     return ApiVersion::VER_3;
   case 2:
     return ApiVersion::VER_2;
   default:
     dout(0) << "ERROR: wrong Keystone API version: "
-            << g_ceph_context->_conf->rgw_keystone_api_version
+            << g_stone_context->_conf->rgw_keystone_api_version
             << "; falling back to v2" <<  dendl;
     return ApiVersion::VER_2;
   }
 }
 
-std::string CephCtxConfig::get_endpoint_url() const noexcept
+std::string StoneCtxConfig::get_endpoint_url() const noexcept
 {
-  static const std::string url = g_ceph_context->_conf->rgw_keystone_url;
+  static const std::string url = g_stone_context->_conf->rgw_keystone_url;
 
   if (url.empty() || boost::algorithm::ends_with(url, "/")) {
     return url;
@@ -80,7 +80,7 @@ std::string CephCtxConfig::get_endpoint_url() const noexcept
 }
 
 /* secrets */
-const std::string CephCtxConfig::empty{""};
+const std::string StoneCtxConfig::empty{""};
 
 static inline std::string read_secret(const std::string& file_path)
 {
@@ -107,13 +107,13 @@ static inline std::string read_secret(const std::string& file_path)
   return s;
 }
 
-std::string CephCtxConfig::get_admin_token() const noexcept
+std::string StoneCtxConfig::get_admin_token() const noexcept
 {
-  auto& atv = g_ceph_context->_conf->rgw_keystone_admin_token_path;
+  auto& atv = g_stone_context->_conf->rgw_keystone_admin_token_path;
   if (!atv.empty()) {
     return read_secret(atv);
   } else {
-    auto& atv = g_ceph_context->_conf->rgw_keystone_admin_token;
+    auto& atv = g_stone_context->_conf->rgw_keystone_admin_token;
     if (!atv.empty()) {
       return atv;
     }
@@ -121,12 +121,12 @@ std::string CephCtxConfig::get_admin_token() const noexcept
   return empty;
 }
 
-std::string CephCtxConfig::get_admin_password() const noexcept  {
-  auto& apv = g_ceph_context->_conf->rgw_keystone_admin_password_path;
+std::string StoneCtxConfig::get_admin_password() const noexcept  {
+  auto& apv = g_stone_context->_conf->rgw_keystone_admin_password_path;
   if (!apv.empty()) {
     return read_secret(apv);
   } else {
-    auto& apv = g_ceph_context->_conf->rgw_keystone_admin_password;
+    auto& apv = g_stone_context->_conf->rgw_keystone_admin_password;
     if (!apv.empty()) {
       return apv;
     }
@@ -134,7 +134,7 @@ std::string CephCtxConfig::get_admin_password() const noexcept  {
   return empty;
 }
 
-int Service::get_admin_token(CephContext* const cct,
+int Service::get_admin_token(StoneContext* const cct,
                              TokenCache& token_cache,
                              const Config& config,
                              std::string& token)
@@ -166,7 +166,7 @@ int Service::get_admin_token(CephContext* const cct,
   return ret;
 }
 
-int Service::issue_admin_token_request(CephContext* const cct,
+int Service::issue_admin_token_request(StoneContext* const cct,
                                        const Config& config,
                                        TokenEnvelope& t)
 {
@@ -225,10 +225,10 @@ int Service::issue_admin_token_request(CephContext* const cct,
   return 0;
 }
 
-int Service::get_keystone_barbican_token(CephContext * const cct,
+int Service::get_keystone_barbican_token(StoneContext * const cct,
                                          std::string& token)
 {
-  using keystone_config_t = rgw::keystone::CephCtxConfig;
+  using keystone_config_t = rgw::keystone::StoneCtxConfig;
   using keystone_cache_t = rgw::keystone::TokenCache;
 
   auto& config = keystone_config_t::get_instance();
@@ -314,9 +314,9 @@ bool TokenEnvelope::has_role(const std::string& r) const
   return false;
 }
 
-int TokenEnvelope::parse(CephContext* const cct,
+int TokenEnvelope::parse(StoneContext* const cct,
                          const std::string& token_str,
-                         ceph::bufferlist& bl,
+                         stone::bufferlist& bl,
                          const ApiVersion version)
 {
   JSONParser parser;
@@ -379,7 +379,7 @@ bool TokenCache::find(const std::string& token_id,
 bool TokenCache::find_locked(const std::string& token_id,
                              rgw::keystone::TokenEnvelope& token)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
   map<string, token_entry>::iterator iter = tokens.find(token_id);
   if (iter == tokens.end()) {
     if (perfcounter) perfcounter->inc(l_rgw_keystone_token_cache_miss);
@@ -428,7 +428,7 @@ void TokenCache::add(const std::string& token_id,
 void TokenCache::add_locked(const std::string& token_id,
                             const rgw::keystone::TokenEnvelope& token)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
   map<string, token_entry>::iterator iter = tokens.find(token_id);
   if (iter != tokens.end()) {
     token_entry& e = iter->second;
@@ -443,7 +443,7 @@ void TokenCache::add_locked(const std::string& token_id,
   while (tokens_lru.size() > max) {
     list<string>::reverse_iterator riter = tokens_lru.rbegin();
     iter = tokens.find(*riter);
-    ceph_assert(iter != tokens.end());
+    stone_assert(iter != tokens.end());
     tokens.erase(iter);
     tokens_lru.pop_back();
   }

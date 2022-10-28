@@ -1,5 +1,5 @@
-#ifndef __CEPH_CMP_H
-#define __CEPH_CMP_H
+#ifndef __STONE_CMP_H
+#define __STONE_CMP_H
 
 /*
  * macros to define comparison operators for classes with small numbers of members.

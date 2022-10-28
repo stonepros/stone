@@ -1,9 +1,9 @@
-# see http://tracker.ceph.com/issues/20360 and http://tracker.ceph.com/issues/18126
+# see http://tracker.stone.com/issues/20360 and http://tracker.stone.com/issues/18126
 os_type: centos
 
 overrides:
   install:
-    ceph:
+    stone:
       debuginfo: true
   rbd_fsx:
     valgrind: ["--tool=memcheck"]

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Allen Samuels <allen.samuels@sandisk.com>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef _CEPH_INCLUDE_MEMPOOL_H
-#define _CEPH_INCLUDE_MEMPOOL_H
+#ifndef _STONE_INCLUDE_MEMPOOL_H
+#define _STONE_INCLUDE_MEMPOOL_H
 
 #include <cstddef>
 #include <map>
@@ -259,7 +259,7 @@ public:
     // Dirt cheap, see:
     //   https://fossies.org/dox/glibc-2.32/pthread__self_8c_source.html
     size_t me = (size_t)pthread_self();
-    size_t i = (me >> CEPH_PAGE_SHIFT) & ((1 << num_shard_bits) - 1);
+    size_t i = (me >> STONE_PAGE_SHIFT) & ((1 << num_shard_bits) - 1);
     return i;
   }
 

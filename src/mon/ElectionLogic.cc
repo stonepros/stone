@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -14,10 +14,10 @@
 
 #include "ElectionLogic.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/dout.h"
 
-#define dout_subsys ceph_subsys_mon
+#define dout_subsys stone_subsys_mon
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, epoch, elector)
 using std::cerr;
@@ -38,14 +38,14 @@ using std::to_string;
 using std::vector;
 using std::unique_ptr;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::Formatter;
-using ceph::JSONFormatter;
-using ceph::mono_clock;
-using ceph::mono_time;
-using ceph::timespan_str;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::Formatter;
+using stone::JSONFormatter;
+using stone::mono_clock;
+using stone::mono_time;
+using stone::timespan_str;
 static ostream& _prefix(std::ostream *_dout, epoch_t epoch, ElectionOwner* elector) {
   return *_dout << "paxos." << elector->get_my_rank()
 		<< ").electionLogic(" <<  epoch << ") ";
@@ -69,7 +69,7 @@ void ElectionLogic::init()
 void ElectionLogic::bump_epoch(epoch_t e)
 {
   ldout(cct, 10) << __func__ << epoch << " to " << e << dendl;
-  ceph_assert(epoch <= e);
+  stone_assert(epoch <= e);
   epoch = e;
   peer_tracker->increase_epoch(e);
   elector->persist_epoch(epoch);
@@ -101,7 +101,7 @@ void ElectionLogic::reset_stable_tracker()
 
 void ElectionLogic::connectivity_bump_epoch_in_election(epoch_t mepoch)
 {
-  ceph_assert(mepoch > epoch);
+  stone_assert(mepoch > epoch);
   bump_epoch(mepoch);
   reset_stable_tracker();
   double lscore, my_score;
@@ -147,10 +147,10 @@ void ElectionLogic::defer(int who)
 {
   if (strategy == CLASSIC) {
       ldout(cct, 5) << "defer to " << who << dendl;
-      ceph_assert(who < elector->get_my_rank());
+      stone_assert(who < elector->get_my_rank());
   } else {
     ldout(cct, 5) << "defer to " << who << ", disallowed_leaders=" << elector->get_disallowed_leaders() << dendl;
-    ceph_assert(!elector->get_disallowed_leaders().count(who));
+    stone_assert(!elector->get_disallowed_leaders().count(who));
   }
 
   if (electing_me) {
@@ -193,7 +193,7 @@ void ElectionLogic::declare_victory()
   set<int> new_quorum;
   new_quorum.swap(acked_me);
   
-  ceph_assert(epoch % 2 == 1);  // election
+  stone_assert(epoch % 2 == 1);  // election
   bump_epoch(epoch+1);     // is over!
 
   elector->message_victory(new_quorum);
@@ -238,7 +238,7 @@ void ElectionLogic::receive_propose(int from, epoch_t mepoch,
     propose_connectivity_handler(from, mepoch, ct);
     break;
   default:
-    ceph_assert(0 == "how did election strategy become an invalid value?");
+    stone_assert(0 == "how did election strategy become an invalid value?");
   }
 }
 
@@ -261,7 +261,7 @@ void ElectionLogic::propose_disallow_handler(int from, epoch_t mepoch)
   if (my_win) {
     // i would win over them.
     if (leader_acked >= 0) {        // we already acked someone
-      ceph_assert(leader_acked < from || from_disallowed);  // and they still win, of course
+      stone_assert(leader_acked < from || from_disallowed);  // and they still win, of course
       ldout(cct, 5) << "no, we already acked " << leader_acked << dendl;
     } else {
       // wait, i should win!
@@ -288,7 +288,7 @@ void ElectionLogic::propose_classic_handler(int from, epoch_t mepoch)
   if (elector->get_my_rank() < from) {
     // i would win over them.
     if (leader_acked >= 0) {        // we already acked someone
-      ceph_assert(leader_acked < from);  // and they still win, of course
+      stone_assert(leader_acked < from);  // and they still win, of course
       ldout(cct, 5) << "no, we already acked " << leader_acked << dendl;
     } else {
       // wait, i should win!
@@ -397,7 +397,7 @@ void ElectionLogic::propose_connectivity_handler(int from, epoch_t mepoch,
   if (my_win) {
     // i would win over them.
     if (leader_acked >= 0) {        // we already acked someone
-      ceph_assert(leader_score >= from_score);  // and they still win, of course
+      stone_assert(leader_score >= from_score);  // and they still win, of course
       ldout(cct, 5) << "no, we already acked " << leader_acked << dendl;
     } else {
       // wait, i should win!
@@ -456,7 +456,7 @@ void ElectionLogic::propose_connectivity_handler(int from, epoch_t mepoch,
 
 void ElectionLogic::receive_ack(int from, epoch_t from_epoch)
 {
-  ceph_assert(from_epoch % 2 == 1); // sender in an election epoch
+  stone_assert(from_epoch % 2 == 1); // sender in an election epoch
   if (from_epoch > epoch) {
     ldout(cct, 5) << "woah, that's a newer epoch, i must have rebooted.  bumping and re-starting!" << dendl;
     bump_epoch(from_epoch);
@@ -472,7 +472,7 @@ void ElectionLogic::receive_ack(int from, epoch_t from_epoch)
     }
   } else {
     // ignore, i'm deferring already.
-    ceph_assert(leader_acked >= 0);
+    stone_assert(leader_acked >= 0);
   }
 }
 
@@ -498,7 +498,7 @@ bool ElectionLogic::victory_makes_sense(int from)
     makes_sense = (leader_score >= my_score);
     break;
   default:
-    ceph_assert(0 == "how did you get a nonsense election strategy assigned?");
+    stone_assert(0 == "how did you get a nonsense election strategy assigned?");
   }
   return makes_sense;
 }
@@ -512,7 +512,7 @@ bool ElectionLogic::receive_victory_claim(int from, epoch_t from_epoch)
   clear_live_election_state();
 
   if (!election_okay) {
-    ceph_assert(strategy == CONNECTIVITY);
+    stone_assert(strategy == CONNECTIVITY);
     ldout(cct, 1) << "I should have been elected over this leader; bumping and restarting!" << dendl;
     bump_epoch(from_epoch);
     start();

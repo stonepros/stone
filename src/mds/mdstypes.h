@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_MDSTYPES_H
-#define CEPH_MDSTYPES_H
+#ifndef STONE_MDSTYPES_H
+#define STONE_MDSTYPES_H
 
 #include "include/int_types.h"
 
@@ -33,7 +33,7 @@
 #include <boost/serialization/strong_typedef.hpp>
 #include "common/ceph_json.h"
 
-#define CEPH_FS_ONDISK_MAGIC "ceph fs volume v011"
+#define STONE_FS_ONDISK_MAGIC "ceph fs volume v011"
 
 #define MDS_PORT_CACHE   0x200
 #define MDS_PORT_LOCKER  0x300
@@ -42,7 +42,7 @@
 #define MAX_MDS                   0x100
 #define NUM_STRAY                 10
 
-// Inode numbers 1,2 and 4 please see CEPH_INO_* in include/ceph_fs.h
+// Inode numbers 1,2 and 4 please see STONE_INO_* in include/ceph_fs.h
 
 #define MDS_INO_MDSDIR_OFFSET     (1*MAX_MDS)
 #define MDS_INO_STRAY_OFFSET      (6*MAX_MDS)
@@ -61,7 +61,7 @@
 #define MDS_INO_IS_STRAY(i)  ((i) >= MDS_INO_STRAY_OFFSET  && (i) < (MDS_INO_STRAY_OFFSET+(MAX_MDS*NUM_STRAY)))
 #define MDS_INO_IS_MDSDIR(i) ((i) >= MDS_INO_MDSDIR_OFFSET && (i) < (MDS_INO_MDSDIR_OFFSET+MAX_MDS))
 #define MDS_INO_MDSDIR_OWNER(i) (signed ((unsigned (i)) - MDS_INO_MDSDIR_OFFSET))
-#define MDS_INO_IS_BASE(i)   ((i) == CEPH_INO_ROOT || (i) == CEPH_INO_GLOBAL_SNAPREALM || MDS_INO_IS_MDSDIR(i))
+#define MDS_INO_IS_BASE(i)   ((i) == STONE_INO_ROOT || (i) == STONE_INO_GLOBAL_SNAPREALM || MDS_INO_IS_MDSDIR(i))
 #define MDS_INO_STRAY_OWNER(i) (signed (((unsigned (i)) - MDS_INO_STRAY_OFFSET) / NUM_STRAY))
 #define MDS_INO_STRAY_INDEX(i) (((unsigned (i)) - MDS_INO_STRAY_OFFSET) % NUM_STRAY)
 
@@ -113,31 +113,31 @@ inline std::ostream& operator<<(std::ostream& out, const mds_role_t& role) {
 inline std::string gcap_string(int cap)
 {
   std::string s;
-  if (cap & CEPH_CAP_GSHARED) s += "s";  
-  if (cap & CEPH_CAP_GEXCL) s += "x";
-  if (cap & CEPH_CAP_GCACHE) s += "c";
-  if (cap & CEPH_CAP_GRD) s += "r";
-  if (cap & CEPH_CAP_GWR) s += "w";
-  if (cap & CEPH_CAP_GBUFFER) s += "b";
-  if (cap & CEPH_CAP_GWREXTEND) s += "a";
-  if (cap & CEPH_CAP_GLAZYIO) s += "l";
+  if (cap & STONE_CAP_GSHARED) s += "s";  
+  if (cap & STONE_CAP_GEXCL) s += "x";
+  if (cap & STONE_CAP_GCACHE) s += "c";
+  if (cap & STONE_CAP_GRD) s += "r";
+  if (cap & STONE_CAP_GWR) s += "w";
+  if (cap & STONE_CAP_GBUFFER) s += "b";
+  if (cap & STONE_CAP_GWREXTEND) s += "a";
+  if (cap & STONE_CAP_GLAZYIO) s += "l";
   return s;
 }
 inline std::string ccap_string(int cap)
 {
   std::string s;
-  if (cap & CEPH_CAP_PIN) s += "p";
+  if (cap & STONE_CAP_PIN) s += "p";
 
-  int a = (cap >> CEPH_CAP_SAUTH) & 3;
+  int a = (cap >> STONE_CAP_SAUTH) & 3;
   if (a) s += 'A' + gcap_string(a);
 
-  a = (cap >> CEPH_CAP_SLINK) & 3;
+  a = (cap >> STONE_CAP_SLINK) & 3;
   if (a) s += 'L' + gcap_string(a);
 
-  a = (cap >> CEPH_CAP_SXATTR) & 3;
+  a = (cap >> STONE_CAP_SXATTR) & 3;
   if (a) s += 'X' + gcap_string(a);
 
-  a = cap >> CEPH_CAP_SFILE;
+  a = cap >> STONE_CAP_SFILE;
   if (a) s += 'F' + gcap_string(a);
 
   if (s.length() == 0)
@@ -353,7 +353,7 @@ namespace std {
 
 inline std::ostream& operator<<(std::ostream &out, const vinodeno_t &vino) {
   out << vino.ino;
-  if (vino.snapid == CEPH_NOSNAP)
+  if (vino.snapid == STONE_NOSNAP)
     out << ".head";
   else if (vino.snapid)
     out << '.' << vino.snapid;
@@ -756,7 +756,7 @@ void inode_t<Allocator>::decode(ceph::buffer::list::const_iterator &p)
   if (struct_v >= 9) {
     decode(inline_data, p);
   } else {
-    inline_data.version = CEPH_INLINE_NONE;
+    inline_data.version = STONE_INLINE_NONE;
   }
   if (struct_v < 10)
     backtrace_version = 0; // force update backtrace
@@ -1367,7 +1367,7 @@ struct dentry_key_t {
   }
   void encode(std::string& key) const {
     char b[20];
-    if (snapid != CEPH_NOSNAP) {
+    if (snapid != STONE_NOSNAP) {
       uint64_t val(snapid);
       snprintf(b, sizeof(b), "%" PRIx64, val);
     } else {
@@ -1389,7 +1389,7 @@ struct dentry_key_t {
     ceph_assert(i != std::string::npos);
     if (key.compare(i+1, std::string_view::npos, "head") == 0) {
       // name_head
-      sn = CEPH_NOSNAP;
+      sn = STONE_NOSNAP;
     } else {
       // name_%x
       long long unsigned x = 0;

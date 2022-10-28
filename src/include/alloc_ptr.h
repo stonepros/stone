@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc.
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_ALLOC_PTR_H
-#define CEPH_ALLOC_PTR_H
+#ifndef STONE_ALLOC_PTR_H
+#define STONE_ALLOC_PTR_H
 
 #include <memory>
 

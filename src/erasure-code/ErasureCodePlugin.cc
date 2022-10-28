@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -17,12 +17,12 @@
 
 #include <errno.h>
 
-#include "ceph_ver.h"
+#include "stone_ver.h"
 #include "ErasureCodePlugin.h"
 #include "common/errno.h"
 #include "include/dlfcn_compat.h"
 #include "include/str_list.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 using namespace std;
 
@@ -31,7 +31,7 @@ using namespace std;
 #define PLUGIN_INIT_FUNCTION "__erasure_code_init"
 #define PLUGIN_VERSION_FUNCTION "__erasure_code_version"
 
-namespace ceph {
+namespace stone {
 
 ErasureCodePluginRegistry ErasureCodePluginRegistry::singleton;
 
@@ -53,7 +53,7 @@ ErasureCodePluginRegistry::~ErasureCodePluginRegistry()
 
 int ErasureCodePluginRegistry::remove(const std::string &name)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   if (plugins.find(name) == plugins.end())
     return -ENOENT;
   std::map<std::string,ErasureCodePlugin*>::iterator plugin = plugins.find(name);
@@ -67,7 +67,7 @@ int ErasureCodePluginRegistry::remove(const std::string &name)
 int ErasureCodePluginRegistry::add(const std::string &name,
                                    ErasureCodePlugin* plugin)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   if (plugins.find(name) != plugins.end())
     return -EEXIST;
   plugins[name] = plugin;
@@ -76,7 +76,7 @@ int ErasureCodePluginRegistry::add(const std::string &name,
 
 ErasureCodePlugin *ErasureCodePluginRegistry::get(const std::string &name)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   if (plugins.find(name) != plugins.end())
     return plugins[name];
   else
@@ -122,7 +122,7 @@ int ErasureCodePluginRegistry::load(const std::string &plugin_name,
 				    ErasureCodePlugin **plugin,
 				    ostream *ss)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   std::string fname = directory + "/" PLUGIN_PREFIX
     + plugin_name + PLUGIN_SUFFIX;
   void *library = dlopen(fname.c_str(), RTLD_NOW);
@@ -135,8 +135,8 @@ int ErasureCodePluginRegistry::load(const std::string &plugin_name,
     (const char *(*)())dlsym(library, PLUGIN_VERSION_FUNCTION);
   if (erasure_code_version == NULL)
     erasure_code_version = an_older_version;
-  if (erasure_code_version() != string(CEPH_GIT_NICE_VER)) {
-    *ss << "expected plugin " << fname << " version " << CEPH_GIT_NICE_VER
+  if (erasure_code_version() != string(STONE_GIT_NICE_VER)) {
+    *ss << "expected plugin " << fname << " version " << STONE_GIT_NICE_VER
 	<< " but it claims to be " << erasure_code_version() << " instead";
     dlclose(library);
     return -EXDEV;

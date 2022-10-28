@@ -5,7 +5,7 @@
 #include "test/librbd/test_support.h"
 #include "test/librbd/mock/migration/MockSnapshotInterface.h"
 #include "include/rbd_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/migration/RawFormat.h"
 #include "librbd/migration/SourceSpecBuilder.h"
 #include "gtest/gtest.h"
@@ -142,7 +142,7 @@ TEST_F(TestMockMigrationRawFormat, OpenClose) {
   MockSourceSpecBuilder mock_source_spec_builder;
 
   auto mock_snapshot_interface = new MockSnapshotInterface();
-  expect_build_snapshot(mock_source_spec_builder, CEPH_NOSNAP,
+  expect_build_snapshot(mock_source_spec_builder, STONE_NOSNAP,
                         mock_snapshot_interface, 0);
 
   expect_snapshot_open(*mock_snapshot_interface, 0);
@@ -168,7 +168,7 @@ TEST_F(TestMockMigrationRawFormat, OpenError) {
   MockSourceSpecBuilder mock_source_spec_builder;
 
   auto mock_snapshot_interface = new MockSnapshotInterface();
-  expect_build_snapshot(mock_source_spec_builder, CEPH_NOSNAP,
+  expect_build_snapshot(mock_source_spec_builder, STONE_NOSNAP,
                         mock_snapshot_interface, 0);
 
   expect_snapshot_open(*mock_snapshot_interface, -ENOENT);
@@ -191,7 +191,7 @@ TEST_F(TestMockMigrationRawFormat, OpenSnapshotError) {
   MockSourceSpecBuilder mock_source_spec_builder;
 
   auto mock_snapshot_interface_head = new MockSnapshotInterface();
-  expect_build_snapshot(mock_source_spec_builder, CEPH_NOSNAP,
+  expect_build_snapshot(mock_source_spec_builder, STONE_NOSNAP,
                         mock_snapshot_interface_head, 0);
 
   auto mock_snapshot_interface_1 = new MockSnapshotInterface();
@@ -224,7 +224,7 @@ TEST_F(TestMockMigrationRawFormat, GetSnapshots) {
   MockSourceSpecBuilder mock_source_spec_builder;
 
   auto mock_snapshot_interface = new MockSnapshotInterface();
-  expect_build_snapshot(mock_source_spec_builder, CEPH_NOSNAP,
+  expect_build_snapshot(mock_source_spec_builder, STONE_NOSNAP,
                         mock_snapshot_interface, 0);
 
   expect_snapshot_open(*mock_snapshot_interface, 0);
@@ -256,7 +256,7 @@ TEST_F(TestMockMigrationRawFormat, GetImageSize) {
   MockSourceSpecBuilder mock_source_spec_builder;
 
   auto mock_snapshot_interface = new MockSnapshotInterface();
-  expect_build_snapshot(mock_source_spec_builder, CEPH_NOSNAP,
+  expect_build_snapshot(mock_source_spec_builder, STONE_NOSNAP,
                         mock_snapshot_interface, 0);
 
   expect_snapshot_open(*mock_snapshot_interface, 0);
@@ -275,7 +275,7 @@ TEST_F(TestMockMigrationRawFormat, GetImageSize) {
 
   C_SaferCond ctx2;
   uint64_t size;
-  mock_raw_format.get_image_size(CEPH_NOSNAP, &size, &ctx2);
+  mock_raw_format.get_image_size(STONE_NOSNAP, &size, &ctx2);
   ASSERT_EQ(0, ctx2.wait());
   ASSERT_EQ(size, 123);
 
@@ -291,7 +291,7 @@ TEST_F(TestMockMigrationRawFormat, GetImageSizeSnapshotDNE) {
   MockSourceSpecBuilder mock_source_spec_builder;
 
   auto mock_snapshot_interface = new MockSnapshotInterface();
-  expect_build_snapshot(mock_source_spec_builder, CEPH_NOSNAP,
+  expect_build_snapshot(mock_source_spec_builder, STONE_NOSNAP,
                         mock_snapshot_interface, 0);
 
   expect_snapshot_open(*mock_snapshot_interface, 0);
@@ -322,7 +322,7 @@ TEST_F(TestMockMigrationRawFormat, Read) {
   MockSourceSpecBuilder mock_source_spec_builder;
 
   auto mock_snapshot_interface = new MockSnapshotInterface();
-  expect_build_snapshot(mock_source_spec_builder, CEPH_NOSNAP,
+  expect_build_snapshot(mock_source_spec_builder, STONE_NOSNAP,
                         mock_snapshot_interface, 0);
 
   expect_snapshot_open(*mock_snapshot_interface, 0);
@@ -345,7 +345,7 @@ TEST_F(TestMockMigrationRawFormat, Read) {
     &ctx2, m_image_ctx, io::AIO_TYPE_READ);
   bufferlist bl;
   io::ReadResult read_result{&bl};
-  ASSERT_TRUE(mock_raw_format.read(aio_comp, CEPH_NOSNAP, {{123, 123}},
+  ASSERT_TRUE(mock_raw_format.read(aio_comp, STONE_NOSNAP, {{123, 123}},
                                    std::move(read_result), 0, 0, {}));
   ASSERT_EQ(123, ctx2.wait());
   ASSERT_EQ(expect_bl, bl);
@@ -362,7 +362,7 @@ TEST_F(TestMockMigrationRawFormat, ListSnaps) {
   MockSourceSpecBuilder mock_source_spec_builder;
 
   auto mock_snapshot_interface = new MockSnapshotInterface();
-  expect_build_snapshot(mock_source_spec_builder, CEPH_NOSNAP,
+  expect_build_snapshot(mock_source_spec_builder, STONE_NOSNAP,
                         mock_snapshot_interface, 0);
 
   expect_snapshot_open(*mock_snapshot_interface, 0);
@@ -385,12 +385,12 @@ TEST_F(TestMockMigrationRawFormat, ListSnaps) {
 
   C_SaferCond ctx2;
   io::SnapshotDelta snapshot_delta;
-  mock_raw_format.list_snaps({{0, 123}}, {CEPH_NOSNAP}, 0, &snapshot_delta, {},
+  mock_raw_format.list_snaps({{0, 123}}, {STONE_NOSNAP}, 0, &snapshot_delta, {},
                              &ctx2);
   ASSERT_EQ(0, ctx2.wait());
 
   io::SnapshotDelta expected_snapshot_delta;
-  expected_snapshot_delta[{CEPH_NOSNAP, CEPH_NOSNAP}] = sparse_extents;
+  expected_snapshot_delta[{STONE_NOSNAP, STONE_NOSNAP}] = sparse_extents;
   ASSERT_EQ(expected_snapshot_delta, snapshot_delta);
 
   C_SaferCond ctx3;
@@ -405,7 +405,7 @@ TEST_F(TestMockMigrationRawFormat, ListSnapsError) {
   MockSourceSpecBuilder mock_source_spec_builder;
 
   auto mock_snapshot_interface = new MockSnapshotInterface();
-  expect_build_snapshot(mock_source_spec_builder, CEPH_NOSNAP,
+  expect_build_snapshot(mock_source_spec_builder, STONE_NOSNAP,
                         mock_snapshot_interface, 0);
 
 
@@ -429,7 +429,7 @@ TEST_F(TestMockMigrationRawFormat, ListSnapsError) {
 
   C_SaferCond ctx2;
   io::SnapshotDelta snapshot_delta;
-  mock_raw_format.list_snaps({{0, 123}}, {CEPH_NOSNAP}, 0, &snapshot_delta, {},
+  mock_raw_format.list_snaps({{0, 123}}, {STONE_NOSNAP}, 0, &snapshot_delta, {},
                              &ctx2);
   ASSERT_EQ(-EINVAL, ctx2.wait());
 
@@ -445,7 +445,7 @@ TEST_F(TestMockMigrationRawFormat, ListSnapsMerge) {
   MockSourceSpecBuilder mock_source_spec_builder;
 
   auto mock_snapshot_interface_head = new MockSnapshotInterface();
-  expect_build_snapshot(mock_source_spec_builder, CEPH_NOSNAP,
+  expect_build_snapshot(mock_source_spec_builder, STONE_NOSNAP,
                         mock_snapshot_interface_head, 0);
 
   auto mock_snapshot_interface_1 = new MockSnapshotInterface();
@@ -502,7 +502,7 @@ TEST_F(TestMockMigrationRawFormat, ListSnapsMerge) {
 
   C_SaferCond ctx2;
   io::SnapshotDelta snapshot_delta;
-  mock_raw_format.list_snaps({{0, 123}}, {1, CEPH_NOSNAP}, 0, &snapshot_delta,
+  mock_raw_format.list_snaps({{0, 123}}, {1, STONE_NOSNAP}, 0, &snapshot_delta,
                              {}, &ctx2);
   ASSERT_EQ(0, ctx2.wait());
 
@@ -510,8 +510,8 @@ TEST_F(TestMockMigrationRawFormat, ListSnapsMerge) {
   expected_snapshot_delta[{1, 1}] = sparse_extents_1;
   sparse_extents_2.erase(0, 16);
   sparse_extents_2.insert(64, 59, {io::SPARSE_EXTENT_STATE_ZEROED, 59});
-  expected_snapshot_delta[{CEPH_NOSNAP, 2}] = sparse_extents_2;
-  expected_snapshot_delta[{CEPH_NOSNAP, CEPH_NOSNAP}] = sparse_extents_head;
+  expected_snapshot_delta[{STONE_NOSNAP, 2}] = sparse_extents_2;
+  expected_snapshot_delta[{STONE_NOSNAP, STONE_NOSNAP}] = sparse_extents_head;
   ASSERT_EQ(expected_snapshot_delta, snapshot_delta);
 
   C_SaferCond ctx3;

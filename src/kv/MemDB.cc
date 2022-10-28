@@ -29,15 +29,15 @@ namespace fs = std::experimental::filesystem;
 #include "KeyValueDB.h"
 #include "MemDB.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/debug.h"
 #include "common/errno.h"
 #include "include/buffer.h"
 #include "include/buffer_raw.h"
 #include "include/compat.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_memdb
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_memdb
 #undef dout_prefix
 #define dout_prefix *_dout << "memdb: "
 #define dtrace dout(30)
@@ -49,15 +49,15 @@ using std::ostream;
 using std::string;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::decode;
+using stone::encode;
 
 static void split_key(const string& raw_key, string *prefix, string *key)
 {
   size_t pos = raw_key.find(KEY_DELIM, 0);
-  ceph_assert(pos != std::string::npos);
+  stone_assert(pos != std::string::npos);
   *prefix = raw_key.substr(0, pos);
   *key = raw_key.substr(pos + 1, raw_key.length());
 }
@@ -138,8 +138,8 @@ int MemDB::_load()
     string key;
     bufferptr datap;
 
-    bytes_done += ceph::decode_file(fd, key);
-    bytes_done += ceph::decode_file(fd, datap);
+    bytes_done += stone::decode_file(fd, key);
+    bytes_done += stone::decode_file(fd, datap);
 
     dout(10) << __func__ << " Key:"<< key << dendl;
     m_map[key] = datap;
@@ -168,7 +168,7 @@ int MemDB::_init(bool create)
     r = _load();
   }
 
-  PerfCountersBuilder plb(g_ceph_context, "memdb", l_memdb_first, l_memdb_last);
+  PerfCountersBuilder plb(g_stone_context, "memdb", l_memdb_first, l_memdb_last);
   plb.add_u64_counter(l_memdb_gets, "get", "Gets");
   plb.add_u64_counter(l_memdb_txns, "submit_transaction", "Submit transactions");
   plb.add_time_avg(l_memdb_get_latency, "get_latency", "Get latency");
@@ -197,14 +197,14 @@ int MemDB::do_open(ostream &out, bool create)
 
 int MemDB::open(ostream &out, const std::string& cfs) {
   if (!cfs.empty()) {
-    ceph_abort_msg("Not implemented");
+    stone_abort_msg("Not implemented");
   }
   return do_open(out, false);
 }
 
 int MemDB::create_and_open(ostream &out, const std::string& cfs) {
   if (!cfs.empty()) {
-    ceph_abort_msg("Not implemented");
+    stone_abort_msg("Not implemented");
   }
   return do_open(out, true);
 }
@@ -227,7 +227,7 @@ void MemDB::close()
 
 int MemDB::submit_transaction(KeyValueDB::Transaction t)
 {
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
 
   MDBTransactionImpl* mt =  static_cast<MDBTransactionImpl*>(t.get());
 
@@ -241,12 +241,12 @@ int MemDB::submit_transaction(KeyValueDB::Transaction t)
       _merge(merge_op);
     } else {
       ms_op_t rm_op = op.second;
-      ceph_assert(op.first == MDBTransactionImpl::DELETE);
+      stone_assert(op.first == MDBTransactionImpl::DELETE);
       _rmkey(rm_op);
     }
   }
 
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->inc(l_memdb_txns);
   logger->tinc(l_memdb_submit_latency, lat);
 
@@ -327,7 +327,7 @@ int MemDB::_setkey(ms_op_t &op)
     /*
      * delete and free existing key.
      */
-    ceph_assert(m_total_bytes >= bl_old.length());
+    stone_assert(m_total_bytes >= bl_old.length());
     m_total_bytes -= bl_old.length();
     m_map.erase(key);
   }
@@ -344,7 +344,7 @@ int MemDB::_rmkey(ms_op_t &op)
 
   bufferlist bl_old;
   if (_get(op.first.first, op.first.second, &bl_old)) {
-    ceph_assert(m_total_bytes >= bl_old.length());
+    stone_assert(m_total_bytes >= bl_old.length());
     m_total_bytes -= bl_old.length();
   }
   iterator_seq_no++;
@@ -379,7 +379,7 @@ int MemDB::_merge(ms_op_t &op)
    *  find the operator for this prefix
    */
   std::shared_ptr<MergeOperator> mop = _find_merge_op(prefix);
-  ceph_assert(mop);
+  stone_assert(mop);
 
   /*
    * call the merge operator with value and non value
@@ -403,7 +403,7 @@ int MemDB::_merge(ms_op_t &op)
     bl_old.clear();
   }
 
-  ceph_assert((int64_t)m_total_bytes + bytes_adjusted >= 0);
+  stone_assert((int64_t)m_total_bytes + bytes_adjusted >= 0);
   m_total_bytes += bytes_adjusted;
   iterator_seq_no++;
   return 0;
@@ -435,7 +435,7 @@ bool MemDB::_get_locked(const string &prefix, const string &k, bufferlist *out)
 int MemDB::get(const string &prefix, const std::string& key,
                  bufferlist *out)
 {
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   int ret;
 
   if (_get_locked(prefix, key, out)) {
@@ -444,7 +444,7 @@ int MemDB::get(const string &prefix, const std::string& key,
     ret = -ENOENT;
   }
 
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->inc(l_memdb_gets);
   logger->tinc(l_memdb_get_latency, lat);
 
@@ -454,7 +454,7 @@ int MemDB::get(const string &prefix, const std::string& key,
 int MemDB::get(const string &prefix, const std::set<string> &keys,
     std::map<string, bufferlist> *out)
 {
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
 
   for (const auto& i : keys) {
     bufferlist bl;
@@ -462,7 +462,7 @@ int MemDB::get(const string &prefix, const std::set<string> &keys,
       out->insert(make_pair(i, bl));
   }
 
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->inc(l_memdb_gets);
   logger->tinc(l_memdb_get_latency, lat);
 
@@ -488,7 +488,7 @@ bool MemDB::MDBWholeSpaceIteratorImpl::iterator_validate() {
 
   if (this_seq_no != *global_seq_no) {
     auto key = m_key_value.first;
-    ceph_assert(!key.empty());
+    stone_assert(!key.empty());
 
     bool restart_iter = false;
     if (!m_using_btree) {

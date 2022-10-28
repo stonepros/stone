@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MSTATFS_H
-#define CEPH_MSTATFS_H
+#ifndef STONE_MSTATFS_H
+#define STONE_MSTATFS_H
 
 #include <sys/statvfs.h>    /* or <sys/statfs.h> */
 #include "messages/PaxosServiceMessage.h"
@@ -28,10 +28,10 @@ public:
   uuid_d fsid;
   boost::optional<int64_t> data_pool;
 
-  MStatfs() : PaxosServiceMessage{CEPH_MSG_STATFS, 0, HEAD_VERSION, COMPAT_VERSION} {}
+  MStatfs() : PaxosServiceMessage{STONE_MSG_STATFS, 0, HEAD_VERSION, COMPAT_VERSION} {}
   MStatfs(const uuid_d& f, ceph_tid_t t, boost::optional<int64_t> _data_pool,
 	  version_t v)
-    : PaxosServiceMessage{CEPH_MSG_STATFS, v, HEAD_VERSION, COMPAT_VERSION},
+    : PaxosServiceMessage{STONE_MSG_STATFS, v, HEAD_VERSION, COMPAT_VERSION},
       fsid(f), data_pool(_data_pool) {
     set_tid(t);
   }

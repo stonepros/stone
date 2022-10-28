@@ -11,8 +11,8 @@
 #include "Instances.h"
 #include "Threads.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::Instances: " \
                            << this << " " << __func__ << ": "
@@ -29,8 +29,8 @@ Instances<I>::Instances(Threads<I> *threads, librados::IoCtx &ioctx,
                         const std::string& instance_id,
                         instances::Listener& listener) :
   m_threads(threads), m_ioctx(ioctx), m_instance_id(instance_id),
-  m_listener(listener), m_cct(reinterpret_cast<CephContext *>(ioctx.cct())),
-  m_lock(ceph::make_mutex("rbd::mirror::Instances " + ioctx.get_pool_name())) {
+  m_listener(listener), m_cct(reinterpret_cast<StoneContext *>(ioctx.cct())),
+  m_lock(stone::make_mutex("rbd::mirror::Instances " + ioctx.get_pool_name())) {
 }
 
 template <typename I>
@@ -42,7 +42,7 @@ void Instances<I>::init(Context *on_finish) {
   dout(10) << dendl;
 
   std::lock_guard locker{m_lock};
-  ceph_assert(m_on_finish == nullptr);
+  stone_assert(m_on_finish == nullptr);
   m_on_finish = on_finish;
   get_instances();
 }
@@ -52,7 +52,7 @@ void Instances<I>::shut_down(Context *on_finish) {
   dout(10) << dendl;
 
   std::lock_guard locker{m_lock};
-  ceph_assert(m_on_finish == nullptr);
+  stone_assert(m_on_finish == nullptr);
   m_on_finish = on_finish;
 
   Context *ctx = new LambdaContext(
@@ -70,7 +70,7 @@ void Instances<I>::unblock_listener() {
   dout(5) << dendl;
 
   std::lock_guard locker{m_lock};
-  ceph_assert(m_listener_blocked);
+  stone_assert(m_listener_blocked);
   m_listener_blocked = false;
 
   InstanceIds added_instance_ids;
@@ -183,7 +183,7 @@ template <typename I>
 void Instances<I>::get_instances() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   Context *ctx = create_context_callback<
     Instances, &Instances<I>::handle_get_instances>(this);
@@ -213,7 +213,7 @@ template <typename I>
 void Instances<I>::wait_for_ops() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   Context *ctx = create_async_context_callback(
     m_threads->work_queue, create_context_callback<
@@ -226,7 +226,7 @@ template <typename I>
 void Instances<I>::handle_wait_for_ops(int r) {
   dout(10) << "r=" << r << dendl;
 
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   Context *on_finish = nullptr;
   {
@@ -238,7 +238,7 @@ void Instances<I>::handle_wait_for_ops(int r) {
 
 template <typename I>
 void Instances<I>::remove_instances(const Instances<I>::clock_t::time_point& time) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   InstanceIds instance_ids;
   for (auto& instance_pair : m_instances) {
@@ -252,7 +252,7 @@ void Instances<I>::remove_instances(const Instances<I>::clock_t::time_point& tim
       instance_ids.push_back(instance_pair.first);
     }
   }
-  ceph_assert(!instance_ids.empty());
+  stone_assert(!instance_ids.empty());
 
   dout(10) << "instance_ids=" << instance_ids << dendl;
   Context* ctx = new LambdaContext([this, instance_ids](int r) {
@@ -276,7 +276,7 @@ void Instances<I>::handle_remove_instances(
   std::scoped_lock locker{m_threads->timer_lock, m_lock};
 
   dout(10) << "r=" << r << ", instance_ids=" << instance_ids << dendl;
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   // fire removed notification now that instances have been blocklisted
   m_threads->work_queue->queue(
@@ -289,8 +289,8 @@ void Instances<I>::handle_remove_instances(
 
 template <typename I>
 void Instances<I>::cancel_remove_task() {
-  ceph_assert(ceph_mutex_is_locked(m_threads->timer_lock));
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_threads->timer_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   if (m_timer_task == nullptr) {
     return;
@@ -299,7 +299,7 @@ void Instances<I>::cancel_remove_task() {
   dout(10) << dendl;
 
   bool canceled = m_threads->timer->cancel_event(m_timer_task);
-  ceph_assert(canceled);
+  stone_assert(canceled);
   m_timer_task = nullptr;
 }
 
@@ -339,14 +339,14 @@ void Instances<I>::schedule_remove_task(const Instances<I>::clock_t::time_point&
   // schedule a time to fire when the oldest instance should be removed
   m_timer_task = new LambdaContext(
     [this, oldest_time](int r) {
-      ceph_assert(ceph_mutex_is_locked(m_threads->timer_lock));
+      stone_assert(stone_mutex_is_locked(m_threads->timer_lock));
       std::lock_guard locker{m_lock};
       m_timer_task = nullptr;
 
       remove_instances(oldest_time);
     });
 
-  oldest_time += ceph::make_timespan(after);
+  oldest_time += stone::make_timespan(after);
   m_threads->timer->add_event_at(oldest_time, m_timer_task);
 }
 

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LOG_SUBSYSTEMS
-#define CEPH_LOG_SUBSYSTEMS
+#ifndef STONE_LOG_SUBSYSTEMS
+#define STONE_LOG_SUBSYSTEMS
 
 #include <string>
 #include <vector>

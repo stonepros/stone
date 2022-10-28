@@ -42,18 +42,18 @@ void MetaSession::dump(Formatter *f, bool cap_dump) const
   f->dump_string("state", get_state_name());
 }
 
-void MetaSession::enqueue_cap_release(inodeno_t ino, uint64_t cap_id, ceph_seq_t iseq,
-    ceph_seq_t mseq, epoch_t osd_barrier)
+void MetaSession::enqueue_cap_release(inodeno_t ino, uint64_t cap_id, stone_seq_t iseq,
+    stone_seq_t mseq, epoch_t osd_barrier)
 {
   if (!release) {
-    release = ceph::make_message<MClientCapRelease>();
+    release = stone::make_message<MClientCapRelease>();
   }
 
   if (osd_barrier > release->osd_epoch_barrier) {
     release->osd_epoch_barrier = osd_barrier;
   }
 
-  ceph_mds_cap_item i;
+  stone_mds_cap_item i;
   i.ino = ino;
   i.cap_id = cap_id;
   i.seq = iseq;

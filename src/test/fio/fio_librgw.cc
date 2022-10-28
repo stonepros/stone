@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc.
  *
@@ -93,7 +93,7 @@ namespace {
 
   uint32_t create_mask = RGW_SETATTR_UID | RGW_SETATTR_GID | RGW_SETATTR_MODE;
 
-/* borrowed from fio_ceph_objectstore */
+/* borrowed from fio_stone_objectstore */
   template <class F>
   fio_option make_option(F&& func)
   {
@@ -107,15 +107,15 @@ namespace {
 
   static std::vector<fio_option> options = {
     make_option([] (fio_option& o) {
-		  o.name   = "ceph_conf";
-		  o.lname  = "ceph configuration file";
+		  o.name   = "stone_conf";
+		  o.lname  = "stone configuration file";
 		  o.type   = FIO_OPT_STR_STORE;
-		  o.help   = "Path to ceph.conf file";
+		  o.help   = "Path to stone.conf file";
 		  o.off1   = offsetof(opt_struct, config);
 		}),
     make_option([] (fio_option& o) {
-		  o.name     = "ceph_name";
-		  o.lname    = "ceph instance name";
+		  o.name     = "stone_name";
+		  o.lname    = "stone instance name";
 		  o.type     = FIO_OPT_STR_STORE;
 		  o.help     = "Name of this program instance";
 		  o.off1     = offsetof(opt_struct, name);
@@ -123,19 +123,19 @@ namespace {
 		  o.group    = FIO_OPT_G_INVALID;
 		}),
     make_option([] (fio_option& o) {
-		  o.name     = "ceph_cluster";
-		  o.lname    = "ceph cluster name";
+		  o.name     = "stone_cluster";
+		  o.lname    = "stone cluster name";
 		  o.type     = FIO_OPT_STR_STORE;
-		  o.help     = "Name of ceph cluster (default=ceph)";
+		  o.help     = "Name of stone cluster (default=stone)";
 		  o.off1     = offsetof(opt_struct, cluster);
 		  o.category = FIO_OPT_C_ENGINE;
 		  o.group    = FIO_OPT_G_INVALID;
 		}),
     make_option([] (fio_option& o) {
-		  o.name     = "ceph_init_args";
-		  o.lname    = "ceph init args";
+		  o.name     = "stone_init_args";
+		  o.lname    = "stone init args";
 		  o.type     = FIO_OPT_STR_STORE;
-		  o.help     = "Extra ceph arguments (e.g., -d --debug-rgw=16)";
+		  o.help     = "Extra stone arguments (e.g., -d --debug-rgw=16)";
 		  o.off1     = offsetof(opt_struct, init_args);
 		  o.category = FIO_OPT_C_ENGINE;
 		  o.group    = FIO_OPT_G_INVALID;

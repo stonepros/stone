@@ -6,10 +6,10 @@
 #include "common/debug.h"
 #include "common/Clock.h"
 #include "common/config.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 struct T : public Thread {
   int num;
@@ -51,11 +51,11 @@ int main(int argc, const char **argv)
   vector<const char*> args;
   argv_to_vec(argc, argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_OSD,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_OSD,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
 
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
 
   list<T*> ls;
   for (int i=0; i<threads; i++) {
@@ -71,13 +71,13 @@ int main(int argc, const char **argv)
     delete t;
   }
 
-  utime_t t = ceph_clock_now();
+  utime_t t = stone_clock_now();
   t -= start;
   cout << " flushing.. " << t << " so far ..." << std::endl;
 
-  g_ceph_context->_log->flush();
+  g_stone_context->_log->flush();
 
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   utime_t dur = end - start;
 
   cout << dur << std::endl;

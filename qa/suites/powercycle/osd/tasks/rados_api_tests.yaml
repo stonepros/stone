@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - reached quota
       - \(POOL_APP_NOT_ENABLED\)
@@ -8,7 +8,7 @@ overrides:
       mon:
         mon warn on pool no app: false
 tasks:
-- ceph-fuse:
+- stone-fuse:
 - workunit:
     clients:
       client.0:

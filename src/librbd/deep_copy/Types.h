@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_DEEP_COPY_TYPES_H
-#define CEPH_LIBRBD_DEEP_COPY_TYPES_H
+#ifndef STONE_LIBRBD_DEEP_COPY_TYPES_H
+#define STONE_LIBRBD_DEEP_COPY_TYPES_H
 
 #include "include/int_types.h"
 #include "include/rados/librados.hpp"
@@ -25,4 +25,4 @@ typedef boost::optional<uint64_t> ObjectNumber;
 } // namespace deep_copy
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_DEEP_COPY_TYPES_H
+#endif // STONE_LIBRBD_DEEP_COPY_TYPES_H

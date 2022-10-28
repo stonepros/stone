@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat Inc.
  *
@@ -63,7 +63,7 @@ WRITE_CMP_OPERATORS_2(scheduler_id_t, class_id, client_profile_id)
  */
 class mClockScheduler : public OpScheduler, md_config_obs_t {
 
-  CephContext *cct;
+  StoneContext *cct;
   const uint32_t num_shards;
   bool is_rotational;
   double max_osd_capacity;
@@ -136,7 +136,7 @@ class mClockScheduler : public OpScheduler, md_config_obs_t {
   }
 
 public:
-  mClockScheduler(CephContext *cct, uint32_t num_shards, bool is_rotational);
+  mClockScheduler(StoneContext *cct, uint32_t num_shards, bool is_rotational);
   ~mClockScheduler() override;
 
   // Set the max osd capacity in iops

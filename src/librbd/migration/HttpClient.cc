@@ -24,7 +24,7 @@
 namespace librbd {
 namespace migration {
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::migration::HttpClient::" \
                            << "HttpSession " << this << " " << __func__ \
@@ -41,25 +41,25 @@ template <typename D>
 class HttpClient<I>::HttpSession : public HttpSessionInterface {
 public:
   void init(Context* on_finish) override {
-    ceph_assert(m_http_client->m_strand.running_in_this_thread());
+    stone_assert(m_http_client->m_strand.running_in_this_thread());
 
     auto cct = m_http_client->m_cct;
     ldout(cct, 15) << dendl;
 
-    ceph_assert(m_state == STATE_UNINITIALIZED);
+    stone_assert(m_state == STATE_UNINITIALIZED);
     m_state = STATE_CONNECTING;
 
     resolve_host(on_finish);
   }
 
   void shut_down(Context* on_finish) override {
-    ceph_assert(m_http_client->m_strand.running_in_this_thread());
+    stone_assert(m_http_client->m_strand.running_in_this_thread());
 
     auto cct = m_http_client->m_cct;
     ldout(cct, 15) << dendl;
 
-    ceph_assert(on_finish != nullptr);
-    ceph_assert(m_on_shutdown == nullptr);
+    stone_assert(on_finish != nullptr);
+    stone_assert(m_on_shutdown == nullptr);
     m_on_shutdown = on_finish;
 
     auto current_state = m_state;
@@ -79,7 +79,7 @@ public:
   }
 
   void issue(std::shared_ptr<Work>&& work) override {
-    ceph_assert(m_http_client->m_strand.running_in_this_thread());
+    stone_assert(m_http_client->m_strand.running_in_this_thread());
 
     auto cct = m_http_client->m_cct;
     ldout(cct, 20) << "work=" << work.get() << dendl;
@@ -115,19 +115,19 @@ public:
 
   void handle_issue(boost::system::error_code ec,
                     std::shared_ptr<Work>&& work) override {
-    ceph_assert(m_http_client->m_strand.running_in_this_thread());
+    stone_assert(m_http_client->m_strand.running_in_this_thread());
 
     auto cct = m_http_client->m_cct;
     ldout(cct, 20) << "work=" << work.get() << ", r=" << -ec.value() << dendl;
 
-    ceph_assert(m_in_flight_requests > 0);
+    stone_assert(m_in_flight_requests > 0);
     --m_in_flight_requests;
     if (maybe_finalize_reset()) {
       // previous request is attempting reset to this request will be resent
       return;
     }
 
-    ceph_assert(!m_issue_queue.empty());
+    stone_assert(!m_issue_queue.empty());
     m_issue_queue.pop_front();
 
     if (is_shutdown()) {
@@ -305,13 +305,13 @@ private:
   }
 
   bool is_shutdown() const {
-    ceph_assert(m_http_client->m_strand.running_in_this_thread());
+    stone_assert(m_http_client->m_strand.running_in_this_thread());
     return (m_state == STATE_SHUTTING_DOWN || m_state == STATE_SHUTDOWN);
   }
 
   void reset() {
-    ceph_assert(m_http_client->m_strand.running_in_this_thread());
-    ceph_assert(m_state == STATE_READY);
+    stone_assert(m_http_client->m_strand.running_in_this_thread());
+    stone_assert(m_state == STATE_READY);
 
     auto cct = m_http_client->m_cct;
     ldout(cct, 15) << dendl;
@@ -329,7 +329,7 @@ private:
       return true;
     }
 
-    ceph_assert(m_http_client->m_strand.running_in_this_thread());
+    stone_assert(m_http_client->m_strand.running_in_this_thread());
     auto cct = m_http_client->m_cct;
     ldout(cct, 15) << dendl;
 
@@ -383,7 +383,7 @@ private:
     auto cct = m_http_client->m_cct;
     ldout(cct, 15) << "work=" << work.get() << dendl;
 
-    ceph_assert(!m_receive_queue.empty());
+    stone_assert(!m_receive_queue.empty());
     ++m_in_flight_requests;
 
     // receive the response for this request
@@ -416,14 +416,14 @@ private:
     auto cct = m_http_client->m_cct;
     ldout(cct, 15) << "work=" << work.get() << ", r=" << -ec.value() << dendl;
 
-    ceph_assert(m_in_flight_requests > 0);
+    stone_assert(m_in_flight_requests > 0);
     --m_in_flight_requests;
     if (maybe_finalize_reset()) {
       // previous request is attempting reset to this request will be resent
       return;
     }
 
-    ceph_assert(!m_receive_queue.empty());
+    stone_assert(!m_receive_queue.empty());
     m_receive_queue.pop_front();
 
     if (is_shutdown()) {
@@ -519,19 +519,19 @@ private:
       } else if (next_state == STATE_UNINITIALIZED ||
                  next_state == STATE_SHUTDOWN ||
                  next_state == STATE_RESET_CONNECTING) {
-        ceph_assert(m_on_shutdown != nullptr);
+        stone_assert(m_on_shutdown != nullptr);
         m_on_shutdown->complete(r);
         return;
       }
     } else if (current_state == STATE_RESET_DISCONNECTING) {
       // disconnected from peer -- ignore errors and reconnect
-      ceph_assert(next_state == STATE_RESET_CONNECTING);
-      ceph_assert(on_finish == nullptr);
+      stone_assert(next_state == STATE_RESET_CONNECTING);
+      stone_assert(on_finish == nullptr);
       shutdown_socket();
       resolve_host(nullptr);
       return;
     } else if (current_state == STATE_RESET_CONNECTING) {
-      ceph_assert(on_finish == nullptr);
+      stone_assert(on_finish == nullptr);
       if (next_state == STATE_READY) {
         // restart queued IO
         if (!m_issue_queue.empty()) {
@@ -551,7 +551,7 @@ private:
     lderr(cct) << "unexpected state transition: "
                << "current_state=" << current_state << ", "
                << "next_state=" << next_state << dendl;
-    ceph_assert(false);
+    stone_assert(false);
   }
 
   void complete_work(std::shared_ptr<Work> work, int r, Response&& response) {
@@ -569,7 +569,7 @@ private:
       complete_work(work, r, {});
     }
     m_issue_queue.clear();
-    ceph_assert(m_receive_queue.empty());
+    stone_assert(m_receive_queue.empty());
   }
 };
 
@@ -858,7 +858,7 @@ void HttpClient<I>::read(io::Extents&& byte_extents, bufferlist* data,
     req.method(boost::beast::http::verb::get);
 
     std::stringstream range;
-    ceph_assert(byte_length > 0);
+    stone_assert(byte_length > 0);
     range << "bytes=" << byte_offset << "-" << (byte_offset + byte_length - 1);
     req.set(boost::beast::http::field::range, range.str());
 
@@ -912,7 +912,7 @@ template <typename I>
 void HttpClient<I>::create_http_session(Context* on_finish) {
   ldout(m_cct, 15) << dendl;
 
-  ceph_assert(m_http_session == nullptr);
+  stone_assert(m_http_session == nullptr);
   switch (m_url_spec.scheme) {
   case URL_SCHEME_HTTP:
     m_http_session = std::make_unique<PlainHttpSession>(this);
@@ -921,7 +921,7 @@ void HttpClient<I>::create_http_session(Context* on_finish) {
     m_http_session = std::make_unique<SslHttpSession>(this);
     break;
   default:
-    ceph_assert(false);
+    stone_assert(false);
     break;
   }
 

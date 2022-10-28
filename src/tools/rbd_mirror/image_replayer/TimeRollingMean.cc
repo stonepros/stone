@@ -9,7 +9,7 @@ namespace mirror {
 namespace image_replayer {
 
 void TimeRollingMean::operator()(uint32_t value) {
-  auto time = ceph_clock_now();
+  auto time = stone_clock_now();
   if (m_last_time.is_zero()) {
     m_last_time = time;
   } else if (m_last_time.sec() < time.sec()) {

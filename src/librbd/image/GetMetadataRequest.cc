@@ -5,12 +5,12 @@
 #include "cls/rbd/cls_rbd_client.h"
 #include "common/dout.h"
 #include "common/errno.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "librbd/ImageCtx.h"
 #include "librbd/Utils.h"
 #include <boost/algorithm/string/predicate.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::GetMetadataRequest: " \
                            << this << " " << __func__ << ": "
@@ -36,7 +36,7 @@ GetMetadataRequest<I>::GetMetadataRequest(
     m_filter_key_prefix(filter_key_prefix), m_last_key(last_key),
     m_max_results(max_results), m_key_values(key_values),
     m_on_finish(on_finish),
-    m_cct(reinterpret_cast<CephContext*>(m_io_ctx.cct())) {
+    m_cct(reinterpret_cast<StoneContext*>(m_io_ctx.cct())) {
 }
 
 template <typename I>

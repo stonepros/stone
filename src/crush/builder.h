@@ -1,5 +1,5 @@
-#ifndef CEPH_CRUSH_BUILDER_H
-#define CEPH_CRUSH_BUILDER_H
+#ifndef STONE_CRUSH_BUILDER_H
+#define STONE_CRUSH_BUILDER_H
 
 #include "include/int_types.h"
 

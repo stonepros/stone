@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat, Inc
  *
@@ -9,8 +9,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_COMPACT_MAP_H
-#define CEPH_COMPACT_MAP_H
+#ifndef STONE_COMPACT_MAP_H
+#define STONE_COMPACT_MAP_H
 
 #include "buffer.h"
 #include "encoding.h"

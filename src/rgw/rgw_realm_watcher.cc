@@ -7,13 +7,13 @@
 #include "rgw_tools.h"
 #include "rgw_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #undef dout_prefix
 #define dout_prefix (*_dout << "rgw realm watcher: ")
 
 
-RGWRealmWatcher::RGWRealmWatcher(const DoutPrefixProvider *dpp, CephContext* cct, const RGWRealm& realm)
+RGWRealmWatcher::RGWRealmWatcher(const DoutPrefixProvider *dpp, StoneContext* cct, const RGWRealm& realm)
   : cct(cct)
 {
   // no default realm, nothing to watch
@@ -122,7 +122,7 @@ int RGWRealmWatcher::watch_start(const DoutPrefixProvider *dpp, const RGWRealm& 
 
 int RGWRealmWatcher::watch_restart()
 {
-  ceph_assert(!watch_oid.empty());
+  stone_assert(!watch_oid.empty());
   int r = pool_ctx.unwatch2(watch_handle);
   if (r < 0) {
     lderr(cct) << "Failed to unwatch on " << watch_oid

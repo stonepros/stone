@@ -1,53 +1,53 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_INCLUDE_FS_TYPES_H
-#define CEPH_INCLUDE_FS_TYPES_H
+#ifndef STONE_INCLUDE_FS_TYPES_H
+#define STONE_INCLUDE_FS_TYPES_H
 
 #include "types.h"
 class JSONObj;
 
-#define CEPHFS_EBLOCKLISTED    108
-#define CEPHFS_EPERM           1
-#define CEPHFS_ESTALE          116
-#define CEPHFS_ENOSPC          28
-#define CEPHFS_ETIMEDOUT       110
-#define CEPHFS_EIO             5
-#define CEPHFS_ENOTCONN        107
-#define CEPHFS_EEXIST          17
-#define CEPHFS_EINTR           4
-#define CEPHFS_EINVAL          22
-#define CEPHFS_EBADF           9
-#define CEPHFS_EROFS           30
-#define CEPHFS_EAGAIN          11
-#define CEPHFS_EACCES          13
-#define CEPHFS_ELOOP           40
-#define CEPHFS_EISDIR          21
-#define CEPHFS_ENOENT          2
-#define CEPHFS_ENOTDIR         20
-#define CEPHFS_ENAMETOOLONG    36
-#define CEPHFS_EBUSY           16
-#define CEPHFS_EDQUOT          122
-#define CEPHFS_EFBIG           27
-#define CEPHFS_ERANGE          34
-#define CEPHFS_ENXIO           6
-#define CEPHFS_ECANCELED       125
-#define CEPHFS_ENODATA         61
-#define CEPHFS_EOPNOTSUPP      95
-#define CEPHFS_EXDEV           18
-#define CEPHFS_ENOMEM          12
-#define CEPHFS_ENOTRECOVERABLE 131
-#define CEPHFS_ENOSYS          38
-#define CEPHFS_EWOULDBLOCK     CEPHFS_EAGAIN
-#define CEPHFS_ENOTEMPTY       39
-#define CEPHFS_EDEADLK         35
-#define CEPHFS_EDEADLOCK       CEPHFS_EDEADLK
-#define CEPHFS_EDOM            33
-#define CEPHFS_EMLINK          31
-#define CEPHFS_ETIME           62
-#define CEPHFS_EOLDSNAPC       85
+#define STONEFS_EBLOCKLISTED    108
+#define STONEFS_EPERM           1
+#define STONEFS_ESTALE          116
+#define STONEFS_ENOSPC          28
+#define STONEFS_ETIMEDOUT       110
+#define STONEFS_EIO             5
+#define STONEFS_ENOTCONN        107
+#define STONEFS_EEXIST          17
+#define STONEFS_EINTR           4
+#define STONEFS_EINVAL          22
+#define STONEFS_EBADF           9
+#define STONEFS_EROFS           30
+#define STONEFS_EAGAIN          11
+#define STONEFS_EACCES          13
+#define STONEFS_ELOOP           40
+#define STONEFS_EISDIR          21
+#define STONEFS_ENOENT          2
+#define STONEFS_ENOTDIR         20
+#define STONEFS_ENAMETOOLONG    36
+#define STONEFS_EBUSY           16
+#define STONEFS_EDQUOT          122
+#define STONEFS_EFBIG           27
+#define STONEFS_ERANGE          34
+#define STONEFS_ENXIO           6
+#define STONEFS_ECANCELED       125
+#define STONEFS_ENODATA         61
+#define STONEFS_EOPNOTSUPP      95
+#define STONEFS_EXDEV           18
+#define STONEFS_ENOMEM          12
+#define STONEFS_ENOTRECOVERABLE 131
+#define STONEFS_ENOSYS          38
+#define STONEFS_EWOULDBLOCK     STONEFS_EAGAIN
+#define STONEFS_ENOTEMPTY       39
+#define STONEFS_EDEADLK         35
+#define STONEFS_EDEADLOCK       STONEFS_EDEADLK
+#define STONEFS_EDOM            33
+#define STONEFS_EMLINK          31
+#define STONEFS_ETIME           62
+#define STONEFS_EOLDSNAPC       85
 
 // taken from linux kernel: include/uapi/linux/fcntl.h
-#define CEPHFS_AT_FDCWD        -100    /* Special value used to indicate
+#define STONEFS_AT_FDCWD        -100    /* Special value used to indicate
                                           openat should use the current
                                           working directory. */
 
@@ -110,7 +110,7 @@ struct hash<inodeno_t> {
 // file modes
 
 inline bool file_mode_is_readonly(int mode) {
-  return (mode & CEPH_FILE_MODE_WR) == 0;
+  return (mode & STONE_FILE_MODE_WR) == 0;
 }
 
 

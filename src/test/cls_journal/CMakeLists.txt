@@ -1,8 +1,8 @@
 # cls_test_cls_journal
-add_executable(ceph_test_cls_journal
+add_executable(stone_test_cls_journal
   test_cls_journal.cc
   $<TARGET_OBJECTS:common_texttable_obj>)
-target_link_libraries(ceph_test_cls_journal
+target_link_libraries(stone_test_cls_journal
   cls_journal_client
   librados
   global
@@ -12,5 +12,5 @@ target_link_libraries(ceph_test_cls_journal
   ${EXTRALIBS}
   radostest-cxx)
 install(TARGETS
-  ceph_test_cls_journal
+  stone_test_cls_journal
   DESTINATION ${CMAKE_INSTALL_BINDIR})

@@ -10,7 +10,7 @@
 #include "librbd/Operations.h"
 #include "librbd/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::snapshot::UnlinkPeerRequest: " \
                            << this << " " << __func__ << ": "
@@ -34,7 +34,7 @@ void UnlinkPeerRequest<I>::send() {
 
 template <typename I>
 void UnlinkPeerRequest<I>::refresh_image() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   auto ctx = create_context_callback<
@@ -44,7 +44,7 @@ void UnlinkPeerRequest<I>::refresh_image() {
 
 template <typename I>
 void UnlinkPeerRequest<I>::handle_refresh_image(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -58,7 +58,7 @@ void UnlinkPeerRequest<I>::handle_refresh_image(int r) {
 
 template <typename I>
 void UnlinkPeerRequest<I>::unlink_peer() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
 
   m_image_ctx->image_lock.lock_shared();
   int r = -ENOENT;
@@ -110,13 +110,13 @@ void UnlinkPeerRequest<I>::unlink_peer() {
   auto aio_comp = create_rados_callback<
     UnlinkPeerRequest<I>, &UnlinkPeerRequest<I>::handle_unlink_peer>(this);
   r = m_image_ctx->md_ctx.aio_operate(m_image_ctx->header_oid, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
 template <typename I>
 void UnlinkPeerRequest<I>::handle_unlink_peer(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r == -ERESTART || r == -ENOENT) {
@@ -135,7 +135,7 @@ void UnlinkPeerRequest<I>::handle_unlink_peer(int r) {
 
 template <typename I>
 void UnlinkPeerRequest<I>::notify_update() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   auto ctx = create_context_callback<
@@ -145,7 +145,7 @@ void UnlinkPeerRequest<I>::notify_update() {
 
 template <typename I>
 void UnlinkPeerRequest<I>::handle_notify_update(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r == -ENOENT || r == -ETIMEDOUT) {
@@ -162,7 +162,7 @@ void UnlinkPeerRequest<I>::handle_notify_update(int r) {
 
 template <typename I>
 void UnlinkPeerRequest<I>::remove_snapshot() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   cls::rbd::SnapshotNamespace snap_namespace;
@@ -206,7 +206,7 @@ void UnlinkPeerRequest<I>::remove_snapshot() {
 
 template <typename I>
 void UnlinkPeerRequest<I>::handle_remove_snapshot(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0 && r != -ENOENT) {
@@ -220,7 +220,7 @@ void UnlinkPeerRequest<I>::handle_remove_snapshot(int r) {
 
 template <typename I>
 void UnlinkPeerRequest<I>::finish(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   auto on_finish = m_on_finish;

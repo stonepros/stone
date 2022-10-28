@@ -5,7 +5,7 @@
 extern "C"{
 #include <curl/curl.h>
 }
-#include "common/ceph_crypto.h"
+#include "common/stone_crypto.h"
 #include <map>
 #include <list>
 #define S3_BUCKET_NAME "s3testgw.fcgi"
@@ -14,7 +14,7 @@ extern "C"{
   ((g_test->get_key_type() == KEY_TYPE_S3)?(string("/" S3_BUCKET_NAME)):(string("/swift/v1/" SWIFT_BUCKET_NAME)))
 #include <gtest/gtest.h>
 #include "common/code_environment.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/Finisher.h"
 #include "global/global_init.h"
 #include "rgw/rgw_cors.h"
@@ -24,9 +24,9 @@ using namespace std;
 
 #define CURL_VERBOSE 0
 #define HTTP_RESPONSE_STR "RespCode"
-#define CEPH_CRYPTO_HMACSHA1_DIGESTSIZE 20
+#define STONE_CRYPTO_HMACSHA1_DIGESTSIZE 20
 
-extern "C" int ceph_armor(char *dst, const char *dst_end, 
+extern "C" int stone_armor(char *dst, const char *dst_end, 
                           const char *src, const char *end);
 enum key_type {
   KEY_TYPE_UNDEFINED = 0,
@@ -148,14 +148,14 @@ static inline void buf_to_hex(const unsigned char *buf, int len, char *str)
 
 static void calc_hmac_sha1(const char *key, int key_len,
                     const char *msg, int msg_len, char *dest)
-/* destination should be CEPH_CRYPTO_HMACSHA1_DIGESTSIZE bytes long */
+/* destination should be STONE_CRYPTO_HMACSHA1_DIGESTSIZE bytes long */
 {
-  ceph::crypto::HMACSHA1 hmac((const unsigned char *)key, key_len);
+  stone::crypto::HMACSHA1 hmac((const unsigned char *)key, key_len);
   hmac.Update((const unsigned char *)msg, msg_len);
   hmac.Final((unsigned char *)dest);
   
-  char hex_str[(CEPH_CRYPTO_HMACSHA1_DIGESTSIZE * 2) + 1];
-  buf_to_hex((unsigned char *)dest, CEPH_CRYPTO_HMACSHA1_DIGESTSIZE, hex_str);
+  char hex_str[(STONE_CRYPTO_HMACSHA1_DIGESTSIZE * 2) + 1];
+  buf_to_hex((unsigned char *)dest, STONE_CRYPTO_HMACSHA1_DIGESTSIZE, hex_str);
 }
 
 static int get_s3_auth(const string &method, string creds, const string &date, const string &res, string& out){
@@ -167,14 +167,14 @@ static int get_s3_auth(const string &method, string creds, const string &date, c
     secret.assign(creds, off + 1, string::npos);
 
     /*sprintf(auth_hdr, "%s\n\n\n%s\n%s", req_type, date, res);*/
-    char hmac_sha1[CEPH_CRYPTO_HMACSHA1_DIGESTSIZE];
+    char hmac_sha1[STONE_CRYPTO_HMACSHA1_DIGESTSIZE];
     char b64[65]; /* 64 is really enough */
     auth_hdr.append(method + string("\n\n\n") + date + string("\n") + res);
     calc_hmac_sha1(secret.c_str(), secret.length(), auth_hdr.c_str(), auth_hdr.length(), hmac_sha1);
-    int ret = ceph_armor(b64, b64 + 64, hmac_sha1,
-                         hmac_sha1 + CEPH_CRYPTO_HMACSHA1_DIGESTSIZE);
+    int ret = stone_armor(b64, b64 + 64, hmac_sha1,
+                         hmac_sha1 + STONE_CRYPTO_HMACSHA1_DIGESTSIZE);
     if (ret < 0) {
-      cout << "ceph_armor failed\n";
+      cout << "stone_armor failed\n";
       return -1;
     }
     b64[ret] = 0;
@@ -307,8 +307,8 @@ static int delete_bucket(void){
 
 RGWCORSRule *xml_to_cors_rule(string s){
   RGWCORSConfiguration_S3 *cors_config;
-  const DoutPrefix dp(g_ceph_context, 1, "test cors: ");
-  RGWCORSXMLParser_S3 parser(&dp, g_ceph_context);
+  const DoutPrefix dp(g_stone_context, 1, "test cors: ");
+  RGWCORSXMLParser_S3 parser(&dp, g_stone_context);
   const string *data = g_test->get_response_data();
   if (!parser.init()) {
     return NULL;
@@ -872,12 +872,12 @@ int main(int argc, char *argv[]){
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
   g_test = new test_cors_helper();
-  finisher = new Finisher(g_ceph_context);
+  finisher = new Finisher(g_stone_context);
 #ifdef GTEST
   ::testing::InitGoogleTest(&argc, argv);
 #endif

@@ -5,15 +5,15 @@ if(WITH_MGR_ROOK_CLIENT)
   add_subdirectory(rook)
 endif()
 if(WITH_TESTS)
-  include(AddCephTest)
+  include(AddStoneTest)
   add_tox_test(mgr ${CMAKE_CURRENT_SOURCE_DIR} TOX_ENVS py3 mypy flake8 jinjalint)
 endif()
 
 # Location needs to match default setting for mgr_module_path, currently:
-# OPTION(mgr_module_path, OPT_STR, CEPH_PKGLIBDIR "/mgr")
+# OPTION(mgr_module_path, OPT_STR, STONE_PKGLIBDIR "/mgr")
 install(DIRECTORY
   ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CEPH_INSTALL_DATADIR}
+  DESTINATION ${STONE_INSTALL_DATADIR}
   REGEX "CMakeLists.txt" EXCLUDE
   REGEX "\\.gitignore" EXCLUDE
   REGEX ".*\\.pyi" EXCLUDE

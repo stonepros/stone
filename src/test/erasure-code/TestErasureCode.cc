@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
  *
@@ -50,7 +50,7 @@ public:
   int decode_chunks(const set<int> &want_to_read,
                     const map<int, bufferlist> &chunks,
                     map<int, bufferlist> *decoded) override {
-    ceph_abort_msg("ErasureCode::decode_chunks not implemented");
+    stone_abort_msg("ErasureCode::decode_chunks not implemented");
   }
 
   int create_rule(const string &name,

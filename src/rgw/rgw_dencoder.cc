@@ -207,7 +207,7 @@ void ObjectMetaInfo::generate_test_instances(list<ObjectMetaInfo*>& o)
 
 void ObjectCacheInfo::generate_test_instances(list<ObjectCacheInfo*>& o)
 {
-  using ceph::encode;
+  using stone::encode;
   ObjectCacheInfo *i = new ObjectCacheInfo;
   i->status = 0;
   i->flags = CACHE_FLAG_MODIFY_XATTRS;
@@ -451,7 +451,7 @@ void RGWBucketEntryPoint::generate_test_instances(list<RGWBucketEntryPoint*>& o)
   RGWBucketEntryPoint *bp = new RGWBucketEntryPoint();
   init_bucket(&bp->bucket, "tenant", "bucket", "pool", ".index.pool", "marker", "10");
   bp->owner = "owner";
-  bp->creation_time = ceph::real_clock::from_ceph_timespec({init_le32(2), init_le32(3)});
+  bp->creation_time = stone::real_clock::from_stone_timespec({init_le32(2), init_le32(3)});
 
   o.push_back(bp);
   o.push_back(new RGWBucketEntryPoint);

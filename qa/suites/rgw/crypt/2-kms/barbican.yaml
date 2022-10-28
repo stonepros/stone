@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         rgw crypt s3 kms backend: barbican

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stonee distributed storage system
  *
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -15,8 +15,8 @@
  * 
  */
 
-#ifndef CEPH_ERASURE_CODE_PLUGIN_H
-#define CEPH_ERASURE_CODE_PLUGIN_H
+#ifndef STONE_ERASURE_CODE_PLUGIN_H
+#define STONE_ERASURE_CODE_PLUGIN_H
 
 #include "common/ceph_mutex.h"
 #include "ErasureCodeInterface.h"

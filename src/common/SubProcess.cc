@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include "common/errno.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/compat.h"
 
 SubProcess::SubProcess(const char *cmd_, std_fd_op stdin_op_, std_fd_op stdout_op_, std_fd_op stderr_op_) :
@@ -27,14 +27,14 @@ SubProcess::SubProcess(const char *cmd_, std_fd_op stdin_op_, std_fd_op stdout_o
 }
 
 SubProcess::~SubProcess() {
-  ceph_assert(!is_spawned());
-  ceph_assert(stdin_pipe_out_fd == -1);
-  ceph_assert(stdout_pipe_in_fd == -1);
-  ceph_assert(stderr_pipe_in_fd == -1);
+  stone_assert(!is_spawned());
+  stone_assert(stdin_pipe_out_fd == -1);
+  stone_assert(stdout_pipe_in_fd == -1);
+  stone_assert(stderr_pipe_in_fd == -1);
 }
 
 void SubProcess::add_cmd_args(const char *arg, ...) {
-  ceph_assert(!is_spawned());
+  stone_assert(!is_spawned());
 
   va_list ap;
   va_start(ap, arg);
@@ -47,28 +47,28 @@ void SubProcess::add_cmd_args(const char *arg, ...) {
 }
 
 void SubProcess::add_cmd_arg(const char *arg) {
-  ceph_assert(!is_spawned());
+  stone_assert(!is_spawned());
 
   cmd_args.push_back(arg);
 }
 
 int SubProcess::get_stdin() const {
-  ceph_assert(is_spawned());
-  ceph_assert(stdin_op == PIPE);
+  stone_assert(is_spawned());
+  stone_assert(stdin_op == PIPE);
 
   return stdin_pipe_out_fd;
 }
 
 int SubProcess::get_stdout() const {
-  ceph_assert(is_spawned());
-  ceph_assert(stdout_op == PIPE);
+  stone_assert(is_spawned());
+  stone_assert(stdout_op == PIPE);
 
   return stdout_pipe_in_fd;
 }
 
 int SubProcess::get_stderr() const {
-  ceph_assert(is_spawned());
-  ceph_assert(stderr_op == PIPE);
+  stone_assert(is_spawned());
+  stone_assert(stderr_op == PIPE);
 
   return stderr_pipe_in_fd;
 }
@@ -82,31 +82,31 @@ void SubProcess::close(int &fd) {
 }
 
 void SubProcess::close_stdin() {
-  ceph_assert(is_spawned());
-  ceph_assert(stdin_op == PIPE);
+  stone_assert(is_spawned());
+  stone_assert(stdin_op == PIPE);
 
   close(stdin_pipe_out_fd);
 }
 
 void SubProcess::close_stdout() {
-  ceph_assert(is_spawned());
-  ceph_assert(stdout_op == PIPE);
+  stone_assert(is_spawned());
+  stone_assert(stdout_op == PIPE);
 
   close(stdout_pipe_in_fd);
 }
 
 void SubProcess::close_stderr() {
-  ceph_assert(is_spawned());
-  ceph_assert(stderr_op == PIPE);
+  stone_assert(is_spawned());
+  stone_assert(stderr_op == PIPE);
 
   close(stderr_pipe_in_fd);
 }
 
 void SubProcess::kill(int signo) const {
-  ceph_assert(is_spawned());
+  stone_assert(is_spawned());
 
   int ret = ::kill(pid, signo);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
 }
 
 const std::string SubProcess::err() const {
@@ -133,10 +133,10 @@ protected:
 };
 
 int SubProcess::spawn() {
-  ceph_assert(!is_spawned());
-  ceph_assert(stdin_pipe_out_fd == -1);
-  ceph_assert(stdout_pipe_in_fd == -1);
-  ceph_assert(stderr_pipe_in_fd == -1);
+  stone_assert(!is_spawned());
+  stone_assert(stdin_pipe_out_fd == -1);
+  stone_assert(stdout_pipe_in_fd == -1);
+  stone_assert(stderr_pipe_in_fd == -1);
 
   enum { IN = 0, OUT = 1 };
 
@@ -211,7 +211,7 @@ int SubProcess::spawn() {
     }
 
     exec();
-    ceph_abort(); // Never reached
+    stone_abort(); // Never reached
   }
 
   ret = -errno;
@@ -229,7 +229,7 @@ fail:
 }
 
 void SubProcess::exec() {
-  ceph_assert(is_child());
+  stone_assert(is_child());
 
   std::vector<const char *> args;
   args.push_back(cmd.c_str());
@@ -241,14 +241,14 @@ void SubProcess::exec() {
   args.push_back(NULL);
 
   int ret = execvp(cmd.c_str(), (char * const *)&args[0]);
-  ceph_assert(ret == -1);
+  stone_assert(ret == -1);
 
   std::cerr << cmd << ": exec failed: " << cpp_strerror(errno) << "\n";
   _exit(EXIT_FAILURE);
 }
 
 int SubProcess::join() {
-  ceph_assert(is_spawned());
+  stone_assert(is_spawned());
 
   close(stdin_pipe_out_fd);
   close(stdout_pipe_in_fd);
@@ -257,7 +257,7 @@ int SubProcess::join() {
   int status;
 
   while (waitpid(pid, &status, 0) == -1)
-    ceph_assert(errno == EINTR);
+    stone_assert(errno == EINTR);
 
   pid = -1;
 
@@ -289,11 +289,11 @@ void timeout_sighandler(int sig) {
 static void dummy_sighandler(int sig) {}
 
 void SubProcessTimed::exec() {
-  ceph_assert(is_child());
+  stone_assert(is_child());
 
   if (timeout <= 0) {
     SubProcess::exec();
-    ceph_abort(); // Never reached
+    stone_abort(); // Never reached
   }
 
   sigset_t mask, oldmask;
@@ -342,7 +342,7 @@ void SubProcessTimed::exec() {
     }
     (void)setpgid(0, 0); // Become process group leader.
     SubProcess::exec();
-    ceph_abort(); // Never reached
+    stone_abort(); // Never reached
   }
 
   // Parent

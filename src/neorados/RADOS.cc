@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat <contact@redhat.com>
  *
@@ -21,10 +21,10 @@
 
 #include <fmt/format.h>
 
-#include "include/ceph_fs.h"
+#include "include/stone_fs.h"
 
-#include "common/ceph_context.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_context.h"
+#include "common/stone_argparse.h"
 #include "common/common_init.h"
 #include "common/hobject.h"
 #include "common/EventTrace.h"
@@ -39,8 +39,8 @@
 
 namespace bc = boost::container;
 namespace bs = boost::system;
-namespace ca = ceph::async;
-namespace cb = ceph::buffer;
+namespace ca = stone::async;
+namespace cb = stone::buffer;
 
 namespace neorados {
 // Object
@@ -131,7 +131,7 @@ std::ostream& operator <<(std::ostream& m, const Object& o) {
 
 struct IOContextImpl {
   object_locator_t oloc;
-  snapid_t snap_seq = CEPH_NOSNAP;
+  snapid_t snap_seq = STONE_NOSNAP;
   SnapContext snapc;
   int extra_op_flags = 0;
 };
@@ -253,14 +253,14 @@ void IOContext::clear_hash() {
 
 std::optional<std::uint64_t> IOContext::read_snap() const {
   auto& snap_seq = reinterpret_cast<const IOContextImpl*>(&impl)->snap_seq;
-  if (snap_seq == CEPH_NOSNAP)
+  if (snap_seq == STONE_NOSNAP)
     return std::nullopt;
   else
     return snap_seq;
 }
 void IOContext::read_snap(std::optional<std::uint64_t> _snapid) {
   auto& snap_seq = reinterpret_cast<IOContextImpl*>(&impl)->snap_seq;
-  snap_seq = _snapid.value_or(CEPH_NOSNAP);
+  snap_seq = _snapid.value_or(STONE_NOSNAP);
 }
 
 std::optional<
@@ -295,15 +295,15 @@ void IOContext::write_snap_context(
 
 bool IOContext::full_try() const {
   const auto ioc = reinterpret_cast<const IOContextImpl*>(&impl);
-  return (ioc->extra_op_flags & CEPH_OSD_FLAG_FULL_TRY) != 0;
+  return (ioc->extra_op_flags & STONE_OSD_FLAG_FULL_TRY) != 0;
 }
 
 void IOContext::full_try(bool _full_try) {
   auto ioc = reinterpret_cast<IOContextImpl*>(&impl);
   if (_full_try) {
-    ioc->extra_op_flags |= CEPH_OSD_FLAG_FULL_TRY;
+    ioc->extra_op_flags |= STONE_OSD_FLAG_FULL_TRY;
   } else {
-    ioc->extra_op_flags &= ~CEPH_OSD_FLAG_FULL_TRY;
+    ioc->extra_op_flags &= ~STONE_OSD_FLAG_FULL_TRY;
   }
 }
 
@@ -365,7 +365,7 @@ std::ostream& operator <<(std::ostream& m, const IOContext& o) {
 
 struct OpImpl {
   ObjectOperation op;
-  std::optional<ceph::real_time> mtime;
+  std::optional<stone::real_time> mtime;
 
   OpImpl() = default;
 
@@ -394,31 +394,31 @@ Op::~Op() {
 }
 
 void Op::set_excl() {
-  reinterpret_cast<OpImpl*>(&impl)->op.set_last_op_flags(CEPH_OSD_OP_FLAG_EXCL);
+  reinterpret_cast<OpImpl*>(&impl)->op.set_last_op_flags(STONE_OSD_OP_FLAG_EXCL);
 }
 void Op::set_failok() {
   reinterpret_cast<OpImpl*>(&impl)->op.set_last_op_flags(
-    CEPH_OSD_OP_FLAG_FAILOK);
+    STONE_OSD_OP_FLAG_FAILOK);
 }
 void Op::set_fadvise_random() {
   reinterpret_cast<OpImpl*>(&impl)->op.set_last_op_flags(
-    CEPH_OSD_OP_FLAG_FADVISE_RANDOM);
+    STONE_OSD_OP_FLAG_FADVISE_RANDOM);
 }
 void Op::set_fadvise_sequential() {
   reinterpret_cast<OpImpl*>(&impl)->op.set_last_op_flags(
-    CEPH_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
+    STONE_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
 }
 void Op::set_fadvise_willneed() {
   reinterpret_cast<OpImpl*>(&impl)->op.set_last_op_flags(
-    CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+    STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
 }
 void Op::set_fadvise_dontneed() {
   reinterpret_cast<OpImpl*>(&impl)->op.set_last_op_flags(
-    CEPH_OSD_OP_FLAG_FADVISE_DONTNEED);
+    STONE_OSD_OP_FLAG_FADVISE_DONTNEED);
 }
 void Op::set_fadvise_nocache() {
   reinterpret_cast<OpImpl*>(&impl)->op.set_last_op_flags(
-    CEPH_OSD_OP_FLAG_FADVISE_NOCACHE);
+    STONE_OSD_OP_FLAG_FADVISE_NOCACHE);
 }
 
 void Op::cmpext(uint64_t off, bufferlist&& cmp_bl, std::size_t* s) {
@@ -427,13 +427,13 @@ void Op::cmpext(uint64_t off, bufferlist&& cmp_bl, std::size_t* s) {
 }
 void Op::cmpxattr(std::string_view name, cmpxattr_op op, const bufferlist& val) {
   reinterpret_cast<OpImpl*>(&impl)->
-    op.cmpxattr(name, std::uint8_t(op), CEPH_OSD_CMPXATTR_MODE_STRING, val);
+    op.cmpxattr(name, std::uint8_t(op), STONE_OSD_CMPXATTR_MODE_STRING, val);
 }
 void Op::cmpxattr(std::string_view name, cmpxattr_op op, std::uint64_t val) {
   bufferlist bl;
   encode(val, bl);
   reinterpret_cast<OpImpl*>(&impl)->
-    op.cmpxattr(name, std::uint8_t(op), CEPH_OSD_CMPXATTR_MODE_U64, bl);
+    op.cmpxattr(name, std::uint8_t(op), STONE_OSD_CMPXATTR_MODE_U64, bl);
 }
 
 void Op::assert_version(uint64_t ver) {
@@ -442,7 +442,7 @@ void Op::assert_version(uint64_t ver) {
 void Op::assert_exists() {
   reinterpret_cast<OpImpl*>(&impl)->op.stat(
     nullptr,
-    static_cast<ceph::real_time*>(nullptr),
+    static_cast<stone::real_time*>(nullptr),
     static_cast<bs::error_code*>(nullptr));
 }
 void Op::cmp_omap(const bc::flat_map<
@@ -478,37 +478,37 @@ void Op::exec(std::string_view cls, std::string_view method,
 }
 
 void Op::balance_reads() {
-  reinterpret_cast<OpImpl*>(&impl)->op.flags |= CEPH_OSD_FLAG_BALANCE_READS;
+  reinterpret_cast<OpImpl*>(&impl)->op.flags |= STONE_OSD_FLAG_BALANCE_READS;
 }
 void Op::localize_reads() {
-  reinterpret_cast<OpImpl*>(&impl)->op.flags |= CEPH_OSD_FLAG_LOCALIZE_READS;
+  reinterpret_cast<OpImpl*>(&impl)->op.flags |= STONE_OSD_FLAG_LOCALIZE_READS;
 }
 void Op::order_reads_writes() {
-  reinterpret_cast<OpImpl*>(&impl)->op.flags |= CEPH_OSD_FLAG_RWORDERED;
+  reinterpret_cast<OpImpl*>(&impl)->op.flags |= STONE_OSD_FLAG_RWORDERED;
 }
 void Op::ignore_cache() {
-  reinterpret_cast<OpImpl*>(&impl)->op.flags |= CEPH_OSD_FLAG_IGNORE_CACHE;
+  reinterpret_cast<OpImpl*>(&impl)->op.flags |= STONE_OSD_FLAG_IGNORE_CACHE;
 }
 void Op::skiprwlocks() {
-  reinterpret_cast<OpImpl*>(&impl)->op.flags |= CEPH_OSD_FLAG_SKIPRWLOCKS;
+  reinterpret_cast<OpImpl*>(&impl)->op.flags |= STONE_OSD_FLAG_SKIPRWLOCKS;
 }
 void Op::ignore_overlay() {
-  reinterpret_cast<OpImpl*>(&impl)->op.flags |= CEPH_OSD_FLAG_IGNORE_OVERLAY;
+  reinterpret_cast<OpImpl*>(&impl)->op.flags |= STONE_OSD_FLAG_IGNORE_OVERLAY;
 }
 void Op::full_try() {
-  reinterpret_cast<OpImpl*>(&impl)->op.flags |= CEPH_OSD_FLAG_FULL_TRY;
+  reinterpret_cast<OpImpl*>(&impl)->op.flags |= STONE_OSD_FLAG_FULL_TRY;
 }
 void Op::full_force() {
-  reinterpret_cast<OpImpl*>(&impl)->op.flags |= CEPH_OSD_FLAG_FULL_FORCE;
+  reinterpret_cast<OpImpl*>(&impl)->op.flags |= STONE_OSD_FLAG_FULL_FORCE;
 }
 void Op::ignore_redirect() {
-  reinterpret_cast<OpImpl*>(&impl)->op.flags |= CEPH_OSD_FLAG_IGNORE_REDIRECT;
+  reinterpret_cast<OpImpl*>(&impl)->op.flags |= STONE_OSD_FLAG_IGNORE_REDIRECT;
 }
 void Op::ordersnap() {
-  reinterpret_cast<OpImpl*>(&impl)->op.flags |= CEPH_OSD_FLAG_ORDERSNAP;
+  reinterpret_cast<OpImpl*>(&impl)->op.flags |= STONE_OSD_FLAG_ORDERSNAP;
 }
 void Op::returnvec() {
-  reinterpret_cast<OpImpl*>(&impl)->op.flags |= CEPH_OSD_FLAG_RETURNVEC;
+  reinterpret_cast<OpImpl*>(&impl)->op.flags |= STONE_OSD_FLAG_RETURNVEC;
 }
 
 std::size_t Op::size() const {
@@ -546,7 +546,7 @@ void ReadOp::sparse_read(uint64_t off, uint64_t len, cb::list* out,
   reinterpret_cast<OpImpl*>(&impl)->op.sparse_read(off, len, ec, extents, out);
 }
 
-void ReadOp::stat(std::uint64_t* size, ceph::real_time* mtime,
+void ReadOp::stat(std::uint64_t* size, stone::real_time* mtime,
 		  bs::error_code* ec) {
   reinterpret_cast<OpImpl*>(&impl)->op.stat(size, mtime, ec);
 }
@@ -596,7 +596,7 @@ void ReadOp::list_snaps(SnapSet* snaps,
 
 // WriteOp
 
-void WriteOp::set_mtime(ceph::real_time t) {
+void WriteOp::set_mtime(stone::real_time t) {
   auto o = reinterpret_cast<OpImpl*>(&impl);
   o->mtime = t;
 }
@@ -669,25 +669,25 @@ void WriteOp::set_alloc_hint(uint64_t expected_object_size,
 			     alloc_hint::alloc_hint_t flags) {
   using namespace alloc_hint;
   static_assert(sequential_write ==
-		static_cast<int>(CEPH_OSD_ALLOC_HINT_FLAG_SEQUENTIAL_WRITE));
+		static_cast<int>(STONE_OSD_ALLOC_HINT_FLAG_SEQUENTIAL_WRITE));
   static_assert(random_write ==
-		static_cast<int>(CEPH_OSD_ALLOC_HINT_FLAG_RANDOM_WRITE));
+		static_cast<int>(STONE_OSD_ALLOC_HINT_FLAG_RANDOM_WRITE));
   static_assert(sequential_read ==
-		static_cast<int>(CEPH_OSD_ALLOC_HINT_FLAG_SEQUENTIAL_READ));
+		static_cast<int>(STONE_OSD_ALLOC_HINT_FLAG_SEQUENTIAL_READ));
   static_assert(random_read ==
-		static_cast<int>(CEPH_OSD_ALLOC_HINT_FLAG_RANDOM_READ));
+		static_cast<int>(STONE_OSD_ALLOC_HINT_FLAG_RANDOM_READ));
   static_assert(append_only ==
-		static_cast<int>(CEPH_OSD_ALLOC_HINT_FLAG_APPEND_ONLY));
+		static_cast<int>(STONE_OSD_ALLOC_HINT_FLAG_APPEND_ONLY));
   static_assert(immutable ==
-		static_cast<int>(CEPH_OSD_ALLOC_HINT_FLAG_IMMUTABLE));
+		static_cast<int>(STONE_OSD_ALLOC_HINT_FLAG_IMMUTABLE));
   static_assert(shortlived ==
-		static_cast<int>(CEPH_OSD_ALLOC_HINT_FLAG_SHORTLIVED));
+		static_cast<int>(STONE_OSD_ALLOC_HINT_FLAG_SHORTLIVED));
   static_assert(longlived ==
-		static_cast<int>(CEPH_OSD_ALLOC_HINT_FLAG_LONGLIVED));
+		static_cast<int>(STONE_OSD_ALLOC_HINT_FLAG_LONGLIVED));
   static_assert(compressible ==
-		static_cast<int>(CEPH_OSD_ALLOC_HINT_FLAG_COMPRESSIBLE));
+		static_cast<int>(STONE_OSD_ALLOC_HINT_FLAG_COMPRESSIBLE));
   static_assert(incompressible ==
-		static_cast<int>(CEPH_OSD_ALLOC_HINT_FLAG_INCOMPRESSIBLE));
+		static_cast<int>(STONE_OSD_ALLOC_HINT_FLAG_INCOMPRESSIBLE));
 
   reinterpret_cast<OpImpl*>(&impl)->op.set_alloc_hint(expected_object_size,
 						      expected_write_size,
@@ -707,18 +707,18 @@ RADOS::Builder& RADOS::Builder::add_conf_file(std::string_view f) {
 void RADOS::Builder::build(boost::asio::io_context& ioctx,
 			   std::unique_ptr<BuildComp> c) {
   constexpr auto env = CODE_ENVIRONMENT_LIBRARY;
-  CephInitParameters ci(env);
+  StoneInitParameters ci(env);
   if (name)
-    ci.name.set(CEPH_ENTITY_TYPE_CLIENT, *name);
+    ci.name.set(STONE_ENTITY_TYPE_CLIENT, *name);
   else
-    ci.name.set(CEPH_ENTITY_TYPE_CLIENT, "admin");
+    ci.name.set(STONE_ENTITY_TYPE_CLIENT, "admin");
   uint32_t flags = 0;
   if (no_default_conf)
     flags |= CINIT_FLAG_NO_DEFAULT_CONFIG_FILE;
   if (no_mon_conf)
     flags |= CINIT_FLAG_NO_MON_CONFIG;
 
-  CephContext *cct = common_preinit(ci, env, flags);
+  StoneContext *cct = common_preinit(ci, env, flags);
   if (cluster)
     cct->_conf->cluster = *cluster;
 
@@ -733,7 +733,7 @@ void RADOS::Builder::build(boost::asio::io_context& ioctx,
     auto r = cct->_conf.parse_config_files(conf_files ? conf_files->data() : nullptr,
 					   &ss, flags);
     if (r < 0)
-      c->post(std::move(c), ceph::to_error_code(r), RADOS{nullptr});
+      c->post(std::move(c), stone::to_error_code(r), RADOS{nullptr});
   }
 
   cct->_conf.parse_env(cct->get_module_type());
@@ -742,7 +742,7 @@ void RADOS::Builder::build(boost::asio::io_context& ioctx,
     std::stringstream ss;
     auto r = cct->_conf.set_val(n, v, &ss);
     if (r < 0)
-      c->post(std::move(c), ceph::to_error_code(-EINVAL), RADOS{nullptr});
+      c->post(std::move(c), stone::to_error_code(-EINVAL), RADOS{nullptr});
   }
 
   if (!no_mon_conf) {
@@ -750,7 +750,7 @@ void RADOS::Builder::build(boost::asio::io_context& ioctx,
     // TODO This function should return an error code.
     auto err = mc_bootstrap.get_monmap_and_config();
     if (err < 0)
-      c->post(std::move(c), ceph::to_error_code(err), RADOS{nullptr});
+      c->post(std::move(c), stone::to_error_code(err), RADOS{nullptr});
   }
   if (!cct->_log->is_started()) {
     cct->_log->start();
@@ -760,7 +760,7 @@ void RADOS::Builder::build(boost::asio::io_context& ioctx,
   RADOS::make_with_cct(cct, ioctx, std::move(c));
 }
 
-void RADOS::make_with_cct(CephContext* cct,
+void RADOS::make_with_cct(StoneContext* cct,
 			  boost::asio::io_context& ioctx,
 			  std::unique_ptr<BuildComp> c) {
   try {
@@ -827,11 +827,11 @@ void RADOS::execute(const Object& o, const IOContext& _ioc, WriteOp&& _op,
   auto ioc = reinterpret_cast<const IOContextImpl*>(&_ioc.impl);
   auto op = reinterpret_cast<OpImpl*>(&_op.impl);
   auto flags = op->op.flags | ioc->extra_op_flags;
-  ceph::real_time mtime;
+  stone::real_time mtime;
   if (op->mtime)
     mtime = *op->mtime;
   else
-    mtime = ceph::real_clock::now();
+    mtime = stone::real_clock::now();
 
   ZTracer::Trace trace;
   if (trace_info) {
@@ -864,7 +864,7 @@ void RADOS::execute(const Object& o, std::int64_t pool, ReadOp&& _op,
     oloc.key = *key;
 
   impl->objecter->read(
-    *oid, oloc, std::move(op->op), CEPH_NOSNAP, bl, flags,
+    *oid, oloc, std::move(op->op), STONE_NOSNAP, bl, flags,
     std::move(c), objver);
 }
 
@@ -883,11 +883,11 @@ void RADOS::execute(const Object& o, std::int64_t pool, WriteOp&& _op,
   if (key)
     oloc.key = *key;
 
-  ceph::real_time mtime;
+  stone::real_time mtime;
   if (op->mtime)
     mtime = *op->mtime;
   else
-    mtime = ceph::real_clock::now();
+    mtime = stone::real_clock::now();
 
   impl->objecter->mutate(
     *oid, oloc, std::move(op->op), {},
@@ -1097,7 +1097,7 @@ void RADOS::stat_fs(std::optional<std::int64_t> _pool,
     pool = *pool;
   impl->objecter->get_fs_stats(
     pool,
-    [c = std::move(c)](bs::error_code ec, const struct ceph_statfs s) mutable {
+    [c = std::move(c)](bs::error_code ec, const struct stone_statfs s) mutable {
       FSStats fso{s.kb, s.kb_used, s.kb_avail, s.num_objects};
       c->dispatch(std::move(c), ec, std::move(fso));
     });
@@ -1117,10 +1117,10 @@ void RADOS::watch(const Object& o, const IOContext& _ioc,
                                                    ioc->extra_op_flags);
   uint64_t cookie = linger_op->get_cookie();
   linger_op->handle = std::move(cb);
-  op.watch(cookie, CEPH_OSD_WATCH_OP_WATCH, timeout.value_or(0s).count());
+  op.watch(cookie, STONE_OSD_WATCH_OP_WATCH, timeout.value_or(0s).count());
   bufferlist bl;
   impl->objecter->linger_watch(
-    linger_op, op, ioc->snapc, ceph::real_clock::now(), bl,
+    linger_op, op, ioc->snapc, stone::real_clock::now(), bl,
     Objecter::LingerOp::OpComp::create(
       get_executor(),
       [c = std::move(c), cookie](bs::error_code e, cb::list) mutable {
@@ -1146,10 +1146,10 @@ void RADOS::watch(const Object& o, std::int64_t pool,
   Objecter::LingerOp *linger_op = impl->objecter->linger_register(*oid, oloc, 0);
   uint64_t cookie = linger_op->get_cookie();
   linger_op->handle = std::move(cb);
-  op.watch(cookie, CEPH_OSD_WATCH_OP_WATCH, timeout.value_or(0s).count());
+  op.watch(cookie, STONE_OSD_WATCH_OP_WATCH, timeout.value_or(0s).count());
   bufferlist bl;
   impl->objecter->linger_watch(
-    linger_op, op, {}, ceph::real_clock::now(), bl,
+    linger_op, op, {}, stone::real_clock::now(), bl,
     Objecter::LingerOp::OpComp::create(
       get_executor(),
       [c = std::move(c), cookie](bs::error_code e, bufferlist) mutable {
@@ -1192,11 +1192,11 @@ void RADOS::notify_ack(const Object& o,
 
   ObjectOperation op;
   op.notify_ack(notify_id, cookie, bl);
-  impl->objecter->read(*oid, oloc, std::move(op), CEPH_NOSNAP, nullptr, 0,
+  impl->objecter->read(*oid, oloc, std::move(op), STONE_NOSNAP, nullptr, 0,
 		       std::move(c));
 }
 
-tl::expected<ceph::timespan, bs::error_code> RADOS::watch_check(uint64_t cookie)
+tl::expected<stone::timespan, bs::error_code> RADOS::watch_check(uint64_t cookie)
 {
   Objecter::LingerOp *linger_op = reinterpret_cast<Objecter::LingerOp*>(cookie);
   return impl->objecter->linger_check(linger_op);
@@ -1210,9 +1210,9 @@ void RADOS::unwatch(uint64_t cookie, const IOContext& _ioc,
   Objecter::LingerOp *linger_op = reinterpret_cast<Objecter::LingerOp*>(cookie);
 
   ObjectOperation op;
-  op.watch(cookie, CEPH_OSD_WATCH_OP_UNWATCH);
+  op.watch(cookie, STONE_OSD_WATCH_OP_UNWATCH);
   impl->objecter->mutate(linger_op->target.base_oid, ioc->oloc, std::move(op),
-			 ioc->snapc, ceph::real_clock::now(), ioc->extra_op_flags,
+			 ioc->snapc, stone::real_clock::now(), ioc->extra_op_flags,
 			 Objecter::Op::OpComp::create(
 			   get_executor(),
 			   [objecter = impl->objecter,
@@ -1238,9 +1238,9 @@ void RADOS::unwatch(uint64_t cookie, std::int64_t pool,
   Objecter::LingerOp *linger_op = reinterpret_cast<Objecter::LingerOp*>(cookie);
 
   ObjectOperation op;
-  op.watch(cookie, CEPH_OSD_WATCH_OP_UNWATCH);
+  op.watch(cookie, STONE_OSD_WATCH_OP_UNWATCH);
   impl->objecter->mutate(linger_op->target.base_oid, oloc, std::move(op),
-			 {}, ceph::real_clock::now(), 0,
+			 {}, stone::real_clock::now(), 0,
 			 Objecter::Op::OpComp::create(
 			   get_executor(),
 			   [objecter = impl->objecter,
@@ -1305,7 +1305,7 @@ struct NotifyHandler : std::enable_shared_from_this<NotifyHandler> {
       res = ec;
     if ((acked && finished) || res) {
       objecter->linger_cancel(op);
-      ceph_assert(c);
+      stone_assert(c);
       ca::dispatch(std::move(c), res, std::move(rbl));
     }
   }
@@ -1325,7 +1325,7 @@ void RADOS::notify(const Object& o, const IOContext& _ioc, bufferlist&& bl,
   linger_op->on_notify_finish =
     Objecter::LingerOp::OpComp::create(
       get_executor(),
-      [cb](bs::error_code ec, ceph::bufferlist bl) mutable {
+      [cb](bs::error_code ec, stone::bufferlist bl) mutable {
 	(*cb)(ec, std::move(bl));
       });
   ObjectOperation rd;
@@ -1339,7 +1339,7 @@ void RADOS::notify(const Object& o, const IOContext& _ioc, bufferlist&& bl,
     linger_op, rd, ioc->snap_seq, inbl,
     Objecter::LingerOp::OpComp::create(
       get_executor(),
-      [cb](bs::error_code ec, ceph::bufferlist bl) mutable {
+      [cb](bs::error_code ec, stone::bufferlist bl) mutable {
 	cb->handle_ack(ec, std::move(bl));
       }), nullptr);
 }
@@ -1364,7 +1364,7 @@ void RADOS::notify(const Object& o, std::int64_t pool, bufferlist&& bl,
   linger_op->on_notify_finish =
     Objecter::LingerOp::OpComp::create(
       get_executor(),
-      [cb](bs::error_code ec, ceph::bufferlist&& bl) mutable {
+      [cb](bs::error_code ec, stone::bufferlist&& bl) mutable {
 	(*cb)(ec, std::move(bl));
       });
   ObjectOperation rd;
@@ -1375,7 +1375,7 @@ void RADOS::notify(const Object& o, std::int64_t pool, bufferlist&& bl,
     bl, &inbl);
 
   impl->objecter->linger_notify(
-    linger_op, rd, CEPH_NOSNAP, inbl,
+    linger_op, rd, STONE_NOSNAP, inbl,
     Objecter::LingerOp::OpComp::create(
       get_executor(),
       [cb](bs::error_code ec, bufferlist&& bl) mutable {
@@ -1532,24 +1532,24 @@ void RADOS::enumerate_objects(std::int64_t pool,
 
 
 void RADOS::osd_command(int osd, std::vector<std::string>&& cmd,
-			ceph::bufferlist&& in, std::unique_ptr<CommandComp> c) {
+			stone::bufferlist&& in, std::unique_ptr<CommandComp> c) {
   impl->objecter->osd_command(osd, std::move(cmd), std::move(in), nullptr,
 			      [c = std::move(c)]
 			      (bs::error_code ec,
 			       std::string&& s,
-			       ceph::bufferlist&& b) mutable {
+			       stone::bufferlist&& b) mutable {
 				ca::dispatch(std::move(c), ec,
 					     std::move(s),
 					     std::move(b));
 			      });
 }
 void RADOS::pg_command(PG pg, std::vector<std::string>&& cmd,
-		       ceph::bufferlist&& in, std::unique_ptr<CommandComp> c) {
+		       stone::bufferlist&& in, std::unique_ptr<CommandComp> c) {
   impl->objecter->pg_command(pg_t{pg.seed, pg.pool}, std::move(cmd), std::move(in), nullptr,
 			     [c = std::move(c)]
 			     (bs::error_code ec,
 			      std::string&& s,
-			      ceph::bufferlist&& b) mutable {
+			      stone::bufferlist&& b) mutable {
 			       ca::dispatch(std::move(c), ec,
 					    std::move(s),
 					    std::move(b));
@@ -1561,8 +1561,8 @@ void RADOS::enable_application(std::string_view pool, std::string_view app_name,
   // pre-Luminous clusters will return -EINVAL and application won't be
   // preserved until Luminous is configured as minimum version.
   if (!impl->get_required_monitor_features().contains_all(
-	ceph::features::mon::FEATURE_LUMINOUS)) {
-    ca::post(std::move(c), ceph::to_error_code(-EOPNOTSUPP));
+	stone::features::mon::FEATURE_LUMINOUS)) {
+    ca::post(std::move(c), stone::to_error_code(-EOPNOTSUPP));
   } else {
     impl->monclient.start_mon_command(
       { fmt::format("{{ \"prefix\": \"osd pool application enable\","
@@ -1638,7 +1638,7 @@ uint64_t RADOS::instance_id() const {
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-class category : public ceph::converting_category {
+class category : public stone::converting_category {
 public:
   category() {}
   const char* name() const noexcept override;
@@ -1648,7 +1648,7 @@ public:
     override;
   bool equivalent(int ev, const bs::error_condition& c) const
     noexcept override;
-  using ceph::converting_category::equivalent;
+  using stone::converting_category::equivalent;
   int from_code(int ev) const noexcept override;
 };
 #pragma GCC diagnostic pop
@@ -1681,7 +1681,7 @@ std::string category::message(int ev) const {
 bs::error_condition category::default_error_condition(int ev) const noexcept {
   switch (static_cast<errc>(ev)) {
   case errc::pool_dne:
-    return ceph::errc::does_not_exist;
+    return stone::errc::does_not_exist;
   case errc::invalid_snapcontext:
     return bs::errc::invalid_argument;
   }
@@ -1714,7 +1714,7 @@ const bs::error_category& error_category() noexcept {
   return c;
 }
 
-CephContext* RADOS::cct() {
+StoneContext* RADOS::cct() {
   return impl->cct.get();
 }
 }

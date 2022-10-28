@@ -12,7 +12,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <unistd.h>
-#include <include/cephfs/libcephfs.h>
+#include <include/stonefs/libstonefs.h>
 
 int main(int argc, char *argv[]) 
 {
@@ -28,37 +28,37 @@ int main(int argc, char *argv[])
 	else
 		close(pipefd[0]);
 
-	struct ceph_mount_info *cmount = NULL;
+	struct stone_mount_info *cmount = NULL;
 
-	ceph_create(&cmount, "admin");
-	ceph_conf_read_file(cmount, NULL);
+	stone_create(&cmount, "admin");
+	stone_conf_read_file(cmount, NULL);
 
-	int ret [[maybe_unused]] = ceph_mount(cmount, NULL);
+	int ret [[maybe_unused]] = stone_mount(cmount, NULL);
 	assert(ret >= 0);
 
 	if (pid == 0) {
 		ret = read(pipefd[0], &buf, 1);
 		assert(ret == 1);
 
-		ret = ceph_rename(cmount, "1", "3");
+		ret = stone_rename(cmount, "1", "3");
 		assert(ret >= 0);
 
-		ret = ceph_rename(cmount, "2", "1");
+		ret = stone_rename(cmount, "2", "1");
 		assert(ret >= 0);
 
-		ceph_unmount(cmount);
+		stone_unmount(cmount);
 		printf("child exits\n");
 	} else {
-		ret = ceph_mkdirs(cmount, "1/2", 0755);
+		ret = stone_mkdirs(cmount, "1/2", 0755);
 		assert(ret >= 0);
 
-		struct ceph_statx stx;
-		ret = ceph_statx(cmount, "1", &stx, 0, 0);
+		struct stone_statx stx;
+		ret = stone_statx(cmount, "1", &stx, 0, 0);
 		assert(ret >= 0);
 		uint64_t orig_ino [[maybe_unused]] = stx.stx_ino;
 
 
-		ret = ceph_mkdir(cmount, "2", 0755);
+		ret = stone_mkdir(cmount, "2", 0755);
 		assert(ret >= 0);
 
 		ret = write(pipefd[1], &buf, 1);
@@ -70,12 +70,12 @@ int main(int argc, char *argv[])
 		assert(wstatus == 0);
 
 		// make origin '1' no parent dentry
-		ret = ceph_statx(cmount, "1", &stx, 0, 0);
+		ret = stone_statx(cmount, "1", &stx, 0, 0);
 		assert(ret >= 0);
 		assert(orig_ino != stx.stx_ino);
 
 		// move root inode's cap_item to tail of session->caps
-		ret = ceph_statx(cmount, ".", &stx, 0, 0);
+		ret = stone_statx(cmount, ".", &stx, 0, 0);
 		assert(ret >= 0);
 
 		printf("waiting for crash\n");

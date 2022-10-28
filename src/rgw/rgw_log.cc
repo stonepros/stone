@@ -19,7 +19,7 @@
 #include <chrono>
 #include <math.h>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 static void set_param_str(struct req_state *s, const char *name, string& str)
 {
@@ -90,12 +90,12 @@ string render_log_object_name(const string& format,
 
 /* usage logger */
 class UsageLogger : public DoutPrefixProvider {
-  CephContext *cct;
+  StoneContext *cct;
   RGWRados *store;
   map<rgw_user_bucket, RGWUsageBatch> usage_map;
-  ceph::mutex lock = ceph::make_mutex("UsageLogger");
+  stone::mutex lock = stone::make_mutex("UsageLogger");
   int32_t num_entries;
-  ceph::mutex timer_lock = ceph::make_mutex("UsageLogger::timer_lock");
+  stone::mutex timer_lock = stone::make_mutex("UsageLogger::timer_lock");
   SafeTimer timer;
   utime_t round_timestamp;
 
@@ -114,11 +114,11 @@ class UsageLogger : public DoutPrefixProvider {
   }
 public:
 
-  UsageLogger(CephContext *_cct, RGWRados *_store) : cct(_cct), store(_store), num_entries(0), timer(cct, timer_lock) {
+  UsageLogger(StoneContext *_cct, RGWRados *_store) : cct(_cct), store(_store), num_entries(0), timer(cct, timer_lock) {
     timer.init();
     std::lock_guard l{timer_lock};
     set_timer();
-    utime_t ts = ceph_clock_now();
+    utime_t ts = stone_clock_now();
     recalc_round_timestamp(ts);
   }
 
@@ -171,14 +171,14 @@ public:
     store->log_usage(this, old_map);
   }
 
-  CephContext *get_cct() const override { return cct; }
+  StoneContext *get_cct() const override { return cct; }
   unsigned get_subsys() const override { return dout_subsys; }
   std::ostream& gen_prefix(std::ostream& out) const override { return out << "rgw UsageLogger: "; }
 };
 
 static UsageLogger *usage_logger = NULL;
 
-void rgw_log_usage_init(CephContext *cct, RGWRados *store)
+void rgw_log_usage_init(StoneContext *cct, RGWRados *store)
 {
   usage_logger = new UsageLogger(cct, store);
 }
@@ -239,7 +239,7 @@ static void log_usage(struct req_state *s, const string& op_name)
 
   entry.add(op_name, data);
 
-  utime_t ts = ceph_clock_now();
+  utime_t ts = stone_clock_now();
 
   usage_logger->insert(ts, entry);
 }
@@ -340,7 +340,7 @@ int OpsLogManifold::log(struct req_state* s, struct rgw_log_entry& entry)
   return ret;
 }
 
-OpsLogFile::OpsLogFile(CephContext* cct, std::string& path, uint64_t max_data_size) :
+OpsLogFile::OpsLogFile(StoneContext* cct, std::string& path, uint64_t max_data_size) :
   cct(cct), file(path, std::ofstream::app), data_size(0), max_data_size(max_data_size)
 {
 }
@@ -458,7 +458,7 @@ void OpsLogSocket::init_connection(bufferlist& bl)
   bl.append("[");
 }
 
-OpsLogSocket::OpsLogSocket(CephContext *cct, uint64_t _backlog) : OutputDataSocket(cct, _backlog)
+OpsLogSocket::OpsLogSocket(StoneContext *cct, uint64_t _backlog) : OutputDataSocket(cct, _backlog)
 {
   delim.append(",\n");
 }

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat Inc.
  *
@@ -79,7 +79,7 @@ class ClassedOpQueueScheduler final : public Scheduler {
   }
 
   priority_t get_priority(scheduler_class_t kl) const {
-    ceph_assert(static_cast<size_t>(kl) <
+    stone_assert(static_cast<size_t>(kl) <
 		static_cast<size_t>(scheduler_class_t::immediate));
     return priority_map[static_cast<size_t>(kl)];
   }
@@ -132,7 +132,7 @@ public:
     return queue.dequeue();
   }
 
-  void dump(ceph::Formatter &f) const final {
+  void dump(stone::Formatter &f) const final {
     return queue.dump(&f);
   }
 
@@ -168,7 +168,7 @@ SchedulerRef make_scheduler(ConfigProxy &conf)
   } else if (*type == "mclock_scheduler") {
     return std::make_unique<mClockScheduler>(conf);
   } else {
-    ceph_assert("Invalid choice of wq" == 0);
+    stone_assert("Invalid choice of wq" == 0);
     return std::unique_ptr<mClockScheduler>();
   }
 }

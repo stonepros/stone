@@ -10,9 +10,9 @@
 #include "auth/Crypto.h"
 
 #include "common/armor.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/config.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/Formatter.h"
 #include "common/errno.h"
 
@@ -40,8 +40,8 @@
 #include "cls/lock/cls_lock_client.h"
 #include "cls/timeindex/cls_timeindex_client.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 static string objexp_lock_name = "gc_process";
 
@@ -72,7 +72,7 @@ static void objexp_get_shard(int shard_num,
   *shard = objexp_hint_get_shardname(shard_num);
 }
 
-static int objexp_hint_parse(CephContext *cct, cls_timeindex_entry &ti_entry,
+static int objexp_hint_parse(StoneContext *cct, cls_timeindex_entry &ti_entry,
                              objexp_hint_entry *hint_entry)
 {
   try {
@@ -86,7 +86,7 @@ static int objexp_hint_parse(CephContext *cct, cls_timeindex_entry &ti_entry,
 }
 
 int RGWObjExpStore::objexp_hint_add(const DoutPrefixProvider *dpp, 
-                              const ceph::real_time& delete_at,
+                              const stone::real_time& delete_at,
                               const string& tenant_name,
                               const string& bucket_name,
                               const string& bucket_id,
@@ -117,8 +117,8 @@ int RGWObjExpStore::objexp_hint_add(const DoutPrefixProvider *dpp,
 
 int RGWObjExpStore::objexp_hint_list(const DoutPrefixProvider *dpp, 
                                const string& oid,
-                               const ceph::real_time& start_time,
-                               const ceph::real_time& end_time,
+                               const stone::real_time& start_time,
+                               const stone::real_time& end_time,
                                const int max_entries,
                                const string& marker,
                                list<cls_timeindex_entry>& entries, /* out */
@@ -173,8 +173,8 @@ static int cls_timeindex_trim_repeat(const DoutPrefixProvider *dpp,
 
 int RGWObjExpStore::objexp_hint_trim(const DoutPrefixProvider *dpp, 
                                const string& oid,
-                               const ceph::real_time& start_time,
-                               const ceph::real_time& end_time,
+                               const stone::real_time& start_time,
+                               const stone::real_time& end_time,
                                const string& from_marker,
                                const string& to_marker)
 {
@@ -312,11 +312,11 @@ bool RGWObjectExpirer::process_single_shard(const DoutPrefixProvider *dpp,
   bool truncated = false;
   bool done = true;
 
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
   int num_entries = cct->_conf->rgw_objexp_chunk_size;
 
   int max_secs = cct->_conf->rgw_objexp_gc_interval;
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   end += max_secs;
 
   rados::cls::lock::Lock l(objexp_lock_name);
@@ -351,7 +351,7 @@ bool RGWObjectExpirer::process_single_shard(const DoutPrefixProvider *dpp,
       trim_chunk(dpp, shard, last_run, round_start, marker, out_marker);
     }
 
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     if (now >= end) {
       done = false;
       break;
@@ -369,7 +369,7 @@ bool RGWObjectExpirer::inspect_all_shards(const DoutPrefixProvider *dpp,
                                           const utime_t& last_run,
                                           const utime_t& round_start)
 {
-  CephContext * const cct = store->ctx();
+  StoneContext * const cct = store->ctx();
   int num_shards = cct->_conf->rgw_objexp_hints_num_shards;
   bool all_done = true;
 
@@ -412,7 +412,7 @@ void RGWObjectExpirer::stop_processor()
 void *RGWObjectExpirer::OEWorker::entry() {
   utime_t last_run;
   do {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     ldout(cct, 2) << "object expiration: start" << dendl;
     if (oe->inspect_all_shards(this, last_run, start)) {
       /* All shards have been processed properly. Next time we can start
@@ -425,7 +425,7 @@ void *RGWObjectExpirer::OEWorker::entry() {
     if (oe->going_down())
       break;
 
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     end -= start;
     int secs = cct->_conf->rgw_objexp_gc_interval;
 
@@ -447,7 +447,7 @@ void RGWObjectExpirer::OEWorker::stop()
   cond.notify_all();
 }
 
-CephContext *RGWObjectExpirer::OEWorker::get_cct() const 
+StoneContext *RGWObjectExpirer::OEWorker::get_cct() const 
 { 
   return cct; 
 }

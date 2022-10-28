@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "rbd_replay/ActionTypes.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/byteorder.h"
 #include "include/stringify.h"
 #include "common/Formatter.h"
@@ -15,7 +15,7 @@ namespace action {
 namespace {
 
 bool byte_swap_required(__u8 version) {
-#if defined(CEPH_LITTLE_ENDIAN)
+#if defined(STONE_LITTLE_ENDIAN)
   return (version == 0);
 #else
   return false;
@@ -23,15 +23,15 @@ bool byte_swap_required(__u8 version) {
 }
 
 void decode_big_endian_string(std::string &str, bufferlist::const_iterator &it) {
-  using ceph::decode;
-#if defined(CEPH_LITTLE_ENDIAN)
+  using stone::decode;
+#if defined(STONE_LITTLE_ENDIAN)
   uint32_t length;
   decode(length, it);
   length = swab(length);
   str.clear();
   it.copy(length, str);
 #else
-  ceph_abort();
+  stone_abort();
 #endif
 }
 
@@ -42,7 +42,7 @@ public:
 
   template <typename Action>
   inline void operator()(const Action &action) const {
-    using ceph::encode;
+    using stone::encode;
     encode(static_cast<uint8_t>(Action::ACTION_TYPE), m_bl);
     action.encode(m_bl);
   }
@@ -76,13 +76,13 @@ public:
     action.dump(m_formatter);
   }
 private:
-  ceph::Formatter *m_formatter;
+  stone::Formatter *m_formatter;
 };
 
 } // anonymous namespace
 
 void Dependency::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(id, bl);
   encode(time_delta, bl);
 }
@@ -92,7 +92,7 @@ void Dependency::decode(bufferlist::const_iterator &it) {
 }
 
 void Dependency::decode(__u8 version, bufferlist::const_iterator &it) {
-  using ceph::decode;
+  using stone::decode;
   decode(id, it);
   decode(time_delta, it);
   if (byte_swap_required(version)) {
@@ -112,14 +112,14 @@ void Dependency::generate_test_instances(std::list<Dependency *> &o) {
 }
 
 void ActionBase::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(id, bl);
   encode(thread_id, bl);
   encode(dependencies, bl);
 }
 
 void ActionBase::decode(__u8 version, bufferlist::const_iterator &it) {
-  using ceph::decode;
+  using stone::decode;
   decode(id, it);
   decode(thread_id, it);
   if (version == 0) {
@@ -159,13 +159,13 @@ void ActionBase::dump(Formatter *f) const {
 }
 
 void ImageActionBase::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   ActionBase::encode(bl);
   encode(imagectx_id, bl);
 }
 
 void ImageActionBase::decode(__u8 version, bufferlist::const_iterator &it) {
-  using ceph::decode;
+  using stone::decode;
   ActionBase::decode(version, it);
   decode(imagectx_id, it);
   if (byte_swap_required(version)) {
@@ -179,14 +179,14 @@ void ImageActionBase::dump(Formatter *f) const {
 }
 
 void IoActionBase::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   ImageActionBase::encode(bl);
   encode(offset, bl);
   encode(length, bl);
 }
 
 void IoActionBase::decode(__u8 version, bufferlist::const_iterator &it) {
-  using ceph::decode;
+  using stone::decode;
   ImageActionBase::decode(version, it);
   decode(offset, it);
   decode(length, it);
@@ -203,7 +203,7 @@ void IoActionBase::dump(Formatter *f) const {
 }
 
 void OpenImageAction::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   ImageActionBase::encode(bl);
   encode(name, bl);
   encode(snap_name, bl);
@@ -211,7 +211,7 @@ void OpenImageAction::encode(bufferlist &bl) const {
 }
 
 void OpenImageAction::decode(__u8 version, bufferlist::const_iterator &it) {
-  using ceph::decode;
+  using stone::decode;
   ImageActionBase::decode(version, it);
   if (byte_swap_required(version)) {
     decode_big_endian_string(name, it);
@@ -231,7 +231,7 @@ void OpenImageAction::dump(Formatter *f) const {
 }
 
 void AioOpenImageAction::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   ImageActionBase::encode(bl);
   encode(name, bl);
   encode(snap_name, bl);
@@ -239,7 +239,7 @@ void AioOpenImageAction::encode(bufferlist &bl) const {
 }
 
 void AioOpenImageAction::decode(__u8 version, bufferlist::const_iterator &it) {
-  using ceph::decode;
+  using stone::decode;
   ImageActionBase::decode(version, it);
   if (byte_swap_required(version)) {
     decode_big_endian_string(name, it);
@@ -259,7 +259,7 @@ void AioOpenImageAction::dump(Formatter *f) const {
 }
 
 void UnknownAction::encode(bufferlist &bl) const {
-  ceph_abort();
+  stone_abort();
 }
 
 void UnknownAction::decode(__u8 version, bufferlist::const_iterator &it) {
@@ -285,7 +285,7 @@ void ActionEntry::decode_unversioned(bufferlist::const_iterator &it) {
 }
 
 void ActionEntry::decode_versioned(__u8 version, bufferlist::const_iterator &it) {
-  using ceph::decode;
+  using stone::decode;
   uint8_t action_type;
   decode(action_type, it);
 

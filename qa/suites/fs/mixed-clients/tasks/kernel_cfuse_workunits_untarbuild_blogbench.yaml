@@ -4,7 +4,7 @@ tasks:
    - kclient-workload
 user-workload:
   sequential:
-  - ceph-fuse: [client.0]
+  - stone-fuse: [client.0]
   - workunit:
       clients:
          client.0:

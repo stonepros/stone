@@ -6,7 +6,7 @@
 
 #include <errno.h>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 int ObjectCache::get(const DoutPrefixProvider *dpp, const string& name, ObjectCacheInfo& info, uint32_t mask, rgw_cache_entry_info *cache_info)
@@ -27,7 +27,7 @@ int ObjectCache::get(const DoutPrefixProvider *dpp, const string& name, ObjectCa
   }
 
   if (expiry.count() &&
-       (ceph::coarse_mono_clock::now() - iter->second.info.time_added) > expiry) {
+       (stone::coarse_mono_clock::now() - iter->second.info.time_added) > expiry) {
     ldpp_dout(dpp, 10) << "cache get: name=" << name << " : expiry miss" << dendl;
     rl.unlock();
     wl.lock(); // write lock for expiration
@@ -151,7 +151,7 @@ void ObjectCache::put(const DoutPrefixProvider *dpp, const string& name, ObjectC
 
   auto [iter, inserted] = cache_map.emplace(name, ObjectCacheEntry{});
   ObjectCacheEntry& entry = iter->second;
-  entry.info.time_added = ceph::coarse_mono_clock::now();
+  entry.info.time_added = stone::coarse_mono_clock::now();
   if (inserted) {
     entry.lru_iter = lru.end();
   }

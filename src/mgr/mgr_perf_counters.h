@@ -6,8 +6,8 @@
 
 extern PerfCounters* perfcounter;
 
-extern int mgr_perf_start(CephContext* cct);
-extern void mgr_perf_stop(CephContext* cct);
+extern int mgr_perf_start(StoneeContext* cct);
+extern void mgr_perf_stop(StoneeContext* cct);
 
 enum {
   l_mgr_first,

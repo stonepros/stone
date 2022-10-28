@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat
  *
@@ -17,7 +17,7 @@
 #include <boost/intrusive/list.hpp>
 #include <gtest/gtest.h>
 
-namespace ceph::async {
+namespace stone::async {
 
 using boost::system::error_code;
 
@@ -253,4 +253,4 @@ TEST(AsyncCompletion, FreeFunctions)
   EXPECT_TRUE(context.stopped());
 }
 
-} // namespace ceph::async
+} // namespace stone::async

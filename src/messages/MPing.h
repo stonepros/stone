@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,14 +13,14 @@
  */
 
 
-#ifndef CEPH_MPING_H
-#define CEPH_MPING_H
+#ifndef STONE_MPING_H
+#define STONE_MPING_H
 
 #include "msg/Message.h"
 
 class MPing final : public Message {
 public:
-  MPing() : Message{CEPH_MSG_PING} {}
+  MPing() : Message{STONE_MSG_PING} {}
 private:
   ~MPing() final {}
 

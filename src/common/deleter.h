@@ -19,8 +19,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_COMMON_DELETER_H
-#define CEPH_COMMON_DELETER_H
+#ifndef STONE_COMMON_DELETER_H
+#define STONE_COMMON_DELETER_H
 
 #include <atomic>
 #include <cstdlib>
@@ -257,4 +257,4 @@ inline deleter make_object_deleter(deleter d, T&& obj) {
 
 /// @}
 
-#endif /* CEPH_COMMON_DELETER_H */
+#endif /* STONE_COMMON_DELETER_H */

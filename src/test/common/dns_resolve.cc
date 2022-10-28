@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -24,7 +24,7 @@
 
 #define TEST_DEBUG 20
 
-#define dout_subsys ceph_subsys_
+#define dout_subsys stone_subsys_
 
 
 using ::testing::Return;
@@ -36,7 +36,7 @@ using ::testing::StrEq;
 class DNSResolverTest : public ::testing::Test {
   protected:
     void SetUp() override {
-      g_ceph_context->_conf->subsys.set_log_level(dout_subsys, TEST_DEBUG);
+      g_stone_context->_conf->subsys.set_log_level(dout_subsys, TEST_DEBUG);
     }
 
     void TearDown() override  {
@@ -49,18 +49,18 @@ TEST_F(DNSResolverTest, resolve_ip_addr) {
 
   int lena = sizeof(ns_query_msg_mon_a_payload);
 #ifdef HAVE_RES_NQUERY
-  EXPECT_CALL(*resolvH, res_nquery(_,StrEq("mon.a.ceph.com"), C_IN, T_A,_,_))
+  EXPECT_CALL(*resolvH, res_nquery(_,StrEq("mon.a.stone.com"), C_IN, T_A,_,_))
        .WillOnce(DoAll(SetArrayArgument<4>(ns_query_msg_mon_a_payload,
             ns_query_msg_mon_a_payload+lena), Return(lena)));
 #else
-  EXPECT_CALL(*resolvH, res_query(StrEq("mon.a.ceph.com"), C_IN, T_A,_,_))
+  EXPECT_CALL(*resolvH, res_query(StrEq("mon.a.stone.com"), C_IN, T_A,_,_))
        .WillOnce(DoAll(SetArrayArgument<3>(ns_query_msg_mon_a_payload,
             ns_query_msg_mon_a_payload+lena), Return(lena)));
 #endif
 
   entity_addr_t addr;
-  DNSResolver::get_instance(resolvH)->resolve_ip_addr(g_ceph_context,
-      "mon.a.ceph.com", &addr);
+  DNSResolver::get_instance(resolvH)->resolve_ip_addr(g_stone_context,
+      "mon.a.stone.com", &addr);
 
   std::ostringstream os;
   os << addr;
@@ -79,7 +79,7 @@ TEST_F(DNSResolverTest, resolve_ip_addr_fail) {
 #endif
 
   entity_addr_t addr;
-  int ret = DNSResolver::get_instance(resolvH)->resolve_ip_addr(g_ceph_context, 
+  int ret = DNSResolver::get_instance(resolvH)->resolve_ip_addr(g_stone_context, 
       "not_exists.com", &addr);
 
   ASSERT_EQ(ret, -1);
@@ -103,42 +103,42 @@ TEST_F(DNSResolverTest, resolve_srv_hosts_empty_domain) {
     InSequence s;
 
 #ifdef HAVE_RES_NQUERY
-    EXPECT_CALL(*resolvH, res_nsearch(_, StrEq("_cephmon._tcp"), C_IN, T_SRV, _, _))
+    EXPECT_CALL(*resolvH, res_nsearch(_, StrEq("_stonemon._tcp"), C_IN, T_SRV, _, _))
       .WillOnce(DoAll(SetArrayArgument<4>(ns_search_msg_ok_payload,
             ns_search_msg_ok_payload+len), Return(len)));
 
-    EXPECT_CALL(*resolvH, res_nquery(_,StrEq("mon.a.ceph.com"), C_IN, T_A,_,_))
+    EXPECT_CALL(*resolvH, res_nquery(_,StrEq("mon.a.stone.com"), C_IN, T_A,_,_))
       .WillOnce(DoAll(SetArrayArgument<4>(ns_query_msg_mon_a_payload,
             ns_query_msg_mon_a_payload+lena), Return(lena)));
 
-    EXPECT_CALL(*resolvH, res_nquery(_, StrEq("mon.c.ceph.com"), C_IN, T_A,_,_))
+    EXPECT_CALL(*resolvH, res_nquery(_, StrEq("mon.c.stone.com"), C_IN, T_A,_,_))
       .WillOnce(DoAll(SetArrayArgument<4>(ns_query_msg_mon_c_payload,
             ns_query_msg_mon_c_payload+lenc), Return(lenc)));
 
-    EXPECT_CALL(*resolvH, res_nquery(_,StrEq("mon.b.ceph.com"), C_IN, T_A, _,_))
+    EXPECT_CALL(*resolvH, res_nquery(_,StrEq("mon.b.stone.com"), C_IN, T_A, _,_))
       .WillOnce(DoAll(SetArrayArgument<4>(ns_query_msg_mon_b_payload,
             ns_query_msg_mon_b_payload+lenb), Return(lenb)));
 #else
-    EXPECT_CALL(*resolvH, res_search(StrEq("_cephmon._tcp"), C_IN, T_SRV, _, _))
+    EXPECT_CALL(*resolvH, res_search(StrEq("_stonemon._tcp"), C_IN, T_SRV, _, _))
       .WillOnce(DoAll(SetArrayArgument<3>(ns_search_msg_ok_payload,
             ns_search_msg_ok_payload+len), Return(len)));
 
-    EXPECT_CALL(*resolvH, res_query(StrEq("mon.a.ceph.com"), C_IN, T_A,_,_))
+    EXPECT_CALL(*resolvH, res_query(StrEq("mon.a.stone.com"), C_IN, T_A,_,_))
       .WillOnce(DoAll(SetArrayArgument<3>(ns_query_msg_mon_a_payload,
             ns_query_msg_mon_a_payload+lena), Return(lena)));
 
-    EXPECT_CALL(*resolvH, res_query(StrEq("mon.c.ceph.com"), C_IN, T_A,_,_))
+    EXPECT_CALL(*resolvH, res_query(StrEq("mon.c.stone.com"), C_IN, T_A,_,_))
       .WillOnce(DoAll(SetArrayArgument<3>(ns_query_msg_mon_c_payload,
             ns_query_msg_mon_c_payload+lenc), Return(lenc)));
 
-    EXPECT_CALL(*resolvH, res_query(StrEq("mon.b.ceph.com"), C_IN, T_A, _,_))
+    EXPECT_CALL(*resolvH, res_query(StrEq("mon.b.stone.com"), C_IN, T_A, _,_))
       .WillOnce(DoAll(SetArrayArgument<3>(ns_query_msg_mon_b_payload,
             ns_query_msg_mon_b_payload+lenb), Return(lenb)));
 #endif
   }
 
   map<string, DNSResolver::Record> records;
-  DNSResolver::get_instance(resolvH)->resolve_srv_hosts(g_ceph_context, "cephmon", 
+  DNSResolver::get_instance(resolvH)->resolve_srv_hosts(g_stone_context, "stonemon", 
       DNSResolver::SRV_Protocol::TCP, &records);
 
   ASSERT_EQ(records.size(), (unsigned int)3);
@@ -179,43 +179,43 @@ TEST_F(DNSResolverTest, resolve_srv_hosts_full_domain) {
     InSequence s;
 
 #ifdef HAVE_RES_NQUERY
-    EXPECT_CALL(*resolvH, res_nsearch(_, StrEq("_cephmon._tcp.ceph.com"), C_IN, T_SRV, _, _))
+    EXPECT_CALL(*resolvH, res_nsearch(_, StrEq("_stonemon._tcp.stone.com"), C_IN, T_SRV, _, _))
       .WillOnce(DoAll(SetArrayArgument<4>(ns_search_msg_ok_payload,
             ns_search_msg_ok_payload+len), Return(len)));
 
-    EXPECT_CALL(*resolvH, res_nquery(_,StrEq("mon.a.ceph.com"), C_IN, T_A,_,_))
+    EXPECT_CALL(*resolvH, res_nquery(_,StrEq("mon.a.stone.com"), C_IN, T_A,_,_))
       .WillOnce(DoAll(SetArrayArgument<4>(ns_query_msg_mon_a_payload,
             ns_query_msg_mon_a_payload+lena), Return(lena)));
 
-    EXPECT_CALL(*resolvH, res_nquery(_, StrEq("mon.c.ceph.com"), C_IN, T_A,_,_))
+    EXPECT_CALL(*resolvH, res_nquery(_, StrEq("mon.c.stone.com"), C_IN, T_A,_,_))
       .WillOnce(DoAll(SetArrayArgument<4>(ns_query_msg_mon_c_payload,
             ns_query_msg_mon_c_payload+lenc), Return(lenc)));
 
-    EXPECT_CALL(*resolvH, res_nquery(_,StrEq("mon.b.ceph.com"), C_IN, T_A, _,_))
+    EXPECT_CALL(*resolvH, res_nquery(_,StrEq("mon.b.stone.com"), C_IN, T_A, _,_))
       .WillOnce(DoAll(SetArrayArgument<4>(ns_query_msg_mon_b_payload,
             ns_query_msg_mon_b_payload+lenb), Return(lenb)));
 #else
-    EXPECT_CALL(*resolvH, res_search(StrEq("_cephmon._tcp.ceph.com"), C_IN, T_SRV, _, _))
+    EXPECT_CALL(*resolvH, res_search(StrEq("_stonemon._tcp.stone.com"), C_IN, T_SRV, _, _))
       .WillOnce(DoAll(SetArrayArgument<3>(ns_search_msg_ok_payload,
             ns_search_msg_ok_payload+len), Return(len)));
 
-    EXPECT_CALL(*resolvH, res_query(StrEq("mon.a.ceph.com"), C_IN, T_A,_,_))
+    EXPECT_CALL(*resolvH, res_query(StrEq("mon.a.stone.com"), C_IN, T_A,_,_))
       .WillOnce(DoAll(SetArrayArgument<3>(ns_query_msg_mon_a_payload,
             ns_query_msg_mon_a_payload+lena), Return(lena)));
 
-    EXPECT_CALL(*resolvH, res_query(StrEq("mon.c.ceph.com"), C_IN, T_A,_,_))
+    EXPECT_CALL(*resolvH, res_query(StrEq("mon.c.stone.com"), C_IN, T_A,_,_))
       .WillOnce(DoAll(SetArrayArgument<3>(ns_query_msg_mon_c_payload,
             ns_query_msg_mon_c_payload+lenc), Return(lenc)));
 
-    EXPECT_CALL(*resolvH, res_query(StrEq("mon.b.ceph.com"), C_IN, T_A, _,_))
+    EXPECT_CALL(*resolvH, res_query(StrEq("mon.b.stone.com"), C_IN, T_A, _,_))
       .WillOnce(DoAll(SetArrayArgument<3>(ns_query_msg_mon_b_payload,
             ns_query_msg_mon_b_payload+lenb), Return(lenb)));
 #endif
   }
 
   map<string, DNSResolver::Record> records;
-  DNSResolver::get_instance(resolvH)->resolve_srv_hosts(g_ceph_context, "cephmon", 
-      DNSResolver::SRV_Protocol::TCP, "ceph.com", &records);
+  DNSResolver::get_instance(resolvH)->resolve_srv_hosts(g_stone_context, "stonemon", 
+      DNSResolver::SRV_Protocol::TCP, "stone.com", &records);
 
   ASSERT_EQ(records.size(), (unsigned int)3);
   auto it = records.find("mon.a");
@@ -254,7 +254,7 @@ TEST_F(DNSResolverTest, resolve_srv_hosts_fail) {
 
   map<string, DNSResolver::Record> records;
   int ret = DNSResolver::get_instance(resolvH)->resolve_srv_hosts(
-      g_ceph_context, "noservice", DNSResolver::SRV_Protocol::TCP, "", &records);
+      g_stone_context, "noservice", DNSResolver::SRV_Protocol::TCP, "", &records);
 
   ASSERT_EQ(0, ret);
   ASSERT_TRUE(records.empty());

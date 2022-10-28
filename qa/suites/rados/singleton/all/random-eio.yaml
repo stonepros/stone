@@ -14,9 +14,9 @@ openstack:
       size: 10 # GB
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     log-ignorelist:
     - missing primary copy of
     - objects unfound and apparently lost
@@ -28,11 +28,11 @@ tasks:
 - full_sequential:
   - exec:
       client.0:
-        - sudo ceph tell osd.1 injectargs -- --filestore_debug_random_read_err=0.33
-        - sudo ceph tell osd.1 injectargs -- --bluestore_debug_random_read_err=0.33
-        - sudo ceph osd pool create test 16 16
-        - sudo ceph osd pool set test size 3
-        - sudo ceph pg  dump pgs --format=json-pretty
+        - sudo stone tell osd.1 injectargs -- --filestore_debug_random_read_err=0.33
+        - sudo stone tell osd.1 injectargs -- --bluestore_debug_random_read_err=0.33
+        - sudo stone osd pool create test 16 16
+        - sudo stone osd pool set test size 3
+        - sudo stone pg  dump pgs --format=json-pretty
   - radosbench:
       clients: [client.0]
       time: 360
@@ -42,5 +42,5 @@ tasks:
       create_pool: false
   - exec:
       client.0:
-        - sudo ceph tell osd.1 injectargs -- --filestore_debug_random_read_err=0.0
-        - sudo ceph tell osd.1 injectargs -- --bluestore_debug_random_read_err=0.0
+        - sudo stone tell osd.1 injectargs -- --filestore_debug_random_read_err=0.0
+        - sudo stone tell osd.1 injectargs -- --bluestore_debug_random_read_err=0.0

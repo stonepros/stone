@@ -23,7 +23,7 @@
 #include "librbd/ImageCtx.h"
 #include "librbd/plugin/Api.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl:InitRequest " \
                            << this << " " << __func__ << ": "
@@ -64,7 +64,7 @@ void InitRequest<I>::send() {
 
 template <typename I>
 void InitRequest<I>::get_image_cache_state() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   int r;
@@ -118,7 +118,7 @@ void InitRequest<I>::get_image_cache_state() {
 
 template <typename I>
 void InitRequest<I>::init_image_cache() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = InitRequest<I>;
@@ -129,7 +129,7 @@ void InitRequest<I>::init_image_cache() {
 
 template <typename I>
 void InitRequest<I>::handle_init_image_cache(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   if (r < 0) {
@@ -146,7 +146,7 @@ void InitRequest<I>::handle_init_image_cache(int r) {
 
 template <typename I>
 void InitRequest<I>::set_feature_bit() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   uint64_t new_features = m_image_ctx.features | RBD_FEATURE_DIRTY_CACHE;
   uint64_t features_mask = RBD_FEATURE_DIRTY_CACHE;
@@ -167,7 +167,7 @@ void InitRequest<I>::set_feature_bit() {
 
 template <typename I>
 void InitRequest<I>::handle_set_feature_bit(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -189,7 +189,7 @@ void InitRequest<I>::handle_set_feature_bit(int r) {
 
 template <typename I>
 void InitRequest<I>::shutdown_image_cache() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = InitRequest<I>;
@@ -200,7 +200,7 @@ void InitRequest<I>::shutdown_image_cache() {
 
 template <typename I>
 void InitRequest<I>::handle_shutdown_image_cache(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   if (r < 0) {

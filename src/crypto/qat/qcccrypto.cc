@@ -6,8 +6,8 @@
 #include "include/scope_guard.h"
 
 // -----------------------------------------------------------------------------
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 
@@ -80,7 +80,7 @@ bool QccCrypto::init()
     return false;
   }
 
-  stat = icp_sal_userStart("CEPH");
+  stat = icp_sal_userStart("STONE");
   if(stat != CPA_STATUS_SUCCESS) {
     derr << "Unable to start qat device" << dendl;
     this->cleanup();

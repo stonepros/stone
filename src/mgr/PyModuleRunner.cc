@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -12,7 +12,7 @@
  */
 
 
-// Python.h comes first because otherwise it clobbers ceph's assert
+// Python.h comes first because otherwise it clobbers stone's assert
 #include <Python.h>
 
 #include "PyModule.h"
@@ -22,8 +22,8 @@
 
 #include "PyModuleRunner.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 
 
 PyModuleRunner::~PyModuleRunner()
@@ -38,7 +38,7 @@ PyModuleRunner::~PyModuleRunner()
 
 int PyModuleRunner::serve()
 {
-  ceph_assert(pClassInstance != nullptr);
+  stone_assert(pClassInstance != nullptr);
 
   // This method is called from a separate OS thread (i.e. a thread not
   // created by Python), so tell Gil to wrap this in a new thread state.
@@ -75,7 +75,7 @@ int PyModuleRunner::serve()
 
 void PyModuleRunner::shutdown()
 {
-  ceph_assert(pClassInstance != nullptr);
+  stone_assert(pClassInstance != nullptr);
 
   Gil gil(py_module->pMyThreadState, true);
 

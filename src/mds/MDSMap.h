@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MDSMAP_H
-#define CEPH_MDSMAP_H
+#ifndef STONE_MDSMAP_H
+#define STONE_MDSMAP_H
 
 #include <algorithm>
 #include <map>
@@ -63,31 +63,31 @@ public:
   typedef enum {
     // States of an MDS daemon not currently holding a rank
     // ====================================================
-    STATE_NULL     =   CEPH_MDS_STATE_NULL,                                  // null value for fns returning this type.
-    STATE_BOOT     =   CEPH_MDS_STATE_BOOT,                // up, boot announcement.  destiny unknown.
-    STATE_STANDBY  =   CEPH_MDS_STATE_STANDBY,             // up, idle.  waiting for assignment by monitor.
-    STATE_STANDBY_REPLAY = CEPH_MDS_STATE_STANDBY_REPLAY,  // up, replaying active node, ready to take over.
+    STATE_NULL     =   STONE_MDS_STATE_NULL,                                  // null value for fns returning this type.
+    STATE_BOOT     =   STONE_MDS_STATE_BOOT,                // up, boot announcement.  destiny unknown.
+    STATE_STANDBY  =   STONE_MDS_STATE_STANDBY,             // up, idle.  waiting for assignment by monitor.
+    STATE_STANDBY_REPLAY = STONE_MDS_STATE_STANDBY_REPLAY,  // up, replaying active node, ready to take over.
 
     // States of an MDS rank, and of any MDS daemon holding that rank
     // ==============================================================
-    STATE_STOPPED  =   CEPH_MDS_STATE_STOPPED,        // down, once existed, but no subtrees. empty log.  may not be held by a daemon.
+    STATE_STOPPED  =   STONE_MDS_STATE_STOPPED,        // down, once existed, but no subtrees. empty log.  may not be held by a daemon.
 
-    STATE_CREATING  =  CEPH_MDS_STATE_CREATING,       // up, creating MDS instance (new journal, idalloc..).
-    STATE_STARTING  =  CEPH_MDS_STATE_STARTING,       // up, starting prior stopped MDS instance.
+    STATE_CREATING  =  STONE_MDS_STATE_CREATING,       // up, creating MDS instance (new journal, idalloc..).
+    STATE_STARTING  =  STONE_MDS_STATE_STARTING,       // up, starting prior stopped MDS instance.
 
-    STATE_REPLAY    =  CEPH_MDS_STATE_REPLAY,         // up, starting prior failed instance. scanning journal.
-    STATE_RESOLVE   =  CEPH_MDS_STATE_RESOLVE,        // up, disambiguating distributed operations (import, rename, etc.)
-    STATE_RECONNECT =  CEPH_MDS_STATE_RECONNECT,      // up, reconnect to clients
-    STATE_REJOIN    =  CEPH_MDS_STATE_REJOIN,         // up, replayed journal, rejoining distributed cache
-    STATE_CLIENTREPLAY = CEPH_MDS_STATE_CLIENTREPLAY, // up, active
-    STATE_ACTIVE =     CEPH_MDS_STATE_ACTIVE,         // up, active
-    STATE_STOPPING  =  CEPH_MDS_STATE_STOPPING,       // up, exporting metadata (-> standby or out)
-    STATE_DNE       =  CEPH_MDS_STATE_DNE,             // down, rank does not exist
+    STATE_REPLAY    =  STONE_MDS_STATE_REPLAY,         // up, starting prior failed instance. scanning journal.
+    STATE_RESOLVE   =  STONE_MDS_STATE_RESOLVE,        // up, disambiguating distributed operations (import, rename, etc.)
+    STATE_RECONNECT =  STONE_MDS_STATE_RECONNECT,      // up, reconnect to clients
+    STATE_REJOIN    =  STONE_MDS_STATE_REJOIN,         // up, replayed journal, rejoining distributed cache
+    STATE_CLIENTREPLAY = STONE_MDS_STATE_CLIENTREPLAY, // up, active
+    STATE_ACTIVE =     STONE_MDS_STATE_ACTIVE,         // up, active
+    STATE_STOPPING  =  STONE_MDS_STATE_STOPPING,       // up, exporting metadata (-> standby or out)
+    STATE_DNE       =  STONE_MDS_STATE_DNE,             // down, rank does not exist
 
     // State which a daemon may send to MDSMonitor in its beacon
     // to indicate that offline repair is required.  Daemon must stop
     // immediately after indicating this state.
-    STATE_DAMAGED   = CEPH_MDS_STATE_DAMAGED
+    STATE_DAMAGED   = STONE_MDS_STATE_DAMAGED
 
     /*
      * In addition to explicit states, an MDS rank implicitly in state:
@@ -131,7 +131,7 @@ public:
     }
 
     void encode(ceph::buffer::list& bl, uint64_t features) const {
-      if ((features & CEPH_FEATURE_MDSENC) == 0 ) encode_unversioned(bl);
+      if ((features & STONE_FEATURE_MDSENC) == 0 ) encode_unversioned(bl);
       else encode_versioned(bl, features);
     }
     void decode(ceph::buffer::list::const_iterator& p);
@@ -217,30 +217,30 @@ public:
   std::string_view get_fs_name() const {return fs_name;}
 
   void set_snaps_allowed() {
-    set_flag(CEPH_MDSMAP_ALLOW_SNAPS);
-    ever_allowed_features |= CEPH_MDSMAP_ALLOW_SNAPS;
-    explicitly_allowed_features |= CEPH_MDSMAP_ALLOW_SNAPS;
+    set_flag(STONE_MDSMAP_ALLOW_SNAPS);
+    ever_allowed_features |= STONE_MDSMAP_ALLOW_SNAPS;
+    explicitly_allowed_features |= STONE_MDSMAP_ALLOW_SNAPS;
   }
-  void clear_snaps_allowed() { clear_flag(CEPH_MDSMAP_ALLOW_SNAPS); }
-  bool allows_snaps() const { return test_flag(CEPH_MDSMAP_ALLOW_SNAPS); }
-  bool was_snaps_ever_allowed() const { return ever_allowed_features & CEPH_MDSMAP_ALLOW_SNAPS; }
+  void clear_snaps_allowed() { clear_flag(STONE_MDSMAP_ALLOW_SNAPS); }
+  bool allows_snaps() const { return test_flag(STONE_MDSMAP_ALLOW_SNAPS); }
+  bool was_snaps_ever_allowed() const { return ever_allowed_features & STONE_MDSMAP_ALLOW_SNAPS; }
 
   void set_standby_replay_allowed() {
-    set_flag(CEPH_MDSMAP_ALLOW_STANDBY_REPLAY);
-    ever_allowed_features |= CEPH_MDSMAP_ALLOW_STANDBY_REPLAY;
-    explicitly_allowed_features |= CEPH_MDSMAP_ALLOW_STANDBY_REPLAY;
+    set_flag(STONE_MDSMAP_ALLOW_STANDBY_REPLAY);
+    ever_allowed_features |= STONE_MDSMAP_ALLOW_STANDBY_REPLAY;
+    explicitly_allowed_features |= STONE_MDSMAP_ALLOW_STANDBY_REPLAY;
   }
-  void clear_standby_replay_allowed() { clear_flag(CEPH_MDSMAP_ALLOW_STANDBY_REPLAY); }
-  bool allows_standby_replay() const { return test_flag(CEPH_MDSMAP_ALLOW_STANDBY_REPLAY); }
-  bool was_standby_replay_ever_allowed() const { return ever_allowed_features & CEPH_MDSMAP_ALLOW_STANDBY_REPLAY; }
+  void clear_standby_replay_allowed() { clear_flag(STONE_MDSMAP_ALLOW_STANDBY_REPLAY); }
+  bool allows_standby_replay() const { return test_flag(STONE_MDSMAP_ALLOW_STANDBY_REPLAY); }
+  bool was_standby_replay_ever_allowed() const { return ever_allowed_features & STONE_MDSMAP_ALLOW_STANDBY_REPLAY; }
 
   void set_multimds_snaps_allowed() {
-    set_flag(CEPH_MDSMAP_ALLOW_MULTIMDS_SNAPS);
-    ever_allowed_features |= CEPH_MDSMAP_ALLOW_MULTIMDS_SNAPS;
-    explicitly_allowed_features |= CEPH_MDSMAP_ALLOW_MULTIMDS_SNAPS;
+    set_flag(STONE_MDSMAP_ALLOW_MULTIMDS_SNAPS);
+    ever_allowed_features |= STONE_MDSMAP_ALLOW_MULTIMDS_SNAPS;
+    explicitly_allowed_features |= STONE_MDSMAP_ALLOW_MULTIMDS_SNAPS;
   }
-  void clear_multimds_snaps_allowed() { clear_flag(CEPH_MDSMAP_ALLOW_MULTIMDS_SNAPS); }
-  bool allows_multimds_snaps() const { return test_flag(CEPH_MDSMAP_ALLOW_MULTIMDS_SNAPS); }
+  void clear_multimds_snaps_allowed() { clear_flag(STONE_MDSMAP_ALLOW_MULTIMDS_SNAPS); }
+  bool allows_multimds_snaps() const { return test_flag(STONE_MDSMAP_ALLOW_MULTIMDS_SNAPS); }
 
   epoch_t get_epoch() const { return epoch; }
   void inc_epoch() { epoch++; }
@@ -332,7 +332,7 @@ public:
   int remove_data_pool(int64_t poolid) {
     std::vector<int64_t>::iterator p = std::find(data_pools.begin(), data_pools.end(), poolid);
     if (p == data_pools.end())
-      return -CEPHFS_ENOENT;
+      return -STONEFS_ENOENT;
     data_pools.erase(p);
     return 0;
   }
@@ -408,9 +408,9 @@ public:
    */
   bool is_resizeable() const {
     return !is_degraded() &&
-        get_num_mds(CEPH_MDS_STATE_CREATING) == 0 &&
-        get_num_mds(CEPH_MDS_STATE_STARTING) == 0 &&
-        get_num_mds(CEPH_MDS_STATE_STOPPING) == 0;
+        get_num_mds(STONE_MDS_STATE_CREATING) == 0 &&
+        get_num_mds(STONE_MDS_STATE_STARTING) == 0 &&
+        get_num_mds(STONE_MDS_STATE_STOPPING) == 0;
   }
 
   // mds states
@@ -588,7 +588,7 @@ protected:
   epoch_t epoch = 0;
   bool enabled = false;
   std::string fs_name = MDS_FS_NAME_DEFAULT;
-  uint32_t flags = CEPH_MDSMAP_DEFAULTS; // flags
+  uint32_t flags = STONE_MDSMAP_DEFAULTS; // flags
   epoch_t last_failure = 0;  // mds epoch of last failure
   epoch_t last_failure_osd_epoch = 0; // osd epoch of last failure; any mds entering replay needs
                                   // at least this osdmap to ensure the blocklist propagates.

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_MIRROR_H
-#define CEPH_RBD_MIRROR_H
+#ifndef STONE_RBD_MIRROR_H
+#define STONE_RBD_MIRROR_H
 
 #include "common/ceph_context.h"
 #include "common/ceph_mutex.h"
@@ -86,4 +86,4 @@ private:
 } // namespace mirror
 } // namespace rbd
 
-#endif // CEPH_RBD_MIRROR_H
+#endif // STONE_RBD_MIRROR_H

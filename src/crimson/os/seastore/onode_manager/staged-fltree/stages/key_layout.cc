@@ -25,7 +25,7 @@ void string_key_view_t::append_dedup(
   } else if (dedup_type == Type::MAX) {
     mut.copy_in_absolute(p_append, MAX);
   } else {
-    ceph_abort("impossible path");
+    stone_abort("impossible path");
   }
 }
 

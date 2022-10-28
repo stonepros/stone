@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -16,7 +16,7 @@
 #include <errno.h>
 
 #include "AuthClientHandler.h"
-#include "cephx/CephxClientHandler.h"
+#include "stonex/StonexClientHandler.h"
 #ifdef HAVE_GSSAPI
 #include "krb/KrbClientHandler.hpp"
 #endif
@@ -24,16 +24,16 @@
 
 
 AuthClientHandler*
-AuthClientHandler::create(CephContext* cct, int proto,
+AuthClientHandler::create(StoneContext* cct, int proto,
 			  RotatingKeyRing* rkeys)
 {
   switch (proto) {
-  case CEPH_AUTH_CEPHX:
-    return new CephxClientHandler(cct, rkeys);
-  case CEPH_AUTH_NONE:
+  case STONE_AUTH_STONEX:
+    return new StonexClientHandler(cct, rkeys);
+  case STONE_AUTH_NONE:
     return new AuthNoneClientHandler{cct};
 #ifdef HAVE_GSSAPI
-  case CEPH_AUTH_GSS: 
+  case STONE_AUTH_GSS: 
     return new KrbClientHandler(cct);
 #endif
   default:

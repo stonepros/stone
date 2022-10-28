@@ -46,7 +46,7 @@ public:
   static uint64_t _image_number;
   static std::string _data_pool;
 
-  CephContext* m_cct = nullptr;
+  StoneeContext* m_cct = nullptr;
   librados::IoCtx m_ioctx;
   librbd::RBD m_rbd;
 

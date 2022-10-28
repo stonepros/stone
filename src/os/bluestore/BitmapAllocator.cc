@@ -4,11 +4,11 @@
 #include "BitmapAllocator.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_bluestore
+#define dout_subsys stone_subsys_bluestore
 #undef dout_prefix
 #define dout_prefix *_dout << "fbmap_alloc " << this << " "
 
-BitmapAllocator::BitmapAllocator(CephContext* _cct,
+BitmapAllocator::BitmapAllocator(StoneContext* _cct,
 					 int64_t capacity,
 					 int64_t alloc_unit,
 					 const std::string& name) :

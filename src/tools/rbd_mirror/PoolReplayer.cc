@@ -5,7 +5,7 @@
 #include "common/Cond.h"
 #include "common/Formatter.h"
 #include "common/admin_socket.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/code_environment.h"
 #include "common/common_init.h"
 #include "common/debug.h"
@@ -19,8 +19,8 @@
 #include "ServiceDaemon.h"
 #include "Threads.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::PoolReplayer: " \
                            << this << " " << __func__ << ": "
@@ -131,7 +131,7 @@ public:
 template <typename I>
 class PoolReplayerAdminSocketHook : public AdminSocketHook {
 public:
-  PoolReplayerAdminSocketHook(CephContext *cct, const std::string &name,
+  PoolReplayerAdminSocketHook(StoneContext *cct, const std::string &name,
                               PoolReplayer<I> *pool_replayer)
     : admin_socket(cct->get_admin_socket()) {
     std::string command;
@@ -192,7 +192,7 @@ public:
 	   std::ostream& ss,
 	   bufferlist& out) override {
     auto i = commands.find(command);
-    ceph_assert(i != commands.end());
+    stone_assert(i != commands.end());
     return i->second->call(f);
   }
 
@@ -234,7 +234,7 @@ PoolReplayer<I>::PoolReplayer(
   m_local_pool_id(local_pool_id),
   m_peer(peer),
   m_args(args),
-  m_lock(ceph::make_mutex("rbd::mirror::PoolReplayer " + stringify(peer))),
+  m_lock(stone::make_mutex("rbd::mirror::PoolReplayer " + stringify(peer))),
   m_pool_replayer_thread(this),
   m_leader_listener(this) {
 }
@@ -244,7 +244,7 @@ PoolReplayer<I>::~PoolReplayer()
 {
   shut_down();
 
-  ceph_assert(m_asok_hook == nullptr);
+  stone_assert(m_asok_hook == nullptr);
 }
 
 template <typename I>
@@ -268,7 +268,7 @@ template <typename I>
 void PoolReplayer<I>::init(const std::string& site_name) {
   std::lock_guard locker{m_lock};
 
-  ceph_assert(!m_pool_replayer_thread.is_started());
+  stone_assert(!m_pool_replayer_thread.is_started());
 
   // reset state
   m_stopping = false;
@@ -276,8 +276,8 @@ void PoolReplayer<I>::init(const std::string& site_name) {
   m_site_name = site_name;
 
   dout(10) << "replaying for " << m_peer << dendl;
-  int r = init_rados(g_ceph_context->_conf->cluster,
-                     g_ceph_context->_conf->name.to_str(),
+  int r = init_rados(g_stone_context->_conf->cluster,
+                     g_stone_context->_conf->name.to_str(),
                      "", "", "local cluster", &m_local_rados, false);
   if (r < 0) {
     m_callout_id = m_service_daemon->add_or_update_callout(
@@ -304,7 +304,7 @@ void PoolReplayer<I>::init(const std::string& site_name) {
     return;
   }
 
-  auto cct = reinterpret_cast<CephContext *>(m_local_io_ctx.cct());
+  auto cct = reinterpret_cast<StoneContext *>(m_local_io_ctx.cct());
   librbd::api::Config<I>::apply_pool_overrides(m_local_io_ctx, &cct->_conf);
 
   r = librbd::cls_client::mirror_uuid_get(&m_local_io_ctx,
@@ -354,7 +354,7 @@ void PoolReplayer<I>::init(const std::string& site_name) {
     m_remote_pool_poller.reset();
     return;
   }
-  ceph_assert(!m_remote_pool_meta.mirror_uuid.empty());
+  stone_assert(!m_remote_pool_meta.mirror_uuid.empty());
   m_pool_meta_cache->set_remote_pool_meta(
     m_remote_io_ctx.get_id(), m_remote_pool_meta);
   m_pool_meta_cache->set_local_pool_meta(
@@ -452,17 +452,17 @@ int PoolReplayer<I>::init_rados(const std::string &cluster_name,
 			        const std::string &description,
 			        RadosRef *rados_ref,
                                 bool strip_cluster_overrides) {
-  // NOTE: manually bootstrap a CephContext here instead of via
+  // NOTE: manually bootstrap a StoneContext here instead of via
   // the librados API to avoid mixing global singletons between
   // the librados shared library and the daemon
-  // TODO: eliminate intermingling of global singletons within Ceph APIs
-  CephInitParameters iparams(CEPH_ENTITY_TYPE_CLIENT);
+  // TODO: eliminate intermingling of global singletons within Stone APIs
+  StoneInitParameters iparams(STONE_ENTITY_TYPE_CLIENT);
   if (client_name.empty() || !iparams.name.from_str(client_name)) {
     derr << "error initializing cluster handle for " << description << dendl;
     return -EINVAL;
   }
 
-  CephContext *cct = common_preinit(iparams, CODE_ENVIRONMENT_LIBRARY,
+  StoneContext *cct = common_preinit(iparams, CODE_ENVIRONMENT_LIBRARY,
                                     CINIT_FLAG_UNPRIVILEGED_DAEMON_DEFAULTS);
   cct->_conf->cluster = cluster_name;
 
@@ -470,7 +470,7 @@ int PoolReplayer<I>::init_rados(const std::string &cluster_name,
   int r = cct->_conf.parse_config_files(nullptr, nullptr, 0);
   if (r < 0 && r != -ENOENT) {
     // do not treat this as fatal, it might still be able to connect
-    derr << "could not read ceph conf for " << description << ": "
+    derr << "could not read stone conf for " << description << ": "
 	 << cpp_strerror(r) << dendl;
   }
 
@@ -524,7 +524,7 @@ int PoolReplayer<I>::init_rados(const std::string &cluster_name,
     }
   }
 
-  if (!g_ceph_context->_conf->admin_socket.empty()) {
+  if (!g_stone_context->_conf->admin_socket.empty()) {
     cct->_conf.set_val_or_die("admin_socket",
                                "$run_dir/$name.$pid.$cluster.$cctid.asok");
   }
@@ -557,7 +557,7 @@ int PoolReplayer<I>::init_rados(const std::string &cluster_name,
   rados_ref->reset(new librados::Rados());
 
   r = (*rados_ref)->init_with_context(cct);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   cct->put();
 
   r = (*rados_ref)->connect();
@@ -581,7 +581,7 @@ void PoolReplayer<I>::run() {
       m_asok_hook_name = asok_hook_name;
       delete m_asok_hook;
 
-      m_asok_hook = new PoolReplayerAdminSocketHook<I>(g_ceph_context,
+      m_asok_hook = new PoolReplayerAdminSocketHook<I>(g_stone_context,
 						       m_asok_hook_name, this);
     }
 
@@ -607,9 +607,9 @@ void PoolReplayer<I>::run() {
       break;
     }
 
-    auto seconds = g_ceph_context->_conf.get_val<uint64_t>(
+    auto seconds = g_stone_context->_conf.get_val<uint64_t>(
         "rbd_mirror_pool_replayers_refresh_interval");
-    m_cond.wait_for(locker, ceph::make_timespan(seconds));
+    m_cond.wait_for(locker, stone::make_timespan(seconds));
   }
 
   // shut down namespace replayers
@@ -623,7 +623,7 @@ template <typename I>
 void PoolReplayer<I>::update_namespace_replayers() {
   dout(20) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   std::set<std::string> mirroring_namespaces;
   if (!m_stopping) {
@@ -633,7 +633,7 @@ void PoolReplayer<I>::update_namespace_replayers() {
     }
   }
 
-  auto cct = reinterpret_cast<CephContext *>(m_local_io_ctx.cct());
+  auto cct = reinterpret_cast<StoneContext *>(m_local_io_ctx.cct());
   C_SaferCond cond;
   auto gather_ctx = new C_Gather(cct, &cond);
   for (auto it = m_namespace_replayers.begin();
@@ -722,7 +722,7 @@ void PoolReplayer<I>::update_namespace_replayers() {
 template <typename I>
 int PoolReplayer<I>::list_mirroring_namespaces(
     std::set<std::string> *namespaces) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   std::vector<std::string> names;
 
@@ -758,20 +758,20 @@ void PoolReplayer<I>::reopen_logs()
   std::lock_guard locker{m_lock};
 
   if (m_local_rados) {
-    reinterpret_cast<CephContext *>(m_local_rados->cct())->reopen_logs();
+    reinterpret_cast<StoneContext *>(m_local_rados->cct())->reopen_logs();
   }
   if (m_remote_rados) {
-    reinterpret_cast<CephContext *>(m_remote_rados->cct())->reopen_logs();
+    reinterpret_cast<StoneContext *>(m_remote_rados->cct())->reopen_logs();
   }
 }
 
 template <typename I>
 void PoolReplayer<I>::namespace_replayer_acquire_leader(const std::string &name,
                                                         Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   auto it = m_namespace_replayers.find(name);
-  ceph_assert(it != m_namespace_replayers.end());
+  stone_assert(it != m_namespace_replayers.end());
 
   on_finish = new LambdaContext(
       [this, name, on_finish](int r) {
@@ -845,12 +845,12 @@ void PoolReplayer<I>::print_status(Formatter *f) {
   }
 
   if (m_local_rados) {
-    auto cct = reinterpret_cast<CephContext *>(m_local_rados->cct());
+    auto cct = reinterpret_cast<StoneContext *>(m_local_rados->cct());
     f->dump_string("local_cluster_admin_socket",
                    cct->_conf.get_val<std::string>("admin_socket"));
   }
   if (m_remote_rados) {
-    auto cct = reinterpret_cast<CephContext *>(m_remote_rados->cct());
+    auto cct = reinterpret_cast<StoneContext *>(m_remote_rados->cct());
     f->dump_string("remote_cluster_admin_socket",
                    cct->_conf.get_val<std::string>("admin_socket"));
   }
@@ -983,7 +983,7 @@ void PoolReplayer<I>::handle_post_acquire_leader(Context *on_finish) {
       [this](Context *on_finish) {
         dout(10) << "handle_post_acquire_leader" << dendl;
 
-        ceph_assert(ceph_mutex_is_locked(m_lock));
+        stone_assert(stone_mutex_is_locked(m_lock));
 
         m_service_daemon->add_or_update_attribute(m_local_pool_id,
                                                   SERVICE_DAEMON_LEADER_KEY,
@@ -997,7 +997,7 @@ void PoolReplayer<I>::handle_post_acquire_leader(Context *on_finish) {
               on_finish->complete(r);
             });
 
-        auto cct = reinterpret_cast<CephContext *>(m_local_io_ctx.cct());
+        auto cct = reinterpret_cast<StoneContext *>(m_local_io_ctx.cct());
         auto gather_ctx = new C_Gather(cct, ctx);
 
         m_default_namespace_replayer->handle_acquire_leader(
@@ -1019,13 +1019,13 @@ void PoolReplayer<I>::handle_pre_release_leader(Context *on_finish) {
       [this](Context *on_finish) {
         dout(10) << "handle_pre_release_leader" << dendl;
 
-        ceph_assert(ceph_mutex_is_locked(m_lock));
+        stone_assert(stone_mutex_is_locked(m_lock));
 
         m_leader = false;
         m_service_daemon->remove_attribute(m_local_pool_id,
                                            SERVICE_DAEMON_LEADER_KEY);
 
-        auto cct = reinterpret_cast<CephContext *>(m_local_io_ctx.cct());
+        auto cct = reinterpret_cast<StoneContext *>(m_local_io_ctx.cct());
         auto gather_ctx = new C_Gather(cct, on_finish);
 
         m_default_namespace_replayer->handle_release_leader(

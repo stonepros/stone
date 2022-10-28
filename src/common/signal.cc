@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -67,13 +67,13 @@ void block_signals(const int *siglist, sigset_t *old_sigset)
     }
   }
   int ret = pthread_sigmask(SIG_BLOCK, &sigset, old_sigset);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
 }
 
 void restore_sigset(const sigset_t *old_sigset)
 {
   int ret = pthread_sigmask(SIG_SETMASK, old_sigset, NULL);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
 }
 
 void unblock_all_signals(sigset_t *old_sigset)
@@ -82,7 +82,7 @@ void unblock_all_signals(sigset_t *old_sigset)
   sigfillset(&sigset);
   sigdelset(&sigset, SIGKILL);
   int ret = pthread_sigmask(SIG_UNBLOCK, &sigset, old_sigset);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
 }
 #else
 std::string signal_mask_to_str()

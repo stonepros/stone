@@ -24,7 +24,7 @@ using namespace std::chrono;
 using namespace std::chrono_literals;
 
 #define dout_context (m_osds->cct)
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, this)
 
@@ -102,7 +102,7 @@ bool PgScrubber::is_message_relevant(epoch_t epoch_to_verify)
     return false;
   }
 
-  ceph_assert(is_primary());
+  stone_assert(is_primary());
 
   // were we instructed to abort?
   return verify_against_abort(epoch_to_verify);
@@ -132,14 +132,14 @@ bool PgScrubber::should_abort() const
   }
 
   if (m_is_deep) {
-    if (get_osdmap()->test_flag(CEPH_OSDMAP_NODEEP_SCRUB) ||
+    if (get_osdmap()->test_flag(STONE_OSDMAP_NODEEP_SCRUB) ||
 	m_pg->pool.info.has_flag(pg_pool_t::FLAG_NODEEP_SCRUB)) {
       dout(10) << "nodeep_scrub set, aborting" << dendl;
       return true;
     }
   }
 
-  if (get_osdmap()->test_flag(CEPH_OSDMAP_NOSCRUB) ||
+  if (get_osdmap()->test_flag(STONE_OSDMAP_NOSCRUB) ||
       m_pg->pool.info.has_flag(pg_pool_t::FLAG_NOSCRUB)) {
     dout(10) << "noscrub set, aborting" << dendl;
     return true;
@@ -437,7 +437,7 @@ void PgScrubber::reg_next_scrub(const requested_scrub_t& request_flags)
 	   << request_flags.need_auto << " stamp: " << m_pg->info.history.last_scrub_stamp
 	   << dendl;
 
-  ceph_assert(!is_scrub_registered());
+  stone_assert(!is_scrub_registered());
 
   utime_t reg_stamp;
   bool must = false;
@@ -448,7 +448,7 @@ void PgScrubber::reg_next_scrub(const requested_scrub_t& request_flags)
     must = true;
   } else if (m_pg->info.stats.stats_invalid &&
 	     m_pg->cct->_conf->osd_scrub_invalid_stats) {
-    reg_stamp = ceph_clock_now();
+    reg_stamp = stone_clock_now();
     must = true;
   } else {
     reg_stamp = m_pg->info.history.last_scrub_stamp;
@@ -600,7 +600,7 @@ bool PgScrubber::select_range()
   std::vector<hobject_t> objects;
   int ret = m_pg->get_pgbackend()->objects_list_partial(start, min_idx, max_idx, &objects,
 							&candidate_end);
-  ceph_assert(ret >= 0);
+  stone_assert(ret >= 0);
 
   if (!objects.empty()) {
 
@@ -609,7 +609,7 @@ bool PgScrubber::select_range()
       candidate_end = back;
       objects.pop_back();
       if (objects.empty()) {
-	ceph_assert(0 ==
+	stone_assert(0 ==
 		    "Somehow we got more than 2 objects which"
 		    "have the same head but are not clones");
       }
@@ -617,12 +617,12 @@ bool PgScrubber::select_range()
     }
 
     if (candidate_end.is_head()) {
-      ceph_assert(candidate_end != back.get_head());
+      stone_assert(candidate_end != back.get_head());
       candidate_end = candidate_end.get_object_boundary();
     }
 
   } else {
-    ceph_assert(candidate_end.is_max());
+    stone_assert(candidate_end.is_max());
   }
 
   // is that range free for us? if not - we will be rescheduled later by whoever
@@ -717,7 +717,7 @@ void PgScrubber::add_delayed_scheduling()
     // schedule a transition for some 'sleep_time' ms in the future
 
     m_needs_sleep = false;
-    m_sleep_started_at = ceph_clock_now();
+    m_sleep_started_at = stone_clock_now();
 
     // the following log line is used by osd-scrub-test.sh
     dout(20) << __func__ << " scrub state is PendingTimer, sleeping" << dendl;
@@ -729,7 +729,7 @@ void PgScrubber::add_delayed_scheduling()
 				     scrbr = this]([[maybe_unused]] int r) mutable {
       PGRef pg = osds->osd->lookup_lock_pg(pgid);
       if (!pg) {
-	lgeneric_subdout(g_ceph_context, osd, 10)
+	lgeneric_subdout(g_stone_context, osd, 10)
 	  << "scrub_requeue_callback: Could not find "
 	  << "PG " << pgid << " can't complete scrub requeue after sleep" << dendl;
 	return;
@@ -737,7 +737,7 @@ void PgScrubber::add_delayed_scheduling()
       scrbr->m_needs_sleep = true;
       lgeneric_dout(scrbr->get_pg_cct(), 7)
 	<< "scrub_requeue_callback: slept for "
-	<< ceph_clock_now() - scrbr->m_sleep_started_at << ", re-queuing scrub" << dendl;
+	<< stone_clock_now() - scrbr->m_sleep_started_at << ", re-queuing scrub" << dendl;
 
       scrbr->m_sleep_started_at = utime_t{};
       osds->queue_for_scrub_resched(&(*pg), Scrub::scrub_prio_t::low_priority);
@@ -840,7 +840,7 @@ void PgScrubber::_request_scrub_map(pg_shard_t replica,
 				    bool deep,
 				    bool allow_preemption)
 {
-  ceph_assert(replica != m_pg_whoami);
+  stone_assert(replica != m_pg_whoami);
   dout(10) << __func__ << " scrubmap from osd." << replica
 	   << (deep ? " deep" : " shallow") << dendl;
 
@@ -867,13 +867,13 @@ void PgScrubber::cleanup_store(ObjectStore::Transaction* t)
   };
   m_store->cleanup(t);
   t->register_on_complete(new OnComplete(std::move(m_store)));
-  ceph_assert(!m_store);
+  stone_assert(!m_store);
 }
 
 void PgScrubber::on_init()
 {
   // going upwards from 'inactive'
-  ceph_assert(!is_scrub_active());
+  stone_assert(!is_scrub_active());
 
   preemption_data.reset();
   m_pg->publish_stats_to_osd();
@@ -915,7 +915,7 @@ void PgScrubber::_scan_snaps(ScrubMap& smap)
 
     dout(20) << __func__ << " " << hoid << dendl;
 
-    ceph_assert(!hoid.is_snapdir());
+    stone_assert(!hoid.is_snapdir());
     if (hoid.is_head()) {
       // parse the SnapSet
       bufferlist bl;
@@ -933,7 +933,7 @@ void PgScrubber::_scan_snaps(ScrubMap& smap)
       continue;
     }
 
-    if (hoid.snap < CEPH_MAXSNAP) {
+    if (hoid.snap < STONE_MAXSNAP) {
       // check and if necessary fix snap_mapper
       if (hoid.get_head() != head) {
 	derr << __func__ << " no head for " << hoid << " (have " << head << ")" << dendl;
@@ -950,7 +950,7 @@ void PgScrubber::_scan_snaps(ScrubMap& smap)
       int r = m_pg->snap_mapper.get_snaps(hoid, &cur_snaps);
       if (r != 0 && r != -ENOENT) {
 	derr << __func__ << ": get_snaps returned " << cpp_strerror(r) << dendl;
-	ceph_abort();
+	stone_abort();
       }
       if (r == -ENOENT || cur_snaps != obj_snaps) {
 	ObjectStore::Transaction t;
@@ -959,7 +959,7 @@ void PgScrubber::_scan_snaps(ScrubMap& smap)
 	  r = m_pg->snap_mapper.remove_oid(hoid, &_t);
 	  if (r != 0) {
 	    derr << __func__ << ": remove_oid returned " << cpp_strerror(r) << dendl;
-	    ceph_abort();
+	    stone_abort();
 	  }
 	  m_pg->osd->clog->error()
 	    << "osd." << m_pg->osd->whoami << " found snap mapper error on pg "
@@ -978,8 +978,8 @@ void PgScrubber::_scan_snaps(ScrubMap& smap)
 	{
 	  dout(15) << __func__ << " wait on repair!" << dendl;
 
-	  ceph::condition_variable my_cond;
-	  ceph::mutex my_lock = ceph::make_mutex("PG::_scan_snaps my_lock");
+	  stone::condition_variable my_cond;
+	  stone::mutex my_lock = stone::make_mutex("PG::_scan_snaps my_lock");
 	  int e = 0;
 	  bool done;
 
@@ -1108,7 +1108,7 @@ int PgScrubber::build_scrub_map_chunk(
 
   // finish
   dout(20) << __func__ << " finishing" << dendl;
-  ceph_assert(pos.done());
+  stone_assert(pos.done());
   m_pg->_repair_oinfo_oid(map);
 
   dout(20) << __func__ << " done, got " << map.objects.size() << " items" << dendl;
@@ -1561,7 +1561,7 @@ void PgScrubber::clear_scrub_reservations()
 
 void PgScrubber::message_all_replicas(int32_t opcode, std::string_view op_text)
 {
-  ceph_assert(m_pg->recovery_state.get_backfill_targets().empty());
+  stone_assert(m_pg->recovery_state.get_backfill_targets().empty());
 
   std::vector<pair<int, Message*>> messages;
   messages.reserve(m_pg->get_actingset().size());
@@ -1641,7 +1641,7 @@ void PgScrubber::scrub_finish()
 	   << ". repair state: " << (state_test(PG_STATE_REPAIR) ? "repair" : "no-repair")
 	   << ". deep_scrub_on_error: " << m_flags.deep_scrub_on_error << dendl;
 
-  ceph_assert(m_pg->is_locked());
+  stone_assert(m_pg->is_locked());
 
   m_pg->m_planned_scrub = requested_scrub_t{};
 
@@ -1661,7 +1661,7 @@ void PgScrubber::scrub_finish()
   // if a regular scrub had errors within the limit, do a deep scrub to auto repair
   if (m_flags.deep_scrub_on_error && !m_authoritative.empty() &&
       m_authoritative.size() <= m_pg->cct->_conf->osd_scrub_auto_repair_num_errors) {
-    ceph_assert(!m_is_deep);
+    stone_assert(!m_is_deep);
     do_auto_scrub = true;
     dout(15) << __func__ << " Try to auto repair after scrub errors" << dendl;
   }
@@ -1697,7 +1697,7 @@ void PgScrubber::scrub_finish()
   if (m_is_repair) {
     if (m_fixed_count == m_shallow_errors + m_deep_errors) {
 
-      ceph_assert(m_is_deep);
+      stone_assert(m_is_deep);
       m_shallow_errors = 0;
       m_deep_errors = 0;
       dout(20) << __func__ << " All may be fixed" << dendl;
@@ -1728,7 +1728,7 @@ void PgScrubber::scrub_finish()
     m_pg->recovery_state.update_stats(
       [this](auto& history, auto& stats) {
 	dout(10) << "m_pg->recovery_state.update_stats()" << dendl;
-	utime_t now = ceph_clock_now();
+	utime_t now = stone_clock_now();
 	history.last_scrub = m_pg->recovery_state.get_info().last_update;
 	history.last_scrub_stamp = now;
 	if (m_is_deep) {
@@ -1768,7 +1768,7 @@ void PgScrubber::scrub_finish()
       },
       &t);
     int tr = m_osds->store->queue_transaction(m_pg->ch, std::move(t), nullptr);
-    ceph_assert(tr == 0);
+    stone_assert(tr == 0);
   }
 
   if (has_error) {
@@ -1823,7 +1823,7 @@ void PgScrubber::on_digest_updates()
  * is cleared once scrubbing starts; Some of the values dumped here are
  * thus transitory.
  */
-void PgScrubber::dump(ceph::Formatter* f) const
+void PgScrubber::dump(stone::Formatter* f) const
 {
   f->open_object_section("scrubber");
   f->dump_stream("epoch_start") << m_interval_start;
@@ -1860,7 +1860,7 @@ void PgScrubber::dump(ceph::Formatter* f) const
 }
 
 
-void PgScrubber::handle_query_state(ceph::Formatter* f)
+void PgScrubber::handle_query_state(stone::Formatter* f)
 {
   dout(10) << __func__ << dendl;
 
@@ -1907,7 +1907,7 @@ void PgScrubber::reserve_replicas()
 void PgScrubber::cleanup_on_finish()
 {
   dout(10) << __func__ << dendl;
-  ceph_assert(m_pg->is_locked());
+  stone_assert(m_pg->is_locked());
 
   state_clear(PG_STATE_SCRUBBING);
   state_clear(PG_STATE_DEEP_SCRUB);
@@ -1940,7 +1940,7 @@ void PgScrubber::scrub_clear_state()
 void PgScrubber::clear_pgscrub_state()
 {
   dout(10) << __func__ << dendl;
-  ceph_assert(m_pg->is_locked());
+  stone_assert(m_pg->is_locked());
 
   state_clear(PG_STATE_SCRUBBING);
   state_clear(PG_STATE_DEEP_SCRUB);

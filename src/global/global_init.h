@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_COMMON_GLOBAL_INIT_H
-#define CEPH_COMMON_GLOBAL_INIT_H
+#ifndef STONE_COMMON_GLOBAL_INIT_H
+#define STONE_COMMON_GLOBAL_INIT_H
 
 #include <stdint.h>
 #include <vector>
@@ -29,7 +29,7 @@
  * daemons and utility programs need to call. It takes care of a lot of
  * initialization, including setting up g_ceph_context.
  */
-boost::intrusive_ptr<CephContext>
+boost::intrusive_ptr<StoneContext>
 global_init(
   const std::map<std::string,std::string> *defaults,
   std::vector < const char* >& args,
@@ -49,18 +49,18 @@ void global_pre_init(const std::map<std::string,std::string> *defaults,
  * to actually forking (via daemon(3)).  return 0 if we are going to proceed
  * with the fork, or -1 otherwise.
  */
-int global_init_prefork(CephContext *cct);
+int global_init_prefork(StoneContext *cct);
 
 /*
  * perform all the steps that global_init_daemonize performs just after
  * the fork, except closing stderr, which we'll do later on.
  */
-void global_init_postfork_start(CephContext *cct);
+void global_init_postfork_start(StoneContext *cct);
 
 /*
  * close stderr, thus completing the postfork.
  */
-void global_init_postfork_finish(CephContext *cct);
+void global_init_postfork_finish(StoneContext *cct);
 
 
 /*
@@ -70,14 +70,14 @@ void global_init_postfork_finish(CephContext *cct);
  * Note that this is equivalent to calling _prefork(), daemon(), and
  * _postfork.
  */
-void global_init_daemonize(CephContext *cct);
+void global_init_daemonize(StoneContext *cct);
 
 /*
  * global_init_chdir changes the process directory.
  *
  * If this is called, it *must* be called before common_init_finish
  */
-void global_init_chdir(const CephContext *cct);
+void global_init_chdir(const StoneContext *cct);
 
 /*
  * Explicitly shut down stderr. Usually, you don't need to do
@@ -86,13 +86,13 @@ void global_init_chdir(const CephContext *cct);
  *
  * If this is called, it *must* be called before common_init_finish
  */
-int global_init_shutdown_stderr(CephContext *cct);
+int global_init_shutdown_stderr(StoneContext *cct);
 
 /*
  * Preload the erasure coding libraries to detect early issues with
  * configuration.
  */
-int global_init_preload_erasure_code(const CephContext *cct);
+int global_init_preload_erasure_code(const StoneContext *cct);
 
 /**
  * print daemon startup banner/warning

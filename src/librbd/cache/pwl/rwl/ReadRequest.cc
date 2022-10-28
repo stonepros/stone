@@ -3,7 +3,7 @@
 
 #include "ReadRequest.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::rwl::ReadRequest: " << this << " " \
                            <<  __func__ << ": "
@@ -30,7 +30,7 @@ void C_ReadRequest::finish(int r) {
     for (auto extent : read_extents) {
       if (extent->m_bl.length()) {
         /* This was a hit */
-        ceph_assert(extent->second == extent->m_bl.length());
+        stone_assert(extent->second == extent->m_bl.length());
         ++hits;
         hit_bytes += extent->second;
         m_out_bl->claim_append(extent->m_bl);
@@ -48,8 +48,8 @@ void C_ReadRequest::finish(int r) {
     }
   }
   ldout(m_cct, 20) << "(" << get_name() << "): r=" << r << " bl=" << *m_out_bl << dendl;
-  utime_t now = ceph_clock_now();
-  ceph_assert((int)m_out_bl->length() == hit_bytes + miss_bytes);
+  utime_t now = stone_clock_now();
+  stone_assert((int)m_out_bl->length() == hit_bytes + miss_bytes);
   m_on_finish->complete(r);
   m_perfcounter->inc(l_librbd_pwl_rd_bytes, hit_bytes + miss_bytes);
   m_perfcounter->inc(l_librbd_pwl_rd_hit_bytes, hit_bytes);

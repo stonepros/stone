@@ -8,7 +8,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -69,17 +69,17 @@ BackfillState::Initial::Initial(my_context ctx)
     logger().debug("{}: target shard {} from {}",
                    __func__, bt, peering_state().get_peer_last_backfill(bt));
   }
-  ceph_assert(peering_state().get_backfill_targets().size());
-  ceph_assert(!backfill_state().last_backfill_started.is_max());
+  stone_assert(peering_state().get_backfill_targets().size());
+  stone_assert(!backfill_state().last_backfill_started.is_max());
 }
 
 boost::statechart::result
 BackfillState::Initial::react(const BackfillState::Triggered& evt)
 {
   logger().debug("{}: backfill triggered", __func__);
-  ceph_assert(backfill_state().last_backfill_started == \
+  stone_assert(backfill_state().last_backfill_started == \
               peering_state().earliest_backfill());
-  ceph_assert(peering_state().is_backfilling());
+  stone_assert(peering_state().is_backfilling());
   // initialize BackfillIntervals
   for (const auto& bt : peering_state().get_backfill_targets()) {
     backfill_state().peer_backfill_info[bt].reset(
@@ -104,7 +104,7 @@ void BackfillState::Enqueuing::maybe_update_range()
   if (auto& primary_bi = backfill_state().backfill_info;
       primary_bi.version >= pg().get_projected_last_update()) {
     logger().info("{}: bi is current", __func__);
-    ceph_assert(primary_bi.version == pg().get_projected_last_update());
+    stone_assert(primary_bi.version == pg().get_projected_last_update());
   } else if (primary_bi.version >= peering_state().get_log_tail()) {
 #if 0
     if (peering_state().get_pg_log().get_log().empty() &&
@@ -115,7 +115,7 @@ void BackfillState::Enqueuing::maybe_update_range()
        * eversion_t(), because otherwise the entry which changed
        * last_update since the last scan would have to be present.
        */
-      ceph_assert(primary_bi.version == eversion_t());
+      stone_assert(primary_bi.version == eversion_t());
       return;
     }
 #endif
@@ -144,7 +144,7 @@ void BackfillState::Enqueuing::maybe_update_range()
       });
     primary_bi.version = pg().get_projected_last_update();
   } else {
-    ceph_abort_msg(
+    stone_abort_msg(
       "scan_range should have raised primary_bi.version past log_tail");
   }
 }
@@ -183,7 +183,7 @@ hobject_t BackfillState::Enqueuing::earliest_peer_backfill(
   hobject_t e = hobject_t::get_max();
   for (const pg_shard_t& bt : peering_state().get_backfill_targets()) {
     const auto iter = peer_backfill_info.find(bt);
-    ceph_assert(iter != peer_backfill_info.end());
+    stone_assert(iter != peer_backfill_info.end());
     e = std::min(e, iter->second.begin);
   }
   return e;
@@ -237,7 +237,7 @@ BackfillState::Enqueuing::remove_on_peers(const hobject_t& check)
   }
   logger().debug("{}: BACKFILL removing {} from peers {}",
                  __func__, check, result.pbi_targets);
-  ceph_assert(!result.pbi_targets.empty());
+  stone_assert(!result.pbi_targets.empty());
   return result;
 }
 
@@ -403,12 +403,12 @@ BackfillState::ReplicasScanning::ReplicasScanning(my_context ctx)
                      __func__, bt, pbi.end);
       backfill_listener().request_replica_scan(bt, pbi.end, hobject_t{});
 
-      ceph_assert(waiting_on_backfill.find(bt) == \
+      stone_assert(waiting_on_backfill.find(bt) == \
                   waiting_on_backfill.end());
       waiting_on_backfill.insert(bt);
     }
   }
-  ceph_assert(!waiting_on_backfill.empty());
+  stone_assert(!waiting_on_backfill.empty());
   // TODO: start_recovery_op(hobject_t::get_max()); // XXX: was pbi.end
 }
 
@@ -426,11 +426,11 @@ BackfillState::ReplicasScanning::react(ReplicaScanned evt)
                  __func__, evt.from, evt.result);
   // TODO: maybe we'll be able to move waiting_on_backfill from
   // the machine to the state.
-  ceph_assert(peering_state().is_backfill_target(evt.from));
+  stone_assert(peering_state().is_backfill_target(evt.from));
   if (waiting_on_backfill.erase(evt.from)) {
     backfill_state().peer_backfill_info[evt.from] = std::move(evt.result);
     if (waiting_on_backfill.empty()) {
-      ceph_assert(backfill_state().peer_backfill_info.size() == \
+      stone_assert(backfill_state().peer_backfill_info.size() == \
                   peering_state().get_backfill_targets().size());
       return transit<Enqueuing>();
     }
@@ -488,7 +488,7 @@ BackfillState::Done::Done(my_context ctx)
 // -- Crashed
 BackfillState::Crashed::Crashed()
 {
-  ceph_abort_msg("{}: this should not happen");
+  stone_abort_msg("{}: this should not happen");
 }
 
 // ProgressTracker is an intermediary between the BackfillListener and
@@ -530,7 +530,7 @@ void BackfillState::ProgressTracker::complete_to(
     completion_iter->second = \
       registry_item_t{ op_stage_t::completed_push, stats };
   } else {
-    ceph_abort_msg("completing untracked object shall not happen");
+    stone_abort_msg("completing untracked object shall not happen");
   }
   for (auto it = std::begin(registry);
        it != std::end(registry) &&

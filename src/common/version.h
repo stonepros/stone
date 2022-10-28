@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -12,15 +12,15 @@
  *
  */
 
-#ifndef CEPH_COMMON_VERSION_H
-#define CEPH_COMMON_VERSION_H
+#ifndef STONE_COMMON_VERSION_H
+#define STONE_COMMON_VERSION_H
 
 #include <string>
 
-// Return a string describing the Ceph version
+// Return a string describing the Stonee version
 const char *ceph_version_to_str();
 
-// Return a string with the Ceph release
+// Return a string with the Stonee release
 const char *ceph_release_to_str(void);
 
 // Return a string describing the git version

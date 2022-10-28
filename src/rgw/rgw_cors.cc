@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
  *
@@ -27,8 +27,8 @@
 
 #include "rgw_cors.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 void RGWCORSRule::dump_origins() {
   unsigned num_origins = allowed_origins.size();

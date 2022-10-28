@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -33,22 +33,22 @@
 
 using std::string;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::decode;
+using stone::encode;
 
 static int set_version(const char *path, uint32_t version) {
   bufferlist bl;
   encode(version, bl);
   return chain_setxattr<true, true>(
-    path, "user.cephos.collection_version", bl.c_str(),
+    path, "user.stoneos.collection_version", bl.c_str(),
     bl.length());
 }
 
 static int get_version(const char *path, uint32_t *version) {
   bufferptr bp(PATH_MAX);
-  int r = chain_getxattr(path, "user.cephos.collection_version",
+  int r = chain_getxattr(path, "user.stoneos.collection_version",
 		      bp.c_str(), bp.length());
   if (r < 0) {
     if (r != -ENOENT) {
@@ -68,7 +68,7 @@ static int get_version(const char *path, uint32_t *version) {
 
 IndexManager::~IndexManager() {
 
-  for (ceph::unordered_map<coll_t, CollectionIndex* > ::iterator it = col_indices.begin();
+  for (stone::unordered_map<coll_t, CollectionIndex* > ::iterator it = col_indices.begin();
        it != col_indices.end(); ++it) {
 
     delete it->second;
@@ -114,7 +114,7 @@ int IndexManager::build_index(coll_t c, const char *path, CollectionIndex **inde
 			     version);
       return (*index)->read_settings();
     }
-    default: ceph_abort();
+    default: stone_abort();
     }
 
   } else {
@@ -129,7 +129,7 @@ int IndexManager::build_index(coll_t c, const char *path, CollectionIndex **inde
 
 bool IndexManager::get_index_optimistic(coll_t c, Index *index) {
   std::shared_lock l{lock};
-  ceph::unordered_map<coll_t, CollectionIndex* > ::iterator it = col_indices.find(c);
+  stone::unordered_map<coll_t, CollectionIndex* > ::iterator it = col_indices.find(c);
   if (it == col_indices.end()) 
     return false;
   index->index = it->second;
@@ -140,7 +140,7 @@ int IndexManager::get_index(coll_t c, const string& baseDir, Index *index) {
   if (get_index_optimistic(c, index))
     return 0;
   std::unique_lock l{lock};
-  ceph::unordered_map<coll_t, CollectionIndex* > ::iterator it = col_indices.find(c);
+  stone::unordered_map<coll_t, CollectionIndex* > ::iterator it = col_indices.find(c);
   if (it == col_indices.end()) {
     char path[PATH_MAX];
     snprintf(path, sizeof(path), "%s/current/%s", baseDir.c_str(), c.to_str().c_str());

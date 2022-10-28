@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -27,12 +27,12 @@
 #include "common/Graylog.h"
 #include "common/errno.h"
 #include "common/strtol.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/str_list.h"
 #include "include/str_map.h"
 #include "include/compat.h"
 
-#define dout_subsys ceph_subsys_mon
+#define dout_subsys stone_subsys_mon
 
 using namespace TOPNSPC::common;
 
@@ -54,15 +54,15 @@ using std::to_string;
 using std::vector;
 using std::unique_ptr;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::Formatter;
-using ceph::JSONFormatter;
-using ceph::make_message;
-using ceph::mono_clock;
-using ceph::mono_time;
-using ceph::timespan_str;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::Formatter;
+using stone::JSONFormatter;
+using stone::make_message;
+using stone::mono_clock;
+using stone::mono_time;
+using stone::timespan_str;
 
 string LogMonitor::log_channel_info::get_log_file(const string &channel)
 {
@@ -137,14 +137,14 @@ bool LogMonitor::log_channel_info::do_log_to_syslog(const string &channel) {
   return ret;
 }
 
-ceph::logging::Graylog::Ref LogMonitor::log_channel_info::get_graylog(
+stone::logging::Graylog::Ref LogMonitor::log_channel_info::get_graylog(
     const string &channel)
 {
   dout(25) << __func__ << " for channel '"
 	   << channel << "'" << dendl;
 
   if (graylogs.count(channel) == 0) {
-    auto graylog(std::make_shared<ceph::logging::Graylog>("mon"));
+    auto graylog(std::make_shared<stone::logging::Graylog>("mon"));
 
     graylog->set_fsid(g_conf().get_val<uuid_d>("fsid"));
     graylog->set_hostname(g_conf()->host);
@@ -196,7 +196,7 @@ void LogMonitor::create_initial()
   e.name = g_conf()->name;
   e.rank = entity_name_t::MON(mon.rank);
   e.addrs = mon.messenger->get_myaddrs();
-  e.stamp = ceph_clock_now();
+  e.stamp = stone_clock_now();
   e.prio = CLOG_INFO;
   std::stringstream ss;
   ss << "mkfs " << mon.monmap->get_fsid();
@@ -213,7 +213,7 @@ void LogMonitor::update_from_paxos(bool *need_bootstrap)
            << " summary v " << summary.version << dendl;
   if (version == summary.version)
     return;
-  ceph_assert(version >= summary.version);
+  stone_assert(version >= summary.version);
 
   map<string,bufferlist> channel_blog;
 
@@ -222,7 +222,7 @@ void LogMonitor::update_from_paxos(bool *need_bootstrap)
   if ((latest_full > 0) && (latest_full > summary.version)) {
     bufferlist latest_bl;
     get_version_full(latest_full, latest_bl);
-    ceph_assert(latest_bl.length() != 0);
+    stone_assert(latest_bl.length() != 0);
     dout(7) << __func__ << " loading summary e" << latest_full << dendl;
     auto p = latest_bl.cbegin();
     decode(summary, p);
@@ -233,8 +233,8 @@ void LogMonitor::update_from_paxos(bool *need_bootstrap)
   while (version > summary.version) {
     bufferlist bl;
     int err = get_version(summary.version+1, bl);
-    ceph_assert(err == 0);
-    ceph_assert(bl.length());
+    stone_assert(err == 0);
+    stone_assert(bl.length());
 
     auto p = bl.cbegin();
     __u8 v;
@@ -266,7 +266,7 @@ void LogMonitor::update_from_paxos(bool *need_bootstrap)
       }
 
       if (channels.do_log_to_graylog(channel)) {
-	ceph::logging::Graylog::Ref graylog = channels.get_graylog(channel);
+	stone::logging::Graylog::Ref graylog = channels.get_graylog(channel);
 	if (graylog) {
 	  graylog->log_log_entry(&le);
 	}
@@ -362,7 +362,7 @@ void LogMonitor::encode_pending(MonitorDBStore::TransactionRef t)
 void LogMonitor::encode_full(MonitorDBStore::TransactionRef t)
 {
   dout(10) << __func__ << " log v " << summary.version << dendl;
-  ceph_assert(get_last_committed() == summary.version);
+  stone_assert(get_last_committed() == summary.version);
 
   bufferlist summary_bl;
   encode(summary, summary_bl, mon.get_quorum_con_features());
@@ -402,7 +402,7 @@ bool LogMonitor::preprocess_query(MonOpRequestRef op)
     return preprocess_log(op);
 
   default:
-    ceph_abort();
+    stone_abort();
     return true;
   }
 }
@@ -424,7 +424,7 @@ bool LogMonitor::prepare_update(MonOpRequestRef op)
   case MSG_LOG:
     return prepare_log(op);
   default:
-    ceph_abort();
+    stone_abort();
     return false;
   }
 }
@@ -753,7 +753,7 @@ void LogMonitor::check_sub(Subscription *s)
   dout(10) << __func__ << " client wants " << s->type << " ver " << s->next << dendl;
 
   int sub_level = sub_name_to_id(s->type);
-  ceph_assert(sub_level >= 0);
+  stone_assert(sub_level >= 0);
 
   version_t summary_version = summary.version;
   if (s->next > summary_version) {
@@ -806,7 +806,7 @@ void LogMonitor::_create_sub_incremental(MLog *mlog, int level, version_t sv)
     dout(10) << __func__ << " skipped from " << sv
 	     << " to first_committed " << get_first_committed() << dendl;
     LogEntry le;
-    le.stamp = ceph_clock_now();
+    le.stamp = stone_clock_now();
     le.prio = CLOG_WARN;
     ostringstream ss;
     ss << "skipped log messages from " << sv << " to " << get_first_committed();
@@ -819,8 +819,8 @@ void LogMonitor::_create_sub_incremental(MLog *mlog, int level, version_t sv)
   while (sv && sv <= summary_ver) {
     bufferlist bl;
     int err = get_version(sv, bl);
-    ceph_assert(err == 0);
-    ceph_assert(bl.length());
+    stone_assert(err == 0);
+    stone_assert(bl.length());
     auto p = bl.cbegin();
     __u8 v;
     decode(v,p);

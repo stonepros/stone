@@ -11,9 +11,9 @@
 
 #include "auth/AuthRegistry.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
-RGWSI_RADOS::RGWSI_RADOS(CephContext *cct) : RGWServiceInstance(cct)
+RGWSI_RADOS::RGWSI_RADOS(StoneContext *cct) : RGWServiceInstance(cct)
 {
 }
 
@@ -214,7 +214,7 @@ int RGWSI_RADOS::Pool::create(const vector<rgw_pool>& pools, vector<int> *retcod
   vector<librados::PoolAsyncCompletion *>::iterator citer;
 
   bool error = false;
-  ceph_assert(rets.size() == completions.size());
+  stone_assert(rets.size() == completions.size());
   for (riter = rets.begin(), citer = completions.begin(); riter != rets.end(); ++riter, ++citer) {
     int r = *riter;
     librados::PoolAsyncCompletion *c = *citer;
@@ -255,7 +255,7 @@ int RGWSI_RADOS::Pool::create(const vector<rgw_pool>& pools, vector<int> *retcod
     completions.push_back(c);
     int ret = io_ctx.application_enable_async(pg_pool_t::APPLICATION_NAME_RGW,
                                               false, c);
-    ceph_assert(ret == 0);
+    stone_assert(ret == 0);
   }
 
   retcodes->clear();
@@ -394,7 +394,7 @@ bool RGWSI_RADOS::check_secure_mon_conn() const
   std::vector<uint32_t> methods;
   std::vector<uint32_t> modes;
 
-  reg.get_supported_methods(CEPH_ENTITY_TYPE_MON, &methods, &modes);
+  reg.get_supported_methods(STONE_ENTITY_TYPE_MON, &methods, &modes);
   ldout(cct, 20) << __func__ << "(): auth registy supported: methods=" << methods << " modes=" << modes << dendl;
 
   for (auto method : methods) {

@@ -27,7 +27,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -124,7 +124,7 @@ seastar::future<crimson::osd::acked_peers_t>
 PGBackend::mutate_object(
   std::set<pg_shard_t> pg_shards,
   crimson::osd::ObjectContextRef &&obc,
-  ceph::os::Transaction&& txn,
+  stone::os::Transaction&& txn,
   const osd_op_params_t& osd_op_p,
   epoch_t min_epoch,
   epoch_t map_epoch,
@@ -144,13 +144,13 @@ PGBackend::mutate_object(
       obc->obs.oi.user_version = osd_op_p.user_at_version;
     obc->obs.oi.last_reqid = m->get_reqid();
     obc->obs.oi.mtime = m->get_mtime();
-    obc->obs.oi.local_mtime = ceph_clock_now();
+    obc->obs.oi.local_mtime = stone_clock_now();
 
     // object_info_t
     {
-      ceph::bufferlist osv;
-      encode(obc->obs.oi, osv, CEPH_FEATURES_ALL);
-      // TODO: get_osdmap()->get_features(CEPH_ENTITY_TYPE_OSD, nullptr));
+      stone::bufferlist osv;
+      encode(obc->obs.oi, osv, STONE_FEATURES_ALL);
+      // TODO: get_osdmap()->get_features(STONE_ENTITY_TYPE_OSD, nullptr));
       txn.setattr(coll->get_cid(), ghobject_t{obc->obs.oi.soid}, OI_ATTR, osv);
     }
   } else {
@@ -164,7 +164,7 @@ PGBackend::mutate_object(
 
 static inline bool _read_verify_data(
   const object_info_t& oi,
-  const ceph::bufferlist& data)
+  const stone::bufferlist& data)
 {
   if (oi.is_data_digest() && oi.size == data.length()) {
     // whole object?  can we verify the checksum?
@@ -182,7 +182,7 @@ PGBackend::read_errorator::future<>
 PGBackend::read(const ObjectState& os, OSDOp& osd_op)
 {
   const auto& oi = os.oi;
-  const ceph_osd_op& op = osd_op.op;
+  const stone_osd_op& op = osd_op.op;
   const uint64_t offset = op.extent.offset;
   uint64_t length = op.extent.length;
   logger().trace("read: {} {}~{}", oi.soid, offset, length);
@@ -235,7 +235,7 @@ PGBackend::sparse_read(const ObjectState& os, OSDOp& osd_op)
         if (_read_verify_data(os.oi, bl)) {
           osd_op.op.extent.length = bl.length();
           // re-encode since it might be modified
-          ceph::encode(extents, osd_op.outdata);
+          stone::encode(extents, osd_op.outdata);
           encode_destructively(bl, osd_op.outdata);
           logger().trace("sparse_read got {} bytes from object {}",
                          osd_op.op.extent.length, os.oi.soid);
@@ -253,10 +253,10 @@ namespace {
 
   template<class CSum>
   PGBackend::checksum_errorator::future<>
-  do_checksum(ceph::bufferlist& init_value_bl,
+  do_checksum(stone::bufferlist& init_value_bl,
 	      size_t chunk_size,
-	      const ceph::bufferlist& buf,
-	      ceph::bufferlist& result)
+	      const stone::bufferlist& buf,
+	      stone::bufferlist& result)
   {
     typename CSum::init_value_t init_value;
     auto init_value_p = init_value_bl.cbegin();
@@ -264,13 +264,13 @@ namespace {
       decode(init_value, init_value_p);
       // chop off the consumed part
       init_value_bl.splice(0, init_value_p.get_off());
-    } catch (const ceph::buffer::end_of_buffer&) {
+    } catch (const stone::buffer::end_of_buffer&) {
       logger().warn("{}: init value not provided", __func__);
       return crimson::ct_error::invarg::make();
     }
     const uint32_t chunk_count = buf.length() / chunk_size;
-    ceph::bufferptr csum_data{
-      ceph::buffer::create(sizeof(typename CSum::value_t) * chunk_count)};
+    stone::bufferptr csum_data{
+      stone::buffer::create(sizeof(typename CSum::value_t) * chunk_count)};
     Checksummer::calculate<CSum>(
       init_value, chunk_size, 0, buf.length(), buf, &csum_data);
     encode(chunk_count, result);
@@ -321,17 +321,17 @@ PGBackend::checksum(const ObjectState& os, OSDOp& osd_op)
     }
     // calculate its checksum and put the result in outdata
     switch (checksum.type) {
-    case CEPH_OSD_CHECKSUM_OP_TYPE_XXHASH32:
+    case STONE_OSD_CHECKSUM_OP_TYPE_XXHASH32:
       return do_checksum<Checksummer::xxhash32>(osd_op.indata,
                                                 checksum.chunk_size,
                                                 read_bl,
                                                 osd_op.outdata);
-    case CEPH_OSD_CHECKSUM_OP_TYPE_XXHASH64:
+    case STONE_OSD_CHECKSUM_OP_TYPE_XXHASH64:
       return do_checksum<Checksummer::xxhash64>(osd_op.indata,
                                                 checksum.chunk_size,
                                                 read_bl,
                                                 osd_op.outdata);
-    case CEPH_OSD_CHECKSUM_OP_TYPE_CRC32C:
+    case STONE_OSD_CHECKSUM_OP_TYPE_CRC32C:
       return do_checksum<Checksummer::crc32c>(osd_op.indata,
                                               checksum.chunk_size,
                                               read_bl,
@@ -347,7 +347,7 @@ PGBackend::checksum(const ObjectState& os, OSDOp& osd_op)
 PGBackend::cmp_ext_errorator::future<>
 PGBackend::cmp_ext(const ObjectState& os, OSDOp& osd_op)
 {
-  const ceph_osd_op& op = osd_op.op;
+  const stone_osd_op& op = osd_op.op;
   // return the index of the first unmatched byte in the payload, hence the
   // strange limit and check
   if (op.extent.length > MAX_ERRNO) {
@@ -366,7 +366,7 @@ PGBackend::cmp_ext(const ObjectState& os, OSDOp& osd_op)
   } else {
     ext_len = op.extent.length;
   }
-  auto read_ext = ll_read_errorator::make_ready_future<ceph::bufferlist>();
+  auto read_ext = ll_read_errorator::make_ready_future<stone::bufferlist>();
   if (ext_len == 0) {
     logger().debug("{}: zero length extent", __func__);
   } else if (!os.exists || os.oi.is_whiteout()) {
@@ -408,10 +408,10 @@ PGBackend::stat_errorator::future<> PGBackend::stat(
 
 bool PGBackend::maybe_create_new_object(
   ObjectState& os,
-  ceph::os::Transaction& txn)
+  stone::os::Transaction& txn)
 {
   if (!os.exists) {
-    ceph_assert(!os.oi.is_whiteout());
+    stone_assert(!os.oi.is_whiteout());
     os.exists = true;
     os.oi.new_object();
 
@@ -443,10 +443,10 @@ static bool is_offset_and_length_valid(
 seastar::future<> PGBackend::write(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& txn,
+    stone::os::Transaction& txn,
     osd_op_params_t& osd_op_params)
 {
-  const ceph_osd_op& op = osd_op.op;
+  const stone_osd_op& op = osd_op.op;
   uint64_t offset = op.extent.offset;
   uint64_t length = op.extent.length;
   bufferlist buf = osd_op.indata;
@@ -506,10 +506,10 @@ seastar::future<> PGBackend::write(
 seastar::future<> PGBackend::write_same(
   ObjectState& os,
   const OSDOp& osd_op,
-  ceph::os::Transaction& txn,
+  stone::os::Transaction& txn,
   osd_op_params_t& osd_op_params)
 {
-  const ceph_osd_op& op = osd_op.op;
+  const stone_osd_op& op = osd_op.op;
   const uint64_t len = op.writesame.length;
   if (len == 0) {
     return seastar::now();
@@ -519,7 +519,7 @@ seastar::future<> PGBackend::write_same(
       op.writesame.data_length != osd_op.indata.length()) {
     throw crimson::osd::invalid_argument();
   }
-  ceph::bufferlist repeated_indata;
+  stone::bufferlist repeated_indata;
   for (uint64_t size = 0; size < len; size += op.writesame.data_length) {
     repeated_indata.append(osd_op.indata);
   }
@@ -535,10 +535,10 @@ seastar::future<> PGBackend::write_same(
 seastar::future<> PGBackend::writefull(
   ObjectState& os,
   const OSDOp& osd_op,
-  ceph::os::Transaction& txn,
+  stone::os::Transaction& txn,
   osd_op_params_t& osd_op_params)
 {
-  const ceph_osd_op& op = osd_op.op;
+  const stone_osd_op& op = osd_op.op;
   if (op.extent.length != osd_op.indata.length()) {
     throw crimson::osd::invalid_argument();
   }
@@ -562,10 +562,10 @@ seastar::future<> PGBackend::writefull(
 PGBackend::append_errorator::future<> PGBackend::append(
   ObjectState& os,
   OSDOp& osd_op,
-  ceph::os::Transaction& txn,
+  stone::os::Transaction& txn,
   osd_op_params_t& osd_op_params)
 {
-  const ceph_osd_op& op = osd_op.op;
+  const stone_osd_op& op = osd_op.op;
   if (op.extent.length != osd_op.indata.length()) {
     return crimson::ct_error::invarg::make();
   }
@@ -584,14 +584,14 @@ PGBackend::append_errorator::future<> PGBackend::append(
 PGBackend::write_ertr::future<> PGBackend::truncate(
   ObjectState& os,
   const OSDOp& osd_op,
-  ceph::os::Transaction& txn,
+  stone::os::Transaction& txn,
   osd_op_params_t& osd_op_params)
 {
   if (!os.exists || os.oi.is_whiteout()) {
     logger().debug("{} object dne, truncate is a no-op", __func__);
     return write_ertr::now();
   }
-  const ceph_osd_op& op = osd_op.op;
+  const stone_osd_op& op = osd_op.op;
   if (!is_offset_and_length_valid(op.extent.offset, op.extent.length)) {
     return crimson::ct_error::file_too_large::make();
   }
@@ -636,14 +636,14 @@ PGBackend::write_ertr::future<> PGBackend::truncate(
 PGBackend::write_ertr::future<> PGBackend::zero(
   ObjectState& os,
   const OSDOp& osd_op,
-  ceph::os::Transaction& txn,
+  stone::os::Transaction& txn,
   osd_op_params_t& osd_op_params)
 {
   if (!os.exists || os.oi.is_whiteout()) {
     logger().debug("{} object dne, zero is a no-op", __func__);
     return write_ertr::now();
   }
-  const ceph_osd_op& op = osd_op.op;
+  const stone_osd_op& op = osd_op.op;
   if (!is_offset_and_length_valid(op.extent.offset, op.extent.length)) {
     return crimson::ct_error::file_too_large::make();
   }
@@ -663,10 +663,10 @@ PGBackend::write_ertr::future<> PGBackend::zero(
 seastar::future<> PGBackend::create(
   ObjectState& os,
   const OSDOp& osd_op,
-  ceph::os::Transaction& txn)
+  stone::os::Transaction& txn)
 {
   if (os.exists && !os.oi.is_whiteout() &&
-      (osd_op.op.flags & CEPH_OSD_OP_FLAG_EXCL)) {
+      (osd_op.op.flags & STONE_OSD_OP_FLAG_EXCL)) {
     // this is an exclusive create
     throw crimson::osd::make_error(-EEXIST);
   }
@@ -687,7 +687,7 @@ seastar::future<> PGBackend::create(
 }
 
 seastar::future<> PGBackend::remove(ObjectState& os,
-                                    ceph::os::Transaction& txn)
+                                    stone::os::Transaction& txn)
 {
   // todo: snapset
   txn.remove(coll->get_cid(),
@@ -739,7 +739,7 @@ PGBackend::list_objects(const hobject_t& start, uint64_t limit) const
 seastar::future<> PGBackend::setxattr(
   ObjectState& os,
   const OSDOp& osd_op,
-  ceph::os::Transaction& txn)
+  stone::os::Transaction& txn)
 {
   if (local_conf()->osd_max_attr_size > 0 &&
       osd_op.op.xattr.value_len > local_conf()->osd_max_attr_size) {
@@ -755,7 +755,7 @@ seastar::future<> PGBackend::setxattr(
   maybe_create_new_object(os, txn);
 
   std::string name{"_"};
-  ceph::bufferlist val;
+  stone::bufferlist val;
   {
     auto bp = osd_op.indata.cbegin();
     bp.copy(osd_op.op.xattr.name_len, name);
@@ -773,7 +773,7 @@ PGBackend::get_attr_errorator::future<> PGBackend::getxattr(
   OSDOp& osd_op) const
 {
   std::string name;
-  ceph::bufferlist val;
+  stone::bufferlist val;
   {
     auto bp = osd_op.indata.cbegin();
     std::string aname;
@@ -781,7 +781,7 @@ PGBackend::get_attr_errorator::future<> PGBackend::getxattr(
     name = "_" + aname;
   }
   logger().debug("getxattr on obj={} for attr={}", os.oi.soid, name);
-  return getxattr(os.oi.soid, name).safe_then([&osd_op] (ceph::bufferptr val) {
+  return getxattr(os.oi.soid, name).safe_then([&osd_op] (stone::bufferptr val) {
     osd_op.outdata.clear();
     osd_op.outdata.push_back(std::move(val));
     osd_op.op.xattr.value_len = osd_op.outdata.length();
@@ -791,7 +791,7 @@ PGBackend::get_attr_errorator::future<> PGBackend::getxattr(
   //ctx->delta_stats.num_rd++;
 }
 
-PGBackend::get_attr_errorator::future<ceph::bufferptr> PGBackend::getxattr(
+PGBackend::get_attr_errorator::future<stone::bufferptr> PGBackend::getxattr(
   const hobject_t& soid,
   std::string_view key) const
 {
@@ -814,12 +814,12 @@ PGBackend::get_attr_errorator::future<> PGBackend::get_xattrs(
     std::vector<std::pair<std::string, bufferlist>> user_xattrs;
     for (auto& [key, val] : attrs) {
       if (key.size() > 1 && key[0] == '_') {
-	ceph::bufferlist bl;
+	stone::bufferlist bl;
 	bl.append(std::move(val));
 	user_xattrs.emplace_back(key.substr(1), std::move(bl));
       }
     }
-    ceph::encode(user_xattrs, osd_op.outdata);
+    stone::encode(user_xattrs, osd_op.outdata);
     return get_attr_errorator::now();
   });
 }
@@ -827,7 +827,7 @@ PGBackend::get_attr_errorator::future<> PGBackend::get_xattrs(
 PGBackend::rm_xattr_ertr::future<> PGBackend::rm_xattr(
   ObjectState& os,
   const OSDOp& osd_op,
-  ceph::os::Transaction& txn)
+  stone::os::Transaction& txn)
 {
   if (__builtin_expect(stopping, false)) {
     throw crimson::common::system_shutdown_exception();
@@ -878,7 +878,7 @@ maybe_get_omap_vals(
   }
 }
 
-PGBackend::ll_read_errorator::future<ceph::bufferlist>
+PGBackend::ll_read_errorator::future<stone::bufferlist>
 PGBackend::omap_get_header(
   const crimson::os::CollectionRef& c,
   const ghobject_t& oid) const
@@ -892,7 +892,7 @@ PGBackend::omap_get_header(
   OSDOp& osd_op) const
 {
   return omap_get_header(coll, ghobject_t{os.oi.soid}).safe_then(
-    [&osd_op] (ceph::bufferlist&& header) {
+    [&osd_op] (stone::bufferlist&& header) {
       osd_op.outdata = std::move(header);
       return seastar::now();
     });
@@ -925,7 +925,7 @@ PGBackend::omap_get_keys(
   // TODO: truly chunk the reading
   return maybe_get_omap_vals(store, coll, os.oi, start_after).safe_then(
     [=, &osd_op](auto ret) {
-      ceph::bufferlist result;
+      stone::bufferlist result;
       bool truncated = false;
       uint32_t num = 0;
       for (auto &[key, val] : std::get<1>(ret)) {
@@ -985,7 +985,7 @@ PGBackend::omap_get_vals(
     [=, &osd_op] (auto&& ret) {
       auto [done, vals] = std::move(ret);
       assert(done);
-      ceph::bufferlist result;
+      stone::bufferlist result;
       bool truncated = false;
       uint32_t num = 0;
       auto iter = filter_prefix > start_after ? vals.lower_bound(filter_prefix)
@@ -1062,12 +1062,12 @@ PGBackend::omap_get_vals_by_keys(
 seastar::future<> PGBackend::omap_set_vals(
   ObjectState& os,
   const OSDOp& osd_op,
-  ceph::os::Transaction& txn,
+  stone::os::Transaction& txn,
   osd_op_params_t& osd_op_params)
 {
   maybe_create_new_object(os, txn);
 
-  ceph::bufferlist to_set_bl;
+  stone::bufferlist to_set_bl;
   try {
     auto p = osd_op.indata.cbegin();
     decode_str_str_map_to_bl(p, &to_set_bl);
@@ -1092,7 +1092,7 @@ seastar::future<> PGBackend::omap_set_vals(
 seastar::future<> PGBackend::omap_set_header(
   ObjectState& os,
   const OSDOp& osd_op,
-  ceph::os::Transaction& txn)
+  stone::os::Transaction& txn)
 {
   maybe_create_new_object(os, txn);
   txn.omap_setheader(coll->get_cid(), ghobject_t{os.oi.soid}, osd_op.indata);
@@ -1107,7 +1107,7 @@ seastar::future<> PGBackend::omap_set_header(
 seastar::future<> PGBackend::omap_remove_range(
   ObjectState& os,
   const OSDOp& osd_op,
-  ceph::os::Transaction& txn)
+  stone::os::Transaction& txn)
 {
   std::string key_begin, key_end;
   try {
@@ -1128,7 +1128,7 @@ PGBackend::omap_clear_ertr::future<>
 PGBackend::omap_clear(
   ObjectState& os,
   OSDOp& osd_op,
-  ceph::os::Transaction& txn,
+  stone::os::Transaction& txn,
   osd_op_params_t& osd_op_params)
 {
   if (__builtin_expect(stopping, false)) {

@@ -11,9 +11,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 static volatile sig_atomic_t got_sigusr1 = 0;
 
 static void handle_sigusr1(int signo)
@@ -70,7 +70,7 @@ void testhandler(int signal)
     usr2 = true;
     break;
   default:
-    ceph_abort_msg("unexpected signal");
+    stone_abort_msg("unexpected signal");
   }
 }
 
@@ -118,12 +118,12 @@ TEST(SignalHandler, Multiple)
 
 TEST(SignalHandler, LogInternal)
 {
-  g_ceph_context->_log->inject_segv();
+  g_stone_context->_log->inject_segv();
   {
     PrCtl unset_dumpable;
     ASSERT_DEATH(derr << "foo" << dendl, ".*");
   }
-  g_ceph_context->_log->reset_segv();
+  g_stone_context->_log->reset_segv();
 }
 
 

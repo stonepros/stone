@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_OPERATION_DISABLE_FEATURES_REQUEST_H
-#define CEPH_LIBRBD_OPERATION_DISABLE_FEATURES_REQUEST_H
+#ifndef STONE_LIBRBD_OPERATION_DISABLE_FEATURES_REQUEST_H
+#define STONE_LIBRBD_OPERATION_DISABLE_FEATURES_REQUEST_H
 
 #include "librbd/ImageCtx.h"
 #include "librbd/operation/Request.h"
@@ -168,4 +168,4 @@ private:
 
 extern template class librbd::operation::DisableFeaturesRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_OPERATION_DISABLE_FEATURES_REQUEST_H
+#endif // STONE_LIBRBD_OPERATION_DISABLE_FEATURES_REQUEST_H

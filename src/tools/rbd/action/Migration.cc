@@ -146,7 +146,7 @@ void get_prepare_arguments(po::options_description *positional,
 }
 
 int execute_prepare(const po::variables_map &vm,
-                    const std::vector<std::string> &ceph_global_init_args) {
+                    const std::vector<std::string> &stone_global_init_args) {
   bool import_only = vm["import-only"].as<bool>();
 
   size_t arg_index = 0;
@@ -282,7 +282,7 @@ int execute_prepare(const po::variables_map &vm,
       return r;
     }
   } else {
-    ceph_assert(import_only);
+    stone_assert(import_only);
     r = librbd::RBD().migration_prepare_import(source_spec.c_str(), io_ctx,
                                                image_name.c_str(), opts);
     if (r < 0) {
@@ -302,7 +302,7 @@ void get_execute_arguments(po::options_description *positional,
 }
 
 int execute_execute(const po::variables_map &vm,
-                    const std::vector<std::string> &ceph_global_init_args) {
+                    const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -338,7 +338,7 @@ void get_abort_arguments(po::options_description *positional,
 }
 
 int execute_abort(const po::variables_map &vm,
-                  const std::vector<std::string> &ceph_global_init_args) {
+                  const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -376,7 +376,7 @@ void get_commit_arguments(po::options_description *positional,
 }
 
 int execute_commit(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;

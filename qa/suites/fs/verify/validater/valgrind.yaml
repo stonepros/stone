@@ -1,8 +1,8 @@
 overrides:
   install:
-    ceph:
+    stone:
       debuginfo: true
-  ceph:
+  stone:
     # Valgrind makes everything slow, so ignore slow requests and extend heartbeat grace
     log-ignorelist:
       - slow request
@@ -24,6 +24,6 @@ overrides:
       mds: [--tool=memcheck]
     watchdog:
       daemon_restart: normal
-  ceph-fuse:
+  stone-fuse:
     client.0:
       valgrind: [--tool=memcheck, --leak-check=full, --show-reachable=yes]

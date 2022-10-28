@@ -32,7 +32,7 @@
 
 #include <atomic>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 using namespace rgw;
 
@@ -46,8 +46,8 @@ namespace rgw {
 
   uint32_t RGWLibFS::write_completion_interval_s = 10;
 
-  ceph::timer<ceph::mono_clock> RGWLibFS::write_timer{
-    ceph::construct_suspended};
+  stone::timer<stone::mono_clock> RGWLibFS::write_timer{
+    stone::construct_suspended};
 
   inline int valid_fs_bucket_name(const string& name) {
     int rc = valid_s3_bucket_name(name, false /* relaxed */);
@@ -578,7 +578,7 @@ namespace rgw {
       }
       goto out;
       default:
-	ceph_abort();
+	stone_abort();
       } /* switch */
     } /* ix */
   unlock:
@@ -1006,7 +1006,7 @@ namespace rgw {
       req.emplace_key(std::move(k));
     }
 
-    if (ldlog_p1(get_context(), ceph_subsys_rgw, 15)) {
+    if (ldlog_p1(get_context(), stone_subsys_rgw, 15)) {
       lsubdout(get_context(), rgw, 15)
 	<< __func__
 	<< " get keys for: "
@@ -1447,11 +1447,11 @@ namespace rgw {
     }
   }
 
-  void RGWFileHandle::encode_attrs(ceph::buffer::list& ux_key1,
-				   ceph::buffer::list& ux_attrs1,
+  void RGWFileHandle::encode_attrs(stone::buffer::list& ux_key1,
+				   stone::buffer::list& ux_attrs1,
 				   bool inc_ov)
   {
-    using ceph::encode;
+    using stone::encode;
     fh_key fhk(this->fh.fh_hk);
     encode(fhk, ux_key1);
     bool need_ondisk_version =
@@ -1467,10 +1467,10 @@ namespace rgw {
     }
   } /* RGWFileHandle::encode_attrs */
 
-  DecodeAttrsResult RGWFileHandle::decode_attrs(const ceph::buffer::list* ux_key1,
-                                                const ceph::buffer::list* ux_attrs1)
+  DecodeAttrsResult RGWFileHandle::decode_attrs(const stone::buffer::list* ux_key1,
+                                                const stone::buffer::list* ux_attrs1)
   {
-    using ceph::decode;
+    using stone::decode;
     DecodeAttrsResult dar { false, false };
     fh_key fhk;
     auto bl_iter_key1 = ux_key1->cbegin();
@@ -1572,7 +1572,7 @@ namespace rgw {
     using boost::get;
     int rc = 0;
     struct timespec now;
-    CephContext* cct = fs->get_context();
+    StoneContext* cct = fs->get_context();
 
     lsubdout(cct, rgw, 10)
       << __func__ << " readdir called on "
@@ -1845,8 +1845,8 @@ namespace rgw {
 	state->bucket->get_placement_rule());
 
     /* not obviously supportable */
-    ceph_assert(! dlo_manifest);
-    ceph_assert(! slo_info);
+    stone_assert(! dlo_manifest);
+    stone_assert(! slo_info);
 
     perfcounter->inc(l_rgw_put);
     op_ret = -EINVAL;
@@ -1947,8 +1947,8 @@ namespace rgw {
   {
     buffer::list bl, aclbl, ux_key, ux_attrs;
     map<string, string>::iterator iter;
-    char calc_md5[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
-    unsigned char m[CEPH_CRYPTO_MD5_DIGESTSIZE];
+    char calc_md5[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+    unsigned char m[STONE_CRYPTO_MD5_DIGESTSIZE];
     struct req_state* state = get_state();
 
     size_t osize = rgw_fh->get_size();
@@ -1987,7 +1987,7 @@ namespace rgw {
 			<< ", blocks=" << cs_info.blocks.size() << dendl;
     }
 
-    buf_to_hex(m, CEPH_CRYPTO_MD5_DIGESTSIZE, calc_md5);
+    buf_to_hex(m, STONE_CRYPTO_MD5_DIGESTSIZE, calc_md5);
     etag = calc_md5;
 
     bl.append(etag.c_str(), etag.size() + 1);
@@ -2023,7 +2023,7 @@ namespace rgw {
      * processing any input from user in order to prohibit overwriting. */
     if (unlikely(!! slo_info)) {
       buffer::list slo_userindicator_bl;
-      using ceph::encode;
+      using stone::encode;
       encode("True", slo_userindicator_bl);
       emplace_attr(RGW_ATTR_SLO_UINDICATOR, std::move(slo_userindicator_bl));
     }
@@ -2069,9 +2069,9 @@ void rgwfile_version(int *major, int *minor, int *extra)
   int rc = 0;
 
   /* stash access data for "mount" */
-  RGWLibFS* new_fs = new RGWLibFS(static_cast<CephContext*>(rgw), uid, acc_key,
+  RGWLibFS* new_fs = new RGWLibFS(static_cast<StoneContext*>(rgw), uid, acc_key,
 				  sec_key, "/");
-  ceph_assert(new_fs);
+  stone_assert(new_fs);
 
   const DoutPrefix dp(rgwlib.get_store()->ctx(), dout_subsys, "rgw mount: ");
   rc = new_fs->authorize(&dp, rgwlib.get_store());
@@ -2106,15 +2106,15 @@ int rgw_mount2(librgw_t rgw, const char *uid, const char *acc_key,
      (!strcmp(root, ""))) {
     /* stash access data for "mount" */
     new_fs = new RGWLibFS(
-      static_cast<CephContext*>(rgw), uid, acc_key, sec_key, "/");
+      static_cast<StoneContext*>(rgw), uid, acc_key, sec_key, "/");
   }
   else {
     /* stash access data for "mount" */
     new_fs = new RGWLibFS(
-      static_cast<CephContext*>(rgw), uid, acc_key, sec_key, root);
+      static_cast<StoneContext*>(rgw), uid, acc_key, sec_key, root);
   }
 
-  ceph_assert(new_fs); /* should we be using ceph_assert? */
+  stone_assert(new_fs); /* should we be using stone_assert? */
 
   const DoutPrefix dp(rgwlib.get_store()->ctx(), dout_subsys, "rgw mount2: ");
   rc = new_fs->authorize(&dp, rgwlib.get_store());
@@ -2179,12 +2179,12 @@ int rgw_statfs(struct rgw_fs *rgw_fs,
   }
 
   //Set block size to 1M.
-  constexpr uint32_t CEPH_BLOCK_SHIFT = 20;
-  vfs_st->f_bsize = 1 << CEPH_BLOCK_SHIFT;
-  vfs_st->f_frsize = 1 << CEPH_BLOCK_SHIFT;
-  vfs_st->f_blocks = stats.kb >> (CEPH_BLOCK_SHIFT - 10);
-  vfs_st->f_bfree = stats.kb_avail >> (CEPH_BLOCK_SHIFT - 10);
-  vfs_st->f_bavail = stats.kb_avail >> (CEPH_BLOCK_SHIFT - 10);
+  constexpr uint32_t STONE_BLOCK_SHIFT = 20;
+  vfs_st->f_bsize = 1 << STONE_BLOCK_SHIFT;
+  vfs_st->f_frsize = 1 << STONE_BLOCK_SHIFT;
+  vfs_st->f_blocks = stats.kb >> (STONE_BLOCK_SHIFT - 10);
+  vfs_st->f_bfree = stats.kb_avail >> (STONE_BLOCK_SHIFT - 10);
+  vfs_st->f_bavail = stats.kb_avail >> (STONE_BLOCK_SHIFT - 10);
   vfs_st->f_files = stats.num_objects;
   vfs_st->f_ffree = -1;
   vfs_st->f_fsid[0] = fs->get_fsid();
@@ -2315,7 +2315,7 @@ int rgw_lookup(struct rgw_fs *rgw_fs,
 	      struct rgw_file_handle **fh,
 	      struct stat *st, uint32_t mask, uint32_t flags)
 {
-  //CephContext* cct = static_cast<CephContext*>(rgw_fs->rgw);
+  //StoneContext* cct = static_cast<StoneContext*>(rgw_fs->rgw);
   RGWLibFS *fs = static_cast<RGWLibFS*>(rgw_fs->fs_private);
 
   RGWFileHandle* parent = get_rgwfh(parent_fh);
@@ -2659,7 +2659,7 @@ int rgw_readv(struct rgw_fs *rgw_fs,
 	      struct rgw_file_handle *fh, rgw_uio *uio, uint32_t flags)
 {
 #if 0 /* XXX */
-  CephContext* cct = static_cast<CephContext*>(rgw_fs->rgw);
+  StoneContext* cct = static_cast<StoneContext*>(rgw_fs->rgw);
   RGWLibFS *fs = static_cast<RGWLibFS*>(rgw_fs->fs_private);
   RGWFileHandle* rgw_fh = get_rgwfh(fh);
 
@@ -2718,7 +2718,7 @@ int rgw_writev(struct rgw_fs *rgw_fs, struct rgw_file_handle *fh,
   // not supported - rest of function is ignored
   return -ENOTSUP;
 
-  CephContext* cct = static_cast<CephContext*>(rgw_fs->rgw);
+  StoneContext* cct = static_cast<StoneContext*>(rgw_fs->rgw);
   RGWLibFS *fs = static_cast<RGWLibFS*>(rgw_fs->fs_private);
   RGWFileHandle* rgw_fh = get_rgwfh(fh);
 

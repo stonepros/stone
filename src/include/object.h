@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_OBJECT_H
-#define CEPH_OBJECT_H
+#ifndef STONE_OBJECT_H
+#define STONE_OBJECT_H
 
 #include <cstdint>
 #include <cstdio>
@@ -154,9 +154,9 @@ struct denc_traits<snapid_t> {
 };
 
 inline std::ostream& operator<<(std::ostream& out, const snapid_t& s) {
-  if (s == CEPH_NOSNAP)
+  if (s == STONE_NOSNAP)
     return out << "head";
-  else if (s == CEPH_SNAPDIR)
+  else if (s == STONE_SNAPDIR)
     return out << "snapdir";
   else
     return out << std::hex << s.val << std::dec;

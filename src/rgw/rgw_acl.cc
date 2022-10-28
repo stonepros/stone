@@ -13,7 +13,7 @@
 #include "rgw_acl.h"
 #include "rgw_user.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 bool operator==(const ACLPermission& lhs, const ACLPermission& rhs) {
   return lhs.flags == rhs.flags;

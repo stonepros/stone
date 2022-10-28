@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_SCHEDULE_H
-#define CEPH_RBD_SCHEDULE_H
+#ifndef STONE_RBD_SCHEDULE_H
+#define STONE_RBD_SCHEDULE_H
 
 #include "json_spirit/json_spirit.h"
 
@@ -64,4 +64,4 @@ std::ostream& operator<<(std::ostream& os, ScheduleList &l);
 
 } // namespace rbd
 
-#endif // CEPH_RBD_SCHEDULE_H
+#endif // STONE_RBD_SCHEDULE_H

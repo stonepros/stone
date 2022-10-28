@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 Mirantis, Inc.
  *
@@ -14,17 +14,17 @@
  *
  */
 
-#ifndef CEPH_COMPRESSION_ZLIB_H
-#define CEPH_COMPRESSION_ZLIB_H
+#ifndef STONE_COMPRESSION_ZLIB_H
+#define STONE_COMPRESSION_ZLIB_H
 
 #include "common/config.h"
 #include "compressor/Compressor.h"
 
 class ZlibCompressor : public Compressor {
   bool isal_enabled;
-  CephContext *const cct;
+  StoneeContext *const cct;
 public:
-  ZlibCompressor(CephContext *cct, bool isal)
+  ZlibCompressor(StoneeContext *cct, bool isal)
     : Compressor(COMP_ALG_ZLIB, "zlib"), isal_enabled(isal), cct(cct) {
 #ifdef HAVE_QATZIP
     if (cct->_conf->qat_compressor_enabled && qat_accel.init("zlib"))

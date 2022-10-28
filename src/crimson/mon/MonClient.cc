@@ -38,7 +38,7 @@
 namespace {
   seastar::logger& logger()
   {
-    return crimson::get_logger(ceph_subsys_monc);
+    return crimson::get_logger(stone_subsys_monc);
   }
 }
 
@@ -69,7 +69,7 @@ public:
                    uint32_t want_keys);
   using secret_t = string;
   tuple<CryptoKey, secret_t, bufferlist>
-  handle_auth_reply_more(const ceph::buffer::list& bl);
+  handle_auth_reply_more(const stone::buffer::list& bl);
   int handle_auth_bad_method(uint32_t old_auth_method,
                              int result,
                              const std::vector<uint32_t>& allowed_methods,
@@ -78,7 +78,7 @@ public:
   // v1 and v2
   tuple<CryptoKey, secret_t, int>
   handle_auth_done(uint64_t new_global_id,
-                   const ceph::buffer::list& bl);
+                   const stone::buffer::list& bl);
   void close();
   bool is_my_peer(const entity_addr_t& addr) const;
   AuthAuthorizer* get_authorizer(entity_type_t peer) const;
@@ -127,7 +127,7 @@ Connection::Connection(const AuthRegistry& auth_registry,
     conn{conn},
     rotating_keyring{
       std::make_unique<RotatingKeyRing>(nullptr,
-                                        CEPH_ENTITY_TYPE_OSD,
+                                        STONE_ENTITY_TYPE_OSD,
                                         keyring)}
 {}
 
@@ -193,7 +193,7 @@ Connection::create_auth(crimson::auth::method_t protocol,
                         const EntityName& name,
                         uint32_t want_keys)
 {
-  static crimson::common::CephContext cct;
+  static crimson::common::StoneContext cct;
   std::unique_ptr<AuthClientHandler> auth;
   auth.reset(AuthClientHandler::create(&cct,
                                        protocol,
@@ -213,8 +213,8 @@ seastar::future<>
 Connection::setup_session(epoch_t epoch,
                           const EntityName& name)
 {
-  auto m = ceph::make_message<MAuth>();
-  m->protocol = CEPH_AUTH_UNKNOWN;
+  auto m = stone::make_message<MAuth>();
+  m->protocol = STONE_AUTH_UNKNOWN;
   m->monmap_epoch = epoch;
   __u8 struct_v = 1;
   encode(struct_v, m->auth_payload);
@@ -252,7 +252,7 @@ Connection::do_auth_single(Connection::request_t what)
     return reply.get_shared_future();
   }).then([this] (Ref<MAuthReply> m) {
     if (!m) {
-      ceph_assert(closed);
+      stone_assert(closed);
       logger().info("do_auth: connection closed");
       return seastar::make_ready_future<std::optional<Connection::auth_result_t>>(
 	std::make_optional(auth_result_t::canceled));
@@ -310,10 +310,10 @@ Connection::authenticate_v1(epoch_t epoch,
       // none
       return seastar::make_ready_future<auth_result_t>(auth_result_t::success);
     case -EAGAIN:
-      // cephx
+      // stonex
       return do_auth(request_t::general);
     default:
-      ceph_assert_always(0);
+      stone_assert_always(0);
     }
   }).handle_exception([](auto ep) {
     logger().error("authenticate_v1 failed with {}", ep);
@@ -354,7 +354,7 @@ Connection::get_auth_request(const EntityName& entity_name,
   }
   auth = create_auth(auth_method, global_id, entity_name, want_keys);
 
-  using ceph::encode;
+  using stone::encode;
   bufferlist bl;
   // initial request includes some boilerplate...
   encode((char)AUTH_MODE_MON, bl);
@@ -366,7 +366,7 @@ Connection::get_auth_request(const EntityName& entity_name,
 }
 
 tuple<CryptoKey, Connection::secret_t, bufferlist>
-Connection::handle_auth_reply_more(const ceph::buffer::list& payload)
+Connection::handle_auth_reply_more(const stone::buffer::list& payload)
 {
   CryptoKey session_key;
   secret_t connection_secret;
@@ -389,7 +389,7 @@ Connection::handle_auth_reply_more(const ceph::buffer::list& payload)
 
 tuple<CryptoKey, Connection::secret_t, int>
 Connection::handle_auth_done(uint64_t new_global_id,
-                             const ceph::buffer::list& payload)
+                             const stone::buffer::list& payload)
 {
   global_id = new_global_id;
   auth->set_global_id(global_id);
@@ -447,7 +447,7 @@ void Connection::close()
 
 bool Connection::is_my_peer(const entity_addr_t& addr) const
 {
-  ceph_assert(conn);
+  stone_assert(conn);
   return conn->get_peer_addr() == addr;
 }
 
@@ -458,9 +458,9 @@ crimson::net::ConnectionRef Connection::get_conn() {
 Client::Client(crimson::net::Messenger& messenger,
                crimson::common::AuthHandler& auth_handler)
   // currently, crimson is OSD-only
-  : want_keys{CEPH_ENTITY_TYPE_MON |
-              CEPH_ENTITY_TYPE_OSD |
-              CEPH_ENTITY_TYPE_MGR},
+  : want_keys{STONE_ENTITY_TYPE_MON |
+              STONE_ENTITY_TYPE_OSD |
+              STONE_ENTITY_TYPE_MGR},
     timer{[this] { tick(); }},
     msgr{messenger},
     auth_registry{&cct},
@@ -488,7 +488,7 @@ seastar::future<> Client::start() {
 
 seastar::future<> Client::load_keyring()
 {
-  if (!auth_registry.is_supported_method(msgr.get_mytype(), CEPH_AUTH_CEPHX)) {
+  if (!auth_registry.is_supported_method(msgr.get_mytype(), STONE_AUTH_STONEX)) {
     return seastar::now();
   } else {
     return crimson::auth::load_from_keyring(&keyring).then([](KeyRing* keyring) {
@@ -525,15 +525,15 @@ Client::ms_dispatch(crimson::net::ConnectionRef conn, MessageRef m)
   gate.dispatch_in_background(__func__, *this, [this, conn, &m, &dispatched] {
     // we only care about these message types
     switch (m->get_type()) {
-    case CEPH_MSG_MON_MAP:
+    case STONE_MSG_MON_MAP:
       return handle_monmap(conn, boost::static_pointer_cast<MMonMap>(m));
-    case CEPH_MSG_AUTH_REPLY:
+    case STONE_MSG_AUTH_REPLY:
       return handle_auth_reply(
 	conn, boost::static_pointer_cast<MAuthReply>(m));
-    case CEPH_MSG_MON_SUBSCRIBE_ACK:
+    case STONE_MSG_MON_SUBSCRIBE_ACK:
       return handle_subscribe_ack(
 	boost::static_pointer_cast<MMonSubscribeAck>(m));
-    case CEPH_MSG_MON_GET_VERSION_REPLY:
+    case STONE_MSG_MON_GET_VERSION_REPLY:
       return handle_get_version_reply(
 	boost::static_pointer_cast<MMonGetVersionReply>(m));
     case MSG_MON_COMMAND_ACK:
@@ -604,8 +604,8 @@ int Client::handle_auth_request(crimson::net::ConnectionRef con,
                                 AuthConnectionMetaRef auth_meta,
                                 bool more,
                                 uint32_t auth_method,
-                                const ceph::bufferlist& payload,
-                                ceph::bufferlist *reply)
+                                const stone::bufferlist& payload,
+                                stone::bufferlist *reply)
 {
   // for some channels prior to nautilus (osd heartbeat), we tolerate the lack of
   // an authorizer.
@@ -669,7 +669,7 @@ Client::get_auth_request(crimson::net::ConnectionRef con,
   logger().info("get_auth_request(con={}, auth_method={})",
                 con, auth_meta->auth_method);
   // connection to mon?
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_MON) {
     auto found = std::find_if(pending_conns.begin(), pending_conns.end(),
                               [peer_addr = con->get_peer_addr()](auto& mc) {
                                 return mc->is_my_peer(peer_addr);
@@ -687,7 +687,7 @@ Client::get_auth_request(crimson::net::ConnectionRef con,
     auto authorizer = active_con->get_authorizer(con->get_peer_type());
     if (!authorizer) {
       logger().error("failed to build_authorizer for type {}",
-                     ceph_entity_type_name(con->get_peer_type()));
+                     stone_entity_type_name(con->get_peer_type()));
       throw crimson::auth::error("unable to build auth");
     }
     auth_meta->authorizer.reset(authorizer);
@@ -700,11 +700,11 @@ Client::get_auth_request(crimson::net::ConnectionRef con,
   }
 }
 
-ceph::bufferlist Client::handle_auth_reply_more(crimson::net::ConnectionRef conn,
+stone::bufferlist Client::handle_auth_reply_more(crimson::net::ConnectionRef conn,
                                                 AuthConnectionMetaRef auth_meta,
                                                 const bufferlist& bl)
 {
-  if (conn->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
+  if (conn->get_peer_type() == STONE_ENTITY_TYPE_MON) {
     auto found = std::find_if(pending_conns.begin(), pending_conns.end(),
                               [peer_addr = conn->get_peer_addr()](auto& mc) {
                                 return mc->is_my_peer(peer_addr);
@@ -733,7 +733,7 @@ int Client::handle_auth_done(crimson::net::ConnectionRef conn,
                              uint32_t con_mode,
                              const bufferlist& bl)
 {
-  if (conn->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
+  if (conn->get_peer_type() == STONE_ENTITY_TYPE_MON) {
     auto found = std::find_if(pending_conns.begin(), pending_conns.end(),
                               [peer_addr = conn->get_peer_addr()](auto& mc) {
                                 return mc->is_my_peer(peer_addr);
@@ -765,7 +765,7 @@ int Client::handle_auth_bad_method(crimson::net::ConnectionRef conn,
                                    const std::vector<uint32_t>& allowed_methods,
                                    const std::vector<uint32_t>& allowed_modes)
 {
-  if (conn->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
+  if (conn->get_peer_type() == STONE_ENTITY_TYPE_MON) {
     auto found = std::find_if(pending_conns.begin(), pending_conns.end(),
                               [peer_addr = conn->get_peer_addr()](auto& mc) {
                                 return mc->is_my_peer(peer_addr);
@@ -966,7 +966,7 @@ seastar::future<> Client::reopen_session(int rank)
     logger().info("connecting to mon.{}", rank);
     return seastar::futurize_invoke(
         [peer, this] () -> seastar::future<Connection::auth_result_t> {
-      auto conn = msgr.connect(peer, CEPH_ENTITY_TYPE_MON);
+      auto conn = msgr.connect(peer, STONE_ENTITY_TYPE_MON);
       auto& mc = pending_conns.emplace_back(
 	std::make_unique<Connection>(auth_registry, conn, &keyring));
       if (conn->get_peer_addr().is_msgr2()) {
@@ -1010,13 +1010,13 @@ void Client::_finish_auth(const entity_addr_t& peer)
   });
   if (found == pending_conns.end()) {
     // Happens if another connection has won the race
-    ceph_assert(active_con && pending_conns.empty());
+    stone_assert(active_con && pending_conns.empty());
     logger().info("no pending connection for mon.{}, peer {}",
       monmap.get_name(peer), peer);
     return;
   }
 
-  ceph_assert(!active_con && !pending_conns.empty());
+  stone_assert(!active_con && !pending_conns.empty());
   active_con = std::move(*found);
   found->reset();
   for (auto& conn : pending_conns) {
@@ -1097,7 +1097,7 @@ seastar::future<> Client::renew_subs()
 
   auto m = make_message<MMonSubscribe>();
   m->what = sub.get_subs();
-  m->hostname = ceph_get_short_hostname();
+  m->hostname = stone_get_short_hostname();
   return send_message(m).then([this] {
     sub.renewed();
   });

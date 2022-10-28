@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Sebastien Ponce <sebastien.ponce@cern.ch>
  *
@@ -34,7 +34,7 @@
 
 libradosstriper::MultiAioCompletion::~MultiAioCompletion()
 {
-  ceph_assert(pc->ref == 1);
+  stone_assert(pc->ref == 1);
   pc->put();
 }
 
@@ -337,7 +337,7 @@ libradosstriper::RadosStriper::multi_aio_create_completion(void *cb_arg,
 {
   MultiAioCompletionImpl *c;
   int r = rados_striper_multi_aio_create_completion(cb_arg, cb_complete, cb_safe, (void**)&c);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   return new MultiAioCompletion(c);
 }
 

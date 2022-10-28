@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_GLOBAL_SIGNAL_HANDLER_H
-#define CEPH_GLOBAL_SIGNAL_HANDLER_H
+#ifndef STONE_GLOBAL_SIGNAL_HANDLER_H
+#define STONE_GLOBAL_SIGNAL_HANDLER_H
 
 #include <signal.h>
 #include "acconfig.h"
@@ -33,7 +33,7 @@ void install_sighandler(int signum, signal_handler_t handler, int flags);
 // handles SIGHUP
 void sighup_handler(int signum);
 
-// Install the standard Ceph signal handlers
+// Install the standard Stone signal handlers
 void install_standard_sighandlers(void);
 
 

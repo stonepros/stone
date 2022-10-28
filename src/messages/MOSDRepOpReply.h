@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MOSDREPOPREPLY_H
-#define CEPH_MOSDREPOPREPLY_H
+#ifndef STONE_MOSDREPOPREPLY_H
+#define STONE_MOSDREPOPREPLY_H
 
 #include "MOSDFastDispatchOp.h"
 #include "MOSDRepOp.h"
@@ -106,8 +106,8 @@ public:
   spg_t get_pg() { return pgid; }
 
   int get_ack_type() { return ack_type; }
-  bool is_ondisk() { return ack_type & CEPH_OSD_FLAG_ONDISK; }
-  bool is_onnvram() { return ack_type & CEPH_OSD_FLAG_ONNVRAM; }
+  bool is_ondisk() { return ack_type & STONE_OSD_FLAG_ONDISK; }
+  bool is_onnvram() { return ack_type & STONE_OSD_FLAG_ONNVRAM; }
 
   int get_result() { return result; }
 
@@ -145,11 +145,11 @@ public:
     out << "osd_repop_reply(" << reqid
         << " " << pgid << " e" << map_epoch << "/" << min_epoch;
     if (!final_decode_needed) {
-      if (ack_type & CEPH_OSD_FLAG_ONDISK)
+      if (ack_type & STONE_OSD_FLAG_ONDISK)
         out << " ondisk";
-      if (ack_type & CEPH_OSD_FLAG_ONNVRAM)
+      if (ack_type & STONE_OSD_FLAG_ONNVRAM)
         out << " onnvram";
-      if (ack_type & CEPH_OSD_FLAG_ACK)
+      if (ack_type & STONE_OSD_FLAG_ACK)
         out << " ack";
       out << ", result = " << result;
     }

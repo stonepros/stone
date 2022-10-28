@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_GLOBAL_CONTEXT_H
-#define CEPH_GLOBAL_CONTEXT_H
+#ifndef STONE_GLOBAL_CONTEXT_H
+#define STONE_GLOBAL_CONTEXT_H
 
 #include <limits.h>
 
@@ -21,7 +21,7 @@
 #include "include/common_fwd.h"
 
 namespace TOPNSPC::global {
-extern CephContext *g_ceph_context;
+extern StoneContext *g_ceph_context;
 ConfigProxy& g_conf();
 
 extern const char *g_assert_file;

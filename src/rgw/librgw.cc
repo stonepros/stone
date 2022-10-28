@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -32,8 +32,8 @@
 #include "common/Timer.h"
 #include "common/Throttle.h"
 #include "common/WorkQueue.h"
-#include "common/ceph_argparse.h"
-#include "common/ceph_context.h"
+#include "common/stone_argparse.h"
+#include "common/stone_context.h"
 #include "common/common_init.h"
 #include "common/dout.h"
 
@@ -67,7 +67,7 @@
 #include <string>
 #include <mutex>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 bool global_stop = false;
 
@@ -150,7 +150,7 @@ namespace rgw {
     // XXX move RGWLibIO and timing setup into process_request
 
 #if 0 /* XXX */
-    utime_t tm = ceph_clock_now();
+    utime_t tm = stone_clock_now();
 #endif
 
     RGWLibIO io_ctx;
@@ -169,7 +169,7 @@ namespace rgw {
     // XXX move RGWLibIO and timing setup into process_request
 
 #if 0 /* XXX */
-    utime_t tm = ceph_clock_now();
+    utime_t tm = stone_clock_now();
 #endif
 
     RGWLibIO io_ctx;
@@ -328,7 +328,7 @@ namespace rgw {
       op->execute(null_yield);
       op->complete();
 
-    } catch (const ceph::crypto::DigestException& e) {
+    } catch (const stone::crypto::DigestException& e) {
       dout(0) << "authentication failed" << e.what() << dendl;
       abort_req(s, op, -ERR_INVALID_SECRET_KEY);
     }
@@ -484,7 +484,7 @@ namespace rgw {
 
   int RGWLibFrontend::init()
   {
-    pprocess = new RGWLibProcess(g_ceph_context, &env,
+    pprocess = new RGWLibProcess(g_stone_context, &env,
 				 g_conf()->rgw_thread_pool_size, conf);
     return 0;
   }
@@ -507,24 +507,24 @@ namespace rgw {
     };
 
     cct = global_init(&defaults, args,
-		      CEPH_ENTITY_TYPE_CLIENT,
+		      STONE_ENTITY_TYPE_CLIENT,
 		      CODE_ENVIRONMENT_DAEMON,
 		      CINIT_FLAG_UNPRIVILEGED_DAEMON_DEFAULTS);
 
-    ceph::mutex mutex = ceph::make_mutex("main");
-    SafeTimer init_timer(g_ceph_context, mutex);
+    stone::mutex mutex = stone::make_mutex("main");
+    SafeTimer init_timer(g_stone_context, mutex);
     init_timer.init();
     mutex.lock();
     init_timer.add_event_after(g_conf()->rgw_init_timeout, new C_InitTimeout);
     mutex.unlock();
 
-    common_init_finish(g_ceph_context);
+    common_init_finish(g_stone_context);
 
-    rgw_tools_init(g_ceph_context);
+    rgw_tools_init(g_stone_context);
 
     rgw_init_resolver();
     rgw::curl::setup_curl(boost::none);
-    rgw_http_client_init(g_ceph_context);
+    rgw_http_client_init(g_stone_context);
 
     auto run_gc =
       g_conf()->rgw_enable_gc_threads &&
@@ -542,7 +542,7 @@ namespace rgw {
       g_conf()->rgw_run_sync_thread &&
       g_conf()->rgw_nfs_run_sync_thread;
 
-    store = RGWStoreManager::get_storage(this, g_ceph_context,
+    store = RGWStoreManager::get_storage(this, g_stone_context,
 					 run_gc,
 					 run_lc,
 					 run_quota,
@@ -559,9 +559,9 @@ namespace rgw {
       return -EIO;
     }
 
-    r = rgw_perf_start(g_ceph_context);
+    r = rgw_perf_start(g_stone_context);
 
-    rgw_rest_init(g_ceph_context, store->svc()->zone->get_zonegroup());
+    rgw_rest_init(g_stone_context, store->svc()->zone->get_zonegroup());
 
     mutex.lock();
     init_timer.cancel_all_events();
@@ -584,19 +584,19 @@ namespace rgw {
     ldh->init();
     ldh->bind();
 
-    rgw_log_usage_init(g_ceph_context, store->getRados());
+    rgw_log_usage_init(g_stone_context, store->getRados());
 
     // XXX ex-RGWRESTMgr_lib, mgr->set_logging(true)
 
     OpsLogManifold* olog_manifold = new OpsLogManifold();
     if (!g_conf()->rgw_ops_log_socket_path.empty()) {
-      OpsLogSocket* olog_socket = new OpsLogSocket(g_ceph_context, g_conf()->rgw_ops_log_data_backlog);
+      OpsLogSocket* olog_socket = new OpsLogSocket(g_stone_context, g_conf()->rgw_ops_log_data_backlog);
       olog_socket->init(g_conf()->rgw_ops_log_socket_path);
       olog_manifold->add_sink(olog_socket);
     }
     OpsLogFile* ops_log_file;
     if (!g_conf()->rgw_ops_log_file_path.empty()) {
-      ops_log_file = new OpsLogFile(g_ceph_context, g_conf()->rgw_ops_log_file_path, g_conf()->rgw_ops_log_data_backlog);
+      ops_log_file = new OpsLogFile(g_stone_context, g_conf()->rgw_ops_log_file_path, g_conf()->rgw_ops_log_data_backlog);
       ops_log_file->start();
       olog_manifold->add_sink(ops_log_file);
     }
@@ -678,7 +678,7 @@ namespace rgw {
     rgw::kafka::shutdown();
 #endif
 
-    rgw_perf_stop(g_ceph_context);
+    rgw_perf_stop(g_stone_context);
 
     dout(1) << "final shutdown" << dendl;
     cct.reset();
@@ -755,9 +755,9 @@ int librgw_create(librgw_t* rgw, int argc, char **argv)
 
   int rc = -EINVAL;
 
-  if (! g_ceph_context) {
+  if (! g_stone_context) {
     std::lock_guard<std::mutex> lg(librgw_mtx);
-    if (! g_ceph_context) {
+    if (! g_stone_context) {
       vector<const char*> args;
       std::vector<std::string> spl_args;
       // last non-0 argument will be split and consumed
@@ -774,7 +774,7 @@ int librgw_create(librgw_t* rgw, int argc, char **argv)
     }
   }
 
-  *rgw = g_ceph_context->get();
+  *rgw = g_stone_context->get();
 
   return rc;
 }
@@ -783,7 +783,7 @@ void librgw_shutdown(librgw_t rgw)
 {
   using namespace rgw;
 
-  CephContext* cct = static_cast<CephContext*>(rgw);
+  StoneContext* cct = static_cast<StoneContext*>(rgw);
   rgwlib.stop();
   cct->put();
 }

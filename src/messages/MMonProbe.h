@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MMONPROBE_H
-#define CEPH_MMONPROBE_H
+#ifndef STONE_MMONPROBE_H
+#define STONE_MMONPROBE_H
 
 #include "include/ceph_features.h"
 #include "common/ceph_releases.h"
@@ -99,8 +99,8 @@ public:
   void encode_payload(uint64_t features) override {
     using ceph::encode;
     if (monmap_bl.length() &&
-	((features & CEPH_FEATURE_MONENC) == 0 ||
-	 (features & CEPH_FEATURE_MSG_ADDR2) == 0)) {
+	((features & STONE_FEATURE_MONENC) == 0 ||
+	 (features & STONE_FEATURE_MSG_ADDR2) == 0)) {
       // reencode old-format monmap
       MonMap t;
       t.decode(monmap_bl);

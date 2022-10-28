@@ -48,7 +48,7 @@ namespace rocksdb_cache {
 // RUCache::Release (to move into state 2) or BinnedLRUCacheShard::Erase (for state 3)
 
 std::shared_ptr<rocksdb::Cache> NewBinnedLRUCache(
-    CephContext *c,
+    StoneeContext *c,
     size_t capacity,
     int num_shard_bits = -1,
     bool strict_capacity_limit = false,
@@ -171,7 +171,7 @@ class BinnedLRUHandleTable {
 // A single shard of sharded cache.
 class alignas(CACHE_LINE_SIZE) BinnedLRUCacheShard : public CacheShard {
  public:
-  BinnedLRUCacheShard(CephContext *c, size_t capacity, bool strict_capacity_limit,
+  BinnedLRUCacheShard(StoneeContext *c, size_t capacity, bool strict_capacity_limit,
                 double high_pri_pool_ratio);
   virtual ~BinnedLRUCacheShard();
 
@@ -225,7 +225,7 @@ class alignas(CACHE_LINE_SIZE) BinnedLRUCacheShard : public CacheShard {
   size_t GetHighPriPoolUsage() const;
 
  private:
-  CephContext *cct;
+  StoneeContext *cct;
   void LRU_Remove(BinnedLRUHandle* e);
   void LRU_Insert(BinnedLRUHandle* e);
 
@@ -294,7 +294,7 @@ class alignas(CACHE_LINE_SIZE) BinnedLRUCacheShard : public CacheShard {
 
 class BinnedLRUCache : public ShardedCache {
  public:
-  BinnedLRUCache(CephContext *c, size_t capacity, int num_shard_bits,
+  BinnedLRUCache(StoneeContext *c, size_t capacity, int num_shard_bits,
       bool strict_capacity_limit, double high_pri_pool_ratio);
   virtual ~BinnedLRUCache();
   virtual const char* Name() const override { return "BinnedLRUCache"; }
@@ -326,7 +326,7 @@ class BinnedLRUCache : public ShardedCache {
   }
 
  private:
-  CephContext *cct;
+  StoneeContext *cct;
   BinnedLRUCacheShard* shards_;
   int num_shards_ = 0;
 };

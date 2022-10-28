@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  * Copyright (C) 2020 Abutalib Aghayev
@@ -16,8 +16,8 @@
 // Copied from KernelDevice with HM-SMR specific functionality added.  Will be
 // further specialized for HM-SMR.
 
-#ifndef CEPH_BLK_HMSMRDEVICE_H
-#define CEPH_BLK_HMSMRDEVICE_H
+#ifndef STONE_BLK_HMSMRDEVICE_H
+#define STONE_BLK_HMSMRDEVICE_H
 
 #include <atomic>
 
@@ -29,7 +29,7 @@
 #include "aio/aio.h"
 #include "BlockDevice.h"
 
-#define RW_IO_MAX (INT_MAX & CEPH_PAGE_MASK)
+#define RW_IO_MAX (INT_MAX & STONE_PAGE_MASK)
 
 class HMSMRDevice final : public BlockDevice {
   std::vector<int> fd_directs, fd_buffereds;
@@ -115,7 +115,7 @@ class HMSMRDevice final : public BlockDevice {
   bool set_smr_params(const std::string& path);
 
 public:
-  HMSMRDevice(CephContext* cct, aio_callback_t cb, void *cbpriv,
+  HMSMRDevice(StoneeContext* cct, aio_callback_t cb, void *cbpriv,
               aio_callback_t d_cb, void *d_cbpriv);
   static bool support(const std::string& path);
 
@@ -160,4 +160,4 @@ public:
   void close() final;
 };
 
-#endif //CEPH_BLK_HMSMRDEVICE_H
+#endif //STONE_BLK_HMSMRDEVICE_H

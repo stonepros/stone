@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Intel Corporation All Rights Reserved
  *

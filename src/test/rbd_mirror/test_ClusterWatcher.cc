@@ -3,7 +3,7 @@
 #include "include/rados/librados.hpp"
 #include "common/Cond.h"
 #include "common/errno.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/internal.h"
 #include "librbd/api/Mirror.h"
 #include "tools/rbd_mirror/ClusterWatcher.h"
@@ -46,7 +46,7 @@ public:
 
   void SetUp() override {
     TestFixture::SetUp();
-    m_service_daemon.reset(new rbd::mirror::ServiceDaemon<>(g_ceph_context,
+    m_service_daemon.reset(new rbd::mirror::ServiceDaemon<>(g_stone_context,
                                                             m_cluster,
                                                             m_threads));
     m_cluster_watcher.reset(new ClusterWatcher(m_cluster, m_lock,
@@ -165,7 +165,7 @@ public:
   }
 
   RadosRef m_cluster;
-  ceph::mutex m_lock = ceph::make_mutex("TestClusterWatcherLock");
+  stone::mutex m_lock = stone::make_mutex("TestClusterWatcherLock");
   unique_ptr<rbd::mirror::ServiceDaemon<>> m_service_daemon;
   unique_ptr<ClusterWatcher> m_cluster_watcher;
 

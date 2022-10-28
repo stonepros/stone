@@ -3,7 +3,7 @@
 #include "rgw_common.h"
 #include "rgw_sync_policy.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 string rgw_sync_bucket_entity::bucket_key() const

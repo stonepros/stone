@@ -1,12 +1,12 @@
 overrides:
-  ceph:
+  stone:
     conf:
       global:
         ms die on skipped message: false
       client:
         rbd default features: 5
 tasks:
-- ceph:
+- stone:
 - rbd:
     all:
       image_size: 20480

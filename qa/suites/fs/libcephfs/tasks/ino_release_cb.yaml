@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         debug ms: 1
@@ -10,10 +10,10 @@ overrides:
 tasks:
 - exec:
     mon.a:
-    - ceph config set mds mds_min_caps_per_client 1
+    - stone config set mds mds_min_caps_per_client 1
 - background_exec:
     mon.a:
-    - "sleep 30 && ceph config set mds mds_max_caps_per_client 1"
+    - "sleep 30 && stone config set mds mds_max_caps_per_client 1"
 - exec:
     client.0:
-    - ceph_test_ino_release_cb
+    - stone_test_ino_release_cb

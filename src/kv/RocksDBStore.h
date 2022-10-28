@@ -77,7 +77,7 @@ inline rocksdb::Slice make_slice(const std::optional<std::string>& bound) {
  * Uses RocksDB to implement the KeyValueDB interface
  */
 class RocksDBStore : public KeyValueDB {
-  CephContext *cct;
+  StoneeContext *cct;
   PerfCounters *logger;
   std::string path;
   std::map<std::string,std::string> kv_options;
@@ -209,7 +209,7 @@ public:
 
   int ParseOptionsFromString(const std::string& opt_str, rocksdb::Options& opt);
   static int ParseOptionsFromStringStatic(
-    CephContext* cct,
+    StoneeContext* cct,
     const std::string& opt_str,
     rocksdb::Options &opt,
     std::function<int(const std::string&, const std::string&, rocksdb::Options&)> interp);
@@ -232,7 +232,7 @@ public:
     compact_range_async(combine_strings(prefix, start), combine_strings(prefix, end));
   }
 
-  RocksDBStore(CephContext *c, const std::string &path, std::map<std::string,std::string> opt, void *p) :
+  RocksDBStore(StoneeContext *c, const std::string &path, std::map<std::string,std::string> opt, void *p) :
     cct(c),
     logger(NULL),
     path(path),

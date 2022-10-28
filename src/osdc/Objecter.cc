@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -70,30 +70,30 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-using ceph::decode;
-using ceph::encode;
-using ceph::Formatter;
+using stone::decode;
+using stone::encode;
+using stone::Formatter;
 
 using std::defer_lock;
 
-using ceph::real_time;
-using ceph::real_clock;
+using stone::real_time;
+using stone::real_clock;
 
-using ceph::mono_clock;
-using ceph::mono_time;
+using stone::mono_clock;
+using stone::mono_time;
 
-using ceph::timespan;
+using stone::timespan;
 
-using ceph::shunique_lock;
-using ceph::acquire_shared;
-using ceph::acquire_unique;
+using stone::shunique_lock;
+using stone::acquire_shared;
+using stone::acquire_unique;
 
 namespace bc = boost::container;
 namespace bs = boost::system;
-namespace ca = ceph::async;
-namespace cb = ceph::buffer;
+namespace ca = stone::async;
+namespace cb = stone::buffer;
 
-#define dout_subsys ceph_subsys_objecter
+#define dout_subsys stone_subsys_objecter
 #undef dout_prefix
 #define dout_prefix *_dout << messenger->get_myname() << ".objecter "
 
@@ -201,7 +201,7 @@ std::unique_lock<std::mutex> Objecter::OSDSession::get_lock(object_t& oid)
     return {};
 
   static constexpr uint32_t HASH_PRIME = 1021;
-  uint32_t h = ceph_str_hash_linux(oid.name.c_str(), oid.name.size())
+  uint32_t h = stone_str_hash_linux(oid.name.c_str(), oid.name.size())
     % HASH_PRIME;
 
   return {completion_locks[h % num_locks], std::defer_lock};
@@ -246,7 +246,7 @@ void Objecter::update_crush_location()
  */
 void Objecter::init()
 {
-  ceph_assert(!initialized);
+  stone_assert(!initialized);
 
   if (!logger) {
     PerfCountersBuilder pcb(cct, "objecter", l_osdc_first, l_osdc_last);
@@ -379,7 +379,7 @@ void Objecter::init()
 					   m_request_state_hook,
 					   "show in-progress osd requests");
 
-  /* Don't warn on EEXIST, happens if multiple ceph clients
+  /* Don't warn on EEXIST, happens if multiple stone clients
    * are instantiated from one process */
   if (ret < 0 && ret != -EEXIST) {
     lderr(cct) << "error registering admin socket command: "
@@ -411,7 +411,7 @@ void Objecter::start(const OSDMap* o)
 
 void Objecter::shutdown()
 {
-  ceph_assert(initialized);
+  stone_assert(initialized);
 
   unique_lock wl(rwlock);
 
@@ -526,9 +526,9 @@ void Objecter::shutdown()
 }
 
 void Objecter::_send_linger(LingerOp *info,
-			    ceph::shunique_lock<ceph::shared_mutex>& sul)
+			    stone::shunique_lock<stone::shared_mutex>& sul)
 {
-  ceph_assert(sul.owns_lock() && sul.mutex() == &rwlock);
+  stone_assert(sul.owns_lock() && sul.mutex() == &rwlock);
 
   fu2::unique_function<Op::OpSig> oncommit;
   osdc_opvec opv;
@@ -538,9 +538,9 @@ void Objecter::_send_linger(LingerOp *info,
     ldout(cct, 15) << "send_linger " << info->linger_id << " reconnect"
 		   << dendl;
     opv.push_back(OSDOp());
-    opv.back().op.op = CEPH_OSD_OP_WATCH;
+    opv.back().op.op = STONE_OSD_OP_WATCH;
     opv.back().op.watch.cookie = info->get_cookie();
-    opv.back().op.watch.op = CEPH_OSD_WATCH_OP_RECONNECT;
+    opv.back().op.watch.op = STONE_OSD_WATCH_OP_RECONNECT;
     opv.back().op.watch.gen = ++info->register_gen;
     oncommit = CB_Linger_Reconnect(this, info);
   } else {
@@ -560,7 +560,7 @@ void Objecter::_send_linger(LingerOp *info,
   }
   watchl.unlock();
   auto o = new Op(info->target.base_oid, info->target.base_oloc,
-		  std::move(opv), info->target.flags | CEPH_OSD_FLAG_READ,
+		  std::move(opv), info->target.flags | STONE_OSD_FLAG_READ,
 		  std::move(oncommit), info->pobjver);
   o->outbl = poutbl;
   o->snapid = info->snap;
@@ -683,23 +683,23 @@ void Objecter::_send_linger_ping(LingerOp *info)
 		   << dendl;
     return;
   }
-  if (osdmap->test_flag(CEPH_OSDMAP_PAUSERD)) {
+  if (osdmap->test_flag(STONE_OSDMAP_PAUSERD)) {
     ldout(cct, 10) << __func__ << " PAUSERD" << dendl;
     return;
   }
 
-  ceph::coarse_mono_time now = ceph::coarse_mono_clock::now();
+  stone::coarse_mono_time now = stone::coarse_mono_clock::now();
   ldout(cct, 10) << __func__ << " " << info->linger_id << " now " << now
 		 << dendl;
 
   osdc_opvec opv(1);
-  opv[0].op.op = CEPH_OSD_OP_WATCH;
+  opv[0].op.op = STONE_OSD_OP_WATCH;
   opv[0].op.watch.cookie = info->get_cookie();
-  opv[0].op.watch.op = CEPH_OSD_WATCH_OP_PING;
+  opv[0].op.watch.op = STONE_OSD_WATCH_OP_PING;
   opv[0].op.watch.gen = info->register_gen;
 
   Op *o = new Op(info->target.base_oid, info->target.base_oloc,
-		 std::move(opv), info->target.flags | CEPH_OSD_FLAG_READ,
+		 std::move(opv), info->target.flags | STONE_OSD_FLAG_READ,
 		 CB_Linger_Ping(this, info, now),
 		 nullptr, nullptr);
   o->target = info->target;
@@ -713,7 +713,7 @@ void Objecter::_send_linger_ping(LingerOp *info)
   logger->inc(l_osdc_linger_ping);
 }
 
-void Objecter::_linger_ping(LingerOp *info, bs::error_code ec, ceph::coarse_mono_time sent,
+void Objecter::_linger_ping(LingerOp *info, bs::error_code ec, stone::coarse_mono_time sent,
 			    uint32_t register_gen)
 {
   std::unique_lock l(info->watch_lock);
@@ -736,15 +736,15 @@ void Objecter::_linger_ping(LingerOp *info, bs::error_code ec, ceph::coarse_mono
   }
 }
 
-tl::expected<ceph::timespan,
+tl::expected<stone::timespan,
 	     bs::error_code> Objecter::linger_check(LingerOp *info)
 {
   std::shared_lock l(info->watch_lock);
 
-  ceph::coarse_mono_time stamp = info->watch_valid_thru;
+  stone::coarse_mono_time stamp = info->watch_valid_thru;
   if (!info->watch_pending_async.empty())
     stamp = std::min(info->watch_valid_thru, info->watch_pending_async.front());
-  auto age = ceph::coarse_mono_clock::now() - stamp;
+  auto age = stone::coarse_mono_clock::now() - stamp;
 
   ldout(cct, 10) << __func__ << " " << info->linger_id
 		 << " err " << info->last_error
@@ -774,7 +774,7 @@ void Objecter::_linger_cancel(LingerOp *info)
 
     linger_ops.erase(info->linger_id);
     linger_ops_set.erase(info);
-    ceph_assert(linger_ops.size() == linger_ops_set.size());
+    stone_assert(linger_ops.size() == linger_ops_set.size());
 
     info->canceled = true;
     info->put();
@@ -797,20 +797,20 @@ Objecter::LingerOp *Objecter::linger_register(const object_t& oid,
   if (info->target.base_oloc.key == oid)
     info->target.base_oloc.key.clear();
   info->target.flags = flags;
-  info->watch_valid_thru = ceph::coarse_mono_clock::now();
+  info->watch_valid_thru = stone::coarse_mono_clock::now();
   ldout(cct, 10) << __func__ << " info " << info
 		 << " linger_id " << info->linger_id
 		 << " cookie " << info->get_cookie()
 		 << dendl;
   linger_ops[info->linger_id] = info;
   linger_ops_set.insert(info);
-  ceph_assert(linger_ops.size() == linger_ops_set.size());
+  stone_assert(linger_ops.size() == linger_ops_set.size());
 
   info->get(); // for the caller
   return info;
 }
 
-ceph_tid_t Objecter::linger_watch(LingerOp *info,
+stone_tid_t Objecter::linger_watch(LingerOp *info,
 				  ObjectOperation& op,
 				  const SnapContext& snapc,
 				  real_time mtime,
@@ -821,7 +821,7 @@ ceph_tid_t Objecter::linger_watch(LingerOp *info,
   info->is_watch = true;
   info->snapc = snapc;
   info->mtime = mtime;
-  info->target.flags |= CEPH_OSD_FLAG_WRITE;
+  info->target.flags |= STONE_OSD_FLAG_WRITE;
   info->ops = op.ops;
   info->inbl = inbl;
   info->pobjver = objver;
@@ -829,7 +829,7 @@ ceph_tid_t Objecter::linger_watch(LingerOp *info,
 
   info->ctx_budget = take_linger_budget(info);
 
-  shunique_lock sul(rwlock, ceph::acquire_unique);
+  shunique_lock sul(rwlock, stone::acquire_unique);
   _linger_submit(info, sul);
   logger->inc(l_osdc_linger_active);
 
@@ -837,21 +837,21 @@ ceph_tid_t Objecter::linger_watch(LingerOp *info,
   return info->linger_id;
 }
 
-ceph_tid_t Objecter::linger_notify(LingerOp *info,
+stone_tid_t Objecter::linger_notify(LingerOp *info,
 				   ObjectOperation& op,
 				   snapid_t snap, cb::list& inbl,
 				   decltype(LingerOp::on_reg_commit)&& onfinish,
 				   version_t *objver)
 {
   info->snap = snap;
-  info->target.flags |= CEPH_OSD_FLAG_READ;
+  info->target.flags |= STONE_OSD_FLAG_READ;
   info->ops = op.ops;
   info->inbl = inbl;
   info->pobjver = objver;
   info->on_reg_commit = std::move(onfinish);
   info->ctx_budget = take_linger_budget(info);
 
-  shunique_lock sul(rwlock, ceph::acquire_unique);
+  shunique_lock sul(rwlock, stone::acquire_unique);
   _linger_submit(info, sul);
   logger->inc(l_osdc_linger_active);
 
@@ -860,11 +860,11 @@ ceph_tid_t Objecter::linger_notify(LingerOp *info,
 }
 
 void Objecter::_linger_submit(LingerOp *info,
-			      ceph::shunique_lock<ceph::shared_mutex>& sul)
+			      stone::shunique_lock<stone::shared_mutex>& sul)
 {
-  ceph_assert(sul.owns_lock() && sul.mutex() == &rwlock);
-  ceph_assert(info->linger_id);
-  ceph_assert(info->ctx_budget != -1); // caller needs to have taken budget already!
+  stone_assert(sul.owns_lock() && sul.mutex() == &rwlock);
+  stone_assert(info->linger_id);
+  stone_assert(info->ctx_budget != -1); // caller needs to have taken budget already!
 
   // Populate Op::target
   OSDSession *s = NULL;
@@ -872,7 +872,7 @@ void Objecter::_linger_submit(LingerOp *info,
 
   // Create LingerOp<->OSDSession relation
   int r = _get_session(info->target.osd, &s, sul);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   unique_lock sl(s->lock);
   _session_linger_op_assign(s, info);
   sl.unlock();
@@ -907,7 +907,7 @@ void Objecter::handle_watch_notify(MWatchNotify *m)
     return;
   }
   std::unique_lock wl(info->watch_lock);
-  if (m->opcode == CEPH_WATCH_EVENT_DISCONNECT) {
+  if (m->opcode == STONE_WATCH_EVENT_DISCONNECT) {
     if (!info->last_error) {
       info->last_error = bs::error_code(ENOTCONN, osd_category());
       if (info->handle) {
@@ -916,7 +916,7 @@ void Objecter::handle_watch_notify(MWatchNotify *m)
       }
     }
   } else if (!info->is_watch) {
-    // we have CEPH_WATCH_EVENT_NOTIFY_COMPLETE; we can do this inline
+    // we have STONE_WATCH_EVENT_NOTIFY_COMPLETE; we can do this inline
     // since we know the only user (librados) is safe to call in
     // fast-dispatch context
     if (info->notify_id &&
@@ -943,7 +943,7 @@ void Objecter::_do_watch_notify(boost::intrusive_ptr<LingerOp> info,
   ldout(cct, 10) << __func__ << " " << *m << dendl;
 
   shared_lock l(rwlock);
-  ceph_assert(initialized);
+  stone_assert(initialized);
 
   if (info->canceled) {
     l.unlock();
@@ -951,14 +951,14 @@ void Objecter::_do_watch_notify(boost::intrusive_ptr<LingerOp> info,
   }
 
   // notify completion?
-  ceph_assert(info->is_watch);
-  ceph_assert(info->handle);
-  ceph_assert(m->opcode != CEPH_WATCH_EVENT_DISCONNECT);
+  stone_assert(info->is_watch);
+  stone_assert(info->handle);
+  stone_assert(m->opcode != STONE_WATCH_EVENT_DISCONNECT);
 
   l.unlock();
 
   switch (m->opcode) {
-  case CEPH_WATCH_EVENT_NOTIFY:
+  case STONE_WATCH_EVENT_NOTIFY:
     info->handle({}, m->notify_id, m->cookie, m->notifier_gid, std::move(m->bl));
     break;
   }
@@ -972,21 +972,21 @@ bool Objecter::ms_dispatch(Message *m)
   ldout(cct, 10) << __func__ << " " << cct << " " << *m << dendl;
   switch (m->get_type()) {
     // these we exlusively handle
-  case CEPH_MSG_OSD_OPREPLY:
+  case STONE_MSG_OSD_OPREPLY:
     handle_osd_op_reply(static_cast<MOSDOpReply*>(m));
     return true;
 
-  case CEPH_MSG_OSD_BACKOFF:
+  case STONE_MSG_OSD_BACKOFF:
     handle_osd_backoff(static_cast<MOSDBackoff*>(m));
     return true;
 
-  case CEPH_MSG_WATCH_NOTIFY:
+  case STONE_MSG_WATCH_NOTIFY:
     handle_watch_notify(static_cast<MWatchNotify*>(m));
     m->put();
     return true;
 
   case MSG_COMMAND_REPLY:
-    if (m->get_source().type() == CEPH_ENTITY_TYPE_OSD) {
+    if (m->get_source().type() == STONE_ENTITY_TYPE_OSD) {
       handle_command_reply(static_cast<MCommandReply*>(m));
       return true;
     } else {
@@ -997,18 +997,18 @@ bool Objecter::ms_dispatch(Message *m)
     handle_get_pool_stats_reply(static_cast<MGetPoolStatsReply*>(m));
     return true;
 
-  case CEPH_MSG_POOLOP_REPLY:
+  case STONE_MSG_POOLOP_REPLY:
     handle_pool_op_reply(static_cast<MPoolOpReply*>(m));
     return true;
 
-  case CEPH_MSG_STATFS_REPLY:
+  case STONE_MSG_STATFS_REPLY:
     handle_fs_stats_reply(static_cast<MStatfsReply*>(m));
     return true;
 
     // these we give others a chance to inspect
 
     // MDS, OSD
-  case CEPH_MSG_OSD_MAP:
+  case STONE_MSG_OSD_MAP:
     handle_osd_map(static_cast<MOSDMap*>(m));
     return false;
   }
@@ -1020,12 +1020,12 @@ void Objecter::_scan_requests(
   bool skipped_map,
   bool cluster_full,
   map<int64_t, bool> *pool_full_map,
-  map<ceph_tid_t, Op*>& need_resend,
+  map<stone_tid_t, Op*>& need_resend,
   list<LingerOp*>& need_resend_linger,
-  map<ceph_tid_t, CommandOp*>& need_resend_command,
-  ceph::shunique_lock<ceph::shared_mutex>& sul)
+  map<stone_tid_t, CommandOp*>& need_resend_command,
+  stone::shunique_lock<stone::shared_mutex>& sul)
 {
-  ceph_assert(sul.owns_lock() && sul.mutex() == &rwlock);
+  stone_assert(sul.owns_lock() && sul.mutex() == &rwlock);
 
   list<LingerOp*> unregister_lingers;
 
@@ -1035,7 +1035,7 @@ void Objecter::_scan_requests(
   auto lp = s->linger_ops.begin();
   while (lp != s->linger_ops.end()) {
     auto op = lp->second;
-    ceph_assert(op->session == s);
+    stone_assert(op->session == s);
     // check_linger_pool_dne() may touch linger_ops; prevent iterator
     // invalidation
     ++lp;
@@ -1137,11 +1137,11 @@ void Objecter::_scan_requests(
 
 void Objecter::handle_osd_map(MOSDMap *m)
 {
-  ceph::shunique_lock sul(rwlock, acquire_unique);
+  stone::shunique_lock sul(rwlock, acquire_unique);
   if (!initialized)
     return;
 
-  ceph_assert(osdmap);
+  stone_assert(osdmap);
 
   if (m->fsid != monc->get_fsid()) {
     ldout(cct, 0) << "handle_osd_map fsid " << m->fsid
@@ -1149,9 +1149,9 @@ void Objecter::handle_osd_map(MOSDMap *m)
     return;
   }
 
-  bool was_pauserd = osdmap->test_flag(CEPH_OSDMAP_PAUSERD);
+  bool was_pauserd = osdmap->test_flag(STONE_OSDMAP_PAUSERD);
   bool cluster_full = _osdmap_full_flag();
-  bool was_pausewr = osdmap->test_flag(CEPH_OSDMAP_PAUSEWR) || cluster_full ||
+  bool was_pausewr = osdmap->test_flag(STONE_OSDMAP_PAUSEWR) || cluster_full ||
     _osdmap_has_pool_full();
   map<int64_t, bool> pool_full_map;
   for (auto it = osdmap->get_pools().begin();
@@ -1160,8 +1160,8 @@ void Objecter::handle_osd_map(MOSDMap *m)
 
 
   list<LingerOp*> need_resend_linger;
-  map<ceph_tid_t, Op*> need_resend;
-  map<ceph_tid_t, CommandOp*> need_resend_command;
+  map<stone_tid_t, Op*> need_resend;
+  map<stone_tid_t, CommandOp*> need_resend_command;
 
   if (m->get_last() <= osdmap->get_epoch()) {
     ldout(cct, 3) << "handle_osd_map ignoring epochs ["
@@ -1242,7 +1242,7 @@ void Objecter::handle_osd_map(MOSDMap *m)
 	  }
 	}
 
-	ceph_assert(e == osdmap->get_epoch());
+	stone_assert(e == osdmap->get_epoch());
       }
 
     } else {
@@ -1265,7 +1265,7 @@ void Objecter::handle_osd_map(MOSDMap *m)
       } else {
 	ldout(cct, 3) << "handle_osd_map hmm, i want a full map, requesting"
 		      << dendl;
-	monc->sub_want("osdmap", 0, CEPH_SUBSCRIBE_ONETIME);
+	monc->sub_want("osdmap", 0, STONE_SUBSCRIBE_ONETIME);
 	monc->renew_subs();
       }
     }
@@ -1288,8 +1288,8 @@ void Objecter::handle_osd_map(MOSDMap *m)
     }
   }
 
-  bool pauserd = osdmap->test_flag(CEPH_OSDMAP_PAUSERD);
-  bool pausewr = osdmap->test_flag(CEPH_OSDMAP_PAUSEWR) || _osdmap_full_flag()
+  bool pauserd = osdmap->test_flag(STONE_OSDMAP_PAUSERD);
+  bool pausewr = osdmap->test_flag(STONE_OSDMAP_PAUSEWR) || _osdmap_full_flag()
     || _osdmap_has_pool_full();
 
   // was/is paused?
@@ -1306,7 +1306,7 @@ void Objecter::handle_osd_map(MOSDMap *m)
     bool mapped_session = false;
     if (!s) {
       int r = _map_session(&op->target, &s, sul);
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       mapped_session = true;
     } else {
       get_session(s);
@@ -1330,7 +1330,7 @@ void Objecter::handle_osd_map(MOSDMap *m)
   for (auto p = need_resend_linger.begin();
        p != need_resend_linger.end(); ++p) {
     LingerOp *op = *p;
-    ceph_assert(op->session);
+    stone_assert(op->session);
     if (!op->session->is_homeless()) {
       logger->inc(l_osdc_linger_resend);
       _send_linger(op, sul);
@@ -1543,8 +1543,8 @@ void Objecter::_check_op_pool_dne(Op *op, std::unique_lock<std::shared_mutex> *s
 
       OSDSession *s = op->session;
       if (s) {
-	ceph_assert(s != NULL);
-	ceph_assert(sl->mutex() == &s->lock);
+	stone_assert(s != NULL);
+	stone_assert(sl->mutex() == &s->lock);
 	bool session_locked = sl->owns_lock();
 	if (!session_locked) {
 	  sl->lock();
@@ -1761,9 +1761,9 @@ void Objecter::_command_cancel_map_check(CommandOp *c)
  * promotion to write.
  */
 int Objecter::_get_session(int osd, OSDSession **session,
-			   shunique_lock<ceph::shared_mutex>& sul)
+			   shunique_lock<stone::shared_mutex>& sul)
 {
-  ceph_assert(sul && sul.mutex() == &rwlock);
+  stone_assert(sul && sul.mutex() == &rwlock);
 
   if (osd < 0) {
     *session = homeless_session;
@@ -1808,7 +1808,7 @@ void Objecter::put_session(Objecter::OSDSession *s)
 
 void Objecter::get_session(Objecter::OSDSession *s)
 {
-  ceph_assert(s != NULL);
+  stone_assert(s != NULL);
 
   if (!s->is_homeless()) {
     ldout(cct, 20) << __func__ << " s=" << s << " osd=" << s->osd << " "
@@ -1916,9 +1916,9 @@ void Objecter::wait_for_osd_map(epoch_t e)
 
 void Objecter::_get_latest_version(epoch_t oldest, epoch_t newest,
 				   std::unique_ptr<OpCompletion> fin,
-				   std::unique_lock<ceph::shared_mutex>&& l)
+				   std::unique_lock<stone::shared_mutex>&& l)
 {
-  ceph_assert(fin);
+  stone_assert(fin);
   if (osdmap->get_epoch() >= newest) {
     ldout(cct, 10) << __func__ << " latest " << newest << ", have it" << dendl;
     l.unlock();
@@ -1941,14 +1941,14 @@ void Objecter::_maybe_request_map()
   // rwlock is locked
   int flag = 0;
   if (_osdmap_full_flag()
-      || osdmap->test_flag(CEPH_OSDMAP_PAUSERD)
-      || osdmap->test_flag(CEPH_OSDMAP_PAUSEWR)) {
+      || osdmap->test_flag(STONE_OSDMAP_PAUSERD)
+      || osdmap->test_flag(STONE_OSDMAP_PAUSEWR)) {
     ldout(cct, 10) << "_maybe_request_map subscribing (continuous) to next "
       "osd map (FULL flag is set)" << dendl;
   } else {
     ldout(cct, 10)
       << "_maybe_request_map subscribing (onetime) to next osd map" << dendl;
-    flag = CEPH_SUBSCRIBE_ONETIME;
+    flag = STONE_SUBSCRIBE_ONETIME;
   }
   epoch_t epoch = osdmap->get_epoch() ? osdmap->get_epoch()+1 : 0;
   if (monc->sub_want("osdmap", epoch, flag)) {
@@ -1995,7 +1995,7 @@ void Objecter::_kick_requests(OSDSession *session,
   session->backoffs_by_id.clear();
 
   // resend ops
-  map<ceph_tid_t,Op*> resend;  // resend in tid order
+  map<stone_tid_t,Op*> resend;  // resend in tid order
   for (auto p = session->ops.begin(); p != session->ops.end();) {
     Op *op = p->second;
     ++p;
@@ -2020,7 +2020,7 @@ void Objecter::_kick_requests(OSDSession *session,
        j != session->linger_ops.end(); ++j) {
     LingerOp *op = j->second;
     op->get();
-    ceph_assert(lresend.count(j->first) == 0);
+    stone_assert(lresend.count(j->first) == 0);
     lresend[j->first] = op;
   }
 
@@ -2038,9 +2038,9 @@ void Objecter::_kick_requests(OSDSession *session,
 }
 
 void Objecter::_linger_ops_resend(map<uint64_t, LingerOp *>& lresend,
-				  unique_lock<ceph::shared_mutex>& ul)
+				  unique_lock<stone::shared_mutex>& ul)
 {
-  ceph_assert(ul.owns_lock());
+  stone_assert(ul.owns_lock());
   shunique_lock sul(std::move(ul));
   while (!lresend.empty()) {
     LingerOp *op = lresend.begin()->second;
@@ -2055,9 +2055,9 @@ void Objecter::_linger_ops_resend(map<uint64_t, LingerOp *>& lresend,
 
 void Objecter::start_tick()
 {
-  ceph_assert(tick_event == 0);
+  stone_assert(tick_event == 0);
   tick_event =
-    timer.add_event(ceph::make_timespan(cct->_conf->objecter_tick_interval),
+    timer.add_event(stone::make_timespan(cct->_conf->objecter_tick_interval),
 		    &Objecter::tick, this);
 }
 
@@ -2080,8 +2080,8 @@ void Objecter::tick()
 
 
   // look for laggy requests
-  auto cutoff = ceph::coarse_mono_clock::now();
-  cutoff -= ceph::make_timespan(cct->_conf->objecter_timeout);  // timeout
+  auto cutoff = stone::coarse_mono_clock::now();
+  cutoff -= stone::make_timespan(cct->_conf->objecter_timeout);  // timeout
 
   unsigned laggy_ops = 0;
 
@@ -2092,7 +2092,7 @@ void Objecter::tick()
     bool found = false;
     for (auto p = s->ops.begin(); p != s->ops.end(); ++p) {
       auto op = p->second;
-      ceph_assert(op->session);
+      stone_assert(op->session);
       if (op->stamp < cutoff) {
 	ldout(cct, 2) << " tid " << p->first << " on osd." << op->session->osd
 		      << " is laggy" << dendl;
@@ -2105,7 +2105,7 @@ void Objecter::tick()
 	++p) {
       auto op = p->second;
       std::unique_lock wl(op->watch_lock);
-      ceph_assert(op->session);
+      stone_assert(op->session);
       ldout(cct, 10) << " pinging osd that serves lingering tid " << p->first
 		     << " (osd." << op->session->osd << ")" << dendl;
       found = true;
@@ -2116,7 +2116,7 @@ void Objecter::tick()
 	p != s->command_ops.end();
 	++p) {
       auto op = p->second;
-      ceph_assert(op->session);
+      stone_assert(op->session);
       ldout(cct, 10) << " pinging osd that serves command tid " << p->first
 		     << " (osd." << op->session->osd << ")" << dendl;
       found = true;
@@ -2141,7 +2141,7 @@ void Objecter::tick()
 
   // Make sure we don't reschedule if we wake up after shutdown
   if (initialized) {
-    tick_event = timer.reschedule_me(ceph::make_timespan(
+    tick_event = timer.reschedule_me(stone::make_timespan(
 				       cct->_conf->objecter_tick_interval));
   }
 }
@@ -2188,10 +2188,10 @@ void Objecter::resend_mon_ops()
 
 // read | write ---------------------------
 
-void Objecter::op_submit(Op *op, ceph_tid_t *ptid, int *ctx_budget)
+void Objecter::op_submit(Op *op, stone_tid_t *ptid, int *ctx_budget)
 {
-  shunique_lock rl(rwlock, ceph::acquire_shared);
-  ceph_tid_t tid = 0;
+  shunique_lock rl(rwlock, stone::acquire_shared);
+  stone_tid_t tid = 0;
   if (!ptid)
     ptid = &tid;
   op->trace.event("op submit");
@@ -2199,15 +2199,15 @@ void Objecter::op_submit(Op *op, ceph_tid_t *ptid, int *ctx_budget)
 }
 
 void Objecter::_op_submit_with_budget(Op *op,
-				      shunique_lock<ceph::shared_mutex>& sul,
-				      ceph_tid_t *ptid,
+				      shunique_lock<stone::shared_mutex>& sul,
+				      stone_tid_t *ptid,
 				      int *ctx_budget)
 {
-  ceph_assert(initialized);
+  stone_assert(initialized);
 
-  ceph_assert(op->ops.size() == op->out_bl.size());
-  ceph_assert(op->ops.size() == op->out_rval.size());
-  ceph_assert(op->ops.size() == op->out_handler.size());
+  stone_assert(op->ops.size() == op->out_bl.size());
+  stone_assert(op->ops.size() == op->out_rval.size());
+  stone_assert(op->ops.size() == op->out_handler.size());
 
   // throttle.  before we look at any state, because
   // _take_op_budget() may drop our lock while it blocks.
@@ -2247,70 +2247,70 @@ void Objecter::_send_op_account(Op *op)
   logger->inc(l_osdc_op);
   logger->inc(l_osdc_oplen_avg, op->ops.size());
 
-  if ((op->target.flags & (CEPH_OSD_FLAG_READ | CEPH_OSD_FLAG_WRITE)) ==
-      (CEPH_OSD_FLAG_READ|CEPH_OSD_FLAG_WRITE))
+  if ((op->target.flags & (STONE_OSD_FLAG_READ | STONE_OSD_FLAG_WRITE)) ==
+      (STONE_OSD_FLAG_READ|STONE_OSD_FLAG_WRITE))
     logger->inc(l_osdc_op_rmw);
-  else if (op->target.flags & CEPH_OSD_FLAG_WRITE)
+  else if (op->target.flags & STONE_OSD_FLAG_WRITE)
     logger->inc(l_osdc_op_w);
-  else if (op->target.flags & CEPH_OSD_FLAG_READ)
+  else if (op->target.flags & STONE_OSD_FLAG_READ)
     logger->inc(l_osdc_op_r);
 
-  if (op->target.flags & CEPH_OSD_FLAG_PGOP)
+  if (op->target.flags & STONE_OSD_FLAG_PGOP)
     logger->inc(l_osdc_op_pg);
 
   for (auto p = op->ops.begin(); p != op->ops.end(); ++p) {
     int code = l_osdc_osdop_other;
     switch (p->op.op) {
-    case CEPH_OSD_OP_STAT: code = l_osdc_osdop_stat; break;
-    case CEPH_OSD_OP_CREATE: code = l_osdc_osdop_create; break;
-    case CEPH_OSD_OP_READ: code = l_osdc_osdop_read; break;
-    case CEPH_OSD_OP_WRITE: code = l_osdc_osdop_write; break;
-    case CEPH_OSD_OP_WRITEFULL: code = l_osdc_osdop_writefull; break;
-    case CEPH_OSD_OP_WRITESAME: code = l_osdc_osdop_writesame; break;
-    case CEPH_OSD_OP_APPEND: code = l_osdc_osdop_append; break;
-    case CEPH_OSD_OP_ZERO: code = l_osdc_osdop_zero; break;
-    case CEPH_OSD_OP_TRUNCATE: code = l_osdc_osdop_truncate; break;
-    case CEPH_OSD_OP_DELETE: code = l_osdc_osdop_delete; break;
-    case CEPH_OSD_OP_MAPEXT: code = l_osdc_osdop_mapext; break;
-    case CEPH_OSD_OP_SPARSE_READ: code = l_osdc_osdop_sparse_read; break;
-    case CEPH_OSD_OP_GETXATTR: code = l_osdc_osdop_getxattr; break;
-    case CEPH_OSD_OP_SETXATTR: code = l_osdc_osdop_setxattr; break;
-    case CEPH_OSD_OP_CMPXATTR: code = l_osdc_osdop_cmpxattr; break;
-    case CEPH_OSD_OP_RMXATTR: code = l_osdc_osdop_rmxattr; break;
-    case CEPH_OSD_OP_RESETXATTRS: code = l_osdc_osdop_resetxattrs; break;
+    case STONE_OSD_OP_STAT: code = l_osdc_osdop_stat; break;
+    case STONE_OSD_OP_CREATE: code = l_osdc_osdop_create; break;
+    case STONE_OSD_OP_READ: code = l_osdc_osdop_read; break;
+    case STONE_OSD_OP_WRITE: code = l_osdc_osdop_write; break;
+    case STONE_OSD_OP_WRITEFULL: code = l_osdc_osdop_writefull; break;
+    case STONE_OSD_OP_WRITESAME: code = l_osdc_osdop_writesame; break;
+    case STONE_OSD_OP_APPEND: code = l_osdc_osdop_append; break;
+    case STONE_OSD_OP_ZERO: code = l_osdc_osdop_zero; break;
+    case STONE_OSD_OP_TRUNCATE: code = l_osdc_osdop_truncate; break;
+    case STONE_OSD_OP_DELETE: code = l_osdc_osdop_delete; break;
+    case STONE_OSD_OP_MAPEXT: code = l_osdc_osdop_mapext; break;
+    case STONE_OSD_OP_SPARSE_READ: code = l_osdc_osdop_sparse_read; break;
+    case STONE_OSD_OP_GETXATTR: code = l_osdc_osdop_getxattr; break;
+    case STONE_OSD_OP_SETXATTR: code = l_osdc_osdop_setxattr; break;
+    case STONE_OSD_OP_CMPXATTR: code = l_osdc_osdop_cmpxattr; break;
+    case STONE_OSD_OP_RMXATTR: code = l_osdc_osdop_rmxattr; break;
+    case STONE_OSD_OP_RESETXATTRS: code = l_osdc_osdop_resetxattrs; break;
 
     // OMAP read operations
-    case CEPH_OSD_OP_OMAPGETVALS:
-    case CEPH_OSD_OP_OMAPGETKEYS:
-    case CEPH_OSD_OP_OMAPGETHEADER:
-    case CEPH_OSD_OP_OMAPGETVALSBYKEYS:
-    case CEPH_OSD_OP_OMAP_CMP: code = l_osdc_osdop_omap_rd; break;
+    case STONE_OSD_OP_OMAPGETVALS:
+    case STONE_OSD_OP_OMAPGETKEYS:
+    case STONE_OSD_OP_OMAPGETHEADER:
+    case STONE_OSD_OP_OMAPGETVALSBYKEYS:
+    case STONE_OSD_OP_OMAP_CMP: code = l_osdc_osdop_omap_rd; break;
 
     // OMAP write operations
-    case CEPH_OSD_OP_OMAPSETVALS:
-    case CEPH_OSD_OP_OMAPSETHEADER: code = l_osdc_osdop_omap_wr; break;
+    case STONE_OSD_OP_OMAPSETVALS:
+    case STONE_OSD_OP_OMAPSETHEADER: code = l_osdc_osdop_omap_wr; break;
 
     // OMAP del operations
-    case CEPH_OSD_OP_OMAPCLEAR:
-    case CEPH_OSD_OP_OMAPRMKEYS: code = l_osdc_osdop_omap_del; break;
+    case STONE_OSD_OP_OMAPCLEAR:
+    case STONE_OSD_OP_OMAPRMKEYS: code = l_osdc_osdop_omap_del; break;
 
-    case CEPH_OSD_OP_CALL: code = l_osdc_osdop_call; break;
-    case CEPH_OSD_OP_WATCH: code = l_osdc_osdop_watch; break;
-    case CEPH_OSD_OP_NOTIFY: code = l_osdc_osdop_notify; break;
+    case STONE_OSD_OP_CALL: code = l_osdc_osdop_call; break;
+    case STONE_OSD_OP_WATCH: code = l_osdc_osdop_watch; break;
+    case STONE_OSD_OP_NOTIFY: code = l_osdc_osdop_notify; break;
     }
     if (code)
       logger->inc(code);
   }
 }
 
-void Objecter::_op_submit(Op *op, shunique_lock<ceph::shared_mutex>& sul, ceph_tid_t *ptid)
+void Objecter::_op_submit(Op *op, shunique_lock<stone::shared_mutex>& sul, stone_tid_t *ptid)
 {
   // rwlock is locked
 
   ldout(cct, 10) << __func__ << " op " << op << dendl;
 
   // pick target
-  ceph_assert(op->session == NULL);
+  stone_assert(op->session == NULL);
   OSDSession *s = NULL;
 
   bool check_for_latest_map = _calc_target(&op->target, nullptr)
@@ -2341,17 +2341,17 @@ void Objecter::_op_submit(Op *op, shunique_lock<ceph::shared_mutex>& sul, ceph_t
     }
   }
   if (r == -EAGAIN) {
-    ceph_assert(s == NULL);
+    stone_assert(s == NULL);
     r = _get_session(op->target.osd, &s, sul);
   }
-  ceph_assert(r == 0);
-  ceph_assert(s);  // may be homeless
+  stone_assert(r == 0);
+  stone_assert(s);  // may be homeless
 
   _send_op_account(op);
 
   // send?
 
-  ceph_assert(op->target.flags & (CEPH_OSD_FLAG_READ|CEPH_OSD_FLAG_WRITE));
+  stone_assert(op->target.flags & (STONE_OSD_FLAG_READ|STONE_OSD_FLAG_WRITE));
 
   bool need_send = false;
   if (op->target.paused) {
@@ -2382,7 +2382,7 @@ void Objecter::_op_submit(Op *op, shunique_lock<ceph::shared_mutex>& sul, ceph_t
 
   // Last chance to touch Op here, after giving up session lock it can
   // be freed at any time by response handler.
-  ceph_tid_t tid = op->tid;
+  stone_tid_t tid = op->tid;
   if (check_for_latest_map) {
     _send_op_map_check(op);
   }
@@ -2396,9 +2396,9 @@ void Objecter::_op_submit(Op *op, shunique_lock<ceph::shared_mutex>& sul, ceph_t
   ldout(cct, 5) << num_in_flight << " in flight" << dendl;
 }
 
-int Objecter::op_cancel(OSDSession *s, ceph_tid_t tid, int r)
+int Objecter::op_cancel(OSDSession *s, stone_tid_t tid, int r)
 {
-  ceph_assert(initialized);
+  stone_assert(initialized);
 
   unique_lock sl(s->lock);
 
@@ -2411,7 +2411,7 @@ int Objecter::op_cancel(OSDSession *s, ceph_tid_t tid, int r)
 
 #if 0
   if (s->con) {
-    ldout(cct, 20) << " revoking rx ceph::buffer for " << tid
+    ldout(cct, 20) << " revoking rx stone::buffer for " << tid
 		   << " on " << s->con << dendl;
     s->con->revoke_rx_buffer(tid);
   }
@@ -2431,7 +2431,7 @@ int Objecter::op_cancel(OSDSession *s, ceph_tid_t tid, int r)
   return 0;
 }
 
-int Objecter::op_cancel(ceph_tid_t tid, int r)
+int Objecter::op_cancel(stone_tid_t tid, int r)
 {
   int ret = 0;
 
@@ -2441,7 +2441,7 @@ int Objecter::op_cancel(ceph_tid_t tid, int r)
   return ret;
 }
 
-int Objecter::op_cancel(const vector<ceph_tid_t>& tids, int r)
+int Objecter::op_cancel(const vector<stone_tid_t>& tids, int r)
 {
   unique_lock wl(rwlock);
   ldout(cct,10) << __func__ << " " << tids << dendl;
@@ -2451,7 +2451,7 @@ int Objecter::op_cancel(const vector<ceph_tid_t>& tids, int r)
   return 0;
 }
 
-int Objecter::_op_cancel(ceph_tid_t tid, int r)
+int Objecter::_op_cancel(stone_tid_t tid, int r)
 {
   int ret = 0;
 
@@ -2504,7 +2504,7 @@ epoch_t Objecter::op_cancel_writes(int r, int64_t pool)
 {
   unique_lock wl(rwlock);
 
-  std::vector<ceph_tid_t> to_cancel;
+  std::vector<stone_tid_t> to_cancel;
   bool found = false;
 
   for (auto siter = osd_sessions.begin();
@@ -2513,7 +2513,7 @@ epoch_t Objecter::op_cancel_writes(int r, int64_t pool)
     shared_lock sl(s->lock);
     for (auto op_i = s->ops.begin();
 	 op_i != s->ops.end(); ++op_i) {
-      if (op_i->second->target.flags & CEPH_OSD_FLAG_WRITE
+      if (op_i->second->target.flags & STONE_OSD_FLAG_WRITE
 	  && (pool == -1 || op_i->second->target.target_oloc.pool == pool)) {
 	to_cancel.push_back(op_i->first);
       }
@@ -2524,7 +2524,7 @@ epoch_t Objecter::op_cancel_writes(int r, int64_t pool)
       int cancel_result = op_cancel(s, *titer, r);
       // We hold rwlock across search and cancellation, so cancels
       // should always succeed
-      ceph_assert(cancel_result == 0);
+      stone_assert(cancel_result == 0);
     }
     if (!found && to_cancel.size())
       found = true;
@@ -2549,7 +2549,7 @@ bool Objecter::is_pg_changed(
   const vector<int>& newacting,
   bool any_change)
 {
-  if (OSDMap::primary_changed_broken( // https://tracker.ceph.com/issues/43213
+  if (OSDMap::primary_changed_broken( // https://tracker.stone.com/issues/43213
 	oldprimary,
 	oldacting,
 	newprimary,
@@ -2563,12 +2563,12 @@ bool Objecter::is_pg_changed(
 bool Objecter::target_should_be_paused(op_target_t *t)
 {
   const pg_pool_t *pi = osdmap->get_pg_pool(t->base_oloc.pool);
-  bool pauserd = osdmap->test_flag(CEPH_OSDMAP_PAUSERD);
-  bool pausewr = osdmap->test_flag(CEPH_OSDMAP_PAUSEWR) ||
+  bool pauserd = osdmap->test_flag(STONE_OSDMAP_PAUSERD);
+  bool pausewr = osdmap->test_flag(STONE_OSDMAP_PAUSEWR) ||
     (t->respects_full() && (_osdmap_full_flag() || _osdmap_pool_full(*pi)));
 
-  return (t->flags & CEPH_OSD_FLAG_READ && pauserd) ||
-    (t->flags & CEPH_OSD_FLAG_WRITE && pausewr) ||
+  return (t->flags & STONE_OSD_FLAG_READ && pauserd) ||
+    (t->flags & STONE_OSD_FLAG_WRITE && pausewr) ||
     (osdmap->get_epoch() < epoch_barrier);
 }
 
@@ -2620,7 +2620,7 @@ bool Objecter::_osdmap_has_pool_full() const
 bool Objecter::_osdmap_full_flag() const
 {
   // Ignore the FULL flag if the caller does not have honor_osdmap_full
-  return osdmap->test_flag(CEPH_OSDMAP_FULL) && honor_pool_full;
+  return osdmap->test_flag(STONE_OSDMAP_FULL) && honor_pool_full;
 }
 
 void Objecter::update_pool_full_map(map<int64_t, bool>& pool_full_map)
@@ -2688,8 +2688,8 @@ void Objecter::_prune_snapc(
 int Objecter::_calc_target(op_target_t *t, Connection *con, bool any_change)
 {
   // rwlock is locked
-  bool is_read = t->flags & CEPH_OSD_FLAG_READ;
-  bool is_write = t->flags & CEPH_OSD_FLAG_WRITE;
+  bool is_read = t->flags & STONE_OSD_FLAG_READ;
+  bool is_write = t->flags & STONE_OSD_FLAG_WRITE;
   t->epoch = osdmap->get_epoch();
   ldout(cct,20) << __func__ << " epoch " << t->epoch
 		<< " base " << t->base_oid << " " << t->base_oloc
@@ -2720,7 +2720,7 @@ int Objecter::_calc_target(op_target_t *t, Connection *con, bool any_change)
   // apply tiering
   t->target_oid = t->base_oid;
   t->target_oloc = t->base_oloc;
-  if ((t->flags & CEPH_OSD_FLAG_IGNORE_OVERLAY) == 0) {
+  if ((t->flags & STONE_OSD_FLAG_IGNORE_OVERLAY) == 0) {
     if (is_read && pi->has_read_tier())
       t->target_oloc.pool = pi->read_tier;
     if (is_write && pi->has_write_tier())
@@ -2734,9 +2734,9 @@ int Objecter::_calc_target(op_target_t *t, Connection *con, bool any_change)
 
   pg_t pgid;
   if (t->precalc_pgid) {
-    ceph_assert(t->flags & CEPH_OSD_FLAG_IGNORE_OVERLAY);
-    ceph_assert(t->base_oid.name.empty()); // make sure this is a pg op
-    ceph_assert(t->base_oloc.pool == (int64_t)t->base_pgid.pool());
+    stone_assert(t->flags & STONE_OSD_FLAG_IGNORE_OVERLAY);
+    stone_assert(t->base_oid.name.empty()); // make sure this is a pg op
+    stone_assert(t->base_oloc.pool == (int64_t)t->base_pgid.pool());
     pgid = t->base_pgid;
   } else {
     int ret = osdmap->object_locator_to_pg(t->target_oid, t->target_oloc,
@@ -2759,7 +2759,7 @@ int Objecter::_calc_target(op_target_t *t, Connection *con, bool any_change)
   unsigned pg_num_pending = pi->get_pg_num_pending();
   int up_primary, acting_primary;
   vector<int> up, acting;
-  ps_t actual_ps = ceph_stable_mod(pgid.ps(), pg_num, pg_num_mask);
+  ps_t actual_ps = stone_stable_mod(pgid.ps(), pg_num, pg_num_mask);
   pg_t actual_pgid(actual_ps, pgid.pool());
   pg_mapping_t pg_mapping;
   pg_mapping.epoch = osdmap->get_epoch();
@@ -2775,9 +2775,9 @@ int Objecter::_calc_target(op_target_t *t, Connection *con, bool any_change)
                             up, up_primary, acting, acting_primary);
     update_pg_mapping(actual_pgid, std::move(pg_mapping));
   }
-  bool sort_bitwise = osdmap->test_flag(CEPH_OSDMAP_SORTBITWISE);
-  bool recovery_deletes = osdmap->test_flag(CEPH_OSDMAP_RECOVERY_DELETES);
-  unsigned prev_seed = ceph_stable_mod(pgid.ps(), t->pg_num, t->pg_num_mask);
+  bool sort_bitwise = osdmap->test_flag(STONE_OSDMAP_SORTBITWISE);
+  bool recovery_deletes = osdmap->test_flag(STONE_OSDMAP_RECOVERY_DELETES);
+  unsigned prev_seed = stone_stable_mod(pgid.ps(), t->pg_num, t->pg_num_mask);
   pg_t prev_pgid(prev_seed, pgid.pool());
   if (any_change && PastIntervals::is_new_interval(
 	t->acting_primary,
@@ -2868,12 +2868,12 @@ int Objecter::_calc_target(op_target_t *t, Connection *con, bool any_change)
 		   << " acting " << acting
 		   << " primary " << acting_primary << dendl;
     t->used_replica = false;
-    if ((t->flags & (CEPH_OSD_FLAG_BALANCE_READS |
-                     CEPH_OSD_FLAG_LOCALIZE_READS)) &&
+    if ((t->flags & (STONE_OSD_FLAG_BALANCE_READS |
+                     STONE_OSD_FLAG_LOCALIZE_READS)) &&
         !is_write && pi->is_replicated() && acting.size() > 1) {
       int osd;
-      ceph_assert(is_read && acting[0] == acting_primary);
-      if (t->flags & CEPH_OSD_FLAG_BALANCE_READS) {
+      stone_assert(is_read && acting[0] == acting_primary);
+      if (t->flags & STONE_OSD_FLAG_BALANCE_READS) {
 	int p = rand() % acting.size();
 	if (p)
 	  t->used_replica = true;
@@ -2901,7 +2901,7 @@ int Objecter::_calc_target(op_target_t *t, Connection *con, bool any_change)
 	      t->used_replica = true;
 	  }
 	}
-	ceph_assert(best >= 0);
+	stone_assert(best >= 0);
 	osd = acting[best];
       }
       t->osd = osd;
@@ -2913,7 +2913,7 @@ int Objecter::_calc_target(op_target_t *t, Connection *con, bool any_change)
     return RECALC_OP_TARGET_NEED_RESEND;
   }
   if (split_or_merge &&
-      (osdmap->require_osd_release >= ceph_release_t::luminous ||
+      (osdmap->require_osd_release >= stone_release_t::luminous ||
        HAVE_FEATURE(osdmap->get_xinfo(acting_primary).features,
 		    RESEND_ON_SPLIT))) {
     return RECALC_OP_TARGET_NEED_RESEND;
@@ -2922,7 +2922,7 @@ int Objecter::_calc_target(op_target_t *t, Connection *con, bool any_change)
 }
 
 int Objecter::_map_session(op_target_t *target, OSDSession **s,
-			   shunique_lock<ceph::shared_mutex>& sul)
+			   shunique_lock<stone::shared_mutex>& sul)
 {
   _calc_target(target, nullptr);
   return _get_session(target->osd, s, sul);
@@ -2931,8 +2931,8 @@ int Objecter::_map_session(op_target_t *target, OSDSession **s,
 void Objecter::_session_op_assign(OSDSession *to, Op *op)
 {
   // to->lock is locked
-  ceph_assert(op->session == NULL);
-  ceph_assert(op->tid);
+  stone_assert(op->session == NULL);
+  stone_assert(op->tid);
 
   get_session(to);
   op->session = to;
@@ -2947,7 +2947,7 @@ void Objecter::_session_op_assign(OSDSession *to, Op *op)
 
 void Objecter::_session_op_remove(OSDSession *from, Op *op)
 {
-  ceph_assert(op->session == from);
+  stone_assert(op->session == from);
   // from->lock is locked
 
   if (from->is_homeless()) {
@@ -2964,7 +2964,7 @@ void Objecter::_session_op_remove(OSDSession *from, Op *op)
 void Objecter::_session_linger_op_assign(OSDSession *to, LingerOp *op)
 {
   // to lock is locked unique
-  ceph_assert(op->session == NULL);
+  stone_assert(op->session == NULL);
 
   if (to->is_homeless()) {
     num_homeless_ops++;
@@ -2980,7 +2980,7 @@ void Objecter::_session_linger_op_assign(OSDSession *to, LingerOp *op)
 
 void Objecter::_session_linger_op_remove(OSDSession *from, LingerOp *op)
 {
-  ceph_assert(from == op->session);
+  stone_assert(from == op->session);
   // from->lock is locked unique
 
   if (from->is_homeless()) {
@@ -2997,7 +2997,7 @@ void Objecter::_session_linger_op_remove(OSDSession *from, LingerOp *op)
 
 void Objecter::_session_command_op_remove(OSDSession *from, CommandOp *op)
 {
-  ceph_assert(from == op->session);
+  stone_assert(from == op->session);
   // from->lock is locked
 
   if (from->is_homeless()) {
@@ -3014,8 +3014,8 @@ void Objecter::_session_command_op_remove(OSDSession *from, CommandOp *op)
 void Objecter::_session_command_op_assign(OSDSession *to, CommandOp *op)
 {
   // to->lock is locked
-  ceph_assert(op->session == NULL);
-  ceph_assert(op->tid);
+  stone_assert(op->session == NULL);
+  stone_assert(op->tid);
 
   if (to->is_homeless()) {
     num_homeless_ops++;
@@ -3029,7 +3029,7 @@ void Objecter::_session_command_op_assign(OSDSession *to, CommandOp *op)
 }
 
 int Objecter::_recalc_linger_op_target(LingerOp *linger_op,
-				       shunique_lock<ceph::shared_mutex>& sul)
+				       shunique_lock<stone::shared_mutex>& sul)
 {
   // rwlock is locked unique
 
@@ -3041,7 +3041,7 @@ int Objecter::_recalc_linger_op_target(LingerOp *linger_op,
 
     OSDSession *s = NULL;
     r = _get_session(linger_op->target.osd, &s, sul);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
 
     if (linger_op->session != s) {
       // NB locking two sessions (s and linger_op->session) at the
@@ -3064,7 +3064,7 @@ void Objecter::_cancel_linger_op(Op *op)
 {
   ldout(cct, 15) << "cancel_op " << op->tid << dendl;
 
-  ceph_assert(!op->should_resend);
+  stone_assert(!op->should_resend);
   if (op->has_completion()) {
     op->onfinish = nullptr;
     num_in_flight--;
@@ -3093,7 +3093,7 @@ void Objecter::_finish_op(Op *op, int r)
 
   logger->dec(l_osdc_op_active);
 
-  ceph_assert(check_latest_map_ops.find(op->tid) == check_latest_map_ops.end());
+  stone_assert(check_latest_map_ops.find(op->tid) == check_latest_map_ops.end());
 
   inflight_ops--;
 
@@ -3105,17 +3105,17 @@ Objecter::MOSDOp *Objecter::_prepare_osd_op(Op *op)
   // rwlock is locked
 
   int flags = op->target.flags;
-  flags |= CEPH_OSD_FLAG_KNOWN_REDIR;
+  flags |= STONE_OSD_FLAG_KNOWN_REDIR;
 
   // Nothing checks this any longer, but needed for compatibility with
   // pre-luminous osds
-  flags |= CEPH_OSD_FLAG_ONDISK;
+  flags |= STONE_OSD_FLAG_ONDISK;
 
   if (!honor_pool_full)
-    flags |= CEPH_OSD_FLAG_FULL_FORCE;
+    flags |= STONE_OSD_FLAG_FULL_FORCE;
 
   op->target.paused = false;
-  op->stamp = ceph::coarse_mono_clock::now();
+  op->stamp = stone::coarse_mono_clock::now();
 
   hobject_t hobj = op->target.get_hobj();
   auto m = new MOSDOp(client_inc, op->tid,
@@ -3183,7 +3183,7 @@ void Objecter::_send_op(Op *op)
     }
   }
 
-  ceph_assert(op->tid > 0);
+  stone_assert(op->tid > 0);
   MOSDOp *m = _prepare_osd_op(op);
 
   if (op->target.actual_pgid != m->get_spg()) {
@@ -3199,12 +3199,12 @@ void Objecter::_send_op(Op *op)
 		 << dendl;
 
   ConnectionRef con = op->session->con;
-  ceph_assert(con);
+  stone_assert(con);
 
 #if 0
-  // preallocated rx ceph::buffer?
+  // preallocated rx stone::buffer?
   if (op->con) {
-    ldout(cct, 20) << " revoking rx ceph::buffer for " << op->tid << " on "
+    ldout(cct, 20) << " revoking rx stone::buffer for " << op->tid << " on "
 		   << op->con << dendl;
     op->con->revoke_rx_buffer(op->tid);
   }
@@ -3212,7 +3212,7 @@ void Objecter::_send_op(Op *op)
       op->ontimeout == 0 &&  // only post rx_buffer if no timeout; see #9582
       op->outbl->length()) {
     op->outbl->invalidate_crc();  // messenger writes through c_str()
-    ldout(cct, 20) << " posting rx ceph::buffer for " << op->tid << " on " << con
+    ldout(cct, 20) << " posting rx stone::buffer for " << op->tid << " on " << con
 		   << dendl;
     op->con = con;
     op->con->post_rx_buffer(op->tid, *op->outbl);
@@ -3231,13 +3231,13 @@ int Objecter::calc_op_budget(const bc::small_vector_base<OSDOp>& ops)
 {
   int op_budget = 0;
   for (auto i = ops.begin(); i != ops.end(); ++i) {
-    if (i->op.op & CEPH_OSD_OP_MODE_WR) {
+    if (i->op.op & STONE_OSD_OP_MODE_WR) {
       op_budget += i->indata.length();
-    } else if (ceph_osd_op_mode_read(i->op.op)) {
-      if (ceph_osd_op_uses_extent(i->op.op)) {
+    } else if (stone_osd_op_mode_read(i->op.op)) {
+      if (stone_osd_op_uses_extent(i->op.op)) {
         if ((int64_t)i->op.extent.length > 0)
           op_budget += (int64_t)i->op.extent.length;
-      } else if (ceph_osd_op_type_attr(i->op.op)) {
+      } else if (stone_osd_op_type_attr(i->op.op)) {
         op_budget += i->op.xattr.name_len + i->op.xattr.value_len;
       }
     }
@@ -3246,10 +3246,10 @@ int Objecter::calc_op_budget(const bc::small_vector_base<OSDOp>& ops)
 }
 
 void Objecter::_throttle_op(Op *op,
-			    shunique_lock<ceph::shared_mutex>& sul,
+			    shunique_lock<stone::shared_mutex>& sul,
 			    int op_budget)
 {
-  ceph_assert(sul && sul.mutex() == &rwlock);
+  stone_assert(sul && sul.mutex() == &rwlock);
   bool locked_for_write = sul.owns_lock();
 
   if (!op_budget)
@@ -3283,9 +3283,9 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
   ldout(cct, 10) << "in handle_osd_op_reply" << dendl;
 
   // get pio
-  ceph_tid_t tid = m->get_tid();
+  stone_tid_t tid = m->get_tid();
 
-  shunique_lock sul(rwlock, ceph::acquire_shared);
+  shunique_lock sul(rwlock, stone::acquire_shared);
   if (!initialized) {
     m->put();
     return;
@@ -3302,7 +3302,7 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
 
   unique_lock sl(s->lock);
 
-  map<ceph_tid_t, Op *>::iterator iter = s->ops.find(tid);
+  map<stone_tid_t, Op *>::iterator iter = s->ops.find(tid);
   if (iter == s->ops.end()) {
     ldout(cct, 7) << "handle_osd_op_reply " << tid
 		  << (m->is_ondisk() ? " ondisk" : (m->is_onnvram() ?
@@ -3324,7 +3324,7 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
   op->trace.event("osd op reply");
 
   if (retry_writes_after_first_reply && op->attempts == 1 &&
-      (op->target.flags & CEPH_OSD_FLAG_WRITE)) {
+      (op->target.flags & STONE_OSD_FLAG_WRITE)) {
     ldout(cct, 7) << "retrying write after first reply: " << tid << dendl;
     if (op->has_completion()) {
       num_in_flight--;
@@ -3370,9 +3370,9 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
     op->tid = 0;
     m->get_redirect().combine_with_locator(op->target.target_oloc,
 					   op->target.target_oid.name);
-    op->target.flags |= (CEPH_OSD_FLAG_REDIRECTED |
-			 CEPH_OSD_FLAG_IGNORE_CACHE |
-			 CEPH_OSD_FLAG_IGNORE_OVERLAY);
+    op->target.flags |= (STONE_OSD_FLAG_REDIRECTED |
+			 STONE_OSD_FLAG_IGNORE_CACHE |
+			 STONE_OSD_FLAG_IGNORE_OVERLAY);
     _op_submit(op, sul, NULL);
     m->put();
     return;
@@ -3386,8 +3386,8 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
     sl.unlock();
 
     op->tid = 0;
-    op->target.flags &= ~(CEPH_OSD_FLAG_BALANCE_READS |
-			  CEPH_OSD_FLAG_LOCALIZE_READS);
+    op->target.flags &= ~(STONE_OSD_FLAG_BALANCE_READS |
+			  STONE_OSD_FLAG_LOCALIZE_READS);
     op->target.pgid = pg_t();
     _op_submit(op, sul, NULL);
     m->put();
@@ -3416,7 +3416,7 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
       // read into existing buffers happy.  Notably,
       // libradosstriper::RadosStriperImpl::aio_read().
       ldout(cct,10) << __func__ << " copying resulting " << bl.length()
-		    << " into existing ceph::buffer of length " << op->outbl->length()
+		    << " into existing stone::buffer of length " << op->outbl->length()
 		    << dendl;
       cb::list t;
       t = std::move(*op->outbl);
@@ -3438,16 +3438,16 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
 		  << " != request ops " << op->ops
 		  << " from " << m->get_source_inst() << dendl;
 
-  ceph_assert(op->ops.size() == op->out_bl.size());
-  ceph_assert(op->ops.size() == op->out_rval.size());
-  ceph_assert(op->ops.size() == op->out_ec.size());
-  ceph_assert(op->ops.size() == op->out_handler.size());
+  stone_assert(op->ops.size() == op->out_bl.size());
+  stone_assert(op->ops.size() == op->out_rval.size());
+  stone_assert(op->ops.size() == op->out_ec.size());
+  stone_assert(op->ops.size() == op->out_handler.size());
   auto pb = op->out_bl.begin();
   auto pr = op->out_rval.begin();
   auto pe = op->out_ec.begin();
   auto ph = op->out_handler.begin();
-  ceph_assert(op->out_bl.size() == op->out_rval.size());
-  ceph_assert(op->out_bl.size() == op->out_handler.size());
+  stone_assert(op->out_bl.size() == op->out_rval.size());
+  stone_assert(op->out_bl.size() == op->out_handler.size());
   auto p = out_ops.begin();
   for (unsigned i = 0;
        p != out_ops.end() && pb != op->out_bl.end();
@@ -3459,7 +3459,7 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
     // set rval before running handlers so that handlers
     // can change it if e.g. decoding fails
     if (*pr)
-      **pr = ceph_to_hostos_errno(p->rval);
+      **pr = stone_to_hostos_errno(p->rval);
     if (*pe)
       **pe = p->rval < 0 ? bs::error_code(-p->rval, osd_category()) :
 	bs::error_code();
@@ -3509,7 +3509,7 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
 void Objecter::handle_osd_backoff(MOSDBackoff *m)
 {
   ldout(cct, 10) << __func__ << " " << *m << dendl;
-  shunique_lock sul(rwlock, ceph::acquire_shared);
+  shunique_lock sul(rwlock, stone::acquire_shared);
   if (!initialized) {
     m->put();
     return;
@@ -3529,7 +3529,7 @@ void Objecter::handle_osd_backoff(MOSDBackoff *m)
   unique_lock sl(s->lock);
 
   switch (m->op) {
-  case CEPH_OSD_BACKOFF_OP_BLOCK:
+  case STONE_OSD_BACKOFF_OP_BLOCK:
     {
       // register
       OSDBackoff& b = s->backoffs[m->pgid][m->begin];
@@ -3542,7 +3542,7 @@ void Objecter::handle_osd_backoff(MOSDBackoff *m)
       // ack with original backoff's epoch so that the osd can discard this if
       // there was a pg split.
       auto r = new MOSDBackoff(m->pgid, m->map_epoch,
-			       CEPH_OSD_BACKOFF_OP_ACK_BLOCK,
+			       STONE_OSD_BACKOFF_OP_ACK_BLOCK,
 			       m->id, m->begin, m->end);
       // this priority must match the MOSDOps from _prepare_osd_op
       r->set_priority(cct->_conf->osd_client_op_priority);
@@ -3550,7 +3550,7 @@ void Objecter::handle_osd_backoff(MOSDBackoff *m)
     }
     break;
 
-  case CEPH_OSD_BACKOFF_OP_UNBLOCK:
+  case STONE_OSD_BACKOFF_OP_UNBLOCK:
     {
       auto p = s->backoffs_by_id.find(m->id);
       if (p != s->backoffs_by_id.end()) {
@@ -3568,7 +3568,7 @@ void Objecter::handle_osd_backoff(MOSDBackoff *m)
 		       << " [" << b->begin << "," << b->end
 		       << ")" << dendl;
 	auto spgp = s->backoffs.find(b->pgid);
-	ceph_assert(spgp != s->backoffs.end());
+	stone_assert(spgp != s->backoffs.end());
 	spgp->second.erase(b->begin);
 	if (spgp->second.empty()) {
 	  s->backoffs.erase(spgp);
@@ -3609,7 +3609,7 @@ uint32_t Objecter::list_nobjects_seek(NListContext *list_context,
 				      uint32_t pos)
 {
   shared_lock rl(rwlock);
-  list_context->pos = hobject_t(object_t(), string(), CEPH_NOSNAP,
+  list_context->pos = hobject_t(object_t(), string(), STONE_NOSNAP,
 				pos, list_context->pool_id, string());
   ldout(cct, 10) << __func__ << " " << list_context
 		 << " pos " << pos << " -> " << list_context->pos << dendl;
@@ -3665,7 +3665,7 @@ void Objecter::list_nobjects(NListContext *list_context, Context *onfinish)
     return;
   }
   int pg_num = pool->get_pg_num();
-  bool sort_bitwise = osdmap->test_flag(CEPH_OSDMAP_SORTBITWISE);
+  bool sort_bitwise = osdmap->test_flag(STONE_OSDMAP_SORTBITWISE);
 
   if (list_context->pos.is_min()) {
     list_context->starting_pg_num = 0;
@@ -3674,7 +3674,7 @@ void Objecter::list_nobjects(NListContext *list_context, Context *onfinish)
   }
   if (list_context->sort_bitwise != sort_bitwise) {
     list_context->pos = hobject_t(
-      object_t(), string(), CEPH_NOSNAP,
+      object_t(), string(), STONE_NOSNAP,
       list_context->current_pg, list_context->pool_id, string());
     list_context->sort_bitwise = sort_bitwise;
     ldout(cct, 10) << " hobject sort order changed, restarting this pg at "
@@ -3743,7 +3743,7 @@ void Objecter::_nlist_reply(NListContext *list_context, int r,
       list_context->pos = hobject_t::get_max();
     } else {
       // next pg
-      list_context->pos = hobject_t(object_t(), string(), CEPH_NOSNAP,
+      list_context->pos = hobject_t(object_t(), string(), STONE_NOSNAP,
 				    list_context->current_pg,
 				    list_context->pool_id, string());
     }
@@ -3986,7 +3986,7 @@ void Objecter::_pool_op_submit(PoolOp *op)
   if (op->snapid) m->snapid = op->snapid;
   if (op->crush_rule) m->crush_rule = op->crush_rule;
   monc->send_mon_message(m);
-  op->last_submit = ceph::coarse_mono_clock::now();
+  op->last_submit = stone::coarse_mono_clock::now();
 
   logger->inc(l_osdc_poolop_send);
 }
@@ -4011,12 +4011,12 @@ void Objecter::handle_pool_op_reply(MPoolOpReply *m)
   }
 
   ldout(cct, 10) << "handle_pool_op_reply " << *m << dendl;
-  ceph_tid_t tid = m->get_tid();
+  stone_tid_t tid = m->get_tid();
   auto iter = pool_ops.find(tid);
   if (iter != pool_ops.end()) {
     PoolOp *op = iter->second;
     ldout(cct, 10) << "have request " << tid << " at " << op << " Op: "
-		   << ceph_pool_op_name(op->pool_op) << dendl;
+		   << stone_pool_op_name(op->pool_op) << dendl;
     cb::list bl{std::move(m->response_data)};
     if (m->version > last_seen_osdmap_version)
       last_seen_osdmap_version = m->version;
@@ -4044,11 +4044,11 @@ void Objecter::handle_pool_op_reply(MPoolOpReply *m)
 	// map epoch changed, probably because a MOSDMap message
 	// sneaked in. Do caller-specified callback now or else
 	// we lose it forever.
-	ceph_assert(op->onfinish);
+	stone_assert(op->onfinish);
 	op->onfinish->defer(std::move(op->onfinish), ec, std::move(bl));
       }
     } else {
-      ceph_assert(op->onfinish);
+      stone_assert(op->onfinish);
       op->onfinish->defer(std::move(op->onfinish), ec, std::move(bl));
     }
     op->onfinish = nullptr;
@@ -4072,9 +4072,9 @@ done:
   m->put();
 }
 
-int Objecter::pool_op_cancel(ceph_tid_t tid, int r)
+int Objecter::pool_op_cancel(stone_tid_t tid, int r)
 {
-  ceph_assert(initialized);
+  stone_assert(initialized);
 
   unique_lock wl(rwlock);
 
@@ -4143,7 +4143,7 @@ void Objecter::_poolstat_submit(PoolStatOp *op)
   monc->send_mon_message(new MGetPoolStats(monc->get_fsid(), op->tid,
 					   op->pools,
 					   last_seen_pgmap_version));
-  op->last_submit = ceph::coarse_mono_clock::now();
+  op->last_submit = stone::coarse_mono_clock::now();
 
   logger->inc(l_osdc_poolstat_send);
 }
@@ -4151,7 +4151,7 @@ void Objecter::_poolstat_submit(PoolStatOp *op)
 void Objecter::handle_get_pool_stats_reply(MGetPoolStatsReply *m)
 {
   ldout(cct, 10) << "handle_get_pool_stats_reply " << *m << dendl;
-  ceph_tid_t tid = m->get_tid();
+  stone_tid_t tid = m->get_tid();
 
   unique_lock wl(rwlock);
   if (!initialized) {
@@ -4176,9 +4176,9 @@ void Objecter::handle_get_pool_stats_reply(MGetPoolStatsReply *m)
   m->put();
 }
 
-int Objecter::pool_stat_op_cancel(ceph_tid_t tid, int r)
+int Objecter::pool_stat_op_cancel(stone_tid_t tid, int r)
 {
-  ceph_assert(initialized);
+  stone_assert(initialized);
 
   unique_lock wl(rwlock);
 
@@ -4244,7 +4244,7 @@ void Objecter::_fs_stats_submit(StatfsOp *op)
   monc->send_mon_message(new MStatfs(monc->get_fsid(), op->tid,
 				     op->data_pool,
 				     last_seen_pgmap_version));
-  op->last_submit = ceph::coarse_mono_clock::now();
+  op->last_submit = stone::coarse_mono_clock::now();
 
   logger->inc(l_osdc_statfs_send);
 }
@@ -4258,7 +4258,7 @@ void Objecter::handle_fs_stats_reply(MStatfsReply *m)
   }
 
   ldout(cct, 10) << "handle_fs_stats_reply " << *m << dendl;
-  ceph_tid_t tid = m->get_tid();
+  stone_tid_t tid = m->get_tid();
 
   if (statfs_ops.count(tid)) {
     StatfsOp *op = statfs_ops[tid];
@@ -4274,9 +4274,9 @@ void Objecter::handle_fs_stats_reply(MStatfsReply *m)
   ldout(cct, 10) << "done" << dendl;
 }
 
-int Objecter::statfs_op_cancel(ceph_tid_t tid, int r)
+int Objecter::statfs_op_cancel(stone_tid_t tid, int r)
 {
-  ceph_assert(initialized);
+  stone_assert(initialized);
 
   unique_lock wl(rwlock);
 
@@ -4290,7 +4290,7 @@ int Objecter::statfs_op_cancel(ceph_tid_t tid, int r)
 
   auto op = it->second;
   if (op->onfinish)
-    op->onfinish->defer(std::move(op->onfinish), osdcode(r), ceph_statfs{});
+    op->onfinish->defer(std::move(op->onfinish), osdcode(r), stone_statfs{});
   _finish_statfs_op(op, r);
   return 0;
 }
@@ -4348,7 +4348,7 @@ void Objecter::ms_handle_connect(Connection *con)
   if (!initialized)
     return;
 
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_MON)
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_MON)
     resend_mon_ops();
 }
 
@@ -4356,7 +4356,7 @@ bool Objecter::ms_handle_reset(Connection *con)
 {
   if (!initialized)
     return false;
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_OSD) {
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_OSD) {
     unique_lock wl(rwlock);
 
     auto priv = con->get_priv();
@@ -4396,7 +4396,7 @@ void Objecter::ms_handle_remote_reset(Connection *con)
 bool Objecter::ms_handle_refused(Connection *con)
 {
   // just log for now
-  if (osdmap && (con->get_peer_type() == CEPH_ENTITY_TYPE_OSD)) {
+  if (osdmap && (con->get_peer_type() == STONE_ENTITY_TYPE_OSD)) {
     int osd = osdmap->identify_osd(con->get_peer_addr());
     if (osd >= 0) {
       ldout(cct, 1) << "ms_handle_refused on osd." << osd << dendl;
@@ -4467,7 +4467,7 @@ void Objecter::_dump_ops(const OSDSession *s, Formatter *fmt)
 {
   for (auto p = s->ops.begin(); p != s->ops.end(); ++p) {
     Op *op = p->second;
-    auto age = std::chrono::duration<double>(ceph::coarse_mono_clock::now() - op->stamp);
+    auto age = std::chrono::duration<double>(stone::coarse_mono_clock::now() - op->stamp);
     fmt->open_object_section("op");
     fmt->dump_unsigned("tid", op->tid);
     op->target.dump(fmt);
@@ -4725,15 +4725,15 @@ void Objecter::handle_command_reply(MCommandReply *m)
 Objecter::LingerOp::LingerOp(Objecter *o, uint64_t linger_id)
   : objecter(o),
     linger_id(linger_id),
-    watch_lock(ceph::make_shared_mutex(
+    watch_lock(stone::make_shared_mutex(
 		 fmt::format("LingerOp::watch_lock #{}", linger_id)))
 {}
 
-void Objecter::submit_command(CommandOp *c, ceph_tid_t *ptid)
+void Objecter::submit_command(CommandOp *c, stone_tid_t *ptid)
 {
-  shunique_lock sul(rwlock, ceph::acquire_unique);
+  shunique_lock sul(rwlock, stone::acquire_unique);
 
-  ceph_tid_t tid = ++last_tid;
+  stone_tid_t tid = ++last_tid;
   ldout(cct, 10) << "_submit_command " << tid << " " << c->cmd << dendl;
   c->tid = tid;
 
@@ -4766,14 +4766,14 @@ void Objecter::submit_command(CommandOp *c, ceph_tid_t *ptid)
 }
 
 int Objecter::_calc_command_target(CommandOp *c,
-				   shunique_lock<ceph::shared_mutex>& sul)
+				   shunique_lock<stone::shared_mutex>& sul)
 {
-  ceph_assert(sul.owns_lock() && sul.mutex() == &rwlock);
+  stone_assert(sul.owns_lock() && sul.mutex() == &rwlock);
 
   c->map_check_error = 0;
 
   // ignore overlays, just like we do with pg ops
-  c->target.flags |= CEPH_OSD_FLAG_IGNORE_OVERLAY;
+  c->target.flags |= STONE_OSD_FLAG_IGNORE_OVERLAY;
 
   if (c->target_osd >= 0) {
     if (!osdmap->exists(c->target_osd)) {
@@ -4806,7 +4806,7 @@ int Objecter::_calc_command_target(CommandOp *c,
 
   OSDSession *s;
   int r = _get_session(c->target.osd, &s, sul);
-  ceph_assert(r != -EAGAIN); /* shouldn't happen as we're holding the write lock */
+  stone_assert(r != -EAGAIN); /* shouldn't happen as we're holding the write lock */
 
   if (c->session != s) {
     put_session(s);
@@ -4822,13 +4822,13 @@ int Objecter::_calc_command_target(CommandOp *c,
 }
 
 void Objecter::_assign_command_session(CommandOp *c,
-				       shunique_lock<ceph::shared_mutex>& sul)
+				       shunique_lock<stone::shared_mutex>& sul)
 {
-  ceph_assert(sul.owns_lock() && sul.mutex() == &rwlock);
+  stone_assert(sul.owns_lock() && sul.mutex() == &rwlock);
 
   OSDSession *s;
   int r = _get_session(c->target.osd, &s, sul);
-  ceph_assert(r != -EAGAIN); /* shouldn't happen as we're holding the write lock */
+  stone_assert(r != -EAGAIN); /* shouldn't happen as we're holding the write lock */
 
   if (c->session != s) {
     if (c->session) {
@@ -4847,8 +4847,8 @@ void Objecter::_assign_command_session(CommandOp *c,
 void Objecter::_send_command(CommandOp *c)
 {
   ldout(cct, 10) << "_send_command " << c->tid << dendl;
-  ceph_assert(c->session);
-  ceph_assert(c->session->con);
+  stone_assert(c->session);
+  stone_assert(c->session->con);
   auto m = new MCommand(monc->monmap.fsid);
   m->cmd = c->cmd;
   m->set_data(c->inbl);
@@ -4857,10 +4857,10 @@ void Objecter::_send_command(CommandOp *c)
   logger->inc(l_osdc_command_send);
 }
 
-int Objecter::command_op_cancel(OSDSession *s, ceph_tid_t tid,
+int Objecter::command_op_cancel(OSDSession *s, stone_tid_t tid,
 				bs::error_code ec)
 {
-  ceph_assert(initialized);
+  stone_assert(initialized);
 
   unique_lock wl(rwlock);
 
@@ -4906,12 +4906,12 @@ Objecter::OSDSession::~OSDSession()
 {
   // Caller is responsible for re-assigning or
   // destroying any ops that were assigned to us
-  ceph_assert(ops.empty());
-  ceph_assert(linger_ops.empty());
-  ceph_assert(command_ops.empty());
+  stone_assert(ops.empty());
+  stone_assert(linger_ops.empty());
+  stone_assert(command_ops.empty());
 }
 
-Objecter::Objecter(CephContext *cct,
+Objecter::Objecter(StoneContext *cct,
 		   Messenger *m, MonClient *mc,
 		   boost::asio::io_context& service) :
   Dispatcher(cct), messenger(m), monc(mc), service(service)
@@ -4922,22 +4922,22 @@ Objecter::Objecter(CephContext *cct,
 
 Objecter::~Objecter()
 {
-  ceph_assert(homeless_session->get_nref() == 1);
-  ceph_assert(num_homeless_ops == 0);
+  stone_assert(homeless_session->get_nref() == 1);
+  stone_assert(num_homeless_ops == 0);
   homeless_session->put();
 
-  ceph_assert(osd_sessions.empty());
-  ceph_assert(poolstat_ops.empty());
-  ceph_assert(statfs_ops.empty());
-  ceph_assert(pool_ops.empty());
-  ceph_assert(waiting_for_map.empty());
-  ceph_assert(linger_ops.empty());
-  ceph_assert(check_latest_map_lingers.empty());
-  ceph_assert(check_latest_map_ops.empty());
-  ceph_assert(check_latest_map_commands.empty());
+  stone_assert(osd_sessions.empty());
+  stone_assert(poolstat_ops.empty());
+  stone_assert(statfs_ops.empty());
+  stone_assert(pool_ops.empty());
+  stone_assert(waiting_for_map.empty());
+  stone_assert(linger_ops.empty());
+  stone_assert(check_latest_map_lingers.empty());
+  stone_assert(check_latest_map_ops.empty());
+  stone_assert(check_latest_map_commands.empty());
 
-  ceph_assert(!m_request_state_hook);
-  ceph_assert(!logger);
+  stone_assert(!m_request_state_hook);
+  stone_assert(!logger);
 }
 
 /**
@@ -5052,8 +5052,8 @@ void Objecter::enumerate_objects(
   }
 
   shared_lock rl(rwlock);
-  ceph_assert(osdmap->get_epoch());
-  if (!osdmap->test_flag(CEPH_OSDMAP_SORTBITWISE)) {
+  stone_assert(osdmap->get_epoch());
+  if (!osdmap->test_flag(STONE_OSDMAP_SORTBITWISE)) {
     rl.unlock();
     lderr(cct) << __func__ << ": SORTBITWISE cluster flag not set" << dendl;
     std::move(on_finish)(osdc_errc::not_supported, {}, {});
@@ -5186,7 +5186,7 @@ void Objecter::_enumerate_reply(
 		       response.entries.back().nspace);
       hobject_t last(response.entries.back().oid,
 		     response.entries.back().locator,
-		     CEPH_NOSNAP,
+		     STONE_NOSNAP,
 		     hash,
 		     ctx->oloc.get_pool(),
 		     response.entries.back().nspace);
@@ -5213,7 +5213,7 @@ void Objecter::_enumerate_reply(
       pool->hash_key(i->locator, i->nspace);
 
     next = hobject_t{i->oid, i->locator,
-		     CEPH_NOSNAP,
+		     STONE_NOSNAP,
 		     hash,
 		     ctx->oloc.get_pool(),
 		     i->nspace};
@@ -5305,9 +5305,9 @@ namespace {
 		   uint32_t* interval,
 		   int* rval)
   {
-    OSDOp& osd_op = op->add_op(CEPH_OSD_OP_SCRUBLS);
-    op->flags |= CEPH_OSD_FLAG_PGOP;
-    ceph_assert(interval);
+    OSDOp& osd_op = op->add_op(STONE_OSD_OP_SCRUBLS);
+    op->flags |= STONE_OSD_FLAG_PGOP;
+    stone_assert(interval);
     arg.encode(osd_op.indata);
     unsigned p = op->ops.size() - 1;
     auto h = new C_ObjectOperation_scrub_ls{interval, items, rval};

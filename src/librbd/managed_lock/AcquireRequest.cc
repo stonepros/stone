@@ -16,7 +16,7 @@
 #include "librbd/managed_lock/GetLockerRequest.h"
 #include "librbd/managed_lock/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::managed_lock::AcquireRequest: " << this \
                            << " " << __func__ << ": "
@@ -55,7 +55,7 @@ AcquireRequest<I>::AcquireRequest(librados::IoCtx& ioctx, Watcher *watcher,
                                   uint32_t blocklist_expire_seconds,
                                   Context *on_finish)
   : m_ioctx(ioctx), m_watcher(watcher),
-    m_cct(reinterpret_cast<CephContext *>(m_ioctx.cct())),
+    m_cct(reinterpret_cast<StoneContext *>(m_ioctx.cct())),
     m_asio_engine(asio_engine), m_oid(oid), m_cookie(cookie),
     m_exclusive(exclusive),
     m_blocklist_on_break_lock(blocklist_on_break_lock),
@@ -118,7 +118,7 @@ void AcquireRequest<I>::send_lock() {
   librados::AioCompletion *rados_completion =
     create_rados_callback<klass, &klass::handle_lock>(this);
   int r = m_ioctx.aio_operate(m_oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 

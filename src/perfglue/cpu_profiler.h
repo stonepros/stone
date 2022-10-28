@@ -11,7 +11,7 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_PERFGLUE_CPU_PROFILER
+#ifndef STONE_PERFGLUE_CPU_PROFILER
 
 /*
  * Ceph glue for the Google Perftools CPU profiler

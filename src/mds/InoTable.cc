@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,8 +19,8 @@
 
 #include "common/config.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << rank << "." << table_name << ": "
 
@@ -44,7 +44,7 @@ void InoTable::reset_state()
 inodeno_t InoTable::project_alloc_id(inodeno_t id) 
 {
   dout(10) << "project_alloc_id " << id << " to " << projected_free << "/" << free << dendl;
-  ceph_assert(is_active());
+  stone_assert(is_active());
   if (!id)
     id = projected_free.range_start();
   projected_free.erase(id);
@@ -60,7 +60,7 @@ void InoTable::apply_alloc_id(inodeno_t id)
 
 void InoTable::project_alloc_ids(interval_set<inodeno_t>& ids, int want) 
 {
-  ceph_assert(is_active());
+  stone_assert(is_active());
   while (want > 0) {
     inodeno_t start = projected_free.range_start();
     inodeno_t end = projected_free.end_after(start);
@@ -100,7 +100,7 @@ void InoTable::apply_release_ids(const interval_set<inodeno_t>& ids)
 
 void InoTable::replay_alloc_id(inodeno_t id) 
 {
-  ceph_assert(mds);  // Only usable in online mode
+  stone_assert(mds);  // Only usable in online mode
 
   dout(10) << "replay_alloc_id " << id << dendl;
   if (free.contains(id)) {
@@ -114,7 +114,7 @@ void InoTable::replay_alloc_id(inodeno_t id)
 }
 void InoTable::replay_alloc_ids(interval_set<inodeno_t>& ids) 
 {
-  ceph_assert(mds);  // Only usable in online mode
+  stone_assert(mds);  // Only usable in online mode
 
   dout(10) << "replay_alloc_ids " << ids << dendl;
   interval_set<inodeno_t> is;
@@ -215,7 +215,7 @@ bool InoTable::repair(inodeno_t id)
     return false;
   }
 
-  ceph_assert(is_marked_free(id));
+  stone_assert(is_marked_free(id));
   dout(10) << "repair: before status. ino = " << id << " pver =" << projected_version << " ver= " << version << dendl;
   free.erase(id);
   projected_free.erase(id);

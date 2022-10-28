@@ -16,7 +16,7 @@
 #include "librbd/io/WriteBlockImageDispatch.h"
 #include <boost/variant.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::ImageDispatcher: " << this \
                            << " " << __func__ << ": "
@@ -165,7 +165,7 @@ struct ImageDispatcher<I>::PreprocessVisitor
     }
 
     std::shared_lock image_locker{image_dispatcher->m_image_ctx->image_lock};
-    if (image_dispatcher->m_image_ctx->snap_id != CEPH_NOSNAP ||
+    if (image_dispatcher->m_image_ctx->snap_id != STONE_NOSNAP ||
         image_dispatcher->m_image_ctx->read_only) {
       image_dispatch_spec->fail(-EROFS);
       return true;

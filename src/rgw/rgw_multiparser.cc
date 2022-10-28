@@ -10,7 +10,7 @@
 
 #include "rgw_multi.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
                                   
 int main(int argc, char **argv) {

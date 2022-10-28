@@ -20,13 +20,13 @@
 
 #include "services/svc_zone_utils.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 using rgw::dmclock::Scheduler;
 
 void RGWProcess::RGWWQ::_dump_queue()
 {
-  if (!g_conf()->subsys.should_gather<ceph_subsys_rgw, 20>()) {
+  if (!g_conf()->subsys.should_gather<stone_subsys_rgw, 20>()) {
     return;
   }
   deque<RGWRequest *>::iterator iter;
@@ -49,7 +49,7 @@ auto schedule_request(Scheduler *scheduler, req_state *s, RGWOp *op)
 
   const auto client = op->dmclock_client();
   const auto cost = op->dmclock_cost();
-  if (s->cct->_conf->subsys.should_gather(ceph_subsys_rgw, 10)) {
+  if (s->cct->_conf->subsys.should_gather(stone_subsys_rgw, 10)) {
     ldpp_dout(op,10) << "scheduling with "
 		     << s->cct->_conf.get_val<std::string>("rgw_scheduler_type")
 		     << " client=" << static_cast<int>(client)
@@ -182,10 +182,10 @@ int process_request(rgw::sal::RGWRadosStore* const store,
                     optional_yield yield,
 		    rgw::dmclock::Scheduler *scheduler,
                     string* user,
-                    ceph::coarse_real_clock::duration* latency,
+                    stone::coarse_real_clock::duration* latency,
                     int* http_ret)
 {
-  int ret = client_io->init(g_ceph_context);
+  int ret = client_io->init(g_stone_context);
 
   dout(1) << "====== starting new request req=" << hex << req << dec
 	  << " =====" << dendl;
@@ -193,7 +193,7 @@ int process_request(rgw::sal::RGWRadosStore* const store,
 
   RGWEnv& rgw_env = client_io->get_env();
 
-  struct req_state rstate(g_ceph_context, &rgw_env, req->id);
+  struct req_state rstate(g_stone_context, &rgw_env, req->id);
   struct req_state *s = &rstate;
 
   std::unique_ptr<rgw::sal::RGWUser> u = store->get_user(rgw_user());
@@ -304,7 +304,7 @@ int process_request(rgw::sal::RGWRadosStore* const store,
       abort_early(s, op, ret, handler, yield);
       goto done;
     }
-  } catch (const ceph::crypto::DigestException& e) {
+  } catch (const stone::crypto::DigestException& e) {
     dout(0) << "authentication failed" << e.what() << dendl;
     abort_early(s, op, -ERR_INVALID_SECRET_KEY, handler, yield);
   }

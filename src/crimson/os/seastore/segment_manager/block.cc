@@ -11,7 +11,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 }
 
@@ -150,10 +150,10 @@ static
 BlockSegmentManager::access_ertr::future<>
 write_superblock(seastar::file &device, block_sm_superblock_t sb)
 {
-  assert(ceph::encoded_sizeof_bounded<block_sm_superblock_t>() <
+  assert(stone::encoded_sizeof_bounded<block_sm_superblock_t>() <
 	 sb.block_size);
   return seastar::do_with(
-    bufferptr(ceph::buffer::create_page_aligned(sb.block_size)),
+    bufferptr(stone::buffer::create_page_aligned(sb.block_size)),
     [=, &device](auto &bp) {
       bufferlist bl;
       encode(sb, bl);
@@ -169,10 +169,10 @@ static
 BlockSegmentManager::access_ertr::future<block_sm_superblock_t>
 read_superblock(seastar::file &device, seastar::stat_data sd)
 {
-  assert(ceph::encoded_sizeof_bounded<block_sm_superblock_t>() <
+  assert(stone::encoded_sizeof_bounded<block_sm_superblock_t>() <
 	 sd.block_size);
   return seastar::do_with(
-    bufferptr(ceph::buffer::create_page_aligned(sd.block_size)),
+    bufferptr(stone::buffer::create_page_aligned(sd.block_size)),
     [=, &device](auto &bp) {
       return do_read(
 	device,
@@ -207,7 +207,7 @@ Segment::close_ertr::future<> BlockSegment::close()
 }
 
 Segment::write_ertr::future<> BlockSegment::write(
-  segment_off_t offset, ceph::bufferlist bl)
+  segment_off_t offset, stone::bufferlist bl)
 {
   if (offset < write_pointer || offset % manager.superblock.block_size != 0)
     return crimson::ct_error::invarg::make();
@@ -228,7 +228,7 @@ Segment::close_ertr::future<> BlockSegmentManager::segment_close(segment_id_t id
 
 Segment::write_ertr::future<> BlockSegmentManager::segment_write(
   paddr_t addr,
-  ceph::bufferlist bl,
+  stone::bufferlist bl,
   bool ignore_check)
 {
   assert((bl.length() % superblock.block_size) == 0);
@@ -244,7 +244,7 @@ Segment::write_ertr::future<> BlockSegmentManager::segment_write(
   // constituent buffers and they will remain unmodified until the write
   // completes
   return seastar::do_with(
-    bufferptr(ceph::buffer::create_page_aligned(bl.length())),
+    bufferptr(stone::buffer::create_page_aligned(bl.length())),
     [&](auto &bp) {
       auto iter = bl.cbegin();
       iter.copy(bl.length(), bp.c_str());
@@ -368,7 +368,7 @@ SegmentManager::release_ertr::future<> BlockSegmentManager::release(
 SegmentManager::read_ertr::future<> BlockSegmentManager::read(
   paddr_t addr,
   size_t len,
-  ceph::bufferptr &out)
+  stone::bufferptr &out)
 {
   if (addr.segment >= get_num_segments()) {
     logger().error(

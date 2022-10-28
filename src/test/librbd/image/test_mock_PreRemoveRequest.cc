@@ -38,7 +38,7 @@ public:
                                        cls::rbd::SnapshotNamespace sn,
                                        std::string name,
                                        uint64_t id, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -67,7 +67,7 @@ public:
   static ListWatchersRequest *create(MockTestImageCtx &image_ctx, int flags,
                                      std::list<obj_watch_t> *watchers,
                                      Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat
  *
@@ -15,7 +15,7 @@
 #include "utime.h"
 #include "common/Formatter.h"
 
-void utime_t::dump(ceph::Formatter *f) const
+void utime_t::dump(stone::Formatter *f) const
 {
   f->dump_int("seconds", tv.tv_sec);
   f->dump_int("nanoseconds", tv.tv_nsec);

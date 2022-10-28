@@ -4,7 +4,7 @@
 #include "test/librbd/test_mock_fixture.h"
 #include "test/librbd/test_support.h"
 #include "include/rbd_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/ConfigWatcher.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -33,8 +33,8 @@ public:
 
   librbd::ImageCtx *m_image_ctx;
 
-  ceph::mutex m_lock = ceph::make_mutex("m_lock");
-  ceph::condition_variable m_cv;
+  stone::mutex m_lock = stone::make_mutex("m_lock");
+  stone::condition_variable m_cv;
   bool m_refreshed = false;
 
   void SetUp() override {

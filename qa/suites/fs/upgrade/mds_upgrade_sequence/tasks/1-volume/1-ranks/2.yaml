@@ -1,4 +1,4 @@
 tasks:
-- cephadm.shell:
+- stoneadm.shell:
     host.a:
-      - ceph fs set cephfs max_mds 2
+      - stone fs set stonefs max_mds 2

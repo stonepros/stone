@@ -21,7 +21,7 @@
  *
  */
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -41,9 +41,9 @@
 #include "toeplitz.h"
 
 #include "common/dout.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_dpdk
+#define dout_subsys stone_subsys_dpdk
 #undef dout_prefix
 #define dout_prefix *_dout << "dpdk "
 
@@ -84,7 +84,7 @@ struct icmp_hdr {
   uint32_t rest;
 } __attribute__((packed));
 
-ipv4::ipv4(CephContext *c, EventCenter *cen, interface* netif)
+ipv4::ipv4(StoneContext *c, EventCenter *cen, interface* netif)
   : cct(c), center(cen), _netif(netif), _global_arp(netif),
     _arp(c, _global_arp, cen),
     _host_address(0), _gw_address(0), _netmask(0),
@@ -201,7 +201,7 @@ int ipv4::handle_received_packet(Packet p, ethernet_address from)
     // This is a newly created frag_id
     if (frag.mem_size == 0) {
       _frags_age.push_back(frag_id);
-      frag.rx_time = ceph_clock_now();
+      frag.rx_time = stone_clock_now();
     }
     auto added_size = frag.merge(h, offset, std::move(p));
     _frag_mem += added_size;
@@ -384,7 +384,7 @@ void ipv4::frag_timeout() {
   if (_frags.empty()) {
     return;
   }
-  auto now = ceph_clock_now();
+  auto now = stone_clock_now();
   for (auto it = _frags_age.begin(); it != _frags_age.end();) {
     auto frag_id = *it;
     auto& frag = _frags[frag_id];

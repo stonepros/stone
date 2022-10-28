@@ -30,7 +30,7 @@
 #include "librbd/io/ImageDispatchSpec.h"
 #include <boost/scope_exit.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::api::Image: " << __func__ << ": "
 
@@ -97,7 +97,7 @@ int64_t Image<I>::get_data_pool_id(I *ictx) {
   int64_t pool_id;
   int r = cls_client::get_data_pool(&ictx->md_ctx, ictx->header_oid, &pool_id);
   if (r < 0) {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     lderr(cct) << "error getting data pool ID: " << cpp_strerror(r) << dendl;
     return r;
   }
@@ -107,7 +107,7 @@ int64_t Image<I>::get_data_pool_id(I *ictx) {
 
 template <typename I>
 int Image<I>::get_op_features(I *ictx, uint64_t *op_features) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "image_ctx=" << ictx << dendl;
 
   int r = ictx->state->refresh_if_required();
@@ -123,7 +123,7 @@ int Image<I>::get_op_features(I *ictx, uint64_t *op_features) {
 template <typename I>
 int Image<I>::list_images(librados::IoCtx& io_ctx,
                           std::vector<image_spec_t> *images) {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
   ldout(cct, 20) << "list " << &io_ctx << dendl;
 
   int r;
@@ -186,7 +186,7 @@ int Image<I>::list_images(librados::IoCtx& io_ctx,
 
 template <typename I>
 int Image<I>::list_images_v2(librados::IoCtx& io_ctx, ImageNameToIds *images) {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
   ldout(cct, 20) << "io_ctx=" << &io_ctx << dendl;
 
   // new format images are accessed by class methods
@@ -259,7 +259,7 @@ int Image<I>::get_parent(I *ictx,
   std::shared_lock parent_image_locker{parent->image_lock};
   parent_snap->id = parent->snap_id;
   parent_snap->namespace_type = RBD_SNAP_NAMESPACE_TYPE_USER;
-  if (parent->snap_id != CEPH_NOSNAP) {
+  if (parent->snap_id != STONE_NOSNAP) {
     auto snap_info = parent->get_snap_info(parent->snap_id);
     if (snap_info == nullptr) {
       lderr(cct) << "error finding parent snap name: " << cpp_strerror(r)
@@ -311,7 +311,7 @@ int Image<I>::list_descendants(
     std::vector<librbd::linked_image_spec_t> *images) {
   ImageCtx *ictx = new librbd::ImageCtx("", image_id, nullptr,
                                         io_ctx, true);
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   int r = ictx->state->open(OPEN_FLAG_SKIP_OPEN_PARENT);
   if (r < 0) {
     if (r == -ENOENT) {
@@ -341,7 +341,7 @@ int Image<I>::list_descendants(
     std::vector<librbd::linked_image_spec_t> *images) {
   std::shared_lock l{ictx->image_lock};
   std::vector<librados::snap_t> snap_ids;
-  if (ictx->snap_id != CEPH_NOSNAP) {
+  if (ictx->snap_id != STONE_NOSNAP) {
     snap_ids.push_back(ictx->snap_id);
   } else {
     snap_ids = ictx->snaps;
@@ -370,7 +370,7 @@ int Image<I>::list_descendants(
     }
     (*child_max_level)--;
   }
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "ictx=" << ictx << dendl;
 
   // no children for non-layered or old format image
@@ -546,7 +546,7 @@ template <typename I>
 int Image<I>::deep_copy(I *src, librados::IoCtx& dest_md_ctx,
                         const char *destname, ImageOptions& opts,
                         ProgressContext &prog_ctx) {
-  CephContext *cct = (CephContext *)dest_md_ctx.cct();
+  StoneContext *cct = (StoneContext *)dest_md_ctx.cct();
   ldout(cct, 20) << src->name
                  << (src->snap_name.length() ? "@" + src->snap_name : "")
                  << " -> " << destname << " opts = " << opts << dendl;
@@ -731,13 +731,13 @@ int Image<I>::snap_set(I *ictx,
   // snapshot and the user is trying to fix that
   ictx->state->refresh_if_required();
 
-  uint64_t snap_id = CEPH_NOSNAP;
+  uint64_t snap_id = STONE_NOSNAP;
   std::string name(snap_name == nullptr ? "" : snap_name);
   if (!name.empty()) {
     std::shared_lock image_locker{ictx->image_lock};
     snap_id = ictx->get_snap_id(cls::rbd::UserSnapshotNamespace{},
                                 snap_name);
-    if (snap_id == CEPH_NOSNAP) {
+    if (snap_id == STONE_NOSNAP) {
       return -ENOENT;
     }
   }
@@ -759,7 +759,7 @@ int Image<I>::snap_set(I *ictx, uint64_t snap_id) {
   int r = ctx.wait();
   if (r < 0) {
     if (r != -ENOENT) {
-      lderr(ictx->cct) << "failed to " << (snap_id == CEPH_NOSNAP ? "un" : "")
+      lderr(ictx->cct) << "failed to " << (snap_id == STONE_NOSNAP ? "un" : "")
                        << "set snapshot: " << cpp_strerror(r) << dendl;
     }
     return r;
@@ -772,7 +772,7 @@ template <typename I>
 int Image<I>::remove(IoCtx& io_ctx, const std::string &image_name,
                      ProgressContext& prog_ctx)
 {
-  CephContext *cct((CephContext *)io_ctx.cct());
+  StoneContext *cct((StoneContext *)io_ctx.cct());
   ldout(cct, 20) << "name=" << image_name << dendl;
 
   // look up the V2 image id based on the image name
@@ -869,7 +869,7 @@ int Image<I>::remove(IoCtx& io_ctx, const std::string &image_name,
 template <typename I>
 int Image<I>::flatten_children(I *ictx, const char* snap_name,
                                ProgressContext& pctx) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "children flatten " << ictx->name << dendl;
 
   int r = ictx->state->refresh_if_required();
@@ -947,7 +947,7 @@ int Image<I>::flatten_children(I *ictx, const char* snap_name,
     }
 
     pctx.update_progress(++i, size);
-    ceph_assert(i <= size);
+    stone_assert(i <= size);
   }
 
   return 0;

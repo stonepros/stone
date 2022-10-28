@@ -11,9 +11,9 @@
 #include "cls/queue/cls_queue_const.h"
 #include "cls/queue/cls_queue_src.h"
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
 
 CLS_VER(1,0)
 CLS_NAME(queue)
@@ -24,7 +24,7 @@ static int cls_queue_init(cls_method_context_t hctx, bufferlist *in, bufferlist 
   cls_queue_init_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_queue_init_op(): failed to decode entry\n");
     return -EINVAL;
   }
@@ -50,7 +50,7 @@ static int cls_queue_enqueue(cls_method_context_t hctx, bufferlist *in, bufferli
   cls_queue_enqueue_op op;
   try {
     decode(op, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_queue_enqueue: failed to decode input data \n");
     return -EINVAL;
   }
@@ -76,7 +76,7 @@ static int cls_queue_list_entries(cls_method_context_t hctx, bufferlist *in, buf
   cls_queue_list_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(5, "ERROR: cls_queue_list_entries(): failed to decode input data\n");
     return -EINVAL;
   }
@@ -103,7 +103,7 @@ static int cls_queue_remove_entries(cls_method_context_t hctx, bufferlist *in, b
   cls_queue_remove_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(5, "ERROR: cls_queue_remove_entries: failed to decode input data\n");
     return -EINVAL;
   }

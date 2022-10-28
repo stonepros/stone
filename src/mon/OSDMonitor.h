@@ -18,8 +18,8 @@
 /* Object Store Device (OSD) Monitor
  */
 
-#ifndef CEPH_OSDMONITOR_H
-#define CEPH_OSDMONITOR_H
+#ifndef STONE_OSDMONITOR_H
+#define STONE_OSDMONITOR_H
 
 #include <map>
 #include <set>

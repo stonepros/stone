@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -14,8 +14,8 @@
  * See src/doc/exports.txt for a description.
  */
 
-#ifndef CEPH_MDS_MIGRATOR_H
-#define CEPH_MDS_MIGRATOR_H
+#ifndef STONE_MDS_MIGRATOR_H
+#define STONE_MDS_MIGRATOR_H
 
 #include "include/types.h"
 

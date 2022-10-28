@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stone - scalable distributed file system
 *
 * Copyright (C) 2012 New Dream Network
 *
@@ -20,8 +20,8 @@
 
 #include "FileStoreDiff.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_filestore
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_filestore
 #undef dout_prefix
 #define dout_prefix *_dout << "filestore_diff "
 
@@ -30,10 +30,10 @@ FileStoreDiff::FileStoreDiff(FileStore *a, FileStore *b)
 {
   int err;
   err = a_store->mount();
-  ceph_assert(err == 0);
+  stone_assert(err == 0);
 
   err = b_store->mount();
-  ceph_assert(err == 0);
+  stone_assert(err == 0);
 }
 
 FileStoreDiff::~FileStoreDiff()

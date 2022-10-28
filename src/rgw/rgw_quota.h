@@ -13,8 +13,8 @@
  *
  */
 
-#ifndef CEPH_RGW_QUOTA_H
-#define CEPH_RGW_QUOTA_H
+#ifndef STONE_RGW_QUOTA_H
+#define STONE_RGW_QUOTA_H
 
 #include "include/utime.h"
 #include "common/config_fwd.h"

@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 #include "common/ContextCompletion.h"
 
-namespace ceph
+namespace stone
 {
 
 ContextCompletion::ContextCompletion(Context *ctx, bool ignore_enoent)
@@ -46,4 +46,4 @@ void ContextCompletion::finish_op(int r) {
   }
 }
 
-} // namespace ceph
+} // namespace stone

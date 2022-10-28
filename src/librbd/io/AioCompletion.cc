@@ -4,7 +4,7 @@
 #include "librbd/io/AioCompletion.h"
 #include <errno.h>
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/dout.h"
 #include "common/errno.h"
 #include "common/perf_counters.h"
@@ -23,7 +23,7 @@
 #define tracepoint(...)
 #endif
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::AioCompletion: " << this \
                            << " " << __func__ << ": "
@@ -44,8 +44,8 @@ int AioCompletion::wait_for_complete() {
 }
 
 void AioCompletion::finalize() {
-  ceph_assert(ictx != nullptr);
-  CephContext *cct = ictx->cct;
+  stone_assert(ictx != nullptr);
+  StoneContext *cct = ictx->cct;
 
   // finalize any pending error results since we won't be
   // atomically incrementing rval anymore
@@ -62,18 +62,18 @@ void AioCompletion::finalize() {
 }
 
 void AioCompletion::complete() {
-  ceph_assert(ictx != nullptr);
+  stone_assert(ictx != nullptr);
 
   ssize_t r = rval;
   if ((aio_type == AIO_TYPE_CLOSE) || (aio_type == AIO_TYPE_OPEN && r < 0)) {
     ictx = nullptr;
     external_callback = false;
   } else {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
 
     tracepoint(librbd, aio_complete_enter, this, r);
     if (ictx->perfcounter != nullptr) {
-      ceph::timespan elapsed = coarse_mono_clock::now() - start_time;
+      stone::timespan elapsed = coarse_mono_clock::now() - start_time;
       switch (aio_type) {
       case AIO_TYPE_GENERIC:
       case AIO_TYPE_OPEN:
@@ -123,21 +123,21 @@ void AioCompletion::init_time(ImageCtx *i, aio_type_t t) {
 }
 
 void AioCompletion::start_op() {
-  ceph_assert(ictx != nullptr);
+  stone_assert(ictx != nullptr);
 
   if (aio_type == AIO_TYPE_OPEN || aio_type == AIO_TYPE_CLOSE) {
     // no need to track async open/close operations
     return;
   }
 
-  ceph_assert(!async_op.started());
+  stone_assert(!async_op.started());
   async_op.start_op(*ictx);
 }
 
 void AioCompletion::queue_complete() {
   uint32_t zero = 0;
   pending_count.compare_exchange_strong(zero, 1);
-  ceph_assert(zero == 0);
+  stone_assert(zero == 0);
 
   add_request();
 
@@ -147,20 +147,20 @@ void AioCompletion::queue_complete() {
     });
 }
 
-void AioCompletion::block(CephContext* cct) {
+void AioCompletion::block(StoneContext* cct) {
   ldout(cct, 20) << dendl;
-  ceph_assert(!was_armed);
+  stone_assert(!was_armed);
 
   get();
   ++pending_count;
 }
 
-void AioCompletion::unblock(CephContext* cct) {
+void AioCompletion::unblock(StoneContext* cct) {
   ldout(cct, 20) << dendl;
-  ceph_assert(was_armed);
+  stone_assert(was_armed);
 
   uint32_t previous_pending_count = pending_count--;
-  ceph_assert(previous_pending_count > 0);
+  stone_assert(previous_pending_count > 0);
 
   if (previous_pending_count == 1) {
     queue_complete();
@@ -170,19 +170,19 @@ void AioCompletion::unblock(CephContext* cct) {
 
 void AioCompletion::fail(int r)
 {
-  ceph_assert(ictx != nullptr);
-  ceph_assert(r < 0);
+  stone_assert(ictx != nullptr);
+  stone_assert(r < 0);
 
   bool queue_required = true;
   if (aio_type == AIO_TYPE_CLOSE || aio_type == AIO_TYPE_OPEN) {
     // executing from a safe context and the ImageCtx has been destructed
     queue_required = false;
   } else {
-    CephContext *cct = ictx->cct;
+    StoneContext *cct = ictx->cct;
     lderr(cct) << cpp_strerror(r) << dendl;
   }
 
-  ceph_assert(!was_armed);
+  stone_assert(!was_armed);
   was_armed = true;
 
   rval = r;
@@ -198,10 +198,10 @@ void AioCompletion::fail(int r)
 }
 
 void AioCompletion::set_request_count(uint32_t count) {
-  ceph_assert(ictx != nullptr);
-  CephContext *cct = ictx->cct;
+  stone_assert(ictx != nullptr);
+  StoneContext *cct = ictx->cct;
 
-  ceph_assert(!was_armed);
+  stone_assert(!was_armed);
   was_armed = true;
 
   ldout(cct, 20) << "pending=" << count << dendl;
@@ -213,8 +213,8 @@ void AioCompletion::set_request_count(uint32_t count) {
 
 void AioCompletion::complete_request(ssize_t r)
 {
-  ceph_assert(ictx != nullptr);
-  CephContext *cct = ictx->cct;
+  stone_assert(ictx != nullptr);
+  StoneContext *cct = ictx->cct;
 
   if (r > 0) {
     rval += r;
@@ -226,7 +226,7 @@ void AioCompletion::complete_request(ssize_t r)
   }
 
   uint32_t previous_pending_count = pending_count--;
-  ceph_assert(previous_pending_count > 0);
+  stone_assert(previous_pending_count > 0);
   auto pending_count = previous_pending_count - 1;
 
   ldout(cct, 20) << "cb=" << complete_cb << ", "

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -26,7 +26,7 @@
 #include "include/linux_fiemap.h"
 #include "include/color.h"
 #include "include/buffer.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #ifndef __CYGWIN__
 #include "os/fs/btrfs_ioctl.h"
@@ -44,7 +44,7 @@
 #if defined(__linux__)
 
 #define dout_context cct()
-#define dout_subsys ceph_subsys_filestore
+#define dout_subsys stone_subsys_filestore
 #undef dout_prefix
 #define dout_prefix *_dout << "btrfsfilestorebackend(" << get_basedir_path() << ") "
 

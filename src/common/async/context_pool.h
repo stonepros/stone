@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -13,8 +13,8 @@
  *
  */
 
-#ifndef CEPH_COMMON_ASYNC_CONTEXT_POOL_H
-#define CEPH_COMMON_ASYNC_CONTEXT_POOL_H
+#ifndef STONE_COMMON_ASYNC_CONTEXT_POOL_H
+#define STONE_COMMON_ASYNC_CONTEXT_POOL_H
 
 #include <cstddef>
 #include <cstdint>
@@ -96,4 +96,4 @@ public:
 };
 }
 
-#endif // CEPH_COMMON_ASYNC_CONTEXT_POOL_H
+#endif // STONE_COMMON_ASYNC_CONTEXT_POOL_H

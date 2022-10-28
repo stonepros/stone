@@ -21,8 +21,8 @@
 using std::ostream;
 using std::ostringstream;
 
-using ceph::Formatter;
-using ceph::parse_timespan;
+using stone::Formatter;
+using stone::parse_timespan;
 
 namespace {
 class printer : public boost::static_visitor<> {
@@ -214,7 +214,7 @@ int Option::parse_value(
       return -EINVAL;
     }
   } else {
-    ceph_abort();
+    stone_abort();
   }
 
   r = validate(*out, error_message);
@@ -361,7 +361,7 @@ std::vector<Option> get_global_options() {
   return std::vector<Option>({
     Option("host", Option::TYPE_STR, Option::LEVEL_BASIC)
     .set_description("local hostname")
-    .set_long_description("if blank, ceph assumes the short hostname (hostname -s)")
+    .set_long_description("if blank, stone assumes the short hostname (hostname -s)")
     .set_flag(Option::FLAG_NO_MON_UPDATE)
     .add_service("common")
     .add_tag("network"),
@@ -446,7 +446,7 @@ std::vector<Option> get_global_options() {
     .add_service("common"),
 
     Option("mon_dns_srv_name", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("ceph-mon")
+    .set_default("stone-mon")
     .set_description("name of DNS SRV record to check for monitor addresses")
     .set_flag(Option::FLAG_STARTUP)
     .add_service("common")
@@ -454,9 +454,9 @@ std::vector<Option> get_global_options() {
     .add_see_also("mon_host"),
 
     Option("container_image", Option::TYPE_STR, Option::LEVEL_BASIC)
-    .set_description("container image (used by cephadm orchestrator)")
+    .set_description("container image (used by stoneadm orchestrator)")
     .set_flag(Option::FLAG_STARTUP)
-    .set_default("docker.io/ceph/daemon-base:latest-pacific-devel"),
+    .set_default("docker.io/stone/daemon-base:latest-pacific-devel"),
 
     Option("no_config_file", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(false)
@@ -484,7 +484,7 @@ std::vector<Option> get_global_options() {
     .add_see_also("lockdep"),
 
     Option("run_dir", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("/var/run/ceph")
+    .set_default("/var/run/stone")
     .set_flag(Option::FLAG_STARTUP)
     .set_description("path for the 'run' directory for storing pid and socket files")
     .add_service("common")
@@ -494,7 +494,7 @@ std::vector<Option> get_global_options() {
     .set_default("")
     .set_daemon_default("$run_dir/$cluster-$name.asok")
     .set_flag(Option::FLAG_STARTUP)
-    .set_description("path for the runtime control socket file, used by the 'ceph daemon' command")
+    .set_description("path for the runtime control socket file, used by the 'stone daemon' command")
     .add_service("common"),
 
     Option("admin_socket_mode", Option::TYPE_STR, Option::LEVEL_ADVANCED)
@@ -533,7 +533,7 @@ std::vector<Option> get_global_options() {
     Option("setuser_match_path", Option::TYPE_STR, Option::LEVEL_ADVANCED)
     .set_flag(Option::FLAG_STARTUP)
     .set_description("if set, setuser/setgroup is condition on this path matching ownership")
-    .set_long_description("If setuser or setgroup are specified, and this option is non-empty, then the uid/gid of the daemon will only be changed if the file or directory specified by this option has a matching uid and/or gid.  This exists primarily to allow switching to user ceph for OSDs to be conditional on whether the osd data contents have also been chowned after an upgrade.  This is normally specified by the systemd unit file.")
+    .set_long_description("If setuser or setgroup are specified, and this option is non-empty, then the uid/gid of the daemon will only be changed if the file or directory specified by this option has a matching uid and/or gid.  This exists primarily to allow switching to user stone for OSDs to be conditional on whether the osd data contents have also been chowned after an upgrade.  This is normally specified by the systemd unit file.")
     .add_service({"mon", "mgr", "osd", "mds"})
     .add_tag("service")
     .add_see_also({"setuser", "setgroup"}),
@@ -562,7 +562,7 @@ std::vector<Option> get_global_options() {
 
     Option("crash_dir", Option::TYPE_STR, Option::LEVEL_ADVANCED)
     .set_flag(Option::FLAG_STARTUP)
-    .set_default("/var/lib/ceph/crash")
+    .set_default("/var/lib/stone/crash")
     .set_description("Directory where crash reports are archived"),
 
     // restapi
@@ -573,7 +573,7 @@ std::vector<Option> get_global_options() {
     .set_description("default set by python code"),
 
     Option("erasure_code_dir", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default(CEPH_PKGLIBDIR"/erasure-code")
+    .set_default(STONE_PKGLIBDIR"/erasure-code")
     .set_flag(Option::FLAG_STARTUP)
     .set_description("directory where erasure-code plugins can be found")
     .add_service({"mon", "osd"}),
@@ -581,7 +581,7 @@ std::vector<Option> get_global_options() {
     // logging
     Option("log_file", Option::TYPE_STR, Option::LEVEL_BASIC)
     .set_default("")
-    .set_daemon_default("/var/log/ceph/$cluster-$name.log")
+    .set_daemon_default("/var/log/stone/$cluster-$name.log")
     .set_description("path to log file")
     .add_see_also({"log_to_file",
 		   "log_to_stderr",
@@ -748,7 +748,7 @@ std::vector<Option> get_global_options() {
     .add_see_also("mon_cluster_log_file"),
 
     Option("mon_cluster_log_file", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("default=/var/log/ceph/$cluster.$channel.log cluster=/var/log/ceph/$cluster.log")
+    .set_default("default=/var/log/stone/$cluster.$channel.log cluster=/var/log/stone/$cluster.log")
     .set_flag(Option::FLAG_RUNTIME)
     .add_service("mon")
     .set_description("File(s) to write cluster log to")
@@ -788,7 +788,7 @@ std::vector<Option> get_global_options() {
     .set_description("Enable named (or all with '*') experimental features that may be untested, dangerous, and/or cause permanent data loss"),
 
     Option("plugin_dir", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default(CEPH_PKGLIBDIR)
+    .set_default(STONE_PKGLIBDIR)
     .set_flag(Option::FLAG_STARTUP)
     .add_service({"mon", "osd"})
     .set_description("Base directory for dynamically loaded plugins"),
@@ -834,12 +834,12 @@ std::vector<Option> get_global_options() {
     .set_default(false)
     .set_flag(Option::FLAG_STARTUP)
     .set_description("enable transparent huge page (THP) support")
-    .set_long_description("Ceph is known to suffer from memory fragmentation due to THP use. This is indicated by RSS usage above configured memory targets. Enabling THP is currently discouraged until selective use of THP by Ceph is implemented."),
+    .set_long_description("Stone is known to suffer from memory fragmentation due to THP use. This is indicated by RSS usage above configured memory targets. Enabling THP is currently discouraged until selective use of THP by Stone is implemented."),
 
     Option("key", Option::TYPE_STR, Option::LEVEL_ADVANCED)
     .set_default("")
     .set_description("Authentication key")
-    .set_long_description("A CephX authentication key, base64 encoded.  It normally looks something like 'AQAtut9ZdMbNJBAAHz6yBAWyJyz2yYRyeMWDag=='.")
+    .set_long_description("A StoneX authentication key, base64 encoded.  It normally looks something like 'AQAtut9ZdMbNJBAAHz6yBAWyJyz2yYRyeMWDag=='.")
     .set_flag(Option::FLAG_STARTUP)
     .set_flag(Option::FLAG_NO_MON_UPDATE)
     .add_see_also("keyfile")
@@ -848,23 +848,23 @@ std::vector<Option> get_global_options() {
     Option("keyfile", Option::TYPE_STR, Option::LEVEL_ADVANCED)
     .set_default("")
     .set_description("Path to a file containing a key")
-    .set_long_description("The file should contain a CephX authentication key and optionally a trailing newline, but nothing else.")
+    .set_long_description("The file should contain a StoneX authentication key and optionally a trailing newline, but nothing else.")
     .set_flag(Option::FLAG_STARTUP)
     .set_flag(Option::FLAG_NO_MON_UPDATE)
     .add_see_also("key"),
 
     Option("keyring", Option::TYPE_STR, Option::LEVEL_ADVANCED)
     .set_default(
-      "/etc/ceph/$cluster.$name.keyring,/etc/ceph/$cluster.keyring,"
-      "/etc/ceph/keyring,/etc/ceph/keyring.bin,"
+      "/etc/stone/$cluster.$name.keyring,/etc/stone/$cluster.keyring,"
+      "/etc/stone/keyring,/etc/stone/keyring.bin,"
   #if defined(__FreeBSD)
-      "/usr/local/etc/ceph/$cluster.$name.keyring,"
-      "/usr/local/etc/ceph/$cluster.keyring,"
-      "/usr/local/etc/ceph/keyring,/usr/local/etc/ceph/keyring.bin,"
+      "/usr/local/etc/stone/$cluster.$name.keyring,"
+      "/usr/local/etc/stone/$cluster.keyring,"
+      "/usr/local/etc/stone/keyring,/usr/local/etc/stone/keyring.bin,"
   #endif
     )
     .set_description("Path to a keyring file.")
-    .set_long_description("A keyring file is an INI-style formatted file where the section names are client or daemon names (e.g., 'osd.0') and each section contains a 'key' property with CephX authentication key as the value.")
+    .set_long_description("A keyring file is an INI-style formatted file where the section names are client or daemon names (e.g., 'osd.0') and each section contains a 'key' property with StoneX authentication key as the value.")
     .set_flag(Option::FLAG_STARTUP)
     .set_flag(Option::FLAG_NO_MON_UPDATE)
     .add_see_also("key")
@@ -1323,7 +1323,7 @@ std::vector<Option> get_global_options() {
 
     Option("mon_data", Option::TYPE_STR, Option::LEVEL_ADVANCED)
     .set_flag(Option::FLAG_NO_MON_UPDATE)
-    .set_default("/var/lib/ceph/mon/$cluster-$id")
+    .set_default("/var/lib/stone/mon/$cluster-$id")
     .add_service("mon")
     .set_description("path to mon database"),
 
@@ -1450,7 +1450,7 @@ std::vector<Option> get_global_options() {
     .set_default(10)
     .add_service("mon")
     .add_service("mon")
-    .set_description("window duration for rate calculations in 'ceph status'"),
+    .set_description("window duration for rate calculations in 'stone status'"),
 
     Option("mon_osd_laggy_halflife", Option::TYPE_INT, Option::LEVEL_ADVANCED)
     .set_default(1_hr)
@@ -1698,7 +1698,7 @@ std::vector<Option> get_global_options() {
     .add_service("mgr")
     .set_description("Max number of PGs per OSD the cluster will allow")
     .set_long_description("If the number of PGs per OSD exceeds this, a "
-        "health warning will be visible in `ceph status`.  This is also used "
+        "health warning will be visible in `stone status`.  This is also used "
         "in automated PG management, as the threshold at which some pools' "
         "pg_num may be shrunk in order to enable increasing the pg_num of "
         "others."),
@@ -1816,7 +1816,7 @@ std::vector<Option> get_global_options() {
     Option("mon_crush_min_required_version", Option::TYPE_STR, Option::LEVEL_ADVANCED)
     .set_default("hammer")
     .add_service("mgr")
-    .set_description("minimum ceph release to use for mon_warn_on_legacy_crush_tunables")
+    .set_description("minimum stone release to use for mon_warn_on_legacy_crush_tunables")
     .add_see_also("mon_warn_on_legacy_crush_tunables"),
 
     Option("mon_warn_on_crush_straw_calc_version_zero", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
@@ -2110,7 +2110,7 @@ std::vector<Option> get_global_options() {
     Option("mds_beacon_mon_down_grace", Option::TYPE_SECS, Option::LEVEL_ADVANCED)
     .set_default(1_min)
     .set_description("tolerance in seconds for missed MDS beacons to monitors")
-    .set_long_description("The interval without beacons before Ceph declares an MDS laggy when a monitor is down."),
+    .set_long_description("The interval without beacons before Stone declares an MDS laggy when a monitor is down."),
 
     Option("mon_mds_skip_sanity", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(false)
@@ -2153,7 +2153,7 @@ std::vector<Option> get_global_options() {
     .add_see_also("mon_debug_dump_transactions"),
 
     Option("mon_debug_dump_location", Option::TYPE_STR, Option::LEVEL_DEV)
-    .set_default("/var/log/ceph/$cluster-$name.tdump")
+    .set_default("/var/log/stone/$cluster-$name.tdump")
     .add_service("mon")
     .set_description("file to dump paxos transactions to")
     .add_see_also("mon_debug_dump_transactions"),
@@ -2259,7 +2259,7 @@ std::vector<Option> get_global_options() {
     .set_default(true)
     .add_service("mon")
     .set_description("Whether to parse non-monitor capabilities set by the "
-		     "'ceph auth ...' commands. Disabling this saves CPU on the "
+		     "'stone auth ...' commands. Disabling this saves CPU on the "
 		     "monitor, but allows invalid capabilities to be set, and "
 		     "only be rejected later, when they are used.")
     .set_flag(Option::FLAG_RUNTIME),
@@ -2337,15 +2337,15 @@ std::vector<Option> get_global_options() {
     // AUTH
 
     Option("auth_cluster_required", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("cephx")
+    .set_default("stonex")
     .set_description("authentication methods required by the cluster"),
 
     Option("auth_service_required", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("cephx")
+    .set_default("stonex")
     .set_description("authentication methods required by service daemons"),
 
     Option("auth_client_required", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("cephx, none")
+    .set_default("stonex, none")
     .set_flag(Option::FLAG_MINIMAL_CONF)
     .set_description("authentication methods allowed by clients"),
 
@@ -2365,31 +2365,31 @@ std::vector<Option> get_global_options() {
     .set_default(10)
     .set_description("timeout for updating rotating keys (seconds)"),
 
-    Option("cephx_require_signatures", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
+    Option("stonex_require_signatures", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(false)
     .set_description(""),
 
-    Option("cephx_require_version", Option::TYPE_INT, Option::LEVEL_ADVANCED)
+    Option("stonex_require_version", Option::TYPE_INT, Option::LEVEL_ADVANCED)
     .set_default(2)
-    .set_description("Cephx version required (1 = pre-mimic, 2 = mimic+)"),
+    .set_description("Stonex version required (1 = pre-mimic, 2 = mimic+)"),
 
-    Option("cephx_cluster_require_signatures", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
+    Option("stonex_cluster_require_signatures", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(false)
     .set_description(""),
 
-    Option("cephx_cluster_require_version", Option::TYPE_INT, Option::LEVEL_ADVANCED)
+    Option("stonex_cluster_require_version", Option::TYPE_INT, Option::LEVEL_ADVANCED)
     .set_default(2)
-    .set_description("Cephx version required by the cluster from clients (1 = pre-mimic, 2 = mimic+)"),
+    .set_description("Stonex version required by the cluster from clients (1 = pre-mimic, 2 = mimic+)"),
 
-    Option("cephx_service_require_signatures", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
+    Option("stonex_service_require_signatures", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(false)
     .set_description(""),
 
-    Option("cephx_service_require_version", Option::TYPE_INT, Option::LEVEL_ADVANCED)
+    Option("stonex_service_require_version", Option::TYPE_INT, Option::LEVEL_ADVANCED)
     .set_default(2)
-    .set_description("Cephx version required from ceph services (1 = pre-mimic, 2 = mimic+)"),
+    .set_description("Stonex version required from stone services (1 = pre-mimic, 2 = mimic+)"),
 
-    Option("cephx_sign_messages", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
+    Option("stonex_sign_messages", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(true)
     .set_description(""),
 
@@ -2643,12 +2643,12 @@ std::vector<Option> get_global_options() {
     .set_description("uuid label for a new OSD"),
 
     Option("osd_data", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("/var/lib/ceph/osd/$cluster-$id")
+    .set_default("/var/lib/stone/osd/$cluster-$id")
     .set_flag(Option::FLAG_NO_MON_UPDATE)
     .set_description("path to OSD data"),
 
     Option("osd_journal", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("/var/lib/ceph/osd/$cluster-$id/journal")
+    .set_default("/var/lib/stone/osd/$cluster-$id/journal")
     .set_flag(Option::FLAG_NO_MON_UPDATE)
     .set_description("path to OSD journal (when FileStore backend is in use)"),
 
@@ -2746,7 +2746,7 @@ std::vector<Option> get_global_options() {
     .set_min_max(0, 255)
     .set_flag(Option::FLAG_RUNTIME)
     .set_description("the minimal number of copies allowed to write to a degraded pool for new replicated pools")
-    .set_long_description("0 means no specific default; ceph will use size-size/2")
+    .set_long_description("0 means no specific default; stone will use size-size/2")
     .add_see_also("osd_pool_default_size")
     .add_service("mon"),
 
@@ -2874,7 +2874,7 @@ std::vector<Option> get_global_options() {
     .set_description(""),
 
     Option("osd_hit_set_namespace", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default(".ceph-internal")
+    .set_default(".stone-internal")
     .set_description(""),
 
     Option("osd_tier_promote_max_objects_sec", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
@@ -3530,7 +3530,7 @@ std::vector<Option> get_global_options() {
     .add_see_also("osd_deep_scrub_large_omap_object_key_threshold"),
 
     Option("osd_class_dir", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default(CEPH_LIBDIR "/rados-classes")
+    .set_default(STONE_LIBDIR "/rados-classes")
     .set_description(""),
 
     Option("osd_open_classes_on_start", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
@@ -3538,11 +3538,11 @@ std::vector<Option> get_global_options() {
     .set_description(""),
 
     Option("osd_class_load_list", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("cephfs hello journal lock log numops " "otp rbd refcount rgw rgw_gc timeindex user version cas cmpomap queue 2pc_queue fifo")
+    .set_default("stonefs hello journal lock log numops " "otp rbd refcount rgw rgw_gc timeindex user version cas cmpomap queue 2pc_queue fifo")
     .set_description(""),
 
     Option("osd_class_default_list", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("cephfs hello journal lock log numops " "otp rbd refcount rgw rgw_gc timeindex user version cas cmpomap queue 2pc_queue fifo")
+    .set_default("stonefs hello journal lock log numops " "otp rbd refcount rgw rgw_gc timeindex user version cas cmpomap queue 2pc_queue fifo")
     .set_description(""),
 
     Option("osd_check_for_log_corruption", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
@@ -3853,7 +3853,7 @@ std::vector<Option> get_global_options() {
     .set_default(2)
     .set_description(""),
 
-    Option("leveldb_log_to_ceph_log", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
+    Option("leveldb_log_to_stone_log", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(true)
     .set_description(""),
 
@@ -3893,7 +3893,7 @@ std::vector<Option> get_global_options() {
     .set_default(false)
     .set_description(""),
 
-    Option("rocksdb_log_to_ceph_log", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
+    Option("rocksdb_log_to_stone_log", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(true)
     .set_description(""),
 
@@ -4251,7 +4251,7 @@ std::vector<Option> get_global_options() {
     .set_description("times to retry the flock")
     .set_long_description(
         "The number of times to retry on getting the block device lock. "
-        "Programs such as systemd-udevd may compete with Ceph for this lock. "
+        "Programs such as systemd-udevd may compete with Stone for this lock. "
         "0 means 'unlimited'."),
 
     Option("bluefs_alloc_size", Option::TYPE_SIZE, Option::LEVEL_ADVANCED)
@@ -5502,10 +5502,10 @@ std::vector<Option> get_global_options() {
     .set_default(false)
     .set_description(""),
 
-    Option("cephadm_path", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("/usr/sbin/cephadm")
+    Option("stoneadm_path", Option::TYPE_STR, Option::LEVEL_ADVANCED)
+    .set_default("/usr/sbin/stoneadm")
     .add_service("mgr")
-    .set_description("Path to cephadm utility"),
+    .set_description("Path to stoneadm utility"),
 
     Option("mgr_max_pg_num_change", Option::TYPE_INT, Option::LEVEL_ADVANCED)
     .set_default(128)
@@ -5513,7 +5513,7 @@ std::vector<Option> get_global_options() {
     .set_description("maximum change in pg_num"),
 
     Option("mgr_module_path", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default(CEPH_DATADIR "/mgr")
+    .set_default(STONE_DATADIR "/mgr")
     .add_service("mgr")
     .set_description("Filesystem path to manager modules."),
 
@@ -5556,10 +5556,10 @@ std::vector<Option> get_global_options() {
         "or space separated."),
 
     Option("mgr_data", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("/var/lib/ceph/mgr/$cluster-$id")
+    .set_default("/var/lib/stone/mgr/$cluster-$id")
     .set_flag(Option::FLAG_NO_MON_UPDATE)
     .add_service("mgr")
-    .set_description("Filesystem path to the ceph-mgr data directory, used to "
+    .set_description("Filesystem path to the stone-mgr data directory, used to "
                      "contain keyring."),
 
     Option("mgr_tick_period", Option::TYPE_SECS, Option::LEVEL_ADVANCED)
@@ -5678,7 +5678,7 @@ std::vector<Option> get_global_options() {
 
     Option("debug_asserts_on_shutdown", Option::TYPE_BOOL,Option::LEVEL_DEV)
     .set_default(false)
-    .set_description("Enable certain asserts to check for refcounting bugs on shutdown; see http://tracker.ceph.com/issues/21738"),
+    .set_description("Enable certain asserts to check for refcounting bugs on shutdown; see http://tracker.stone.com/issues/21738"),
 
     Option("debug_asok_assert_abort", Option::TYPE_BOOL, Option::LEVEL_DEV)
     .set_default(false)
@@ -5697,13 +5697,13 @@ std::vector<Option> get_global_options() {
 
     /*  KRB Authentication. */
     Option("gss_ktab_client_file", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("/var/lib/ceph/$name/gss_client_$name.ktab")
+    .set_default("/var/lib/stone/$name/gss_client_$name.ktab")
     .set_description("GSS/KRB5 Keytab file for client authentication")
     .add_service({"mon", "osd"})
     .set_long_description("This sets the full path for the GSS/Kerberos client keytab file location."),
 
     Option("gss_target_name", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("ceph")
+    .set_default("stone")
     .set_description("")
     .add_service({"mon", "osd"})
     .set_long_description("This sets the gss target service name."),
@@ -5728,27 +5728,27 @@ std::vector<Option> get_global_options() {
     .set_description("Size of thread pool for ASIO completions")
     .add_tag("osd"),
 
-    Option("cephsqlite_lock_renewal_interval", Option::TYPE_MILLISECS, Option::LEVEL_ADVANCED)
-    .add_see_also("cephsqlite_lock_renewal_timeout")
+    Option("stonesqlite_lock_renewal_interval", Option::TYPE_MILLISECS, Option::LEVEL_ADVANCED)
+    .add_see_also("stonesqlite_lock_renewal_timeout")
     .add_tag("client")
     .set_default(2000)
     .set_description("number of milliseconds before lock is renewed")
     .set_min(100)
     ,
 
-    Option("cephsqlite_lock_renewal_timeout", Option::TYPE_MILLISECS, Option::LEVEL_ADVANCED)
-    .add_see_also("cephsqlite_lock_renewal_interval")
+    Option("stonesqlite_lock_renewal_timeout", Option::TYPE_MILLISECS, Option::LEVEL_ADVANCED)
+    .add_see_also("stonesqlite_lock_renewal_interval")
     .add_tag("client")
     .set_default(30000)
     .set_description("number of milliseconds before transaction lock times out")
-    .set_long_description("The amount of time before a running libcephsqlite VFS connection has to renew a lock on the database before the lock is automatically lost. If the lock is lost, the VFS will abort the process to prevent database corruption.")
+    .set_long_description("The amount of time before a running libstonesqlite VFS connection has to renew a lock on the database before the lock is automatically lost. If the lock is lost, the VFS will abort the process to prevent database corruption.")
     .set_min(100),
 
-    Option("cephsqlite_blocklist_dead_locker", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
+    Option("stonesqlite_blocklist_dead_locker", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .add_tag("client")
     .set_default(true)
     .set_description("blocklist the last dead owner of the database lock")
-    .set_long_description("Require that the Ceph SQLite VFS blocklist the last dead owner of the database when cleanup was incomplete. DO NOT CHANGE THIS UNLESS YOU UNDERSTAND THE RAMIFICATIONS. CORRUPTION MAY RESULT."),
+    .set_long_description("Require that the Stone SQLite VFS blocklist the last dead owner of the database when cleanup was incomplete. DO NOT CHANGE THIS UNLESS YOU UNDERSTAND THE RAMIFICATIONS. CORRUPTION MAY RESULT."),
 
     // ----------------------------
     // Crimson specific options
@@ -5897,11 +5897,11 @@ std::vector<Option> get_rgw_options() {
     .add_see_also({"rgw_enable_gc_threads", "rgw_enable_quota_threads"}),
 
     Option("rgw_data", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("/var/lib/ceph/radosgw/$cluster-$id")
+    .set_default("/var/lib/stone/radosgw/$cluster-$id")
     .set_flag(Option::FLAG_NO_MON_UPDATE)
     .set_description("Alternative location for RGW configuration.")
     .set_long_description(
-        "If this is set, the different Ceph system configurables (such as the keyring file "
+        "If this is set, the different Stone system configurables (such as the keyring file "
         "will be located in the path that is specified here. "),
 
     Option("rgw_enable_apis", Option::TYPE_STR, Option::LEVEL_ADVANCED)
@@ -8185,11 +8185,11 @@ static std::vector<Option> get_rbd_mirror_options() {
 static std::vector<Option> get_immutable_object_cache_options() {
   return std::vector<Option>({
     Option("immutable_object_cache_path", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("/tmp/ceph_immutable_object_cache")
+    .set_default("/tmp/stone_immutable_object_cache")
     .set_description("immutable object cache data dir"),
 
     Option("immutable_object_cache_sock", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("/var/run/ceph/immutable_object_cache_sock")
+    .set_default("/var/run/stone/immutable_object_cache_sock")
     .set_description("immutable object cache domain socket"),
 
     Option("immutable_object_cache_max_size", Option::TYPE_SIZE, Option::LEVEL_ADVANCED)
@@ -8263,7 +8263,7 @@ std::vector<Option> get_mds_options() {
     .set_description("set mds's cpu affinity to a numa node (-1 for none)"),
 
     Option("mds_data", Option::TYPE_STR, Option::LEVEL_ADVANCED)
-    .set_default("/var/lib/ceph/mds/$cluster-$id")
+    .set_default("/var/lib/stone/mds/$cluster-$id")
     .set_flag(Option::FLAG_NO_MON_UPDATE)
     .set_description("path to MDS data and keyring"),
 
@@ -8470,7 +8470,7 @@ std::vector<Option> get_mds_options() {
     .set_description("complete all the replay request when mds is restarted, no matter the session is closed or not"),
 
     Option("mds_default_dir_hash", Option::TYPE_INT, Option::LEVEL_ADVANCED)
-    .set_default(CEPH_STR_HASH_RJENKINS)
+    .set_default(STONE_STR_HASH_RJENKINS)
     .set_description("hash function to select directory fragment for dentry name"),
 
     Option("mds_log_pause", Option::TYPE_BOOL, Option::LEVEL_DEV)
@@ -8584,7 +8584,7 @@ std::vector<Option> get_mds_options() {
     Option("mds_bal_fragment_dirs", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(true)
     .set_description("enable directory fragmentation")
-    .set_long_description("Directory fragmentation is a standard feature of CephFS that allows sharding directories across multiple objects for performance and stability. Additionally, this allows fragments to be distributed across multiple active MDSs to increase throughput. Disabling (new) fragmentation should only be done in exceptional circumstances and may lead to performance issues."),
+    .set_long_description("Directory fragmentation is a standard feature of StoneFS that allows sharding directories across multiple objects for performance and stability. Additionally, this allows fragments to be distributed across multiple active MDSs to increase throughput. Disabling (new) fragmentation should only be done in exceptional circumstances and may lead to performance issues."),
 
     Option("mds_bal_idle_threshold", Option::TYPE_FLOAT, Option::LEVEL_ADVANCED)
     .set_default(0)
@@ -8884,7 +8884,7 @@ std::vector<Option> get_mds_options() {
     Option("mds_task_status_update_interval", Option::TYPE_FLOAT, Option::LEVEL_DEV)
      .set_default(2.0)
      .set_description("task status update interval to manager")
-     .set_long_description("interval (in seconds) for sending mds task status to ceph manager"),
+     .set_long_description("interval (in seconds) for sending mds task status to stone manager"),
 
     Option("mds_max_snaps_per_dir", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
      .set_default(100)
@@ -8951,7 +8951,7 @@ std::vector<Option> get_mds_client_options() {
 
     Option("client_mount_timeout", Option::TYPE_FLOAT, Option::LEVEL_ADVANCED)
     .set_default(300.0)
-    .set_description("timeout for mounting CephFS (seconds)"),
+    .set_description("timeout for mounting StoneFS (seconds)"),
 
     Option("client_tick_interval", Option::TYPE_SECS, Option::LEVEL_DEV)
     .set_default(1)
@@ -9079,7 +9079,7 @@ std::vector<Option> get_mds_client_options() {
     Option("client_dirsize_rbytes", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(true)
     .set_description("set the directory size as the number of file bytes recursively used")
-    .set_long_description("This option enables a CephFS feature that stores the recursive directory size (the bytes used by files in the directory and its descendents) in the st_size field of the stat structure."),
+    .set_long_description("This option enables a StoneFS feature that stores the recursive directory size (the bytes used by files in the directory and its descendents) in the st_size field of the stat structure."),
 
     Option("client_force_lazyio", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(false)
@@ -9148,7 +9148,7 @@ std::vector<Option> get_mds_client_options() {
 
     Option("fuse_set_user_groups", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(true)
-    .set_description("check for ceph-fuse to consider supplementary groups for permissions"),
+    .set_description("check for stone-fuse to consider supplementary groups for permissions"),
 
     Option("client_try_dentry_invalidate", Option::TYPE_BOOL, Option::LEVEL_DEV)
     .set_default(false)
@@ -9161,7 +9161,7 @@ std::vector<Option> get_mds_client_options() {
     Option("client_die_on_failed_dentry_invalidate", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(true)
     .set_description("kill the client when no dentry invalidation options are available")
-    .set_long_description("The CephFS client requires a mechanism to invalidate dentries in the caller (e.g. the kernel for ceph-fuse) when capabilities must be recalled. If the client cannot do this then the MDS cache cannot shrink which can cause the MDS to fail."),
+    .set_long_description("The StoneFS client requires a mechanism to invalidate dentries in the caller (e.g. the kernel for stone-fuse) when capabilities must be recalled. If the client cannot do this then the MDS cache cannot shrink which can cause the MDS to fail."),
 
     Option("client_check_pool_perm", Option::TYPE_BOOL, Option::LEVEL_ADVANCED)
     .set_default(true)
@@ -9174,9 +9174,9 @@ std::vector<Option> get_mds_client_options() {
     Option("client_fs", Option::TYPE_STR, Option::LEVEL_ADVANCED)
     .set_flag(Option::FLAG_STARTUP)
     .set_default("")
-    .set_description("CephFS file system name to mount")
-    .set_long_description("Use this with ceph-fuse, or with any process "
-        "that uses libcephfs.  Programs using libcephfs may also pass "
+    .set_description("StoneFS file system name to mount")
+    .set_long_description("Use this with stone-fuse, or with any process "
+        "that uses libstonefs.  Programs using libstonefs may also pass "
         "the filesystem name into mount(), which will override this setting. "
         "If no filesystem name is given in mount() or this setting, the default "
         "filesystem will be mounted (usually the first created)."),
@@ -9204,67 +9204,67 @@ std::vector<Option> get_mds_client_options() {
     .set_flag(Option::FLAG_RUNTIME)
     .set_default(30)
     .set_min(0)
-    .set_description("timeout for shutting down CephFS")
-    .set_long_description("Timeout for shutting down CephFS via unmount or shutdown.")
+    .set_description("timeout for shutting down StoneFS")
+    .set_long_description("Timeout for shutting down StoneFS via unmount or shutdown.")
     .add_tag("client")
     });
 }
 
-std::vector<Option> get_cephfs_mirror_options() {
+std::vector<Option> get_stonefs_mirror_options() {
   return std::vector<Option>({
-    Option("cephfs_mirror_max_concurrent_directory_syncs", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
+    Option("stonefs_mirror_max_concurrent_directory_syncs", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
     .set_default(3)
     .set_min(1)
     .set_description("maximum number of concurrent snapshot synchronization threads")
-    .set_long_description("maximum number of directory snapshots that can be synchronized concurrently by cephfs-mirror daemon. Controls the number of synchronization threads."),
+    .set_long_description("maximum number of directory snapshots that can be synchronized concurrently by stonefs-mirror daemon. Controls the number of synchronization threads."),
 
-    Option("cephfs_mirror_action_update_interval", Option::TYPE_SECS, Option::LEVEL_ADVANCED)
+    Option("stonefs_mirror_action_update_interval", Option::TYPE_SECS, Option::LEVEL_ADVANCED)
     .set_default(2)
     .set_min(1)
     .set_description("interval for driving asynchornous mirror actions")
     .set_long_description("Interval in seconds to process pending mirror update actions."),
 
-    Option("cephfs_mirror_restart_mirror_on_blocklist_interval", Option::TYPE_SECS, Option::LEVEL_ADVANCED)
+    Option("stonefs_mirror_restart_mirror_on_blocklist_interval", Option::TYPE_SECS, Option::LEVEL_ADVANCED)
     .set_default(30)
     .set_min(0)
     .set_description("interval to restart blocklisted instances")
     .set_long_description("Interval in seconds to restart blocklisted mirror instances. Setting to zero (0) disables restarting blocklisted instances."),
 
-    Option("cephfs_mirror_max_snapshot_sync_per_cycle", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
+    Option("stonefs_mirror_max_snapshot_sync_per_cycle", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
     .set_default(3)
     .set_min(1)
     .set_description("number of snapshots to mirror in one cycle")
     .set_long_description("maximum number of snapshots to mirror when a directory is picked up for mirroring by worker threads."),
 
-    Option("cephfs_mirror_directory_scan_interval", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
+    Option("stonefs_mirror_directory_scan_interval", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
     .set_default(10)
     .set_min(1)
     .set_description("interval to scan directories to mirror snapshots")
     .set_long_description("interval in seconds to scan configured directories for snapshot mirroring."),
 
-    Option("cephfs_mirror_max_consecutive_failures_per_directory", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
+    Option("stonefs_mirror_max_consecutive_failures_per_directory", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
     .set_default(10)
     .set_min(0)
     .set_description("consecutive failed directory synchronization attempts before marking a directory as \"failed\"")
     .set_long_description("number of consecutive snapshot synchronization failues to mark a directory as \"failed\". failed directories are retried for synchronization less frequently."),
 
-    Option("cephfs_mirror_retry_failed_directories_interval", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
+    Option("stonefs_mirror_retry_failed_directories_interval", Option::TYPE_UINT, Option::LEVEL_ADVANCED)
     .set_default(60)
     .set_min(1)
     .set_description("failed directory retry interval for synchronization")
     .set_long_description("interval in seconds to retry synchronization for failed directories."),
 
-    Option("cephfs_mirror_restart_mirror_on_failure_interval", Option::TYPE_SECS, Option::LEVEL_ADVANCED)
+    Option("stonefs_mirror_restart_mirror_on_failure_interval", Option::TYPE_SECS, Option::LEVEL_ADVANCED)
     .set_default(20)
     .set_min(0)
     .set_description("interval to restart failed mirror instances")
     .set_long_description("Interval in seconds to restart failed mirror instances. Setting to zero (0) disables restarting failed mirror instances."),
 
-    Option("cephfs_mirror_mount_timeout", Option::TYPE_SECS, Option::LEVEL_ADVANCED)
+    Option("stonefs_mirror_mount_timeout", Option::TYPE_SECS, Option::LEVEL_ADVANCED)
     .set_default(10)
     .set_min(0)
-    .set_description("timeout for mounting primary/seconday ceph file system")
-    .set_long_description("Timeout in seconds for mounting primary or secondary (remote) ceph file system by the cephfs-mirror daemon. Setting this to a higher value could result in the mirror daemon getting stalled when mounting a file system if the cluster is not reachable. This option is used to override the usual client_mount_timeout."),
+    .set_description("timeout for mounting primary/seconday stone file system")
+    .set_long_description("Timeout in seconds for mounting primary or secondary (remote) stone file system by the stonefs-mirror daemon. Setting this to a higher value could result in the mirror daemon getting stalled when mounting a file system if the cluster is not reachable. This option is used to override the usual client_mount_timeout."),
     });
 }
 
@@ -9285,9 +9285,9 @@ static std::vector<Option> build_options()
   ingest(get_immutable_object_cache_options(), "immutable-objet-cache");
   ingest(get_mds_options(), "mds");
   ingest(get_mds_client_options(), "mds_client");
-  ingest(get_cephfs_mirror_options(), "cephfs-mirror");
+  ingest(get_stonefs_mirror_options(), "stonefs-mirror");
 
   return result;
 }
 
-const std::vector<Option> ceph_options = build_options();
+const std::vector<Option> stone_options = build_options();

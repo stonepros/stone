@@ -52,7 +52,7 @@ static void init_sqe(struct ioring_data *d, struct io_uring_sqe *sqe,
 {
   int fixed_fd = find_fixed_fd(d, io->fd);
 
-  ceph_assert(fixed_fd != -1);
+  stone_assert(fixed_fd != -1);
 
   if (io->iocb.aio_lio_opcode == IO_CMD_PWRITEV)
     io_uring_prep_writev(sqe, fixed_fd, &io->iov[0],
@@ -61,7 +61,7 @@ static void init_sqe(struct ioring_data *d, struct io_uring_sqe *sqe,
     io_uring_prep_readv(sqe, fixed_fd, &io->iov[0],
 			io->iov.size(), io->offset);
   else
-    ceph_assert(0);
+    stone_assert(0);
 
   io_uring_sqe_set_data(sqe, io);
   io_uring_sqe_set_flags(sqe, IOSQE_FIXED_FILE);
@@ -73,7 +73,7 @@ static int ioring_queue(struct ioring_data *d, void *priv,
   struct io_uring *ring = &d->io_uring;
   struct aio_t *io = nullptr;
 
-  ceph_assert(beg != end);
+  stone_assert(beg != end);
 
   do {
     struct io_uring_sqe *sqe = io_uring_get_sqe(ring);
@@ -223,34 +223,34 @@ struct ioring_data {};
 
 ioring_queue_t::ioring_queue_t(unsigned iodepth_, bool hipri_, bool sq_thread_)
 {
-  ceph_assert(0);
+  stone_assert(0);
 }
 
 ioring_queue_t::~ioring_queue_t()
 {
-  ceph_assert(0);
+  stone_assert(0);
 }
 
 int ioring_queue_t::init(std::vector<int> &fds)
 {
-  ceph_assert(0);
+  stone_assert(0);
 }
 
 void ioring_queue_t::shutdown()
 {
-  ceph_assert(0);
+  stone_assert(0);
 }
 
 int ioring_queue_t::submit_batch(aio_iter beg, aio_iter end,
                                  uint16_t aios_size, void *priv,
                                  int *retries)
 {
-  ceph_assert(0);
+  stone_assert(0);
 }
 
 int ioring_queue_t::get_next_completed(int timeout_ms, aio_t **paio, int max)
 {
-  ceph_assert(0);
+  stone_assert(0);
 }
 
 bool ioring_queue_t::supported()

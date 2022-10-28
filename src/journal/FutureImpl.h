@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_JOURNAL_FUTURE_IMPL_H
-#define CEPH_JOURNAL_FUTURE_IMPL_H
+#ifndef STONE_JOURNAL_FUTURE_IMPL_H
+#define STONE_JOURNAL_FUTURE_IMPL_H
 
 #include "include/int_types.h"
 #include "common/RefCountedObj.h"
@@ -119,4 +119,4 @@ std::ostream &operator<<(std::ostream &os, const FutureImpl &future);
 
 using journal::operator<<;
 
-#endif // CEPH_JOURNAL_FUTURE_IMPL_H
+#endif // STONE_JOURNAL_FUTURE_IMPL_H

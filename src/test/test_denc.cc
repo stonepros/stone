@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2016 Red Hat
  *
@@ -18,7 +18,7 @@
 #include <numeric>
 
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_context.h"
 #include "gtest/gtest.h"
 
@@ -183,11 +183,11 @@ TEST(denc, string)
 struct legacy_t {
   int32_t a = 1;
   void encode(bufferlist& bl) const {
-    using ceph::encode;
+    using stone::encode;
     encode(a, bl);
   }
   void decode(bufferlist::const_iterator& p) {
-    using ceph::decode;
+    using stone::decode;
     decode(a, p);
   }
   legacy_t() {}
@@ -631,7 +631,7 @@ struct Legacy {
   }
   void decode(buffer::list::const_iterator& p) {
     n_decode++;
-    using ceph::decode;
+    using stone::decode;
     decode(value, p);
   }
   static void reset() {
@@ -649,13 +649,13 @@ bufferlist Legacy::encode_n(unsigned n, const vector<unsigned>& segments) {
     v.push_back(Legacy());
   }
   bufferlist bl(n * sizeof(uint8_t));
-  using ceph::encode;
+  using stone::encode;
   encode(v, bl);
   bufferlist segmented;
   auto p = bl.begin();
 
   auto sum = std::accumulate(segments.begin(), segments.end(), 0u);
-  ceph_assert(sum != 0u);
+  stone_assert(sum != 0u);
   for (auto i : segments) {
     buffer::ptr seg;
     p.copy_deep(bl.length() * i / sum, seg);
@@ -675,7 +675,7 @@ TEST(denc, no_copy_if_segmented_and_lengthy)
     const vector<unsigned> segs{50, 50}; // half-half
     bufferlist segmented = Legacy::encode_n(N_COPIES, segs);
     ASSERT_GT(segmented.get_num_buffers(), 1u);
-    ASSERT_LT(segmented.length(), CEPH_PAGE_SIZE);
+    ASSERT_LT(segmented.length(), STONE_PAGE_SIZE);
     auto p = segmented.cbegin();
     vector<Legacy> v;
     // denc() is shared by encode() and decode(), so reset() right before
@@ -688,11 +688,11 @@ TEST(denc, no_copy_if_segmented_and_lengthy)
   }
   {
     // use denc() which shallow_copy() if the buffer is not segmented and large
-    const unsigned N_COPIES = CEPH_PAGE_SIZE * 2;
+    const unsigned N_COPIES = STONE_PAGE_SIZE * 2;
     const vector<unsigned> segs{100};
     bufferlist segmented = Legacy::encode_n(N_COPIES, segs);
     ASSERT_EQ(segmented.get_num_buffers(), 1u);
-    ASSERT_GT(segmented.length(), CEPH_PAGE_SIZE);
+    ASSERT_GT(segmented.length(), STONE_PAGE_SIZE);
     auto p = segmented.cbegin();
     vector<Legacy> v;
     Legacy::reset();
@@ -704,16 +704,16 @@ TEST(denc, no_copy_if_segmented_and_lengthy)
   {
     // use denc() which shallow_copy() if the buffer is segmented and large,
     // but the total size of the chunks to be decoded is smallish.
-    bufferlist large_bl = Legacy::encode_n(CEPH_PAGE_SIZE * 2, {50, 50});
+    bufferlist large_bl = Legacy::encode_n(STONE_PAGE_SIZE * 2, {50, 50});
     bufferlist small_bl = Legacy::encode_n(100, {50, 50});
     bufferlist segmented;
     segmented.append(large_bl);
     segmented.append(small_bl);
     ASSERT_GT(segmented.get_num_buffers(), 1u);
-    ASSERT_GT(segmented.length(), CEPH_PAGE_SIZE);
+    ASSERT_GT(segmented.length(), STONE_PAGE_SIZE);
     auto p = segmented.cbegin();
     p += large_bl.length();
-    ASSERT_LT(segmented.length() - p.get_off(), CEPH_PAGE_SIZE);
+    ASSERT_LT(segmented.length() - p.get_off(), STONE_PAGE_SIZE);
     vector<Legacy> v;
     Legacy::reset();
     decode(v, p);
@@ -723,19 +723,19 @@ TEST(denc, no_copy_if_segmented_and_lengthy)
   {
     // use decode() which avoids deep copy if the buffer is segmented and large
     bufferlist small_bl = Legacy::encode_n(100, {50, 50});
-    bufferlist large_bl = Legacy::encode_n(CEPH_PAGE_SIZE * 2, {50, 50});
+    bufferlist large_bl = Legacy::encode_n(STONE_PAGE_SIZE * 2, {50, 50});
     bufferlist segmented;
     segmented.append(small_bl);
     segmented.append(large_bl);
     ASSERT_GT(segmented.get_num_buffers(), 1u);
-    ASSERT_GT(segmented.length(), CEPH_PAGE_SIZE);
+    ASSERT_GT(segmented.length(), STONE_PAGE_SIZE);
     auto p = segmented.cbegin();
     p += small_bl.length();
-    ASSERT_GT(segmented.length() - p.get_off(), CEPH_PAGE_SIZE);
+    ASSERT_GT(segmented.length() - p.get_off(), STONE_PAGE_SIZE);
     vector<Legacy> v;
     Legacy::reset();
     decode(v, p);
     ASSERT_EQ(0u, Legacy::n_denc);
-    ASSERT_EQ(CEPH_PAGE_SIZE * 2, Legacy::n_decode);
+    ASSERT_EQ(STONE_PAGE_SIZE * 2, Legacy::n_decode);
   }
 }

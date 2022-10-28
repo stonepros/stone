@@ -7,7 +7,7 @@
 #include "include/rados/librados.h"
 #include "include/rbd/librbd.hpp"
 #include "common/Cond.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/errno.h"
 #include "cls/lock/cls_lock_client.h"
 #include "cls/lock/cls_lock_types.h"
@@ -28,7 +28,7 @@
 #include <sstream>
 #include <vector>
 
-using namespace ceph;
+using namespace stone;
 using namespace boost::assign;
 using namespace librbd::watch_notify;
 
@@ -248,14 +248,14 @@ public:
 
   AsyncRequestId m_async_request_id;
 
-  ceph::mutex m_callback_lock = ceph::make_mutex("m_callback_lock");
-  ceph::condition_variable m_callback_cond;
+  stone::mutex m_callback_lock = stone::make_mutex("m_callback_lock");
+  stone::condition_variable m_callback_cond;
 
 };
 
 struct ProgressContext : public librbd::ProgressContext {
-  ceph::mutex mutex = ceph::make_mutex("ProgressContext::mutex");
-  ceph::condition_variable cond;
+  stone::mutex mutex = stone::make_mutex("ProgressContext::mutex");
+  stone::condition_variable cond;
   bool received;
   uint64_t offset;
   uint64_t total;

@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat, Inc.
  *
@@ -19,16 +19,16 @@
 #include <string>
 
 #include "common/config.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
 #include "global/global_init.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/str_list.h"
 
 #include "rgw_token.h"
 #include "rgw_b64.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace {
 
@@ -67,14 +67,14 @@ int main(int argc, char **argv)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY, 0);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   char *v{nullptr};
   v = getenv("RGW_ACCESS_KEY_ID");
@@ -88,13 +88,13 @@ int main(int argc, char **argv)
   }
 
   for (auto arg_iter = args.begin(); arg_iter != args.end();) {
-    if (ceph_argparse_witharg(args, arg_iter, &val, "--access",
+    if (stone_argparse_witharg(args, arg_iter, &val, "--access",
 			      (char*) nullptr)) {
       access_key = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--secret",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--secret",
 				     (char*) nullptr)) {
       secret_key = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--ttype",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--ttype",
 				     (char*) nullptr)) {
       for (const auto& ttype : {"ad", "ldap"}) {
 	if (boost::iequals(val, ttype)) {
@@ -102,13 +102,13 @@ int main(int argc, char **argv)
 	  break;
 	}
       }
-    } else if (ceph_argparse_flag(args, arg_iter, "--encode",
+    } else if (stone_argparse_flag(args, arg_iter, "--encode",
 					    (char*) nullptr)) {
       do_encode = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--decode",
+    } else if (stone_argparse_flag(args, arg_iter, "--decode",
 					    (char*) nullptr)) {
       do_decode = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--verbose",
+    } else if (stone_argparse_flag(args, arg_iter, "--verbose",
 					    (char*) nullptr)) {
       verbose = true;
     } else {

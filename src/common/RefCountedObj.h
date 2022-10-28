@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_REFCOUNTEDOBJ_H
-#define CEPH_REFCOUNTEDOBJ_H
+#ifndef STONE_REFCOUNTEDOBJ_H
+#define STONE_REFCOUNTEDOBJ_H
  
 #include "common/ceph_mutex.h"
 #include "common/ref.h"
@@ -43,7 +43,7 @@
 namespace TOPNSPC::common {
 class RefCountedObject {
 public:
-  void set_cct(CephContext *c) {
+  void set_cct(StoneeContext *c) {
     cct = c;
   }
 
@@ -67,7 +67,7 @@ protected:
   RefCountedObject& operator=(const RefCountedObject& o) = delete;
   RefCountedObject(RefCountedObject&&) = delete;
   RefCountedObject& operator=(RefCountedObject&&) = delete;
-  RefCountedObject(CephContext* c) : cct(c) {}
+  RefCountedObject(StoneeContext* c) : cct(c) {}
 
   virtual ~RefCountedObject();
 
@@ -80,7 +80,7 @@ private:
 #else
   mutable std::atomic<uint64_t> nref{1};
 #endif
-  CephContext *cct{nullptr};
+  StoneeContext *cct{nullptr};
 };
 
 class RefCountedObjectSafe : public RefCountedObject {

@@ -45,7 +45,7 @@ public:
 
   MOSDPGNotify2() : MOSDPeeringOp{MSG_OSD_PG_NOTIFY2,
 				  HEAD_VERSION, COMPAT_VERSION} {
-    set_priority(CEPH_MSG_PRIO_HIGH);
+    set_priority(STONE_MSG_PRIO_HIGH);
   }
   MOSDPGNotify2(
     spg_t s,
@@ -53,7 +53,7 @@ public:
     : MOSDPeeringOp{MSG_OSD_PG_NOTIFY2, HEAD_VERSION, COMPAT_VERSION},
       spgid(s),
       notify(n) {
-    set_priority(CEPH_MSG_PRIO_HIGH);
+    set_priority(STONE_MSG_PRIO_HIGH);
   }
 
 private:

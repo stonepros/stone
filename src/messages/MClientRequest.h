@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MCLIENTREQUEST_H
-#define CEPH_MCLIENTREQUEST_H
+#ifndef STONE_MCLIENTREQUEST_H
+#define STONE_MCLIENTREQUEST_H
 
 /**
  *
@@ -107,9 +107,9 @@ public:
 protected:
   // cons
   MClientRequest()
-    : MMDSOp(CEPH_MSG_CLIENT_REQUEST, HEAD_VERSION, COMPAT_VERSION) {}
+    : MMDSOp(STONE_MSG_CLIENT_REQUEST, HEAD_VERSION, COMPAT_VERSION) {}
   MClientRequest(int op)
-    : MMDSOp(CEPH_MSG_CLIENT_REQUEST, HEAD_VERSION, COMPAT_VERSION) {
+    : MMDSOp(STONE_MSG_CLIENT_REQUEST, HEAD_VERSION, COMPAT_VERSION) {
     memset(&head, 0, sizeof(head));
     head.op = op;
   }
@@ -119,14 +119,14 @@ public:
   void set_mdsmap_epoch(epoch_t e) { head.mdsmap_epoch = e; }
   epoch_t get_mdsmap_epoch() const { return head.mdsmap_epoch; }
   epoch_t get_osdmap_epoch() const {
-    ceph_assert(head.op == CEPH_MDS_OP_SETXATTR);
+    ceph_assert(head.op == STONE_MDS_OP_SETXATTR);
     if (header.version >= 3)
       return head.args.setxattr.osdmap_epoch;
     else
       return 0;
   }
   void set_osdmap_epoch(epoch_t e) {
-    ceph_assert(head.op == CEPH_MDS_OP_SETXATTR);
+    ceph_assert(head.op == STONE_MDS_OP_SETXATTR);
     head.args.setxattr.osdmap_epoch = e;
   }
 
@@ -140,18 +140,18 @@ public:
     }*/
   bool may_write() const {
     return
-      (head.op & CEPH_MDS_OP_WRITE) || 
-      (head.op == CEPH_MDS_OP_OPEN && (head.args.open.flags & (O_CREAT|O_TRUNC)));
+      (head.op & STONE_MDS_OP_WRITE) || 
+      (head.op == STONE_MDS_OP_OPEN && (head.args.open.flags & (O_CREAT|O_TRUNC)));
   }
 
   int get_flags() const {
     return head.flags;
   }
   bool is_replay() const {
-    return get_flags() & CEPH_MDS_FLAG_REPLAY;
+    return get_flags() & STONE_MDS_FLAG_REPLAY;
   }
   bool is_async() const {
-    return get_flags() & CEPH_MDS_FLAG_ASYNC;
+    return get_flags() & STONE_MDS_FLAG_ASYNC;
   }
 
   // normal fields
@@ -171,13 +171,13 @@ public:
     }
   }
   void set_dentry_wanted() {
-    head.flags = head.flags | CEPH_MDS_FLAG_WANT_DENTRY;
+    head.flags = head.flags | STONE_MDS_FLAG_WANT_DENTRY;
   }
   void set_replayed_op() {
-    head.flags = head.flags | CEPH_MDS_FLAG_REPLAY;
+    head.flags = head.flags | STONE_MDS_FLAG_REPLAY;
   }
   void set_async_op() {
-    head.flags = head.flags | CEPH_MDS_FLAG_ASYNC;
+    head.flags = head.flags | STONE_MDS_FLAG_ASYNC;
   }
 
   void set_alternate_name(std::string _alternate_name) {
@@ -202,7 +202,7 @@ public:
   const filepath& get_filepath2() const { return path2; }
   std::string_view get_alternate_name() const { return std::string_view(alternate_name); }
 
-  int get_dentry_wanted() const { return get_flags() & CEPH_MDS_FLAG_WANT_DENTRY; }
+  int get_dentry_wanted() const { return get_flags() & STONE_MDS_FLAG_WANT_DENTRY; }
 
   void mark_queued_for_replay() const { queued_for_replay = true; }
   bool is_queued_for_replay() const { return queued_for_replay; }
@@ -221,10 +221,10 @@ public:
       head.version = 0;
 
       /* Can't set the btime from legacy struct */
-      if (head.op == CEPH_MDS_OP_SETATTR) {
+      if (head.op == STONE_MDS_OP_SETATTR) {
 	int localmask = head.args.setattr.mask;
 
-	localmask &= ~CEPH_SETATTR_BTIME;
+	localmask &= ~STONE_SETATTR_BTIME;
 
 	head.args.setattr.btime = { init_le32(0), init_le32(0) };
 	head.args.setattr.mask = localmask;
@@ -245,9 +245,9 @@ public:
   void encode_payload(uint64_t features) override {
     using ceph::encode;
     head.num_releases = releases.size();
-    head.version = CEPH_MDS_REQUEST_HEAD_VERSION;
+    head.version = STONE_MDS_REQUEST_HEAD_VERSION;
 
-    if (features & CEPH_FEATURE_FS_BTIME) {
+    if (features & STONE_FEATURE_FS_BTIME) {
       encode(head, payload);
     } else {
       struct ceph_mds_request_head_legacy old_mds_head;
@@ -269,24 +269,24 @@ public:
     out << "client_request(" << get_orig_source()
 	<< ":" << get_tid()
 	<< " " << ceph_mds_op_name(get_op());
-    if (head.op == CEPH_MDS_OP_GETATTR)
+    if (head.op == STONE_MDS_OP_GETATTR)
       out << " " << ccap_string(head.args.getattr.mask);
-    if (head.op == CEPH_MDS_OP_SETATTR) {
-      if (head.args.setattr.mask & CEPH_SETATTR_MODE)
+    if (head.op == STONE_MDS_OP_SETATTR) {
+      if (head.args.setattr.mask & STONE_SETATTR_MODE)
 	out << " mode=0" << std::oct << head.args.setattr.mode << std::dec;
-      if (head.args.setattr.mask & CEPH_SETATTR_UID)
+      if (head.args.setattr.mask & STONE_SETATTR_UID)
 	out << " uid=" << head.args.setattr.uid;
-      if (head.args.setattr.mask & CEPH_SETATTR_GID)
+      if (head.args.setattr.mask & STONE_SETATTR_GID)
 	out << " gid=" << head.args.setattr.gid;
-      if (head.args.setattr.mask & CEPH_SETATTR_SIZE)
+      if (head.args.setattr.mask & STONE_SETATTR_SIZE)
 	out << " size=" << head.args.setattr.size;
-      if (head.args.setattr.mask & CEPH_SETATTR_MTIME)
+      if (head.args.setattr.mask & STONE_SETATTR_MTIME)
 	out << " mtime=" << utime_t(head.args.setattr.mtime);
-      if (head.args.setattr.mask & CEPH_SETATTR_ATIME)
+      if (head.args.setattr.mask & STONE_SETATTR_ATIME)
 	out << " atime=" << utime_t(head.args.setattr.atime);
     }
-    if (head.op == CEPH_MDS_OP_SETFILELOCK ||
-	head.op == CEPH_MDS_OP_GETFILELOCK) {
+    if (head.op == STONE_MDS_OP_SETFILELOCK ||
+	head.op == STONE_MDS_OP_GETFILELOCK) {
       out << " rule " << (int)head.args.filelock_change.rule
 	  << ", type " << (int)head.args.filelock_change.type
 	  << ", owner " << head.args.filelock_change.owner

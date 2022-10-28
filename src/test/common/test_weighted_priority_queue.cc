@@ -11,10 +11,10 @@
 #include <list>
 #include <tuple>
 
-#define CEPH_OP_CLASS_STRICT	0
-#define CEPH_OP_CLASS_NORMAL	0
-#define CEPH_OP_QUEUE_BACK	0
-#define CEPH_OP_QUEUE_FRONT	0
+#define STONE_OP_CLASS_STRICT	0
+#define STONE_OP_CLASS_NORMAL	0
+#define STONE_OP_QUEUE_BACK	0
+#define STONE_OP_QUEUE_FRONT	0
 
 class WeightedPriorityQueueTest : public testing::Test
 {

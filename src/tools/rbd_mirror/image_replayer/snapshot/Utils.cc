@@ -6,8 +6,8 @@
 #include "common/errno.h"
 #include "cls/rbd/cls_rbd_types.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::snapshot::util::" \
                            << __func__ << ": "
@@ -19,10 +19,10 @@ namespace snapshot {
 namespace util {
 
 uint64_t compute_remote_snap_id(
-    const ceph::shared_mutex& local_image_lock,
+    const stone::shared_mutex& local_image_lock,
     const std::map<librados::snap_t, librbd::SnapInfo>& local_snap_infos,
     uint64_t local_snap_id, const std::string& remote_mirror_uuid) {
-  ceph_assert(ceph_mutex_is_locked(local_image_lock));
+  stone_assert(stone_mutex_is_locked(local_image_lock));
 
   // Search our local non-primary snapshots for a mapping to the remote
   // snapshot. The non-primary mirror snapshot with the mappings will always
@@ -55,7 +55,7 @@ uint64_t compute_remote_snap_id(
     }
   }
 
-  return CEPH_NOSNAP;
+  return STONE_NOSNAP;
 }
 
 } // namespace util

@@ -10,8 +10,8 @@
 * License version 2.1, as published by the Free Software
 * Foundation. See file COPYING.
 */
-#ifndef CEPH_MONITOR_DB_STORE_H
-#define CEPH_MONITOR_DB_STORE_H
+#ifndef STONE_MONITOR_DB_STORE_H
+#define STONE_MONITOR_DB_STORE_H
 
 #include "include/types.h"
 #include "include/buffer.h"
@@ -811,4 +811,4 @@ class MonitorDBStore
 WRITE_CLASS_ENCODER(MonitorDBStore::Op)
 WRITE_CLASS_ENCODER(MonitorDBStore::Transaction)
 
-#endif /* CEPH_MONITOR_DB_STORE_H */
+#endif /* STONE_MONITOR_DB_STORE_H */

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 
-#ifndef CEPH_PAXOSSERVICEMESSAGE_H
-#define CEPH_PAXOSSERVICEMESSAGE_H
+#ifndef STONE_PAXOSSERVICEMESSAGE_H
+#define STONE_PAXOSSERVICEMESSAGE_H
 
 #include "msg/Message.h"
 #include "mon/Session.h"

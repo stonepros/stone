@@ -13,7 +13,7 @@
 #include "librbd/mirror/GetInfoRequest.h"
 #include "librbd/mirror/snapshot/DemoteRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::DemoteRequest: " << this \
                            << " " << __func__ << ": "
@@ -30,7 +30,7 @@ void DemoteRequest<I>::send() {
 
 template <typename I>
 void DemoteRequest<I>::get_info() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   auto ctx = create_context_callback<
@@ -43,7 +43,7 @@ void DemoteRequest<I>::get_info() {
 
 template <typename I>
 void DemoteRequest<I>::handle_get_info(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0 && r != -ENOENT) {
@@ -66,7 +66,7 @@ void DemoteRequest<I>::handle_get_info(int r) {
 
 template <typename I>
 void DemoteRequest<I>::acquire_lock() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   m_image_ctx.owner_lock.lock_shared();
   if (m_image_ctx.exclusive_lock == nullptr) {
@@ -102,7 +102,7 @@ void DemoteRequest<I>::acquire_lock() {
 
 template <typename I>
 void DemoteRequest<I>::handle_acquire_lock(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -127,7 +127,7 @@ void DemoteRequest<I>::handle_acquire_lock(int r) {
 
 template <typename I>
 void DemoteRequest<I>::demote() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   auto ctx = create_context_callback<
@@ -147,7 +147,7 @@ void DemoteRequest<I>::demote() {
 
 template <typename I>
 void DemoteRequest<I>::handle_demote(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -160,7 +160,7 @@ void DemoteRequest<I>::handle_demote(int r) {
 
 template <typename I>
 void DemoteRequest<I>::release_lock() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   m_image_ctx.owner_lock.lock_shared();
@@ -179,7 +179,7 @@ void DemoteRequest<I>::release_lock() {
 
 template <typename I>
 void DemoteRequest<I>::handle_release_lock(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -203,7 +203,7 @@ void DemoteRequest<I>::finish(int r) {
     }
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

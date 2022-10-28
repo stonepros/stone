@@ -12,7 +12,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 }
 
@@ -32,7 +32,7 @@ segment_nonce_t generate_nonce(
   segment_seq_t seq,
   const seastore_meta_t &meta)
 {
-  return ceph_crc32c(
+  return stone_crc32c(
     seq,
     reinterpret_cast<const unsigned char *>(meta.seastore_id.bytes()),
     sizeof(meta.seastore_id.uuid));
@@ -42,7 +42,7 @@ Journal::Journal(SegmentManager &segment_manager)
   : block_size(segment_manager.get_block_size()),
     max_record_length(
       segment_manager.get_segment_size() -
-      p2align(ceph::encoded_sizeof_bounded<segment_header_t>(),
+      p2align(stone::encoded_sizeof_bounded<segment_header_t>(),
 	      size_t(block_size))),
     segment_manager(segment_manager) {}
 
@@ -56,7 +56,7 @@ Journal::initialize_segment(Segment &segment)
     segment.get_segment_id(),
     new_tail);
   // write out header
-  ceph_assert(segment.get_write_ptr() == 0);
+  stone_assert(segment.get_write_ptr() == 0);
   bufferlist bl;
 
   segment_seq_t seq = next_journal_segment_seq++;
@@ -70,7 +70,7 @@ Journal::initialize_segment(Segment &segment)
   encode(header, bl);
 
   bufferptr bp(
-    ceph::buffer::create_page_aligned(
+    stone::buffer::create_page_aligned(
       segment_manager.get_block_size()));
   bp.zero();
   auto iter = bl.cbegin();
@@ -89,7 +89,7 @@ Journal::initialize_segment(Segment &segment)
     crimson::ct_error::assert_all{ "TODO" });
 }
 
-ceph::bufferlist Journal::encode_record(
+stone::bufferlist Journal::encode_record(
   record_size_t rsize,
   record_t &&record)
 {
@@ -122,25 +122,25 @@ ceph::bufferlist Journal::encode_record(
     bl.append_zero(
       block_size - (bl.length() % block_size));
   }
-  ceph_assert(bl.length() == rsize.mdlength);
+  stone_assert(bl.length() == rsize.mdlength);
 
 
   auto bliter = bl.cbegin();
   auto metadata_crc = bliter.crc32c(
-    ceph::encoded_sizeof_bounded<record_header_t>(),
+    stone::encoded_sizeof_bounded<record_header_t>(),
     -1);
   bliter += sizeof(checksum_t); /* crc hole again */
   metadata_crc = bliter.crc32c(
     bliter.get_remaining(),
     metadata_crc);
-  ceph_le32 metadata_crc_le;
+  stone_le32 metadata_crc_le;
   metadata_crc_le = metadata_crc;
   metadata_crc_filler.copy_in(
     sizeof(checksum_t),
     reinterpret_cast<const char *>(&metadata_crc_le));
 
   bl.claim_append(data_bl);
-  ceph_assert(bl.length() == (rsize.dlength + rsize.mdlength));
+  stone_assert(bl.length() == (rsize.dlength + rsize.mdlength));
 
   return bl;
 }
@@ -149,9 +149,9 @@ bool Journal::validate_metadata(const bufferlist &bl)
 {
   auto bliter = bl.cbegin();
   auto test_crc = bliter.crc32c(
-    ceph::encoded_sizeof_bounded<record_header_t>(),
+    stone::encoded_sizeof_bounded<record_header_t>(),
     -1);
-  ceph_le32 recorded_crc_le;
+  stone_le32 recorded_crc_le;
   ::decode(recorded_crc_le, bliter);
   uint32_t recorded_crc = recorded_crc_le;
   test_crc = bliter.crc32c(
@@ -178,7 +178,7 @@ Journal::write_record_ret Journal::write_record(
   record_size_t rsize,
   record_t &&record)
 {
-  ceph::bufferlist to_write = encode_record(
+  stone::bufferlist to_write = encode_record(
     rsize, std::move(record));
   auto target = written_to;
   assert((to_write.length() % block_size) == 0);
@@ -203,13 +203,13 @@ Journal::write_record_ret Journal::write_record(
 Journal::record_size_t Journal::get_encoded_record_length(
   const record_t &record) const {
   extent_len_t metadata =
-    (extent_len_t)ceph::encoded_sizeof_bounded<record_header_t>();
+    (extent_len_t)stone::encoded_sizeof_bounded<record_header_t>();
   metadata += sizeof(checksum_t) /* crc */;
   metadata += record.extents.size() *
-    ceph::encoded_sizeof_bounded<extent_info_t>();
+    stone::encoded_sizeof_bounded<extent_info_t>();
   extent_len_t data = 0;
   for (const auto &i: record.deltas) {
-    metadata += ceph::encoded_sizeof(i);
+    metadata += stone::encoded_sizeof(i);
   }
   for (const auto &i: record.extents) {
     data += i.bl.length();
@@ -251,7 +251,7 @@ Journal::roll_journal_segment()
       return seq;
     }).handle_error(
       roll_journal_segment_ertr::pass_further{},
-      crimson::ct_error::all_same_way([] { ceph_assert(0 == "TODO"); })
+      crimson::ct_error::all_same_way([] { stone_assert(0 == "TODO"); })
     );
 }
 
@@ -277,7 +277,7 @@ Journal::read_segment_header(segment_id_t segment)
     auto bp = bl.cbegin();
     try {
       decode(header, bp);
-    } catch (ceph::buffer::error &e) {
+    } catch (stone::buffer::error &e) {
       logger().debug(
 	"Journal::read_segment_header: segment {} unable to decode "
 	"header, skipping",
@@ -438,7 +438,7 @@ Journal::read_validate_record_metadata_ret Journal::read_validate_record_metadat
       record_header_t header;
       try {
 	decode(header, bp);
-      } catch (ceph::buffer::error &e) {
+      } catch (stone::buffer::error &e) {
 	return read_validate_record_metadata_ret(
 	  read_validate_record_metadata_ertr::ready_future_marker{},
 	  std::nullopt);
@@ -488,15 +488,15 @@ std::optional<std::vector<delta_info_t>> Journal::try_decode_deltas(
   const bufferlist &bl)
 {
   auto bliter = bl.cbegin();
-  bliter += ceph::encoded_sizeof_bounded<record_header_t>();
+  bliter += stone::encoded_sizeof_bounded<record_header_t>();
   bliter += sizeof(checksum_t) /* crc */;
-  bliter += header.extents  * ceph::encoded_sizeof_bounded<extent_info_t>();
+  bliter += header.extents  * stone::encoded_sizeof_bounded<extent_info_t>();
   logger().debug("{}: decoding {} deltas", __func__, header.deltas);
   std::vector<delta_info_t> deltas(header.deltas);
   for (auto &&i : deltas) {
     try {
       decode(i, bliter);
-    } catch (ceph::buffer::error &e) {
+    } catch (stone::buffer::error &e) {
       return std::nullopt;
     }
   }
@@ -508,14 +508,14 @@ std::optional<std::vector<extent_info_t>> Journal::try_decode_extent_infos(
   const bufferlist &bl)
 {
   auto bliter = bl.cbegin();
-  bliter += ceph::encoded_sizeof_bounded<record_header_t>();
+  bliter += stone::encoded_sizeof_bounded<record_header_t>();
   bliter += sizeof(checksum_t) /* crc */;
   logger().debug("{}: decoding {} extents", __func__, header.extents);
   std::vector<extent_info_t> extent_infos(header.extents);
   for (auto &&i : extent_infos) {
     try {
       decode(i, bliter);
-    } catch (ceph::buffer::error &e) {
+    } catch (stone::buffer::error &e) {
       return std::nullopt;
     }
   }

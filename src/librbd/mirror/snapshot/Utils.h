@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_MIRROR_SNAPSHOT_UTILS_H
-#define CEPH_LIBRBD_MIRROR_SNAPSHOT_UTILS_H
+#ifndef STONE_LIBRBD_MIRROR_SNAPSHOT_UTILS_H
+#define STONE_LIBRBD_MIRROR_SNAPSHOT_UTILS_H
 
 #include "include/int_types.h"
 #include "include/stringify.h"
@@ -35,4 +35,4 @@ std::string image_state_object_name(ImageCtxT *image_ctx, uint64_t snap_id,
 } // namespace mirror
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_MIRROR_SNAPSHOT_UTILS_H
+#endif // STONE_LIBRBD_MIRROR_SNAPSHOT_UTILS_H

@@ -14,15 +14,15 @@
 
 #include "include/str_list.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 
 namespace rgw {
 namespace auth {
 
 std::unique_ptr<rgw::auth::Identity>
-transform_old_authinfo(CephContext* const cct,
+transform_old_authinfo(StoneContext* const cct,
                        const rgw_user& auth_id,
                        const int perm_mask,
                        const bool is_admin,
@@ -32,7 +32,7 @@ transform_old_authinfo(CephContext* const cct,
    * with this function after moving all our APIs to the new authentication
    * infrastructure. */
   class DummyIdentityApplier : public rgw::auth::Identity {
-    CephContext* const cct;
+    StoneContext* const cct;
 
     /* For this particular case it's OK to use rgw_user structure to convey
      * the identity info as this was the policy for doing that before the
@@ -42,7 +42,7 @@ transform_old_authinfo(CephContext* const cct,
     const bool is_admin;
     const uint32_t type;
   public:
-    DummyIdentityApplier(CephContext* const cct,
+    DummyIdentityApplier(StoneContext* const cct,
                          const rgw_user& auth_id,
                          const int perm_mask,
                          const bool is_admin,
@@ -174,7 +174,7 @@ strategy_handle_rejected(rgw::auth::Engine::result_t&& engine_result,
 
     default:
       /* Huh, memory corruption? */
-      ceph_abort();
+      stone_abort();
   }
 }
 
@@ -198,7 +198,7 @@ strategy_handle_denied(rgw::auth::Engine::result_t&& engine_result,
 
     default:
       /* Huh, memory corruption? */
-      ceph_abort();
+      stone_abort();
   }
 }
 
@@ -223,7 +223,7 @@ strategy_handle_granted(rgw::auth::Engine::result_t&& engine_result,
 
     default:
       /* Huh, memory corruption? */
-      ceph_abort();
+      stone_abort();
   }
 }
 
@@ -274,7 +274,7 @@ rgw::auth::Strategy::authenticate(const DoutPrefixProvider* dpp, const req_state
         break;
       }
       default: {
-        ceph_abort();
+        stone_abort();
       }
     }
 
@@ -631,7 +631,7 @@ void rgw::auth::RemoteApplier::load_acct_info(const DoutPrefixProvider* dpp, RGW
    * If that fails, we look up in the requested (possibly empty) tenant.
    * If that fails too, we create the account within the global or separated
    * namespace depending on rgw_keystone_implicit_tenants.
-   * For compatibility with previous versions of ceph, it is possible
+   * For compatibility with previous versions of stone, it is possible
    * to enable implicit_tenants for only s3 or only swift.
    * in this mode ("split_mode"), we must constrain the id lookups to
    * only use the identifier space that would be used if the id were

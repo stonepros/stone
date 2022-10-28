@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 New Dream Network
  *
@@ -23,10 +23,10 @@
 #include "rgw/rgw_token.h"
 
 #include "gtest/gtest.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace {
 
@@ -91,10 +91,10 @@ int main(int argc, char *argv[])
   env_to_vec(args);
 
   for (auto arg_iter = args.begin(); arg_iter != args.end();) {
-    if (ceph_argparse_witharg(args, arg_iter, &val, "--access",
+    if (stone_argparse_witharg(args, arg_iter, &val, "--access",
 			      (char*) nullptr)) {
       access_key = val;
-    } else if (ceph_argparse_flag(args, arg_iter, "--hexdump",
+    } else if (stone_argparse_flag(args, arg_iter, "--hexdump",
 					    (char*) nullptr)) {
       do_hexdump = true;
     } else {

@@ -1,6 +1,6 @@
 overrides:
-  ceph:
+  stone:
     conf:
       client:
-        setuser: ceph
-        setgroup: ceph
+        setuser: stone
+        setgroup: stone

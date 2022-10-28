@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MOSDOP_H
-#define CEPH_MOSDOP_H
+#ifndef STONE_MOSDOP_H
+#define STONE_MOSDOP_H
 
 #include <atomic>
 
@@ -170,14 +170,14 @@ public:
   }
 
   MOSDOp()
-    : MOSDFastDispatchOp(CEPH_MSG_OSD_OP, HEAD_VERSION, COMPAT_VERSION),
+    : MOSDFastDispatchOp(STONE_MSG_OSD_OP, HEAD_VERSION, COMPAT_VERSION),
       partial_decode_needed(true),
       final_decode_needed(true),
       bdata_encode(false) { }
   MOSDOp(int inc, long tid, const hobject_t& ho, spg_t& _pgid,
 	 epoch_t _osdmap_epoch,
 	 int _flags, uint64_t feat)
-    : MOSDFastDispatchOp(CEPH_MSG_OSD_OP, HEAD_VERSION, COMPAT_VERSION),
+    : MOSDFastDispatchOp(STONE_MSG_OSD_OP, HEAD_VERSION, COMPAT_VERSION),
       client_inc(inc),
       osdmap_epoch(_osdmap_epoch), flags(_flags), retry_attempt(-1),
       hobj(ho),
@@ -210,40 +210,40 @@ public:
     ops.push_back(osd_op);
   }
   void write(uint64_t off, uint64_t len, ceph::buffer::list& bl) {
-    add_simple_op(CEPH_OSD_OP_WRITE, off, len);
+    add_simple_op(STONE_OSD_OP_WRITE, off, len);
     data = std::move(bl);
     header.data_off = off;
   }
   void writefull(ceph::buffer::list& bl) {
-    add_simple_op(CEPH_OSD_OP_WRITEFULL, 0, bl.length());
+    add_simple_op(STONE_OSD_OP_WRITEFULL, 0, bl.length());
     data = std::move(bl);
     header.data_off = 0;
   }
   void zero(uint64_t off, uint64_t len) {
-    add_simple_op(CEPH_OSD_OP_ZERO, off, len);
+    add_simple_op(STONE_OSD_OP_ZERO, off, len);
   }
   void truncate(uint64_t off) {
-    add_simple_op(CEPH_OSD_OP_TRUNCATE, off, 0);
+    add_simple_op(STONE_OSD_OP_TRUNCATE, off, 0);
   }
   void remove() {
-    add_simple_op(CEPH_OSD_OP_DELETE, 0, 0);
+    add_simple_op(STONE_OSD_OP_DELETE, 0, 0);
   }
 
   void read(uint64_t off, uint64_t len) {
-    add_simple_op(CEPH_OSD_OP_READ, off, len);
+    add_simple_op(STONE_OSD_OP_READ, off, len);
   }
   void stat() {
-    add_simple_op(CEPH_OSD_OP_STAT, 0, 0);
+    add_simple_op(STONE_OSD_OP_STAT, 0, 0);
   }
 
   bool has_flag(__u32 flag) const { return flags & flag; };
 
-  bool is_retry_attempt() const { return flags & CEPH_OSD_FLAG_RETRY; }
+  bool is_retry_attempt() const { return flags & STONE_OSD_FLAG_RETRY; }
   void set_retry_attempt(unsigned a) { 
     if (a)
-      flags |= CEPH_OSD_FLAG_RETRY;
+      flags |= STONE_OSD_FLAG_RETRY;
     else
-      flags &= ~CEPH_OSD_FLAG_RETRY;
+      flags &= ~STONE_OSD_FLAG_RETRY;
     retry_attempt = a;
   }
 
@@ -255,7 +255,7 @@ public:
       bdata_encode = true;
     }
 
-    if ((features & CEPH_FEATURE_OBJECTLOCATOR) == 0) {
+    if ((features & STONE_FEATURE_OBJECTLOCATOR) == 0) {
       // here is the old structure we are encoding to: //
 #if 0
 struct ceph_osd_request_head {
@@ -306,7 +306,7 @@ struct ceph_osd_request_head {
 
       ceph::encode_nohead(hobj.oid.name, payload);
       ceph::encode_nohead(snaps, payload);
-    } else if ((features & CEPH_FEATURE_NEW_OSDOP_ENCODING) == 0) {
+    } else if ((features & STONE_FEATURE_NEW_OSDOP_ENCODING) == 0) {
       header.version = 6;
       encode(client_inc, payload);
       encode(osdmap_epoch, payload);
@@ -451,7 +451,7 @@ struct ceph_osd_request_head {
       ceph::decode_nohead(num_snaps, snaps, p);
 
       // recalculate pgid hash value
-      pgid.pgid.set_ps(ceph_str_hash(CEPH_STR_HASH_RJENKINS,
+      pgid.pgid.set_ps(ceph_str_hash(STONE_STR_HASH_RJENKINS,
 				     hobj.oid.name.c_str(),
 				     hobj.oid.name.length()));
       hobj.pool = pgid.pgid.pool();

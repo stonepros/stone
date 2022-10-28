@@ -6,8 +6,8 @@
  * as published by the Free Software Foundation; either version
  * 2 of the License, or (at your option) any later version.
  */
-#ifndef CEPH_ARCH_PPC_H
-#define CEPH_ARCH_PPC_H
+#ifndef STONE_ARCH_PPC_H
+#define STONE_ARCH_PPC_H
 
 #ifdef __cplusplus
 extern "C" {

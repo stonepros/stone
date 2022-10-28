@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OSD_KSTORE_H
-#define CEPH_OSD_KSTORE_H
+#ifndef STONE_OSD_KSTORE_H
+#define STONE_OSD_KSTORE_H
 
 #include "acconfig.h"
 
@@ -23,7 +23,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/unordered_map.h"
 #include "common/Finisher.h"
 #include "common/RWLock.h"
@@ -57,7 +57,7 @@ public:
 
   /// an in-memory object
   struct Onode {
-    CephContext* cct;
+    StoneContext* cct;
     std::atomic_int nref;  ///< reference count
 
     ghobject_t oid;
@@ -73,11 +73,11 @@ public:
     std::set<TransContext*> flush_txns;   ///< committing txns
 
     uint64_t tail_offset;
-    ceph::buffer::list tail_bl;
+    stone::buffer::list tail_bl;
 
-    std::map<uint64_t,ceph::buffer::list> pending_stripes;  ///< unwritten stripes
+    std::map<uint64_t,stone::buffer::list> pending_stripes;  ///< unwritten stripes
 
-    Onode(CephContext* cct, const ghobject_t& o, const std::string& k)
+    Onode(StoneContext* cct, const ghobject_t& o, const std::string& k)
       : cct(cct),
 	nref(0),
 	oid(o),
@@ -107,7 +107,7 @@ public:
   typedef boost::intrusive_ptr<Onode> OnodeRef;
 
   struct OnodeHashLRU {
-    CephContext* cct;
+    StoneContext* cct;
     typedef boost::intrusive::list<
       Onode,
       boost::intrusive::member_hook<
@@ -116,10 +116,10 @@ public:
 	&Onode::lru_item> > lru_list_t;
 
     std::mutex lock;
-    ceph::unordered_map<ghobject_t,OnodeRef> onode_map;  ///< forward lookups
+    stone::unordered_map<ghobject_t,OnodeRef> onode_map;  ///< forward lookups
     lru_list_t lru;                                      ///< lru
 
-    OnodeHashLRU(CephContext* cct) : cct(cct) {}
+    OnodeHashLRU(StoneContext* cct) : cct(cct) {}
 
     void add(const ghobject_t& oid, OnodeRef o);
     void _touch(OnodeRef o);
@@ -136,8 +136,8 @@ public:
   struct Collection : public CollectionImpl {
     KStore *store;
     kstore_cnode_t cnode;
-    ceph::shared_mutex lock =
-      ceph::make_shared_mutex("KStore::Collection::lock", true, false);
+    stone::shared_mutex lock =
+      stone::make_shared_mutex("KStore::Collection::lock", true, false);
 
     OpSequencerRef osr;
 
@@ -165,7 +165,7 @@ public:
     FRIEND_MAKE_REF(Collection);
     Collection(KStore *ns, coll_t c);
   };
-  using CollectionRef = ceph::ref_t<Collection>;
+  using CollectionRef = stone::ref_t<Collection>;
 
   class OmapIteratorImpl : public ObjectMap::ObjectMapIteratorImpl {
     CollectionRef c;
@@ -180,7 +180,7 @@ public:
     bool valid() override;
     int next() override;
     std::string key() override;
-    ceph::buffer::list value() override;
+    stone::buffer::list value() override;
     int status() override {
       return 0;
     }
@@ -215,7 +215,7 @@ public:
     }
 
     void log_state_latency(PerfCounters *logger, int state) {
-        utime_t lat, now = ceph_clock_now();
+        utime_t lat, now = stone_clock_now();
         lat = now - start;
         logger->tinc(state, lat);
         start = now;
@@ -245,7 +245,7 @@ public:
 	oncommit(NULL),
 	onreadable(NULL),
 	onreadable_sync(NULL),
-        start(ceph_clock_now()){
+        start(stone_clock_now()){
       //cout << "txc new " << this << std::endl;
     }
     ~TransContext() {
@@ -270,7 +270,7 @@ public:
     q_list_t q;  ///< transactions
 
     ~OpSequencer() {
-      ceph_assert(q.empty());
+      stone_assert(q.empty());
     }
 
     void queue_new(TransContext *txc) {
@@ -293,7 +293,7 @@ public:
       if (txc->state >= TransContext::STATE_KV_DONE) {
 	return true;
       }
-      ceph_assert(txc->state < TransContext::STATE_KV_DONE);
+      stone_assert(txc->state < TransContext::STATE_KV_DONE);
       txc->oncommits.push_back(c);
       return false;
     }
@@ -319,8 +319,8 @@ private:
   bool mounted;
 
   /// rwlock to protect coll_map
-  ceph::shared_mutex coll_lock = ceph::make_shared_mutex("KStore::coll_lock");
-  ceph::unordered_map<coll_t, CollectionRef> coll_map;
+  stone::shared_mutex coll_lock = stone::make_shared_mutex("KStore::coll_lock");
+  stone::unordered_map<coll_t, CollectionRef> coll_map;
   std::map<coll_t,CollectionRef> new_coll_map;
 
   std::mutex nid_lock;
@@ -392,9 +392,9 @@ private:
     kv_stop = false;
   }
 
-  void _do_read_stripe(OnodeRef o, uint64_t offset, ceph::buffer::list *pbl, bool do_cache);
+  void _do_read_stripe(OnodeRef o, uint64_t offset, stone::buffer::list *pbl, bool do_cache);
   void _do_write_stripe(TransContext *txc, OnodeRef o,
-			uint64_t offset, ceph::buffer::list& bl);
+			uint64_t offset, stone::buffer::list& bl);
   void _do_remove_stripe(TransContext *txc, OnodeRef o, uint64_t offset);
 
   int _collection_list(
@@ -402,7 +402,7 @@ private:
     int max, std::vector<ghobject_t> *ls, ghobject_t *next);
 
 public:
-  KStore(CephContext *cct, const std::string& path);
+  KStore(StoneContext *cct, const std::string& path);
   ~KStore() override;
 
   std::string get_type() override {
@@ -435,12 +435,12 @@ public:
   int mkjournal() override {
     return 0;
   }
-  void dump_perf_counters(ceph::Formatter *f) override {
+  void dump_perf_counters(stone::Formatter *f) override {
     f->open_object_section("perf_counters");
     logger->dump_formatted(f, false);
     f->close_section();
   }
-  void get_db_statistics(ceph::Formatter *f) override {
+  void get_db_statistics(stone::Formatter *f) override {
     db->get_statistics(f);
   }
   int statfs(struct store_statfs_t *buf,
@@ -471,23 +471,23 @@ public:
     const ghobject_t& oid,
     uint64_t offset,
     size_t len,
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     uint32_t op_flags = 0) override;
   int _do_read(
     OnodeRef o,
     uint64_t offset,
     size_t len,
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     bool do_cache,
     uint32_t op_flags = 0);
 
   using ObjectStore::fiemap;
   int fiemap(CollectionHandle& c, const ghobject_t& oid, uint64_t offset, size_t len, std::map<uint64_t, uint64_t>& destmap) override;
-  int fiemap(CollectionHandle& c, const ghobject_t& oid, uint64_t offset, size_t len, ceph::buffer::list& outbl) override;
+  int fiemap(CollectionHandle& c, const ghobject_t& oid, uint64_t offset, size_t len, stone::buffer::list& outbl) override;
   using ObjectStore::getattr;
-  int getattr(CollectionHandle& c, const ghobject_t& oid, const char *name, ceph::buffer::ptr& value) override;
+  int getattr(CollectionHandle& c, const ghobject_t& oid, const char *name, stone::buffer::ptr& value) override;
   using ObjectStore::getattrs;
-  int getattrs(CollectionHandle& c, const ghobject_t& oid, std::map<std::string,ceph::buffer::ptr>& aset) override;
+  int getattrs(CollectionHandle& c, const ghobject_t& oid, std::map<std::string,stone::buffer::ptr>& aset) override;
 
   int list_collections(std::vector<coll_t>& ls) override;
   bool collection_exists(const coll_t& c) override;
@@ -502,8 +502,8 @@ public:
   int omap_get(
     CollectionHandle& c,                ///< [in] Collection containing oid
     const ghobject_t &oid,   ///< [in] Object containing omap
-    ceph::buffer::list *header,      ///< [out] omap header
-    std::map<std::string, ceph::buffer::list> *out /// < [out] Key to value std::map
+    stone::buffer::list *header,      ///< [out] omap header
+    std::map<std::string, stone::buffer::list> *out /// < [out] Key to value std::map
     ) override;
 
   using ObjectStore::omap_get_header;
@@ -511,7 +511,7 @@ public:
   int omap_get_header(
     CollectionHandle& c,                ///< [in] Collection containing oid
     const ghobject_t &oid,   ///< [in] Object containing omap
-    ceph::buffer::list *header,      ///< [out] omap header
+    stone::buffer::list *header,      ///< [out] omap header
     bool allow_eio = false ///< [in] don't assert on eio
     ) override;
 
@@ -529,7 +529,7 @@ public:
     CollectionHandle& c,                    ///< [in] Collection containing oid
     const ghobject_t &oid,       ///< [in] Object containing omap
     const std::set<std::string> &keys,     ///< [in] Keys to get
-    std::map<std::string, ceph::buffer::list> *out ///< [out] Returned keys and values
+    std::map<std::string, stone::buffer::list> *out ///< [out] Returned keys and values
     ) override;
 
   using ObjectStore::omap_check_keys;
@@ -573,7 +573,7 @@ public:
     ThreadPool::TPHandle *handle = NULL) override;
 
   void compact () override {
-    ceph_assert(db);
+    stone_assert(db);
     db->compact();
   }
   
@@ -585,12 +585,12 @@ private:
 	     CollectionRef& c,
 	     OnodeRef& o,
 	     uint64_t offset, size_t len,
-	     ceph::buffer::list& bl,
+	     stone::buffer::list& bl,
 	     uint32_t fadvise_flags);
   int _do_write(TransContext *txc,
 		OnodeRef o,
 		uint64_t offset, uint64_t length,
-		ceph::buffer::list& bl,
+		stone::buffer::list& bl,
 		uint32_t fadvise_flags);
   int _touch(TransContext *txc,
 	     CollectionRef& c,
@@ -615,11 +615,11 @@ private:
 	       CollectionRef& c,
 	       OnodeRef& o,
 	       const std::string& name,
-	       ceph::buffer::ptr& val);
+	       stone::buffer::ptr& val);
   int _setattrs(TransContext *txc,
 		CollectionRef& c,
 		OnodeRef& o,
-		const std::map<std::string,ceph::buffer::ptr>& aset);
+		const std::map<std::string,stone::buffer::ptr>& aset);
   int _rmattr(TransContext *txc,
 	      CollectionRef& c,
 	      OnodeRef& o,
@@ -634,15 +634,15 @@ private:
   int _omap_setkeys(TransContext *txc,
 		    CollectionRef& c,
 		    OnodeRef& o,
-		    ceph::buffer::list& bl);
+		    stone::buffer::list& bl);
   int _omap_setheader(TransContext *txc,
 		      CollectionRef& c,
 		      OnodeRef& o,
-		      ceph::buffer::list& header);
+		      stone::buffer::list& header);
   int _omap_rmkeys(TransContext *txc,
 		   CollectionRef& c,
 		   OnodeRef& o,
-		   const ceph::buffer::list& bl);
+		   const stone::buffer::list& bl);
   int _omap_rmkey_range(TransContext *txc,
 			CollectionRef& c,
 			OnodeRef& o,

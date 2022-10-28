@@ -10,9 +10,9 @@
 #include "test/librados_test_stub/TestRadosClient.h"
 #include <boost/bind/bind.hpp>
 #include <boost/function.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rados
+#define dout_subsys stone_subsys_rados
 #undef dout_prefix
 #define dout_prefix *_dout << "TestWatchNotify::" << __func__ << ": "
 
@@ -54,7 +54,7 @@ TestWatchNotify::TestWatchNotify(TestCluster* test_cluster)
 }
 
 void TestWatchNotify::flush(TestRadosClient *rados_client) {
-  CephContext *cct = rados_client->cct();
+  StoneContext *cct = rados_client->cct();
 
   ldout(cct, 20) << "enter" << dendl;
   // block until we know no additional async notify callbacks will occur
@@ -154,7 +154,7 @@ void TestWatchNotify::notify_ack(TestRadosClient *rados_client, int64_t pool_id,
                                  const std::string& o, uint64_t notify_id,
                                  uint64_t handle, uint64_t gid,
                                  bufferlist& bl) {
-  CephContext *cct = rados_client->cct();
+  StoneContext *cct = rados_client->cct();
   ldout(cct, 20) << "notify_id=" << notify_id << ", handle=" << handle
 		 << ", gid=" << gid << dendl;
   std::lock_guard lock{m_lock};
@@ -169,7 +169,7 @@ void TestWatchNotify::execute_watch(TestRadosClient *rados_client,
                                     uint64_t *handle, librados::WatchCtx *ctx,
                                     librados::WatchCtx2 *ctx2,
                                     Context* on_finish) {
-  CephContext *cct = rados_client->cct();
+  StoneContext *cct = rados_client->cct();
 
   m_lock.lock();
   SharedWatcher watcher = get_watcher(pool_id, nspace, o);
@@ -200,7 +200,7 @@ void TestWatchNotify::execute_watch(TestRadosClient *rados_client,
 
 void TestWatchNotify::execute_unwatch(TestRadosClient *rados_client,
                                       uint64_t handle, Context* on_finish) {
-  CephContext *cct = rados_client->cct();
+  StoneContext *cct = rados_client->cct();
 
   ldout(cct, 20) << "handle=" << handle << dendl;
   {
@@ -222,7 +222,7 @@ void TestWatchNotify::execute_unwatch(TestRadosClient *rados_client,
 
 TestWatchNotify::SharedWatcher TestWatchNotify::get_watcher(
     int64_t pool_id, const std::string& nspace, const std::string& oid) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   auto it = m_file_watchers.find({pool_id, nspace, oid});
   if (it == m_file_watchers.end()) {
@@ -243,7 +243,7 @@ TestWatchNotify::SharedWatcher TestWatchNotify::get_watcher(
 }
 
 void TestWatchNotify::maybe_remove_watcher(SharedWatcher watcher) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   // TODO
   if (watcher->watch_handles.empty() && watcher->notify_handles.empty()) {
@@ -265,7 +265,7 @@ void TestWatchNotify::execute_notify(TestRadosClient *rados_client,
                                      const std::string &oid,
                                      const bufferlist &bl, bufferlist *pbl,
                                      Context *on_notify) {
-  CephContext *cct = rados_client->cct();
+  StoneContext *cct = rados_client->cct();
 
   m_lock.lock();
   uint64_t notify_id = ++m_notify_id;
@@ -324,9 +324,9 @@ void TestWatchNotify::ack_notify(TestRadosClient *rados_client, int64_t pool_id,
                                  const std::string &oid, uint64_t notify_id,
                                  const WatcherID &watcher_id,
                                  const bufferlist &bl) {
-  CephContext *cct = rados_client->cct();
+  StoneContext *cct = rados_client->cct();
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   SharedWatcher watcher = get_watcher(pool_id, nspace, oid);
   if (!watcher) {
     ldout(cct, 1) << "oid=" << oid << ": not found" << dendl;
@@ -355,11 +355,11 @@ void TestWatchNotify::finish_notify(TestRadosClient *rados_client,
                                     int64_t pool_id, const std::string& nspace,
                                     const std::string &oid,
                                     uint64_t notify_id) {
-  CephContext *cct = rados_client->cct();
+  StoneContext *cct = rados_client->cct();
 
   ldout(cct, 20) << "oid=" << oid << ", notify_id=" << notify_id << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   SharedWatcher watcher = get_watcher(pool_id, nspace, oid);
   if (!watcher) {
     ldout(cct, 1) << "oid=" << oid << ": not found" << dendl;

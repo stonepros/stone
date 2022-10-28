@@ -5,7 +5,7 @@
 #include "test/librbd/test_support.h"
 #include "test/librbd/mock/migration/MockStreamInterface.h"
 #include "include/rbd_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/migration/FileStream.h"
 #include "librbd/migration/RawSnapshot.h"
 #include "librbd/migration/SourceSpecBuilder.h"

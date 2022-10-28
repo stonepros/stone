@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     conf:
       osd:
         # remove the threshold so that test_bucket_index_log_trim() will test DeleteRange

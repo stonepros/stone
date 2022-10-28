@@ -19,7 +19,7 @@
 #include "common/errno.h"
 #include "common/mime.h"
 #include "common/utf8.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/static_ptr.h"
 
 #include "rgw_rados.h"
@@ -59,7 +59,7 @@
 #include "cls/rgw/cls_rgw_client.h"
 
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "compressor/Compressor.h"
 
@@ -73,11 +73,11 @@
 #define tracepoint(...)
 #endif
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 using namespace librados;
-using ceph::crypto::MD5;
+using stone::crypto::MD5;
 using boost::optional;
 using boost::none;
 
@@ -88,7 +88,7 @@ using rgw::IAM::Policy;
 static string mp_ns = RGW_OBJ_NS_MULTIPART;
 static string shadow_ns = RGW_OBJ_NS_SHADOW;
 
-static void forward_req_info(CephContext *cct, req_info& info, const std::string& bucket_name);
+static void forward_req_info(StoneContext *cct, req_info& info, const std::string& bucket_name);
 
 static MultipartMetaFilter mp_filter;
 
@@ -164,7 +164,7 @@ done:
 }
 
 static int decode_policy(const DoutPrefixProvider *dpp,
-                         CephContext *cct,
+                         StoneContext *cct,
                          bufferlist& bl,
                          RGWAccessControlPolicy *policy)
 {
@@ -175,7 +175,7 @@ static int decode_policy(const DoutPrefixProvider *dpp,
     ldpp_dout(dpp, 0) << "ERROR: could not decode policy, caught buffer::error" << dendl;
     return -EIO;
   }
-  if (cct->_conf->subsys.should_gather<ceph_subsys_rgw, 15>()) {
+  if (cct->_conf->subsys.should_gather<stone_subsys_rgw, 15>()) {
     ldpp_dout(dpp, 15) << __func__ << " Read AccessControlPolicy";
     RGWAccessControlPolicy_S3 *s3policy = static_cast<RGWAccessControlPolicy_S3 *>(policy);
     s3policy->to_xml(*_dout);
@@ -186,7 +186,7 @@ static int decode_policy(const DoutPrefixProvider *dpp,
 
 
 static int get_user_policy_from_attr(const DoutPrefixProvider *dpp,
-                                     CephContext * const cct,
+                                     StoneContext * const cct,
 				     rgw::sal::RGWRadosStore * const store,
 				     map<string, bufferlist>& attrs,
 				     RGWAccessControlPolicy& policy    /* out */)
@@ -212,7 +212,7 @@ static int get_user_policy_from_attr(const DoutPrefixProvider *dpp,
  * Returns: 0 on success, -ERR# otherwise.
  */
 int rgw_op_get_bucket_policy_from_attr(const DoutPrefixProvider *dpp, 
-                                       CephContext *cct,
+                                       StoneContext *cct,
 				       rgw::sal::RGWStore *store,
 				       RGWBucketInfo& bucket_info,
 				       map<string, bufferlist>& bucket_attrs,
@@ -239,7 +239,7 @@ int rgw_op_get_bucket_policy_from_attr(const DoutPrefixProvider *dpp,
 }
 
 static int get_obj_policy_from_attr(const DoutPrefixProvider *dpp, 
-                                    CephContext *cct,
+                                    StoneContext *cct,
 				    rgw::sal::RGWStore *store,
 				    RGWObjectCtx& obj_ctx,
 				    RGWBucketInfo& bucket_info,
@@ -284,7 +284,7 @@ static int get_obj_policy_from_attr(const DoutPrefixProvider *dpp,
 }
 
 
-static boost::optional<Policy> get_iam_policy_from_attr(CephContext* cct,
+static boost::optional<Policy> get_iam_policy_from_attr(StoneContext* cct,
 							map<string, bufferlist>& attrs,
 							const string& tenant) {
   auto i = attrs.find(RGW_ATTR_IAM_POLICY);
@@ -312,7 +312,7 @@ get_public_access_conf_from_attr(const map<string, bufferlist>& attrs)
   return boost::none;
 }
 
-vector<Policy> get_iam_user_policy_from_attr(CephContext* cct,
+vector<Policy> get_iam_user_policy_from_attr(StoneContext* cct,
                         rgw::sal::RGWRadosStore* store,
                         map<string, bufferlist>& attrs,
                         const string& tenant) {
@@ -816,9 +816,9 @@ void rgw_build_iam_environment(rgw::sal::RGWRadosStore* store,
 	                              struct req_state* s)
 {
   const auto& m = s->info.env->get_map();
-  auto t = ceph::real_clock::now();
-  s->env.emplace("aws:CurrentTime", std::to_string(ceph::real_clock::to_time_t(t)));
-  s->env.emplace("aws:EpochTime", ceph::to_iso_8601(t));
+  auto t = stone::real_clock::now();
+  s->env.emplace("aws:CurrentTime", std::to_string(stone::real_clock::to_time_t(t)));
+  s->env.emplace("aws:EpochTime", stone::to_iso_8601(t));
   // TODO: This is fine for now, but once we have STS we'll need to
   // look and see. Also this won't work with the IdentityApplier
   // model, since we need to know the actual credential.
@@ -1400,7 +1400,7 @@ int RGWOp::read_bucket_cors()
     ldpp_dout(this, 0) << "ERROR: could not decode CORS, caught buffer::error" << dendl;
     return -EIO;
   }
-  if (s->cct->_conf->subsys.should_gather<ceph_subsys_rgw, 15>()) {
+  if (s->cct->_conf->subsys.should_gather<stone_subsys_rgw, 15>()) {
     RGWCORSConfiguration_S3 *s3cors = static_cast<RGWCORSConfiguration_S3 *>(&bucket_cors);
     ldpp_dout(this, 15) << "Read RGWCORSConfiguration";
     s3cors->to_xml(*_dout);
@@ -1594,7 +1594,7 @@ int RGWGetObj::read_user_manifest_part(rgw::sal::RGWBucket* bucket,
 }
 
 static int iterate_user_manifest_parts(const DoutPrefixProvider *dpp, 
-                                       CephContext * const cct,
+                                       StoneContext * const cct,
                                        rgw::sal::RGWStore* const store,
                                        const off_t ofs,
                                        const off_t end,
@@ -1620,7 +1620,7 @@ static int iterate_user_manifest_parts(const DoutPrefixProvider *dpp,
   bool found_start = false, found_end = false, handled_end = false;
   string delim;
 
-  utime_t start_time = ceph_clock_now();
+  utime_t start_time = stone_clock_now();
 
   rgw::sal::RGWBucket::ListParams params;
   params.prefix = obj_prefix;
@@ -1659,7 +1659,7 @@ static int iterate_user_manifest_parts(const DoutPrefixProvider *dpp,
       }
 
       perfcounter->tinc(l_rgw_get_lat,
-			(ceph_clock_now() - start_time));
+			(stone_clock_now() - start_time));
 
       if (found_start && !handled_end) {
         len_count += end_ofs - start_ofs;
@@ -1674,7 +1674,7 @@ static int iterate_user_manifest_parts(const DoutPrefixProvider *dpp,
       }
 
       handled_end = found_end;
-      start_time = ceph_clock_now();
+      start_time = stone_clock_now();
     }
   } while (results.is_truncated);
 
@@ -1700,7 +1700,7 @@ struct rgw_slo_part {
   string etag;
 };
 
-static int iterate_slo_parts(CephContext *cct,
+static int iterate_slo_parts(StoneContext *cct,
                              rgw::sal::RGWStore*store,
                              off_t ofs,
                              off_t end,
@@ -1721,7 +1721,7 @@ static int iterate_slo_parts(CephContext *cct,
     return 0;
   }
 
-  utime_t start_time = ceph_clock_now();
+  utime_t start_time = stone_clock_now();
 
   map<uint64_t, rgw_slo_part>::iterator iter = slo_parts.upper_bound(ofs);
   if (iter != slo_parts.begin()) {
@@ -1754,7 +1754,7 @@ static int iterate_slo_parts(CephContext *cct,
     }
 
     perfcounter->tinc(l_rgw_get_lat,
-		      (ceph_clock_now() - start_time));
+		      (stone_clock_now() - start_time));
 
     if (found_start) {
       if (cb) {
@@ -1774,7 +1774,7 @@ static int iterate_slo_parts(CephContext *cct,
       }
     }
 
-    start_time = ceph_clock_now();
+    start_time = stone_clock_now();
   }
 
   return 0;
@@ -2026,7 +2026,7 @@ int RGWGetObj::handle_slo_manifest(bufferlist& bl, optional_yield y)
 int RGWGetObj::get_data_cb(bufferlist& bl, off_t bl_ofs, off_t bl_len)
 {
   /* garbage collection related handling:
-   * defer_gc disabled for https://tracker.ceph.com/issues/47866 */
+   * defer_gc disabled for https://tracker.stone.com/issues/47866 */
   return send_response_data(bl, bl_ofs, bl_len);
 }
 
@@ -2071,7 +2071,7 @@ static inline void rgw_cond_decode_objtags(
 void RGWGetObj::execute(optional_yield y)
 {
   bufferlist bl;
-  gc_invalidate_time = ceph_clock_now();
+  gc_invalidate_time = stone_clock_now();
   gc_invalidate_time += (s->cct->_conf->rgw_gc_obj_min_wait / 2);
 
   bool need_decompress;
@@ -3031,7 +3031,7 @@ static int filter_out_quota_info(std::map<std::string, bufferlist>& add_attrs,
 }
 
 
-static void filter_out_website(std::map<std::string, ceph::bufferlist>& add_attrs,
+static void filter_out_website(std::map<std::string, stone::bufferlist>& add_attrs,
                                const std::set<std::string>& rmattr_names,
                                RGWBucketWebsiteConf& ws_conf)
 {
@@ -3742,10 +3742,10 @@ static CompressorRef get_compressor_plugin(const req_state *s,
 
 void RGWPutObj::execute(optional_yield y)
 {
-  char supplied_md5_bin[CEPH_CRYPTO_MD5_DIGESTSIZE + 1];
-  char supplied_md5[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
-  char calc_md5[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
-  unsigned char m[CEPH_CRYPTO_MD5_DIGESTSIZE];
+  char supplied_md5_bin[STONE_CRYPTO_MD5_DIGESTSIZE + 1];
+  char supplied_md5[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+  char calc_md5[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+  unsigned char m[STONE_CRYPTO_MD5_DIGESTSIZE];
   MD5 hash;
   // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
   hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
@@ -3786,15 +3786,15 @@ void RGWPutObj::execute(optional_yield y)
     need_calc_md5 = true;
 
     ldpp_dout(this, 15) << "supplied_md5_b64=" << supplied_md5_b64 << dendl;
-    op_ret = ceph_unarmor(supplied_md5_bin, &supplied_md5_bin[CEPH_CRYPTO_MD5_DIGESTSIZE + 1],
+    op_ret = stone_unarmor(supplied_md5_bin, &supplied_md5_bin[STONE_CRYPTO_MD5_DIGESTSIZE + 1],
                        supplied_md5_b64, supplied_md5_b64 + strlen(supplied_md5_b64));
-    ldpp_dout(this, 15) << "ceph_armor ret=" << op_ret << dendl;
-    if (op_ret != CEPH_CRYPTO_MD5_DIGESTSIZE) {
+    ldpp_dout(this, 15) << "stone_armor ret=" << op_ret << dendl;
+    if (op_ret != STONE_CRYPTO_MD5_DIGESTSIZE) {
       op_ret = -ERR_INVALID_DIGEST;
       return;
     }
 
-    buf_to_hex((const unsigned char *)supplied_md5_bin, CEPH_CRYPTO_MD5_DIGESTSIZE, supplied_md5);
+    buf_to_hex((const unsigned char *)supplied_md5_bin, STONE_CRYPTO_MD5_DIGESTSIZE, supplied_md5);
     ldpp_dout(this, 15) << "supplied_md5=" << supplied_md5 << dendl;
   }
 
@@ -3838,7 +3838,7 @@ void RGWPutObj::execute(optional_yield y)
   constexpr auto max_processor_size = std::max({sizeof(MultipartObjectProcessor),
                                                sizeof(AtomicObjectProcessor),
                                                sizeof(AppendObjectProcessor)});
-  ceph::static_ptr<ObjectProcessor, max_processor_size> processor;
+  stone::static_ptr<ObjectProcessor, max_processor_size> processor;
 
   rgw_placement_rule *pdest_placement;
 
@@ -4028,7 +4028,7 @@ void RGWPutObj::execute(optional_yield y)
         << ", blocks=" << cs_info.blocks.size() << dendl;
   }
 
-  buf_to_hex(m, CEPH_CRYPTO_MD5_DIGESTSIZE, calc_md5);
+  buf_to_hex(m, STONE_CRYPTO_MD5_DIGESTSIZE, calc_md5);
 
   etag = calc_md5;
 
@@ -4131,7 +4131,7 @@ void RGWPostObj::execute(optional_yield y)
 {
   boost::optional<RGWPutObj_Compress> compressor;
   CompressorRef plugin;
-  char supplied_md5[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+  char supplied_md5[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
 
   /* Read in the data from the POST form. */
   op_ret = get_params(y);
@@ -4220,12 +4220,12 @@ void RGWPostObj::execute(optional_yield y)
   /* Start iteration over data fields. It's necessary as Swift's FormPost
    * is capable to handle multiple files in single form. */
   do {
-    char calc_md5[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
-    unsigned char m[CEPH_CRYPTO_MD5_DIGESTSIZE];
+    char calc_md5[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+    unsigned char m[STONE_CRYPTO_MD5_DIGESTSIZE];
     MD5 hash;
     // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
     hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
-    ceph::buffer::list bl, aclbl;
+    stone::buffer::list bl, aclbl;
     int len = 0;
 
     op_ret = s->bucket->check_quota(user_quota, bucket_quota, s->content_length, y);
@@ -4234,17 +4234,17 @@ void RGWPostObj::execute(optional_yield y)
     }
 
     if (supplied_md5_b64) {
-      char supplied_md5_bin[CEPH_CRYPTO_MD5_DIGESTSIZE + 1];
+      char supplied_md5_bin[STONE_CRYPTO_MD5_DIGESTSIZE + 1];
       ldpp_dout(this, 15) << "supplied_md5_b64=" << supplied_md5_b64 << dendl;
-      op_ret = ceph_unarmor(supplied_md5_bin, &supplied_md5_bin[CEPH_CRYPTO_MD5_DIGESTSIZE + 1],
+      op_ret = stone_unarmor(supplied_md5_bin, &supplied_md5_bin[STONE_CRYPTO_MD5_DIGESTSIZE + 1],
                             supplied_md5_b64, supplied_md5_b64 + strlen(supplied_md5_b64));
-      ldpp_dout(this, 15) << "ceph_armor ret=" << op_ret << dendl;
-      if (op_ret != CEPH_CRYPTO_MD5_DIGESTSIZE) {
+      ldpp_dout(this, 15) << "stone_armor ret=" << op_ret << dendl;
+      if (op_ret != STONE_CRYPTO_MD5_DIGESTSIZE) {
         op_ret = -ERR_INVALID_DIGEST;
         return;
       }
 
-      buf_to_hex((const unsigned char *)supplied_md5_bin, CEPH_CRYPTO_MD5_DIGESTSIZE, supplied_md5);
+      buf_to_hex((const unsigned char *)supplied_md5_bin, STONE_CRYPTO_MD5_DIGESTSIZE, supplied_md5);
       ldpp_dout(this, 15) << "supplied_md5=" << supplied_md5 << dendl;
     }
 
@@ -4295,7 +4295,7 @@ void RGWPostObj::execute(optional_yield y)
 
     bool again;
     do {
-      ceph::bufferlist data;
+      stone::bufferlist data;
       len = get_data(data, again);
 
       if (len < 0) {
@@ -4342,7 +4342,7 @@ void RGWPostObj::execute(optional_yield y)
     }
 
     hash.Final(m);
-    buf_to_hex(m, CEPH_CRYPTO_MD5_DIGESTSIZE, calc_md5);
+    buf_to_hex(m, STONE_CRYPTO_MD5_DIGESTSIZE, calc_md5);
 
     etag = calc_md5;
     
@@ -4359,13 +4359,13 @@ void RGWPostObj::execute(optional_yield y)
 
     const std::string content_type = get_current_content_type();
     if (! content_type.empty()) {
-      ceph::bufferlist ct_bl;
+      stone::bufferlist ct_bl;
       ct_bl.append(content_type.c_str(), content_type.size() + 1);
       emplace_attr(RGW_ATTR_CONTENT_TYPE, std::move(ct_bl));
     }
 
     if (compressor && compressor->is_compressed()) {
-      ceph::bufferlist tmp;
+      stone::bufferlist tmp;
       RGWCompressionInfo cs_info;
       cs_info.compression_type = plugin->get_type_name();
       cs_info.orig_size = s->obj_size;
@@ -4385,7 +4385,7 @@ void RGWPostObj::execute(optional_yield y)
   } while (is_next_file_to_upload());
 
   // send request to notification manager
-  const auto ret = rgw::notify::publish_commit(s->object.get(), ofs, ceph::real_clock::now(), etag, event_type, res, this);
+  const auto ret = rgw::notify::publish_commit(s->object.get(), ofs, stone::real_clock::now(), etag, event_type, res, this);
   if (ret < 0) {
     ldpp_dout(this, 1) << "ERROR: publishing notification failed, with error: " << ret << dendl;
     // too late to rollback operation, hence op_ret is not set here
@@ -4867,7 +4867,7 @@ void RGWDeleteObj::execute(optional_yield y)
       op_ret = 0;
 
       if (check_obj_lock) {
-        ceph_assert(astate);
+        stone_assert(astate);
         int object_lock_response = verify_object_lock(this, astate->attrset, bypass_perm, bypass_governance_mode);
         if (object_lock_response != 0) {
           op_ret = object_lock_response;
@@ -4950,7 +4950,7 @@ void RGWDeleteObj::execute(optional_yield y)
     }
 
     // send request to notification manager
-    const auto ret = rgw::notify::publish_commit(s->object.get(), obj_size, ceph::real_clock::now(), etag, event_type, res, this);
+    const auto ret = rgw::notify::publish_commit(s->object.get(), obj_size, stone::real_clock::now(), etag, event_type, res, this);
     if (ret < 0) {
       ldpp_dout(this, 1) << "ERROR: publishing notification failed, with error: " << ret << dendl;
       // too late to rollback operation, hence op_ret is not set here
@@ -5597,7 +5597,7 @@ void RGWPutACLs::execute(optional_yield y)
     }
   }
 
-  if (s->cct->_conf->subsys.should_gather<ceph_subsys_rgw, 15>()) {
+  if (s->cct->_conf->subsys.should_gather<stone_subsys_rgw, 15>()) {
     ldpp_dout(this, 15) << "Old AccessControlPolicy";
     policy->to_xml(*_dout);
     *_dout << dendl;
@@ -5607,7 +5607,7 @@ void RGWPutACLs::execute(optional_yield y)
   if (op_ret < 0)
     return;
 
-  if (s->cct->_conf->subsys.should_gather<ceph_subsys_rgw, 15>()) {
+  if (s->cct->_conf->subsys.should_gather<stone_subsys_rgw, 15>()) {
     ldpp_dout(this, 15) << "New AccessControlPolicy:";
     new_policy.to_xml(*_dout);
     *_dout << dendl;
@@ -5680,11 +5680,11 @@ void RGWPutLC::execute(optional_yield y)
   MD5 data_hash;
   // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
   data_hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
-  unsigned char data_hash_res[CEPH_CRYPTO_MD5_DIGESTSIZE];
+  unsigned char data_hash_res[STONE_CRYPTO_MD5_DIGESTSIZE];
   data_hash.Update(reinterpret_cast<const unsigned char*>(buf), data.length());
   data_hash.Final(data_hash_res);
 
-  if (memcmp(data_hash_res, content_md5_bin.c_str(), CEPH_CRYPTO_MD5_DIGESTSIZE) != 0) {
+  if (memcmp(data_hash_res, content_md5_bin.c_str(), STONE_CRYPTO_MD5_DIGESTSIZE) != 0) {
     op_ret = -ERR_BAD_DIGEST;
     s->err.message = "The Content-MD5 you specified did not match what we received.";
     ldpp_dout(this, 5) << s->err.message
@@ -5711,7 +5711,7 @@ void RGWPutLC::execute(optional_yield y)
   if (op_ret < 0)
     return;
 
-  if (s->cct->_conf->subsys.should_gather<ceph_subsys_rgw, 15>()) {
+  if (s->cct->_conf->subsys.should_gather<stone_subsys_rgw, 15>()) {
     XMLFormatter xf;
     new_config.dump_xml(&xf);
     stringstream ss;
@@ -6070,7 +6070,7 @@ void RGWInitMultipart::execute(optional_yield y)
   } while (op_ret == -EEXIST);
 
   // send request to notification manager
-  const auto ret = rgw::notify::publish_commit(s->object.get(), s->obj_size, ceph::real_clock::now(), attrs[RGW_ATTR_ETAG].to_str(), event_type, res, this);
+  const auto ret = rgw::notify::publish_commit(s->object.get(), s->obj_size, stone::real_clock::now(), attrs[RGW_ATTR_ETAG].to_str(), event_type, res, this);
   if (ret < 0) {
     ldpp_dout(this, 1) << "ERROR: publishing notification failed, with error: " << ret << dendl;
     // too late to rollback operation, hence op_ret is not set here
@@ -6156,8 +6156,8 @@ void RGWCompleteMultipart::execute(optional_yield y)
   MD5 hash;
   // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
   hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
-  char final_etag[CEPH_CRYPTO_MD5_DIGESTSIZE];
-  char final_etag_str[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 16];
+  char final_etag[STONE_CRYPTO_MD5_DIGESTSIZE];
+  char final_etag_str[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 16];
   bufferlist etag_bl;
   std::unique_ptr<rgw::sal::RGWObject> meta_obj;
   std::unique_ptr<rgw::sal::RGWObject> target_obj;
@@ -6281,7 +6281,7 @@ void RGWCompleteMultipart::execute(optional_yield y)
         return;
       }
 
-      char petag[CEPH_CRYPTO_MD5_DIGESTSIZE];
+      char petag[STONE_CRYPTO_MD5_DIGESTSIZE];
       if (iter->first != (int)obj_iter->first) {
         ldpp_dout(this, 0) << "NOTICE: parts num mismatch: next requested: "
 			 << iter->first << " next uploaded: "
@@ -6298,7 +6298,7 @@ void RGWCompleteMultipart::execute(optional_yield y)
       }
 
       hex_to_buf(obj_iter->second.etag.c_str(), petag,
-		CEPH_CRYPTO_MD5_DIGESTSIZE);
+		STONE_CRYPTO_MD5_DIGESTSIZE);
       hash.Update((const unsigned char *)petag, sizeof(petag));
 
       RGWUploadPartInfo& obj_part = obj_iter->second;
@@ -6360,7 +6360,7 @@ void RGWCompleteMultipart::execute(optional_yield y)
   hash.Final((unsigned char *)final_etag);
 
   buf_to_hex((unsigned char *)final_etag, sizeof(final_etag), final_etag_str);
-  snprintf(&final_etag_str[CEPH_CRYPTO_MD5_DIGESTSIZE * 2],  sizeof(final_etag_str) - CEPH_CRYPTO_MD5_DIGESTSIZE * 2,
+  snprintf(&final_etag_str[STONE_CRYPTO_MD5_DIGESTSIZE * 2],  sizeof(final_etag_str) - STONE_CRYPTO_MD5_DIGESTSIZE * 2,
            "-%lld", (long long)parts->parts.size());
   etag = final_etag_str;
   ldpp_dout(this, 10) << "calculated etag: " << final_etag_str << dendl;
@@ -6418,7 +6418,7 @@ void RGWCompleteMultipart::execute(optional_yield y)
 
   // remove the upload meta object ; the meta object is not versioned
   // when the bucket is, as that would add an unneeded delete marker
-  int r = meta_obj->delete_object(this, s->obj_ctx, ACLOwner(), ACLOwner(), ceph::real_time(), false, 0,
+  int r = meta_obj->delete_object(this, s->obj_ctx, ACLOwner(), ACLOwner(), stone::real_time(), false, 0,
 				  version_id, null_yield, true /* prevent versioning*/ );
   if (r >= 0)  {
     /* serializer's exclusive lock is released */
@@ -6428,7 +6428,7 @@ void RGWCompleteMultipart::execute(optional_yield y)
   }
 
   // send request to notification manager
-  const auto ret = rgw::notify::publish_commit(s->object.get(), ofs, ceph::real_clock::now(), final_etag_str, event_type, res, this);
+  const auto ret = rgw::notify::publish_commit(s->object.get(), ofs, stone::real_clock::now(), final_etag_str, event_type, res, this);
   if (ret < 0) {
     ldpp_dout(this, 1) << "ERROR: publishing notification failed, with error: " << ret << dendl;
     // too late to rollback operation, hence op_ret is not set here
@@ -6895,7 +6895,7 @@ void RGWDeleteMultiObj::execute(optional_yield y)
       }
 
       if (check_obj_lock) {
-        ceph_assert(astate);
+        stone_assert(astate);
         int object_lock_response = verify_object_lock(this, astate->attrset, bypass_perm, bypass_governance_mode);
         if (object_lock_response != 0) {
           send_partial_response(*iter, false, "", object_lock_response);
@@ -6917,7 +6917,7 @@ void RGWDeleteMultiObj::execute(optional_yield y)
 
     obj->set_atomic(obj_ctx);
 
-    op_ret = obj->delete_object(this, obj_ctx, s->owner, s->bucket_owner, ceph::real_time(),
+    op_ret = obj->delete_object(this, obj_ctx, s->owner, s->bucket_owner, stone::real_time(),
 				false, 0, version_id, s->yield);
     if (op_ret == -ENOENT) {
       op_ret = 0;
@@ -6926,7 +6926,7 @@ void RGWDeleteMultiObj::execute(optional_yield y)
     send_partial_response(*iter, obj->get_delete_marker(), version_id, op_ret);
 
     // send request to notification manager
-    const auto ret = rgw::notify::publish_commit(obj.get(), obj_size, ceph::real_clock::now(), etag, event_type, res, this);
+    const auto ret = rgw::notify::publish_commit(obj.get(), obj_size, stone::real_clock::now(), etag, event_type, res, this);
     if (ret < 0) {
       ldpp_dout(this, 1) << "ERROR: publishing notification failed, with error: " << ret << dendl;
       // too late to rollback operation, hence op_ret is not set here
@@ -6998,7 +6998,7 @@ bool RGWBulkDelete::Deleter::delete_single(const acct_path_t& path, optional_yie
     std::unique_ptr<rgw::sal::RGWObject> obj = bucket->get_object(path.obj_key);
     obj->set_atomic(s->obj_ctx);
 
-    ret = obj->delete_object(dpp, s->obj_ctx, bowner, bucket_owner, ceph::real_time(), false, 0,
+    ret = obj->delete_object(dpp, s->obj_ctx, bowner, bucket_owner, stone::real_time(), false, 0,
 			     version_id, s->yield);
     if (ret < 0) {
       goto delop_fail;
@@ -7195,7 +7195,7 @@ int RGWBulkUploadOp::handle_dir_verify_permission(optional_yield y)
   return 0;
 }
 
-static void forward_req_info(CephContext *cct, req_info& info, const std::string& bucket_name)
+static void forward_req_info(StoneContext *cct, req_info& info, const std::string& bucket_name)
 {
   /* the request of container or object level will contain bucket name.
    * only at account level need to append the bucket name */
@@ -7238,10 +7238,10 @@ int RGWBulkUploadOp::handle_dir(const std::string_view path, optional_yield y)
   std::unique_ptr<rgw::sal::RGWBucket> bucket;
 
   /* Create metadata: ACLs. */
-  std::map<std::string, ceph::bufferlist> attrs;
+  std::map<std::string, stone::bufferlist> attrs;
   RGWAccessControlPolicy policy;
   policy.create_default(s->user->get_id(), s->user->get_display_name());
-  ceph::bufferlist aclbl;
+  stone::bufferlist aclbl;
   policy.encode(aclbl);
   attrs.emplace(RGW_ATTR_ACL, std::move(aclbl));
 
@@ -7311,7 +7311,7 @@ int RGWBulkUploadOp::handle_dir(const std::string_view path, optional_yield y)
 
 bool RGWBulkUploadOp::handle_file_verify_permission(RGWBucketInfo& binfo,
 						    const rgw_obj& obj,
-                                                    std::map<std::string, ceph::bufferlist>& battrs,
+                                                    std::map<std::string, stone::bufferlist>& battrs,
                                                     ACLOwner& bucket_owner /* out */,
 						    optional_yield y)
 {
@@ -7461,7 +7461,7 @@ int RGWBulkUploadOp::handle_file(const std::string_view path,
   // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
   hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
   do {
-    ceph::bufferlist data;
+    stone::bufferlist data;
     len = body.get_at_most(s->cct->_conf->rgw_max_chunk_size, data);
 
     ldpp_dout(this, 20) << "body=" << data.c_str() << dendl;
@@ -7499,28 +7499,28 @@ int RGWBulkUploadOp::handle_file(const std::string_view path,
     return op_ret;
   }
 
-  char calc_md5[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
-  unsigned char m[CEPH_CRYPTO_MD5_DIGESTSIZE];
+  char calc_md5[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+  unsigned char m[STONE_CRYPTO_MD5_DIGESTSIZE];
   hash.Final(m);
-  buf_to_hex(m, CEPH_CRYPTO_MD5_DIGESTSIZE, calc_md5);
+  buf_to_hex(m, STONE_CRYPTO_MD5_DIGESTSIZE, calc_md5);
 
   /* Create metadata: ETAG. */
-  std::map<std::string, ceph::bufferlist> attrs;
+  std::map<std::string, stone::bufferlist> attrs;
   std::string etag = calc_md5;
-  ceph::bufferlist etag_bl;
+  stone::bufferlist etag_bl;
   etag_bl.append(etag.c_str(), etag.size() + 1);
   attrs.emplace(RGW_ATTR_ETAG, std::move(etag_bl));
 
   /* Create metadata: ACLs. */
   RGWAccessControlPolicy policy;
   policy.create_default(s->user->get_id(), s->user->get_display_name());
-  ceph::bufferlist aclbl;
+  stone::bufferlist aclbl;
   policy.encode(aclbl);
   attrs.emplace(RGW_ATTR_ACL, std::move(aclbl));
 
   /* Create metadata: compression info. */
   if (compressor && compressor->is_compressed()) {
-    ceph::bufferlist tmp;
+    stone::bufferlist tmp;
     RGWCompressionInfo cs_info;
     cs_info.compression_type = plugin->get_type_name();
     cs_info.orig_size = size;
@@ -7531,8 +7531,8 @@ int RGWBulkUploadOp::handle_file(const std::string_view path,
   }
 
   /* Complete the transaction. */
-  op_ret = processor.complete(size, etag, nullptr, ceph::real_time(),
-                              attrs, ceph::real_time() /* delete_at */,
+  op_ret = processor.complete(size, etag, nullptr, stone::real_time(),
+                              attrs, stone::real_time() /* delete_at */,
                               nullptr, nullptr, nullptr, nullptr, nullptr,
                               s->yield);
   if (op_ret < 0) {
@@ -7544,7 +7544,7 @@ int RGWBulkUploadOp::handle_file(const std::string_view path,
 
 void RGWBulkUploadOp::execute(optional_yield y)
 {
-  ceph::bufferlist buffer(64 * 1024);
+  stone::bufferlist buffer(64 * 1024);
 
   ldpp_dout(this, 20) << "start" << dendl;
 
@@ -7640,13 +7640,13 @@ void RGWBulkUploadOp::execute(optional_yield y)
 RGWBulkUploadOp::AlignedStreamGetter::~AlignedStreamGetter()
 {
   const size_t aligned_legnth = length + (-length % alignment);
-  ceph::bufferlist junk;
+  stone::bufferlist junk;
 
   DecoratedStreamGetter::get_exactly(aligned_legnth - position, junk);
 }
 
 ssize_t RGWBulkUploadOp::AlignedStreamGetter::get_at_most(const size_t want,
-                                                          ceph::bufferlist& dst)
+                                                          stone::bufferlist& dst)
 {
   const size_t max_to_read = std::min(want, length - position);
   const auto len = DecoratedStreamGetter::get_at_most(max_to_read, dst);
@@ -7657,7 +7657,7 @@ ssize_t RGWBulkUploadOp::AlignedStreamGetter::get_at_most(const size_t want,
 }
 
 ssize_t RGWBulkUploadOp::AlignedStreamGetter::get_exactly(const size_t want,
-                                                          ceph::bufferlist& dst)
+                                                          stone::bufferlist& dst)
 {
   const auto len = DecoratedStreamGetter::get_exactly(want, dst);
   if (len > 0) {
@@ -8240,7 +8240,7 @@ void RGWPutObjRetention::execute(optional_yield y)
     return;
   }
 
-  if (ceph::real_clock::to_time_t(obj_retention.get_retain_until_date()) < ceph_clock_now()) {
+  if (stone::real_clock::to_time_t(obj_retention.get_retain_until_date()) < stone_clock_now()) {
     s->err.message = "the retain-until date must be in the future";
     ldpp_dout(this, 0) << "ERROR: " << s->err.message << dendl;
     op_ret = -EINVAL;
@@ -8266,7 +8266,7 @@ void RGWPutObjRetention::execute(optional_yield y)
       op_ret = -EIO;
       return;
     }
-    if (ceph::real_clock::to_time_t(obj_retention.get_retain_until_date()) < ceph::real_clock::to_time_t(old_obj_retention.get_retain_until_date())) {
+    if (stone::real_clock::to_time_t(obj_retention.get_retain_until_date()) < stone::real_clock::to_time_t(old_obj_retention.get_retain_until_date())) {
       if (old_obj_retention.get_mode().compare("GOVERNANCE") != 0 || !bypass_perm || !bypass_governance_mode) {
 	  s->err.message = "proposed retain-until date shortens an existing retention period and governance bypass check failed";
         op_ret = -EACCES;

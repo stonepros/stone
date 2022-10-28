@@ -21,8 +21,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 static const auto signed_subresources = {
   "acl",
@@ -251,12 +251,12 @@ namespace rgw::auth::s3 {
 
 bool is_time_skew_ok(time_t t)
 {
-  auto req_tp = ceph::coarse_real_clock::from_time_t(t);
-  auto cur_tp = ceph::coarse_real_clock::now();
+  auto req_tp = stone::coarse_real_clock::from_time_t(t);
+  auto cur_tp = stone::coarse_real_clock::now();
 
   if (std::chrono::abs(cur_tp - req_tp) > RGW_AUTH_GRACE) {
     dout(10) << "NOTICE: request time skew too big." << dendl;
-    using ceph::operator<<;
+    using stone::operator<<;
     dout(10) << "req_tp=" << req_tp << ", cur_tp=" << cur_tp << dendl;
     return false;
   }
@@ -299,7 +299,7 @@ static inline int parse_v4_query_string(const req_info& info,              /* in
   }
   /* handle expiration in epoch time */
   uint64_t req_sec = (uint64_t)internal_timegm(&date_t);
-  uint64_t now = ceph_clock_now();
+  uint64_t now = stone_clock_now();
   if (now >= req_sec + exp) {
     dout(10) << "NOTICE: now = " << now << ", req_sec = " << req_sec << ", exp = " << exp << dendl;
     return -EPERM;
@@ -631,7 +631,7 @@ get_v4_canonical_headers(const req_info& info,
  * http://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
  */
 sha256_digest_t
-get_v4_canon_req_hash(CephContext* cct,
+get_v4_canon_req_hash(StoneContext* cct,
                       const std::string_view& http_verb,
                       const std::string& canonical_uri,
                       const std::string& canonical_qs,
@@ -666,7 +666,7 @@ get_v4_canon_req_hash(CephContext* cct,
  * http://docs.aws.amazon.com/general/latest/gr/sigv4-create-string-to-sign.html
  */
 AWSEngine::VersionAbstractor::string_to_sign_t
-get_v4_string_to_sign(CephContext* const cct,
+get_v4_string_to_sign(StoneContext* const cct,
                       const std::string_view& algorithm,
                       const std::string_view& request_date,
                       const std::string_view& credential_scope,
@@ -738,7 +738,7 @@ transform_secret_key(const std::string_view& secret_access_key)
  * calculate the SigningKey of AWS auth version 4
  */
 static sha256_digest_t
-get_v4_signing_key(CephContext* const cct,
+get_v4_signing_key(StoneContext* const cct,
                    const std::string_view& credential_scope,
                    const std::string_view& secret_access_key,
                    const DoutPrefixProvider *dpp)
@@ -768,13 +768,13 @@ get_v4_signing_key(CephContext* const cct,
  *
  * http://docs.aws.amazon.com/general/latest/gr/sigv4-calculate-signature.html
  *
- * srv_signature_t is an alias over Ceph's basic_sstring. We're using
+ * srv_signature_t is an alias over Stone's basic_sstring. We're using
  * it to keep everything within the stack boundaries instead of doing
  * dynamic allocations.
  */
 AWSEngine::VersionAbstractor::server_signature_t
 get_v4_signature(const std::string_view& credential_scope,
-                 CephContext* const cct,
+                 StoneContext* const cct,
                  const std::string_view& secret_key,
                  const AWSEngine::VersionAbstractor::string_to_sign_t& string_to_sign,
                  const DoutPrefixProvider *dpp)
@@ -797,7 +797,7 @@ get_v4_signature(const std::string_view& credential_scope,
 }
 
 AWSEngine::VersionAbstractor::server_signature_t
-get_v2_signature(CephContext* const cct,
+get_v2_signature(StoneContext* const cct,
                  const std::string& secret_key,
                  const AWSEngine::VersionAbstractor::string_to_sign_t& string_to_sign)
 {
@@ -809,12 +809,12 @@ get_v2_signature(CephContext* const cct,
 
   /* 64 is really enough */;
   char buf[64];
-  const int ret = ceph_armor(std::begin(buf),
+  const int ret = stone_armor(std::begin(buf),
                              std::begin(buf) + 64,
                              reinterpret_cast<const char *>(digest.v),
                              reinterpret_cast<const char *>(digest.v + digest.SIZE));
   if (ret < 0) {
-    ldout(cct, 10) << "ceph_armor failed" << dendl;
+    ldout(cct, 10) << "stone_armor failed" << dendl;
     throw ret;
   } else {
     buf[ret] = '\0';
@@ -841,7 +841,7 @@ size_t AWSv4ComplMulti::ChunkMeta::get_data_size(size_t stream_pos) const
 
 /* AWSv4 completers begin. */
 std::pair<AWSv4ComplMulti::ChunkMeta, size_t /* consumed */>
-AWSv4ComplMulti::ChunkMeta::create_next(CephContext* const cct,
+AWSv4ComplMulti::ChunkMeta::create_next(StoneContext* const cct,
                                         ChunkMeta&& old,
                                         const char* const metabuf,
                                         const size_t metabuf_len)

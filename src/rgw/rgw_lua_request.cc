@@ -12,7 +12,7 @@
 #include "rgw_acl.h"
 #include "rgw_sal_rados.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace rgw::lua::request {
 
@@ -275,7 +275,7 @@ struct StringMapMetaTable : public EmptyMetaTable {
 
   static int PairsClosure(lua_State* L) {
     auto map = reinterpret_cast<MapType*>(lua_touserdata(L, lua_upvalueindex(1)));
-    ceph_assert(map);
+    stone_assert(map);
     lua_pushlightuserdata(L, map);
     lua_pushcclosure(L, stateless_iter, ONE_UPVAL); // push the stateless iterator function
     lua_pushnil(L);                                 // indicate this is the first call
@@ -293,7 +293,7 @@ struct StringMapMetaTable : public EmptyMetaTable {
     } else {
       const char* index = luaL_checkstring(L, 2);
       const auto it = map->find(std::string(index));
-      ceph_assert(it != map->end());
+      stone_assert(it != map->end());
       next_it = std::next(it);
     }
 
@@ -371,7 +371,7 @@ struct GrantsMetaTable : public EmptyMetaTable {
   
   static int PairsClosure(lua_State* L) {
     auto map = reinterpret_cast<ACLGrantMap*>(lua_touserdata(L, lua_upvalueindex(1)));
-    ceph_assert(map);
+    stone_assert(map);
     lua_pushlightuserdata(L, map);
     lua_pushcclosure(L, stateless_iter, ONE_UPVAL); // push the stateless iterator function
     lua_pushnil(L);                                 // indicate this is the first call
@@ -389,7 +389,7 @@ struct GrantsMetaTable : public EmptyMetaTable {
     } else {
       const char* index = luaL_checkstring(L, 2);
       const auto it = map->find(std::string(index));
-      ceph_assert(it != map->end());
+      stone_assert(it != map->end());
       next_it = std::next(it);
     }
 
@@ -479,7 +479,7 @@ struct StatementsMetaTable : public EmptyMetaTable {
   
   static int PairsClosure(lua_State* L) {
     auto statements = reinterpret_cast<Type*>(lua_touserdata(L, lua_upvalueindex(1)));
-    ceph_assert(statements);
+    stone_assert(statements);
     lua_pushlightuserdata(L, statements);
     lua_pushcclosure(L, stateless_iter, ONE_UPVAL); // push the stateless iterator function
     lua_pushnil(L);                                 // indicate this is the first call
@@ -569,7 +569,7 @@ struct PoliciesMetaTable : public EmptyMetaTable {
   
   static int PairsClosure(lua_State* L) {
     auto policies = reinterpret_cast<Type*>(lua_touserdata(L, lua_upvalueindex(1)));
-    ceph_assert(policies);
+    stone_assert(policies);
     lua_pushlightuserdata(L, policies);
     lua_pushcclosure(L, stateless_iter, ONE_UPVAL); // push the stateless iterator function
     lua_pushnil(L);                                 // indicate this is the first call
@@ -584,7 +584,7 @@ struct PoliciesMetaTable : public EmptyMetaTable {
     if (lua_isnil(L, -1)) {
       next_it = 0;
     } else {
-      ceph_assert(lua_isinteger(L, -1));
+      stone_assert(lua_isinteger(L, -1));
       const auto it = luaL_checkinteger(L, -1);
       next_it = it+1;
     }
@@ -790,7 +790,7 @@ int execute(
   
   // add the ops log action
   lua_getglobal(L, RequestMetaTable::TableName().c_str());
-  ceph_assert(lua_istable(L, -1));
+  stone_assert(lua_istable(L, -1));
   pushstring(L, RequestLogAction);
   lua_pushlightuserdata(L, rest);
   lua_pushlightuserdata(L, olog);

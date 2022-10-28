@@ -9,7 +9,7 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::ReadResult: " << this \
                            << " " << __func__ << ": "
@@ -27,7 +27,7 @@ struct ReadResult::SetImageExtentsVisitor : public boost::static_visitor<void> {
   void operator()(Linear &linear) const {
     uint64_t length = util::get_extents_length(image_extents);
 
-    ceph_assert(length <= linear.buf_len);
+    stone_assert(length <= linear.buf_len);
     linear.buf_len = length;
   }
 
@@ -41,10 +41,10 @@ struct ReadResult::SetImageExtentsVisitor : public boost::static_visitor<void> {
 };
 
 struct ReadResult::AssembleResultVisitor : public boost::static_visitor<void> {
-  CephContext *cct;
+  StoneContext *cct;
   Striper::StripedReadResult &destriper;
 
-  AssembleResultVisitor(CephContext *cct, Striper::StripedReadResult &destriper)
+  AssembleResultVisitor(StoneContext *cct, Striper::StripedReadResult &destriper)
     : cct(cct), destriper(destriper) {
   }
 
@@ -74,7 +74,7 @@ struct ReadResult::AssembleResultVisitor : public boost::static_visitor<void> {
       it.copy(len, static_cast<char *>(vector.iov[idx].iov_base));
       offset += len;
     }
-    ceph_assert(offset == bl.length());
+    stone_assert(offset == bl.length());
   }
 
   void operator()(Bufferlist &bufferlist) const {
@@ -115,7 +115,7 @@ struct ReadResult::AssembleResultVisitor : public boost::static_visitor<void> {
         }
 
         // current buffer-extent should be within the current image-extent
-        ceph_assert(buffer_offset <= buffer_extent_offset &&
+        stone_assert(buffer_offset <= buffer_extent_offset &&
                     buffer_offset + image_length >=
                       buffer_extent_offset + buffer_extent_length);
         auto image_extent_offset =
@@ -131,8 +131,8 @@ struct ReadResult::AssembleResultVisitor : public boost::static_visitor<void> {
 
       buffer_offset += image_length;
     }
-    ceph_assert(buffer_offset == buffer_extents_length);
-    ceph_assert(bem_it == buffer_extent_map.end());
+    stone_assert(buffer_offset == buffer_extents_length);
+    stone_assert(bem_it == buffer_extent_map.end());
 
     ldout(cct, 20) << "moved resulting " << *sparse_bufferlist.extent_map
                    << " extents of total " << sparse_bufferlist.bl->length()
@@ -150,7 +150,7 @@ ReadResult::C_ImageReadRequest::C_ImageReadRequest(
 }
 
 void ReadResult::C_ImageReadRequest::finish(int r) {
-  CephContext *cct = aio_completion->ictx->cct;
+  StoneContext *cct = aio_completion->ictx->cct;
   ldout(cct, 10) << "C_ImageReadRequest: r=" << r
                  << dendl;
   if (r >= 0 || (ignore_enoent && r == -ENOENT)) {
@@ -160,7 +160,7 @@ void ReadResult::C_ImageReadRequest::finish(int r) {
       buffer_extents.emplace_back(buffer_offset + length, image_extent.second);
       length += image_extent.second;
     }
-    ceph_assert(r == -ENOENT || length == bl.length());
+    stone_assert(r == -ENOENT || length == bl.length());
 
     aio_completion->lock.lock();
     aio_completion->read_result.m_destriper.add_partial_result(
@@ -179,7 +179,7 @@ ReadResult::C_ObjectReadRequest::C_ObjectReadRequest(
 }
 
 void ReadResult::C_ObjectReadRequest::finish(int r) {
-  CephContext *cct = aio_completion->ictx->cct;
+  StoneContext *cct = aio_completion->ictx->cct;
   ldout(cct, 10) << "C_ObjectReadRequest: r=" << r
                  << dendl;
 
@@ -208,7 +208,7 @@ void ReadResult::C_ObjectReadRequest::finish(int r) {
 }
 
 ReadResult::C_ObjectReadMergedExtents::C_ObjectReadMergedExtents(
-        CephContext* cct, ReadExtents* extents, Context* on_finish)
+        StoneContext* cct, ReadExtents* extents, Context* on_finish)
         : cct(cct), extents(extents), on_finish(on_finish) {
 }
 
@@ -241,11 +241,11 @@ ReadResult::ReadResult(const struct iovec *iov, int iov_count)
   : m_buffer(Vector(iov, iov_count)) {
 }
 
-ReadResult::ReadResult(ceph::bufferlist *bl)
+ReadResult::ReadResult(stone::bufferlist *bl)
   : m_buffer(Bufferlist(bl)) {
 }
 
-ReadResult::ReadResult(Extents* extent_map, ceph::bufferlist* bl)
+ReadResult::ReadResult(Extents* extent_map, stone::bufferlist* bl)
   : m_buffer(SparseBufferlist(extent_map, bl)) {
 }
 
@@ -253,7 +253,7 @@ void ReadResult::set_image_extents(const Extents& image_extents) {
   boost::apply_visitor(SetImageExtentsVisitor(image_extents), m_buffer);
 }
 
-void ReadResult::assemble_result(CephContext *cct) {
+void ReadResult::assemble_result(StoneContext *cct) {
   boost::apply_visitor(AssembleResultVisitor(cct, m_destriper), m_buffer);
 }
 

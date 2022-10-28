@@ -7,9 +7,9 @@
 #include "cls/rbd/cls_rbd_client.h"
 #include "librbd/ImageCtx.h"
 #include "librbd/Utils.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::SetFlagsRequest: "
 
@@ -33,12 +33,12 @@ void SetFlagsRequest<I>::send() {
 
 template <typename I>
 void SetFlagsRequest<I>::send_set_flags() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   std::unique_lock image_locker{m_image_ctx->image_lock};
   std::vector<uint64_t> snap_ids;
-  snap_ids.push_back(CEPH_NOSNAP);
+  snap_ids.push_back(STONE_NOSNAP);
   for (auto it : m_image_ctx->snap_info) {
     snap_ids.push_back(it.first);
   }
@@ -54,7 +54,7 @@ void SetFlagsRequest<I>::send_set_flags() {
     librados::AioCompletion *comp =
       create_rados_callback(gather_ctx->new_sub());
     int r = m_image_ctx->md_ctx.aio_operate(m_image_ctx->header_oid, comp, &op);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
   gather_ctx->activate();
@@ -62,7 +62,7 @@ void SetFlagsRequest<I>::send_set_flags() {
 
 template <typename I>
 Context *SetFlagsRequest<I>::handle_set_flags(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {

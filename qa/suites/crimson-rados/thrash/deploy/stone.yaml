@@ -1,0 +1,11 @@
+overrides:
+  install:
+    stone:
+      flavor: crimson
+tasks:
+- install:
+- stone:
+    conf:
+      osd:
+        debug monc: 20
+    flavor: crimson

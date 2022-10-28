@@ -4,7 +4,7 @@
 #include "librbd/crypto/openssl/DataCryptor.h"
 #include <openssl/err.h>
 #include <string.h>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/compat.h"
 
 namespace librbd {
@@ -14,7 +14,7 @@ namespace openssl {
 int DataCryptor::init(const char* cipher_name, const unsigned char* key,
                       uint16_t key_length) {
   if (m_key != nullptr) {
-    ceph_memzero_s(m_key, m_key_size, m_key_size);
+    stone_memzero_s(m_key, m_key_size, m_key_size);
     delete [] m_key;
     m_key = nullptr;
     m_key_size = 0;
@@ -53,7 +53,7 @@ int DataCryptor::init(const char* cipher_name, const unsigned char* key,
 
 DataCryptor::~DataCryptor() {
   if (m_key != nullptr) {
-    ceph_memzero_s(m_key, m_key_size, m_key_size);
+    stone_memzero_s(m_key, m_key_size, m_key_size);
     delete [] m_key;
     m_key = nullptr;
   }

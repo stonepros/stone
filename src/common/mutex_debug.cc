@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -14,10 +14,10 @@
 
 #include "common/mutex_debug.h"
 #include "common/perf_counters.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 
-namespace ceph {
+namespace stone {
 namespace mutex_debug_detail {
 enum {
   l_mutex_first = 999082,
@@ -36,7 +36,7 @@ mutex_debugging_base::mutex_debugging_base(std::string group, bool ld, bool bt)
 }
 
 mutex_debugging_base::~mutex_debugging_base() {
-  ceph_assert(nlock == 0);
+  stone_assert(nlock == 0);
   if (_enable_lockdep()) {
     lockdep_unregister(id);
   }
@@ -56,4 +56,4 @@ void mutex_debugging_base::_will_unlock() {  // about to unlock
 }
 
 } // namespace mutex_debug_detail
-} // namespace ceph
+} // namespace stone

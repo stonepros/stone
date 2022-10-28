@@ -1,6 +1,6 @@
 tasks:
-- ceph:
-- ceph-fuse:
+- stone:
+- stone-fuse:
 - workunit:
     clients:
       all:

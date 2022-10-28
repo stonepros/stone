@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc
  *
@@ -98,12 +98,12 @@ bool SocketConnection::update_rx_seq(seq_num_t seq)
   if (seq <= in_seq) {
     if (HAVE_FEATURE(features, RECONNECT_SEQ) &&
         local_conf()->ms_die_on_old_message) {
-      ceph_abort_msg("old msgs despite reconnect_seq feature");
+      stone_abort_msg("old msgs despite reconnect_seq feature");
     }
     return false;
   } else if (seq > in_seq + 1) {
     if (local_conf()->ms_die_on_skipped_message) {
-      ceph_abort_msg("skipped incoming seq");
+      stone_abort_msg("skipped incoming seq");
     }
     return false;
   } else {

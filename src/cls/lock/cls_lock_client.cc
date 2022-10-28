@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -122,7 +122,7 @@ namespace rados {
         auto iter = std::cbegin(out);
         try {
           decode(ret, iter);
-        } catch (ceph::buffer::error& err) {
+        } catch (stone::buffer::error& err) {
 	  return -EBADMSG;
         }
 
@@ -148,7 +148,7 @@ namespace rados {
         cls_lock_get_info_reply ret;
         try {
           decode(ret, *iter);
-        } catch (ceph::buffer::error& err) {
+        } catch (stone::buffer::error& err) {
 	  return -EBADMSG;
         }
 

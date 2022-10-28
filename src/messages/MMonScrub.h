@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stonee - scalable distributed file system
 *
 * Copyright (C) 2013 Inktank, Inc.
 *
@@ -10,8 +10,8 @@
 * License version 2.1, as published by the Free Software
 * Foundation. See file COPYING.
 */
-#ifndef CEPH_MMONSCRUB_H
-#define CEPH_MMONSCRUB_H
+#ifndef STONE_MMONSCRUB_H
+#define STONE_MMONSCRUB_H
 
 #include "msg/Message.h"
 #include "mon/mon_types.h"
@@ -89,4 +89,4 @@ private:
   friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
 };
 
-#endif /* CEPH_MMONSCRUB_H */
+#endif /* STONE_MMONSCRUB_H */

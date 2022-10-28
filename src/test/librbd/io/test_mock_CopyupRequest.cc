@@ -57,7 +57,7 @@ struct ObjectCopyRequest<librbd::MockTestImageCtx> {
                                    const SnapMap &snap_map,
                                    uint64_t object_number, uint32_t flags,
                                    Handler*, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->object_number = object_number;
     s_instance->flatten = (
       (flags & deep_copy::OBJECT_COPY_REQUEST_FLAG_FLATTEN) != 0);
@@ -233,7 +233,7 @@ struct TestMockIoCopyupRequest : public TestMockFixture {
     in_bl.append(data);
 
     SnapContext snapc;
-    if (snap_id == CEPH_NOSNAP) {
+    if (snap_id == STONE_NOSNAP) {
       snapc = mock_image_ctx.snapc;
     }
 
@@ -257,7 +257,7 @@ struct TestMockIoCopyupRequest : public TestMockFixture {
     encode(data_bl, in_bl);
 
     SnapContext snapc;
-    if (snap_id == CEPH_NOSNAP) {
+    if (snap_id == STONE_NOSNAP) {
       snapc = mock_image_ctx.snapc;
     }
 
@@ -272,7 +272,7 @@ struct TestMockIoCopyupRequest : public TestMockFixture {
   void expect_write(MockTestImageCtx& mock_image_ctx, uint64_t snap_id,
                     const std::string& oid, int r) {
     SnapContext snapc;
-    if (snap_id == CEPH_NOSNAP) {
+    if (snap_id == STONE_NOSNAP) {
       snapc = mock_image_ctx.snapc;
     }
 
@@ -338,7 +338,7 @@ struct TestMockIoCopyupRequest : public TestMockFixture {
       EXPECT_CALL(*mock_image_ctx.object_map,
                   aio_update(snap_id, object_no, object_no + 1, state,
                              boost::optional<uint8_t>(), _,
-                             (snap_id != CEPH_NOSNAP), _))
+                             (snap_id != STONE_NOSNAP), _))
         .WillOnce(WithArg<7>(Invoke([&mock_image_ctx, updated, ret_val](Context *ctx) {
                                if (updated) {
                                  mock_image_ctx.op_work_queue->queue(ctx, ret_val);
@@ -416,13 +416,13 @@ TEST_F(TestMockIoCopyupRequest, Standard) {
   expect_get_pre_write_object_map_state(mock_image_ctx, mock_write_request,
                                         OBJECT_EXISTS);
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   expect_add_copyup_ops(mock_write_request);
-  expect_sparse_copyup(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0),
+  expect_sparse_copyup(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0),
                        {{0, 4096}}, data, 0);
-  expect_write(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0), 0);
+  expect_write(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0), 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
                                    {{0, 4096}}, {});
@@ -473,13 +473,13 @@ TEST_F(TestMockIoCopyupRequest, StandardWithSnaps) {
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
   expect_object_map_update(mock_image_ctx, 1, 0, OBJECT_EXISTS, true, 0);
   expect_object_map_update(mock_image_ctx, 2, 0, OBJECT_EXISTS_CLEAN, true, 0);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   expect_add_copyup_ops(mock_write_request);
   expect_sparse_copyup(mock_image_ctx, 0, ictx->get_object_name(0), {{0, 4096}},
                        data, 0);
-  expect_write(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0), 0);
+  expect_write(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0), 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
                                    {{0, 4096}}, {});
@@ -515,10 +515,10 @@ TEST_F(TestMockIoCopyupRequest, CopyOnRead) {
   expect_prepare_copyup(mock_image_ctx);
 
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
-  expect_sparse_copyup(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0),
+  expect_sparse_copyup(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0),
                        {{0, 4096}}, data, 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
@@ -561,7 +561,7 @@ TEST_F(TestMockIoCopyupRequest, CopyOnReadWithSnaps) {
 
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
   expect_object_map_update(mock_image_ctx, 1, 0, OBJECT_EXISTS, true, 0);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS_CLEAN,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS_CLEAN,
                            true, 0);
 
   expect_sparse_copyup(mock_image_ctx, 0, ictx->get_object_name(0), {{0, 4096}},
@@ -605,13 +605,13 @@ TEST_F(TestMockIoCopyupRequest, DeepCopy) {
   expect_get_pre_write_object_map_state(mock_image_ctx, mock_write_request,
                                         OBJECT_EXISTS);
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   expect_add_copyup_ops(mock_write_request);
-  expect_sparse_copyup(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0),
+  expect_sparse_copyup(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0),
                        {}, "", 0);
-  expect_write(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0), 0);
+  expect_write(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0), 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
                                    {{0, 4096}}, {});
@@ -648,7 +648,7 @@ TEST_F(TestMockIoCopyupRequest, DeepCopyOnRead) {
   expect_object_copy(mock_image_ctx, mock_object_copy_request, true, 0);
 
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
@@ -694,7 +694,7 @@ TEST_F(TestMockIoCopyupRequest, DeepCopyWithPostSnaps) {
   MockAbstractObjectWriteRequest mock_write_request;
   MockObjectCopyRequest mock_object_copy_request;
   mock_image_ctx.migration_info = {1, "", "", "image id", "",
-                                   {{CEPH_NOSNAP, {2, 1}}},
+                                   {{STONE_NOSNAP, {2, 1}}},
                                    ictx->size, true};
   expect_is_empty_write_op(mock_write_request, false);
   expect_object_copy(mock_image_ctx, mock_object_copy_request, true, 0);
@@ -710,13 +710,13 @@ TEST_F(TestMockIoCopyupRequest, DeepCopyWithPostSnaps) {
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
   expect_object_map_update(mock_image_ctx, 2, 0, OBJECT_EXISTS, true, 0);
   expect_object_map_update(mock_image_ctx, 3, 0, OBJECT_EXISTS_CLEAN, true, 0);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   expect_add_copyup_ops(mock_write_request);
-  expect_sparse_copyup(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0),
+  expect_sparse_copyup(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0),
                        {}, "", 0);
-  expect_write(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0), 0);
+  expect_write(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0), 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
                                    {{0, 4096}}, {});
@@ -766,7 +766,7 @@ TEST_F(TestMockIoCopyupRequest, DeepCopyWithPreAndPostSnaps) {
   MockAbstractObjectWriteRequest mock_write_request;
   MockObjectCopyRequest mock_object_copy_request;
   mock_image_ctx.migration_info = {1, "", "", "image id", "",
-                                   {{CEPH_NOSNAP, {2, 1}}, {10, {1}}},
+                                   {{STONE_NOSNAP, {2, 1}}, {10, {1}}},
                                    ictx->size, true};
   expect_is_empty_write_op(mock_write_request, false);
   expect_object_copy(mock_image_ctx, mock_object_copy_request, true, 0);
@@ -782,13 +782,13 @@ TEST_F(TestMockIoCopyupRequest, DeepCopyWithPreAndPostSnaps) {
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
   expect_object_map_update(mock_image_ctx, 3, 0, OBJECT_EXISTS_CLEAN, true, 0);
   expect_object_map_update(mock_image_ctx, 4, 0, OBJECT_EXISTS_CLEAN, true, 0);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   expect_add_copyup_ops(mock_write_request);
-  expect_sparse_copyup(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0),
+  expect_sparse_copyup(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0),
                        {}, "", 0);
-  expect_write(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0), 0);
+  expect_write(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0), 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
                                    {{0, 4096}}, {});
@@ -824,13 +824,13 @@ TEST_F(TestMockIoCopyupRequest, ZeroedCopyup) {
   expect_get_pre_write_object_map_state(mock_image_ctx, mock_write_request,
                                         OBJECT_EXISTS);
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   expect_add_copyup_ops(mock_write_request);
-  expect_sparse_copyup(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0),
+  expect_sparse_copyup(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0),
                        {}, "", 0);
-  expect_write(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0), 0);
+  expect_write(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0), 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
                                    {{0, 4096}}, {});
@@ -866,10 +866,10 @@ TEST_F(TestMockIoCopyupRequest, ZeroedCopyOnRead) {
   expect_prepare_copyup(mock_image_ctx);
 
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
-  expect_sparse_copyup(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0),
+  expect_sparse_copyup(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0),
                        {}, "", 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
@@ -943,13 +943,13 @@ TEST_F(TestMockIoCopyupRequest, RestartWrite) {
   expect_get_pre_write_object_map_state(mock_image_ctx, mock_write_request1,
                                         OBJECT_EXISTS);
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
                                    {{0, 4096}}, {});
   expect_add_copyup_ops(mock_write_request1);
-  expect_sparse_copyup(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0),
+  expect_sparse_copyup(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0),
                        {{0, 4096}}, data, 0);
 
   MockAbstractObjectWriteRequest mock_write_request2;
@@ -1101,7 +1101,7 @@ TEST_F(TestMockIoCopyupRequest, UpdateObjectMapError) {
   expect_get_pre_write_object_map_state(mock_image_ctx, mock_write_request,
                                         OBJECT_EXISTS);
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            -EINVAL);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
@@ -1149,13 +1149,13 @@ TEST_F(TestMockIoCopyupRequest, CopyupError) {
                                         OBJECT_EXISTS);
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
   expect_object_map_update(mock_image_ctx, 1, 0, OBJECT_EXISTS, true, 0);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   expect_add_copyup_ops(mock_write_request);
   expect_sparse_copyup(mock_image_ctx, 0, ictx->get_object_name(0), {{0, 4096}},
                        data, -EPERM);
-  expect_write(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0), 0);
+  expect_write(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0), 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
                                    {{0, 4096}}, {});
@@ -1196,12 +1196,12 @@ TEST_F(TestMockIoCopyupRequest, SparseCopyupNotSupported) {
   expect_get_pre_write_object_map_state(mock_image_ctx, mock_write_request,
                                         OBJECT_EXISTS);
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   expect_add_copyup_ops(mock_write_request);
-  expect_copyup(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0), data, 0);
-  expect_write(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0), 0);
+  expect_copyup(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0), data, 0);
+  expect_write(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0), 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0, {{0, 4096}}, {});
   mock_image_ctx.copyup_list[0] = req;
@@ -1249,13 +1249,13 @@ TEST_F(TestMockIoCopyupRequest, ProcessCopyup) {
   expect_get_pre_write_object_map_state(mock_image_ctx, mock_write_request,
                                         OBJECT_EXISTS);
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   expect_add_copyup_ops(mock_write_request);
-  expect_sparse_copyup(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0),
+  expect_sparse_copyup(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0),
                        {{2048, 1024}}, data.substr(0, 1024), 0);
-  expect_write(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0), 0);
+  expect_write(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0), 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
                                    {{0, 4096}}, {});
@@ -1313,13 +1313,13 @@ TEST_F(TestMockIoCopyupRequest, ProcessCopyupOverwrite) {
                                         OBJECT_EXISTS);
   expect_object_map_at(mock_image_ctx, 0, OBJECT_NONEXISTENT);
   expect_object_map_update(mock_image_ctx, 1, 0, OBJECT_EXISTS, true, 0);
-  expect_object_map_update(mock_image_ctx, CEPH_NOSNAP, 0, OBJECT_EXISTS, true,
+  expect_object_map_update(mock_image_ctx, STONE_NOSNAP, 0, OBJECT_EXISTS, true,
                            0);
 
   expect_add_copyup_ops(mock_write_request);
   expect_sparse_copyup(mock_image_ctx, 0, ictx->get_object_name(0),
                        {{0, 1024}, {2048, 1024}}, data.substr(0, 2048), 0);
-  expect_write(mock_image_ctx, CEPH_NOSNAP, ictx->get_object_name(0), 0);
+  expect_write(mock_image_ctx, STONE_NOSNAP, ictx->get_object_name(0), 0);
 
   auto req = new MockCopyupRequest(&mock_image_ctx, 0,
                                    {{0, 4096}}, {});

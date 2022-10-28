@@ -1,5 +1,5 @@
 tasks:
-- ceph:
+- stone:
     log-ignorelist:
       - overall HEALTH_
       - \(OSDMAP_FLAGS\)
@@ -9,7 +9,7 @@ tasks:
       - \(CACHE_POOL_
       - is full \(reached quota
     fs: xfs
-- ceph-fuse:
+- stone-fuse:
 - workunit:
     clients:
       client.0:

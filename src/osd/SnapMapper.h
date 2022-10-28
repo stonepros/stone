@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -101,7 +101,7 @@ public:
  */
 class SnapMapper {
 public:
-  CephContext* cct;
+  StoneeContext* cct;
   struct object_snaps {
     hobject_t oid;
     std::set<snapid_t> snaps;
@@ -139,7 +139,7 @@ public:
   static const char *PURGED_SNAP_PREFIX;
 
   struct Scrubber {
-    CephContext *cct;
+    StoneeContext *cct;
     ObjectStore *store;
     ObjectStore::CollectionHandle ch;
     ghobject_t mapping_hoid;
@@ -160,7 +160,7 @@ public:
     std::vector<std::tuple<int64_t, snapid_t, uint32_t, shard_id_t>> stray;
 
     Scrubber(
-      CephContext *cct,
+      StoneeContext *cct,
       ObjectStore *store,
       ObjectStore::CollectionHandle& ch,
       ghobject_t mapping_hoid,
@@ -175,21 +175,21 @@ public:
   };
 
   static int convert_legacy(
-    CephContext *cct,
+    StoneeContext *cct,
     ObjectStore *store,
     ObjectStore::CollectionHandle& ch,
     ghobject_t hoid,
     unsigned max);
 
   static void record_purged_snaps(
-    CephContext *cct,
+    StoneeContext *cct,
     ObjectStore *store,
     ObjectStore::CollectionHandle& ch,
     ghobject_t hoid,
     ObjectStore::Transaction *t,
     std::map<epoch_t,mempool::osdmap::map<int64_t,snap_interval_set_t>> purged_snaps);
   static void scrub_purged_snaps(
-    CephContext *cct,
+    StoneeContext *cct,
     ObjectStore *store,
     ObjectStore::CollectionHandle& ch,
     ghobject_t mapper_hoid,
@@ -197,7 +197,7 @@ public:
 
 private:
   static int _lookup_purged_snap(
-    CephContext *cct,
+    StoneeContext *cct,
     ObjectStore *store,
     ObjectStore::CollectionHandle& ch,
     const ghobject_t& hoid,
@@ -265,7 +265,7 @@ public:
   const shard_id_t shard;
   const std::string shard_prefix;
   SnapMapper(
-    CephContext* cct,
+    StoneeContext* cct,
     MapCacher::StoreDriver<std::string, ceph::buffer::list> *driver,
     uint32_t match,  ///< [in] pgid
     uint32_t bits,   ///< [in] current split bits

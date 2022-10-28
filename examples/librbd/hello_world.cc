@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -153,7 +153,7 @@ int main(int argc, const char **argv)
     test_data[TEST_IO_SIZE] = '\0';
 
     size_t len = strlen(test_data);
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     bl.append(test_data, len);
 
     ret = image.write(0, len, bl);
@@ -168,7 +168,7 @@ int main(int argc, const char **argv)
     /*
      * let's read the image and compare it to the data we wrote
      */
-    ceph::bufferlist bl_r;
+    stone::bufferlist bl_r;
     int read;
     read = image.read(0, TEST_IO_SIZE, bl_r);
     if (read < 0) {

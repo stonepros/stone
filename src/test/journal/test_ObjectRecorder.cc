@@ -3,7 +3,7 @@
 
 #include "journal/ObjectRecorder.h"
 #include "common/Cond.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include "gtest/gtest.h"
 #include "test/librados/test.h"
@@ -17,9 +17,9 @@ public:
   TestObjectRecorder() = default;
 
   struct Handler : public journal::ObjectRecorder::Handler {
-    ceph::mutex lock = ceph::make_mutex("lock");
-    ceph::mutex* object_lock = nullptr;
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("lock");
+    stone::mutex* object_lock = nullptr;
+    stone::condition_variable cond;
     bool is_closed = false;
     uint32_t overflows = 0;
 
@@ -76,8 +76,8 @@ public:
 	}
       }
     }
-    auto create_object(std::string_view oid, uint8_t order, ceph::mutex* lock) {
-      auto object = ceph::make_ref<journal::ObjectRecorder>(
+    auto create_object(std::string_view oid, uint8_t order, stone::mutex* lock) {
+      auto object = stone::make_ref<journal::ObjectRecorder>(
         m_ioctx, oid, 0, lock, m_work_queue, &m_handler,
 	order, m_max_in_flight_appends);
       {
@@ -113,7 +113,7 @@ public:
     double m_flush_age = 600;
     uint64_t m_max_in_flight_appends = 0;
     using ObjectRecorders =
-      std::list<std::pair<ceph::ref_t<journal::ObjectRecorder>, ceph::mutex*>>;
+      std::list<std::pair<stone::ref_t<journal::ObjectRecorder>, stone::mutex*>>;
     ObjectRecorders m_object_recorders;
     Handler m_handler;
   };
@@ -121,8 +121,8 @@ public:
   journal::AppendBuffer create_append_buffer(uint64_t tag_tid,
                                              uint64_t entry_tid,
                                              const std::string &payload) {
-    auto future = ceph::make_ref<journal::FutureImpl>(tag_tid, entry_tid, 456);
-    future->init(ceph::ref_t<journal::FutureImpl>());
+    auto future = stone::make_ref<journal::FutureImpl>(tag_tid, entry_tid, 456);
+    future->init(stone::ref_t<journal::FutureImpl>());
 
     bufferlist bl;
     bl.append(payload);
@@ -137,7 +137,7 @@ TEST_F(TestObjectRecorder, Append) {
   auto metadata = create_metadata(oid);
   ASSERT_EQ(0, init_metadata(metadata));
 
-  ceph::mutex lock = ceph::make_mutex("object_recorder_lock");
+  stone::mutex lock = stone::make_mutex("object_recorder_lock");
   ObjectRecorderFlusher flusher(m_ioctx, m_work_queue, 0, 0, 0, 0);
   auto object = flusher.create_object(oid, 24, &lock);
 
@@ -171,7 +171,7 @@ TEST_F(TestObjectRecorder, AppendFlushByCount) {
   auto metadata = create_metadata(oid);
   ASSERT_EQ(0, init_metadata(metadata));
 
-  ceph::mutex lock = ceph::make_mutex("object_recorder_lock");
+  stone::mutex lock = stone::make_mutex("object_recorder_lock");
   ObjectRecorderFlusher flusher(m_ioctx, m_work_queue, 2, 0, 0, -1);
   auto object = flusher.create_object(oid, 24, &lock);
 
@@ -204,7 +204,7 @@ TEST_F(TestObjectRecorder, AppendFlushByBytes) {
   auto metadata = create_metadata(oid);
   ASSERT_EQ(0, init_metadata(metadata));
 
-  ceph::mutex lock = ceph::make_mutex("object_recorder_lock");
+  stone::mutex lock = stone::make_mutex("object_recorder_lock");
   ObjectRecorderFlusher flusher(m_ioctx, m_work_queue, 0, 10, 0, -1);
   auto object = flusher.create_object(oid, 24, &lock);
 
@@ -237,7 +237,7 @@ TEST_F(TestObjectRecorder, AppendFlushByAge) {
   auto metadata = create_metadata(oid);
   ASSERT_EQ(0, init_metadata(metadata));
 
-  ceph::mutex lock = ceph::make_mutex("object_recorder_lock");
+  stone::mutex lock = stone::make_mutex("object_recorder_lock");
   ObjectRecorderFlusher flusher(m_ioctx, m_work_queue, 0, 0, 0.0005, -1);
   auto object = flusher.create_object(oid, 24, &lock);
 
@@ -277,7 +277,7 @@ TEST_F(TestObjectRecorder, AppendFilledObject) {
   auto metadata = create_metadata(oid);
   ASSERT_EQ(0, init_metadata(metadata));
 
-  ceph::mutex lock = ceph::make_mutex("object_recorder_lock");
+  stone::mutex lock = stone::make_mutex("object_recorder_lock");
   ObjectRecorderFlusher flusher(m_ioctx, m_work_queue, 0, 0, 0.0, -1);
   auto object = flusher.create_object(oid, 12, &lock);
 
@@ -310,7 +310,7 @@ TEST_F(TestObjectRecorder, Flush) {
   auto metadata = create_metadata(oid);
   ASSERT_EQ(0, init_metadata(metadata));
 
-  ceph::mutex lock = ceph::make_mutex("object_recorder_lock");
+  stone::mutex lock = stone::make_mutex("object_recorder_lock");
   ObjectRecorderFlusher flusher(m_ioctx, m_work_queue, 0, 10, 0, -1);
   auto object = flusher.create_object(oid, 24, &lock);
 
@@ -340,7 +340,7 @@ TEST_F(TestObjectRecorder, FlushFuture) {
   auto metadata = create_metadata(oid);
   ASSERT_EQ(0, init_metadata(metadata));
 
-  ceph::mutex lock = ceph::make_mutex("object_recorder_lock");
+  stone::mutex lock = stone::make_mutex("object_recorder_lock");
   ObjectRecorderFlusher flusher(m_ioctx, m_work_queue, 0, 10, 0, -1);
   auto object = flusher.create_object(oid, 24, &lock);
 
@@ -368,7 +368,7 @@ TEST_F(TestObjectRecorder, FlushDetachedFuture) {
   auto metadata = create_metadata(oid);
   ASSERT_EQ(0, init_metadata(metadata));
 
-  ceph::mutex lock = ceph::make_mutex("object_recorder_lock");
+  stone::mutex lock = stone::make_mutex("object_recorder_lock");
   ObjectRecorderFlusher flusher(m_ioctx, m_work_queue);
   auto object = flusher.create_object(oid, 24, &lock);
 
@@ -397,7 +397,7 @@ TEST_F(TestObjectRecorder, Close) {
   auto metadata = create_metadata(oid);
   ASSERT_EQ(0, init_metadata(metadata));
 
-  ceph::mutex lock = ceph::make_mutex("object_recorder_lock");
+  stone::mutex lock = stone::make_mutex("object_recorder_lock");
   ObjectRecorderFlusher flusher(m_ioctx, m_work_queue, 2, 0, 0, -1);
   auto object = flusher.create_object(oid, 24, &lock);
 
@@ -412,7 +412,7 @@ TEST_F(TestObjectRecorder, Close) {
 
   lock.lock();
   ASSERT_FALSE(object->close());
-  ASSERT_TRUE(ceph_mutex_is_locked(lock));
+  ASSERT_TRUE(stone_mutex_is_locked(lock));
   lock.unlock();
 
   ASSERT_TRUE(flusher.wait_for_closed());
@@ -427,8 +427,8 @@ TEST_F(TestObjectRecorder, Overflow) {
   auto metadata = create_metadata(oid);
   ASSERT_EQ(0, init_metadata(metadata));
 
-  ceph::mutex lock1 = ceph::make_mutex("object_recorder_lock_1");
-  ceph::mutex lock2 = ceph::make_mutex("object_recorder_lock_2");
+  stone::mutex lock1 = stone::make_mutex("object_recorder_lock_1");
+  stone::mutex lock2 = stone::make_mutex("object_recorder_lock_2");
 
   ObjectRecorderFlusher flusher(m_ioctx, m_work_queue);
   auto object1 = flusher.create_object(oid, 12, &lock1);

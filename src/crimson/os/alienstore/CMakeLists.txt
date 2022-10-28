@@ -8,8 +8,8 @@ set_target_properties(alien::cflags PROPERTIES
 add_library(crimson-alien-common STATIC
   ${PROJECT_SOURCE_DIR}/src/common/admin_socket.cc
   ${PROJECT_SOURCE_DIR}/src/common/blkdev.cc
-  ${PROJECT_SOURCE_DIR}/src/common/ceph_context.cc
-  ${PROJECT_SOURCE_DIR}/src/common/ceph_crypto.cc
+  ${PROJECT_SOURCE_DIR}/src/common/stone_context.cc
+  ${PROJECT_SOURCE_DIR}/src/common/stone_crypto.cc
   ${PROJECT_SOURCE_DIR}/src/common/condition_variable_debug.cc
   ${PROJECT_SOURCE_DIR}/src/common/cmdparse.cc
   ${PROJECT_SOURCE_DIR}/src/common/Finisher.cc

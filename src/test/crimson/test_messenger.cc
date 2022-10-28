@@ -1,5 +1,5 @@
-#include "common/ceph_argparse.h"
-#include "common/ceph_time.h"
+#include "common/stone_argparse.h"
+#include "common/stone_time.h"
 #include "messages/MPing.h"
 #include "messages/MCommand.h"
 #include "messages/MCommandReply.h"
@@ -32,7 +32,7 @@ using crimson::common::local_conf;
 namespace {
 
 seastar::logger& logger() {
-  return crimson::get_logger(ceph_subsys_ms);
+  return crimson::get_logger(stone_subsys_ms);
 }
 
 static std::random_device rd;
@@ -83,11 +83,11 @@ static seastar::future<> test_echo(unsigned rounds,
             [addr] (const std::error_code& e) {
           logger().error("test_echo(): "
                          "there is another instance running at {}", addr);
-          ceph_abort();
+          stone_abort();
         }));
       }
       seastar::future<> shutdown() {
-        ceph_assert(msgr);
+        stone_assert(msgr);
 	msgr->stop();
         return msgr->shutdown();
       }
@@ -116,7 +116,7 @@ static seastar::future<> test_echo(unsigned rounds,
       PingSessionRef find_session(crimson::net::ConnectionRef c) {
         auto found = sessions.find(c);
         if (found == sessions.end()) {
-          ceph_assert(false);
+          stone_assert(false);
         }
         return found->second;
       }
@@ -125,7 +125,7 @@ static seastar::future<> test_echo(unsigned rounds,
         auto session = seastar::make_shared<PingSession>();
         auto [i, added] = sessions.emplace(conn, session);
         std::ignore = i;
-        ceph_assert(added);
+        stone_assert(added);
         session->connected_time = mono_clock::now();
       }
       std::optional<seastar::future<>> ms_dispatch(
@@ -140,7 +140,7 @@ static seastar::future<> test_echo(unsigned rounds,
           logger().info("{}: finished receiving {} pongs", *c, session->count);
           session->finish_time = mono_clock::now();
           auto found = pending_conns.find(c);
-          ceph_assert(found != pending_conns.end());
+          stone_assert(found != pending_conns.end());
           found->second.set_value();
         }
         return {seastar::now()};
@@ -157,7 +157,7 @@ static seastar::future<> test_echo(unsigned rounds,
       }
 
       seastar::future<> shutdown() {
-        ceph_assert(msgr);
+        stone_assert(msgr);
 	msgr->stop();
         return msgr->shutdown();
       }
@@ -180,7 +180,7 @@ static seastar::future<> test_echo(unsigned rounds,
       seastar::future<> do_dispatch_pingpong(crimson::net::ConnectionRef conn) {
         auto [i, added] = pending_conns.emplace(conn, seastar::promise<>());
         std::ignore = i;
-        ceph_assert(added);
+        stone_assert(added);
         return seastar::do_with(0u, 0u,
             [this, conn](auto &count_ping, auto &count_keepalive) {
           return seastar::do_until(
@@ -313,7 +313,7 @@ static seastar::future<> test_concurrent_dispatch(bool v2)
             [addr] (const std::error_code& e) {
           logger().error("test_concurrent_dispatch(): "
                          "there is another instance running at {}", addr);
-          ceph_abort();
+          stone_abort();
         }));
       }
     };
@@ -406,7 +406,7 @@ seastar::future<> test_preemptive_shutdown(bool v2) {
             [addr] (const std::error_code& e) {
           logger().error("test_preemptive_shutdown(): "
                          "there is another instance running at {}", addr);
-          ceph_abort();
+          stone_abort();
         }));
       }
       entity_addr_t get_addr() const {
@@ -495,7 +495,7 @@ seastar::future<> test_preemptive_shutdown(bool v2) {
   });
 }
 
-using ceph::msgr::v2::Tag;
+using stone::msgr::v2::Tag;
 using crimson::net::bp_action_t;
 using crimson::net::bp_type_t;
 using crimson::net::Breakpoint;
@@ -508,8 +508,8 @@ using crimson::net::Messenger;
 using crimson::net::MessengerRef;
 using crimson::net::SocketPolicy;
 using crimson::net::tag_bp_t;
-using ceph::net::test::cmd_t;
-using ceph::net::test::policy_t;
+using stone::net::test::cmd_t;
+using stone::net::test::policy_t;
 
 struct counter_t { unsigned counter = 0; };
 
@@ -531,7 +531,7 @@ std::ostream& operator<<(std::ostream& out, const conn_state_t& state) {
    case conn_state_t::replaced:
     return out << "replaced";
    default:
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -712,7 +712,7 @@ struct TestInterceptor : public Interceptor {
     auto result = find_result(conn.shared_from_this());
     if (result == nullptr) {
       logger().error("Untracked closed connection: {}", conn);
-      ceph_abort();
+      stone_abort();
     }
 
     if (result->state != conn_state_t::replaced) {
@@ -726,10 +726,10 @@ struct TestInterceptor : public Interceptor {
     auto result = find_result(conn.shared_from_this());
     if (result == nullptr) {
       logger().error("Untracked ready connection: {}", conn);
-      ceph_abort();
+      stone_abort();
     }
 
-    ceph_assert(conn.is_connected());
+    stone_assert(conn.is_connected());
     notify();
     logger().info("[{}] {} ready", result->index, conn);
   }
@@ -738,7 +738,7 @@ struct TestInterceptor : public Interceptor {
     auto result = find_result(conn.shared_from_this());
     if (result == nullptr) {
       logger().error("Untracked replaced connection: {}", conn);
-      ceph_abort();
+      stone_abort();
     }
 
     result->state = conn_state_t::replaced;
@@ -752,7 +752,7 @@ struct TestInterceptor : public Interceptor {
     if (result == nullptr) {
       logger().error("Untracked intercepted connection: {}, at breakpoint {}({})",
                      conn, bp, breakpoints_counter[bp].counter);
-      ceph_abort();
+      stone_abort();
     }
 
     if (bp == custom_bp_t::SOCKET_CONNECTING) {
@@ -807,7 +807,7 @@ SocketPolicy to_socket_policy(policy_t policy) {
     return SocketPolicy::lossless_client(0);
    default:
     logger().error("unexpected policy type");
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -827,18 +827,18 @@ class FailoverSuite : public Dispatcher {
     auto result = interceptor.find_result(c);
     if (result == nullptr) {
       logger().error("Untracked ms dispatched connection: {}", *c);
-      ceph_abort();
+      stone_abort();
     }
 
     if (tracked_conn != c) {
       logger().error("[{}] {} got op, but doesn't match tracked_conn [{}] {}",
                      result->index, *c, tracked_index, *tracked_conn);
-      ceph_abort();
+      stone_abort();
     }
-    ceph_assert(result->index == tracked_index);
+    stone_assert(result->index == tracked_index);
 
-    ceph_assert(m->get_type() == CEPH_MSG_OSD_OP);
-    ceph_assert(pending_receive > 0);
+    stone_assert(m->get_type() == STONE_MSG_OSD_OP);
+    stone_assert(pending_receive > 0);
     --pending_receive;
     if (pending_receive == 0) {
       interceptor.notify();
@@ -852,7 +852,7 @@ class FailoverSuite : public Dispatcher {
     auto result = interceptor.find_result(conn);
     if (result == nullptr) {
       logger().error("Untracked accepted connection: {}", *conn);
-      ceph_abort();
+      stone_abort();
     }
 
     if (tracked_conn &&
@@ -860,7 +860,7 @@ class FailoverSuite : public Dispatcher {
         tracked_conn != conn) {
       logger().error("[{}] {} got accepted, but there's already traced_conn [{}] {}",
                      result->index, *conn, tracked_index, *tracked_conn);
-      ceph_abort();
+      stone_abort();
     }
 
     tracked_index = result->index;
@@ -875,15 +875,15 @@ class FailoverSuite : public Dispatcher {
     auto result = interceptor.find_result(conn);
     if (result == nullptr) {
       logger().error("Untracked connected connection: {}", *conn);
-      ceph_abort();
+      stone_abort();
     }
 
     if (tracked_conn != conn) {
       logger().error("[{}] {} got connected, but doesn't match tracked_conn [{}] {}",
                      result->index, *conn, tracked_index, *tracked_conn);
-      ceph_abort();
+      stone_abort();
     }
-    ceph_assert(result->index == tracked_index);
+    stone_assert(result->index == tracked_index);
 
     ++result->cnt_connect_dispatched;
     logger().info("[Test] got connected (cnt_connect_dispatched={}) -- [{}] {}",
@@ -894,15 +894,15 @@ class FailoverSuite : public Dispatcher {
     auto result = interceptor.find_result(conn);
     if (result == nullptr) {
       logger().error("Untracked reset connection: {}", *conn);
-      ceph_abort();
+      stone_abort();
     }
 
     if (tracked_conn != conn) {
       logger().error("[{}] {} got reset, but doesn't match tracked_conn [{}] {}",
                      result->index, *conn, tracked_index, *tracked_conn);
-      ceph_abort();
+      stone_abort();
     }
-    ceph_assert(result->index == tracked_index);
+    stone_assert(result->index == tracked_index);
 
     tracked_index = 0;
     tracked_conn = nullptr;
@@ -915,15 +915,15 @@ class FailoverSuite : public Dispatcher {
     auto result = interceptor.find_result(conn);
     if (result == nullptr) {
       logger().error("Untracked remotely reset connection: {}", *conn);
-      ceph_abort();
+      stone_abort();
     }
 
     if (tracked_conn != conn) {
       logger().error("[{}] {} got remotely reset, but doesn't match tracked_conn [{}] {}",
                      result->index, *conn, tracked_index, *tracked_conn);
-      ceph_abort();
+      stone_abort();
     }
-    ceph_assert(result->index == tracked_index);
+    stone_assert(result->index == tracked_index);
 
     ++result->cnt_remote_reset_dispatched;
     logger().info("[Test] got remote reset (cnt_remote_reset_dispatched={}) -- [{}] {}",
@@ -941,18 +941,18 @@ class FailoverSuite : public Dispatcher {
     }, Messenger::bind_ertr::all_same_way([addr] (const std::error_code& e) {
       logger().error("FailoverSuite: "
                      "there is another instance running at {}", addr);
-      ceph_abort();
+      stone_abort();
     }));
   }
 
   seastar::future<> send_op(bool expect_reply=true) {
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     if (expect_reply) {
       ++pending_peer_receive;
     }
     pg_t pgid;
     object_locator_t oloc;
-    hobject_t hobj(object_t(), oloc.key, CEPH_NOSNAP, pgid.ps(),
+    hobject_t hobj(object_t(), oloc.key, STONE_NOSNAP, pgid.ps(),
                    pgid.pool(), oloc.nspace);
     spg_t spgid(pgid);
     return tracked_conn->send(make_message<MOSDOp>(0, 0, hobj, spgid, 0, 0, 0));
@@ -962,7 +962,7 @@ class FailoverSuite : public Dispatcher {
     if (pending_send != 0) {
       logger().info("[Test] flush sending {} ops", pending_send);
     }
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     return seastar::do_until(
         [this] { return pending_send == 0; },
         [this] {
@@ -1071,7 +1071,7 @@ class FailoverSuite : public Dispatcher {
   }
 
   void notify_peer_reply() {
-    ceph_assert(pending_peer_receive > 0);
+    stone_assert(pending_peer_receive > 0);
     --pending_peer_receive;
     logger().info("[Test] TestPeer said got op, left {} ops",
                   pending_peer_receive);
@@ -1122,15 +1122,15 @@ class FailoverSuite : public Dispatcher {
     logger().info("[Test] connect_peer({})", test_peer_addr);
     auto conn = test_msgr->connect(test_peer_addr, entity_name_t::TYPE_OSD);
     auto result = interceptor.find_result(conn);
-    ceph_assert(result != nullptr);
+    stone_assert(result != nullptr);
 
     if (tracked_conn) {
       if (tracked_conn->is_closed()) {
-        ceph_assert(tracked_conn != conn);
+        stone_assert(tracked_conn != conn);
         logger().info("[Test] this is a new session replacing an closed one");
       } else {
-        ceph_assert(tracked_index == result->index);
-        ceph_assert(tracked_conn == conn);
+        stone_assert(tracked_index == result->index);
+        stone_assert(tracked_conn == conn);
         logger().info("[Test] this is not a new session");
       }
     } else {
@@ -1145,7 +1145,7 @@ class FailoverSuite : public Dispatcher {
   seastar::future<> send_peer() {
     if (tracked_conn) {
       logger().info("[Test] send_peer()");
-      ceph_assert(!pending_send);
+      stone_assert(!pending_send);
       return send_op();
     } else {
       ++pending_send;
@@ -1156,19 +1156,19 @@ class FailoverSuite : public Dispatcher {
 
   seastar::future<> keepalive_peer() {
     logger().info("[Test] keepalive_peer()");
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     return tracked_conn->keepalive();
   }
 
   seastar::future<> try_send_peer() {
     logger().info("[Test] try_send_peer()");
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     return send_op(false);
   }
 
   seastar::future<> markdown() {
     logger().info("[Test] markdown()");
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     tracked_conn->mark_down();
     return seastar::now();
   }
@@ -1202,7 +1202,7 @@ class FailoverSuite : public Dispatcher {
   }
 
   bool is_standby() {
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     return !(tracked_conn->is_connected() || tracked_conn->is_closed());
   }
 };
@@ -1221,26 +1221,26 @@ class FailoverTest : public Dispatcher {
 
   std::optional<seastar::future<>> ms_dispatch(ConnectionRef c, MessageRef m) override {
     switch (m->get_type()) {
-     case CEPH_MSG_PING:
-      ceph_assert(recv_pong);
+     case STONE_MSG_PING:
+      stone_assert(recv_pong);
       recv_pong->set_value();
       recv_pong = std::nullopt;
       break;
      case MSG_COMMAND_REPLY:
-      ceph_assert(recv_cmdreply);
+      stone_assert(recv_cmdreply);
       recv_cmdreply->set_value();
       recv_cmdreply = std::nullopt;
       break;
      case MSG_COMMAND: {
       auto m_cmd = boost::static_pointer_cast<MCommand>(m);
-      ceph_assert(static_cast<cmd_t>(m_cmd->cmd[0][0]) == cmd_t::suite_recv_op);
-      ceph_assert(test_suite);
+      stone_assert(static_cast<cmd_t>(m_cmd->cmd[0][0]) == cmd_t::suite_recv_op);
+      stone_assert(test_suite);
       test_suite->notify_peer_reply();
       break;
      }
      default:
       logger().error("{} got unexpected msg from cmd server: {}", *c, *m);
-      ceph_abort();
+      stone_abort();
     }
     return {seastar::now()};
   }
@@ -1248,7 +1248,7 @@ class FailoverTest : public Dispatcher {
  private:
   seastar::future<> prepare_cmd(
       cmd_t cmd,
-      std::function<void(ceph::ref_t<MCommand>)>
+      std::function<void(stone::ref_t<MCommand>)>
         f_prepare = [] (auto m) { return; }) {
     assert(!recv_cmdreply);
     recv_cmdreply  = seastar::promise<>();
@@ -1339,12 +1339,12 @@ class FailoverTest : public Dispatcher {
       policy_t peer_policy,
       std::function<seastar::future<>(FailoverSuite&)>&& f) {
     logger().info("\n\n[{}]", name);
-    ceph_assert(!test_suite);
+    stone_assert(!test_suite);
     SocketPolicy test_policy_ = to_socket_policy(test_policy);
     return FailoverSuite::create(
         test_addr, test_policy_, test_peer_addr, interceptor
     ).then([this, peer_policy, f = std::move(f)] (auto suite) mutable {
-      ceph_assert(suite->get_addr() == test_addr);
+      stone_assert(suite->get_addr() == test_addr);
       test_suite.swap(suite);
       return start_peer(peer_policy).then([this, f = std::move(f)] {
         return f(*test_suite);
@@ -1375,19 +1375,19 @@ class FailoverTest : public Dispatcher {
 
   seastar::future<> peer_send_me() {
     logger().info("[Test] peer_send_me()");
-    ceph_assert(test_suite);
+    stone_assert(test_suite);
     test_suite->needs_receive();
     return prepare_cmd(cmd_t::suite_send_me);
   }
 
   seastar::future<> try_peer_send_me() {
     logger().info("[Test] try_peer_send_me()");
-    ceph_assert(test_suite);
+    stone_assert(test_suite);
     return prepare_cmd(cmd_t::suite_send_me);
   }
 
   seastar::future<> send_bidirectional() {
-    ceph_assert(test_suite);
+    stone_assert(test_suite);
     return test_suite->send_peer().then([this] {
       return peer_send_me();
     });
@@ -1395,7 +1395,7 @@ class FailoverTest : public Dispatcher {
 
   seastar::future<> peer_keepalive_me() {
     logger().info("[Test] peer_keepalive_me()");
-    ceph_assert(test_suite);
+    stone_assert(test_suite);
     return prepare_cmd(cmd_t::suite_keepalive_me);
   }
 
@@ -1419,15 +1419,15 @@ class FailoverSuitePeer : public Dispatcher {
 
   std::optional<seastar::future<>> ms_dispatch(ConnectionRef c, MessageRef m) override {
     logger().info("[TestPeer] got op from Test");
-    ceph_assert(m->get_type() == CEPH_MSG_OSD_OP);
-    ceph_assert(tracked_conn == c);
+    stone_assert(m->get_type() == STONE_MSG_OSD_OP);
+    stone_assert(tracked_conn == c);
     std::ignore = op_callback();
     return {seastar::now()};
   }
 
   void ms_handle_accept(ConnectionRef conn) override {
     logger().info("[TestPeer] got accept from Test");
-    ceph_assert(!tracked_conn ||
+    stone_assert(!tracked_conn ||
                 tracked_conn->is_closed() ||
                 tracked_conn == conn);
     tracked_conn = conn;
@@ -1436,7 +1436,7 @@ class FailoverSuitePeer : public Dispatcher {
 
   void ms_handle_reset(ConnectionRef conn, bool is_replace) override {
     logger().info("[TestPeer] got reset from Test");
-    ceph_assert(tracked_conn == conn);
+    stone_assert(tracked_conn == conn);
     tracked_conn = nullptr;
   }
 
@@ -1450,15 +1450,15 @@ class FailoverSuitePeer : public Dispatcher {
     }, Messenger::bind_ertr::all_same_way([addr] (const std::error_code& e) {
       logger().error("FailoverSuitePeer: "
                      "there is another instance running at {}", addr);
-      ceph_abort();
+      stone_abort();
     }));
   }
 
   seastar::future<> send_op() {
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     pg_t pgid;
     object_locator_t oloc;
-    hobject_t hobj(object_t(), oloc.key, CEPH_NOSNAP, pgid.ps(),
+    hobject_t hobj(object_t(), oloc.key, STONE_NOSNAP, pgid.ps(),
                    pgid.pool(), oloc.nspace);
     spg_t spgid(pgid);
     return tracked_conn->send(make_message<MOSDOp>(0, 0, hobj, spgid, 0, 0, 0));
@@ -1468,7 +1468,7 @@ class FailoverSuitePeer : public Dispatcher {
     if (pending_send != 0) {
       logger().info("[TestPeer] flush sending {} ops", pending_send);
     }
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     return seastar::do_until(
         [this] { return pending_send == 0; },
         [this] {
@@ -1491,11 +1491,11 @@ class FailoverSuitePeer : public Dispatcher {
     auto new_tracked_conn = peer_msgr->connect(addr, entity_name_t::TYPE_OSD);
     if (tracked_conn) {
       if (tracked_conn->is_closed()) {
-        ceph_assert(tracked_conn != new_tracked_conn);
+        stone_assert(tracked_conn != new_tracked_conn);
         logger().info("[TestPeer] this is a new session"
                       " replacing an closed one");
       } else {
-        ceph_assert(tracked_conn == new_tracked_conn);
+        stone_assert(tracked_conn == new_tracked_conn);
         logger().info("[TestPeer] this is not a new session");
       }
     } else {
@@ -1518,13 +1518,13 @@ class FailoverSuitePeer : public Dispatcher {
 
   seastar::future<> keepalive_peer() {
     logger().info("[TestPeer] keepalive_peer()");
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     return tracked_conn->keepalive();
   }
 
   seastar::future<> markdown() {
     logger().info("[TestPeer] markdown()");
-    ceph_assert(tracked_conn);
+    stone_assert(tracked_conn);
     tracked_conn->mark_down();
     return seastar::now();
   }
@@ -1548,9 +1548,9 @@ class FailoverTestPeer : public Dispatcher {
   std::unique_ptr<FailoverSuitePeer> test_suite;
 
   std::optional<seastar::future<>> ms_dispatch(ConnectionRef c, MessageRef m) override {
-    ceph_assert(cmd_conn == c);
+    stone_assert(cmd_conn == c);
     switch (m->get_type()) {
-     case CEPH_MSG_PING:
+     case STONE_MSG_PING:
       std::ignore = c->send(make_message<MPing>());
       break;
      case MSG_COMMAND: {
@@ -1570,7 +1570,7 @@ class FailoverTestPeer : public Dispatcher {
      }
      default:
       logger().error("{} got unexpected msg from cmd client: {}", *c, m);
-      ceph_abort();
+      stone_abort();
     }
     return {seastar::now()};
   }
@@ -1581,7 +1581,7 @@ class FailoverTestPeer : public Dispatcher {
 
  private:
   seastar::future<> notify_recv_op() {
-    ceph_assert(cmd_conn);
+    stone_assert(cmd_conn);
     auto m = make_message<MCommand>();
     m->cmd.emplace_back(1, static_cast<char>(cmd_t::suite_recv_op));
     return cmd_conn->send(m);
@@ -1590,7 +1590,7 @@ class FailoverTestPeer : public Dispatcher {
   seastar::future<> handle_cmd(cmd_t cmd, MRef<MCommand> m_cmd) {
     switch (cmd) {
      case cmd_t::suite_start: {
-      ceph_assert(!test_suite);
+      stone_assert(!test_suite);
       auto policy = to_socket_policy(static_cast<policy_t>(m_cmd->cmd[1][0]));
       return FailoverSuitePeer::create(test_peer_addr, policy,
                                        [this] { return notify_recv_op(); }
@@ -1599,28 +1599,28 @@ class FailoverTestPeer : public Dispatcher {
       });
      }
      case cmd_t::suite_stop:
-      ceph_assert(test_suite);
+      stone_assert(test_suite);
       return test_suite->shutdown().then([this] {
         test_suite.reset();
       });
      case cmd_t::suite_connect_me: {
-      ceph_assert(test_suite);
+      stone_assert(test_suite);
       entity_addr_t test_addr = entity_addr_t();
       test_addr.parse(m_cmd->cmd[1].c_str(), nullptr);
       return test_suite->connect_peer(test_addr);
      }
      case cmd_t::suite_send_me:
-      ceph_assert(test_suite);
+      stone_assert(test_suite);
       return test_suite->send_peer();
      case cmd_t::suite_keepalive_me:
-      ceph_assert(test_suite);
+      stone_assert(test_suite);
       return test_suite->keepalive_peer();
      case cmd_t::suite_markdown:
-      ceph_assert(test_suite);
+      stone_assert(test_suite);
       return test_suite->markdown();
      default:
       logger().error("TestPeer got unexpected command {} from Test", m_cmd);
-      ceph_abort();
+      stone_abort();
       return seastar::now();
     }
   }
@@ -1634,7 +1634,7 @@ class FailoverTestPeer : public Dispatcher {
     }, Messenger::bind_ertr::all_same_way([cmd_peer_addr] (const std::error_code& e) {
       logger().error("FailoverTestPeer: "
                      "there is another instance running at {}", cmd_peer_addr);
-      ceph_abort();
+      stone_abort();
     }));
   }
 
@@ -2839,7 +2839,7 @@ test_v2_stale_reaccept(FailoverTest& test) {
       results[2].assert_connect(0, 0, 0, 0);
       results[2].assert_accept(1, 0);
       results[2].assert_reset(0, 0);
-      ceph_assert(results[2].server_reconnect_attempts >= 1);
+      stone_assert(results[2].server_reconnect_attempts >= 1);
     });
   });
 }
@@ -3211,7 +3211,7 @@ test_v2_peer_reuse_connector(FailoverTest& test) {
     }).then([] {
       return seastar::sleep(100ms);
     }).then([&suite] {
-      ceph_assert(suite.is_standby());
+      stone_assert(suite.is_standby());
       logger().info("-- 3 --");
       logger().info("[Test] connector reconnect...");
       return suite.connect_peer();
@@ -3361,7 +3361,7 @@ test_v2_lossless_peer_connector(FailoverTest& test) {
     }).then([] {
       return seastar::sleep(100ms);
     }).then([&suite] {
-      ceph_assert(suite.is_standby());
+      stone_assert(suite.is_standby());
       logger().info("-- 3 --");
       logger().info("[Test] connector reconnect...");
       return suite.connect_peer();
@@ -3468,8 +3468,8 @@ seastar::future<>
 test_v2_protocol(entity_addr_t test_addr,
                  entity_addr_t test_peer_addr,
                  bool test_peer_islocal) {
-  ceph_assert(test_addr.is_msgr2());
-  ceph_assert(test_peer_addr.is_msgr2());
+  stone_assert(test_addr.is_msgr2());
+  stone_assert(test_peer_addr.is_msgr2());
 
   if (test_peer_islocal) {
     // initiate crimson test peer locally
@@ -3589,8 +3589,8 @@ seastar::future<int> do_test(seastar::app_template& app)
   std::vector<const char*> args;
   std::string cluster;
   std::string conf_file_list;
-  auto init_params = ceph_argparse_early_args(args,
-                                              CEPH_ENTITY_TYPE_CLIENT,
+  auto init_params = stone_argparse_early_args(args,
+                                              STONE_ENTITY_TYPE_CLIENT,
                                               &cluster,
                                               &conf_file_list);
   return crimson::common::sharded_conf().start(init_params.name, cluster)
@@ -3602,10 +3602,10 @@ seastar::future<int> do_test(seastar::app_template& app)
     auto rounds = config["rounds"].as<unsigned>();
     auto keepalive_ratio = config["keepalive-ratio"].as<double>();
     entity_addr_t v2_test_addr;
-    ceph_assert(v2_test_addr.parse(
+    stone_assert(v2_test_addr.parse(
         config["v2-test-addr"].as<std::string>().c_str(), nullptr));
     entity_addr_t v2_testpeer_addr;
-    ceph_assert(v2_testpeer_addr.parse(
+    stone_assert(v2_testpeer_addr.parse(
         config["v2-testpeer-addr"].as<std::string>().c_str(), nullptr));
     auto v2_testpeer_islocal = config["v2-testpeer-islocal"].as<bool>();
     return test_echo(rounds, keepalive_ratio, false)

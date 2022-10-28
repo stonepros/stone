@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 Haomai Wang <haomaiwang@gmail.com>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_ZSTDCOMPRESSOR_H
-#define CEPH_ZSTDCOMPRESSOR_H
+#ifndef STONE_ZSTDCOMPRESSOR_H
+#define STONE_ZSTDCOMPRESSOR_H
 
 #define ZSTD_STATIC_LINKING_ONLY
 #include "zstd/lib/zstd.h"
@@ -24,7 +24,7 @@
 
 class ZstdCompressor : public Compressor {
  public:
-  ZstdCompressor(CephContext *cct) : Compressor(COMP_ALG_ZSTD, "zstd"), cct(cct) {}
+  ZstdCompressor(StoneeContext *cct) : Compressor(COMP_ALG_ZSTD, "zstd"), cct(cct) {}
 
   int compress(const ceph::buffer::list &src, ceph::buffer::list &dst, boost::optional<int32_t> &compressor_message) override {
     ZSTD_CStream *s = ZSTD_createCStream();
@@ -101,7 +101,7 @@ class ZstdCompressor : public Compressor {
     return 0;
   }
  private:
-  CephContext *const cct;
+  StoneeContext *const cct;
 };
 
 #endif

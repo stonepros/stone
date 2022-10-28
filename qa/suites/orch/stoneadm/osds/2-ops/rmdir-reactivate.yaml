@@ -1,0 +1,20 @@
+tasks:
+- stoneadm.shell:
+    host.a:
+      - |
+        set -e
+        set -x
+        stone orch ps
+        HOST=$(hostname -s)
+        OSD=$(stone orch ps $HOST | grep osd | head -n 1 | awk '{print $1}')
+        echo "host $HOST, osd $OSD"
+        stone orch daemon stop $OSD
+        while stone orch ps | grep $OSD | grep running ; do sleep 5 ; done
+        stone auth export $OSD > k
+        stone orch daemon rm $OSD --force
+        stone orch ps --refresh
+        while stone orch ps | grep $OSD ; do sleep 5 ; done
+        stone auth add $OSD -i k
+        stone stoneadm osd activate $HOST
+        while ! stone orch ps | grep $OSD | grep running ; do sleep 5 ; done
+- stoneadm.healthy:

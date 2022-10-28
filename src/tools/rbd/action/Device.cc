@@ -7,7 +7,7 @@
 
 #include <boost/program_options.hpp>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace rbd {
 namespace action {
@@ -18,15 +18,15 @@ namespace po = boost::program_options;
 #define DECLARE_DEVICE_OPERATIONS(ns)                                   \
   namespace ns {                                                        \
   int execute_list(const po::variables_map &vm,                         \
-                   const std::vector<std::string> &ceph_global_args);   \
+                   const std::vector<std::string> &stone_global_args);   \
   int execute_map(const po::variables_map &vm,                          \
-                  const std::vector<std::string> &ceph_global_args);    \
+                  const std::vector<std::string> &stone_global_args);    \
   int execute_unmap(const po::variables_map &vm,                        \
-                    const std::vector<std::string> &ceph_global_args);  \
+                    const std::vector<std::string> &stone_global_args);  \
   int execute_attach(const po::variables_map &vm,                       \
-                     const std::vector<std::string> &ceph_global_args); \
+                     const std::vector<std::string> &stone_global_args); \
   int execute_detach(const po::variables_map &vm,                       \
-                     const std::vector<std::string> &ceph_global_args); \
+                     const std::vector<std::string> &stone_global_args); \
   }
 
 DECLARE_DEVICE_OPERATIONS(ggate);
@@ -40,15 +40,15 @@ namespace {
 
 struct DeviceOperations {
   int (*execute_list)(const po::variables_map &vm,
-                      const std::vector<std::string> &ceph_global_args);
+                      const std::vector<std::string> &stone_global_args);
   int (*execute_map)(const po::variables_map &vm,
-                     const std::vector<std::string> &ceph_global_args);
+                     const std::vector<std::string> &stone_global_args);
   int (*execute_unmap)(const po::variables_map &vm,
-                       const std::vector<std::string> &ceph_global_args);
+                       const std::vector<std::string> &stone_global_args);
   int (*execute_attach)(const po::variables_map &vm,
-                        const std::vector<std::string> &ceph_global_args);
+                        const std::vector<std::string> &stone_global_args);
   int (*execute_detach)(const po::variables_map &vm,
-                        const std::vector<std::string> &ceph_global_args);
+                        const std::vector<std::string> &stone_global_args);
 };
 
 const DeviceOperations ggate_operations = {
@@ -151,7 +151,7 @@ const DeviceOperations *get_device_operations(const po::variables_map &vm) {
   case DEVICE_TYPE_WNBD:
     return &wnbd_operations;
   default:
-    ceph_abort();
+    stone_abort();
     return nullptr;
   }
 }
@@ -165,8 +165,8 @@ void get_list_arguments(po::options_description *positional,
 }
 
 int execute_list(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
-  return (*get_device_operations(vm)->execute_list)(vm, ceph_global_init_args);
+                 const std::vector<std::string> &stone_global_init_args) {
+  return (*get_device_operations(vm)->execute_list)(vm, stone_global_init_args);
 }
 
 void get_map_arguments(po::options_description *positional,
@@ -185,8 +185,8 @@ void get_map_arguments(po::options_description *positional,
 }
 
 int execute_map(const po::variables_map &vm,
-                const std::vector<std::string> &ceph_global_init_args) {
-  return (*get_device_operations(vm)->execute_map)(vm, ceph_global_init_args);
+                const std::vector<std::string> &stone_global_init_args) {
+  return (*get_device_operations(vm)->execute_map)(vm, stone_global_init_args);
 }
 
 void get_unmap_arguments(po::options_description *positional,
@@ -203,8 +203,8 @@ void get_unmap_arguments(po::options_description *positional,
 }
 
 int execute_unmap(const po::variables_map &vm,
-                  const std::vector<std::string> &ceph_global_init_args) {
-  return (*get_device_operations(vm)->execute_unmap)(vm, ceph_global_init_args);
+                  const std::vector<std::string> &stone_global_init_args) {
+  return (*get_device_operations(vm)->execute_unmap)(vm, stone_global_init_args);
 }
 
 void get_attach_arguments(po::options_description *positional,
@@ -225,8 +225,8 @@ void get_attach_arguments(po::options_description *positional,
 }
 
 int execute_attach(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
-  return (*get_device_operations(vm)->execute_attach)(vm, ceph_global_init_args);
+                   const std::vector<std::string> &stone_global_init_args) {
+  return (*get_device_operations(vm)->execute_attach)(vm, stone_global_init_args);
 }
 
 void get_detach_arguments(po::options_description *positional,
@@ -243,8 +243,8 @@ void get_detach_arguments(po::options_description *positional,
 }
 
 int execute_detach(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
-  return (*get_device_operations(vm)->execute_detach)(vm, ceph_global_init_args);
+                   const std::vector<std::string> &stone_global_init_args) {
+  return (*get_device_operations(vm)->execute_detach)(vm, stone_global_init_args);
 }
 
 Shell::SwitchArguments switched_arguments({"exclusive", "force", "quiesce",

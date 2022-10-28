@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -13,8 +13,8 @@
  *
  */
 
-#ifndef CEPH_COMMON_ASYNC_LIBRADOS_COMPLETION_H
-#define CEPH_COMMON_ASYNC_LIBRADOS_COMPLETION_H
+#ifndef STONE_COMMON_ASYNC_LIBRADOS_COMPLETION_H
+#define STONE_COMMON_ASYNC_LIBRADOS_COMPLETION_H
 
 #include <atomic>
 #include <condition_variable>
@@ -122,4 +122,4 @@ public:
 };
 }
 
-#endif // !CEPH_COMMON_ASYNC_LIBRADOS_COMPLETION_H
+#endif // !STONE_COMMON_ASYNC_LIBRADOS_COMPLETION_H

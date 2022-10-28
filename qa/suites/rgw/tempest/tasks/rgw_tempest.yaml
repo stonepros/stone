@@ -1,10 +1,10 @@
 # ubuntu for py2 until we move to py3
 os_type: ubuntu
 
-# see http://tracker.ceph.com/issues/20360 and http://tracker.ceph.com/issues/18126
+# see http://tracker.stone.com/issues/20360 and http://tracker.stone.com/issues/18126
 tasks:
 - install:
-- ceph:
+- stone:
 - tox: [ client.0 ]
 - keystone:
     client.0:
@@ -51,7 +51,7 @@ tasks:
         - .*test_object_services.ObjectTest.test_create_object_with_transfer_encoding
 
 overrides:
-  ceph:
+  stone:
     conf:
       global:
         osd_min_pg_log_entries: 10

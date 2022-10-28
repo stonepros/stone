@@ -1,11 +1,11 @@
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         rgw crypt s3 kms backend: kmip
-        rgw crypt kmip ca path: /etc/ceph/kmiproot.crt
-        rgw crypt kmip client cert: /etc/ceph/kmip-client.crt
-        rgw crypt kmip client key: /etc/ceph/kmip-client.key
+        rgw crypt kmip ca path: /etc/stone/kmiproot.crt
+        rgw crypt kmip client cert: /etc/stone/kmip-client.crt
+        rgw crypt kmip client key: /etc/stone/kmip-client.key
         rgw crypt kmip kms key template: pykmip-$keyid
   rgw:
     client.0:
@@ -26,7 +26,7 @@ tasks:
       cn: rgw-client
 - exec:
     client.0:
-      - chmod 644 /home/ubuntu/cephtest/ca/kmip-client.key
+      - chmod 644 /home/ubuntu/stonetest/ca/kmip-client.key
 - pykmip:
     client.0:
       clientca: kmiproot

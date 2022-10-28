@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -33,8 +33,8 @@
 #include "PyModule.h"
 #include "Mgr.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr " << __func__ << " "
 
@@ -47,7 +47,7 @@ Mgr::Mgr(MonClient *monc_, const MgrMap& mgrmap,
   objecter(objecter_),
   client(client_),
   client_messenger(clientm_),
-  finisher(g_ceph_context, "Mgr", "mgr-fin"),
+  finisher(g_stone_context, "Mgr", "mgr-fin"),
   digest_received(false),
   py_module_registry(py_module_registry_),
   cluster_state(monc, nullptr, mgrmap),
@@ -140,7 +140,7 @@ void MetadataUpdate::finish(int r)
         daemon_state.insert(state);
       }
     } else {
-      ceph_abort();
+      stone_abort();
     }
   } else {
     dout(1) << "mon failed to return metadata for " << key
@@ -151,8 +151,8 @@ void MetadataUpdate::finish(int r)
 void Mgr::background_init(Context *completion)
 {
   std::lock_guard l(lock);
-  ceph_assert(!initializing);
-  ceph_assert(!initialized);
+  stone_assert(!initializing);
+  stone_assert(!initialized);
   initializing = true;
 
   finisher.start();
@@ -165,7 +165,7 @@ void Mgr::background_init(Context *completion)
 
 std::map<std::string, std::string> Mgr::load_store()
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   dout(10) << "listing keys" << dendl;
   JSONCommand cmd;
@@ -173,7 +173,7 @@ std::map<std::string, std::string> Mgr::load_store()
   lock.unlock();
   cmd.wait();
   lock.lock();
-  ceph_assert(cmd.r == 0);
+  stone_assert(cmd.r == 0);
 
   std::map<std::string, std::string> loaded;
   
@@ -206,7 +206,7 @@ std::map<std::string, std::string> Mgr::load_store()
 
 void Mgr::handle_signal(int signum)
 {
-  ceph_assert(signum == SIGINT || signum == SIGTERM);
+  stone_assert(signum == SIGINT || signum == SIGTERM);
   shutdown();
 }
 
@@ -215,7 +215,7 @@ static void handle_mgr_signal(int signum)
   derr << " *** Got signal " << sig_str(signum) << " ***" << dendl;
 
   // The python modules don't reliably shut down, so don't even
-  // try. The mon will blocklist us (and all of our rados/cephfs
+  // try. The mon will blocklist us (and all of our rados/stonefs
   // clients) anyway. Just exit!
 
   _exit(0);  // exit with 0 result code, as if we had done an orderly shutdown
@@ -224,8 +224,8 @@ static void handle_mgr_signal(int signum)
 void Mgr::init()
 {
   std::unique_lock l(lock);
-  ceph_assert(initializing);
-  ceph_assert(!initialized);
+  stone_assert(initializing);
+  stone_assert(!initialized);
 
   // Enable signal handlers
   register_async_signal_handler_oneshot(SIGINT, handle_mgr_signal);
@@ -236,14 +236,14 @@ void Mgr::init()
   monc->with_monmap(
     [&](const MonMap &monmap) {
       if (monmap.get_required_features().contains_all(
-	    ceph::features::mon::FEATURE_PACIFIC)) {
+	    stone::features::mon::FEATURE_PACIFIC)) {
 	mon_allows_kv_sub = true;
       }
     });
   if (!mon_allows_kv_sub) {
     // mons are still pre-pacific.  wait long enough to ensure our
     // next beacon is processed so that our module options are
-    // propagated.  See https://tracker.ceph.com/issues/49778
+    // propagated.  See https://tracker.stone.com/issues/49778
     lock.unlock();
     dout(10) << "waiting a bit for the pre-pacific mon to process our beacon" << dendl;
     sleep(g_conf().get_val<std::chrono::seconds>("mgr_tick_period").count() * 3);
@@ -350,11 +350,11 @@ void Mgr::init()
 
   cluster_state.final_init();
 
-  AdminSocket *admin_socket = g_ceph_context->get_admin_socket();
+  AdminSocket *admin_socket = g_stone_context->get_admin_socket();
   r = admin_socket->register_command(
     "mgr_status", this,
     "Dump mgr status");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   dout(4) << "Complete." << dendl;
   initializing = false;
@@ -363,7 +363,7 @@ void Mgr::init()
 
 void Mgr::load_all_metadata()
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   JSONCommand mds_cmd;
   mds_cmd.run(monc, "{\"prefix\": \"mds metadata\"}");
@@ -378,9 +378,9 @@ void Mgr::load_all_metadata()
   mon_cmd.wait();
   lock.lock();
 
-  ceph_assert(mds_cmd.r == 0);
-  ceph_assert(mon_cmd.r == 0);
-  ceph_assert(osd_cmd.r == 0);
+  stone_assert(mds_cmd.r == 0);
+  stone_assert(mon_cmd.r == 0);
+  stone_assert(osd_cmd.r == 0);
 
   for (auto &metadata_val : mds_cmd.json_result.get_array()) {
     json_spirit::mObject daemon_meta = metadata_val.get_obj();
@@ -477,7 +477,7 @@ void Mgr::shutdown()
 
 void Mgr::handle_osd_map()
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   std::set<std::string> names_exist;
 
@@ -549,7 +549,7 @@ void Mgr::handle_service_map(ref_t<MServiceMap> m)
 void Mgr::handle_mon_map()
 {
   dout(20) << __func__ << dendl;
-  assert(ceph_mutex_is_locked_by_me(lock));
+  assert(stone_mutex_is_locked_by_me(lock));
   std::set<std::string> names_exist;
   cluster_state.with_monmap([&] (auto &monmap) {
     for (unsigned int i = 0; i < monmap.size(); i++) {
@@ -578,15 +578,15 @@ bool Mgr::ms_dispatch2(const ref_t<Message>& m)
     case MSG_MGR_DIGEST:
       handle_mgr_digest(ref_cast<MMgrDigest>(m));
       break;
-    case CEPH_MSG_MON_MAP:
+    case STONE_MSG_MON_MAP:
       py_module_registry->notify_all("mon_map", "");
       handle_mon_map();
       break;
-    case CEPH_MSG_FS_MAP:
+    case STONE_MSG_FS_MAP:
       py_module_registry->notify_all("fs_map", "");
       handle_fs_map(ref_cast<MFSMap>(m));
       return false; // I shall let this pass through for Client
-    case CEPH_MSG_OSD_MAP:
+    case STONE_MSG_OSD_MAP:
       handle_osd_map();
 
       py_module_registry->notify_all("osd_map", "");
@@ -649,7 +649,7 @@ bool Mgr::ms_dispatch2(const ref_t<Message>& m)
 
 void Mgr::handle_fs_map(ref_t<MFSMap> m)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   std::set<std::string> names_exist;
   const FSMap &new_fsmap = m->get_fsmap();

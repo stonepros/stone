@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::Config: " << __func__ << ": "
 
@@ -58,7 +58,7 @@ struct Options : Parent {
     m_io_ctx.dup(io_ctx);
     m_io_ctx.set_namespace("");
 
-    CephContext *cct = reinterpret_cast<CephContext *>(m_io_ctx.cct());
+    StoneContext *cct = reinterpret_cast<StoneContext *>(m_io_ctx.cct());
 
     const std::string rbd_key_prefix("rbd_");
     const std::string rbd_mirror_key_prefix("rbd_mirror_");
@@ -81,11 +81,11 @@ struct Options : Parent {
   }
 
   int init() {
-    CephContext *cct = (CephContext *)m_io_ctx.cct();
+    StoneContext *cct = (StoneContext *)m_io_ctx.cct();
 
     for (auto& [k,v] : *this) {
       int r = cct->_conf.get_val(k, &v.first);
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       v.second = RBD_CONFIG_SOURCE_CONFIG;
     }
 
@@ -161,7 +161,7 @@ bool Config<I>::is_option_name(I *image_ctx, const std::string &name) {
 
 template <typename I>
 int Config<I>::list(I *image_ctx, std::vector<config_option_t> *options) {
-  CephContext *cct = image_ctx->cct;
+  StoneContext *cct = image_ctx->cct;
   Options opts(image_ctx->md_ctx, true);
 
   int r = opts.init();
@@ -206,7 +206,7 @@ int Config<I>::list(I *image_ctx, std::vector<config_option_t> *options) {
 template <typename I>
 void Config<I>::apply_pool_overrides(librados::IoCtx& io_ctx,
                                      ConfigProxy* config) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
 
   Options opts(io_ctx, false);
   int r = opts.init();

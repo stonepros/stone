@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -15,18 +15,18 @@
  *
  */
 
-#include "ceph_ver.h"
+#include "stone_ver.h"
 #include "common/debug.h"
 #include "ErasureCodePluginLrc.h"
 #include "ErasureCodeLrc.h"
 
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 
 int ErasureCodePluginLrc::factory(const std::string &directory,
-				  ceph::ErasureCodeProfile &profile,
-				  ceph::ErasureCodeInterfaceRef *erasure_code,
+				  stone::ErasureCodeProfile &profile,
+				  stone::ErasureCodeInterfaceRef *erasure_code,
 				  std::ostream *ss) {
     ErasureCodeLrc *interface;
     interface = new ErasureCodeLrc(directory);
@@ -35,14 +35,14 @@ int ErasureCodePluginLrc::factory(const std::string &directory,
       delete interface;
       return r;
     }
-    *erasure_code = ceph::ErasureCodeInterfaceRef(interface);
+    *erasure_code = stone::ErasureCodeInterfaceRef(interface);
     return 0;
 };
 
-const char *__erasure_code_version() { return CEPH_GIT_NICE_VER; }
+const char *__erasure_code_version() { return STONE_GIT_NICE_VER; }
 
 int __erasure_code_init(char *plugin_name, char *directory)
 {
-  auto& instance = ceph::ErasureCodePluginRegistry::instance();
+  auto& instance = stone::ErasureCodePluginRegistry::instance();
   return instance.add(plugin_name, new ErasureCodePluginLrc());
 }

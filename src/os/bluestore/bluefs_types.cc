@@ -10,8 +10,8 @@
 using std::list;
 using std::ostream;
 
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
 // bluefs_extent_t
 void bluefs_extent_t::dump(Formatter *f) const
@@ -210,7 +210,7 @@ void bluefs_transaction_t::decode(bufferlist::const_iterator& p)
   DECODE_FINISH(p);
   uint32_t actual = op_bl.crc32c(-1);
   if (actual != crc)
-    throw ceph::buffer::malformed_input("bad crc " + stringify(actual)
+    throw stone::buffer::malformed_input("bad crc " + stringify(actual)
 				  + " expected " + stringify(crc));
 }
 

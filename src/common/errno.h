@@ -1,5 +1,5 @@
-#ifndef CEPH_ERRNO_H
-#define CEPH_ERRNO_H
+#ifndef STONE_ERRNO_H
+#define STONE_ERRNO_H
 
 #include <string>
 

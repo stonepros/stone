@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 XSKY <haomai@xsky.com>
  *
@@ -43,11 +43,11 @@ class C_handle_connection_read : public EventCallback {
   }
 };
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #undef dout_prefix
 #define dout_prefix *_dout << " RDMAConnectedSocketImpl "
 
-RDMAConnectedSocketImpl::RDMAConnectedSocketImpl(CephContext *cct, std::shared_ptr<Infiniband> &ib,
+RDMAConnectedSocketImpl::RDMAConnectedSocketImpl(StoneContext *cct, std::shared_ptr<Infiniband> &ib,
                                                  std::shared_ptr<RDMADispatcher>& rdma_dispatcher,
                                                  RDMAWorker *w)
   : cct(cct), connected(0), error(0), ib(ib),
@@ -133,7 +133,7 @@ int RDMAConnectedSocketImpl::activate()
 int RDMAConnectedSocketImpl::try_connect(const entity_addr_t& peer_addr, const SocketOptions &opts) {
   ldout(cct, 20) << __func__ << " nonblock:" << opts.nonblock << ", nodelay:"
                  << opts.nodelay << ", rbuf_size: " << opts.rcbuf_size << dendl;
-  ceph::NetHandler net(cct);
+  stone::NetHandler net(cct);
 
   // we construct a socket to transport ib sync message
   // but we shouldn't block in tcp connecting
@@ -212,7 +212,7 @@ void RDMAConnectedSocketImpl::handle_connection() {
   if (!is_server) {// first time: cm meta sync + ack from server
     if (!connected) {
       r = activate();
-      ceph_assert(!r);
+      stone_assert(!r);
     }
     notify();
     r = qp->send_cm_meta(cct, tcp_fd);
@@ -228,7 +228,7 @@ void RDMAConnectedSocketImpl::handle_connection() {
         return ;
       }
       r = activate();
-      ceph_assert(!r);
+      stone_assert(!r);
       r = qp->send_cm_meta(cct, tcp_fd);
       if (r < 0) {
         ldout(cct, 1) << __func__ << " server ack failed." << dendl;
@@ -290,7 +290,7 @@ void RDMAConnectedSocketImpl::buffer_prefetch(void)
 
   for(size_t i = 0; i < cqe.size(); ++i) {
     ibv_wc* response = &cqe[i];
-    ceph_assert(response->status == IBV_WC_SUCCESS);
+    stone_assert(response->status == IBV_WC_SUCCESS);
     Chunk* chunk = reinterpret_cast<Chunk *>(response->wr_id);
     chunk->prepare_read(response->byte_len);
 
@@ -341,7 +341,7 @@ ssize_t RDMAConnectedSocketImpl::read_buffers(char* buf, size_t len)
   return read_size;
 }
 
-ssize_t RDMAConnectedSocketImpl::send(ceph::buffer::list &bl, bool more)
+ssize_t RDMAConnectedSocketImpl::send(stone::buffer::list &bl, bool more)
 {
   if (error) {
     if (!active)
@@ -370,7 +370,7 @@ size_t RDMAConnectedSocketImpl::tx_copy_chunk(std::vector<Chunk*> &tx_buffers,
     size_t req_copy_len, decltype(std::cbegin(pending_bl.buffers()))& start,
     const decltype(std::cbegin(pending_bl.buffers()))& end)
 {
-  ceph_assert(start != end);
+  stone_assert(start != end);
   auto chunk_idx = tx_buffers.size();
   if (0 == worker->get_reged_mem(this, tx_buffers, req_copy_len)) {
     ldout(cct, 1) << __func__ << " no enough buffers in worker " << worker << dendl;
@@ -400,7 +400,7 @@ size_t RDMAConnectedSocketImpl::tx_copy_chunk(std::vector<Chunk*> &tx_buffers,
 
     ++start;
   }
-  ceph_assert(req_copy_len == 0);
+  stone_assert(req_copy_len == 0);
   return write_len;
 }
 
@@ -428,7 +428,7 @@ ssize_t RDMAConnectedSocketImpl::submit(bool more)
           goto sending;
         wait_copy_len = 0;
       }
-      ceph_assert(copy_start == it);
+      stone_assert(copy_start == it);
       tx_buffers.push_back(ib->get_tx_chunk_by_buffer(it->raw_c_str()));
       total_copied += it->length();
       ++copy_start;
@@ -443,8 +443,8 @@ ssize_t RDMAConnectedSocketImpl::submit(bool more)
  sending:
   if (total_copied == 0)
     return -EAGAIN;
-  ceph_assert(total_copied <= pending_bl.length());
-  ceph::buffer::list swapped;
+  stone_assert(total_copied <= pending_bl.length());
+  stone::buffer::list swapped;
   if (total_copied < pending_bl.length()) {
     worker->perf_logger->inc(l_msgr_rdma_tx_parital_mem);
     pending_bl.splice(total_copied, pending_bl.length() - total_copied, &swapped);
@@ -554,7 +554,7 @@ void RDMAConnectedSocketImpl::notify()
 {
   eventfd_t event_val = 1;
   int r = eventfd_write(notify_fd, event_val);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 }
 
 void RDMAConnectedSocketImpl::shutdown()

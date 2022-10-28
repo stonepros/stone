@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat
  *
@@ -26,7 +26,7 @@ using namespace std::literals;
 
 namespace ba = boost::asio;
 namespace bs = boost::system;
-namespace ca = ceph::async;
+namespace ca = stone::async;
 
 class context_thread {
   ba::io_context c;

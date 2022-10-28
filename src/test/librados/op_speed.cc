@@ -11,8 +11,8 @@ int main() {
     bufferlist bl;
     std::uint64_t sz;
     struct timespec tm;
-    std::map<std::string, ceph::buffer::list> xattrs;
-    std::map<std::string, ceph::buffer::list> omap;
+    std::map<std::string, stone::buffer::list> xattrs;
+    std::map<std::string, stone::buffer::list> omap;
     bool more;
     op.read(0, 0, &bl, nullptr);
     op.stat2(&sz, &tm, nullptr);

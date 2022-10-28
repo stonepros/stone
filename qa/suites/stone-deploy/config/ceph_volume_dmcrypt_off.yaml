@@ -1,0 +1,3 @@
+overrides:
+   stone-deploy:
+      use-stone-volume: True

@@ -8,7 +8,7 @@
 #include "librbd/internal.h"
 #include "librbd/api/Io.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbdadminsocket: "
 
@@ -84,7 +84,7 @@ int LibrbdAdminSocketHook::call(std::string_view command,
 				std::ostream& errss,
 				bufferlist& out) {
   Commands::const_iterator i = commands.find(command);
-  ceph_assert(i != commands.end());
+  stone_assert(i != commands.end());
   return i->second->call(f);
 }
 

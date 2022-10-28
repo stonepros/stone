@@ -59,7 +59,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
   static constexpr int TICK_INTERVAL = 1;
 }
@@ -119,27 +119,27 @@ namespace {
 // Features here are also automatically upgraded
 CompatSet get_osd_initial_compat_set()
 {
-  CompatSet::FeatureSet ceph_osd_feature_compat;
-  CompatSet::FeatureSet ceph_osd_feature_ro_compat;
-  CompatSet::FeatureSet ceph_osd_feature_incompat;
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_BASE);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_PGINFO);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_OLOC);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_LEC);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_CATEGORIES);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_HOBJECTPOOL);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_BIGINFO);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_LEVELDBINFO);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_LEVELDBLOG);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_SNAPMAPPER);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_HINTS);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_PGMETA);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_MISSING);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_FASTINFO);
-  ceph_osd_feature_incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_RECOVERY_DELETES);
-  return CompatSet(ceph_osd_feature_compat,
-                   ceph_osd_feature_ro_compat,
-                   ceph_osd_feature_incompat);
+  CompatSet::FeatureSet stone_osd_feature_compat;
+  CompatSet::FeatureSet stone_osd_feature_ro_compat;
+  CompatSet::FeatureSet stone_osd_feature_incompat;
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_BASE);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_PGINFO);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_OLOC);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_LEC);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_CATEGORIES);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_HOBJECTPOOL);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_BIGINFO);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_LEVELDBINFO);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_LEVELDBLOG);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_SNAPMAPPER);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_HINTS);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_PGMETA);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_MISSING);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_FASTINFO);
+  stone_osd_feature_incompat.insert(STONE_OSD_FEATURE_INCOMPAT_RECOVERY_DELETES);
+  return CompatSet(stone_osd_feature_compat,
+                   stone_osd_feature_ro_compat,
+                   stone_osd_feature_incompat);
 }
 }
 
@@ -163,13 +163,13 @@ seastar::future<> OSD::mkfs(uuid_d osd_uuid, uuid_d cluster_fsid)
     return store->create_new_collection(coll_t::meta());
   }).then([this] (auto ch) {
     meta_coll = make_unique<OSDMeta>(ch , store.get());
-    ceph::os::Transaction t;
+    stone::os::Transaction t;
     meta_coll->create(t);
     meta_coll->store_superblock(t, superblock);
     return store->do_transaction(meta_coll->collection(), std::move(t));
   }).then([cluster_fsid, this] {
     return when_all_succeed(
-      store->write_meta("ceph_fsid", cluster_fsid.to_string()),
+      store->write_meta("stone_fsid", cluster_fsid.to_string()),
       store->write_meta("whoami", std::to_string(whoami)));
   }).then_unpack([cluster_fsid, this] {
     fmt::print("created object store {} for osd.{} fsid {}\n",
@@ -182,7 +182,7 @@ seastar::future<> OSD::mkfs(uuid_d osd_uuid, uuid_d cluster_fsid)
 namespace {
   entity_addrvec_t pick_addresses(int what) {
     entity_addrvec_t addrs;
-    crimson::common::CephContext cct;
+    crimson::common::StoneContext cct;
     if (int r = ::pick_addresses(&cct, what, &addrs, -1); r < 0) {
       throw std::runtime_error("failed to pick address");
     }
@@ -224,7 +224,7 @@ seastar::future<> OSD::start()
 {
   logger().info("start");
 
-  startup_time = ceph::mono_clock::now();
+  startup_time = stone::mono_clock::now();
 
   return store->start().then([this] {
     return store->mount();
@@ -244,9 +244,9 @@ seastar::future<> OSD::start()
   }).then([this] {
 
     uint64_t osd_required =
-      CEPH_FEATURE_UID |
-      CEPH_FEATURE_PGID64 |
-      CEPH_FEATURE_OSDENC;
+      STONE_FEATURE_UID |
+      STONE_FEATURE_PGID64 |
+      STONE_FEATURE_OSDENC;
     using crimson::net::SocketPolicy;
 
     public_msgr->set_default_policy(SocketPolicy::stateless_server(0));
@@ -267,7 +267,7 @@ seastar::future<> OSD::start()
 
     crimson::net::dispatchers_t dispatchers{this, monc.get(), mgrc.get()};
     return seastar::when_all_succeed(
-      cluster_msgr->try_bind(pick_addresses(CEPH_PICK_ADDRESS_CLUSTER),
+      cluster_msgr->try_bind(pick_addresses(STONE_PICK_ADDRESS_CLUSTER),
                              local_conf()->ms_bind_port_min,
                              local_conf()->ms_bind_port_max)
         .safe_then([this, dispatchers]() mutable {
@@ -275,9 +275,9 @@ seastar::future<> OSD::start()
         }, crimson::net::Messenger::bind_ertr::all_same_way(
             [] (const std::error_code& e) {
           logger().error("cluster messenger try_bind(): address range is unavailable.");
-          ceph_abort();
+          stone_abort();
         })),
-      public_msgr->try_bind(pick_addresses(CEPH_PICK_ADDRESS_PUBLIC),
+      public_msgr->try_bind(pick_addresses(STONE_PICK_ADDRESS_PUBLIC),
                             local_conf()->ms_bind_port_min,
                             local_conf()->ms_bind_port_max)
         .safe_then([this, dispatchers]() mutable {
@@ -285,7 +285,7 @@ seastar::future<> OSD::start()
         }, crimson::net::Messenger::bind_ertr::all_same_way(
             [] (const std::error_code& e) {
           logger().error("public messenger try_bind(): address range is unavailable.");
-          ceph_abort();
+          stone_abort();
         })));
   }).then_unpack([this] {
     return seastar::when_all_succeed(monc->start(),
@@ -340,9 +340,9 @@ seastar::future<> OSD::_preboot(version_t oldest, version_t newest)
     }
   } else if (osdmap->is_noup(whoami)) {
     logger().warn("osdmap NOUP flag is set, waiting for it to clear");
-  } else if (!osdmap->test_flag(CEPH_OSDMAP_SORTBITWISE)) {
+  } else if (!osdmap->test_flag(STONE_OSDMAP_SORTBITWISE)) {
     logger().error("osdmap SORTBITWISE OSDMap flag is NOT set; please set it");
-  } else if (osdmap->require_osd_release < ceph_release_t::octopus) {
+  } else if (osdmap->require_osd_release < stone_release_t::octopus) {
     logger().error("osdmap require_osd_release < octopus; please upgrade to octopus");
   } else if (false) {
     // TODO: update mon if current fullness state is different from osdmap
@@ -372,7 +372,7 @@ seastar::future<> OSD::_send_boot()
                                   heartbeat->get_back_addrs(),
                                   heartbeat->get_front_addrs(),
                                   cluster_msgr->get_myaddrs(),
-                                  CEPH_FEATURES_ALL);
+                                  STONE_FEATURES_ALL);
   collect_sys_info(&m->metadata, NULL);
   return monc->send_message(m);
 }
@@ -396,7 +396,7 @@ seastar::future<> OSD::_add_me_to_crush()
     }
   };
   return get_weight().then([this](auto weight) {
-    const crimson::crush::CrushLocation loc{make_unique<CephContext>().get()};
+    const crimson::crush::CrushLocation loc{make_unique<StoneContext>().get()};
     logger().info("{} crush location is {}", __func__, loc);
     string cmd = fmt::format(R"({{
       "prefix": "osd crush create-or-move",
@@ -609,7 +609,7 @@ seastar::future<Ref<PG>> OSD::load_pg(spg_t pgid)
     });
   }).handle_exception([pgid](auto ep) {
     logger().info("pg {} saw exception on load {}", pgid, ep);
-    ceph_abort("Could not load pg" == 0);
+    stone_abort("Could not load pg" == 0);
     return seastar::make_exception_future<Ref<PG>>(ep);
   });
 }
@@ -623,9 +623,9 @@ OSD::ms_dispatch(crimson::net::ConnectionRef conn, MessageRef m)
   bool dispatched = true;
   gate.dispatch_in_background(__func__, *this, [this, conn, &m, &dispatched] {
     switch (m->get_type()) {
-    case CEPH_MSG_OSD_MAP:
+    case STONE_MSG_OSD_MAP:
       return handle_osd_map(conn, boost::static_pointer_cast<MOSDMap>(m));
-    case CEPH_MSG_OSD_OP:
+    case STONE_MSG_OSD_OP:
       return handle_osd_op(conn, boost::static_pointer_cast<MOSDOp>(m));
     case MSG_OSD_PG_CREATE2:
       shard_services.start_operation<CompoundPeeringRequest>(
@@ -707,7 +707,7 @@ void OSD::handle_authentication(const EntityName& name,
     string str;
     try {
       decode(str, p);
-    } catch (ceph::buffer::error& e) {
+    } catch (stone::buffer::error& e) {
       logger().warn("{} {} failed to decode caps string", __func__, name);
       return;
     }
@@ -775,7 +775,7 @@ seastar::future<OSD::cached_map_t> OSD::get_map(epoch_t e)
   }
 }
 
-void OSD::store_map_bl(ceph::os::Transaction& t,
+void OSD::store_map_bl(stone::os::Transaction& t,
                        epoch_t e, bufferlist&& bl)
 {
   meta_coll->store_map(t, e, bl);
@@ -823,7 +823,7 @@ seastar::future<std::unique_ptr<OSDMap>> OSD::load_map(epoch_t e)
   }
 }
 
-seastar::future<> OSD::store_maps(ceph::os::Transaction& t,
+seastar::future<> OSD::store_maps(stone::os::Transaction& t,
                                   epoch_t start, Ref<MOSDMap> m)
 {
   return seastar::do_for_each(boost::make_counting_iterator(start),
@@ -844,7 +844,7 @@ seastar::future<> OSD::store_maps(ceph::os::Transaction& t,
         inc.decode(i);
         o->apply_incremental(inc);
         bufferlist fbl;
-        o->encode(fbl, inc.encode_features | CEPH_FEATURE_RESERVED);
+        o->encode(fbl, inc.encode_features | STONE_FEATURE_RESERVED);
         store_map_bl(t, e, std::move(fbl));
         osdmaps.insert(e, std::move(o));
         return seastar::now();
@@ -888,7 +888,7 @@ seastar::future<Ref<PG>> OSD::handle_pg_create_info(
 	      return seastar::make_ready_future<std::tuple<Ref<PG>, cached_map_t>>(
                 std::make_tuple(Ref<PG>(), startmap));
 	    }
-	    ceph_assert(osdmap->require_osd_release >= ceph_release_t::octopus);
+	    stone_assert(osdmap->require_osd_release >= stone_release_t::octopus);
 	    if (!pool->has_flag(pg_pool_t::FLAG_CREATING)) {
 	      // this ensures we do not process old creating messages after the
 	      // pool's initial pgs have been created (and pg are subsequently
@@ -911,7 +911,7 @@ seastar::future<Ref<PG>> OSD::handle_pg_create_info(
         auto [pg, startmap] = std::move(ret);
         if (!pg)
           return seastar::make_ready_future<Ref<PG>>(Ref<PG>());
-        PeeringCtx rctx{ceph_release_t::octopus};
+        PeeringCtx rctx{stone_release_t::octopus};
         const pg_pool_t* pp = startmap->get_pg_pool(info->pgid.pool());
 
         int up_primary, acting_primary;
@@ -993,7 +993,7 @@ seastar::future<> OSD::handle_osd_map(crimson::net::ConnectionRef conn,
     start = first;
   }
 
-  return seastar::do_with(ceph::os::Transaction{},
+  return seastar::do_with(stone::os::Transaction{},
                           [=](auto& t) {
     return store_maps(t, start, m).then([=, &t] {
       // even if this map isn't from a mon, we may have satisfied our subscription
@@ -1296,7 +1296,7 @@ seastar::future<> OSD::consume_map(epoch_t epoch)
   return seastar::parallel_for_each(pgs.begin(), pgs.end(), [=](auto& pg) {
     return shard_services.start_operation<PGAdvanceMap>(
       *this, pg.second, pg.second->get_osdmap_epoch(), epoch,
-      PeeringCtx{ceph_release_t::octopus}, false).second;
+      PeeringCtx{stone_release_t::octopus}, false).second;
   }).then([epoch, this] {
     osdmap_gate.got_map(epoch);
     return seastar::make_ready_future();

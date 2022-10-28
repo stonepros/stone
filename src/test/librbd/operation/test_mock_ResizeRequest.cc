@@ -33,7 +33,7 @@ public:
   static TrimRequest *create(MockImageCtx &image_ctx, Context *on_finish,
                              uint64_t original_size, uint64_t new_size,
                              ProgressContext &prog_ctx) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }

@@ -38,7 +38,7 @@ struct GetMetadataRequest<MockTestImageCtx> {
                                     size_t max_results,
                                     std::map<std::string, bufferlist>* pairs,
                                     Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->pairs = pairs;
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -125,7 +125,7 @@ public:
                               int r) {
     for (auto& key : remove) {
       bufferlist bl;
-      ceph::encode(key, bl);
+      stone::encode(key, bl);
       EXPECT_CALL(get_mock_io_ctx(m_mock_local_image_ctx->md_ctx),
                   exec(m_mock_local_image_ctx->header_oid, _, StrEq("rbd"),
                   StrEq("metadata_remove"), ContentsEqual(bl), _, _, _))
@@ -137,7 +137,7 @@ public:
 
     if (!pairs.empty()) {
       bufferlist bl;
-      ceph::encode(pairs, bl);
+      stone::encode(pairs, bl);
       EXPECT_CALL(get_mock_io_ctx(m_mock_local_image_ctx->md_ctx),
                   exec(m_mock_local_image_ctx->header_oid, _, StrEq("rbd"),
                   StrEq("metadata_set"), ContentsEqual(bl), _, _, _))
@@ -307,7 +307,7 @@ TEST_F(TestMockImageReplayerSnapshotApplyImageStateRequest, UpdateImageMeta) {
   InSequence seq;
 
   bufferlist data_bl;
-  ceph::encode("data", data_bl);
+  stone::encode("data", data_bl);
   MockGetMetadataRequest mock_get_metadata_request;
   expect_get_metadata(mock_get_metadata_request,
                       {{"key1", {}}, {"key2", {}}}, 0);
@@ -332,7 +332,7 @@ TEST_F(TestMockImageReplayerSnapshotApplyImageStateRequest, GetImageMetaError) {
   InSequence seq;
 
   bufferlist data_bl;
-  ceph::encode("data", data_bl);
+  stone::encode("data", data_bl);
   MockGetMetadataRequest mock_get_metadata_request;
   expect_get_metadata(mock_get_metadata_request,
                       {{"key1", {}}, {"key2", {}}}, -EINVAL);
@@ -354,7 +354,7 @@ TEST_F(TestMockImageReplayerSnapshotApplyImageStateRequest, UpdateImageMetaError
   InSequence seq;
 
   bufferlist data_bl;
-  ceph::encode("data", data_bl);
+  stone::encode("data", data_bl);
   MockGetMetadataRequest mock_get_metadata_request;
   expect_get_metadata(mock_get_metadata_request,
                       {{"key1", {}}, {"key2", {}}}, 0);
@@ -394,7 +394,7 @@ TEST_F(TestMockImageReplayerSnapshotApplyImageStateRequest, UnprotectSnapshot) {
                            0U, {}, RBD_PROTECTION_STATUS_PROTECTED, 0, {}}},
     {12U, librbd::SnapInfo{"snap2", cls::rbd::MirrorSnapshotNamespace{
        cls::rbd::MIRROR_SNAPSHOT_STATE_NON_PRIMARY, {}, "remote mirror uuid",
-       1, true, 0, {{1, 11}, {2, CEPH_NOSNAP}}},
+       1, true, 0, {{1, 11}, {2, STONE_NOSNAP}}},
      0, {}, 0, 0, {}}}};
 
   C_SaferCond ctx;
@@ -424,7 +424,7 @@ TEST_F(TestMockImageReplayerSnapshotApplyImageStateRequest, UnprotectSnapshotErr
                            0U, {}, RBD_PROTECTION_STATUS_PROTECTED, 0, {}}},
     {12U, librbd::SnapInfo{"snap2", cls::rbd::MirrorSnapshotNamespace{
        cls::rbd::MIRROR_SNAPSHOT_STATE_NON_PRIMARY, {}, "remote mirror uuid",
-       1, true, 0, {{1, 11}, {2, CEPH_NOSNAP}}},
+       1, true, 0, {{1, 11}, {2, STONE_NOSNAP}}},
      0, {}, 0, 0, {}}}};
 
   C_SaferCond ctx;
@@ -453,7 +453,7 @@ TEST_F(TestMockImageReplayerSnapshotApplyImageStateRequest, RemoveSnapshot) {
                            0U, {}, RBD_PROTECTION_STATUS_UNPROTECTED, 0, {}}},
     {12U, librbd::SnapInfo{"snap2", cls::rbd::MirrorSnapshotNamespace{
        cls::rbd::MIRROR_SNAPSHOT_STATE_NON_PRIMARY, {}, "remote mirror uuid",
-       1, true, 0, {{1, 11}, {2, CEPH_NOSNAP}}},
+       1, true, 0, {{1, 11}, {2, STONE_NOSNAP}}},
      0, {}, 0, 0, {}}}};
 
   C_SaferCond ctx;
@@ -480,7 +480,7 @@ TEST_F(TestMockImageReplayerSnapshotApplyImageStateRequest, RemoveSnapshotError)
                            0U, {}, RBD_PROTECTION_STATUS_UNPROTECTED, 0, {}}},
     {12U, librbd::SnapInfo{"snap2", cls::rbd::MirrorSnapshotNamespace{
        cls::rbd::MIRROR_SNAPSHOT_STATE_NON_PRIMARY, {}, "remote mirror uuid",
-       1, true, 0, {{1, 11}, {2, CEPH_NOSNAP}}},
+       1, true, 0, {{1, 11}, {2, STONE_NOSNAP}}},
      0, {}, 0, 0, {}}}};
 
   C_SaferCond ctx;
@@ -512,7 +512,7 @@ TEST_F(TestMockImageReplayerSnapshotApplyImageStateRequest, ProtectSnapshot) {
                            0U, {}, RBD_PROTECTION_STATUS_UNPROTECTED, 0, {}}},
     {12U, librbd::SnapInfo{"snap2", cls::rbd::MirrorSnapshotNamespace{
        cls::rbd::MIRROR_SNAPSHOT_STATE_NON_PRIMARY, {}, "remote mirror uuid",
-       1, true, 0, {{1, 11}, {2, CEPH_NOSNAP}}},
+       1, true, 0, {{1, 11}, {2, STONE_NOSNAP}}},
      0, {}, 0, 0, {}}}};
 
   C_SaferCond ctx;
@@ -542,7 +542,7 @@ TEST_F(TestMockImageReplayerSnapshotApplyImageStateRequest, ProtectSnapshotError
                            0U, {}, RBD_PROTECTION_STATUS_UNPROTECTED, 0, {}}},
     {12U, librbd::SnapInfo{"snap2", cls::rbd::MirrorSnapshotNamespace{
        cls::rbd::MIRROR_SNAPSHOT_STATE_NON_PRIMARY, {}, "remote mirror uuid",
-       1, true, 0, {{1, 11}, {2, CEPH_NOSNAP}}},
+       1, true, 0, {{1, 11}, {2, STONE_NOSNAP}}},
      0, {}, 0, 0, {}}}};
 
   C_SaferCond ctx;
@@ -574,7 +574,7 @@ TEST_F(TestMockImageReplayerSnapshotApplyImageStateRequest, RenameSnapshot) {
                            0U, {}, RBD_PROTECTION_STATUS_PROTECTED, 0, {}}},
     {12U, librbd::SnapInfo{"snap2", cls::rbd::MirrorSnapshotNamespace{
        cls::rbd::MIRROR_SNAPSHOT_STATE_NON_PRIMARY, {}, "remote mirror uuid",
-       1, true, 0, {{1, 11}, {2, CEPH_NOSNAP}}},
+       1, true, 0, {{1, 11}, {2, STONE_NOSNAP}}},
      0, {}, 0, 0, {}}}};
 
   C_SaferCond ctx;
@@ -604,7 +604,7 @@ TEST_F(TestMockImageReplayerSnapshotApplyImageStateRequest, RenameSnapshotError)
                            0U, {}, RBD_PROTECTION_STATUS_PROTECTED, 0, {}}},
     {12U, librbd::SnapInfo{"snap2", cls::rbd::MirrorSnapshotNamespace{
        cls::rbd::MIRROR_SNAPSHOT_STATE_NON_PRIMARY, {}, "remote mirror uuid",
-       1, true, 0, {{1, 11}, {2, CEPH_NOSNAP}}},
+       1, true, 0, {{1, 11}, {2, STONE_NOSNAP}}},
      0, {}, 0, 0, {}}}};
 
   C_SaferCond ctx;

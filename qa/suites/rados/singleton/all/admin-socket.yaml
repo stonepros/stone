@@ -10,7 +10,7 @@ openstack:
       size: 10 # GB
 tasks:
 - install:
-- ceph:
+- stone:
 - admin_socket:
     osd.0:
       version:

@@ -1,0 +1,7 @@
+tasks:
+- install:
+- stone:
+    conf:
+      client:
+        fuse_default_permissions: 0
+- stone-fuse:

@@ -48,7 +48,7 @@
 
 namespace po = boost::program_options;
 
-using namespace ceph;
+using namespace stone;
 using namespace crimson;
 using namespace crimson::os;
 using namespace crimson::os::seastore;
@@ -56,7 +56,7 @@ using namespace crimson::os::seastore::segment_manager::block;
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_test);
+    return crimson::get_logger(stone_subsys_test);
   }
 }
 
@@ -175,7 +175,7 @@ struct request_context_t {
 
       if (has_input_buffer()) {
 	return in.read_exactly(len).then([this](auto buf) {
-	  in_buffer = ceph::buffer::create_page_aligned(len);
+	  in_buffer = stone::buffer::create_page_aligned(len);
 	  in_buffer->copy_in(0, len, buf.get());
 	  return seastar::now();
 	});
@@ -456,7 +456,7 @@ public:
   ~TMDriver() final {}
 
   bufferptr get_buffer(size_t size) final {
-    return ceph::buffer::create_page_aligned(size);
+    return stone::buffer::create_page_aligned(size);
   }
 
   seastar::future<> write(
@@ -615,7 +615,7 @@ BlockDriverRef get_backend(BlockDriver::config_t config)
   if (config.type == "transaction_manager") {
     return std::make_unique<TMDriver>(config);
   } else {
-    ceph_assert(0 == "invalid option");
+    stone_assert(0 == "invalid option");
     return BlockDriverRef();
   }
 }

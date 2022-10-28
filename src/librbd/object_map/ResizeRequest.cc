@@ -9,14 +9,14 @@
 #include "librbd/ObjectMap.h"
 #include "cls/lock/cls_lock_client.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::ResizeRequest: "
 
 namespace librbd {
 namespace object_map {
 
-void ResizeRequest::resize(ceph::BitVector<2> *object_map, uint64_t num_objs,
+void ResizeRequest::resize(stone::BitVector<2> *object_map, uint64_t num_objs,
                            uint8_t default_state) {
   size_t orig_object_map_size = object_map->size();
   object_map->resize(num_objs);
@@ -30,7 +30,7 @@ void ResizeRequest::resize(ceph::BitVector<2> *object_map, uint64_t num_objs,
 }
 
 void ResizeRequest::send() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   std::unique_lock l{*m_object_map_lock};
   m_num_objs = Striper::get_num_objects(m_image_ctx.layout, m_new_size);
@@ -41,19 +41,19 @@ void ResizeRequest::send() {
                 << "oid=" << oid << ", num_objs=" << m_num_objs << dendl;
 
   librados::ObjectWriteOperation op;
-  if (m_snap_id == CEPH_NOSNAP) {
+  if (m_snap_id == STONE_NOSNAP) {
     rados::cls::lock::assert_locked(&op, RBD_LOCK_NAME, ClsLockType::EXCLUSIVE, "", "");
   }
   cls_client::object_map_resize(&op, m_num_objs, m_default_object_state);
 
   librados::AioCompletion *rados_completion = create_callback_completion();
   int r = m_image_ctx.md_ctx.aio_operate(oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 void ResizeRequest::finish_request() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " resizing in-memory object map: "
 		<< m_num_objs << dendl;
 

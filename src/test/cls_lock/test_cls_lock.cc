@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -288,12 +288,12 @@ TEST(ClsLock, TestLockDuration) {
   Lock l("lock");
   utime_t dur(5, 0);
   l.set_duration(dur);
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   ASSERT_EQ(0, l.lock_exclusive(&ioctx, oid));
   int r = l.lock_exclusive(&ioctx, oid);
   if (r == 0) {
     // it's possible to get success if we were just really slow...
-    ASSERT_TRUE(ceph_clock_now() > start + dur);
+    ASSERT_TRUE(stone_clock_now() > start + dur);
   } else {
     ASSERT_EQ(-EEXIST, r);
   }

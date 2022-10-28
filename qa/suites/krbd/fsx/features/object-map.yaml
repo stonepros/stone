@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         # layering, exclusive-lock, object-map, fast-diff, deep-flatten

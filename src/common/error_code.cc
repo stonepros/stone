@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc. <contact@redhat.com>
  *
@@ -27,13 +27,13 @@ using boost::system::error_condition;
 using boost::system::generic_category;
 using boost::system::system_category;
 
-namespace ceph {
+namespace stone {
 
-// A category for error conditions particular to Ceph
+// A category for error conditions particular to Stone
 
-class ceph_error_category : public converting_category {
+class stone_error_category : public converting_category {
 public:
-  ceph_error_category(){}
+  stone_error_category(){}
   const char* name() const noexcept override;
   using converting_category::message;
   std::string message(int ev) const override;
@@ -44,11 +44,11 @@ public:
   int from_code(int ev) const noexcept override;
 };
 
-const char* ceph_error_category::name() const noexcept {
-  return "ceph";
+const char* stone_error_category::name() const noexcept {
+  return "stone";
 }
 
-const char* ceph_error_category::message(int ev, char*,
+const char* stone_error_category::message(int ev, char*,
 					 std::size_t) const noexcept {
   if (ev == 0)
     return "No error";
@@ -74,11 +74,11 @@ const char* ceph_error_category::message(int ev, char*,
   return "Unknown error.";
 }
 
-std::string ceph_error_category::message(int ev) const {
+std::string stone_error_category::message(int ev) const {
   return message(ev, nullptr, 0);
 }
 
-bool ceph_error_category::equivalent(const boost::system::error_code& c,
+bool stone_error_category::equivalent(const boost::system::error_code& c,
 				     int ev) const noexcept {
   if (c.category() == system_category()) {
     if (c.value() == boost::system::errc::no_such_file_or_directory) {
@@ -105,7 +105,7 @@ bool ceph_error_category::equivalent(const boost::system::error_code& c,
       }
     }
     if (c.value() == boost::system::errc::operation_not_permitted) {
-      if (ev == static_cast<int>(ceph::errc::conflict)) {
+      if (ev == static_cast<int>(stone::errc::conflict)) {
 	return true;
       }
     }
@@ -113,7 +113,7 @@ bool ceph_error_category::equivalent(const boost::system::error_code& c,
   return false;
 }
 
-int ceph_error_category::from_code(int ev) const noexcept {
+int stone_error_category::from_code(int ev) const noexcept {
   if (ev == 0)
     return 0;
 
@@ -136,8 +136,8 @@ int ceph_error_category::from_code(int ev) const noexcept {
   return -EDOM;
 }
 
-const error_category& ceph_category() noexcept {
-  static const ceph_error_category c;
+const error_category& stone_category() noexcept {
+  static const stone_error_category c;
   return c;
 }
 

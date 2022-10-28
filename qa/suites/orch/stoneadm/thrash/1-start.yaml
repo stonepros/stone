@@ -1,0 +1,7 @@
+tasks:
+- install:
+- stoneadm:
+    conf:
+      mgr:
+        debug ms: 1
+        debug mgr: 20

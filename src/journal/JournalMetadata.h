@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_JOURNAL_JOURNAL_METADATA_H
-#define CEPH_JOURNAL_JOURNAL_METADATA_H
+#ifndef STONE_JOURNAL_JOURNAL_METADATA_H
+#define STONE_JOURNAL_JOURNAL_METADATA_H
 
 #include "include/int_types.h"
 #include "include/Context.h"
@@ -295,7 +295,7 @@ private:
   };
 
   librados::IoCtx m_ioctx;
-  CephContext *m_cct = nullptr;
+  StoneeContext *m_cct = nullptr;
   std::string m_oid;
   std::string m_client_id;
   Settings m_settings;
@@ -372,4 +372,4 @@ std::ostream &operator<<(std::ostream &os,
 
 } // namespace journal
 
-#endif // CEPH_JOURNAL_JOURNAL_METADATA_H
+#endif // STONE_JOURNAL_JOURNAL_METADATA_H

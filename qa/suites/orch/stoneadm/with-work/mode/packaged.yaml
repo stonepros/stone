@@ -1,0 +1,5 @@
+overrides:
+  stoneadm:
+    stoneadm_mode: stoneadm-package
+  install:
+    extra_packages: [stoneadm]

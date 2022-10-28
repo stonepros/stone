@@ -86,14 +86,14 @@ public:
   };
 private:
 
-  ceph::mutex lock = ceph::make_mutex("PausyAsyncMap");
+  stone::mutex lock = stone::make_mutex("PausyAsyncMap");
   map<string, bufferlist> store;
 
   class Doer : public Thread {
     static const size_t MAX_SIZE = 100;
     PausyAsyncMap *parent;
-    ceph::mutex lock = ceph::make_mutex("Doer lock");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("Doer lock");
+    stone::condition_variable cond;
     int stopping;
     bool paused;
     list<Op> queue;
@@ -113,12 +113,12 @@ private:
 	    cond.notify_all();
 	    return 0;
 	  }
-	  ceph_assert(!queue.empty());
-	  ceph_assert(!paused);
+	  stone_assert(!queue.empty());
+	  stone_assert(!paused);
 	  ops.swap(queue);
 	  cond.notify_all();
 	}
-	ceph_assert(!ops.empty());
+	stone_assert(!ops.empty());
 
 	for (list<Op>::iterator i = ops.begin();
 	     i != ops.end();
@@ -198,16 +198,16 @@ public:
   }
 
   void flush() {
-    ceph::mutex lock = ceph::make_mutex("flush lock");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("flush lock");
+    stone::condition_variable cond;
     bool done = false;
 
     class OnFinish : public Context {
-      ceph::mutex *lock;
-      ceph::condition_variable *cond;
+      stone::mutex *lock;
+      stone::condition_variable *cond;
       bool *done;
     public:
-      OnFinish(ceph::mutex *lock, ceph::condition_variable *cond, bool *done)
+      OnFinish(stone::mutex *lock, stone::condition_variable *cond, bool *done)
 	: lock(lock), cond(cond), done(done) {}
       void finish(int) override {
 	std::lock_guard l{*lock};
@@ -438,7 +438,7 @@ class MapperVerifier {
   snapid_t next;
   uint32_t mask;
   uint32_t bits;
-  ceph::mutex lock = ceph::make_mutex("lock");
+  stone::mutex lock = stone::make_mutex("lock");
 public:
 
   MapperVerifier(
@@ -446,7 +446,7 @@ public:
     uint32_t mask,
     uint32_t bits)
     : driver(driver),
-      mapper(new SnapMapper(g_ceph_context, driver, mask, bits, 0, shard_id_t(1))),
+      mapper(new SnapMapper(g_stone_context, driver, mask, bits, 0, shard_id_t(1))),
              mask(mask), bits(bits) {}
 
   hobject_t random_hobject() {
@@ -459,8 +459,8 @@ public:
   }
 
   void choose_random_snaps(int num, set<snapid_t> *snaps) {
-    ceph_assert(snaps);
-    ceph_assert(!snap_to_hobject.empty());
+    stone_assert(snaps);
+    stone_assert(!snap_to_hobject.empty());
     for (int i = 0; i < num || snaps->empty(); ++i) {
       snaps->insert(rand_choose(snap_to_hobject)->first);
     }
@@ -486,7 +486,7 @@ public:
 	 i != snaps.end();
 	 ++i) {
       map<snapid_t, set<hobject_t> >::iterator j = snap_to_hobject.find(*i);
-      ceph_assert(j != snap_to_hobject.end());
+      stone_assert(j != snap_to_hobject.end());
       j->second.insert(obj);
     }
     {
@@ -508,13 +508,13 @@ public:
     while (mapper->get_next_objects_to_trim(
 	     snap->first, rand() % 5 + 1, &hoids) == 0) {
       for (auto &&hoid: hoids) {
-	ceph_assert(!hoid.is_max());
-	ceph_assert(hobjects.count(hoid));
+	stone_assert(!hoid.is_max());
+	stone_assert(hobjects.count(hoid));
 	hobjects.erase(hoid);
 
 	map<hobject_t, set<snapid_t>>::iterator j =
 	  hobject_to_snap.find(hoid);
-	ceph_assert(j->second.count(snap->first));
+	stone_assert(j->second.count(snap->first));
 	set<snapid_t> old_snaps(j->second);
 	j->second.erase(snap->first);
 
@@ -534,7 +534,7 @@ public:
       }
       hoids.clear();
     }
-    ceph_assert(hobjects.empty());
+    stone_assert(hobjects.empty());
     snap_to_hobject.erase(snap);
   }
 
@@ -549,7 +549,7 @@ public:
 	 ++i) {
       map<snapid_t, set<hobject_t> >::iterator j =
 	snap_to_hobject.find(*i);
-      ceph_assert(j->second.count(obj->first));
+      stone_assert(j->second.count(obj->first));
       j->second.erase(obj->first);
     }
     {
@@ -570,7 +570,7 @@ public:
       rand_choose(hobject_to_snap);
     set<snapid_t> snaps;
     int r = mapper->get_snaps(obj->first, &snaps);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     ASSERT_EQ(snaps, obj->second);
   }
 };

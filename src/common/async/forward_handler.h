@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_ASYNC_FORWARD_HANDLER_H
-#define CEPH_ASYNC_FORWARD_HANDLER_H
+#ifndef STONE_ASYNC_FORWARD_HANDLER_H
+#define STONE_ASYNC_FORWARD_HANDLER_H
 
 #include <boost/asio.hpp>
 
@@ -100,4 +100,4 @@ auto forward_handler(Handler&& h)
 
 } // namespace ceph::async
 
-#endif // CEPH_ASYNC_FORWARD_HANDLER_H
+#endif // STONE_ASYNC_FORWARD_HANDLER_H

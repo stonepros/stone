@@ -34,17 +34,17 @@ struct ManagedLock<MockTestImageCtx> {
                              managed_lock::Mode  mode,
                              bool blocklist_on_break_lock,
                              uint32_t blocklist_expire_seconds) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
   ManagedLock() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
 
   ~ManagedLock() {
-    ceph_assert(s_instance == this);
+    stone_assert(s_instance == this);
     s_instance = nullptr;
   }
 
@@ -64,7 +64,7 @@ namespace mirror {
 
 template <>
 struct Threads<librbd::MockTestImageCtx> {
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
   SafeTimer *timer;
   librbd::asio::ContextWQ *work_queue;
   librbd::AsioEngine* asio_engine;
@@ -89,12 +89,12 @@ struct Throttler<librbd::MockTestImageCtx> {
   static Throttler* s_instance;
 
   Throttler() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
 
   virtual ~Throttler() {
-    ceph_assert(s_instance == this);
+    stone_assert(s_instance == this);
     s_instance = nullptr;
   }
 

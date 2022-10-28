@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Michael Sevilla <mikesevilla3@gmail.com>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_MANTLE_H
-#define CEPH_MANTLE_H
+#ifndef STONE_MANTLE_H
+#define STONE_MANTLE_H
 
 #include <string_view>
 

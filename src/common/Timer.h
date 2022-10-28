@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_TIMER_H
-#define CEPH_TIMER_H
+#ifndef STONE_TIMER_H
+#define STONE_TIMER_H
 
 #include <map>
 #include "include/common_fwd.h"
@@ -29,7 +29,7 @@ template <class Mutex> class CommonSafeTimerThread;
 template <class Mutex>
 class CommonSafeTimer
 {
-  CephContext *cct;
+  StoneeContext *cct;
   Mutex& lock;
   std::condition_variable_any cond;
   bool safe_callbacks;
@@ -64,7 +64,7 @@ public:
    * If you are able to relax requirements on cancelled callbacks, then
    * setting safe_callbacks = false eliminates the lock cycle issue.
    * */
-  CommonSafeTimer(CephContext *cct, Mutex &l, bool safe_callbacks=true);
+  CommonSafeTimer(StoneeContext *cct, Mutex &l, bool safe_callbacks=true);
   virtual ~CommonSafeTimer();
 
   /* Call with the event_lock UNLOCKED.

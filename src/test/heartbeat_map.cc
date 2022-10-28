@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -13,18 +13,18 @@
  */
 
 #include "common/HeartbeatMap.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "global/global_context.h"
 #include "gtest/gtest.h"
 
-using namespace ceph;
+using namespace stone;
 
 TEST(HeartbeatMap, Healthy) {
-  HeartbeatMap hm(g_ceph_context);
+  HeartbeatMap hm(g_stone_context);
   heartbeat_handle_d *h = hm.add_worker("one", pthread_self());
 
-  hm.reset_timeout(h, ceph::make_timespan(9), ceph::make_timespan(18));
+  hm.reset_timeout(h, stone::make_timespan(9), stone::make_timespan(18));
   bool healthy = hm.is_healthy();
   ASSERT_TRUE(healthy);
 
@@ -32,10 +32,10 @@ TEST(HeartbeatMap, Healthy) {
 }
 
 TEST(HeartbeatMap, Unhealth) {
-  HeartbeatMap hm(g_ceph_context);
+  HeartbeatMap hm(g_stone_context);
   heartbeat_handle_d *h = hm.add_worker("one", pthread_self());
 
-  hm.reset_timeout(h, ceph::make_timespan(1), ceph::make_timespan(3));
+  hm.reset_timeout(h, stone::make_timespan(1), stone::make_timespan(3));
   sleep(2);
   bool healthy = hm.is_healthy();
   ASSERT_FALSE(healthy);

@@ -12,7 +12,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror_snapshot::SetImageStateRequest: " \
@@ -32,7 +32,7 @@ void SetImageStateRequest<I>::send() {
 
 template <typename I>
 void SetImageStateRequest<I>::get_name() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   librados::ObjectReadOperation op;
@@ -43,13 +43,13 @@ void SetImageStateRequest<I>::get_name() {
     &SetImageStateRequest<I>::handle_get_name>(this);
   m_bl.clear();
   int r = m_image_ctx->md_ctx.aio_operate(RBD_DIRECTORY, comp, &op, &m_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void SetImageStateRequest<I>::handle_get_name(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r == 0) {
@@ -71,7 +71,7 @@ void SetImageStateRequest<I>::handle_get_name(int r) {
 
 template <typename I>
 void SetImageStateRequest<I>::get_snap_limit() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   librados::ObjectReadOperation op;
@@ -83,13 +83,13 @@ void SetImageStateRequest<I>::get_snap_limit() {
   m_bl.clear();
   int r = m_image_ctx->md_ctx.aio_operate(m_image_ctx->header_oid, comp, &op,
                                           &m_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void SetImageStateRequest<I>::handle_get_snap_limit(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r == 0) {
@@ -111,7 +111,7 @@ void SetImageStateRequest<I>::handle_get_snap_limit(int r) {
 
 template <typename I>
 void SetImageStateRequest<I>::get_metadata() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   auto ctx = create_context_callback<
@@ -125,7 +125,7 @@ void SetImageStateRequest<I>::get_metadata() {
 
 template <typename I>
 void SetImageStateRequest<I>::handle_get_metadata(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -159,7 +159,7 @@ void SetImageStateRequest<I>::handle_get_metadata(int r) {
 
 template <typename I>
 void SetImageStateRequest<I>::write_image_state() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   auto ctx = create_context_callback<
@@ -173,7 +173,7 @@ void SetImageStateRequest<I>::write_image_state() {
 
 template <typename I>
 void SetImageStateRequest<I>::handle_write_image_state(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -188,7 +188,7 @@ void SetImageStateRequest<I>::handle_write_image_state(int r) {
 
 template <typename I>
 void SetImageStateRequest<I>::update_primary_snapshot() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   librados::ObjectWriteOperation op;
@@ -200,13 +200,13 @@ void SetImageStateRequest<I>::update_primary_snapshot() {
     &SetImageStateRequest<I>::handle_update_primary_snapshot>(this);
   int r = m_image_ctx->md_ctx.aio_operate(m_image_ctx->header_oid, aio_comp,
                                           &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
 template <typename I>
 void SetImageStateRequest<I>::handle_update_primary_snapshot(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -221,7 +221,7 @@ void SetImageStateRequest<I>::handle_update_primary_snapshot(int r) {
 
 template <typename I>
 void SetImageStateRequest<I>::finish(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

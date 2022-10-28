@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - overall HEALTH_
       - \(CACHE_POOL_NEAR_FULL\)
@@ -7,11 +7,11 @@ overrides:
 tasks:
 - exec:
     client.0:
-      - sudo ceph osd pool create cache 4
-      - sudo ceph osd tier add rbd cache
-      - sudo ceph osd tier cache-mode cache writeback
-      - sudo ceph osd tier set-overlay rbd cache
-      - sudo ceph osd pool set cache hit_set_type bloom
-      - sudo ceph osd pool set cache hit_set_count 8
-      - sudo ceph osd pool set cache hit_set_period 60
-      - sudo ceph osd pool set cache target_max_objects 250
+      - sudo stone osd pool create cache 4
+      - sudo stone osd tier add rbd cache
+      - sudo stone osd tier cache-mode cache writeback
+      - sudo stone osd tier set-overlay rbd cache
+      - sudo stone osd pool set cache hit_set_type bloom
+      - sudo stone osd pool set cache hit_set_count 8
+      - sudo stone osd pool set cache hit_set_period 60
+      - sudo stone osd pool set cache target_max_objects 250

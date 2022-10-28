@@ -43,7 +43,7 @@ struct ImageDeleter<librbd::MockTestImageCtx> {
   static void trash_move(librados::IoCtx& local_io_ctx,
                          const std::string& global_image_id, bool resync,
                          MockContextWQ* work_queue, Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->trash_move(global_image_id, resync, on_finish);
   }
 
@@ -72,7 +72,7 @@ struct MirrorStatusUpdater<librbd::MockTestImageCtx> {
 template <>
 struct Threads<librbd::MockTestImageCtx> {
   MockSafeTimer *timer;
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
 
   MockContextWQ *work_queue;
 
@@ -114,7 +114,7 @@ struct BootstrapRequest<librbd::MockTestImageCtx> {
       rbd::mirror::ProgressContext *progress_ctx,
       StateBuilder<librbd::MockTestImageCtx>** state_builder,
       bool *do_resync, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->state_builder = state_builder;
     s_instance->do_resync = do_resync;
     s_instance->on_finish = on_finish;
@@ -122,12 +122,12 @@ struct BootstrapRequest<librbd::MockTestImageCtx> {
   }
 
   BootstrapRequest() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
 
   ~BootstrapRequest() {
-    ceph_assert(s_instance == this);
+    stone_assert(s_instance == this);
     s_instance = nullptr;
   }
 

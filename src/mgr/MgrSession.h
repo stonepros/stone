@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MGR_MGRSESSION_H
-#define CEPH_MGR_MGRSESSION_H
+#ifndef STONE_MGR_MGRSESSION_H
+#define STONE_MGR_MGRSESSION_H
 
 #include "common/RefCountedObj.h"
 #include "common/entity_name.h"
@@ -30,7 +30,7 @@ struct MgrSession : public RefCountedObject {
 
 private:
   FRIEND_MAKE_REF(MgrSession);
-  explicit MgrSession(CephContext *cct) : RefCountedObject(cct) {}
+  explicit MgrSession(StoneeContext *cct) : RefCountedObject(cct) {}
   ~MgrSession() override = default;
 };
 

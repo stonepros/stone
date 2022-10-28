@@ -6,7 +6,7 @@
 #include "common/errno.h"
 #include "librbd/ImageCtx.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::SnapshotLimitRequest: "
 
@@ -28,7 +28,7 @@ void SnapshotLimitRequest<I>::send_op() {
 template <typename I>
 bool SnapshotLimitRequest<I>::should_complete(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << " r=" << r << dendl;
 
   if (r < 0) {
@@ -40,9 +40,9 @@ bool SnapshotLimitRequest<I>::should_complete(int r) {
 template <typename I>
 void SnapshotLimitRequest<I>::send_limit_snaps() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   {
@@ -55,7 +55,7 @@ void SnapshotLimitRequest<I>::send_limit_snaps() {
       this->create_callback_completion();
     int r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, rados_completion,
 					 &op);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     rados_completion->release();
   }
 }

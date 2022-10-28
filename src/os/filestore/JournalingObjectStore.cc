@@ -6,15 +6,15 @@
 #include "common/debug.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_journal
+#define dout_subsys stone_subsys_journal
 #undef dout_prefix
 #define dout_prefix *_dout << "journal "
 
 using std::map;
 using std::vector;
 
-using ceph::bufferptr;
-using ceph::bufferlist;
+using stone::bufferptr;
+using stone::bufferlist;
 
 void JournalingObjectStore::journal_start()
 {
@@ -84,7 +84,7 @@ int JournalingObjectStore::journal_replay(uint64_t fs_op_seq)
       dout(3) << "journal_replay: skipping old op seq " << seq << " <= " << op_seq << dendl;
       continue;
     }
-    ceph_assert(op_seq == seq-1);
+    stone_assert(op_seq == seq-1);
 
     dout(3) << "journal_replay: applying op seq " << seq << dendl;
     auto p = bl.cbegin();
@@ -135,8 +135,8 @@ uint64_t JournalingObjectStore::ApplyManager::op_apply_start(uint64_t op)
   });
   dout(10) << "op_apply_start " << op << " open_ops " << open_ops << " -> "
 	   << (open_ops+1) << dendl;
-  ceph_assert(!blocked);
-  ceph_assert(op > committed_seq);
+  stone_assert(!blocked);
+  stone_assert(op > committed_seq);
   open_ops++;
   return op;
 }
@@ -148,7 +148,7 @@ void JournalingObjectStore::ApplyManager::op_apply_finish(uint64_t op)
 	   << (open_ops-1) << ", max_applied_seq " << max_applied_seq << " -> "
 	   << std::max(op, max_applied_seq) << dendl;
   --open_ops;
-  ceph_assert(open_ops >= 0);
+  stone_assert(open_ops >= 0);
 
   // signal a blocked commit_start
   if (blocked) {
@@ -176,7 +176,7 @@ void JournalingObjectStore::SubmitManager::op_submit_finish(uint64_t op)
   if (op != op_submitted + 1) {
     dout(0) << "op_submit_finish " << op << " expected " << (op_submitted + 1)
 	    << ", OUT OF ORDER" << dendl;
-    ceph_abort_msg("out of order op_submit_finish");
+    stone_abort_msg("out of order op_submit_finish");
   }
   op_submitted = op;
   lock.unlock();
@@ -188,7 +188,7 @@ void JournalingObjectStore::SubmitManager::op_submit_finish(uint64_t op)
 void JournalingObjectStore::ApplyManager::add_waiter(uint64_t op, Context *c)
 {
   std::lock_guard l{com_lock};
-  ceph_assert(c);
+  stone_assert(c);
   commit_waiters[op].push_back(c);
 }
 
@@ -208,14 +208,14 @@ bool JournalingObjectStore::ApplyManager::commit_start()
       }
       return open_ops == 0;
     });
-    ceph_assert(open_ops == 0);
+    stone_assert(open_ops == 0);
     dout(10) << "commit_start blocked, all open_ops have completed" << dendl;
     {
       std::lock_guard l{com_lock};
       if (max_applied_seq == committed_seq) {
 	dout(10) << "commit_start nothing to do" << dendl;
 	blocked = false;
-	ceph_assert(commit_waiters.empty());
+	stone_assert(commit_waiters.empty());
 	goto out;
       }
 

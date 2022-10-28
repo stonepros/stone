@@ -5,25 +5,25 @@ tasks:
 
 upgrade-tasks:
   sequential:
-  - cephadm.shell:
+  - stoneadm.shell:
       env: [sha1]
       host.a:
-        - ceph config set mon mon_warn_on_insecure_global_id_reclaim false --force
-        - ceph config set mon mon_warn_on_insecure_global_id_reclaim_allowed false --force
-        - ceph config set global log_to_journald false --force
-        - ceph orch upgrade start --image quay.ceph.io/ceph-ci/ceph:$sha1
-  - cephadm.shell:
+        - stone config set mon mon_warn_on_insecure_global_id_reclaim false --force
+        - stone config set mon mon_warn_on_insecure_global_id_reclaim_allowed false --force
+        - stone config set global log_to_journald false --force
+        - stone orch upgrade start --image quay.stone.io/stone-ci/stone:$sha1
+  - stoneadm.shell:
       env: [sha1]
       host.a:
-        - while ceph orch upgrade status | jq '.in_progress' | grep true && ! ceph orch upgrade status | jq '.message' | grep Error ; do ceph orch ps ; ceph versions ; ceph fs dump; ceph orch upgrade status ; sleep 30 ; done
-        - ceph orch ps
-        - ceph versions
+        - while stone orch upgrade status | jq '.in_progress' | grep true && ! stone orch upgrade status | jq '.message' | grep Error ; do stone orch ps ; stone versions ; stone fs dump; stone orch upgrade status ; sleep 30 ; done
+        - stone orch ps
+        - stone versions
         - echo "wait for servicemap items w/ changing names to refresh"
         - sleep 60
-        - ceph orch ps
-        - ceph versions
-        - ceph versions | jq -e '.overall | length == 1'
-        - ceph versions | jq -e '.overall | keys' | grep $sha1
+        - stone orch ps
+        - stone versions
+        - stone versions | jq -e '.overall | length == 1'
+        - stone versions | jq -e '.overall | keys' | grep $sha1
 
 workload-tasks:
   sequential:

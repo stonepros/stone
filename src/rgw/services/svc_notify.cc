@@ -13,12 +13,12 @@
 
 #include "rgw/rgw_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 static string notify_oid_prefix = "notify";
 
 class RGWWatcher : public DoutPrefixProvider , public librados::WatchCtx2 {
-  CephContext *cct;
+  StoneContext *cct;
   RGWSI_Notify *svc;
   int index;
   RGWSI_RADOS::Obj obj;
@@ -35,14 +35,14 @@ class RGWWatcher : public DoutPrefixProvider , public librados::WatchCtx2 {
       }
   };
 
-  CephContext *get_cct() const override { return cct; }
+  StoneContext *get_cct() const override { return cct; }
   unsigned get_subsys() const override { return dout_subsys; }
   std::ostream& gen_prefix(std::ostream& out) const override {
     return out << "rgw watcher librados: ";
   }
 
 public:
-  RGWWatcher(CephContext *_cct, RGWSI_Notify *s, int i, RGWSI_RADOS::Obj& o) : cct(_cct), svc(s), index(i), obj(o), watch_handle(0) {}
+  RGWWatcher(StoneContext *_cct, RGWSI_Notify *s, int i, RGWSI_RADOS::Obj& o) : cct(_cct), svc(s), index(i), obj(o), watch_handle(0) {}
   void handle_notify(uint64_t notify_id,
 		     uint64_t cookie,
 		     uint64_t notifier_id,
@@ -56,7 +56,7 @@ public:
     if (unlikely(svc->inject_notify_timeout_probability == 1) ||
 	(svc->inject_notify_timeout_probability > 0 &&
          (svc->inject_notify_timeout_probability >
-	  ceph::util::generate_random_number(0.0, 1.0)))) {
+	  stone::util::generate_random_number(0.0, 1.0)))) {
       ldpp_dout(this, 0)
 	<< "RGWWatcher::handle_notify() dropping notification! "
 	<< "If this isn't what you want, set "
@@ -162,7 +162,7 @@ string RGWSI_Notify::get_control_oid(int i)
 // do not call pick_obj_control before init_watch
 RGWSI_RADOS::Obj RGWSI_Notify::pick_control_obj(const string& key)
 {
-  uint32_t r = ceph_str_hash_linux(key.c_str(), key.size());
+  uint32_t r = stone_str_hash_linux(key.c_str(), key.size());
 
   int i = r % num_watchers;
   return notify_objs[i];

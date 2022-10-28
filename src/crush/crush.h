@@ -1,5 +1,5 @@
-#ifndef CEPH_CRUSH_CRUSH_H
-#define CEPH_CRUSH_CRUSH_H
+#ifndef STONE_CRUSH_CRUSH_H
+#define STONE_CRUSH_CRUSH_H
 
 #ifdef __KERNEL__
 # include <linux/types.h>

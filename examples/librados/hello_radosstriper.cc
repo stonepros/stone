@@ -26,15 +26,15 @@ int main(int argc, char* argv[])
   librados::Rados cluster;
   libradosstriper::RadosStriper* rs = new libradosstriper::RadosStriper;
 
-  // make sure the keyring file is in /etc/ceph/ and is world readable
-  ret = cluster.init2("client.admin","ceph",0);
+  // make sure the keyring file is in /etc/stone/ and is world readable
+  ret = cluster.init2("client.admin","stone",0);
   if( ret < 0)
   {
       std::cerr << "Couldn't init cluster "<< ret << std::endl;
   }
 
-  // make sure ceph.conf is in /etc/ceph/ and is world readable
-  ret = cluster.conf_read_file("ceph.conf");
+  // make sure stone.conf is in /etc/stone/ and is world readable
+  ret = cluster.conf_read_file("stone.conf");
   if( ret < 0)
   {
       std::cerr << "Couldn't read conf file "<< ret << std::endl;

@@ -2,7 +2,7 @@ meta:
 - desc: |
    librbd python api tests
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         rbd default clone format: 1

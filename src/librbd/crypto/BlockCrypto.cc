@@ -3,7 +3,7 @@
 
 #include "librbd/crypto/BlockCrypto.h"
 #include "include/byteorder.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/scope_guard.h"
 
 #include <stdlib.h>
@@ -12,13 +12,13 @@ namespace librbd {
 namespace crypto {
 
 template <typename T>
-BlockCrypto<T>::BlockCrypto(CephContext* cct, DataCryptor<T>* data_cryptor,
+BlockCrypto<T>::BlockCrypto(StoneContext* cct, DataCryptor<T>* data_cryptor,
                             uint64_t block_size, uint64_t data_offset)
      : m_cct(cct), m_data_cryptor(data_cryptor), m_block_size(block_size),
        m_data_offset(data_offset), m_iv_size(data_cryptor->get_iv_size()) {
-  ceph_assert(isp2(block_size));
-  ceph_assert((block_size % data_cryptor->get_block_size()) == 0);
-  ceph_assert((block_size % 512) == 0);
+  stone_assert(isp2(block_size));
+  stone_assert((block_size % data_cryptor->get_block_size()) == 0);
+  stone_assert((block_size % 512) == 0);
 }
 
 template <typename T>
@@ -30,7 +30,7 @@ BlockCrypto<T>::~BlockCrypto() {
 }
 
 template <typename T>
-int BlockCrypto<T>::crypt(ceph::bufferlist* data, uint64_t image_offset,
+int BlockCrypto<T>::crypt(stone::bufferlist* data, uint64_t image_offset,
                            CipherMode mode) {
   if (image_offset % m_block_size != 0) {
     lderr(m_cct) << "image offset: " << image_offset
@@ -116,12 +116,12 @@ int BlockCrypto<T>::crypt(ceph::bufferlist* data, uint64_t image_offset,
 }
 
 template <typename T>
-int BlockCrypto<T>::encrypt(ceph::bufferlist* data, uint64_t image_offset) {
+int BlockCrypto<T>::encrypt(stone::bufferlist* data, uint64_t image_offset) {
   return crypt(data, image_offset, CipherMode::CIPHER_MODE_ENC);
 }
 
 template <typename T>
-int BlockCrypto<T>::decrypt(ceph::bufferlist* data, uint64_t image_offset) {
+int BlockCrypto<T>::decrypt(stone::bufferlist* data, uint64_t image_offset) {
   return crypt(data, image_offset, CipherMode::CIPHER_MODE_DEC);
 }
 

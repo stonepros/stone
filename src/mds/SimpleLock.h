@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_SIMPLELOCK_H
-#define CEPH_SIMPLELOCK_H
+#ifndef STONE_SIMPLELOCK_H
+#define STONE_SIMPLELOCK_H
 
 #include <boost/intrusive_ptr.hpp>
 
@@ -22,7 +22,7 @@
 #include "MDSContext.h"
 
 // -- lock types --
-// see CEPH_LOCK_*
+// see STONE_LOCK_*
 
 extern "C" {
 #include "locks.h"
@@ -40,24 +40,24 @@ typedef boost::intrusive_ptr<MutationImpl> MutationRef;
 struct LockType {
   explicit LockType(int t) : type(t) {
     switch (type) {
-    case CEPH_LOCK_DN:
-    case CEPH_LOCK_IAUTH:
-    case CEPH_LOCK_ILINK:
-    case CEPH_LOCK_IXATTR:
-    case CEPH_LOCK_ISNAP:
-    case CEPH_LOCK_IFLOCK:
-    case CEPH_LOCK_IPOLICY:
+    case STONE_LOCK_DN:
+    case STONE_LOCK_IAUTH:
+    case STONE_LOCK_ILINK:
+    case STONE_LOCK_IXATTR:
+    case STONE_LOCK_ISNAP:
+    case STONE_LOCK_IFLOCK:
+    case STONE_LOCK_IPOLICY:
       sm = &sm_simplelock;
       break;
-    case CEPH_LOCK_IDFT:
-    case CEPH_LOCK_INEST:
+    case STONE_LOCK_IDFT:
+    case STONE_LOCK_INEST:
       sm = &sm_scatterlock;
       break;
-    case CEPH_LOCK_IFILE:
+    case STONE_LOCK_IFILE:
       sm = &sm_filelock;
       break;
-    case CEPH_LOCK_DVERSION:
-    case CEPH_LOCK_IVERSION:
+    case STONE_LOCK_DVERSION:
+    case STONE_LOCK_IVERSION:
       sm = &sm_locallock;
       break;
     default:
@@ -138,18 +138,18 @@ public:
 
   static std::string_view get_lock_type_name(int t) {
     switch (t) {
-      case CEPH_LOCK_DN: return "dn";
-      case CEPH_LOCK_DVERSION: return "dversion";
-      case CEPH_LOCK_IVERSION: return "iversion";
-      case CEPH_LOCK_IFILE: return "ifile";
-      case CEPH_LOCK_IAUTH: return "iauth";
-      case CEPH_LOCK_ILINK: return "ilink";
-      case CEPH_LOCK_IDFT: return "idft";
-      case CEPH_LOCK_INEST: return "inest";
-      case CEPH_LOCK_IXATTR: return "ixattr";
-      case CEPH_LOCK_ISNAP: return "isnap";
-      case CEPH_LOCK_IFLOCK: return "iflock";
-      case CEPH_LOCK_IPOLICY: return "ipolicy";
+      case STONE_LOCK_DN: return "dn";
+      case STONE_LOCK_DVERSION: return "dversion";
+      case STONE_LOCK_IVERSION: return "iversion";
+      case STONE_LOCK_IFILE: return "ifile";
+      case STONE_LOCK_IAUTH: return "iauth";
+      case STONE_LOCK_ILINK: return "ilink";
+      case STONE_LOCK_IDFT: return "idft";
+      case STONE_LOCK_INEST: return "inest";
+      case STONE_LOCK_IXATTR: return "ixattr";
+      case STONE_LOCK_ISNAP: return "isnap";
+      case STONE_LOCK_IFLOCK: return "iflock";
+      case STONE_LOCK_IPOLICY: return "ipolicy";
       default: return "unknown";
     }
   }
@@ -529,7 +529,7 @@ public:
 
   int gcaps_xlocker_mask(client_t client) const {
     if (client == get_xlock_by_client())
-      return type->type == CEPH_LOCK_IFILE ? 0xf : (CEPH_CAP_GSHARED|CEPH_CAP_GEXCL);
+      return type->type == STONE_LOCK_IFILE ? 0xf : (STONE_CAP_GSHARED|STONE_CAP_GEXCL);
     return 0;
   }
 

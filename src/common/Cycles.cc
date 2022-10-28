@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -40,7 +40,7 @@ double Cycles::cycles_per_sec = 0;
  *
  * It is not initialized by default because the timing loops cause
  * general process startup times to balloon
- * (http://tracker.ceph.com/issues/15225).
+ * (http://tracker.stone.com/issues/15225).
  */
 void Cycles::init()
 {
@@ -67,12 +67,12 @@ void Cycles::init()
   old_cycles = 0;
   while (1) {
     if (gettimeofday(&start_time, NULL) != 0) {
-      ceph_abort_msg("couldn't read clock");
+      stone_abort_msg("couldn't read clock");
     }
     uint64_t start_cycles = rdtsc();
     while (1) {
       if (gettimeofday(&stop_time, NULL) != 0) {
-        ceph_abort_msg("couldn't read clock");
+        stone_abort_msg("couldn't read clock");
       }
       uint64_t stop_cycles = rdtsc();
       micros = (stop_time.tv_usec - start_time.tv_usec) +

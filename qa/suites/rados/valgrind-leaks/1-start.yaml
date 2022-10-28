@@ -5,9 +5,9 @@ openstack:
 
 overrides:
   install:
-    ceph:
+    stone:
       debuginfo: true
-  ceph:
+  stone:
     log-ignorelist:
       - overall HEALTH_
       - \(PG_
@@ -27,4 +27,4 @@ roles:
 - [mon.a, mon.b, mon.c, mgr.x, mgr.y, osd.0, osd.1, osd.2, client.0]
 tasks:
 - install:
-- ceph:
+- stone:

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MCLIENTREPLY_H
-#define CEPH_MCLIENTREPLY_H
+#ifndef STONE_MCLIENTREPLY_H
+#define STONE_MCLIENTREPLY_H
 
 #include "include/types.h"
 #include "include/fs_types.h"
@@ -248,29 +248,29 @@ struct InodeStat {
       decode(rstat.rctime, p);
       decode(dirfragtree, p);
       decode(symlink, p);
-      if (features & CEPH_FEATURE_DIRLAYOUTHASH)
+      if (features & STONE_FEATURE_DIRLAYOUTHASH)
         decode(dir_layout, p);
       else
         memset(&dir_layout, 0, sizeof(dir_layout));
 
       decode(xattrbl, p);
 
-      if (features & CEPH_FEATURE_MDS_INLINE_DATA) {
+      if (features & STONE_FEATURE_MDS_INLINE_DATA) {
         decode(inline_version, p);
         decode(inline_data, p);
       } else {
-        inline_version = CEPH_INLINE_NONE;
+        inline_version = STONE_INLINE_NONE;
       }
 
-      if (features & CEPH_FEATURE_MDS_QUOTA)
+      if (features & STONE_FEATURE_MDS_QUOTA)
         decode(quota, p);
       else
         quota = quota_info_t{};
 
-      if ((features & CEPH_FEATURE_FS_FILE_LAYOUT_V2))
+      if ((features & STONE_FEATURE_FS_FILE_LAYOUT_V2))
         decode(layout.pool_ns, p);
 
-      if ((features & CEPH_FEATURE_FS_BTIME)) {
+      if ((features & STONE_FEATURE_FS_BTIME)) {
         decode(btime, p);
         decode(change_attr, p);
       } else {
@@ -329,9 +329,9 @@ public:
   bool is_safe() const { return head.safe; }
 
 protected:
-  MClientReply() : SafeMessage{CEPH_MSG_CLIENT_REPLY} {}
+  MClientReply() : SafeMessage{STONE_MSG_CLIENT_REPLY} {}
   MClientReply(const MClientRequest &req, int result = 0) :
-    SafeMessage{CEPH_MSG_CLIENT_REPLY} {
+    SafeMessage{STONE_MSG_CLIENT_REPLY} {
     memset(&head, 0, sizeof(head));
     header.tid = req.get_tid();
     head.op = req.get_op();
@@ -348,7 +348,7 @@ public:
     if (get_result() <= 0) {
       o << " " << cpp_strerror(get_result());
     }
-    if (head.op & CEPH_MDS_OP_WRITE) {
+    if (head.op & STONE_MDS_OP_WRITE) {
       if (head.safe)
 	o << " safe";
       else

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2017 Haomai Wang <haomaiwang@gmail.com>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_LZ4COMPRESSOR_H
-#define CEPH_LZ4COMPRESSOR_H
+#ifndef STONE_LZ4COMPRESSOR_H
+#define STONE_LZ4COMPRESSOR_H
 
 #include <lz4.h>
 
@@ -26,7 +26,7 @@
 
 class LZ4Compressor : public Compressor {
  public:
-  LZ4Compressor(CephContext* cct) : Compressor(COMP_ALG_LZ4, "lz4") {
+  LZ4Compressor(StoneeContext* cct) : Compressor(COMP_ALG_LZ4, "lz4") {
 #ifdef HAVE_QATZIP
     if (cct->_conf->qat_compressor_enabled && qat_accel.init("lz4"))
       qat_enabled = true;

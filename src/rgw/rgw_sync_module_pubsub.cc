@@ -21,7 +21,7 @@
 #include <boost/algorithm/hex.hpp>
 #include <boost/asio/yield.hpp>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 #define PUBSUB_EVENTS_RETENTION_DEFAULT 7
@@ -61,7 +61,7 @@ struct PSSubConfig {
   std::string arn_topic;
   RGWPubSubEndpoint::Ptr push_endpoint;
 
-  void from_user_conf(CephContext *cct, const rgw_pubsub_sub_config& uc, const DoutPrefixProvider *dpp) {
+  void from_user_conf(StoneContext *cct, const rgw_pubsub_sub_config& uc, const DoutPrefixProvider *dpp) {
     name = uc.name;
     topic = uc.topic;
     push_endpoint_name = uc.dest.push_endpoint;
@@ -121,7 +121,7 @@ struct PSNotificationConfig {
     encode_json("is_prefix", is_prefix, f);
   }
 
-  void init(CephContext *cct, const JSONFormattable& config) {
+  void init(StoneContext *cct, const JSONFormattable& config) {
     path = config["path"];
     if (!path.empty() && path[path.size() - 1] == '*') {
       path = path.substr(0, path.size() - 1);
@@ -166,7 +166,7 @@ struct PSConfig {
     encode_json("start_with_full_sync", start_with_full_sync, f);
   }
 
-  void init(CephContext *cct, const JSONFormattable& config) {
+  void init(StoneContext *cct, const JSONFormattable& config) {
     string uid = config["uid"]("pubsub");
     user = rgw_user(config["tenant"], uid);
     data_bucket_prefix = config["data_bucket_prefix"]("pubsub-");
@@ -190,12 +190,12 @@ struct objstore_event {
   string id;
   const rgw_bucket& bucket;
   const rgw_obj_key& key;
-  const ceph::real_time& mtime;
+  const stone::real_time& mtime;
   const std::vector<std::pair<std::string, std::string> > *attrs;
 
   objstore_event(const rgw_bucket& _bucket,
                  const rgw_obj_key& _key,
-                 const ceph::real_time& _mtime,
+                 const stone::real_time& _mtime,
                  const std::vector<std::pair<std::string, std::string> > *_attrs) : bucket(_bucket),
                                                   key(_key),
                                                   mtime(_mtime),
@@ -237,16 +237,16 @@ struct objstore_event {
   }
 };
 
-static void make_event_ref(CephContext *cct, const rgw_bucket& bucket,
+static void make_event_ref(StoneContext *cct, const rgw_bucket& bucket,
                        const rgw_obj_key& key,
-                       const ceph::real_time& mtime,
+                       const stone::real_time& mtime,
                        const std::vector<std::pair<std::string, std::string> > *attrs,
                        rgw::notify::EventType event_type,
                        EventRef<rgw_pubsub_event> *event) {
   *event = std::make_shared<rgw_pubsub_event>();
 
   EventRef<rgw_pubsub_event>& e = *event;
-  e->event_name = rgw::notify::to_ceph_string(event_type);
+  e->event_name = rgw::notify::to_stone_string(event_type);
   e->source = bucket.name + "/" + key.name;
   e->timestamp = real_clock::now();
 
@@ -258,10 +258,10 @@ static void make_event_ref(CephContext *cct, const rgw_bucket& bucket,
   encode_json("info", oevent, &e->info);
 }
 
-static void make_s3_event_ref(CephContext *cct, const rgw_bucket& bucket,
+static void make_s3_event_ref(StoneContext *cct, const rgw_bucket& bucket,
                        const rgw_user& owner,
                        const rgw_obj_key& key,
-                       const ceph::real_time& mtime,
+                       const stone::real_time& mtime,
                        const std::vector<std::pair<std::string, std::string>>* attrs,
                        rgw::notify::EventType event_type,
                        EventRef<rgw_pubsub_s3_event>* event) {
@@ -303,7 +303,7 @@ struct PSEnv {
   PSEnv() : conf(make_shared<PSConfig>()),
             data_user_info(make_shared<RGWUserInfo>()) {}
 
-  void init(CephContext *cct, const JSONFormattable& config) {
+  void init(StoneContext *cct, const JSONFormattable& config) {
     conf->init(cct, config);
   }
 
@@ -399,7 +399,7 @@ class RGWSingletonCR : public RGWCoroutine {
   virtual void return_result(T *result) {}
 
 public:
-  RGWSingletonCR(CephContext *_cct)
+  RGWSingletonCR(StoneContext *_cct)
     : RGWCoroutine(_cct) {}
 
   int execute(RGWCoroutine *caller, T *result = nullptr) {
@@ -664,7 +664,7 @@ class PSSubscription {
 
     int operate(const DoutPrefixProvider *dpp) override {
       reenter(this) {
-        ceph_assert(sub_conf->push_endpoint);
+        stone_assert(sub_conf->push_endpoint);
         yield call(sub_conf->push_endpoint->send_to_completion_async(*event.get(), sync_env));
       
         if (retcode < 0) {
@@ -1050,7 +1050,7 @@ public:
       ldpp_dout(dpp, 20) << "pubsub: " << topics->size() << " topics found for path" << dendl;
      
       // outside caller should check that
-      ceph_assert(!topics->empty());
+      stone_assert(!topics->empty());
 
       if (perfcounter) perfcounter->inc(l_rgw_pubsub_event_triggered);
 
@@ -1173,7 +1173,7 @@ public:
           }
           attrs.push_back(std::make_pair(k, attr.second));
         } 
-        // at this point we don't know whether we need the ceph event or S3 event
+        // at this point we don't know whether we need the stone event or S3 event
         // this is why both are created here, once we have information about the 
         // subscription, we will store/push only the relevant ones
         make_event_ref(sc->cct,
@@ -1269,7 +1269,7 @@ class RGWPSGenericObjEventCBCR : public RGWCoroutine {
   rgw_user owner;
   rgw_bucket bucket;
   rgw_obj_key key;
-  ceph::real_time mtime;
+  stone::real_time mtime;
   rgw::notify::EventType event_type;
   EventRef<rgw_pubsub_event> event;
   EventRef<rgw_pubsub_s3_event> s3_event;
@@ -1277,7 +1277,7 @@ class RGWPSGenericObjEventCBCR : public RGWCoroutine {
 public:
   RGWPSGenericObjEventCBCR(RGWDataSyncCtx *_sc,
                            PSEnvRef _env,
-                           rgw_bucket_sync_pipe& _sync_pipe, rgw_obj_key& _key, const ceph::real_time& _mtime,
+                           rgw_bucket_sync_pipe& _sync_pipe, rgw_obj_key& _key, const stone::real_time& _mtime,
                            rgw::notify::EventType _event_type) : RGWCoroutine(_sc->cct),
                                                              sc(_sc),
                                                              env(_env),
@@ -1298,7 +1298,7 @@ public:
         ldpp_dout(dpp, 20) << "no topics found for " << bucket << "/" << key << dendl;
         return set_cr_done();
       }
-      // at this point we don't know whether we need the ceph event or S3 event
+      // at this point we don't know whether we need the stone event or S3 event
       // this is why both are created here, once we have information about the 
       // subscription, we will store/push only the relevant ones
       make_event_ref(sc->cct,
@@ -1325,7 +1325,7 @@ class RGWPSDataSyncModule : public RGWDataSyncModule {
   PSConfigRef& conf;
 
 public:
-  RGWPSDataSyncModule(CephContext *cct, const JSONFormattable& config) : env(std::make_shared<PSEnv>()), conf(env->conf) {
+  RGWPSDataSyncModule(StoneContext *cct, const JSONFormattable& config) : env(std::make_shared<PSEnv>()), conf(env->conf) {
     env->init(cct, config);
   }
 
@@ -1366,7 +1366,7 @@ public:
   PSConfigRef& get_conf() { return conf; }
 };
 
-RGWPSSyncModuleInstance::RGWPSSyncModuleInstance(CephContext *cct, const JSONFormattable& config)
+RGWPSSyncModuleInstance::RGWPSSyncModuleInstance(StoneContext *cct, const JSONFormattable& config)
 {
   data_handler = std::unique_ptr<RGWPSDataSyncModule>(new RGWPSDataSyncModule(cct, config));
   const std::string jconf = json_str("conf", *data_handler->get_conf());
@@ -1395,7 +1395,7 @@ bool RGWPSSyncModuleInstance::should_full_sync() const {
    return data_handler->get_conf()->start_with_full_sync;
 }
 
-int RGWPSSyncModule::create_instance(CephContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) {
+int RGWPSSyncModule::create_instance(StoneContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) {
   instance->reset(new RGWPSSyncModuleInstance(cct, config));
   return 0;
 }

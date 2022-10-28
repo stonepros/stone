@@ -6,7 +6,7 @@ tasks:
     env:
       ACTION: create
 - print: "**** fs/volume_client create"
-- ceph-fuse:
+- stone-fuse:
     client.0:
       mount_path: /volumes/_nogroup/vol_isolated
       mountpoint: mnt.0
@@ -15,7 +15,7 @@ tasks:
       mount_path: /volumes/_nogroup/vol_default
       mountpoint: mnt.1
       auth_id: vol_default
-- print: "**** ceph-fuse vol_isolated"
+- print: "**** stone-fuse vol_isolated"
 - workunit:
     clients:
       client.0:

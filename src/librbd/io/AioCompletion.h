@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IO_AIO_COMPLETION_H
-#define CEPH_LIBRBD_IO_AIO_COMPLETION_H
+#ifndef STONE_LIBRBD_IO_AIO_COMPLETION_H
+#define STONE_LIBRBD_IO_AIO_COMPLETION_H
 
 #include "common/ceph_time.h"
 #include "include/common_fwd.h"
@@ -126,8 +126,8 @@ struct AioCompletion {
     return async_op.started();
   }
 
-  void block(CephContext* cct);
-  void unblock(CephContext* cct);
+  void block(StoneContext* cct);
+  void unblock(StoneContext* cct);
 
   void init_time(ImageCtx *i, aio_type_t t);
   void start_op();
@@ -200,4 +200,4 @@ protected:
 } // namespace io
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_IO_AIO_COMPLETION_H
+#endif // STONE_LIBRBD_IO_AIO_COMPLETION_H

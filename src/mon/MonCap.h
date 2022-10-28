@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MONCAP_H
-#define CEPH_MONCAP_H
+#ifndef STONE_MONCAP_H
+#define STONE_MONCAP_H
 
 #include <ostream>
 

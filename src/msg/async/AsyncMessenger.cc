@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -29,7 +29,7 @@
 #include "messages/MOSDOpReply.h"
 #include "common/EventTrace.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, this)
 static std::ostream& _prefix(std::ostream *_dout, AsyncMessenger *m) {
@@ -55,7 +55,7 @@ class Processor::C_processor_accept : public EventCallback {
   }
 };
 
-Processor::Processor(AsyncMessenger *r, Worker *w, CephContext *c)
+Processor::Processor(AsyncMessenger *r, Worker *w, StoneContext *c)
   : msgr(r), net(c), worker(w),
     listen_handler(new C_processor_accept(this)) {}
 
@@ -210,8 +210,8 @@ void Processor::accept()
 	  lderr(msgr->cct) << __func__ << " open file descriptions limit reached sd = " << listen_socket.fd()
 			   << " errno " << r << " " << cpp_strerror(r) << dendl;
 	  if (++accept_error_num > msgr->cct->_conf->ms_max_accept_failures) {
-	    lderr(msgr->cct) << "Proccessor accept has encountered enough error numbers, just do ceph_abort()." << dendl;
-	    ceph_abort();
+	    lderr(msgr->cct) << "Proccessor accept has encountered enough error numbers, just do stone_abort()." << dendl;
+	    stone_abort();
 	  }
 	  continue;
 	} else if (r == -ECONNABORTED) {
@@ -222,8 +222,8 @@ void Processor::accept()
 	  lderr(msgr->cct) << __func__ << " no incoming connection?"
 			   << " errno " << r << " " << cpp_strerror(r) << dendl;
 	  if (++accept_error_num > msgr->cct->_conf->ms_max_accept_failures) {
-	    lderr(msgr->cct) << "Proccessor accept has encountered enough error numbers, just do ceph_abort()." << dendl;
-	    ceph_abort();
+	    lderr(msgr->cct) << "Proccessor accept has encountered enough error numbers, just do stone_abort()." << dendl;
+	    stone_abort();
 	  }
 	  continue;
 	}
@@ -248,10 +248,10 @@ void Processor::stop()
 
 
 struct StackSingleton {
-  CephContext *cct;
+  StoneContext *cct;
   std::shared_ptr<NetworkStack> stack;
 
-  explicit StackSingleton(CephContext *c): cct(c) {}
+  explicit StackSingleton(StoneContext *c): cct(c) {}
   void ready(std::string &type) {
     if (!stack)
       stack = NetworkStack::create(cct, type);
@@ -277,7 +277,7 @@ class C_handle_reap : public EventCallback {
  * AsyncMessenger
  */
 
-AsyncMessenger::AsyncMessenger(CephContext *cct, entity_name_t name,
+AsyncMessenger::AsyncMessenger(StoneContext *cct, entity_name_t name,
                                const std::string &type, std::string mname, uint64_t _nonce)
   : SimplePolicyMessenger(cct, name),
     dispatch_queue(cct, this, mname),
@@ -295,7 +295,7 @@ AsyncMessenger::AsyncMessenger(CephContext *cct, entity_name_t name,
   stack = single->stack.get();
   stack->start();
   local_worker = stack->get_worker();
-  local_connection = ceph::make_ref<AsyncConnection>(cct, this, &dispatch_queue,
+  local_connection = stone::make_ref<AsyncConnection>(cct, this, &dispatch_queue,
 					 local_worker, true, true);
   init_local_connection();
   reap_handler = new C_handle_reap(this);
@@ -313,7 +313,7 @@ AsyncMessenger::AsyncMessenger(CephContext *cct, entity_name_t name,
 AsyncMessenger::~AsyncMessenger()
 {
   delete reap_handler;
-  ceph_assert(!did_bind); // either we didn't bind or we shut down the Processor
+  stone_assert(!did_bind); // either we didn't bind or we shut down the Processor
   for (auto &&p : processors)
     delete p;
 }
@@ -327,7 +327,7 @@ void AsyncMessenger::ready()
     int err = bindv(pending_bind_addrs);
     if (err) {
       lderr(cct) << __func__ << " postponed bind failed" << dendl;
-      ceph_abort();
+      stone_abort();
     }
   }
 
@@ -412,7 +412,7 @@ int AsyncMessenger::bindv(const entity_addrvec_t &bind_addrs)
       // it, like port is used case. But if the first worker successfully to bind
       // but the second worker failed, it's not expected and we need to assert
       // here
-      ceph_assert(i == 0);
+      stone_assert(i == 0);
       return r;
     }
     ++i;
@@ -424,7 +424,7 @@ int AsyncMessenger::bindv(const entity_addrvec_t &bind_addrs)
 int AsyncMessenger::rebind(const std::set<int>& avoid_ports)
 {
   ldout(cct,1) << __func__ << " rebind avoid " << avoid_ports << dendl;
-  ceph_assert(did_bind);
+  stone_assert(did_bind);
 
   for (auto &&p : processors)
     p->stop();
@@ -448,7 +448,7 @@ int AsyncMessenger::rebind(const std::set<int>& avoid_ports)
   for (auto &&p : processors) {
     int r = p->bind(bind_addrs, avoid_ports, &bound_addrs);
     if (r) {
-      ceph_assert(i == 0);
+      stone_assert(i == 0);
       return r;
     }
     ++i;
@@ -527,9 +527,9 @@ int AsyncMessenger::start()
   ldout(cct,1) << __func__ << " start" << dendl;
 
   // register at least one entity, first!
-  ceph_assert(my_name.type() >= 0);
+  stone_assert(my_name.type() >= 0);
 
-  ceph_assert(!started);
+  stone_assert(!started);
   started = true;
   stopped = false;
 
@@ -577,7 +577,7 @@ void AsyncMessenger::add_accept(Worker *w, ConnectedSocket cli_socket,
 				const entity_addr_t &peer_addr)
 {
   std::lock_guard l{lock};
-  auto conn = ceph::make_ref<AsyncConnection>(cct, this, &dispatch_queue, w,
+  auto conn = stone::make_ref<AsyncConnection>(cct, this, &dispatch_queue, w,
 						listen_addr.is_msgr2(), false);
   conn->accept(std::move(cli_socket), listen_addr, peer_addr);
   accepting_conns.insert(conn);
@@ -586,7 +586,7 @@ void AsyncMessenger::add_accept(Worker *w, ConnectedSocket cli_socket,
 AsyncConnectionRef AsyncMessenger::create_connect(
   const entity_addrvec_t& addrs, int type, bool anon)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
 
   ldout(cct, 10) << __func__ << " " << addrs
       << ", creating connection and registering" << dendl;
@@ -606,14 +606,14 @@ AsyncConnectionRef AsyncMessenger::create_connect(
 
   // create connection
   Worker *w = stack->get_worker();
-  auto conn = ceph::make_ref<AsyncConnection>(cct, this, &dispatch_queue, w,
+  auto conn = stone::make_ref<AsyncConnection>(cct, this, &dispatch_queue, w,
 						target.is_msgr2(), false);
   conn->anon = anon;
   conn->connect(addrs, type, target);
   if (anon) {
     anon_conns.insert(conn);
   } else {
-    ceph_assert(!conns.count(addrs));
+    stone_assert(!conns.count(addrs));
     ldout(cct, 10) << __func__ << " " << conn << " " << addrs << " "
 		   << *conn->peer_addrs << dendl;
     conns[addrs] = conn;
@@ -661,16 +661,16 @@ entity_addrvec_t AsyncMessenger::_filter_addrs(const entity_addrvec_t& addrs)
 int AsyncMessenger::send_to(Message *m, int type, const entity_addrvec_t& addrs)
 {
   FUNCTRACE(cct);
-  ceph_assert(m);
+  stone_assert(m);
 
 #if defined(WITH_EVENTTRACE)
-  if (m->get_type() == CEPH_MSG_OSD_OP)
+  if (m->get_type() == STONE_MSG_OSD_OP)
     OID_EVENT_TRACE(((MOSDOp *)m)->get_oid().name.c_str(), "SEND_MSG_OSD_OP");
-  else if (m->get_type() == CEPH_MSG_OSD_OPREPLY)
+  else if (m->get_type() == STONE_MSG_OSD_OPREPLY)
     OID_EVENT_TRACE(((MOSDOpReply *)m)->get_oid().name.c_str(), "SEND_MSG_OSD_OP_REPLY");
 #endif
 
-  ldout(cct, 1) << __func__ << "--> " << ceph_entity_type_name(type) << " "
+  ldout(cct, 1) << __func__ << "--> " << stone_entity_type_name(type) << " "
       << addrs << " -- " << *m << " -- ?+"
       << m->get_data().length() << " " << m << dendl;
 
@@ -831,9 +831,9 @@ int AsyncMessenger::get_proto_version(int peer_type, bool connect) const
   } else {
     // public
     switch (connect ? peer_type : my_type) {
-      case CEPH_ENTITY_TYPE_OSD: return CEPH_OSDC_PROTOCOL;
-      case CEPH_ENTITY_TYPE_MDS: return CEPH_MDSC_PROTOCOL;
-      case CEPH_ENTITY_TYPE_MON: return CEPH_MONC_PROTOCOL;
+      case STONE_ENTITY_TYPE_OSD: return STONE_OSDC_PROTOCOL;
+      case STONE_ENTITY_TYPE_MDS: return STONE_MDSC_PROTOCOL;
+      case STONE_ENTITY_TYPE_MON: return STONE_MONC_PROTOCOL;
     }
   }
   return 0;

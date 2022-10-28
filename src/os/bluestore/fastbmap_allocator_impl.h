@@ -16,7 +16,7 @@
 
 typedef uint64_t slot_t;
 
-#ifdef NON_CEPH_BUILD
+#ifdef NON_STONE_BUILD
 #include <assert.h>
 struct interval_t
 {
@@ -767,7 +767,7 @@ protected:
     available -= allocated_here;
   }
 
-#ifndef NON_CEPH_BUILD
+#ifndef NON_STONE_BUILD
   // to provide compatibility with BlueStore's allocator interface
   void _free_l2(const interval_set<uint64_t> & rr)
   {

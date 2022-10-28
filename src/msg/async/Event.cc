@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -32,16 +32,16 @@
 #endif
 #endif
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 
 #undef dout_prefix
 #define dout_prefix *_dout << "EventCallback "
 class C_handle_notify : public EventCallback {
   EventCenter *center;
-  CephContext *cct;
+  StoneContext *cct;
 
  public:
-  C_handle_notify(EventCenter *c, CephContext *cc): center(c), cct(cc) {}
+  C_handle_notify(EventCenter *c, StoneContext *cc): center(c), cct(cc) {}
   void do_request(uint64_t fd_or_id) override {
     char c[256];
     int r = 0;
@@ -52,8 +52,8 @@ class C_handle_notify : public EventCallback {
       r = read(fd_or_id, c, sizeof(c));
       #endif
       if (r < 0) {
-        if (ceph_sock_errno() != EAGAIN)
-          ldout(cct, 1) << __func__ << " read notify pipe failed: " << cpp_strerror(ceph_sock_errno()) << dendl;
+        if (stone_sock_errno() != EAGAIN)
+          ldout(cct, 1) << __func__ << " read notify pipe failed: " << cpp_strerror(stone_sock_errno()) << dendl;
       }
     } while (r > 0);
   }
@@ -107,7 +107,7 @@ std::ostream& EventCenter::_event_prefix(std::ostream *_dout)
 int EventCenter::init(int nevent, unsigned center_id, const std::string &type)
 {
   // can't init multi times
-  ceph_assert(this->nevent == 0);
+  stone_assert(this->nevent == 0);
 
   this->type = type;
   this->center_id = center_id;
@@ -152,7 +152,7 @@ int EventCenter::init(int nevent, unsigned center_id, const std::string &type)
   #else
   if (pipe_cloexec(fds, 0) < 0) {
   #endif
-    int e = ceph_sock_errno();
+    int e = stone_sock_errno();
     lderr(cct) << __func__ << " can't create notify pipe: " << cpp_strerror(e) << dendl;
     return -e;
   }
@@ -205,19 +205,19 @@ void EventCenter::set_owner()
     global_centers = &cct->lookup_or_create_singleton_object<
       EventCenter::AssociatedCenters>(
 	"AsyncMessenger::EventCenter::global_center::" + type, true);
-    ceph_assert(global_centers);
+    stone_assert(global_centers);
     global_centers->centers[center_id] = this;
     if (driver->need_wakeup()) {
       notify_handler = new C_handle_notify(this, cct);
       int r = create_file_event(notify_receive_fd, EVENT_READABLE, notify_handler);
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
     }
   }
 }
 
 int EventCenter::create_file_event(int fd, int mask, EventCallbackRef ctxt)
 {
-  ceph_assert(in_thread());
+  stone_assert(in_thread());
   int r = 0;
   if (fd >= nevent) {
     int new_size = nevent << 2;
@@ -246,7 +246,7 @@ int EventCenter::create_file_event(int fd, int mask, EventCallbackRef ctxt)
     // add_event shouldn't report error, otherwise it must be a innermost bug!
     lderr(cct) << __func__ << " add event failed, ret=" << r << " fd=" << fd
                << " mask=" << mask << " original mask is " << event->mask << dendl;
-    ceph_abort_msg("BUG!");
+    stone_abort_msg("BUG!");
     return r;
   }
 
@@ -264,7 +264,7 @@ int EventCenter::create_file_event(int fd, int mask, EventCallbackRef ctxt)
 
 void EventCenter::delete_file_event(int fd, int mask)
 {
-  ceph_assert(in_thread() && fd >= 0);
+  stone_assert(in_thread() && fd >= 0);
   if (fd >= nevent) {
     ldout(cct, 1) << __func__ << " delete event fd=" << fd << " is equal or greater than nevent=" << nevent
                   << "mask=" << mask << dendl;
@@ -279,7 +279,7 @@ void EventCenter::delete_file_event(int fd, int mask)
   int r = driver->del_event(fd, event->mask, mask);
   if (r < 0) {
     // see create_file_event
-    ceph_abort_msg("BUG!");
+    stone_abort_msg("BUG!");
   }
 
   if (mask & EVENT_READABLE && event->read_cb) {
@@ -296,7 +296,7 @@ void EventCenter::delete_file_event(int fd, int mask)
 
 uint64_t EventCenter::create_time_event(uint64_t microseconds, EventCallbackRef ctxt)
 {
-  ceph_assert(in_thread());
+  stone_assert(in_thread());
   uint64_t id = time_event_next_id++;
 
   ldout(cct, 30) << __func__ << " id=" << id << " trigger after " << microseconds << "us"<< dendl;
@@ -313,7 +313,7 @@ uint64_t EventCenter::create_time_event(uint64_t microseconds, EventCallbackRef 
 
 void EventCenter::delete_time_event(uint64_t id)
 {
-  ceph_assert(in_thread());
+  stone_assert(in_thread());
   ldout(cct, 30) << __func__ << " id=" << id << dendl;
   if (id >= time_event_next_id || id == 0)
     return ;
@@ -343,10 +343,10 @@ void EventCenter::wakeup()
   int n = write(notify_send_fd, &buf, sizeof(buf));
   #endif
   if (n < 0) {
-    if (ceph_sock_errno() != EAGAIN) {
+    if (stone_sock_errno() != EAGAIN) {
       ldout(cct, 1) << __func__ << " write notify pipe failed: "
-                    << cpp_strerror(ceph_sock_errno()) << dendl;
-      ceph_abort();
+                    << cpp_strerror(stone_sock_errno()) << dendl;
+      stone_abort();
     }
   }
 }
@@ -355,7 +355,7 @@ int EventCenter::process_time_events()
 {
   int processed = 0;
   clock_type::time_point now = clock_type::now();
-  using ceph::operator <<;
+  using stone::operator <<;
   ldout(cct, 30) << __func__ << " cur time is " << now << dendl;
 
   while (!time_events.empty()) {
@@ -377,7 +377,7 @@ int EventCenter::process_time_events()
   return processed;
 }
 
-int EventCenter::process_events(unsigned timeout_microseconds,  ceph::timespan *working_dur)
+int EventCenter::process_events(unsigned timeout_microseconds,  stone::timespan *working_dur)
 {
   struct timeval tv;
   int numevents;
@@ -406,7 +406,7 @@ int EventCenter::process_events(unsigned timeout_microseconds,  ceph::timespan *
   ldout(cct, 30) << __func__ << " wait second " << tv.tv_sec << " usec " << tv.tv_usec << dendl;
   std::vector<FiredFileEvent> fired_events;
   numevents = driver->event_wait(fired_events, &tv);
-  auto working_start = ceph::mono_clock::now();
+  auto working_start = stone::mono_clock::now();
   for (int event_id = 0; event_id < numevents; event_id++) {
     int rfired = 0;
     FileEvent *event;
@@ -457,7 +457,7 @@ int EventCenter::process_events(unsigned timeout_microseconds,  ceph::timespan *
   }
 
   if (working_dur)
-    *working_dur = ceph::mono_clock::now() - working_start;
+    *working_dur = stone::mono_clock::now() - working_start;
   return numevents;
 }
 

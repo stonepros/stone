@@ -14,7 +14,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_ms);
+    return crimson::get_logger(stone_subsys_ms);
   }
 }
 
@@ -31,7 +31,7 @@ Protocol::Protocol(proto_t type,
 
 Protocol::~Protocol()
 {
-  ceph_assert(gate.is_closed());
+  stone_assert(gate.is_closed());
   assert(!exit_open);
 }
 
@@ -86,7 +86,7 @@ void Protocol::close(bool dispatch_reset,
 #endif
   }).handle_exception([conn_ref = conn.shared_from_this(), this] (auto eptr) {
     logger().error("{} closing: close_ready got unexpected exception {}", conn, eptr);
-    ceph_abort();
+    stone_abort();
   });
 }
 
@@ -195,7 +195,7 @@ seastar::future<stop_t> Protocol::try_exit_sweep() {
     if (!is_queued()) {
       // still nothing pending to send after flush,
       // the dispatching can ONLY stop now
-      ceph_assert(write_dispatching);
+      stone_assert(write_dispatching);
       write_dispatching = false;
       if (unlikely(exit_open.has_value())) {
         exit_open->set_value();
@@ -261,7 +261,7 @@ seastar::future<> Protocol::do_write_dispatch_sweep()
       return state_changed.get_shared_future()
       .then([] { return stop_t::no; });
      case write_state_t::drop:
-      ceph_assert(write_dispatching);
+      stone_assert(write_dispatching);
       write_dispatching = false;
       if (exit_open) {
         exit_open->set_value();
@@ -272,7 +272,7 @@ seastar::future<> Protocol::do_write_dispatch_sweep()
       }
       return seastar::make_ready_future<stop_t>(stop_t::yes);
      default:
-      ceph_assert(false);
+      stone_assert(false);
     }
   }).handle_exception_type([this] (const std::system_error& e) {
     if (e.code() != std::errc::broken_pipe &&
@@ -280,7 +280,7 @@ seastar::future<> Protocol::do_write_dispatch_sweep()
         e.code() != error::negotiation_failure) {
       logger().error("{} write_event(): unexpected error at {} -- {}",
                      conn, get_state_name(write_state), e);
-      ceph_abort();
+      stone_abort();
     }
     socket->shutdown();
     if (write_state == write_state_t::open) {
@@ -316,7 +316,7 @@ void Protocol::write_event()
     write_dispatching = false;
     return;
    default:
-    ceph_assert(false);
+    stone_assert(false);
   }
 }
 

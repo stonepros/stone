@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_WORKQUEUE_H
-#define CEPH_WORKQUEUE_H
+#ifndef STONE_WORKQUEUE_H
+#define STONE_WORKQUEUE_H
 
 #if defined(WITH_SEASTAR) && !defined(WITH_ALIEN)
 // for ObjectStore.h
@@ -43,7 +43,7 @@ struct ThreadPool {
 /// Pool of threads that share work submitted to multiple work queues.
 class ThreadPool : public md_config_obs_t {
 protected:
-  CephContext *cct;
+  StoneeContext *cct;
   std::string name;
   std::string thread_name;
   std::string lockname;
@@ -57,13 +57,13 @@ protected:
 public:
   class TPHandle : public HBHandle {
     friend class ThreadPool;
-    CephContext *cct;
+    StoneeContext *cct;
     ceph::heartbeat_handle_d *hb;
     ceph::timespan grace;
     ceph::timespan suicide_grace;
   public:
     TPHandle(
-      CephContext *cct,
+      StoneeContext *cct,
       ceph::heartbeat_handle_d *hb,
       ceph::timespan grace,
       ceph::timespan suicide_grace)
@@ -406,7 +406,7 @@ protected:
   virtual void worker(WorkThread *wt);
 
 public:
-  ThreadPool(CephContext *cct_, std::string nm, std::string tn, int n, const char *option = NULL);
+  ThreadPool(StoneeContext *cct_, std::string nm, std::string tn, int n, const char *option = NULL);
   ~ThreadPool() override;
 
   /// return number of threads currently running
@@ -562,7 +562,7 @@ private:
 
 class ShardedThreadPool {
 
-  CephContext *cct;
+  StoneeContext *cct;
   std::string name;
   std::string thread_name;
   std::string lockname;
@@ -650,7 +650,7 @@ private:
 
 public:
 
-  ShardedThreadPool(CephContext *cct_, std::string nm, std::string tn, uint32_t pnum_threads);
+  ShardedThreadPool(StoneeContext *cct_, std::string nm, std::string tn, uint32_t pnum_threads);
 
   ~ShardedThreadPool(){};
 

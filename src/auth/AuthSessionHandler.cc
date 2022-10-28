@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -14,18 +14,18 @@
 
 #include "common/debug.h"
 #include "AuthSessionHandler.h"
-#include "cephx/CephxSessionHandler.h"
+#include "stonex/StonexSessionHandler.h"
 #ifdef HAVE_GSSAPI
 #include "krb/KrbSessionHandler.hpp"
 #endif
 #include "none/AuthNoneSessionHandler.h"
 
-#include "common/ceph_crypto.h"
-#define dout_subsys ceph_subsys_auth
+#include "common/stone_crypto.h"
+#define dout_subsys stone_subsys_auth
 
 
 AuthSessionHandler *get_auth_session_handler(
-  CephContext *cct, int protocol,
+  StoneContext *cct, int protocol,
   const CryptoKey& key,
   uint64_t features)
 {
@@ -35,16 +35,16 @@ AuthSessionHandler *get_auth_session_handler(
   ldout(cct,10) << "In get_auth_session_handler for protocol " << protocol << dendl;
 #endif
   switch (protocol) {
-  case CEPH_AUTH_CEPHX:
+  case STONE_AUTH_STONEX:
     // if there is no session key, there is no session handler.
-    if (key.get_type() == CEPH_CRYPTO_NONE) {
+    if (key.get_type() == STONE_CRYPTO_NONE) {
       return nullptr;
     }
-    return new CephxSessionHandler(cct, key, features);
-  case CEPH_AUTH_NONE:
+    return new StonexSessionHandler(cct, key, features);
+  case STONE_AUTH_NONE:
     return new AuthNoneSessionHandler();
 #ifdef HAVE_GSSAPI
-  case CEPH_AUTH_GSS: 
+  case STONE_AUTH_GSS: 
     return new KrbSessionHandler();
 #endif
   default:

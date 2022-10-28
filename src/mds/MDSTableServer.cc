@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,21 +19,21 @@
 
 #include "events/ETableServer.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << rank << ".tableserver(" << get_mdstable_name(table) << ") "
 
 void MDSTableServer::handle_request(const cref_t<MMDSTableRequest> &req)
 {
-  ceph_assert(req->op >= 0);
+  stone_assert(req->op >= 0);
   switch (req->op) {
   case TABLESERVER_OP_QUERY: return handle_query(req);
   case TABLESERVER_OP_PREPARE: return handle_prepare(req);
   case TABLESERVER_OP_COMMIT: return handle_commit(req);
   case TABLESERVER_OP_ROLLBACK: return handle_rollback(req);
   case TABLESERVER_OP_NOTIFY_ACK: return handle_notify_ack(req);
-  default: ceph_abort_msg("unrecognized mds_table_server request op");
+  default: stone_abort_msg("unrecognized mds_table_server request op");
   }
 }
 
@@ -56,7 +56,7 @@ void MDSTableServer::handle_prepare(const cref_t<MMDSTableRequest> &req)
   dout(7) << "handle_prepare " << *req << dendl;
   mds_rank_t from = mds_rank_t(req->get_source().num());
 
-  ceph_assert(g_conf()->mds_kill_mdstable_at != 1);
+  stone_assert(g_conf()->mds_kill_mdstable_at != 1);
 
   projected_version++;
 
@@ -73,12 +73,12 @@ void MDSTableServer::_prepare_logged(const cref_t<MMDSTableRequest> &req, versio
   dout(7) << "_create_logged " << *req << " tid " << tid << dendl;
   mds_rank_t from = mds_rank_t(req->get_source().num());
 
-  ceph_assert(g_conf()->mds_kill_mdstable_at != 2);
+  stone_assert(g_conf()->mds_kill_mdstable_at != 2);
 
   _note_prepare(from, req->reqid);
   bufferlist out;
   _prepare(req->bl, req->reqid, from, out);
-  ceph_assert(version == tid);
+  stone_assert(version == tid);
 
   auto reply = make_message<MMDSTableRequest>(table, TABLESERVER_OP_AGREE, req->reqid, tid);
   reply->bl = std::move(out);
@@ -141,7 +141,7 @@ void MDSTableServer::handle_commit(const cref_t<MMDSTableRequest> &req)
       return;
     }
 
-    ceph_assert(g_conf()->mds_kill_mdstable_at != 5);
+    stone_assert(g_conf()->mds_kill_mdstable_at != 5);
 
     projected_version++;
     committing_tids.insert(tid);
@@ -159,7 +159,7 @@ void MDSTableServer::handle_commit(const cref_t<MMDSTableRequest> &req)
   else {
     // wtf.
     dout(0) << "got commit for tid " << tid << " > " << version << dendl;
-    ceph_assert(tid <= version);
+    stone_assert(tid <= version);
   }
 }
 
@@ -167,7 +167,7 @@ void MDSTableServer::_commit_logged(const cref_t<MMDSTableRequest> &req)
 {
   dout(7) << "_commit_logged, sending ACK" << dendl;
 
-  ceph_assert(g_conf()->mds_kill_mdstable_at != 6);
+  stone_assert(g_conf()->mds_kill_mdstable_at != 6);
   version_t tid = req->get_tid();
 
   pending_for_mds.erase(tid);
@@ -196,10 +196,10 @@ void MDSTableServer::handle_rollback(const cref_t<MMDSTableRequest> &req)
 {
   dout(7) << "handle_rollback " << *req << dendl;
 
-  ceph_assert(g_conf()->mds_kill_mdstable_at != 8);
+  stone_assert(g_conf()->mds_kill_mdstable_at != 8);
   version_t tid = req->get_tid();
-  ceph_assert(pending_for_mds.count(tid));
-  ceph_assert(!committing_tids.count(tid));
+  stone_assert(pending_for_mds.count(tid));
+  stone_assert(!committing_tids.count(tid));
 
   projected_version++;
   committing_tids.insert(tid);
@@ -326,7 +326,7 @@ void MDSTableServer::handle_mds_recovery(mds_rank_t who)
   for (auto p = pending_for_mds.begin(); p != pending_for_mds.end(); ++p) {
     if (p->second.mds != who)
       continue;
-    ceph_assert(!pending_notifies.count(p->second.tid));
+    stone_assert(!pending_notifies.count(p->second.tid));
 
     if (p->second.reqid >= next_reqid)
       next_reqid = p->second.reqid + 1;

@@ -11,8 +11,8 @@
 namespace cls {
 namespace journal {
 namespace client {
-using ceph::encode;
-using ceph::decode;
+using stone::encode;
+using stone::decode;
 
 namespace {
 
@@ -52,7 +52,7 @@ struct C_ClientList : public C_AioExec {
     librados::AioCompletion *rados_completion =
        librados::Rados::aio_create_completion(this, rados_callback);
     int r = ioctx.aio_operate(oid, rados_completion, &op, &outbl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     rados_completion->release();
   }
 
@@ -113,7 +113,7 @@ struct C_ImmutableMetadata : public C_AioExec {
     librados::AioCompletion *rados_completion =
       librados::Rados::aio_create_completion(this, rados_callback);
     int r = ioctx.aio_operate(oid, rados_completion, &op, &outbl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     rados_completion->release();
   }
 
@@ -153,7 +153,7 @@ struct C_MutableMetadata : public C_AioExec {
     librados::AioCompletion *rados_completion =
       librados::Rados::aio_create_completion(this, rados_callback);
     int r = ioctx.aio_operate(oid, rados_completion, &op, &outbl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     rados_completion->release();
   }
 

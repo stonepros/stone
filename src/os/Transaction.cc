@@ -10,9 +10,9 @@ using std::ostream;
 using std::set;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
 
 void decode_str_str_map_to_bl(bufferlist::const_iterator& p,
 			      bufferlist *out)
@@ -49,9 +49,9 @@ void decode_str_set_to_bl(bufferlist::const_iterator& p,
   start.copy(len, *out);
 }
 
-namespace ceph::os {
+namespace stone::os {
 
-void Transaction::dump(ceph::Formatter *f)
+void Transaction::dump(stone::Formatter *f)
 {
   f->open_array_section("ops");
   iterator i = begin();
@@ -257,7 +257,7 @@ void Transaction::dump(ceph::Formatter *f)
 
     case Transaction::OP_COLL_HINT:
       {
-	using ceph::decode;
+	using stone::decode;
         coll_t cid = i.get_cid(op->cid);
         uint32_t type = op->hint;
         f->dump_string("op_name", "coll_hint");
@@ -509,7 +509,7 @@ void Transaction::dump(ceph::Formatter *f)
         f->dump_stream("oid") << oid;
         f->dump_stream("expected_object_size") << expected_object_size;
         f->dump_stream("expected_write_size") << expected_write_size;
-        f->dump_string("alloc_hint_flags", ceph_osd_alloc_hint_flag_string(alloc_hint_flags));
+        f->dump_string("alloc_hint_flags", stone_osd_alloc_hint_flag_string(alloc_hint_flags));
       }
       break;
 

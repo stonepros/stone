@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CACHE_RWL_READ_REQUEST_H
-#define CEPH_LIBRBD_CACHE_RWL_READ_REQUEST_H
+#ifndef STONE_LIBRBD_CACHE_RWL_READ_REQUEST_H
+#define STONE_LIBRBD_CACHE_RWL_READ_REQUEST_H
 
 #include "include/Context.h"
 #include "librbd/cache/pwl/Types.h"
@@ -20,7 +20,7 @@ public:
   bufferlist miss_bl;
 
   C_ReadRequest(
-      CephContext *cct, utime_t arrived, PerfCounters *perfcounter,
+      StoneContext *cct, utime_t arrived, PerfCounters *perfcounter,
       bufferlist *out_bl, Context *on_finish)
     : m_cct(cct), m_on_finish(on_finish), m_out_bl(out_bl),
       m_arrived_time(arrived), m_perfcounter(perfcounter) {}
@@ -31,7 +31,7 @@ public:
   }
 
 protected:
-  CephContext *m_cct;
+  StoneContext *m_cct;
   Context *m_on_finish;
   bufferlist *m_out_bl;
   utime_t m_arrived_time;
@@ -42,4 +42,4 @@ protected:
 } // namespace cache
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_CACHE_RWL_READ_REQUEST_H
+#endif // STONE_LIBRBD_CACHE_RWL_READ_REQUEST_H

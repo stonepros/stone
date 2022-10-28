@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CACHE_PWL_SSD_WRITE_LOG
-#define CEPH_LIBRBD_CACHE_PWL_SSD_WRITE_LOG
+#ifndef STONE_LIBRBD_CACHE_PWL_SSD_WRITE_LOG
+#define STONE_LIBRBD_CACHE_PWL_SSD_WRITE_LOG
 
 #include "blk/BlockDevice.h"
 #include "common/AsyncOpTracker.h"
@@ -76,7 +76,7 @@ private:
    public:
      Context *on_finish;
      ::IOContext ioc;
-     explicit AioTransContext(CephContext* cct, Context *cb)
+     explicit AioTransContext(StoneContext* cct, Context *cb)
        : on_finish(cb), ioc(cct, this) {}
 
      ~AioTransContext(){}
@@ -153,4 +153,4 @@ private:
 
 extern template class librbd::cache::pwl::ssd::WriteLog<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_CACHE_PWL_SSD_WRITE_LOG
+#endif // STONE_LIBRBD_CACHE_PWL_SSD_WRITE_LOG

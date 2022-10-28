@@ -5,9 +5,9 @@
 
 MEMPOOL_DEFINE_FACTORY(unsigned char, byte, bloom_filter);
 
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::Formatter;
 
 void bloom_filter::encode(bufferlist& bl) const
 {

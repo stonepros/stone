@@ -21,8 +21,8 @@
 
 // tcp/network-stack integration
 
-#ifndef CEPH_MSG_DPDK_TCP_STACK_H
-#define CEPH_MSG_DPDK_TCP_STACK_H
+#ifndef STONE_MSG_DPDK_TCP_STACK_H
+#define STONE_MSG_DPDK_TCP_STACK_H
 
 class ServerSocket;
 class ConnectedSocket;

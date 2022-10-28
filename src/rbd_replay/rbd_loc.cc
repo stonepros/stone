@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Adam Crume <adamcrume@gmail.com>
  *
@@ -13,7 +13,7 @@
  */
 
 #include "rbd_loc.hpp"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 
 using namespace std;
@@ -41,7 +41,7 @@ bool rbd_loc::parse(string name_string) {
       if (read_slash || read_at) {
 	return false;
       }
-      ceph_assert(field == 0);
+      stone_assert(field == 0);
       field++;
       read_slash = true;
       break;
@@ -49,7 +49,7 @@ bool rbd_loc::parse(string name_string) {
       if (read_at) {
 	return false;
       }
-      ceph_assert(field < 2);
+      stone_assert(field < 2);
       field++;
       read_at = true;
       break;

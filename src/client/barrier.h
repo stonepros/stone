@@ -29,7 +29,7 @@ typedef boost::icl::interval<uint64_t>::type barrier_interval;
  * we keep count of uncommitted writes on the inode, so that
  * ll_commit_blocks can do the right thing.
  *
- * This is just a hacked copy of Ceph's sync callback.
+ * This is just a hacked copy of Stonee's sync callback.
  */
 
 enum CBlockSync_State

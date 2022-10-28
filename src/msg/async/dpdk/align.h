@@ -19,8 +19,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_MSG_DPDK_ALIGN_HH_
-#define CEPH_MSG_DPDK_ALIGN_HH_
+#ifndef STONE_MSG_DPDK_ALIGN_HH_
+#define STONE_MSG_DPDK_ALIGN_HH_
 
 #include <cstdint>
 #include <cstdlib>
@@ -47,4 +47,4 @@ inline constexpr T* align_down(T* v, size_t align) {
   return reinterpret_cast<T*>(align_down(reinterpret_cast<uintptr_t>(v), align));
 }
 
-#endif /* CEPH_MSG_DPDK_ALIGN_HH_ */
+#endif /* STONE_MSG_DPDK_ALIGN_HH_ */

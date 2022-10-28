@@ -11,7 +11,7 @@
 #include "services/svc_sys_obj.h"
 #include "services/svc_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 class RGWOp_Bucket_Info : public RGWRESTOp {

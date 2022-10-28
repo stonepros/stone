@@ -7,9 +7,9 @@ roles:
   - client.0
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     log-ignorelist:
     - overall HEALTH_
     - \(AUTH_BAD_CAPS\)

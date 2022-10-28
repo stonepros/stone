@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 Haomai Wang <haomaiwang@gmail.com>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_COMPRESSOR_H
-#define CEPH_COMPRESSOR_H
+#ifndef STONE_COMPRESSOR_H
+#define STONE_COMPRESSOR_H
 
 #include <memory>
 #include <string>
@@ -96,8 +96,8 @@ public:
   // alignment with decode methods
   virtual int decompress(ceph::bufferlist::const_iterator &p, size_t compressed_len, ceph::bufferlist &out, boost::optional<int32_t> compressor_message) = 0;
 
-  static CompressorRef create(CephContext *cct, const std::string &type);
-  static CompressorRef create(CephContext *cct, int alg);
+  static CompressorRef create(StoneeContext *cct, const std::string &type);
+  static CompressorRef create(StoneeContext *cct, int alg);
 
 protected:
   CompressionAlgorithm alg;

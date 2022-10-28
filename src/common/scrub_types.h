@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_SCRUB_TYPES_H
-#define CEPH_SCRUB_TYPES_H
+#ifndef STONE_SCRUB_TYPES_H
+#define STONE_SCRUB_TYPES_H
 
 #include "osd/osd_types.h"
 

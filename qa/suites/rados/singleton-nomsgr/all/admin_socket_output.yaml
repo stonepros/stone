@@ -5,7 +5,7 @@ openstack:
 roles:
 - [mon.a, mds.a, mgr.x, osd.0, osd.1, client.0]
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - MDS in read-only mode
       - force file system read-only
@@ -17,11 +17,11 @@ overrides:
       - \(POOL_FULL\)
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
 - rgw:
   - client.0
 - exec:
     client.0:
-      - ceph_test_admin_socket_output --all
+      - stone_test_admin_socket_output --all

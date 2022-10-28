@@ -21,8 +21,8 @@
 #include "tools/rbd_mirror/image_sync/Utils.h"
 #include <boost/algorithm/string/predicate.hpp>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::CreateImageRequest: " \
                            << this << " " << __func__ << ": "
@@ -82,7 +82,7 @@ void CreateImageRequest<I>::create_image() {
   std::shared_lock image_locker{m_remote_image_ctx->image_lock};
 
   auto& config{
-    reinterpret_cast<CephContext*>(m_local_io_ctx.cct())->_conf};
+    reinterpret_cast<StoneContext*>(m_local_io_ctx.cct())->_conf};
 
   librbd::ImageOptions image_options;
   populate_image_options(&image_options);
@@ -125,7 +125,7 @@ void CreateImageRequest<I>::get_parent_global_image_id() {
   m_out_bl.clear();
   int r = m_remote_parent_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op,
                                              &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -172,7 +172,7 @@ void CreateImageRequest<I>::get_local_parent_image_id() {
   m_out_bl.clear();
   int r = m_local_parent_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op,
                                             &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -280,7 +280,7 @@ void CreateImageRequest<I>::clone_image() {
   populate_image_options(&opts);
 
   auto& config{
-    reinterpret_cast<CephContext*>(m_local_io_ctx.cct())->_conf};
+    reinterpret_cast<StoneContext*>(m_local_io_ctx.cct())->_conf};
 
   using klass = CreateImageRequest<I>;
   Context *ctx = create_context_callback<
@@ -288,7 +288,7 @@ void CreateImageRequest<I>::clone_image() {
 
   librbd::image::CloneRequest<I> *req = librbd::image::CloneRequest<I>::create(
     config, m_local_parent_io_ctx, m_local_parent_spec.image_id, snap_name,
-    snap_namespace, CEPH_NOSNAP, m_local_io_ctx, m_local_image_name,
+    snap_namespace, STONE_NOSNAP, m_local_io_ctx, m_local_image_name,
     m_local_image_id, opts, m_mirror_image_mode, m_global_image_id,
     m_remote_mirror_uuid, m_remote_image_ctx->op_work_queue, ctx);
   req->send();
@@ -418,7 +418,7 @@ void CreateImageRequest<I>::populate_image_options(
   // 3. Don't set the data pool explicitly.
   std::string data_pool;
   librados::Rados local_rados(m_local_io_ctx);
-  auto default_data_pool = g_ceph_context->_conf.get_val<std::string>("rbd_default_data_pool");
+  auto default_data_pool = g_stone_context->_conf.get_val<std::string>("rbd_default_data_pool");
   auto remote_md_pool = m_remote_image_ctx->md_ctx.get_pool_name();
   auto remote_data_pool = m_remote_image_ctx->data_ctx.get_pool_name();
 

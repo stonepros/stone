@@ -1,16 +1,16 @@
 overrides:
-  ceph:
-    cephfs:
+  stone:
+    stonefs:
       fs:
         - name: a
         - name: b
-  ceph-fuse:
+  stone-fuse:
     client.0:
-      cephfs_name: a
+      stonefs_name: a
     client.1:
-      cephfs_name: b
+      stonefs_name: b
   kclient:
     client.0:
-      cephfs_name: a
+      stonefs_name: a
     client.1:
-      cephfs_name: b
+      stonefs_name: b

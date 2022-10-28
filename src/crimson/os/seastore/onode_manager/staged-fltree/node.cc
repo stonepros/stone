@@ -15,7 +15,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 }
 
@@ -255,7 +255,7 @@ node_future<Ref<Node>> Node::load(
       auto impl = InternalNodeImpl::load(extent, field_type, expect_is_level_tail);
       return Ref<Node>(new InternalNode(impl.get(), std::move(impl)));
     } else {
-      ceph_abort("impossible path");
+      stone_abort("impossible path");
     }
   });
 }

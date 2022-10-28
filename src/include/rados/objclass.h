@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_OBJCLASS_OBJCLASS_PUBLIC_H
-#define CEPH_OBJCLASS_OBJCLASS_PUBLIC_H
+#ifndef STONE_OBJCLASS_OBJCLASS_PUBLIC_H
+#define STONE_OBJCLASS_OBJCLASS_PUBLIC_H
 
 #ifdef __cplusplus
 
@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-#define CEPH_CLS_API [[gnu::visibility("default")]]
+#define STONE_CLS_API [[gnu::visibility("default")]]
 
 #define CLS_VER(maj,min) \
 int __cls_ver__## maj ## _ ##min = 0; \
@@ -23,7 +23,7 @@ int __cls_name__## name = 0; \
 const char *__cls_name = #name;
 
 #define CLS_INIT(name) \
-CEPH_CLS_API void __cls_init()
+STONE_CLS_API void __cls_init()
 
 #define CLS_METHOD_RD       0x1 /// method executes read operations
 #define CLS_METHOD_WR       0x2 /// method executes write operations

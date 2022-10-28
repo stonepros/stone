@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CRYPTO_OPENSSL_DATA_CRYPTOR_H
-#define CEPH_LIBRBD_CRYPTO_OPENSSL_DATA_CRYPTOR_H
+#ifndef STONE_LIBRBD_CRYPTO_OPENSSL_DATA_CRYPTOR_H
+#define STONE_LIBRBD_CRYPTO_OPENSSL_DATA_CRYPTOR_H
 
 #include "librbd/crypto/DataCryptor.h"
 #include "include/Context.h"
@@ -15,7 +15,7 @@ namespace openssl {
 class DataCryptor : public crypto::DataCryptor<EVP_CIPHER_CTX> {
 
 public:
-    DataCryptor(CephContext* cct) : m_cct(cct) {};
+    DataCryptor(StoneContext* cct) : m_cct(cct) {};
     ~DataCryptor();
 
     int init(const char* cipher_name, const unsigned char* key,
@@ -33,7 +33,7 @@ public:
                        unsigned char* out, uint32_t len) const override;
 
 private:
-    CephContext* m_cct;
+    StoneContext* m_cct;
     unsigned char* m_key = nullptr;
     uint16_t m_key_size = 0;
     const EVP_CIPHER* m_cipher;
@@ -46,4 +46,4 @@ private:
 } // namespace crypto
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_CRYPTO_OPENSSL_DATA_CRYPTOR_H
+#endif // STONE_LIBRBD_CRYPTO_OPENSSL_DATA_CRYPTOR_H

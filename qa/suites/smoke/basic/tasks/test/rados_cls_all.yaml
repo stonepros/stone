@@ -1,11 +1,11 @@
 overrides:
-  ceph:
+  stone:
     conf:
       osd:
         osd_class_load_list: "*"
         osd_class_default_list: "*"
 tasks:
-- ceph:
+- stone:
     fs: xfs
 - workunit:
     clients:

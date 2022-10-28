@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Michael Sevilla <mikesevilla3@gmail.com>
  *
@@ -19,16 +19,16 @@
 #include "common/Clock.h"
 #include "CInode.h"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 #undef dout_prefix
 #define dout_prefix *_dout << "mds.mantle "
 #define mantle_dout(lvl) \
   do {\
-    auto subsys = ceph_subsys_mds;\
-    if ((dout_context)->_conf->subsys.should_gather(ceph_subsys_mds_balancer, lvl)) {\
-      subsys = ceph_subsys_mds_balancer;\
+    auto subsys = stone_subsys_mds;\
+    if ((dout_context)->_conf->subsys.should_gather(stone_subsys_mds_balancer, lvl)) {\
+      subsys = stone_subsys_mds_balancer;\
     }\
-    dout_impl(dout_context, ceph::dout::need_dynamic(subsys), lvl) dout_prefix
+    dout_impl(dout_context, stone::dout::need_dynamic(subsys), lvl) dout_prefix
 
 #define mantle_dendl dendl; } while (0)
 
@@ -37,7 +37,7 @@ static int dout_wrapper(lua_State *L)
 {
   int level = luaL_checkinteger(L, 1);
   lua_concat(L, lua_gettop(L)-1);
-  mantle_dout(ceph::dout::need_dynamic(level)) << lua_tostring(L, 2)
+  mantle_dout(stone::dout::need_dynamic(level)) << lua_tostring(L, 2)
 					       << mantle_dendl;
   return 0;
 }
@@ -53,7 +53,7 @@ int Mantle::balance(std::string_view script,
   if (luaL_loadstring(L, script.data())) {
     mantle_dout(0) << "WARNING: mantle could not load balancer: "
             << lua_tostring(L, -1) << mantle_dendl;
-    return -CEPHFS_EINVAL;
+    return -STONEFS_EINVAL;
   }
 
   /* tell the balancer which mds is making the decision */
@@ -80,24 +80,24 @@ int Mantle::balance(std::string_view script,
   /* set the name of the global mds table */
   lua_setglobal(L, "mds");
 
-  ceph_assert(lua_gettop(L) == 1);
+  stone_assert(lua_gettop(L) == 1);
   if (lua_pcall(L, 0, 1, 0) != LUA_OK) {
     mantle_dout(0) << "WARNING: mantle could not execute script: "
             << lua_tostring(L, -1) << mantle_dendl;
-    return -CEPHFS_EINVAL;
+    return -STONEFS_EINVAL;
   }
 
   /* parse response by iterating over Lua stack */
   if (lua_istable(L, -1) == 0) {
     mantle_dout(0) << "WARNING: mantle script returned a malformed response" << mantle_dendl;
-    return -CEPHFS_EINVAL;
+    return -STONEFS_EINVAL;
   }
 
   /* fill in return value */
   for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
     if (!lua_isinteger(L, -2) || !lua_isnumber(L, -1)) {
       mantle_dout(0) << "WARNING: mantle script returned a malformed response" << mantle_dendl;
-      return -CEPHFS_EINVAL;
+      return -STONEFS_EINVAL;
     }
     mds_rank_t rank(lua_tointeger(L, -2));
     my_targets[rank] = lua_tonumber(L, -1);

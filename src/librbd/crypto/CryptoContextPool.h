@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CRYPTO_CRYPTO_CONTEXT_POOL_H
-#define CEPH_LIBRBD_CRYPTO_CRYPTO_CONTEXT_POOL_H
+#ifndef STONE_LIBRBD_CRYPTO_CRYPTO_CONTEXT_POOL_H
+#define STONE_LIBRBD_CRYPTO_CRYPTO_CONTEXT_POOL_H
 
 #include "librbd/crypto/DataCryptor.h"
 #include "common/allocator.h"
@@ -68,4 +68,4 @@ private:
 } // namespace crypto
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_CRYPTO_CRYPTO_CONTEXT_POOL_H
+#endif // STONE_LIBRBD_CRYPTO_CRYPTO_CONTEXT_POOL_H

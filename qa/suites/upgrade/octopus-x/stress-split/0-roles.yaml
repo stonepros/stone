@@ -24,7 +24,7 @@ openstack:
     count: 4
     size: 10 # GB
 overrides:
-  ceph:
+  stone:
     create_rbd_pool: true
     conf:
       osd:

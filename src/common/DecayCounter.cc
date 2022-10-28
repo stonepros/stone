@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -17,7 +17,7 @@
 
 #include "include/encoding.h"
 
-void DecayCounter::encode(ceph::buffer::list& bl) const
+void DecayCounter::encode(stone::buffer::list& bl) const
 {
   decay();
   ENCODE_START(5, 4, bl);
@@ -25,7 +25,7 @@ void DecayCounter::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void DecayCounter::decode(ceph::buffer::list::const_iterator &p)
+void DecayCounter::decode(stone::buffer::list::const_iterator &p)
 {
   DECODE_START_LEGACY_COMPAT_LEN(5, 4, 4, p);
   if (struct_v < 2) {
@@ -47,7 +47,7 @@ void DecayCounter::decode(ceph::buffer::list::const_iterator &p)
   DECODE_FINISH(p);
 }
 
-void DecayCounter::dump(ceph::Formatter *f) const
+void DecayCounter::dump(stone::Formatter *f) const
 {
   decay();
   f->dump_float("value", val);

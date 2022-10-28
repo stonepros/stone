@@ -7,7 +7,7 @@
 #include "librbd/asio/ContextWQ.h"
 #include "librbd/watcher/Types.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::watcher::Notifier: " \
                            << this << " " << __func__ << ": "
@@ -39,14 +39,14 @@ void Notifier::C_AioNotify::finish(int r) {
 Notifier::Notifier(asio::ContextWQ *work_queue, IoCtx &ioctx,
                    const std::string &oid)
   : m_work_queue(work_queue), m_ioctx(ioctx), m_oid(oid),
-    m_aio_notify_lock(ceph::make_mutex(util::unique_lock_name(
+    m_aio_notify_lock(stone::make_mutex(util::unique_lock_name(
       "librbd::object_watcher::Notifier::m_aio_notify_lock", this))) {
-  m_cct = reinterpret_cast<CephContext *>(m_ioctx.cct());
+  m_cct = reinterpret_cast<StoneContext *>(m_ioctx.cct());
 }
 
 Notifier::~Notifier() {
   std::lock_guard aio_notify_locker{m_aio_notify_lock};
-  ceph_assert(m_pending_aio_notifies == 0);
+  stone_assert(m_pending_aio_notifies == 0);
 }
 
 void Notifier::flush(Context *on_finish) {
@@ -71,7 +71,7 @@ void Notifier::notify(bufferlist &bl, NotifyResponse *response,
   C_AioNotify *ctx = new C_AioNotify(this, response, on_finish);
   librados::AioCompletion *comp = util::create_rados_callback(ctx);
   int r = m_ioctx.aio_notify(m_oid, comp, bl, NOTIFY_TIMEOUT, &ctx->out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -79,7 +79,7 @@ void Notifier::handle_notify(int r, Context *on_finish) {
   ldout(m_cct, 20) << "r=" << r << dendl;
 
   std::lock_guard aio_notify_locker{m_aio_notify_lock};
-  ceph_assert(m_pending_aio_notifies > 0);
+  stone_assert(m_pending_aio_notifies > 0);
   --m_pending_aio_notifies;
 
   ldout(m_cct, 20) << "pending=" << m_pending_aio_notifies << dendl;

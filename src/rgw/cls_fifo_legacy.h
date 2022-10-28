@@ -13,8 +13,8 @@
  *
  */
 
-#ifndef CEPH_RGW_CLS_FIFO_LEGACY_H
-#define CEPH_RGW_CLS_FIFO_LEGACY_H
+#ifndef STONE_RGW_CLS_FIFO_LEGACY_H
+#define STONE_RGW_CLS_FIFO_LEGACY_H
 
 #include <cstdint>
 #include <deque>
@@ -337,4 +337,4 @@ public:
 
 }
 
-#endif // CEPH_RGW_CLS_FIFO_LEGACY_H
+#endif // STONE_RGW_CLS_FIFO_LEGACY_H

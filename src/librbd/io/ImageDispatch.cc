@@ -8,7 +8,7 @@
 #include "librbd/io/ImageRequest.h"
 #include "librbd/io/ObjectDispatcherInterface.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::ImageDispatch: " << this << " " \
                            << __func__ << ": "

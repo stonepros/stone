@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -183,7 +183,7 @@ class MDSAuthCaps
 {
 public:
   MDSAuthCaps() = default;
-  explicit MDSAuthCaps(CephContext *cct_) : cct(cct_) {}
+  explicit MDSAuthCaps(StoneContext *cct_) : cct(cct_) {}
 
   // this ctor is used by spirit/phoenix; doesn't need cct.
   explicit MDSAuthCaps(const std::vector<MDSCapGrant>& grants_) : grants(grants_) {}
@@ -193,7 +193,7 @@ public:
   }
 
   void set_allow_all();
-  bool parse(CephContext *cct, std::string_view str, std::ostream *err);
+  bool parse(StoneContext *cct, std::string_view str, std::ostream *err);
 
   bool allow_all() const;
   bool is_capable(std::string_view inode_path,
@@ -226,7 +226,7 @@ public:
 
   friend std::ostream &operator<<(std::ostream &out, const MDSAuthCaps &cap);
 private:
-  CephContext *cct = nullptr;
+  StoneContext *cct = nullptr;
   std::vector<MDSCapGrant> grants;
 };
 

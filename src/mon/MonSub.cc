@@ -9,7 +9,7 @@ bool MonSub::have_new() const {
 
 bool MonSub::need_renew() const
 {
-  return ceph::coarse_mono_clock::now() > renew_after;
+  return stone::coarse_mono_clock::now() > renew_after;
 }
 
 void MonSub::renewed()
@@ -29,7 +29,7 @@ void MonSub::acked(uint32_t interval)
     // NOTE: this is only needed for legacy (infernalis or older)
     // mons; see MonClient::tick().
     renew_after = renew_sent;
-    renew_after += ceph::make_timespan(interval / 2.0);
+    renew_after += stone::make_timespan(interval / 2.0);
     renew_sent = clock::zero();
   }
 }
@@ -49,7 +49,7 @@ void MonSub::got(const std::string& what, version_t have)
   if (auto i = sub_new.find(what); i != sub_new.end()) {
     auto& sub = i->second;
     if (sub.start <= have) {
-      if (sub.flags & CEPH_SUBSCRIBE_ONETIME) {
+      if (sub.flags & STONE_SUBSCRIBE_ONETIME) {
         sub_new.erase(i);
       } else {
         sub.start = have + 1;
@@ -58,7 +58,7 @@ void MonSub::got(const std::string& what, version_t have)
   } else if (auto i = sub_sent.find(what); i != sub_sent.end()) {
     auto& sub = i->second;
     if (sub.start <= have) {
-      if (sub.flags & CEPH_SUBSCRIBE_ONETIME) {
+      if (sub.flags & STONE_SUBSCRIBE_ONETIME) {
         sub_sent.erase(i);
       } else {
         sub.start = have + 1;

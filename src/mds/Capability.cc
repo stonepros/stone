@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -23,7 +23,7 @@
  * Capability::Export
  */
 
-void Capability::Export::encode(ceph::buffer::list &bl) const
+void Capability::Export::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(3, 2, bl);
   encode(cap_id, bl);
@@ -38,7 +38,7 @@ void Capability::Export::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void Capability::Export::decode(ceph::buffer::list::const_iterator &p)
+void Capability::Export::decode(stone::buffer::list::const_iterator &p)
 {
   DECODE_START_LEGACY_COMPAT_LEN(3, 2, 2, p);
   decode(cap_id, p);
@@ -54,7 +54,7 @@ void Capability::Export::decode(ceph::buffer::list::const_iterator &p)
   DECODE_FINISH(p);
 }
 
-void Capability::Export::dump(ceph::Formatter *f) const
+void Capability::Export::dump(stone::Formatter *f) const
 {
   f->dump_unsigned("cap_id", cap_id);
   f->dump_stream("wanted") << ccap_string(wanted);
@@ -78,7 +78,7 @@ void Capability::Export::generate_test_instances(std::list<Capability::Export*>&
   ls.back()->last_issue_stamp = utime_t(6, 7);
 }
 
-void Capability::Import::encode(ceph::buffer::list &bl) const
+void Capability::Import::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(1, 1, bl);
   encode(cap_id, bl);
@@ -87,7 +87,7 @@ void Capability::Import::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void Capability::Import::decode(ceph::buffer::list::const_iterator &bl)
+void Capability::Import::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(1, bl);
   decode(cap_id, bl);
@@ -96,7 +96,7 @@ void Capability::Import::decode(ceph::buffer::list::const_iterator &bl)
   DECODE_FINISH(bl);
 }
 
-void Capability::Import::dump(ceph::Formatter *f) const
+void Capability::Import::dump(stone::Formatter *f) const
 {
   f->dump_unsigned("cap_id", cap_id);
   f->dump_unsigned("issue_seq", issue_seq);
@@ -107,7 +107,7 @@ void Capability::Import::dump(ceph::Formatter *f) const
  * Capability::revoke_info
  */
 
-void Capability::revoke_info::encode(ceph::buffer::list& bl) const
+void Capability::revoke_info::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(2, 2, bl)
   encode(before, bl);
@@ -116,7 +116,7 @@ void Capability::revoke_info::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void Capability::revoke_info::decode(ceph::buffer::list::const_iterator& bl)
+void Capability::revoke_info::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(2, 2, 2, bl);
   decode(before, bl);
@@ -125,7 +125,7 @@ void Capability::revoke_info::decode(ceph::buffer::list::const_iterator& bl)
   DECODE_FINISH(bl);
 }
 
-void Capability::revoke_info::dump(ceph::Formatter *f) const
+void Capability::revoke_info::dump(stone::Formatter *f) const
 {
   f->dump_unsigned("before", before);
   f->dump_unsigned("seq", seq);
@@ -159,11 +159,11 @@ Capability::Capability(CInode *i, Session *s, uint64_t id) :
 
     auto& conn = session->get_connection();
     if (conn) {
-      if (!conn->has_feature(CEPH_FEATURE_MDS_INLINE_DATA))
+      if (!conn->has_feature(STONE_FEATURE_MDS_INLINE_DATA))
 	state |= STATE_NOINLINE;
-      if (!conn->has_feature(CEPH_FEATURE_FS_FILE_LAYOUT_V2))
+      if (!conn->has_feature(STONE_FEATURE_FS_FILE_LAYOUT_V2))
 	state |= STATE_NOPOOLNS;
-      if (!conn->has_feature(CEPH_FEATURE_MDS_QUOTA))
+      if (!conn->has_feature(STONE_FEATURE_MDS_QUOTA))
 	state |= STATE_NOQUOTA;
     }
   } else {
@@ -203,7 +203,7 @@ void Capability::maybe_clear_notable()
   if ((_issued == _pending) &&
       !is_clientwriteable() &&
       !is_wanted_notable(_wanted)) {
-    ceph_assert(is_notable());
+    stone_assert(is_notable());
     state &= ~STATE_NOTABLE;
     session->touch_cap_bottom(this);
   }
@@ -224,7 +224,7 @@ void Capability::set_wanted(int w) {
   _wanted = w;
 }
 
-void Capability::encode(ceph::buffer::list& bl) const
+void Capability::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(2, 2, bl)
   encode(last_sent, bl);
@@ -236,7 +236,7 @@ void Capability::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void Capability::decode(ceph::buffer::list::const_iterator &bl)
+void Capability::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(2, 2, 2, bl)
   decode(last_sent, bl);
@@ -252,7 +252,7 @@ void Capability::decode(ceph::buffer::list::const_iterator &bl)
   calc_issued();
 }
 
-void Capability::dump(ceph::Formatter *f) const
+void Capability::dump(stone::Formatter *f) const
 {
   if (inode)
     f->dump_stream("ino") << inode->ino();

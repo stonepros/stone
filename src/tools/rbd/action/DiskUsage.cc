@@ -125,8 +125,8 @@ static int do_disk_usage(librbd::RBD &rbd, librados::IoCtx &io_ctx,
   uint64_t used_size = 0;
   uint64_t total_prov = 0;
   uint64_t total_used = 0;
-  uint64_t snap_id = CEPH_NOSNAP;
-  uint64_t from_id = CEPH_NOSNAP;
+  uint64_t snap_id = STONE_NOSNAP;
+  uint64_t from_id = STONE_NOSNAP;
   bool found = false;
   for (auto& image_spec : images) {
     if (imgname != NULL && image_spec.name != imgname) {
@@ -198,12 +198,12 @@ static int do_disk_usage(librbd::RBD &rbd, librados::IoCtx &io_ctx,
         }
       }
     }
-    if ((snapname != nullptr && snap_id == CEPH_NOSNAP) ||
-        (from_snapname != nullptr && from_id == CEPH_NOSNAP)) {
+    if ((snapname != nullptr && snap_id == STONE_NOSNAP) ||
+        (from_snapname != nullptr && from_id == STONE_NOSNAP)) {
       std::cerr << "specified snapshot is not found." << std::endl;
       return -ENOENT;
     }
-    if (snap_id != CEPH_NOSNAP && from_id != CEPH_NOSNAP) {
+    if (snap_id != STONE_NOSNAP && from_id != STONE_NOSNAP) {
       if (from_id == snap_id) {
         // no diskusage.
         return 0;
@@ -266,10 +266,10 @@ static int do_disk_usage(librbd::RBD &rbd, librados::IoCtx &io_ctx,
       image_full_used_size += used_size;
 
       if (!merge_snap) {
-        format_image_disk_usage(image_spec.name, image_spec.id, "", CEPH_NOSNAP,
+        format_image_disk_usage(image_spec.name, image_spec.id, "", STONE_NOSNAP,
                                  info.size, used_size, tbl, f);
       } else {
-        format_image_disk_usage(image_spec.name, image_spec.id, "", CEPH_NOSNAP,
+        format_image_disk_usage(image_spec.name, image_spec.id, "", STONE_NOSNAP,
                                  info.size, image_full_used_size, tbl, f);
       }
 
@@ -319,7 +319,7 @@ void get_arguments(po::options_description *positional,
 }
 
 int execute(const po::variables_map &vm,
-            const std::vector<std::string> &ceph_global_init_args) {
+            const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;

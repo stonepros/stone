@@ -21,7 +21,7 @@ set(crimson_common_srcs
   common/throttle.cc
   common/tri_mutex.cc)
 
-# the specialized version of ceph-common, where
+# the specialized version of stone-common, where
 #  - the logging is sent to Seastar backend
 #  - and the template parameter of lock_policy is SINGLE
 add_library(crimson-common STATIC
@@ -30,13 +30,13 @@ add_library(crimson-common STATIC
   ${PROJECT_SOURCE_DIR}/src/common/bloom_filter.cc
   ${PROJECT_SOURCE_DIR}/src/common/buffer.cc
   ${PROJECT_SOURCE_DIR}/src/common/buffer_seastar.cc
-  ${PROJECT_SOURCE_DIR}/src/common/ceph_argparse.cc
-  ${PROJECT_SOURCE_DIR}/src/common/ceph_context.cc
-  ${PROJECT_SOURCE_DIR}/src/common/ceph_crypto.cc
-  ${PROJECT_SOURCE_DIR}/src/common/ceph_hash.cc
-  ${PROJECT_SOURCE_DIR}/src/common/ceph_time.cc
-  ${PROJECT_SOURCE_DIR}/src/common/ceph_strings.cc
-  ${PROJECT_SOURCE_DIR}/src/common/ceph_releases.cc
+  ${PROJECT_SOURCE_DIR}/src/common/stone_argparse.cc
+  ${PROJECT_SOURCE_DIR}/src/common/stone_context.cc
+  ${PROJECT_SOURCE_DIR}/src/common/stone_crypto.cc
+  ${PROJECT_SOURCE_DIR}/src/common/stone_hash.cc
+  ${PROJECT_SOURCE_DIR}/src/common/stone_time.cc
+  ${PROJECT_SOURCE_DIR}/src/common/stone_strings.cc
+  ${PROJECT_SOURCE_DIR}/src/common/stone_releases.cc
   ${PROJECT_SOURCE_DIR}/src/common/cmdparse.cc
   ${PROJECT_SOURCE_DIR}/src/common/common_init.cc
   ${PROJECT_SOURCE_DIR}/src/common/compat.cc
@@ -50,7 +50,7 @@ add_library(crimson-common STATIC
   ${PROJECT_SOURCE_DIR}/src/common/escape.cc
   ${PROJECT_SOURCE_DIR}/src/common/hex.cc
   ${PROJECT_SOURCE_DIR}/src/common/fs_types.cc
-  ${PROJECT_SOURCE_DIR}/src/common/ceph_json.cc
+  ${PROJECT_SOURCE_DIR}/src/common/stone_json.cc
   ${PROJECT_SOURCE_DIR}/src/common/histogram.cc
   ${PROJECT_SOURCE_DIR}/src/common/hobject.cc
   ${PROJECT_SOURCE_DIR}/src/common/hostname.cc
@@ -98,7 +98,7 @@ add_library(crimson-common STATIC
   ${PROJECT_SOURCE_DIR}/src/mgr/ServiceMap.cc
   ${PROJECT_SOURCE_DIR}/src/mds/inode_backtrace.cc
   ${PROJECT_SOURCE_DIR}/src/mds/mdstypes.cc
-  ${PROJECT_SOURCE_DIR}/src/mds/cephfs_features.cc
+  ${PROJECT_SOURCE_DIR}/src/mds/stonefs_features.cc
   ${PROJECT_SOURCE_DIR}/src/mds/FSMap.cc
   ${PROJECT_SOURCE_DIR}/src/mds/FSMapUser.cc
   ${PROJECT_SOURCE_DIR}/src/mds/MDSMap.cc
@@ -114,12 +114,12 @@ add_library(crimson-common STATIC
   ${PROJECT_SOURCE_DIR}/src/osd/PGPeeringEvent.cc
   ${PROJECT_SOURCE_DIR}/src/xxHash/xxhash.c
   ${crimson_common_srcs}
-  $<TARGET_OBJECTS:common_mountcephfs_objs>)
+  $<TARGET_OBJECTS:common_mountstonefs_objs>)
 
 target_compile_definitions(crimson-common PRIVATE
-  "CEPH_LIBDIR=\"${CMAKE_INSTALL_FULL_LIBDIR}\""
-  "CEPH_PKGLIBDIR=\"${CEPH_INSTALL_FULL_PKGLIBDIR}\""
-  "CEPH_DATADIR=\"${CEPH_INSTALL_DATADIR}\"")
+  "STONE_LIBDIR=\"${CMAKE_INSTALL_FULL_LIBDIR}\""
+  "STONE_PKGLIBDIR=\"${STONE_INSTALL_FULL_PKGLIBDIR}\""
+  "STONE_DATADIR=\"${STONE_INSTALL_DATADIR}\"")
 
 set(crimson_common_deps
   Boost::iostreams
@@ -152,10 +152,10 @@ set(crimson_auth_srcs
   ${PROJECT_SOURCE_DIR}/src/auth/Crypto.cc
   ${PROJECT_SOURCE_DIR}/src/auth/KeyRing.cc
   ${PROJECT_SOURCE_DIR}/src/auth/RotatingKeyRing.cc
-  ${PROJECT_SOURCE_DIR}/src/auth/cephx/CephxAuthorizeHandler.cc
-  ${PROJECT_SOURCE_DIR}/src/auth/cephx/CephxClientHandler.cc
-  ${PROJECT_SOURCE_DIR}/src/auth/cephx/CephxProtocol.cc
-  ${PROJECT_SOURCE_DIR}/src/auth/cephx/CephxSessionHandler.cc
+  ${PROJECT_SOURCE_DIR}/src/auth/stonex/StonexAuthorizeHandler.cc
+  ${PROJECT_SOURCE_DIR}/src/auth/stonex/StonexClientHandler.cc
+  ${PROJECT_SOURCE_DIR}/src/auth/stonex/StonexProtocol.cc
+  ${PROJECT_SOURCE_DIR}/src/auth/stonex/StonexSessionHandler.cc
   ${PROJECT_SOURCE_DIR}/src/auth/none/AuthNoneAuthorizeHandler.cc)
 set(crimson_mgr_srcs
   mgr/client.cc)

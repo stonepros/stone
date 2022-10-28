@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -23,7 +23,7 @@
 
 #define LARGE_SIZE 8192
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 RGWFormatter_Plain::RGWFormatter_Plain(const bool ukv)
   : use_kv(ukv)
@@ -134,7 +134,7 @@ void RGWFormatter_Plain::dump_string(std::string_view name, std::string_view s)
 std::ostream& RGWFormatter_Plain::dump_stream(std::string_view name)
 {
   // TODO: implement this!
-  ceph_abort();
+  stone_abort();
 }
 
 void RGWFormatter_Plain::dump_format_va(std::string_view name, const char *ns, bool quoted, const char *fmt, va_list ap)

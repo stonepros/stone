@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -13,12 +13,12 @@
  *
  */
 
-#ifndef CEPH_COMMON_DETAIL_CONSTRUCT_SUSPENDED_H
-#define CEPH_COMMON_DETAIL_CONSTRUCT_SUSPENDED_H
+#ifndef STONE_COMMON_DETAIL_CONSTRUCT_SUSPENDED_H
+#define STONE_COMMON_DETAIL_CONSTRUCT_SUSPENDED_H
 
 namespace ceph {
   struct construct_suspended_t { };
   inline constexpr construct_suspended_t construct_suspended { };
 }
 
-#endif // CEPH_COMMON_DETAIL_CONSTRUCT_SUSPENDED_H
+#endif // STONE_COMMON_DETAIL_CONSTRUCT_SUSPENDED_H

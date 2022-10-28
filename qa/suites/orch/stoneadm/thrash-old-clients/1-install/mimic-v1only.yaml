@@ -1,0 +1,32 @@
+overrides:
+  stone:
+    mon_bind_msgr2: false
+    log-ignorelist:
+      - \(MON_DOWN\)
+    conf:
+      global:
+        ms type: async
+        ms bind msgr2: false
+tasks:
+- install:
+    branch: mimic
+    exclude_packages:
+      - librados3
+      - stone-mgr-dashboard
+      - stone-mgr-diskprediction-local
+      - stone-mgr-rook
+      - stone-mgr-stoneadm
+      - stoneadm
+      - stone-immutable-object-cache
+      - stone-base
+      - python3-rados
+      - python3-rgw
+      - python3-rbd
+      - python3-stonefs
+      - librados-devel
+    extra_packages:
+      - librados2
+      - python-rados
+      - python-rgw
+      - python-rbd
+      - python-stonefs

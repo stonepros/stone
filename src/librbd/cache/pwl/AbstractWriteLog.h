@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CACHE_PARENT_WRITE_LOG
-#define CEPH_LIBRBD_CACHE_PARENT_WRITE_LOG
+#ifndef STONE_LIBRBD_CACHE_PARENT_WRITE_LOG
+#define STONE_LIBRBD_CACHE_PARENT_WRITE_LOG
 
 #include "common/Timer.h"
 #include "common/RWLock.h"
@@ -118,7 +118,7 @@ public:
   using C_DiscardRequestT = pwl::C_DiscardRequest<This>;
   using C_WriteSameRequestT = pwl::C_WriteSameRequest<This>;
 
-  CephContext * get_context();
+  StoneContext * get_context();
   void release_guarded_request(BlockGuardCell *cell);
   void release_write_lanes(C_BlockIORequestT *req);
   virtual bool alloc_resources(C_BlockIORequestT *req) = 0;
@@ -407,4 +407,4 @@ protected:
 
 extern template class librbd::cache::pwl::AbstractWriteLog<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_CACHE_PARENT_WRITE_LOG
+#endif // STONE_LIBRBD_CACHE_PARENT_WRITE_LOG

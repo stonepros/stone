@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_MIRROR_REMOTE_POOL_POLLER_H
-#define CEPH_RBD_MIRROR_REMOTE_POOL_POLLER_H
+#ifndef STONE_RBD_MIRROR_REMOTE_POOL_POLLER_H
+#define STONE_RBD_MIRROR_REMOTE_POOL_POLLER_H
 
 #include "include/rados/librados.hpp"
 #include "tools/rbd_mirror/Types.h"
@@ -130,4 +130,4 @@ private:
 
 extern template class rbd::mirror::RemotePoolPoller<librbd::ImageCtx>;
 
-#endif // CEPH_RBD_MIRROR_REMOTE_POOL_POLLER_H
+#endif // STONE_RBD_MIRROR_REMOTE_POOL_POLLER_H

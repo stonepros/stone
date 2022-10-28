@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_JOURNAL_TYPES_H
-#define CEPH_LIBRBD_JOURNAL_TYPES_H
+#ifndef STONE_LIBRBD_JOURNAL_TYPES_H
+#define STONE_LIBRBD_JOURNAL_TYPES_H
 
 #include "cls/rbd/cls_rbd_types.h"
 #include "include/int_types.h"
@@ -222,7 +222,7 @@ struct SnapRenameEvent : public OpEventBase{
   std::string src_snap_name;
   std::string dst_snap_name;
 
-  SnapRenameEvent() : snap_id(CEPH_NOSNAP) {
+  SnapRenameEvent() : snap_id(STONE_NOSNAP) {
   }
   SnapRenameEvent(uint64_t op_tid, uint64_t src_snap_id,
                   const std::string &src_snap_name,
@@ -682,4 +682,4 @@ WRITE_CLASS_ENCODER(TagData);
 } // namespace journal
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_JOURNAL_TYPES_H
+#endif // STONE_LIBRBD_JOURNAL_TYPES_H

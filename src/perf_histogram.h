@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_COMMON_PERF_HISTOGRAM_H
-#define CEPH_COMMON_PERF_HISTOGRAM_H
+#ifndef STONE_COMMON_PERF_HISTOGRAM_H
+#define STONE_COMMON_PERF_HISTOGRAM_H
 
 #include "common/Formatter.h"
 #include "include/int_types.h"

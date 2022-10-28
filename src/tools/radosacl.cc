@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -66,11 +66,11 @@ class ObjectACLs {
 public:
 
   void encode(bufferlist& bl) const {
-    using ceph::encode;
+    using stone::encode;
     encode(acls_map, bl);
   }
   void decode(bufferlist::const_iterator& bl) {
-    using ceph::decode;
+    using stone::decode;
     decode(acls_map, bl);
   }
 
@@ -129,7 +129,7 @@ int main(int argc, const char **argv)
      exit(1);
   }
   if (rados.conf_read_file(NULL)) {
-     cerr << "couldn't read Ceph configuration file!" << std::endl;
+     cerr << "couldn't read Stone configuration file!" << std::endl;
      exit(1);
   }
   if (rados.connect() < 0) {

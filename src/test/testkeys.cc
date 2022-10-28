@@ -1,10 +1,10 @@
-#include "auth/cephx/CephxKeyServer.h"
-#include "common/ceph_argparse.h"
+#include "auth/stonex/StonexKeyServer.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "common/config.h"
 #include "common/debug.h"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 #define AES_KEY_LEN	16
 
@@ -13,12 +13,12 @@ int main(int argc, const char **argv)
   vector<const char*> args;
   argv_to_vec(argc, argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
   KeyRing extra;
-  KeyServer server(g_ceph_context, &extra);
+  KeyServer server(g_stone_context, &extra);
 
   generic_dout(0) << "server created" << dendl;
 
@@ -28,7 +28,7 @@ int main(int argc, const char **argv)
   char aes_key[AES_KEY_LEN];
   memset(aes_key, 0x77, sizeof(aes_key));
   bufferptr keybuf(aes_key, sizeof(aes_key));
-  CryptoKey key(CEPH_CRYPTO_AES, ceph_clock_now(), keybuf);
+  CryptoKey key(STONE_CRYPTO_AES, stone_clock_now(), keybuf);
 
   const char *msg="hello! this is a message\n";
   char pad[16];

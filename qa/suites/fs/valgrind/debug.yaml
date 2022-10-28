@@ -1,4 +1,4 @@
 overrides:
   install:
-    ceph:
+    stone:
       debuginfo: true

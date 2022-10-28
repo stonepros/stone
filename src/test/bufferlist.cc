@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -45,8 +45,8 @@
 
 static char cmd[128];
 
-struct instrumented_bptr : public ceph::buffer::ptr {
-  const ceph::buffer::raw* get_raw() const {
+struct instrumented_bptr : public stone::buffer::ptr {
+  const stone::buffer::raw* get_raw() const {
     return _raw;
   }
 };
@@ -131,12 +131,12 @@ TEST(Buffer, constructors) {
 
 void bench_buffer_alloc(int size, int num)
 {
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   for (int i=0; i<num; ++i) {
     bufferptr p = buffer::create(size);
     p.zero();
   }
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   cout << num << " alloc of size " << size
        << " in " << (end - start) << std::endl;
 }
@@ -394,7 +394,7 @@ TEST(BufferPtr, have_raw) {
 
 TEST(BufferPtr, is_n_page_sized) {
   {
-    bufferptr ptr(CEPH_PAGE_SIZE);
+    bufferptr ptr(STONE_PAGE_SIZE);
     EXPECT_TRUE(ptr.is_n_page_sized());
   }
   {
@@ -523,7 +523,7 @@ TEST(BufferPtr, copy_out) {
 
 TEST(BufferPtr, copy_out_bench) {
   for (int s=1; s<=8; s*=2) {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     int buflen = 1048576;
     int count = 1000;
     uint64_t v;
@@ -533,7 +533,7 @@ TEST(BufferPtr, copy_out_bench) {
 	bp.copy_out(j, s, (char *)&v);
       }
     }
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     cout << count << " fills of buffer len " << buflen
 	 << " with " << s << " byte copy_out in "
 	 << (end - start) << std::endl;
@@ -562,7 +562,7 @@ TEST(BufferPtr, copy_in) {
 
 TEST(BufferPtr, copy_in_bench) {
   for (int s=1; s<=8; s*=2) {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     int buflen = 1048576;
     int count = 1000;
     for (int i=0; i<count; ++i) {
@@ -571,7 +571,7 @@ TEST(BufferPtr, copy_in_bench) {
 	bp.copy_in(j, s, (char *)&j, false);
       }
     }
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     cout << count << " fills of buffer len " << buflen
 	 << " with " << s << " byte copy_in in "
 	 << (end - start) << std::endl;
@@ -606,7 +606,7 @@ TEST(BufferPtr, append_bench) {
   char src[1048576];
   memset(src, 0, sizeof(src));
   for (int s=4; s<=16384; s*=4) {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     int buflen = 1048576;
     int count = 4000;
     for (int i=0; i<count; ++i) {
@@ -616,7 +616,7 @@ TEST(BufferPtr, append_bench) {
 	bp.append(src + j, s);
       }
     }
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     cout << count << " fills of buffer len " << buflen
 	 << " with " << s << " byte appends in "
 	 << (end - start) << std::endl;
@@ -708,7 +708,7 @@ TEST(BufferListIterator, constructors) {
 
   //
   // iterator(list *l, unsigned o, std::list<ptr>::iterator ip, unsigned po)
-  // not tested because of http://tracker.ceph.com/issues/4101
+  // not tested because of http://tracker.stone.com/issues/4101
 
   //
   // iterator(const iterator& other)
@@ -796,18 +796,18 @@ static void bench_bufferlistiter_deref(const size_t step,
 				       const size_t bufsize,
 				       const size_t bufnum) {
   const std::string buf(bufsize, 'a');
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
 
   for (size_t i = 0; i < bufnum; i++) {
-    bl.append(ceph::bufferptr(buf.c_str(), buf.size()));
+    bl.append(stone::bufferptr(buf.c_str(), buf.size()));
   }
 
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   bufferlist::iterator iter = bl.begin();
   while (iter != bl.end()) {
     iter += step;
   }
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   cout << bufsize * bufnum << " derefs over bl with " << bufnum
        << " buffers, each " << bufsize << " bytes long"
        << " in " << (end - start) << std::endl;
@@ -847,23 +847,23 @@ TEST(BufferListIterator, advance) {
 }
 
 TEST(BufferListIterator, iterate_with_empties) {
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   EXPECT_EQ(bl.get_num_buffers(), 0u);
 
-  bl.push_back(ceph::buffer::create(0));
+  bl.push_back(stone::buffer::create(0));
   EXPECT_EQ(bl.length(), 0u);
   EXPECT_EQ(bl.get_num_buffers(), 1u);
 
   encode(int64_t(42), bl);
   EXPECT_EQ(bl.get_num_buffers(), 2u);
 
-  bl.push_back(ceph::buffer::create(0));
+  bl.push_back(stone::buffer::create(0));
   EXPECT_EQ(bl.get_num_buffers(), 3u);
 
   // append bufferlist with single, 0-sized ptr inside
   {
-    ceph::bufferlist bl_with_empty_ptr;
-    bl_with_empty_ptr.push_back(ceph::buffer::create(0));
+    stone::bufferlist bl_with_empty_ptr;
+    bl_with_empty_ptr.push_back(stone::buffer::create(0));
     EXPECT_EQ(bl_with_empty_ptr.length(), 0u);
     EXPECT_EQ(bl_with_empty_ptr.get_num_buffers(), 1u);
 
@@ -1325,13 +1325,13 @@ TEST(BufferList, append_after_move) {
 
 void bench_bufferlist_alloc(int size, int num, int per)
 {
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   for (int i=0; i<num; ++i) {
     bufferlist bl;
     for (int j=0; j<per; ++j)
       bl.push_back(buffer::ptr_node::create(buffer::create(size)));
   }
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   cout << num << " alloc of size " << size
        << " in " << (end - start) << std::endl;
 }
@@ -1354,11 +1354,11 @@ TEST(BufferList, append_bench_with_size_hint) {
   std::array<char, 1048576> src = { 0, };
 
   for (size_t step = 4; step <= 16384; step *= 4) {
-    const utime_t start = ceph_clock_now();
+    const utime_t start = stone_clock_now();
 
     constexpr size_t rounds = 4000;
     for (size_t r = 0; r < rounds; ++r) {
-      ceph::bufferlist bl(std::size(src));
+      stone::bufferlist bl(std::size(src));
       for (auto iter = std::begin(src);
 	   iter != std::end(src);
 	   iter = std::next(iter, step)) {
@@ -1367,7 +1367,7 @@ TEST(BufferList, append_bench_with_size_hint) {
     }
     cout << rounds << " fills of buffer len " << src.size()
 	 << " with " << step << " byte appends in "
-	 << (ceph_clock_now() - start) << std::endl;
+	 << (stone_clock_now() - start) << std::endl;
   }
 }
 
@@ -1375,11 +1375,11 @@ TEST(BufferList, append_bench) {
   std::array<char, 1048576> src = { 0, };
 
   for (size_t step = 4; step <= 16384; step *= 4) {
-    const utime_t start = ceph_clock_now();
+    const utime_t start = stone_clock_now();
 
     constexpr size_t rounds = 4000;
     for (size_t r = 0; r < rounds; ++r) {
-      ceph::bufferlist bl;
+      stone::bufferlist bl;
       for (auto iter = std::begin(src);
 	   iter != std::end(src);
 	   iter = std::next(iter, step)) {
@@ -1388,7 +1388,7 @@ TEST(BufferList, append_bench) {
     }
     cout << rounds << " fills of buffer len " << src.size()
 	 << " with " << step << " byte appends in "
-	 << (ceph_clock_now() - start) << std::endl;
+	 << (stone_clock_now() - start) << std::endl;
   }
 }
 
@@ -1578,9 +1578,9 @@ TEST(BufferList, is_page_aligned) {
   }
   {
     bufferlist bl;
-    bufferptr ptr(buffer::create_page_aligned(CEPH_PAGE_SIZE + 1));
+    bufferptr ptr(buffer::create_page_aligned(STONE_PAGE_SIZE + 1));
     ptr.set_offset(1);
-    ptr.set_length(CEPH_PAGE_SIZE);
+    ptr.set_length(STONE_PAGE_SIZE);
     bl.append(ptr);
     EXPECT_FALSE(bl.is_page_aligned());
     bl.rebuild_page_aligned();
@@ -1600,7 +1600,7 @@ TEST(BufferList, is_n_page_sized) {
   }
   {
     bufferlist bl;
-    bl.append_zero(CEPH_PAGE_SIZE);
+    bl.append_zero(STONE_PAGE_SIZE);
     EXPECT_TRUE(bl.is_n_page_sized());
   }
 }
@@ -1614,7 +1614,7 @@ TEST(BufferList, page_aligned_appender) {
     ASSERT_EQ(1u, bl.get_num_buffers());
     ASSERT_TRUE(bl.contents_equal("asdf", 4));
     a.append("asdf", 4);
-    for (unsigned n = 0; n < 3 * CEPH_PAGE_SIZE; ++n) {
+    for (unsigned n = 0; n < 3 * STONE_PAGE_SIZE; ++n) {
       a.append("x", 1);
     }
     cout << bl << std::endl;
@@ -1625,7 +1625,7 @@ TEST(BufferList, page_aligned_appender) {
       t.substr_of(bl, 0, 10);
       ASSERT_TRUE(t.contents_equal("asdfasdfxx", 10));
     }
-    for (unsigned n = 0; n < 3 * CEPH_PAGE_SIZE; ++n) {
+    for (unsigned n = 0; n < 3 * STONE_PAGE_SIZE; ++n) {
       a.append("y", 1);
     }
     cout << bl << std::endl;
@@ -1666,7 +1666,7 @@ TEST(BufferList, page_aligned_appender) {
 
     // check whether it'll take the first byte only and whether
     // the auto-flushing works.
-    for (unsigned n = 0; n < 10 * CEPH_PAGE_SIZE - 3; ++n) {
+    for (unsigned n = 0; n < 10 * STONE_PAGE_SIZE - 3; ++n) {
       a.append("zasdf", 1);
     }
   }
@@ -1864,11 +1864,11 @@ TEST(BufferList, rebuild) {
   }
   {
     bufferlist bl;
-    const std::string str(CEPH_PAGE_SIZE, 'X');
+    const std::string str(STONE_PAGE_SIZE, 'X');
     bl.append(str.c_str(), str.size());
     bl.append(str.c_str(), str.size());
     EXPECT_EQ((unsigned)2, bl.get_num_buffers());
-    //EXPECT_TRUE(bl.is_aligned(CEPH_BUFFER_APPEND_SIZE));
+    //EXPECT_TRUE(bl.is_aligned(STONE_BUFFER_APPEND_SIZE));
     bl.rebuild();
     EXPECT_TRUE(bl.is_page_aligned());
     EXPECT_EQ((unsigned)1, bl.get_num_buffers());
@@ -1892,9 +1892,9 @@ TEST(BufferList, rebuild_page_aligned) {
   {
     bufferlist bl;
     {
-      bufferptr ptr(buffer::create_page_aligned(CEPH_PAGE_SIZE + 1));
+      bufferptr ptr(buffer::create_page_aligned(STONE_PAGE_SIZE + 1));
       ptr.set_offset(1);
-      ptr.set_length(CEPH_PAGE_SIZE);
+      ptr.set_length(STONE_PAGE_SIZE);
       bl.append(ptr);
     }
     EXPECT_EQ((unsigned)1, bl.get_num_buffers());
@@ -1914,13 +1914,13 @@ TEST(BufferList, rebuild_page_aligned) {
   {
     bufferlist bl;
     {
-      bufferptr ptr(buffer::create_page_aligned(CEPH_PAGE_SIZE));
+      bufferptr ptr(buffer::create_page_aligned(STONE_PAGE_SIZE));
       EXPECT_TRUE(ptr.is_page_aligned());
       EXPECT_TRUE(ptr.is_n_page_sized());
       bl.append(ptr);
     }
     {
-      bufferptr ptr(buffer::create_page_aligned(CEPH_PAGE_SIZE + 1));
+      bufferptr ptr(buffer::create_page_aligned(STONE_PAGE_SIZE + 1));
       EXPECT_TRUE(ptr.is_page_aligned());
       EXPECT_FALSE(ptr.is_n_page_sized());
       bl.append(ptr);
@@ -1934,27 +1934,27 @@ TEST(BufferList, rebuild_page_aligned) {
       bl.append(ptr);
     }
     {
-      bufferptr ptr(buffer::create_page_aligned(CEPH_PAGE_SIZE - 2));
+      bufferptr ptr(buffer::create_page_aligned(STONE_PAGE_SIZE - 2));
       EXPECT_TRUE(ptr.is_page_aligned());
       EXPECT_FALSE(ptr.is_n_page_sized());
       bl.append(ptr);
     }
     {
-      bufferptr ptr(buffer::create_page_aligned(CEPH_PAGE_SIZE));
+      bufferptr ptr(buffer::create_page_aligned(STONE_PAGE_SIZE));
       EXPECT_TRUE(ptr.is_page_aligned());
       EXPECT_TRUE(ptr.is_n_page_sized());
       bl.append(ptr);
     }
     {
-      bufferptr ptr(buffer::create_page_aligned(CEPH_PAGE_SIZE + 1));
+      bufferptr ptr(buffer::create_page_aligned(STONE_PAGE_SIZE + 1));
       ptr.set_offset(1);
-      ptr.set_length(CEPH_PAGE_SIZE);
+      ptr.set_length(STONE_PAGE_SIZE);
       EXPECT_FALSE(ptr.is_page_aligned());
       EXPECT_TRUE(ptr.is_n_page_sized());
       bl.append(ptr);
     }
     EXPECT_EQ((unsigned)6, bl.get_num_buffers());
-    EXPECT_TRUE((bl.length() & ~CEPH_PAGE_MASK) == 0);
+    EXPECT_TRUE((bl.length() & ~STONE_PAGE_MASK) == 0);
     EXPECT_FALSE(bl.is_page_aligned());
     bl.rebuild_page_aligned();
     EXPECT_TRUE(bl.is_page_aligned());
@@ -2008,29 +2008,29 @@ TEST(BufferList, append) {
     EXPECT_EQ((unsigned)0, bl.get_num_buffers());
     bl.append('A');
     EXPECT_EQ((unsigned)1, bl.get_num_buffers());
-    //EXPECT_TRUE(bl.is_aligned(CEPH_BUFFER_APPEND_SIZE));
+    //EXPECT_TRUE(bl.is_aligned(STONE_BUFFER_APPEND_SIZE));
   }
   //
   // void append(const char *data, unsigned len);
   //
   {
-    bufferlist bl(CEPH_PAGE_SIZE);
-    std::string str(CEPH_PAGE_SIZE * 2, 'X');
+    bufferlist bl(STONE_PAGE_SIZE);
+    std::string str(STONE_PAGE_SIZE * 2, 'X');
     bl.append(str.c_str(), str.size());
     EXPECT_EQ((unsigned)2, bl.get_num_buffers());
-    EXPECT_EQ(CEPH_PAGE_SIZE, bl.front().length());
-    EXPECT_EQ(CEPH_PAGE_SIZE, bl.back().length());
+    EXPECT_EQ(STONE_PAGE_SIZE, bl.front().length());
+    EXPECT_EQ(STONE_PAGE_SIZE, bl.back().length());
   }
   //
   // void append(const std::string& s);
   //
   {
-    bufferlist bl(CEPH_PAGE_SIZE);
-    std::string str(CEPH_PAGE_SIZE * 2, 'X');
+    bufferlist bl(STONE_PAGE_SIZE);
+    std::string str(STONE_PAGE_SIZE * 2, 'X');
     bl.append(str);
     EXPECT_EQ((unsigned)2, bl.get_num_buffers());
-    EXPECT_EQ(CEPH_PAGE_SIZE, bl.front().length());
-    EXPECT_EQ(CEPH_PAGE_SIZE, bl.back().length());
+    EXPECT_EQ(STONE_PAGE_SIZE, bl.front().length());
+    EXPECT_EQ(STONE_PAGE_SIZE, bl.back().length());
   }
   //
   // void append(const ptr& bp);
@@ -2345,7 +2345,7 @@ TEST(BufferList, read_fd) {
   fd = ::open(FILENAME, O_RDONLY);
   ASSERT_NE(-1, fd);
   EXPECT_EQ(len, (unsigned)bl.read_fd(fd, len));
-  //EXPECT_EQ(CEPH_BUFFER_APPEND_SIZE - len, bl.front().unused_tail_length());
+  //EXPECT_EQ(STONE_BUFFER_APPEND_SIZE - len, bl.front().unused_tail_length());
   EXPECT_EQ(len, bl.length());
   ::close(fd);
   ::unlink(FILENAME);
@@ -2449,7 +2449,7 @@ TEST(BufferList, crc32c_zeros) {
     uint32_t crca = bla.crc32c(111);
 
     blb.push_back(a);
-    uint32_t crcb = ceph_crc32c(111, (unsigned char*)blb.c_str(), blb.length());
+    uint32_t crcb = stone_crc32c(111, (unsigned char*)blb.c_str(), blb.length());
 
     EXPECT_EQ(crca, crcb);
   }
@@ -2484,113 +2484,113 @@ TEST(BufferList, crc32c_append_perf) {
   bufferlist blb;
   blb.push_back(b);
   {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     uint32_t r = bla.crc32c(0);
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     float rate = (float)len / (float)(1024*1024) / (float)(end - start);
     std::cout << "a.crc32c(0) = " << r << " at " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(r, 1138817026u);
   }
-  ceph_assert(buffer::get_cached_crc() == 0 + base_cached);
+  stone_assert(buffer::get_cached_crc() == 0 + base_cached);
   {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     uint32_t r = bla.crc32c(0);
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     float rate = (float)len / (float)(1024*1024) / (float)(end - start);
     std::cout << "a.crc32c(0) (again) = " << r << " at " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(r, 1138817026u);
   }
-  ceph_assert(buffer::get_cached_crc() == 1 + base_cached);
+  stone_assert(buffer::get_cached_crc() == 1 + base_cached);
 
   {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     uint32_t r = bla.crc32c(5);
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     float rate = (float)len / (float)(1024*1024) / (float)(end - start);
     std::cout << "a.crc32c(5) = " << r << " at " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(r, 3239494520u);
   }
-  ceph_assert(buffer::get_cached_crc() == 1 + base_cached);
-  ceph_assert(buffer::get_cached_crc_adjusted() == 1 + base_cached_adjusted);
+  stone_assert(buffer::get_cached_crc() == 1 + base_cached);
+  stone_assert(buffer::get_cached_crc_adjusted() == 1 + base_cached_adjusted);
   {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     uint32_t r = bla.crc32c(5);
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     float rate = (float)len / (float)(1024*1024) / (float)(end - start);
     std::cout << "a.crc32c(5) (again) = " << r << " at " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(r, 3239494520u);
   }
-  ceph_assert(buffer::get_cached_crc() == 1 + base_cached);
-  ceph_assert(buffer::get_cached_crc_adjusted() == 2 + base_cached_adjusted);
+  stone_assert(buffer::get_cached_crc() == 1 + base_cached);
+  stone_assert(buffer::get_cached_crc_adjusted() == 2 + base_cached_adjusted);
   {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     uint32_t r = blb.crc32c(0);
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     float rate = (float)len / (float)(1024*1024) / (float)(end - start);
     std::cout << "b.crc32c(0) = " << r << " at " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(r, 2481791210u);
   }
-  ceph_assert(buffer::get_cached_crc() == 1 + base_cached);
+  stone_assert(buffer::get_cached_crc() == 1 + base_cached);
   {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     uint32_t r = blb.crc32c(0);
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     float rate = (float)len / (float)(1024*1024) / (float)(end - start);
     std::cout << "b.crc32c(0) (again)= " << r << " at " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(r, 2481791210u);
   }
-  ceph_assert(buffer::get_cached_crc() == 2 + base_cached);
+  stone_assert(buffer::get_cached_crc() == 2 + base_cached);
 
   bufferlist ab;
   ab.push_back(a);
   ab.push_back(b);
   {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     uint32_t r = ab.crc32c(0);
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     float rate = (float)ab.length() / (float)(1024*1024) / (float)(end - start);
     std::cout << "ab.crc32c(0) = " << r << " at " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(r, 2988268779u);
   }
-  ceph_assert(buffer::get_cached_crc() == 3 + base_cached);
-  ceph_assert(buffer::get_cached_crc_adjusted() == 3 + base_cached_adjusted);
+  stone_assert(buffer::get_cached_crc() == 3 + base_cached);
+  stone_assert(buffer::get_cached_crc_adjusted() == 3 + base_cached_adjusted);
   bufferlist ac;
   ac.push_back(a);
   ac.push_back(c);
   {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     uint32_t r = ac.crc32c(0);
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     float rate = (float)ac.length() / (float)(1024*1024) / (float)(end - start);
     std::cout << "ac.crc32c(0) = " << r << " at " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(r, 2988268779u);
   }
-  ceph_assert(buffer::get_cached_crc() == 4 + base_cached);
-  ceph_assert(buffer::get_cached_crc_adjusted() == 3 + base_cached_adjusted);
+  stone_assert(buffer::get_cached_crc() == 4 + base_cached);
+  stone_assert(buffer::get_cached_crc_adjusted() == 3 + base_cached_adjusted);
 
   bufferlist ba;
   ba.push_back(b);
   ba.push_back(a);
   {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     uint32_t r = ba.crc32c(0);
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     float rate = (float)ba.length() / (float)(1024*1024) / (float)(end - start);
     std::cout << "ba.crc32c(0) = " << r << " at " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(r, 169240695u);
   }
-  ceph_assert(buffer::get_cached_crc() == 5 + base_cached);
-  ceph_assert(buffer::get_cached_crc_adjusted() == 4 + base_cached_adjusted);
+  stone_assert(buffer::get_cached_crc() == 5 + base_cached);
+  stone_assert(buffer::get_cached_crc_adjusted() == 4 + base_cached_adjusted);
   {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     uint32_t r = ba.crc32c(5);
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     float rate = (float)ba.length() / (float)(1024*1024) / (float)(end - start);
     std::cout << "ba.crc32c(5) = " << r << " at " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(r, 1265464778u);
   }
-  ceph_assert(buffer::get_cached_crc() == 5 + base_cached);
-  ceph_assert(buffer::get_cached_crc_adjusted() == 6 + base_cached_adjusted);
+  stone_assert(buffer::get_cached_crc() == 5 + base_cached);
+  stone_assert(buffer::get_cached_crc_adjusted() == 6 + base_cached_adjusted);
 
   cout << "crc cache hits (same start) = " << buffer::get_cached_crc() << std::endl;
   cout << "crc cache hits (adjusted) = " << buffer::get_cached_crc_adjusted() << std::endl;
@@ -2732,14 +2732,14 @@ TEST(BufferList, EmptyAppend) {
 }
 
 TEST(BufferList, InternalCarriage) {
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   EXPECT_EQ(bl.get_num_buffers(), 0u);
 
   encode(int64_t(42), bl);
   EXPECT_EQ(bl.get_num_buffers(), 1u);
 
   {
-    ceph::bufferlist bl_with_foo;
+    stone::bufferlist bl_with_foo;
     bl_with_foo.append("foo", 3);
     EXPECT_EQ(bl_with_foo.length(), 3u);
     EXPECT_EQ(bl_with_foo.get_num_buffers(), 1u);
@@ -2753,7 +2753,7 @@ TEST(BufferList, InternalCarriage) {
 }
 
 TEST(BufferList, ContiguousAppender) {
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   EXPECT_EQ(bl.get_num_buffers(), 0u);
 
   // we expect a flush in ~contiguous_appender
@@ -2766,7 +2766,7 @@ TEST(BufferList, ContiguousAppender) {
     // append bufferlist with single ptr inside. This should
     // commit changes to bl::_len and the underlying bp::len.
     {
-      ceph::bufferlist bl_with_foo;
+      stone::bufferlist bl_with_foo;
       bl_with_foo.append("foo", 3);
       EXPECT_EQ(bl_with_foo.length(), 3u);
       EXPECT_EQ(bl_with_foo.get_num_buffers(), 1u);

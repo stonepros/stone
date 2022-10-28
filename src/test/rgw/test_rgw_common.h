@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
  *
@@ -18,8 +18,8 @@
 #include "rgw/rgw_rados.h"
 #include "rgw/rgw_zone.h"
 
-#ifndef CEPH_TEST_RGW_COMMON_H
-#define CEPH_TEST_RGW_COMMON_H
+#ifndef STONE_TEST_RGW_COMMON_H
+#define STONE_TEST_RGW_COMMON_H
 
 struct old_rgw_bucket {
   std::string tenant;

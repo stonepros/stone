@@ -8,7 +8,7 @@
 #include <boost/tokenizer.hpp>
 
 #include "json_spirit/json_spirit.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "rgw_op.h"
 #include "rgw_common.h"
@@ -18,7 +18,7 @@
 #include "rgw_arn.h"
 #include "rgw_data_sync.h"
 
-#include "common/ceph_crypto.h"
+#include "common/stone_crypto.h"
 #include "common/armor.h"
 #include "common/errno.h"
 #include "common/Clock.h"
@@ -34,8 +34,8 @@
 
 #include <sstream>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 using rgw::ARN;
 using rgw::IAM::Effect;
@@ -161,7 +161,7 @@ rgw_http_errors rgw_http_iam_errors({
     { ERR_INTERNAL_ERROR, {500, "ServiceFailure" }},
 });
 
-using namespace ceph::crypto;
+using namespace stone::crypto;
 
 rgw_err::
 rgw_err()
@@ -212,7 +212,7 @@ static string get_abs_path(const string& request_uri) {
   return request_uri.substr(beg_pos, len - beg_pos);
 }
 
-req_info::req_info(CephContext *cct, const class RGWEnv *env) : env(env) {
+req_info::req_info(StoneContext *cct, const class RGWEnv *env) : env(env) {
   method = env->get("REQUEST_METHOD", "");
   script_uri = env->get("SCRIPT_URI", cct->_conf->rgw_script_uri.c_str());
   request_uri = env->get("REQUEST_URI", cct->_conf->rgw_request_uri.c_str());
@@ -262,7 +262,7 @@ void req_info::rebuild_from(req_info& src)
 }
 
 
-req_state::req_state(CephContext* _cct, RGWEnv* e, uint64_t id)
+req_state::req_state(StoneContext* _cct, RGWEnv* e, uint64_t id)
   : cct(_cct), info(_cct, e), id(id)
 {
   enable_ops_log = e->get_enable_ops_log();
@@ -339,7 +339,7 @@ void set_req_state_err(struct req_state* s, int err_no, const string& err_msg)
        * commits will move the logic to a per-RGWHandler replacement of
        * the end_header() function. Alternativaly, we might consider making
        * that just for the dump(). Please take a look on @cbodley's comments
-       * in PR #10690 (https://github.com/ceph/ceph/pull/10690). */
+       * in PR #10690 (https://github.com/stone/stone/pull/10690). */
       s->err.err_code = err_msg;
     } else {
       s->err.message = err_msg;
@@ -696,7 +696,7 @@ string rgw_to_asctime(const utime_t& t)
  */
 void calc_hmac_sha1(const char *key, int key_len,
                     const char *msg, int msg_len, char *dest)
-/* destination should be CEPH_CRYPTO_HMACSHA1_DIGESTSIZE bytes long */
+/* destination should be STONE_CRYPTO_HMACSHA1_DIGESTSIZE bytes long */
 {
   HMACSHA1 hmac((const unsigned char *)key, key_len);
   hmac.Update((const unsigned char *)msg, msg_len);
@@ -709,16 +709,16 @@ void calc_hmac_sha1(const char *key, int key_len,
 void calc_hmac_sha256(const char *key, int key_len,
                       const char *msg, int msg_len, char *dest)
 {
-  char hash_sha256[CEPH_CRYPTO_HMACSHA256_DIGESTSIZE];
+  char hash_sha256[STONE_CRYPTO_HMACSHA256_DIGESTSIZE];
 
   HMACSHA256 hmac((const unsigned char *)key, key_len);
   hmac.Update((const unsigned char *)msg, msg_len);
   hmac.Final((unsigned char *)hash_sha256);
 
-  memcpy(dest, hash_sha256, CEPH_CRYPTO_HMACSHA256_DIGESTSIZE);
+  memcpy(dest, hash_sha256, STONE_CRYPTO_HMACSHA256_DIGESTSIZE);
 }
 
-using ceph::crypto::SHA256;
+using stone::crypto::SHA256;
 
 /*
  * calculate the sha256 hash value of a given msg
@@ -750,12 +750,12 @@ string calc_hash_sha256_close_stream(SHA256 **phash)
   if (!hash) {
     hash = calc_hash_sha256_open_stream();
   }
-  char hash_sha256[CEPH_CRYPTO_HMACSHA256_DIGESTSIZE];
+  char hash_sha256[STONE_CRYPTO_HMACSHA256_DIGESTSIZE];
 
   hash->Final((unsigned char *)hash_sha256);
 
-  char hex_str[(CEPH_CRYPTO_SHA256_DIGESTSIZE * 2) + 1];
-  buf_to_hex((unsigned char *)hash_sha256, CEPH_CRYPTO_SHA256_DIGESTSIZE, hex_str);
+  char hex_str[(STONE_CRYPTO_SHA256_DIGESTSIZE * 2) + 1];
+  buf_to_hex((unsigned char *)hash_sha256, STONE_CRYPTO_SHA256_DIGESTSIZE, hex_str);
 
   delete hash;
   *phash = NULL;
@@ -982,7 +982,7 @@ string RGWHTTPArgs::sys_get(const string& name, bool * const exists) const
   return e ? iter->second : string();
 }
 
-bool rgw_transport_is_secure(CephContext *cct, const RGWEnv& env)
+bool rgw_transport_is_secure(StoneContext *cct, const RGWEnv& env)
 {
   const auto& m = env.get_map();
   // frontend connected with ssl
@@ -1576,7 +1576,7 @@ int verify_object_lock(const DoutPrefixProvider* dpp, const rgw::sal::RGWAttrs& 
       ldpp_dout(dpp, 0) << "ERROR: failed to decode RGWObjectRetention" << dendl;
       return -EIO;
     }
-    if (ceph::real_clock::to_time_t(obj_retention.get_retain_until_date()) > ceph_clock_now()) {
+    if (stone::real_clock::to_time_t(obj_retention.get_retain_until_date()) > stone_clock_now()) {
       if (obj_retention.get_mode().compare("GOVERNANCE") != 0 || !bypass_perm || !bypass_governance_mode) {
         return -EACCES;
       }
@@ -2032,7 +2032,7 @@ string rgw_pool::to_str() const
 
 void rgw_raw_obj::decode_from_rgw_obj(bufferlist::const_iterator& bl)
 {
-  using ceph::decode;
+  using stone::decode;
   rgw_obj old_obj;
   decode(old_obj, bl);
 
@@ -2198,7 +2198,7 @@ void RGWBucketInfo::decode(bufferlist::const_iterator& bl) {
     uint64_t ct;
     decode(ct, bl);
     if (struct_v < 17)
-      creation_time = ceph::real_clock::from_time_t((time_t)ct);
+      creation_time = stone::real_clock::from_time_t((time_t)ct);
   }
   if (struct_v >= 7)
     decode(placement_rule, bl);

@@ -9,7 +9,7 @@
 #include "librbd/ImageState.h"
 #include "librbd/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::trash::MoveRequest: " << this \
                            << " " << __func__ << ": "
@@ -35,7 +35,7 @@ void MoveRequest<I>::trash_add() {
   auto aio_comp = create_rados_callback<
     MoveRequest<I>, &MoveRequest<I>::handle_trash_add>(this);
   int r = m_io_ctx.aio_operate(RBD_TRASH, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -64,7 +64,7 @@ void MoveRequest<I>::remove_id() {
     MoveRequest<I>, &MoveRequest<I>::handle_remove_id>(this);
   int r = m_io_ctx.aio_remove(util::id_obj_name(m_trash_image_spec.name),
                               aio_comp);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -93,7 +93,7 @@ void MoveRequest<I>::directory_remove() {
   auto aio_comp = create_rados_callback<
     MoveRequest<I>, &MoveRequest<I>::handle_directory_remove>(this);
   int r = m_io_ctx.aio_operate(RBD_DIRECTORY, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

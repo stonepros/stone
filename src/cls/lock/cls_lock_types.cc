@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -24,7 +24,7 @@ static void generate_lock_id(locker_id_t& i, int n, const std::string& cookie)
   i.cookie = cookie;
 }
 
-void locker_id_t::dump(ceph::Formatter *f) const
+void locker_id_t::dump(stone::Formatter *f) const
 {
   f->dump_stream("locker") << locker;
   f->dump_string("cookie", cookie);
@@ -38,7 +38,7 @@ void locker_id_t::generate_test_instances(std::list<locker_id_t*>& o)
   o.push_back(new locker_id_t);
 }
 
-void locker_info_t::dump(ceph::Formatter *f) const
+void locker_info_t::dump(stone::Formatter *f) const
 {
   f->dump_stream("expiration") << expiration;
   f->dump_string("addr", addr.get_legacy_str());
@@ -67,7 +67,7 @@ void locker_info_t::generate_test_instances(std::list<locker_info_t*>& o)
   o.push_back(new locker_info_t);
 }
 
-void lock_info_t::dump(ceph::Formatter *f) const
+void lock_info_t::dump(stone::Formatter *f) const
 {
   f->dump_int("lock_type", static_cast<int>(lock_type));
   f->dump_string("tag", tag);

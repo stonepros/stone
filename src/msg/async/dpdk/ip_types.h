@@ -21,7 +21,7 @@
  *
  */
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -34,8 +34,8 @@
  *
  */
 
-#ifndef CEPH_IP_TYPES_H_H
-#define CEPH_IP_TYPES_H_H
+#ifndef STONE_IP_TYPES_H_H
+#define STONE_IP_TYPES_H_H
 
 #include <boost/asio/ip/address_v4.hpp>
 #include <string>
@@ -106,4 +106,4 @@ namespace std {
 
 }
 
-#endif //CEPH_IP_TYPES_H_H
+#endif //STONE_IP_TYPES_H_H

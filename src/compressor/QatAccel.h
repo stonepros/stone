@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2018 Intel Corporation
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_QATACCEL_H
-#define CEPH_QATACCEL_H
+#ifndef STONE_QATACCEL_H
+#define STONE_QATACCEL_H
 
 #include <qatzip.h>
 #include <boost/optional.hpp>

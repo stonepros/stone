@@ -1,5 +1,5 @@
 tasks:
-- ceph:
+- stone:
     fs: xfs
     conf:
       mds:
@@ -9,7 +9,7 @@ tasks:
         debug client: 20
         debug ms: 1
         fuse set user groups: true
-- ceph-fuse:
+- stone-fuse:
 - workunit:
     clients:
       all:

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc.
  *
@@ -20,7 +20,7 @@
 
 using temporary_buffer = seastar::temporary_buffer<char>;
 
-namespace ceph::buffer {
+namespace stone::buffer {
 
 class raw_seastar_foreign_ptr : public raw {
   seastar::foreign_ptr<temporary_buffer> ptr;
@@ -44,13 +44,13 @@ class raw_seastar_local_ptr : public raw {
 
 inline namespace v15_2_0 {
 
-ceph::unique_leakable_ptr<buffer::raw> create_foreign(temporary_buffer&& buf) {
-  return ceph::unique_leakable_ptr<buffer::raw>(
+stone::unique_leakable_ptr<buffer::raw> create_foreign(temporary_buffer&& buf) {
+  return stone::unique_leakable_ptr<buffer::raw>(
     new raw_seastar_foreign_ptr(std::move(buf)));
 }
 
-ceph::unique_leakable_ptr<buffer::raw> create(temporary_buffer&& buf) {
-  return ceph::unique_leakable_ptr<buffer::raw>(
+stone::unique_leakable_ptr<buffer::raw> create(temporary_buffer&& buf) {
+  return stone::unique_leakable_ptr<buffer::raw>(
     new raw_seastar_local_ptr(std::move(buf)));
 }
 
@@ -83,25 +83,25 @@ list::operator seastar::net::packet() &&
   return p;
 }
 
-} // namespace ceph::buffer
+} // namespace stone::buffer
 
 namespace {
 
-using ceph::buffer::raw;
+using stone::buffer::raw;
 class raw_seastar_local_shared_ptr : public raw {
   temporary_buffer buf;
 public:
   raw_seastar_local_shared_ptr(temporary_buffer& buf)
     : raw(buf.get_write(), buf.size()), buf(buf.share()) {}
   raw* clone_empty() override {
-    return ceph::buffer::create(len).release();
+    return stone::buffer::create(len).release();
   }
 };
 }
 
 buffer::ptr seastar_buffer_iterator::get_ptr(size_t len)
 {
-  buffer::ptr p{ceph::unique_leakable_ptr<buffer::raw>(
+  buffer::ptr p{stone::unique_leakable_ptr<buffer::raw>(
     new raw_seastar_local_shared_ptr{buf})};
   p.set_length(len);
   return p;

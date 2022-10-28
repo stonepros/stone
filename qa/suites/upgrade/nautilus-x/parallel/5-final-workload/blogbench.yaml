@@ -1,11 +1,11 @@
 meta:
 - desc: |
-   run a cephfs stress test
-   mount ceph-fuse on client.3 before running workunit
+   run a stonefs stress test
+   mount stone-fuse on client.3 before running workunit
 tasks:
 - sequential:
-  - ceph-fuse:
-  - print: "**** done ceph-fuse 4-final-workload"
+  - stone-fuse:
+  - print: "**** done stone-fuse 4-final-workload"
   - workunit:
       clients:
          client.3:

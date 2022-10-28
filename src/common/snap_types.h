@@ -1,5 +1,5 @@
-#ifndef __CEPH_SNAP_TYPES_H
-#define __CEPH_SNAP_TYPES_H
+#ifndef __STONE_SNAP_TYPES_H
+#define __STONE_SNAP_TYPES_H
 
 #include "include/types.h"
 #include "include/fs_types.h"

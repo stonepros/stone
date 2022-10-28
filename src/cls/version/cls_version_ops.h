@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CLS_VERSION_OPS_H
-#define CEPH_CLS_VERSION_OPS_H
+#ifndef STONE_CLS_VERSION_OPS_H
+#define STONE_CLS_VERSION_OPS_H
 
 #include "cls_version_types.h"
 

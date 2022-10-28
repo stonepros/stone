@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 
   if (argc != 2) {
     cout << "Syntax: "
-         << "ceph_test_mon_rss_usage <mon-memory-target-bytes>"
+         << "stone_test_mon_rss_usage <mon-memory-target-bytes>"
          << endl;
     exit(EINVAL);
   }
@@ -24,8 +24,8 @@ int main(int argc, char **argv)
   // Set max allowed RSS usage to be 125% of mon-memory-target
   maxallowed *= 1.25;
 
-  string target_directory("/var/log/ceph/");
-  string filePath = target_directory + "ceph-mon-rss-usage.log";
+  string target_directory("/var/log/stone/");
+  string filePath = target_directory + "stone-mon-rss-usage.log";
   ifstream buffer(filePath.c_str());
   string line;
   vector<unsigned long> results;

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Sebastien Ponce <sebastien.ponce@cern.ch>
  *
@@ -25,7 +25,7 @@ void libradosstriper::MultiAioCompletionImpl::complete_request(ssize_t r)
     else if (r > 0)
       rval += r;
   }
-  ceph_assert(pending_complete);
+  stone_assert(pending_complete);
   int count = --pending_complete;
   if (!count && !building) {
     complete();
@@ -40,7 +40,7 @@ void libradosstriper::MultiAioCompletionImpl::safe_request(ssize_t r)
     if (r < 0 && r != -EEXIST)
       rval = r;
   }
-  ceph_assert(pending_safe);
+  stone_assert(pending_safe);
   int count = --pending_safe;
   if (!count && !building) {
     safe();
@@ -51,7 +51,7 @@ void libradosstriper::MultiAioCompletionImpl::safe_request(ssize_t r)
 void libradosstriper::MultiAioCompletionImpl::finish_adding_requests()
 {
   std::scoped_lock l{lock};
-  ceph_assert(building);
+  stone_assert(building);
   building = false;
   if (!pending_complete)
     complete();

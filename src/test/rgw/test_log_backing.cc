@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -36,11 +36,11 @@
 #include "gtest/gtest.h"
 
 namespace lr = librados;
-namespace cb = ceph::buffer;
+namespace cb = stone::buffer;
 namespace fifo = rados::cls::fifo;
 namespace RCf = rgw::cls::fifo;
 
-auto cct = new CephContext(CEPH_ENTITY_TYPE_CLIENT);
+auto cct = new StoneContext(STONE_ENTITY_TYPE_CLIENT);
 const DoutPrefix dp(cct, 1, "test log backing: ");
 
 class LogBacking : public testing::Test {
@@ -70,22 +70,22 @@ protected:
 
   void make_omap() {
     for (int i = 0; i < SHARDS; ++i) {
-      using ceph::encode;
+      using stone::encode;
       lr::ObjectWriteOperation op;
       cb::list bl;
       encode(i, bl);
-      cls_log_add(op, ceph_clock_now(), {}, "meow", bl);
+      cls_log_add(op, stone_clock_now(), {}, "meow", bl);
       auto r = rgw_rados_operate(&dp, ioctx, get_oid(0, i), &op, null_yield);
       ASSERT_GE(r, 0);
     }
   }
 
   void add_omap(int i) {
-    using ceph::encode;
+    using stone::encode;
     lr::ObjectWriteOperation op;
     cb::list bl;
     encode(i, bl);
-    cls_log_add(op, ceph_clock_now(), {}, "meow", bl);
+    cls_log_add(op, stone_clock_now(), {}, "meow", bl);
     auto r = rgw_rados_operate(&dp, ioctx, get_oid(0, i), &op, null_yield);
     ASSERT_GE(r, 0);
   }
@@ -133,7 +133,7 @@ protected:
 
   void add_fifo(int i)
     {
-      using ceph::encode;
+      using stone::encode;
       std::unique_ptr<RCf::FIFO> fifo;
       auto r = RCf::FIFO::open(&dp, ioctx, get_oid(0, i), &fifo, null_yield);
       ASSERT_GE(0, r);

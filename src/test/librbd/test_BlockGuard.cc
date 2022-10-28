@@ -35,10 +35,10 @@ public:
 
   void SetUp() override {
     TestFixture::SetUp();
-    m_cct = reinterpret_cast<CephContext*>(m_ioctx.cct());
+    m_cct = reinterpret_cast<StoneContext*>(m_ioctx.cct());
   }
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
 };
 
 TEST_F(TestIOBlockGuard, NonDetainedOps) {

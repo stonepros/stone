@@ -11,7 +11,7 @@
 #include "librbd/io/FlushTracker.h"
 #include "librbd/io/ImageDispatchSpec.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::QueueImageDispatch: " << this \
                            << " " << __func__ << ": "

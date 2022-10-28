@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc
  *
@@ -23,7 +23,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_ms);
+    return crimson::get_logger(stone_subsys_ms);
   }
 }
 
@@ -51,7 +51,7 @@ seastar::future<> SocketMessenger::set_myaddrs(const entity_addrvec_t& addrs)
 SocketMessenger::bind_ertr::future<> SocketMessenger::do_bind(const entity_addrvec_t& addrs)
 {
   assert(seastar::this_shard_id() == master_sid);
-  ceph_assert(addrs.front().get_family() == AF_INET);
+  stone_assert(addrs.front().get_family() == AF_INET);
   return set_myaddrs(addrs).then([this] {
     if (!listener) {
       return FixedCPUServerSocket::create().then([this] (auto _listener) {
@@ -89,7 +89,7 @@ SocketMessenger::try_bind(const entity_addrvec_t& addrs,
       logger().info("{} try_bind: done", *this);
     });
   }
-  ceph_assert(min_port <= max_port);
+  stone_assert(min_port <= max_port);
   return seastar::do_with(uint32_t(min_port),
                           [this, max_port, addr] (auto& port) {
     return seastar::repeat_until_value([this, max_port, addr, &port] {
@@ -129,8 +129,8 @@ seastar::future<> SocketMessenger::start(
   dispatchers.assign(_dispatchers);
   if (listener) {
     // make sure we have already bound to a valid address
-    ceph_assert(get_myaddr().is_legacy() || get_myaddr().is_msgr2());
-    ceph_assert(get_myaddr().get_port() > 0);
+    stone_assert(get_myaddr().is_legacy() || get_myaddr().is_msgr2());
+    stone_assert(get_myaddr().get_port() > 0);
 
     return listener->accept([this] (SocketRef socket, entity_addr_t peer_addr) {
       assert(seastar::this_shard_id() == master_sid);
@@ -149,8 +149,8 @@ SocketMessenger::connect(const entity_addr_t& peer_addr, const entity_name_t& pe
   assert(seastar::this_shard_id() == master_sid);
 
   // make sure we connect to a valid peer_addr
-  ceph_assert(peer_addr.is_legacy() || peer_addr.is_msgr2());
-  ceph_assert(peer_addr.get_port() > 0);
+  stone_assert(peer_addr.is_legacy() || peer_addr.is_msgr2());
+  stone_assert(peer_addr.get_port() > 0);
 
   if (auto found = lookup_conn(peer_addr); found) {
     logger().debug("{} connect to existing", *found);
@@ -180,7 +180,7 @@ seastar::future<> SocketMessenger::shutdown()
       return conn->close_clean(false);
     });
   }).then([this] {
-    ceph_assert(accepting_conns.empty());
+    stone_assert(accepting_conns.empty());
     return seastar::parallel_for_each(connections, [] (auto conn) {
       return conn.second->close_clean(false);
     });
@@ -189,7 +189,7 @@ seastar::future<> SocketMessenger::shutdown()
       return conn->close_clean(false);
     });
   }).then([this] {
-    ceph_assert(connections.empty());
+    stone_assert(connections.empty());
     shutdown_promise.set_value();
   });
 }
@@ -310,15 +310,15 @@ void SocketMessenger::register_conn(SocketConnectionRef conn)
 {
   auto [i, added] = connections.emplace(conn->get_peer_addr(), conn);
   std::ignore = i;
-  ceph_assert(added);
+  stone_assert(added);
 }
 
 void SocketMessenger::unregister_conn(SocketConnectionRef conn)
 {
-  ceph_assert(conn);
+  stone_assert(conn);
   auto found = connections.find(conn->get_peer_addr());
-  ceph_assert(found != connections.end());
-  ceph_assert(found->second == conn);
+  stone_assert(found != connections.end());
+  stone_assert(found->second == conn);
   connections.erase(found);
 }
 

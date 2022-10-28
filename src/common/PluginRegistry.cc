@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -16,25 +16,25 @@
  */
 
 #include "PluginRegistry.h"
-#include "ceph_ver.h"
-#include "common/ceph_context.h"
+#include "stone_ver.h"
+#include "common/stone_context.h"
 #include "common/errno.h"
 #include "common/debug.h"
 #include "include/dlfcn_compat.h"
 
-#define PLUGIN_PREFIX "libceph_"
+#define PLUGIN_PREFIX "libstone_"
 #define PLUGIN_SUFFIX SHARED_LIB_SUFFIX
-#define PLUGIN_INIT_FUNCTION "__ceph_plugin_init"
-#define PLUGIN_VERSION_FUNCTION "__ceph_plugin_version"
+#define PLUGIN_INIT_FUNCTION "__stone_plugin_init"
+#define PLUGIN_VERSION_FUNCTION "__stone_plugin_version"
 
-#define dout_subsys ceph_subsys_context
+#define dout_subsys stone_subsys_context
 
 using std::map;
 using std::string;
 
-namespace ceph {
+namespace stone {
 
-PluginRegistry::PluginRegistry(CephContext *cct) :
+PluginRegistry::PluginRegistry(StoneContext *cct) :
   cct(cct),
   loading(false),
   disable_dlclose(false)
@@ -61,7 +61,7 @@ PluginRegistry::~PluginRegistry()
 
 int PluginRegistry::remove(const std::string& type, const std::string& name)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
 
   std::map<std::string,std::map<std::string,Plugin*> >::iterator i =
     plugins.find(type);
@@ -86,7 +86,7 @@ int PluginRegistry::add(const std::string& type,
 			const std::string& name,
 			Plugin* plugin)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   if (plugins.count(type) &&
       plugins[type].count(name)) {
     return -EEXIST;
@@ -113,7 +113,7 @@ Plugin *PluginRegistry::get_with_load(const std::string& type,
 Plugin *PluginRegistry::get(const std::string& type,
 			    const std::string& name)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   Plugin *ret = 0;
 
   std::map<std::string,Plugin*>::iterator j;
@@ -135,7 +135,7 @@ Plugin *PluginRegistry::get(const std::string& type,
 int PluginRegistry::load(const std::string &type,
 			 const std::string &name)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   ldout(cct, 1) << __func__ << " " << type << " " << name << dendl;
 
   std::string fname = cct->_conf.get_val<std::string>("plugin_dir") + "/" + type + "/" + PLUGIN_PREFIX
@@ -162,18 +162,18 @@ int PluginRegistry::load(const std::string &type,
     lderr(cct) << __func__ << " code_version == NULL" << dlerror() << dendl;
     return -EXDEV;
   }
-  if (code_version() != string(CEPH_GIT_NICE_VER)) {
+  if (code_version() != string(STONE_GIT_NICE_VER)) {
     lderr(cct) << __func__ << " plugin " << fname << " version "
 	       << code_version() << " != expected "
-	       << CEPH_GIT_NICE_VER << dendl;
+	       << STONE_GIT_NICE_VER << dendl;
     dlclose(library);
     return -EXDEV;
   }
 
-  int (*code_init)(CephContext *,
+  int (*code_init)(StoneContext *,
 		   const std::string& type,
 		   const std::string& name) =
-    (int (*)(CephContext *,
+    (int (*)(StoneContext *,
 	     const std::string& type,
 	     const std::string& name))dlsym(library, PLUGIN_INIT_FUNCTION);
   if (code_init) {

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MOSDPGLOG_H
-#define CEPH_MOSDPGLOG_H
+#ifndef STONE_MOSDPGLOG_H
+#define STONE_MOSDPGLOG_H
 
 #include "messages/MOSDPeeringOp.h"
 #include "osd/PGPeeringEvent.h"
@@ -69,7 +69,7 @@ public:
   }
 
   MOSDPGLog() : MOSDPeeringOp{MSG_OSD_PG_LOG, HEAD_VERSION, COMPAT_VERSION} {
-    set_priority(CEPH_MSG_PRIO_HIGH); 
+    set_priority(STONE_MSG_PRIO_HIGH); 
   }
   MOSDPGLog(shard_id_t to, shard_id_t from,
 	    version_t mv, const pg_info_t& i, epoch_t query_epoch)
@@ -77,7 +77,7 @@ public:
       epoch(mv), query_epoch(query_epoch),
       to(to), from(from),
       info(i)  {
-    set_priority(CEPH_MSG_PRIO_HIGH);
+    set_priority(STONE_MSG_PRIO_HIGH);
   }
 
 private:

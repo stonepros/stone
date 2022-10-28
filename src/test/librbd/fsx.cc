@@ -149,7 +149,7 @@ off_t		file_size = 0;
 off_t		biggest = 0;
 unsigned long	testcalls = 0;		/* calls to function "test" */
 
-const char* cluster_name = "ceph";      /* --cluster optional */
+const char* cluster_name = "stone";      /* --cluster optional */
 const char* client_id = "admin";        /* --id optional */
 
 unsigned long	simulatedopcount = 0;	/* -b flag */
@@ -575,7 +575,7 @@ __librbd_open(const char *name, struct rbd_ctx *ctx)
 	rbd_image_t image;
 	int ret;
 
-	ceph_assert(!ctx->name && !ctx->image &&
+	stone_assert(!ctx->name && !ctx->image &&
 	       !ctx->krbd_name && ctx->krbd_fd < 0);
 
 	ret = rbd_open(ioctx, name, &image, NULL);
@@ -603,7 +603,7 @@ __librbd_close(struct rbd_ctx *ctx)
 {
 	int ret;
 
-	ceph_assert(ctx->name && ctx->image);
+	stone_assert(ctx->name && ctx->image);
 
 	ret = rbd_close(ctx->image);
 	if (ret < 0) {
@@ -794,16 +794,16 @@ __librbd_deep_copy(struct rbd_ctx *ctx, const char *src_snapname,
         };
 	ret = rbd_image_options_set_uint64(opts, RBD_IMAGE_OPTION_FEATURES,
                                            features);
-	ceph_assert(ret == 0);
+	stone_assert(ret == 0);
 	ret = rbd_image_options_set_uint64(opts, RBD_IMAGE_OPTION_ORDER,
                                            *order);
-	ceph_assert(ret == 0);
+	stone_assert(ret == 0);
 	ret = rbd_image_options_set_uint64(opts, RBD_IMAGE_OPTION_STRIPE_UNIT,
                                            stripe_unit);
-	ceph_assert(ret == 0);
+	stone_assert(ret == 0);
 	ret = rbd_image_options_set_uint64(opts, RBD_IMAGE_OPTION_STRIPE_COUNT,
                                            stripe_count);
-	ceph_assert(ret == 0);
+	stone_assert(ret == 0);
 
 	ret = rbd_snap_set(ctx->image, src_snapname);
 	if (ret < 0) {
@@ -991,7 +991,7 @@ krbd_close(struct rbd_ctx *ctx)
 {
 	int ret;
 
-	ceph_assert(ctx->krbd_name && ctx->krbd_fd >= 0);
+	stone_assert(ctx->krbd_name && ctx->krbd_fd >= 0);
 
 	if (close(ctx->krbd_fd) < 0) {
 		ret = -errno;
@@ -1150,7 +1150,7 @@ krbd_resize(struct rbd_ctx *ctx, uint64_t size)
 {
 	int ret;
 
-	ceph_assert(size % truncbdy == 0);
+	stone_assert(size % truncbdy == 0);
 
 	/*
 	 * When krbd detects a size change, it calls revalidate_disk(),
@@ -1282,7 +1282,7 @@ nbd_close(struct rbd_ctx *ctx)
 {
 	int r;
 
-	ceph_assert(ctx->krbd_name && ctx->krbd_fd >= 0);
+	stone_assert(ctx->krbd_name && ctx->krbd_fd >= 0);
 
 	if (close(ctx->krbd_fd) < 0) {
 		r = -errno;
@@ -1418,7 +1418,7 @@ ggate_close(struct rbd_ctx *ctx)
 {
 	int r;
 
-	ceph_assert(ctx->krbd_name && ctx->krbd_fd >= 0);
+	stone_assert(ctx->krbd_name && ctx->krbd_fd >= 0);
 
 	if (close(ctx->krbd_fd) < 0) {
 		r = -errno;
@@ -1550,7 +1550,7 @@ ggate_resize(struct rbd_ctx *ctx, uint64_t size)
 {
 	int ret;
 
-	ceph_assert(size % truncbdy == 0);
+	stone_assert(size % truncbdy == 0);
 
 	ret = __ggate_flush(ctx, false);
 	if (ret < 0) {
@@ -1947,7 +1947,7 @@ create_image()
 	rados_conf_parse_env(cluster, NULL);
 	r = rados_conf_read_file(cluster, NULL);
 	if (r < 0) {
-		simple_err("Error reading ceph config file", r);
+		simple_err("Error reading stone config file", r);
 		goto failed_shutdown;
 	}
 	r = rados_connect(cluster);
@@ -2489,7 +2489,7 @@ do_clone()
 	clone_imagename(imagename, sizeof(imagename), num_clones);
 	clone_imagename(lastimagename, sizeof(lastimagename),
 			num_clones - 1);
-	ceph_assert(strcmp(lastimagename, ctx.name) == 0);
+	stone_assert(strcmp(lastimagename, ctx.name) == 0);
 
 	ret = ops->clone(&ctx, "snap", imagename, &order, stripe_unit,
 			 stripe_count);
@@ -2517,7 +2517,7 @@ do_clone()
 				newsize = 0;
 			}
 
-			ceph_assert(newsize != (uint64_t)file_size);
+			stone_assert(newsize != (uint64_t)file_size);
 			prt("truncating image %s from 0x%llx (overlap 0x%llx) to 0x%llx\n",
 			    ctx.name, file_size, overlap, newsize);
 

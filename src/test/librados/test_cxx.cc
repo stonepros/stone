@@ -4,7 +4,7 @@
 #include "test_cxx.h"
 
 #include "include/stringify.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 
 #include <errno.h>
@@ -129,7 +129,7 @@ std::string connect_cluster_pp(librados::Rados &cluster)
 std::string connect_cluster_pp(librados::Rados &cluster,
                                const std::map<std::string, std::string> &config)
 {
-  char *id = getenv("CEPH_CLIENT_ID");
+  char *id = getenv("STONE_CLIENT_ID");
   if (id) std::cerr << "Client id is: " << id << std::endl;
 
   int ret;
@@ -187,7 +187,7 @@ int destroy_one_ec_pool_pp(const std::string &pool_name, Rados &cluster)
     return ret;
   }
 
-  CephContext *cct = static_cast<CephContext*>(cluster.cct());
+  StoneContext *cct = static_cast<StoneContext*>(cluster.cct());
   if (!cct->_conf->mon_fake_pool_delete) { // hope this is in [global]
     std::ostringstream oss;
     ret = destroy_ec_profile_and_ruleset_pp(cluster, pool_name, oss);

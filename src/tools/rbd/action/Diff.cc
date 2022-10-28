@@ -35,7 +35,7 @@ static int diff_cb(uint64_t ofs, size_t len, int exists, void *arg)
     om->f->dump_string("exists", exists ? "true" : "false");
     om->f->close_section();
   } else {
-    ceph_assert(om->t);
+    stone_assert(om->t);
     *(om->t) << ofs << len << (exists ? "data" : "zero") << TextTable::endrow;
   }
   return 0;
@@ -87,7 +87,7 @@ void get_arguments(po::options_description *positional,
 }
 
 int execute(const po::variables_map &vm,
-            const std::vector<std::string> &ceph_global_init_args) {
+            const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;

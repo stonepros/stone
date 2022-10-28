@@ -1,5 +1,5 @@
-#ifndef CEPH_MDS_LOCKS_H
-#define CEPH_MDS_LOCKS_H
+#ifndef STONE_MDS_LOCKS_H
+#define STONE_MDS_LOCKS_H
 #include <stdbool.h>
 
 struct sm_state_t {

@@ -2,8 +2,8 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 
-#ifndef CEPH_RGW_AUTH_REGISTRY_H
-#define CEPH_RGW_AUTH_REGISTRY_H
+#ifndef STONE_RGW_AUTH_REGISTRY_H
+#define STONE_RGW_AUTH_REGISTRY_H
 
 #include <functional>
 #include <memory>
@@ -98,4 +98,4 @@ public:
 using rgw_auth_registry_t = rgw::auth::StrategyRegistry;
 using rgw_auth_registry_ptr_t = std::shared_ptr<rgw_auth_registry_t>;
 
-#endif /* CEPH_RGW_AUTH_REGISTRY_H */
+#endif /* STONE_RGW_AUTH_REGISTRY_H */

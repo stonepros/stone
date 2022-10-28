@@ -22,7 +22,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -99,7 +99,7 @@ seastar::future<> ShardServices::send_to_osd(
     return seastar::now();
   } else {
     auto conn = cluster_msgr.connect(
-        osdmap->get_cluster_addrs(peer).front(), CEPH_ENTITY_TYPE_OSD);
+        osdmap->get_cluster_addrs(peer).front(), STONE_ENTITY_TYPE_OSD);
     return conn->send(m);
   }
 }
@@ -133,10 +133,10 @@ seastar::future<> ShardServices::dispatch_context(
   crimson::os::CollectionRef col,
   PeeringCtx &&ctx)
 {
-  ceph_assert(col || ctx.transaction.empty());
+  stone_assert(col || ctx.transaction.empty());
   return seastar::when_all_succeed(
     dispatch_context_messages(
-      BufferedRecoveryMessages{ceph_release_t::octopus, ctx}),
+      BufferedRecoveryMessages{stone_release_t::octopus, ctx}),
     col ? dispatch_context_transaction(col, ctx) : seastar::now()
   ).then_unpack([] {
     return seastar::now();
@@ -226,7 +226,7 @@ seastar::future<> ShardServices::send_pg_created(pg_t pgid)
 {
   logger().debug(__func__);
   auto o = get_osdmap();
-  ceph_assert(o->require_osd_release >= ceph_release_t::luminous);
+  stone_assert(o->require_osd_release >= stone_release_t::luminous);
   pg_created.insert(pgid);
   return monc.send_message(make_message<MOSDPGCreated>(pgid));
 }
@@ -235,7 +235,7 @@ seastar::future<> ShardServices::send_pg_created()
 {
   logger().debug(__func__);
   auto o = get_osdmap();
-  ceph_assert(o->require_osd_release >= ceph_release_t::luminous);
+  stone_assert(o->require_osd_release >= stone_release_t::luminous);
   return seastar::parallel_for_each(pg_created,
     [this](auto &pgid) {
       return monc.send_message(make_message<MOSDPGCreated>(pgid));
@@ -262,7 +262,7 @@ void ShardServices::prune_pg_created()
 seastar::future<> ShardServices::osdmap_subscribe(version_t epoch, bool force_request)
 {
   logger().info("{}({})", __func__, epoch);
-  if (monc.sub_want_increment("osdmap", epoch, CEPH_SUBSCRIBE_ONETIME) ||
+  if (monc.sub_want_increment("osdmap", epoch, STONE_SUBSCRIBE_ONETIME) ||
       force_request) {
     return monc.renew_subs();
   } else {
@@ -274,7 +274,7 @@ HeartbeatStampsRef ShardServices::get_hb_stamps(int peer)
 {
   auto [stamps, added] = heartbeat_stamps.try_emplace(peer);
   if (added) {
-    stamps->second = ceph::make_ref<HeartbeatStamps>(peer);
+    stamps->second = stone::make_ref<HeartbeatStamps>(peer);
   }
   return stamps->second;
 }

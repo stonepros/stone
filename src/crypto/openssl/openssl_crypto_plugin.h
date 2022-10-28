@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2017 Intel Corporation
  *
@@ -23,7 +23,7 @@ class OpenSSLCryptoPlugin : public CryptoPlugin {
 
   CryptoAccelRef cryptoaccel;
 public:
-  explicit OpenSSLCryptoPlugin(CephContext* cct) : CryptoPlugin(cct)
+  explicit OpenSSLCryptoPlugin(StoneeContext* cct) : CryptoPlugin(cct)
   {}
   int factory(CryptoAccelRef *cs, std::ostream *ss) override {
     if (cryptoaccel == nullptr)

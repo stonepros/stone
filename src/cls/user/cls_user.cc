@@ -11,9 +11,9 @@
 using std::map;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
 
 CLS_VER(1,0)
 CLS_NAME(user)
@@ -63,7 +63,7 @@ static int get_existing_bucket_entry(cls_method_context_t hctx, const string& bu
   try {
     auto iter = bl.cbegin();
     decode(entry, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(0, "ERROR: failed to decode entry %s", key.c_str());
     return -EIO;
   }
@@ -86,7 +86,7 @@ static int read_header(cls_method_context_t hctx, cls_user_header *header)
 
   try {
     decode(*header, bl);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(0, "ERROR: failed to decode user header");
     return -EIO;
   }
@@ -122,7 +122,7 @@ static int cls_user_set_buckets_info(cls_method_context_t hctx, bufferlist *in, 
   cls_user_set_buckets_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_user_add_op(): failed to decode op");
     return -EINVAL;
   }
@@ -206,7 +206,7 @@ static int cls_user_complete_stats_sync(cls_method_context_t hctx, bufferlist *i
   cls_user_complete_stats_sync_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_user_add_op(): failed to decode op");
     return -EINVAL;
   }
@@ -239,7 +239,7 @@ static int cls_user_remove_bucket(cls_method_context_t hctx, bufferlist *in, buf
   cls_user_remove_bucket_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_user_add_op(): failed to decode op");
     return -EINVAL;
   }
@@ -291,7 +291,7 @@ static int cls_user_list_buckets(cls_method_context_t hctx, bufferlist *in, buff
   cls_user_list_buckets_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_user_list_op(): failed to decode op");
     return -EINVAL;
   }
@@ -339,7 +339,7 @@ static int cls_user_list_buckets(cls_method_context_t hctx, bufferlist *in, buff
       cls_user_bucket_entry e;
       decode(e, biter);
       entries.push_back(e);
-    } catch (ceph::buffer::error& err) {
+    } catch (stone::buffer::error& err) {
       CLS_LOG(0, "ERROR: cls_user_list: could not decode entry, index=%s", index.c_str());
     }
   }
@@ -360,7 +360,7 @@ static int cls_user_get_header(cls_method_context_t hctx, bufferlist *in, buffer
   cls_user_get_header_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_user_get_header_op(): failed to decode op");
     return -EINVAL;
   }
@@ -388,7 +388,7 @@ static int cls_user_reset_stats(cls_method_context_t hctx,
   try {
     auto bliter = in->cbegin();
     decode(op, bliter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(0, "ERROR: %s failed to decode op", __func__);
     return -EINVAL;
   }
@@ -413,7 +413,7 @@ static int cls_user_reset_stats(cls_method_context_t hctx,
 	auto bl = kv.second;
 	auto bliter = bl.cbegin();
 	decode(e, bliter);
-      } catch (ceph::buffer::error& err) {
+      } catch (stone::buffer::error& err) {
 	CLS_LOG(0, "ERROR: %s failed to decode bucket entry for %s",
 		__func__, kv.first.c_str());
 	return -EIO;
@@ -445,7 +445,7 @@ static int cls_user_reset_stats2(cls_method_context_t hctx,
   try {
     auto bliter = in->cbegin();
     decode(op, bliter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(0, "ERROR: %s failed to decode op", __func__);
     return -EINVAL;
   }
@@ -470,7 +470,7 @@ static int cls_user_reset_stats2(cls_method_context_t hctx,
       auto& bl = kv.second;
       auto bliter = bl.cbegin();
       decode(e, bliter);
-    } catch (ceph::buffer::error& err) {
+    } catch (stone::buffer::error& err) {
       CLS_LOG(0, "ERROR: %s failed to decode bucket entry for %s",
 	      __func__, kv.first.c_str());
       return -EIO;

@@ -1,0 +1,27 @@
+tasks:
+- stoneadm:
+    roleless: true
+    single_host_defaults: true
+- stoneadm.shell:
+    host.a:
+      - stone orch status
+      - stone orch ps
+      - stone orch ls
+      - stone orch host ls
+      - stone orch device ls
+roles:
+- - host.a
+  - osd.0
+  - osd.1
+  - osd.2
+  - osd.3
+  - client.0
+openstack:
+- volumes: # attached to each instance
+    count: 4
+    size: 10 # GB
+overrides:
+  stone:
+    conf:
+      osd:
+        osd shutdown pgref assert: true

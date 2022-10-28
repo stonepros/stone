@@ -4,7 +4,7 @@
 #include "AbstractWriteLog.h"
 #include "include/buffer.h"
 #include "include/Context.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/deleter.h"
 #include "common/dout.h"
 #include "common/environment.h"
@@ -22,7 +22,7 @@
 #include <vector>
 
 #undef dout_subsys
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::AbstractWriteLog: " << this \
                            << " " <<  __func__ << ": "
@@ -44,11 +44,11 @@ AbstractWriteLog<I>::AbstractWriteLog(
   : m_builder(builder),
     m_write_log_guard(image_ctx.cct),
     m_flush_guard(image_ctx.cct),
-    m_flush_guard_lock(ceph::make_mutex(pwl::unique_lock_name(
+    m_flush_guard_lock(stone::make_mutex(pwl::unique_lock_name(
       "librbd::cache::pwl::AbstractWriteLog::m_flush_guard_lock", this))),
-    m_deferred_dispatch_lock(ceph::make_mutex(pwl::unique_lock_name(
+    m_deferred_dispatch_lock(stone::make_mutex(pwl::unique_lock_name(
       "librbd::cache::pwl::AbstractWriteLog::m_deferred_dispatch_lock", this))),
-    m_blockguard_lock(ceph::make_mutex(pwl::unique_lock_name(
+    m_blockguard_lock(stone::make_mutex(pwl::unique_lock_name(
       "librbd::cache::pwl::AbstractWriteLog::m_blockguard_lock", this))),
     m_thread_pool(
         image_ctx.cct, "librbd::cache::pwl::AbstractWriteLog::thread_pool",
@@ -58,21 +58,21 @@ AbstractWriteLog<I>::AbstractWriteLog(
     m_log_pool_size(DEFAULT_POOL_SIZE),
     m_image_writeback(image_writeback),
     m_plugin_api(plugin_api),
-    m_log_retire_lock(ceph::make_mutex(pwl::unique_lock_name(
+    m_log_retire_lock(stone::make_mutex(pwl::unique_lock_name(
       "librbd::cache::pwl::AbstractWriteLog::m_log_retire_lock", this))),
     m_entry_reader_lock("librbd::cache::pwl::AbstractWriteLog::m_entry_reader_lock"),
-       m_log_append_lock(ceph::make_mutex(pwl::unique_lock_name(
+       m_log_append_lock(stone::make_mutex(pwl::unique_lock_name(
       "librbd::cache::pwl::AbstractWriteLog::m_log_append_lock", this))),
-    m_lock(ceph::make_mutex(pwl::unique_lock_name(
+    m_lock(stone::make_mutex(pwl::unique_lock_name(
       "librbd::cache::pwl::AbstractWriteLog::m_lock", this))),
     m_blocks_to_log_entries(image_ctx.cct),
     m_work_queue("librbd::cache::pwl::ReplicatedWriteLog::work_queue",
-                 ceph::make_timespan(
+                 stone::make_timespan(
                    image_ctx.config.template get_val<uint64_t>(
 		     "rbd_op_thread_timeout")),
                  &m_thread_pool)
 {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   m_plugin_api.get_image_timer_instance(cct, &m_timer, &m_timer_lock);
 }
 
@@ -84,10 +84,10 @@ AbstractWriteLog<I>::~AbstractWriteLog() {
     std::lock_guard locker(m_lock);
     m_timer->cancel_event(m_timer_ctx);
     m_thread_pool.stop();
-    ceph_assert(m_deferred_ios.size() == 0);
-    ceph_assert(m_ops_to_flush.size() == 0);
-    ceph_assert(m_ops_to_append.size() == 0);
-    ceph_assert(m_flush_ops_in_flight == 0);
+    stone_assert(m_deferred_ios.size() == 0);
+    stone_assert(m_ops_to_flush.size() == 0);
+    stone_assert(m_ops_to_append.size() == 0);
+    stone_assert(m_flush_ops_in_flight == 0);
 
     delete m_cache_state;
     m_cache_state = nullptr;
@@ -283,7 +283,7 @@ void AbstractWriteLog<I>::perf_start(std::string name) {
 
 template <typename I>
 void AbstractWriteLog<I>::perf_stop() {
-  ceph_assert(m_perfcounter);
+  stone_assert(m_perfcounter);
   m_image_ctx.cct->get_perfcounters_collection()->remove(m_perfcounter);
   delete m_perfcounter;
 }
@@ -295,7 +295,7 @@ void AbstractWriteLog<I>::log_perf() {
   bl.append("Perf dump follows\n--- Begin perf dump ---\n");
   bl.append("{\n");
   stringstream ss;
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   ss << "\"test_time\": \"" << now << "\",";
   ss << "\"image\": \"" << m_image_ctx.name << "\",";
   bl.append(ss);
@@ -331,7 +331,7 @@ void AbstractWriteLog<I>::periodic_stats() {
 
 template <typename I>
 void AbstractWriteLog<I>::arm_periodic_stats() {
-  ceph_assert(ceph_mutex_is_locked(*m_timer_lock));
+  stone_assert(stone_mutex_is_locked(*m_timer_lock));
   m_timer_ctx = new LambdaContext([this](int r) {
       /* m_timer_lock is held */
       periodic_stats();
@@ -406,9 +406,9 @@ void AbstractWriteLog<I>::update_sync_points(std::map<uint64_t, bool> &missing_s
        * points (e.g. because they were all retired) */
       m_current_sync_gen = kv.first-1;
     }
-    ceph_assert(kv.first == m_current_sync_gen+1);
+    stone_assert(kv.first == m_current_sync_gen+1);
     init_flush_new_sync_point(later);
-    ceph_assert(kv.first == m_current_sync_gen);
+    stone_assert(kv.first == m_current_sync_gen);
     sync_point_entries[kv.first] = m_current_sync_point->log_entry;;
   }
 
@@ -428,7 +428,7 @@ void AbstractWriteLog<I>::update_sync_points(std::map<uint64_t, bool> &missing_s
         auto sync_point_entry = sync_point_entries[gen_write_entry->ram_entry.sync_gen_number];
         if (!sync_point_entry) {
           lderr(m_image_ctx.cct) << "Sync point missing for entry=[" << *gen_write_entry << "]" << dendl;
-          ceph_assert(false);
+          stone_assert(false);
         } else {
           gen_write_entry->sync_point_entry = sync_point_entry;
           sync_point_entry->writes++;
@@ -457,13 +457,13 @@ void AbstractWriteLog<I>::update_sync_points(std::map<uint64_t, bool> &missing_s
           previous_sync_point_entry->next_sync_point_entry = sync_point_entry;
           if (previous_sync_point_entry->ram_entry.sync_gen_number > m_flushed_sync_gen) {
             sync_point_entry->prior_sync_point_flushed = false;
-            ceph_assert(!previous_sync_point_entry->prior_sync_point_flushed ||
+            stone_assert(!previous_sync_point_entry->prior_sync_point_flushed ||
                         (0 == previous_sync_point_entry->writes) ||
                         (previous_sync_point_entry->writes >= previous_sync_point_entry->writes_flushed));
           } else {
             sync_point_entry->prior_sync_point_flushed = true;
-            ceph_assert(previous_sync_point_entry->prior_sync_point_flushed);
-            ceph_assert(previous_sync_point_entry->writes == previous_sync_point_entry->writes_flushed);
+            stone_assert(previous_sync_point_entry->prior_sync_point_flushed);
+            stone_assert(previous_sync_point_entry->writes == previous_sync_point_entry->writes_flushed);
           }
         } else {
           /* There are no previous sync points, so we'll consider them flushed */
@@ -484,15 +484,15 @@ void AbstractWriteLog<I>::update_sync_points(std::map<uint64_t, bool> &missing_s
 
 template <typename I>
 void AbstractWriteLog<I>::pwl_init(Context *on_finish, DeferredContexts &later) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
-  ceph_assert(m_cache_state);
+  stone_assert(m_cache_state);
   std::lock_guard locker(m_lock);
-  ceph_assert(!m_initialized);
+  stone_assert(!m_initialized);
   ldout(cct,5) << "image name: " << m_image_ctx.name << " id: " << m_image_ctx.id << dendl;
 
   if (!m_cache_state->present) {
-    m_cache_state->host = ceph_get_short_hostname();
+    m_cache_state->host = stone_get_short_hostname();
     m_cache_state->size = m_image_ctx.config.template get_val<uint64_t>(
         "rbd_persistent_cache_size");
 
@@ -579,7 +579,7 @@ template <typename I>
 void AbstractWriteLog<I>::update_image_cache_state(Context *on_finish) {
   ldout(m_image_ctx.cct, 10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
   m_cache_state->allocated_bytes = m_bytes_allocated;
   m_cache_state->cached_bytes = m_bytes_cached;
   m_cache_state->dirty_bytes = m_bytes_dirty;
@@ -596,7 +596,7 @@ void AbstractWriteLog<I>::update_image_cache_state(Context *on_finish) {
 
 template <typename I>
 void AbstractWriteLog<I>::handle_update_image_cache_state(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -608,14 +608,14 @@ void AbstractWriteLog<I>::handle_update_image_cache_state(int r) {
 
 template <typename I>
 void AbstractWriteLog<I>::init(Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
   auto pname = std::string("librbd-pwl-") + m_image_ctx.id +
       std::string("-") + m_image_ctx.md_ctx.get_pool_name() +
       std::string("-") + m_image_ctx.name;
   perf_start(pname);
 
-  ceph_assert(!m_initialized);
+  stone_assert(!m_initialized);
 
   Context *ctx = new LambdaContext(
     [this, on_finish](int r) {
@@ -633,7 +633,7 @@ void AbstractWriteLog<I>::init(Context *on_finish) {
 
 template <typename I>
 void AbstractWriteLog<I>::shut_down(Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   ldout(cct,5) << "image name: " << m_image_ctx.name << " id: " << m_image_ctx.id << dendl;
@@ -695,10 +695,10 @@ void AbstractWriteLog<I>::shut_down(Context *on_finish) {
 
 template <typename I>
 void AbstractWriteLog<I>::read(Extents&& image_extents,
-                                     ceph::bufferlist* bl,
+                                     stone::bufferlist* bl,
                                      int fadvise_flags, Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
-  utime_t now = ceph_clock_now();
+  StoneContext *cct = m_image_ctx.cct;
+  utime_t now = stone_clock_now();
 
   on_finish = new LambdaContext(
   [this, on_finish](int r) {
@@ -712,7 +712,7 @@ void AbstractWriteLog<I>::read(Extents&& image_extents,
                  << "bl=" << bl << ", "
                  << "on_finish=" << on_finish << dendl;
 
-  ceph_assert(m_initialized);
+  stone_assert(m_initialized);
   bl->clear();
   m_perfcounter->inc(l_librbd_pwl_rd_req, 1);
 
@@ -769,7 +769,7 @@ void AbstractWriteLog<I>::read(Extents&& image_extents,
         read_ctx->read_extents.push_back(miss_extent_buf);
         extent_offset += miss_extent_length;
       }
-      ceph_assert(entry_image_extent.first <= extent.first + extent_offset);
+      stone_assert(entry_image_extent.first <= extent.first + extent_offset);
       uint64_t entry_offset = 0;
       /* If this map entry starts before the current image extent offset ... */
       if (entry_image_extent.first < extent.first + extent_offset) {
@@ -838,14 +838,14 @@ void AbstractWriteLog<I>::write(Extents &&image_extents,
                                       bufferlist&& bl,
                                       int fadvise_flags,
                                       Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   ldout(cct, 20) << "aio_write" << dendl;
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   m_perfcounter->inc(l_librbd_pwl_wr_req, 1);
 
-  ceph_assert(m_initialized);
+  stone_assert(m_initialized);
 
   /* Split images because PMDK's space management is not perfect, there are
    * fragment problems. The larger the block size difference of the block,
@@ -898,16 +898,16 @@ template <typename I>
 void AbstractWriteLog<I>::discard(uint64_t offset, uint64_t length,
                                         uint32_t discard_granularity_bytes,
                                         Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   ldout(cct, 20) << dendl;
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   m_perfcounter->inc(l_librbd_pwl_discard, 1);
   Extents discard_extents = {{offset, length}};
   m_discard_granularity_bytes = discard_granularity_bytes;
 
-  ceph_assert(m_initialized);
+  stone_assert(m_initialized);
 
   auto *discard_req =
     new C_DiscardRequestT(*this, now, std::move(discard_extents), discard_granularity_bytes,
@@ -937,7 +937,7 @@ void AbstractWriteLog<I>::discard(uint64_t offset, uint64_t length,
  */
 template <typename I>
 void AbstractWriteLog<I>::flush(io::FlushSource flush_source, Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "on_finish=" << on_finish << " flush_source=" << flush_source << dendl;
 
   if (io::FLUSH_SOURCE_SHUTDOWN == flush_source || io::FLUSH_SOURCE_INTERNAL == flush_source ||
@@ -957,7 +957,7 @@ void AbstractWriteLog<I>::flush(io::FlushSource flush_source, Context *on_finish
 
   {
     std::shared_lock image_locker(m_image_ctx.image_lock);
-    if (m_image_ctx.snap_id != CEPH_NOSNAP || m_image_ctx.read_only) {
+    if (m_image_ctx.snap_id != STONE_NOSNAP || m_image_ctx.read_only) {
       on_finish->complete(-EROFS);
       return;
     }
@@ -968,7 +968,7 @@ void AbstractWriteLog<I>::flush(io::FlushSource flush_source, Context *on_finish
   GuardedRequestFunctionContext *guarded_ctx =
     new GuardedRequestFunctionContext([this, flush_req](GuardedRequestFunctionContext &guard_ctx) {
       ldout(m_image_ctx.cct, 20) << "flush_req=" << flush_req << " cell=" << guard_ctx.cell << dendl;
-      ceph_assert(guard_ctx.cell);
+      stone_assert(guard_ctx.cell);
       flush_req->detained = guard_ctx.state.detained;
       /* We don't call flush_req->set_cell(), because the block guard will be released here */
       {
@@ -999,14 +999,14 @@ template <typename I>
 void AbstractWriteLog<I>::writesame(uint64_t offset, uint64_t length,
                                           bufferlist&& bl, int fadvise_flags,
                                           Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   ldout(cct, 20) << "aio_writesame" << dendl;
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   Extents ws_extents = {{offset, length}};
   m_perfcounter->inc(l_librbd_pwl_ws, 1);
-  ceph_assert(m_initialized);
+  stone_assert(m_initialized);
 
   /* A write same request is also a write request. The key difference is the
    * write same data buffer is shorter than the extent of the request. The full
@@ -1040,9 +1040,9 @@ void AbstractWriteLog<I>::compare_and_write(Extents &&image_extents,
                                                   Context *on_finish) {
   ldout(m_image_ctx.cct, 20) << dendl;
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   m_perfcounter->inc(l_librbd_pwl_cmp, 1);
-  ceph_assert(m_initialized);
+  stone_assert(m_initialized);
 
   /* A compare and write request is also a write request. We only allocate
    * resources and dispatch this write request if the compare phase
@@ -1117,21 +1117,21 @@ void AbstractWriteLog<I>::invalidate(Context *on_finish) {
 }
 
 template <typename I>
-CephContext *AbstractWriteLog<I>::get_context() {
+StoneContext *AbstractWriteLog<I>::get_context() {
   return m_image_ctx.cct;
 }
 
 template <typename I>
 BlockGuardCell* AbstractWriteLog<I>::detain_guarded_request_helper(GuardedRequest &req)
 {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   BlockGuardCell *cell;
 
-  ceph_assert(ceph_mutex_is_locked_by_me(m_blockguard_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_blockguard_lock));
   ldout(cct, 20) << dendl;
 
   int r = m_write_log_guard.detain(req.block_extent, &req, &cell);
-  ceph_assert(r>=0);
+  stone_assert(r>=0);
   if (r > 0) {
     ldout(cct, 20) << "detaining guarded request due to in-flight requests: "
                    << "req=" << req << dendl;
@@ -1148,7 +1148,7 @@ BlockGuardCell* AbstractWriteLog<I>::detain_guarded_request_barrier_helper(
 {
   BlockGuardCell *cell = nullptr;
 
-  ceph_assert(ceph_mutex_is_locked_by_me(m_blockguard_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_blockguard_lock));
   ldout(m_image_ctx.cct, 20) << dendl;
 
   if (m_barrier_in_progress) {
@@ -1199,7 +1199,7 @@ void AbstractWriteLog<I>::detain_guarded_request(
 template <typename I>
 void AbstractWriteLog<I>::release_guarded_request(BlockGuardCell *released_cell)
 {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   WriteLogGuard::BlockOperations block_reqs;
   ldout(cct, 20) << "released_cell=" << released_cell << dendl;
 
@@ -1307,7 +1307,7 @@ void AbstractWriteLog<I>::complete_op_log_entries(GenericLogOperations &&ops,
   int published_reserves = 0;
   ldout(m_image_ctx.cct, 20) << __func__ << ": completing" << dendl;
   for (auto &op : ops) {
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     auto log_entry = op->get_log_entry();
     log_entry->completed = true;
     if (op->is_writing_op()) {
@@ -1376,34 +1376,34 @@ void AbstractWriteLog<I>::dispatch_deferred_writes(void)
     do {
       {
         std::lock_guard locker(m_lock);
-        ceph_assert(m_dispatching_deferred_ops);
+        stone_assert(m_dispatching_deferred_ops);
         if (allocated) {
           /* On the 2..n-1 th time we get lock, front_req->alloc_resources() will
            * have succeeded, and we'll need to pop it off the deferred ops list
            * here. */
-          ceph_assert(front_req);
-          ceph_assert(!allocated_req);
+          stone_assert(front_req);
+          stone_assert(!allocated_req);
           m_deferred_ios.pop_front();
           allocated_req = front_req;
           front_req = nullptr;
           allocated = false;
         }
-        ceph_assert(!allocated);
+        stone_assert(!allocated);
         if (!allocated && front_req) {
           /* front_req->alloc_resources() failed on the last iteration.
            * We'll stop dispatching. */
           wake_up();
           front_req = nullptr;
-          ceph_assert(!cleared_dispatching_flag);
+          stone_assert(!cleared_dispatching_flag);
           m_dispatching_deferred_ops = false;
           cleared_dispatching_flag = true;
         } else {
-          ceph_assert(!front_req);
+          stone_assert(!front_req);
           if (m_deferred_ios.size()) {
             /* New allocation candidate */
             front_req = m_deferred_ios.front();
           } else {
-            ceph_assert(!cleared_dispatching_flag);
+            stone_assert(!cleared_dispatching_flag);
             m_dispatching_deferred_ops = false;
             cleared_dispatching_flag = true;
           }
@@ -1412,7 +1412,7 @@ void AbstractWriteLog<I>::dispatch_deferred_writes(void)
       /* Try allocating for front_req before we decide what to do with allocated_req
        * (if any) */
       if (front_req) {
-        ceph_assert(!cleared_dispatching_flag);
+        stone_assert(!cleared_dispatching_flag);
         allocated = front_req->alloc_resources();
       }
       if (allocated_req && front_req && allocated) {
@@ -1423,13 +1423,13 @@ void AbstractWriteLog<I>::dispatch_deferred_writes(void)
           }), 0);
         allocated_req = nullptr;
       }
-      ceph_assert(!(allocated_req && front_req && allocated));
+      stone_assert(!(allocated_req && front_req && allocated));
 
       /* Continue while we're still considering the front of the deferred ops list */
     } while (front_req);
-    ceph_assert(!allocated);
+    stone_assert(!allocated);
   }
-  ceph_assert(cleared_dispatching_flag);
+  stone_assert(cleared_dispatching_flag);
 
   /* If any deferred requests were allocated, the last one will still be in allocated_req */
   if (allocated_req) {
@@ -1560,7 +1560,7 @@ bool AbstractWriteLog<I>::check_allocation(
     /* Expedite flushing and/or retiring */
     std::lock_guard locker(m_lock);
     m_alloc_failed_since_retire = true;
-    m_last_alloc_fail = ceph_clock_now();
+    m_last_alloc_fail = stone_clock_now();
   }
 
   return alloc_succeeds;
@@ -1568,7 +1568,7 @@ bool AbstractWriteLog<I>::check_allocation(
 
 template <typename I>
 C_FlushRequest<AbstractWriteLog<I>>* AbstractWriteLog<I>::make_flush_req(Context *on_finish) {
-  utime_t flush_begins = ceph_clock_now();
+  utime_t flush_begins = stone_clock_now();
   bufferlist bl;
   auto *flush_req =
     new C_FlushRequestT(*this, flush_begins, Extents({whole_volume_extent()}),
@@ -1579,8 +1579,8 @@ C_FlushRequest<AbstractWriteLog<I>>* AbstractWriteLog<I>::make_flush_req(Context
 
 template <typename I>
 void AbstractWriteLog<I>::wake_up() {
-  CephContext *cct = m_image_ctx.cct;
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  StoneContext *cct = m_image_ctx.cct;
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   if (!m_wake_up_enabled) {
     // wake_up is disabled during shutdown after flushing completes
@@ -1614,10 +1614,10 @@ void AbstractWriteLog<I>::wake_up() {
 
 template <typename I>
 bool AbstractWriteLog<I>::can_flush_entry(std::shared_ptr<GenericLogEntry> log_entry) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   ldout(cct, 20) << "" << dendl;
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   if (m_invalidating) {
     return true;
@@ -1683,10 +1683,10 @@ Context* AbstractWriteLog<I>::construct_flush_entry(std::shared_ptr<GenericLogEn
   ldout(m_image_ctx.cct, 20) << "" << dendl;
 
   /* Flush write completion action */
-  utime_t writeback_start_time = ceph_clock_now();
+  utime_t writeback_start_time = stone_clock_now();
   Context *ctx = new LambdaContext(
     [this, log_entry, writeback_start_time, invalidating](int r) {
-      utime_t writeback_comp_time = ceph_clock_now();
+      utime_t writeback_comp_time = stone_clock_now();
       m_perfcounter->tinc(l_librbd_pwl_writeback_latency,
                           writeback_comp_time - writeback_start_time);
       {
@@ -1696,7 +1696,7 @@ Context* AbstractWriteLog<I>::construct_flush_entry(std::shared_ptr<GenericLogEn
                                  << cpp_strerror(r) << dendl;
           m_dirty_log_entries.push_front(log_entry);
         } else {
-          ceph_assert(m_bytes_dirty >= log_entry->bytes_dirty());
+          stone_assert(m_bytes_dirty >= log_entry->bytes_dirty());
           log_entry->set_flushed(true);
           m_bytes_dirty -= log_entry->bytes_dirty();
           sync_point_writer_flushed(log_entry->get_sync_point_entry());
@@ -1742,7 +1742,7 @@ Context* AbstractWriteLog<I>::construct_flush_entry(std::shared_ptr<GenericLogEn
 
 template <typename I>
 void AbstractWriteLog<I>::process_writeback_dirty_entries() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   bool all_clean = false;
   int flushed = 0;
   bool has_write_entry = false;
@@ -1816,8 +1816,8 @@ void AbstractWriteLog<I>::process_writeback_dirty_entries() {
 template <typename I>
 bool AbstractWriteLog<I>::handle_flushed_sync_point(std::shared_ptr<SyncPointLogEntry> log_entry)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
-  ceph_assert(log_entry);
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
+  stone_assert(log_entry);
 
   if ((log_entry->writes_flushed == log_entry->writes) &&
       log_entry->completed && log_entry->prior_sync_point_flushed &&
@@ -1850,8 +1850,8 @@ bool AbstractWriteLog<I>::handle_flushed_sync_point(std::shared_ptr<SyncPointLog
 template <typename I>
 void AbstractWriteLog<I>::sync_point_writer_flushed(std::shared_ptr<SyncPointLogEntry> log_entry)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
-  ceph_assert(log_entry);
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
+  stone_assert(log_entry);
   log_entry->writes_flushed++;
 
   /* If this entry might be completely flushed, look closer */
@@ -1866,8 +1866,8 @@ void AbstractWriteLog<I>::sync_point_writer_flushed(std::shared_ptr<SyncPointLog
  * not be a previous sync point */
 template <typename I>
 void AbstractWriteLog<I>::init_flush_new_sync_point(DeferredContexts &later) {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
-  ceph_assert(!m_initialized); /* Don't use this after init */
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
+  stone_assert(!m_initialized); /* Don't use this after init */
 
   if (!m_current_sync_point) {
     /* First sync point since start */
@@ -1882,12 +1882,12 @@ void AbstractWriteLog<I>::init_flush_new_sync_point(DeferredContexts &later) {
  */
 template <typename I>
 void AbstractWriteLog<I>::new_sync_point(DeferredContexts &later) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   std::shared_ptr<SyncPoint> old_sync_point = m_current_sync_point;
   std::shared_ptr<SyncPoint> new_sync_point;
   ldout(cct, 20) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   /* The first time this is called, if this is a newly created log,
    * this makes the first sync gen number we'll use 1. On the first
@@ -1928,7 +1928,7 @@ void AbstractWriteLog<I>::new_sync_point(DeferredContexts &later) {
 template <typename I>
 void AbstractWriteLog<I>::flush_new_sync_point(C_FlushRequestT *flush_req,
                                                  DeferredContexts &later) {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   if (!flush_req) {
     m_async_null_flush_finish++;
@@ -1944,7 +1944,7 @@ void AbstractWriteLog<I>::flush_new_sync_point(C_FlushRequestT *flush_req,
   /* Add a new sync point. */
   new_sync_point(later);
   std::shared_ptr<SyncPoint> to_append = m_current_sync_point->earlier_sync_point;
-  ceph_assert(to_append);
+  stone_assert(to_append);
 
   /* This flush request will append/persist the (now) previous sync point */
   flush_req->to_append = to_append;
@@ -1977,7 +1977,7 @@ void AbstractWriteLog<I>::flush_new_sync_point(C_FlushRequestT *flush_req,
 template <typename I>
 void AbstractWriteLog<I>::flush_new_sync_point_if_needed(C_FlushRequestT *flush_req,
                                                            DeferredContexts &later) {
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
 
   /* If there have been writes since the last sync point ... */
   if (m_current_sync_point->log_entry->writes) {
@@ -2009,7 +2009,7 @@ void AbstractWriteLog<I>::flush_new_sync_point_if_needed(C_FlushRequestT *flush_
  */
 template <typename I>
 void AbstractWriteLog<I>::flush_dirty_entries(Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   bool all_clean;
   bool flushing;
   bool stop_flushing;
@@ -2078,7 +2078,7 @@ void AbstractWriteLog<I>::internal_flush(bool invalidate, Context *on_finish) {
       [this, on_finish, invalidate](GuardedRequestFunctionContext &guard_ctx) {
         DeferredContexts on_exit;
         ldout(m_image_ctx.cct, 20) << "cell=" << guard_ctx.cell << dendl;
-        ceph_assert(guard_ctx.cell);
+        stone_assert(guard_ctx.cell);
 
         Context *ctx = new LambdaContext(
           [this, cell=guard_ctx.cell, invalidate, on_finish](int r) {
@@ -2093,9 +2093,9 @@ void AbstractWriteLog<I>::internal_flush(bool invalidate, Context *on_finish) {
                                         << dendl;
             }
             if (invalidate) {
-              ceph_assert(m_log_entries.size() == 0);
+              stone_assert(m_log_entries.size() == 0);
             }
-            ceph_assert(m_dirty_log_entries.size() == 0);
+            stone_assert(m_dirty_log_entries.size() == 0);
             m_image_ctx.op_work_queue->queue(on_finish, r);
             release_guarded_request(cell);
             });
@@ -2112,8 +2112,8 @@ void AbstractWriteLog<I>::internal_flush(bool invalidate, Context *on_finish) {
             if (invalidate) {
               {
                 std::lock_guard locker(m_lock);
-                ceph_assert(m_dirty_log_entries.size() == 0);
-                ceph_assert(!m_invalidating);
+                stone_assert(m_dirty_log_entries.size() == 0);
+                stone_assert(!m_invalidating);
                 ldout(m_image_ctx.cct, 6) << "Invalidating" << dendl;
                 m_invalidating = true;
               }
@@ -2123,8 +2123,8 @@ void AbstractWriteLog<I>::internal_flush(bool invalidate, Context *on_finish) {
             } else {
               {
                 std::lock_guard locker(m_lock);
-                ceph_assert(m_dirty_log_entries.size() == 0);
-                ceph_assert(!m_invalidating);
+                stone_assert(m_dirty_log_entries.size() == 0);
+                stone_assert(!m_invalidating);
               }
               m_image_writeback.aio_flush(io::FLUSH_SOURCE_WRITEBACK, next_ctx);
             }
@@ -2156,25 +2156,25 @@ void AbstractWriteLog<I>::add_into_log_map(GenericWriteLogEntries &log_entries,
 
 template <typename I>
 bool AbstractWriteLog<I>::can_retire_entry(std::shared_ptr<GenericLogEntry> log_entry) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   ldout(cct, 20) << dendl;
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
   return log_entry->can_retire();
 }
 
 template <typename I>
 void AbstractWriteLog<I>::check_image_cache_state_clean() {
-  ceph_assert(m_deferred_ios.empty());
-  ceph_assert(m_ops_to_append.empty());;
-  ceph_assert(m_async_flush_ops == 0);
-  ceph_assert(m_async_append_ops == 0);
-  ceph_assert(m_dirty_log_entries.empty());
-  ceph_assert(m_ops_to_flush.empty());
-  ceph_assert(m_flush_ops_in_flight == 0);
-  ceph_assert(m_flush_bytes_in_flight == 0);
-  ceph_assert(m_bytes_dirty == 0);
-  ceph_assert(m_work_queue.empty());
+  stone_assert(m_deferred_ios.empty());
+  stone_assert(m_ops_to_append.empty());;
+  stone_assert(m_async_flush_ops == 0);
+  stone_assert(m_async_append_ops == 0);
+  stone_assert(m_dirty_log_entries.empty());
+  stone_assert(m_ops_to_flush.empty());
+  stone_assert(m_flush_ops_in_flight == 0);
+  stone_assert(m_flush_bytes_in_flight == 0);
+  stone_assert(m_bytes_dirty == 0);
+  stone_assert(m_work_queue.empty());
 }
 
 } // namespace pwl

@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_PAGESET_H
-#define CEPH_PAGESET_H
+#ifndef STONE_PAGESET_H
+#define STONE_PAGESET_H
 
 #include <algorithm>
 #include <atomic>
@@ -229,4 +229,4 @@ class PageSet {
   }
 };
 
-#endif // CEPH_PAGESET_H
+#endif // STONE_PAGESET_H

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_CLASSHANDLER_H
-#define CEPH_CLASSHANDLER_H
+#ifndef STONE_CLASSHANDLER_H
+#define STONE_CLASSHANDLER_H
 
 #include <variant>
 
@@ -14,7 +14,7 @@
 class ClassHandler
 {
 public:
-  CephContext *cct;
+  StoneeContext *cct;
   struct ClassData;
 
   struct ClassMethod {
@@ -109,7 +109,7 @@ private:
   ceph::mutex mutex = ceph::make_mutex("ClassHandler");
 
 public:
-  explicit ClassHandler(CephContext *cct) : cct(cct) {}
+  explicit ClassHandler(StoneeContext *cct) : cct(cct) {}
 
   int open_all_classes();
   int open_class(const std::string& cname, ClassData **pcls);

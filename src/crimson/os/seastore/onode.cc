@@ -8,7 +8,7 @@ namespace crimson::os::seastore {
 
 size_t Onode::size() const
 {
-  return ceph::encoded_sizeof(*this);
+  return stone::encoded_sizeof(*this);
 }
 
 void Onode::encode(void* buffer, size_t len)

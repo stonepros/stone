@@ -32,11 +32,11 @@ public:
   void expect_read_map(librbd::ImageCtx *ictx, int r) {
     if (r < 0) {
       EXPECT_CALL(get_mock_io_ctx(ictx->md_ctx),
-                  read(ObjectMap<>::object_map_name(ictx->id, CEPH_NOSNAP),
+                  read(ObjectMap<>::object_map_name(ictx->id, STONE_NOSNAP),
                        0, 0, _, _, _)).WillOnce(Return(r));
     } else {
       EXPECT_CALL(get_mock_io_ctx(ictx->md_ctx),
-                  read(ObjectMap<>::object_map_name(ictx->id, CEPH_NOSNAP),
+                  read(ObjectMap<>::object_map_name(ictx->id, STONE_NOSNAP),
                        0, 0, _, _, _)).WillOnce(DoDefault());
     }
   }
@@ -56,7 +56,7 @@ public:
   }
 
   void expect_add_snapshot(librbd::ImageCtx *ictx, int r) {
-    std::string oid(ObjectMap<>::object_map_name(ictx->id, CEPH_NOSNAP));
+    std::string oid(ObjectMap<>::object_map_name(ictx->id, STONE_NOSNAP));
     if (r < 0) {
       EXPECT_CALL(get_mock_io_ctx(ictx->md_ctx),
                   exec(oid, _, StrEq("lock"), StrEq("assert_locked"), _, _, _,
@@ -89,8 +89,8 @@ TEST_F(TestMockObjectMapSnapshotCreateRequest, Success) {
   ASSERT_EQ(0, open_image(m_image_name, &ictx));
   ASSERT_EQ(0, acquire_exclusive_lock(*ictx));
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
 
   uint64_t snap_id = 1;
   inject_snap_info(ictx, snap_id);
@@ -119,8 +119,8 @@ TEST_F(TestMockObjectMapSnapshotCreateRequest, ReadMapError) {
   ASSERT_EQ(0, open_image(m_image_name, &ictx));
   ASSERT_EQ(0, acquire_exclusive_lock(*ictx));
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
 
   uint64_t snap_id = 1;
   inject_snap_info(ictx, snap_id);
@@ -146,8 +146,8 @@ TEST_F(TestMockObjectMapSnapshotCreateRequest, WriteMapError) {
   ASSERT_EQ(0, open_image(m_image_name, &ictx));
   ASSERT_EQ(0, acquire_exclusive_lock(*ictx));
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
 
   uint64_t snap_id = 1;
   inject_snap_info(ictx, snap_id);
@@ -174,8 +174,8 @@ TEST_F(TestMockObjectMapSnapshotCreateRequest, AddSnapshotError) {
   ASSERT_EQ(0, open_image(m_image_name, &ictx));
   ASSERT_EQ(0, acquire_exclusive_lock(*ictx));
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
 
   uint64_t snap_id = 1;
   inject_snap_info(ictx, snap_id);
@@ -203,8 +203,8 @@ TEST_F(TestMockObjectMapSnapshotCreateRequest, FlagCleanObjects) {
   ASSERT_EQ(0, open_image(m_image_name, &ictx));
   ASSERT_EQ(0, acquire_exclusive_lock(*ictx));
 
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   object_map.resize(1024);
   for (uint64_t i = 0; i < object_map.size(); ++i) {
     object_map[i] = i % 2 == 0 ? OBJECT_EXISTS : OBJECT_NONEXISTENT;

@@ -334,7 +334,7 @@ TEST_F(TestJournalReplay, SnapCreate) {
 
   {
     std::shared_lock image_locker{ictx->image_lock};
-    ASSERT_NE(CEPH_NOSNAP, ictx->get_snap_id(cls::rbd::UserSnapshotNamespace(),
+    ASSERT_NE(STONE_NOSNAP, ictx->get_snap_id(cls::rbd::UserSnapshotNamespace(),
 					     "snap"));
   }
 
@@ -405,7 +405,7 @@ TEST_F(TestJournalReplay, SnapUnprotect) {
   {
     std::shared_lock image_locker{ictx->image_lock};
     snap_id = ictx->get_snap_id(cls::rbd::UserSnapshotNamespace(), "snap");
-    ASSERT_NE(CEPH_NOSNAP, snap_id);
+    ASSERT_NE(STONE_NOSNAP, snap_id);
   }
   ASSERT_EQ(0, ictx->operations->snap_protect(cls::rbd::UserSnapshotNamespace(),
 					      "snap"));
@@ -461,7 +461,7 @@ TEST_F(TestJournalReplay, SnapRename) {
   {
     std::shared_lock image_locker{ictx->image_lock};
     snap_id = ictx->get_snap_id(cls::rbd::UserSnapshotNamespace(), "snap");
-    ASSERT_NE(CEPH_NOSNAP, snap_id);
+    ASSERT_NE(STONE_NOSNAP, snap_id);
   }
 
   // get current commit position
@@ -489,7 +489,7 @@ TEST_F(TestJournalReplay, SnapRename) {
   {
     std::shared_lock image_locker{ictx->image_lock};
     snap_id = ictx->get_snap_id(cls::rbd::UserSnapshotNamespace(), "snap2");
-    ASSERT_NE(CEPH_NOSNAP, snap_id);
+    ASSERT_NE(STONE_NOSNAP, snap_id);
   }
 
   // verify lock ordering constraints
@@ -576,7 +576,7 @@ TEST_F(TestJournalReplay, SnapRemove) {
     std::shared_lock image_locker{ictx->image_lock};
     uint64_t snap_id = ictx->get_snap_id(cls::rbd::UserSnapshotNamespace(),
 					 "snap");
-    ASSERT_EQ(CEPH_NOSNAP, snap_id);
+    ASSERT_EQ(STONE_NOSNAP, snap_id);
   }
 
   // verify lock ordering constraints

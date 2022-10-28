@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MCLIENTRECONNECT_H
-#define CEPH_MCLIENTRECONNECT_H
+#ifndef STONE_MCLIENTRECONNECT_H
+#define STONE_MCLIENTRECONNECT_H
 
 #include "msg/Message.h"
 #include "mds/mdstypes.h"
@@ -32,7 +32,7 @@ public:
 
 private:
   MClientReconnect() :
-    SafeMessage{CEPH_MSG_CLIENT_RECONNECT, HEAD_VERSION, COMPAT_VERSION} {}
+    SafeMessage{STONE_MSG_CLIENT_RECONNECT, HEAD_VERSION, COMPAT_VERSION} {}
   ~MClientReconnect() final {}
 
   size_t cap_size = 0;
@@ -98,9 +98,9 @@ public:
 
   void encode_payload(uint64_t features) override {
     if (header.version == 0) {
-      if (features & CEPH_FEATURE_MDSENC)
+      if (features & STONE_FEATURE_MDSENC)
 	header.version = 3;
-      else if (features & CEPH_FEATURE_FLOCK)
+      else if (features & STONE_FEATURE_FLOCK)
 	header.version = 2;
       else
 	header.version = 1;

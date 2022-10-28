@@ -18,8 +18,8 @@
 typedef boost::mt11213b gen_type;
 
 #include "common/debug.h"
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_
 
 class AllocTest : public ::testing::TestWithParam<const char*> {
 
@@ -28,7 +28,7 @@ public:
   AllocTest(): alloc(0) { }
   void init_alloc(int64_t size, uint64_t min_alloc_size) {
     std::cout << "Creating alloc type " << string(GetParam()) << " \n";
-    alloc.reset(Allocator::create(g_ceph_context, string(GetParam()), size,
+    alloc.reset(Allocator::create(g_stone_context, string(GetParam()), size,
 				  min_alloc_size));
   }
 
@@ -51,7 +51,7 @@ void dump_mempools()
   f->close_section();
   f->flush(ostr);
   delete f;
-  ldout(g_ceph_context, 0) << ostr.str() << dendl;
+  ldout(g_stone_context, 0) << ostr.str() << dendl;
 }
 
 class AllocTracker
@@ -66,8 +66,8 @@ public:
   AllocTracker(uint64_t capacity, uint64_t alloc_unit)
     : u1(0, capacity)
   {
-    ceph_assert(alloc_unit >= 0x100);
-    ceph_assert(capacity <= (uint64_t(1) << 48)); // we use 5 octets (bytes 1 - 5) to store
+    stone_assert(alloc_unit >= 0x100);
+    stone_assert(capacity <= (uint64_t(1) << 48)); // we use 5 octets (bytes 1 - 5) to store
 				 // offset to save the required space.
 				 // This supports capacity up to 281 TB
 
@@ -85,9 +85,9 @@ public:
 
   bool push(uint64_t offs, uint32_t len)
   {
-    ceph_assert((len & 0xff) == 0);
-    ceph_assert((offs & 0xff) == 0);
-    ceph_assert((offs & 0xffff000000000000) == 0);
+    stone_assert((len & 0xff) == 0);
+    stone_assert((offs & 0xff) == 0);
+    stone_assert((offs & 0xffff000000000000) == 0);
 
     if (head + 1 == tail)
       return false;
@@ -142,7 +142,7 @@ TEST_P(AllocTest, test_alloc_bench_seq)
   init_alloc(capacity, alloc_unit);
   alloc->init_add_free(0, capacity);
 
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   for (uint64_t i = 0; i < capacity; i += want_size)
   {
     tmp.clear();
@@ -165,7 +165,7 @@ TEST_P(AllocTest, test_alloc_bench_seq)
         << capacity / 1024 / 1024 << std::endl;
     }
   }
-  std::cout<<"Executed in "<< ceph_clock_now() - start << std::endl;
+  std::cout<<"Executed in "<< stone_clock_now() - start << std::endl;
   dump_mempools();
 }
 
@@ -183,7 +183,7 @@ TEST_P(AllocTest, test_alloc_bench)
   boost::uniform_int<> u1(0, 9); // 4K-2M
   boost::uniform_int<> u2(0, 7); // 4K-512K
 
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   for (uint64_t i = 0; i < capacity * 2; )
   {
     uint32_t want = alloc_unit << u1(rng);
@@ -218,7 +218,7 @@ TEST_P(AllocTest, test_alloc_bench)
         << capacity / 1024 / 1024 << std::endl;
     }
   }
-  std::cout<<"Executed in "<< ceph_clock_now() - start << std::endl;
+  std::cout<<"Executed in "<< stone_clock_now() - start << std::endl;
   std::cout<<"Avail "<< alloc->get_free() / _1m << " MB" << std::endl;
   dump_mempools();
 }
@@ -237,7 +237,7 @@ void AllocTest::doOverwriteTest(uint64_t capacity, uint64_t prefill,
   boost::uniform_int<> u1(0, 9); // 4K-2M
   boost::uniform_int<> u2(0, 9); // 4K-512K
 
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   // allocate 90% of the capacity
   auto cap = prefill;
   for (uint64_t i = 0; i < cap; )
@@ -296,7 +296,7 @@ void AllocTest::doOverwriteTest(uint64_t capacity, uint64_t prefill,
         << cap / 1024 / 1024 << std::endl;
     }
   }
-  std::cout<<"Executed in "<< ceph_clock_now() - start << std::endl;
+  std::cout<<"Executed in "<< stone_clock_now() - start << std::endl;
   std::cout<<"Avail "<< alloc->get_free() / _1m << " MB" << std::endl;
 
   dump_mempools();
@@ -333,7 +333,7 @@ TEST_P(AllocTest, mempoolAccounting)
 
   uint64_t alloc_size = 4 * 1024;
   uint64_t capacity = 512ll * 1024 * 1024 * 1024;
-  Allocator* alloc = Allocator::create(g_ceph_context, string(GetParam()),
+  Allocator* alloc = Allocator::create(g_stone_context, string(GetParam()),
 				       capacity, alloc_size);
   ASSERT_NE(alloc, nullptr);
   alloc->init_add_free(0, capacity);

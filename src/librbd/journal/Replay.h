@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_JOURNAL_REPLAY_H
-#define CEPH_LIBRBD_JOURNAL_REPLAY_H
+#ifndef STONE_LIBRBD_JOURNAL_REPLAY_H
+#define STONE_LIBRBD_JOURNAL_REPLAY_H
 
 #include "include/int_types.h"
 #include "include/buffer_fwd.h"
@@ -202,4 +202,4 @@ private:
 
 extern template class librbd::journal::Replay<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_JOURNAL_REPLAY_H
+#endif // STONE_LIBRBD_JOURNAL_REPLAY_H

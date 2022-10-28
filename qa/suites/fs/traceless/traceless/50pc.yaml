@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     conf:
       mds:
         mds inject traceless reply probability: .5

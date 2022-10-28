@@ -55,7 +55,7 @@ int main(int argc, char **argv)
   }
 
 #ifdef TEST_LIBRBD_INTERNALS
-  g_ceph_context = reinterpret_cast<CephContext*>(rados.cct());
+  g_stone_context = reinterpret_cast<StoneContext*>(rados.cct());
 #endif // TEST_LIBRBD_INTERNALS
 
   int r = rados.conf_set("lockdep", "true");

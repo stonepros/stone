@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_TEST_LIBRBD_MOCK_JOURNAL_H
-#define CEPH_TEST_LIBRBD_MOCK_JOURNAL_H
+#ifndef STONE_TEST_LIBRBD_MOCK_JOURNAL_H
+#define STONE_TEST_LIBRBD_MOCK_JOURNAL_H
 
 #include "common/RefCountedObj.h"
 #include "gmock/gmock.h"
@@ -93,4 +93,4 @@ struct MockJournal {
 
 } // namespace librbd
 
-#endif // CEPH_TEST_LIBRBD_MOCK_JOURNAL_H
+#endif // STONE_TEST_LIBRBD_MOCK_JOURNAL_H

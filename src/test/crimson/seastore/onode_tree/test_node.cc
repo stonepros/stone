@@ -12,7 +12,7 @@ TEST(OnodeNode, denc)
 {
   Onode onode{"hello"};
   bufferlist bl;
-  ceph::encode(onode, bl);
+  stone::encode(onode, bl);
   bl.rebuild();
   auto flattened = reinterpret_cast<const onode_t*>(bl.c_str());
   auto actual_onode = flattened->decode();
@@ -33,7 +33,7 @@ TEST(OnodeNode, lookup)
   }
   Onode onode{"hello"};
   bufferlist bl;
-  ceph::encode(onode, bl);
+  stone::encode(onode, bl);
   bl.rebuild();
   auto flattened = reinterpret_cast<const onode_t*>(bl.c_str());
   leaf->insert_at(0, oid, *flattened);
@@ -63,7 +63,7 @@ TEST(OnodeNode, grab_from_right)
   ghobject_t oid3{hobject_t{object_t{"saturn"}, "", 0, 0, 0, "solar"}};
   Onode onode{"hello"};
   bufferlist bl;
-  ceph::encode(onode, bl);
+  stone::encode(onode, bl);
   bl.rebuild();
   auto flattened = reinterpret_cast<const onode_t*>(bl.c_str());
   // so they are ordered as they should
@@ -125,7 +125,7 @@ TEST(OnodeNode, merge_right)
   ghobject_t oid3{hobject_t{object_t{"saturn"}, "", 0, 0, 0, "solar"}};
   Onode onode{"hello"};
   bufferlist bl;
-  ceph::encode(onode, bl);
+  stone::encode(onode, bl);
   bl.rebuild();
   auto flattened = reinterpret_cast<const onode_t*>(bl.c_str());
   // so they are ordered as they should
@@ -190,7 +190,7 @@ TEST(OnodeNode, remove_basic)
   }
   Onode onode{"hello"};
   bufferlist bl;
-  ceph::encode(onode, bl);
+  stone::encode(onode, bl);
   bl.rebuild();
   auto flattened = reinterpret_cast<const onode_t*>(bl.c_str());
   leaf->insert_at(0, oid, *flattened);

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -23,8 +23,8 @@
 #include "mds/JournalPointer.h"
 
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_journaler
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_journaler
 #undef dout_prefix
 #define dout_prefix *_dout << objecter->messenger->get_myname() << ".journalpointer "
 
@@ -44,7 +44,7 @@ std::string JournalPointer::get_object_id() const
  */
 int JournalPointer::load(Objecter *objecter)
 {
-  ceph_assert(objecter != NULL);
+  stone_assert(objecter != NULL);
 
   // Blocking read of data
   std::string const object_id = get_object_id();
@@ -52,7 +52,7 @@ int JournalPointer::load(Objecter *objecter)
   bufferlist data;
   C_SaferCond waiter;
   objecter->read_full(object_t(object_id), object_locator_t(pool_id),
-      CEPH_NOSNAP, &data, 0, &waiter);
+      STONE_NOSNAP, &data, 0, &waiter);
   int r = waiter.wait();
 
   // Construct JournalPointer result, null or decoded data
@@ -61,7 +61,7 @@ int JournalPointer::load(Objecter *objecter)
     try {
       decode(q);
     } catch (const buffer::error &e) {
-      return -CEPHFS_EINVAL;
+      return -STONEFS_EINVAL;
     }
   } else {
     dout(1) << "Journal pointer '" << object_id << "' read failed: " << cpp_strerror(r) << dendl;
@@ -77,9 +77,9 @@ int JournalPointer::load(Objecter *objecter)
  */
 int JournalPointer::save(Objecter *objecter) const
 {
-  ceph_assert(objecter != NULL);
+  stone_assert(objecter != NULL);
   // It is not valid to persist a null pointer
-  ceph_assert(!is_null());
+  stone_assert(!is_null());
 
   // Serialize JournalPointer object
   bufferlist data;
@@ -93,7 +93,7 @@ int JournalPointer::save(Objecter *objecter) const
   C_SaferCond waiter;
   objecter->write_full(object_t(object_id), object_locator_t(pool_id),
 		       SnapContext(), data,
-		       ceph::real_clock::now(), 0,
+		       stone::real_clock::now(), 0,
 		       &waiter);
   int write_result = waiter.wait();
   if (write_result < 0) {
@@ -109,14 +109,14 @@ int JournalPointer::save(Objecter *objecter) const
  */
 void JournalPointer::save(Objecter *objecter, Context *completion) const
 {
-  ceph_assert(objecter != NULL);
+  stone_assert(objecter != NULL);
 
   bufferlist data;
   encode(data);
 
   objecter->write_full(object_t(get_object_id()), object_locator_t(pool_id),
 		       SnapContext(), data,
-		       ceph::real_clock::now(), 0,
+		       stone::real_clock::now(), 0,
 		       completion);
 }
 

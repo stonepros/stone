@@ -273,7 +273,7 @@ static int check_writable_op(cls_method_context_t hctx,
  * returns -EKEYREJECTED if size is outside of bound, according to comparator.
  *
  * @bound: the limit to test
- * @comparator: should be CEPH_OSD_CMPXATTR_OP_[EQ|GT|LT]
+ * @comparator: should be STONE_OSD_CMPXATTR_OP_[EQ|GT|LT]
  */
 static int assert_size_in_bound(cls_method_context_t hctx, int bound,
     int comparator) {
@@ -290,17 +290,17 @@ static int assert_size_in_bound(cls_method_context_t hctx, int bound,
 
   //compare size to comparator
   switch (comparator) {
-  case CEPH_OSD_CMPXATTR_OP_EQ:
+  case STONE_OSD_CMPXATTR_OP_EQ:
     if (size != bound) {
       return -EKEYREJECTED;
     }
     break;
-  case CEPH_OSD_CMPXATTR_OP_LT:
+  case STONE_OSD_CMPXATTR_OP_LT:
     if (size >= bound) {
       return -EKEYREJECTED;
     }
     break;
-  case CEPH_OSD_CMPXATTR_OP_GT:
+  case STONE_OSD_CMPXATTR_OP_GT:
     if (size <= bound) {
       return -EKEYREJECTED;
     }

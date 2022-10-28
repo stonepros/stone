@@ -5,7 +5,7 @@
 #include "cls/rbd/cls_rbd_types.h"
 #include "common/dout.h"
 #include "common/errno.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "librbd/ImageState.h"
 #include "librbd/Utils.h"
 #include "librbd/asio/ContextWQ.h"
@@ -18,7 +18,7 @@
 #include "librbd/image/Types.h"
 #include "librbd/mirror/EnableRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::CloneRequest: " << this << " " \
                            << __func__ << ": "
@@ -58,7 +58,7 @@ CloneRequest<I>::CloneRequest(
     m_op_work_queue(op_work_queue), m_on_finish(on_finish),
     m_use_p_features(true) {
 
-  m_cct = reinterpret_cast<CephContext *>(m_ioctx.cct());
+  m_cct = reinterpret_cast<StoneContext *>(m_ioctx.cct());
 
   bool default_format_set;
   m_opts.is_set(RBD_IMAGE_OPTION_FORMAT, &default_format_set);
@@ -118,7 +118,7 @@ void CloneRequest<I>::validate_options() {
         return;
       }
       if (std::max(min_compat_client, require_min_compat_client) <
-            CEPH_RELEASE_MIMIC) {
+            STONE_RELEASE_MIMIC) {
         m_clone_format = 1;
       }
     }
@@ -137,9 +137,9 @@ void CloneRequest<I>::validate_options() {
 template <typename I>
 void CloneRequest<I>::open_parent() {
   ldout(m_cct, 20) << dendl;
-  ceph_assert(m_parent_snap_name.empty() ^ (m_parent_snap_id == CEPH_NOSNAP));
+  stone_assert(m_parent_snap_name.empty() ^ (m_parent_snap_id == STONE_NOSNAP));
 
-  if (m_parent_snap_id != CEPH_NOSNAP) {
+  if (m_parent_snap_id != STONE_NOSNAP) {
     m_parent_image_ctx = I::create("", m_parent_image_id, m_parent_snap_id,
                                    m_parent_io_ctx, true);
   } else {
@@ -185,7 +185,7 @@ void CloneRequest<I>::validate_parent() {
     return;
   }
 
-  if (m_parent_image_ctx->snap_id == CEPH_NOSNAP) {
+  if (m_parent_image_ctx->snap_id == STONE_NOSNAP) {
     lderr(m_cct) << "image to be cloned must be a snapshot" << dendl;
     m_r_saved = -EINVAL;
     close_parent();
@@ -254,7 +254,7 @@ void CloneRequest<I>::validate_child() {
 
   int r = m_ioctx.aio_operate(util::old_header_name(m_name), comp, &op,
                               &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -513,7 +513,7 @@ template <typename I>
 void CloneRequest<I>::close_child() {
   ldout(m_cct, 15) << dendl;
 
-  ceph_assert(m_imctx != nullptr);
+  stone_assert(m_imctx != nullptr);
 
   auto ctx = create_context_callback<
     CloneRequest<I>, &CloneRequest<I>::handle_close_child>(this);
@@ -569,7 +569,7 @@ void CloneRequest<I>::handle_remove_child(int r) {
 template <typename I>
 void CloneRequest<I>::close_parent() {
   ldout(m_cct, 20) << dendl;
-  ceph_assert(m_parent_image_ctx != nullptr);
+  stone_assert(m_parent_image_ctx != nullptr);
 
   auto ctx = create_context_callback<
     CloneRequest<I>, &CloneRequest<I>::handle_close_parent>(this);

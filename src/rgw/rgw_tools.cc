@@ -28,8 +28,8 @@
 #include "services/svc_zone.h"
 #include "services/svc_zone_utils.h"
 
-#define dout_subsys ceph_subsys_rgw
-#define dout_context g_ceph_context
+#define dout_subsys stone_subsys_rgw
+#define dout_context g_stone_context
 
 #define READ_CHUNK_LEN (512 * 1024)
 
@@ -112,7 +112,7 @@ int rgw_init_ioctx(const DoutPrefixProvider *dpp,
 
 void rgw_shard_name(const string& prefix, unsigned max_shards, const string& key, string& name, int *shard_id)
 {
-  uint32_t val = ceph_str_hash_linux(key.c_str(), key.size());
+  uint32_t val = stone_str_hash_linux(key.c_str(), key.size());
   char buf[16];
   if (shard_id) {
     *shard_id = val % max_shards;
@@ -123,8 +123,8 @@ void rgw_shard_name(const string& prefix, unsigned max_shards, const string& key
 
 void rgw_shard_name(const string& prefix, unsigned max_shards, const string& section, const string& key, string& name)
 {
-  uint32_t val = ceph_str_hash_linux(key.c_str(), key.size());
-  val ^= ceph_str_hash_linux(section.c_str(), section.size());
+  uint32_t val = stone_str_hash_linux(key.c_str(), key.size());
+  val ^= stone_str_hash_linux(section.c_str(), section.size());
   char buf[16];
   snprintf(buf, sizeof(buf), "%u", (unsigned)(val % max_shards));
   name = prefix + buf;
@@ -344,7 +344,7 @@ void parse_mime_map(const char *buf)
   }
 }
 
-static int ext_mime_map_init(CephContext *cct, const char *ext_map)
+static int ext_mime_map_init(StoneContext *cct, const char *ext_map)
 {
   int fd = open(ext_map, O_RDONLY);
   char *buf = NULL;
@@ -472,7 +472,7 @@ int RGWDataAccess::Object::put(bufferlist& data,
                                optional_yield y)
 {
   rgw::sal::RGWRadosStore *store = sd->store;
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
 
   string tag;
   append_rand_alpha(cct, tag, tag, 32);
@@ -585,7 +585,7 @@ void RGWDataAccess::Object::set_policy(const RGWAccessControlPolicy& policy)
   policy.encode(aclbl.emplace());
 }
 
-int rgw_tools_init(CephContext *cct)
+int rgw_tools_init(StoneContext *cct)
 {
   ext_mime_map = new std::map<std::string, std::string>;
   ext_mime_map_init(cct, cct->_conf->rgw_mime_types_file.c_str());

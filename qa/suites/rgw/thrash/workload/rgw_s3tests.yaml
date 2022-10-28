@@ -1,10 +1,10 @@
 tasks:
 - s3tests:
     client.0:
-      force-branch: ceph-pacific
+      force-branch: stone-pacific
       rgw_server: client.0
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         rgw lc debug interval: 10

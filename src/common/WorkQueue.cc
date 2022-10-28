@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -16,14 +16,14 @@
 #include "include/compat.h"
 #include "common/errno.h"
 
-#define dout_subsys ceph_subsys_tp
+#define dout_subsys stone_subsys_tp
 #undef dout_prefix
 #define dout_prefix *_dout << name << " "
 
-ThreadPool::ThreadPool(CephContext *cct_, std::string nm, std::string tn, int n, const char *option)
+ThreadPool::ThreadPool(StoneContext *cct_, std::string nm, std::string tn, int n, const char *option)
   : cct(cct_), name(std::move(nm)), thread_name(std::move(tn)),
     lockname(name + "::lock"),
-    _lock(ceph::make_mutex(lockname)),  // this should be safe due to declaration order
+    _lock(stone::make_mutex(lockname)),  // this should be safe due to declaration order
     _stop(false),
     _pause(0),
     _draining(0),
@@ -55,7 +55,7 @@ void ThreadPool::TPHandle::reset_tp_timeout()
 
 ThreadPool::~ThreadPool()
 {
-  ceph_assert(_threads.empty());
+  stone_assert(_threads.empty());
   delete[] _conf_keys;
 }
 
@@ -65,7 +65,7 @@ void ThreadPool::handle_conf_change(const ConfigProxy& conf,
   if (changed.count(_thread_num_option)) {
     char *buf;
     int r = conf.get_val(_thread_num_option.c_str(), &buf, -1);
-    ceph_assert(r >= 0);
+    stone_assert(r >= 0);
     int v = atoi(buf);
     free(buf);
     if (v >= 0) {
@@ -135,8 +135,8 @@ void ThreadPool::worker(WorkThread *wt)
     ldout(cct,20) << "worker waiting" << dendl;
     cct->get_heartbeat_map()->reset_timeout(
       hb,
-      ceph::make_timespan(cct->_conf->threadpool_default_timeout),
-      ceph::make_timespan(0));
+      stone::make_timespan(cct->_conf->threadpool_default_timeout),
+      stone::make_timespan(0));
     auto wait = std::chrono::seconds(
       cct->_conf->threadpool_empty_queue_max_wait);
     _cond.wait_for(ul, wait);
@@ -148,7 +148,7 @@ void ThreadPool::worker(WorkThread *wt)
 
 void ThreadPool::start_threads()
 {
-  ceph_assert(ceph_mutex_is_locked(_lock));
+  stone_assert(stone_mutex_is_locked(_lock));
   while (_threads.size() < _num_threads) {
     WorkThread *wt = new WorkThread(this);
     ldout(cct, 10) << "start_threads creating and starting " << wt << dendl;
@@ -160,7 +160,7 @@ void ThreadPool::start_threads()
 
 void ThreadPool::join_old_threads()
 {
-  ceph_assert(ceph_mutex_is_locked(_lock));
+  stone_assert(stone_mutex_is_locked(_lock));
   while (!_old_threads.empty()) {
     ldout(cct, 10) << "join_old_threads joining and deleting " << _old_threads.front() << dendl;
     _old_threads.front()->join();
@@ -234,7 +234,7 @@ void ThreadPool::unpause()
 {
   ldout(cct,10) << "unpause" << dendl;
   _lock.lock();
-  ceph_assert(_pause > 0);
+  stone_assert(_pause > 0);
   _pause--;
   _cond.notify_all();
   _lock.unlock();
@@ -251,13 +251,13 @@ void ThreadPool::drain(WorkQueue_* wq)
   _draining--;
 }
 
-ShardedThreadPool::ShardedThreadPool(CephContext *pcct_, std::string nm, std::string tn,
+ShardedThreadPool::ShardedThreadPool(StoneContext *pcct_, std::string nm, std::string tn,
 				     uint32_t pnum_threads):
   cct(pcct_),
   name(std::move(nm)),
   thread_name(std::move(tn)),
   lockname(name + "::lock"),
-  shardedpool_lock(ceph::make_mutex(lockname)),
+  shardedpool_lock(stone::make_mutex(lockname)),
   num_threads(pnum_threads),
   num_paused(0),
   num_drained(0),
@@ -265,7 +265,7 @@ ShardedThreadPool::ShardedThreadPool(CephContext *pcct_, std::string nm, std::st
 
 void ShardedThreadPool::shardedthreadpool_worker(uint32_t thread_index)
 {
-  ceph_assert(wq != NULL);
+  stone_assert(wq != NULL);
   ldout(cct,10) << "worker start" << dendl;
 
   std::stringstream ss;
@@ -322,7 +322,7 @@ void ShardedThreadPool::shardedthreadpool_worker(uint32_t thread_index)
 
 void ShardedThreadPool::start_threads()
 {
-  ceph_assert(ceph_mutex_is_locked(shardedpool_lock));
+  stone_assert(stone_mutex_is_locked(shardedpool_lock));
   int32_t thread_index = 0;
   while (threads_shardedpool.size() < num_threads) {
 
@@ -348,7 +348,7 @@ void ShardedThreadPool::stop()
 {
   ldout(cct,10) << "stop" << dendl;
   stop_threads = true;
-  ceph_assert(wq != NULL);
+  stone_assert(wq != NULL);
   wq->return_waiting_threads();
   for (auto p = threads_shardedpool.begin();
        p != threads_shardedpool.end();
@@ -365,7 +365,7 @@ void ShardedThreadPool::pause()
   std::unique_lock ul(shardedpool_lock);
   ldout(cct,10) << "pause" << dendl;
   pause_threads = true;
-  ceph_assert(wq != NULL);
+  stone_assert(wq != NULL);
   wq->return_waiting_threads();
   while (num_threads != num_paused){
     wait_cond.wait(ul);
@@ -378,7 +378,7 @@ void ShardedThreadPool::pause_new()
   ldout(cct,10) << "pause_new" << dendl;
   shardedpool_lock.lock();
   pause_threads = true;
-  ceph_assert(wq != NULL);
+  stone_assert(wq != NULL);
   wq->return_waiting_threads();
   shardedpool_lock.unlock();
   ldout(cct,10) << "paused_new" << dendl;
@@ -400,7 +400,7 @@ void ShardedThreadPool::drain()
   std::unique_lock ul(shardedpool_lock);
   ldout(cct,10) << "drain" << dendl;
   drain_threads = true;
-  ceph_assert(wq != NULL);
+  stone_assert(wq != NULL);
   wq->return_waiting_threads();
   while (num_threads != num_drained) {
     wait_cond.wait(ul);

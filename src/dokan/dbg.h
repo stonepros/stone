@@ -2,8 +2,8 @@
 // logging certain flags. Since those can be rather verbose, it's
 // better if we keep them separate.
 
-#ifndef CEPH_DOKAN_DBG_H
-#define CEPH_DOKAN_DBG_H
+#ifndef STONE_DOKAN_DBG_H
+#define STONE_DOKAN_DBG_H
 
 #include "include/compat.h"
 
@@ -23,4 +23,4 @@ void print_open_params(
   ULONG CreateOptions,
   PDOKAN_FILE_INFO DokanFileInfo);
 
-#endif // CEPH_DOKAN_DBG_H
+#endif // STONE_DOKAN_DBG_H

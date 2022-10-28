@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_SCRUB_RESULT_H
-#define CEPH_SCRUB_RESULT_H
+#ifndef STONE_SCRUB_RESULT_H
+#define STONE_SCRUB_RESULT_H
 
 #include "SnapMapper.h"		// for OSDriver
 #include "common/map_cacher.hpp"
@@ -49,4 +49,4 @@ private:
 };
 }
 
-#endif // CEPH_SCRUB_RESULT_H
+#endif // STONE_SCRUB_RESULT_H

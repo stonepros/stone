@@ -14,7 +14,7 @@ FuturizedStore::create(const std::string& type,
   } else if (type == "bluestore") {
     return std::make_unique<crimson::os::AlienStore>(data, values);
   } else {
-    ceph_abort_msgf("unsupported objectstore type: %s", type.c_str());
+    stone_abort_msgf("unsupported objectstore type: %s", type.c_str());
     return {};
   }
 }

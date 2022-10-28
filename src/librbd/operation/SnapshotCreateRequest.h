@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_OPERATION_SNAPSHOT_CREATE_REQUEST_H
-#define CEPH_LIBRBD_OPERATION_SNAPSHOT_CREATE_REQUEST_H
+#ifndef STONE_LIBRBD_OPERATION_SNAPSHOT_CREATE_REQUEST_H
+#define STONE_LIBRBD_OPERATION_SNAPSHOT_CREATE_REQUEST_H
 
 #include "cls/rbd/cls_rbd_types.h"
 #include "librbd/Types.h"
@@ -97,7 +97,7 @@ private:
   int m_ret_val = 0;
   bool m_writes_blocked = false;
 
-  uint64_t m_snap_id = CEPH_NOSNAP;
+  uint64_t m_snap_id = STONE_NOSNAP;
   uint64_t m_size;
   ParentImageInfo m_parent_info;
 
@@ -145,4 +145,4 @@ private:
 
 extern template class librbd::operation::SnapshotCreateRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_OPERATION_SNAPSHOT_CREATE_REQUEST_H
+#endif // STONE_LIBRBD_OPERATION_SNAPSHOT_CREATE_REQUEST_H

@@ -21,7 +21,7 @@
 #include <map>
 #include <vector>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::DiffIterate: "
 
@@ -84,7 +84,7 @@ protected:
   typedef std::list<Diff> Diffs;
 
   void finish(int r) override {
-    CephContext *cct = m_cct;
+    StoneContext *cct = m_cct;
 
     if (r < 0) {
       ldout(cct, 20) << "list_snaps failed: " << m_image_offset << "~"
@@ -108,7 +108,7 @@ protected:
 
 private:
   I& m_image_ctx;
-  CephContext *m_cct;
+  StoneContext *m_cct;
   DiffContext &m_diff_context;
   uint64_t m_image_offset;
   uint64_t m_image_length;
@@ -116,7 +116,7 @@ private:
   io::SnapshotDelta m_snapshot_delta;
 
   void compute_diffs(Diffs *diffs) {
-    CephContext *cct = m_cct;
+    StoneContext *cct = m_cct;
 
     // merge per-snapshot deltas into an aggregate
     io::SparseExtents aggregate_snapshot_extents;
@@ -212,9 +212,9 @@ int DiffIterate<I>::diff_iterate(I *ictx,
 
 template <typename I>
 int DiffIterate<I>::execute() {
-  CephContext* cct = m_image_ctx.cct;
+  StoneContext* cct = m_image_ctx.cct;
 
-  ceph_assert(m_image_ctx.data_ctx.is_valid());
+  stone_assert(m_image_ctx.data_ctx.is_valid());
 
   librados::snap_t from_snap_id = 0;
   librados::snap_t end_snap_id;
@@ -231,7 +231,7 @@ int DiffIterate<I>::execute() {
     end_size = m_image_ctx.get_image_size(end_snap_id);
   }
 
-  if (from_snap_id == CEPH_NOSNAP) {
+  if (from_snap_id == STONE_NOSNAP) {
     return -ENOENT;
   }
   if (from_snap_id == end_snap_id) {

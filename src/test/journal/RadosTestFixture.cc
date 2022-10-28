@@ -9,7 +9,7 @@
 #include "journal/Settings.h"
 
 RadosTestFixture::RadosTestFixture()
-  : m_timer_lock(ceph::make_mutex("m_timer_lock")),
+  : m_timer_lock(stone::make_mutex("m_timer_lock")),
     m_listener(this) {
 }
 
@@ -17,7 +17,7 @@ void RadosTestFixture::SetUpTestCase() {
   _pool_name = get_temp_pool_name();
   ASSERT_EQ("", create_one_pool_pp(_pool_name, _rados));
 
-  CephContext* cct = reinterpret_cast<CephContext*>(_rados.cct());
+  StoneContext* cct = reinterpret_cast<StoneContext*>(_rados.cct());
   _thread_pool = new ThreadPool(cct, "RadosTestFixture::_thread_pool",
                                  "tp_test", 1);
   _thread_pool->start();
@@ -38,9 +38,9 @@ std::string RadosTestFixture::get_temp_oid() {
 void RadosTestFixture::SetUp() {
   ASSERT_EQ(0, _rados.ioctx_create(_pool_name.c_str(), m_ioctx));
 
-  CephContext* cct = reinterpret_cast<CephContext*>(m_ioctx.cct());
+  StoneContext* cct = reinterpret_cast<StoneContext*>(m_ioctx.cct());
   m_work_queue = new ContextWQ("RadosTestFixture::m_work_queue",
-                               ceph::make_timespan(60),
+                               stone::make_timespan(60),
                                _thread_pool);
 
   m_timer = new SafeTimer(cct, m_timer_lock, true);
@@ -69,14 +69,14 @@ int RadosTestFixture::create(const std::string &oid, uint8_t order,
   return cls::journal::client::create(m_ioctx, oid, order, splay_width, -1);
 }
 
-ceph::ref_t<journal::JournalMetadata> RadosTestFixture::create_metadata(
+stone::ref_t<journal::JournalMetadata> RadosTestFixture::create_metadata(
     const std::string &oid, const std::string &client_id,
     double commit_interval, int max_concurrent_object_sets) {
   journal::Settings settings;
   settings.commit_interval = commit_interval;
   settings.max_concurrent_object_sets = max_concurrent_object_sets;
 
-  auto metadata = ceph::make_ref<journal::JournalMetadata>(
+  auto metadata = stone::make_ref<journal::JournalMetadata>(
     m_work_queue, m_timer, &m_timer_lock, m_ioctx, oid, client_id, settings);
   m_metadatas.push_back(metadata);
   return metadata;
@@ -110,13 +110,13 @@ bufferlist RadosTestFixture::create_payload(const std::string &payload) {
   return bl;
 }
 
-int RadosTestFixture::init_metadata(const ceph::ref_t<journal::JournalMetadata>& metadata) {
+int RadosTestFixture::init_metadata(const stone::ref_t<journal::JournalMetadata>& metadata) {
   C_SaferCond cond;
   metadata->init(&cond);
   return cond.wait();
 }
 
-bool RadosTestFixture::wait_for_update(const ceph::ref_t<journal::JournalMetadata>& metadata) {
+bool RadosTestFixture::wait_for_update(const stone::ref_t<journal::JournalMetadata>& metadata) {
   std::unique_lock locker{m_listener.mutex};
   while (m_listener.updates[metadata.get()] == 0) {
     if (m_listener.cond.wait_for(locker, 10s) == std::cv_status::timeout) {

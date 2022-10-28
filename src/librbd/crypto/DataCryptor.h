@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CRYPTO_DATA_CRYPTOR_H
-#define CEPH_LIBRBD_CRYPTO_DATA_CRYPTOR_H
+#ifndef STONE_LIBRBD_CRYPTO_DATA_CRYPTOR_H
+#define STONE_LIBRBD_CRYPTO_DATA_CRYPTOR_H
 
 #include "include/int_types.h"
 #include "librbd/crypto/Types.h"
@@ -34,4 +34,4 @@ public:
 } // namespace crypto
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_CRYPTO_DATA_CRYPTOR_H
+#endif // STONE_LIBRBD_CRYPTO_DATA_CRYPTOR_H

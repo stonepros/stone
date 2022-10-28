@@ -1,5 +1,5 @@
-#ifndef CEPH_PAGE_H
-#define CEPH_PAGE_H
+#ifndef STONE_PAGE_H
+#define STONE_PAGE_H
 
 namespace ceph {
   // these are in common/page.cc
@@ -11,8 +11,8 @@ namespace ceph {
 #endif
 
 
-#define CEPH_PAGE_SIZE ceph::_page_size
-#define CEPH_PAGE_MASK ceph::_page_mask
-#define CEPH_PAGE_SHIFT ceph::_page_shift
+#define STONE_PAGE_SIZE ceph::_page_size
+#define STONE_PAGE_MASK ceph::_page_mask
+#define STONE_PAGE_SHIFT ceph::_page_shift
 
 

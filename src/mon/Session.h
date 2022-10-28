@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MON_SESSION_H
-#define CEPH_MON_SESSION_H
+#ifndef STONE_MON_SESSION_H
+#define STONE_MON_SESSION_H
 
 #include <string>
 #include <string_view>
@@ -38,7 +38,7 @@ struct Subscription {
   xlist<Subscription*>::item type_item;
   version_t next;
   bool onetime;
-  bool incremental_onetime;  // has CEPH_FEATURE_INCSUBOSDMAP
+  bool incremental_onetime;  // has STONE_FEATURE_INCSUBOSDMAP
   
   Subscription(MonSession *s, const std::string& t) : session(s), type(t), type_item(this),
 						 next(0), onetime(false), incremental_onetime(false) {}

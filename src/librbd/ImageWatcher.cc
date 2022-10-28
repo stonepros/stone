@@ -17,7 +17,7 @@
 #include "common/errno.h"
 #include <boost/bind/bind.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::ImageWatcher: "
 
@@ -29,8 +29,8 @@ using util::create_async_context_callback;
 using util::create_context_callback;
 using util::create_rados_callback;
 
-using ceph::encode;
-using ceph::decode;
+using stone::encode;
+using stone::decode;
 
 using namespace boost::placeholders;
 
@@ -68,9 +68,9 @@ ImageWatcher<I>::ImageWatcher(I &image_ctx)
   : Watcher(image_ctx.md_ctx, image_ctx.op_work_queue, image_ctx.header_oid),
     m_image_ctx(image_ctx),
     m_task_finisher(new TaskFinisher<Task>(*m_image_ctx.cct)),
-    m_async_request_lock(ceph::make_shared_mutex(
+    m_async_request_lock(stone::make_shared_mutex(
       util::unique_lock_name("librbd::ImageWatcher::m_async_request_lock", this))),
-    m_owner_client_id_lock(ceph::make_mutex(
+    m_owner_client_id_lock(stone::make_mutex(
       util::unique_lock_name("librbd::ImageWatcher::m_owner_client_id_lock", this)))
 {
 }
@@ -83,7 +83,7 @@ ImageWatcher<I>::~ImageWatcher()
 
 template <typename I>
 void ImageWatcher<I>::unregister_watch(Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " unregistering image watcher" << dendl;
 
   cancel_async_requests();
@@ -101,7 +101,7 @@ void ImageWatcher<I>::unregister_watch(Context *on_finish) {
 
 template <typename I>
 void ImageWatcher<I>::block_notifies(Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " "  << __func__ << dendl;
 
   on_finish = new LambdaContext([this, on_finish](int r) {
@@ -181,8 +181,8 @@ template <typename I>
 void ImageWatcher<I>::notify_flatten(uint64_t request_id,
                                      ProgressContext &prog_ctx,
                                      Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -196,8 +196,8 @@ void ImageWatcher<I>::notify_resize(uint64_t request_id, uint64_t size,
 			            bool allow_shrink,
                                     ProgressContext &prog_ctx,
                                     Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -214,8 +214,8 @@ void ImageWatcher<I>::notify_snap_create(uint64_t request_id,
                                          uint64_t flags,
                                          ProgressContext &prog_ctx,
                                          Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -231,8 +231,8 @@ void ImageWatcher<I>::notify_snap_rename(uint64_t request_id,
                                          const snapid_t &src_snap_id,
 				         const std::string &dst_snap_name,
 					 Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -247,8 +247,8 @@ template <typename I>
 void ImageWatcher<I>::notify_snap_remove(
     uint64_t request_id, const cls::rbd::SnapshotNamespace &snap_namespace,
     const std::string &snap_name, Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -263,8 +263,8 @@ template <typename I>
 void ImageWatcher<I>::notify_snap_protect(
     uint64_t request_id, const cls::rbd::SnapshotNamespace &snap_namespace,
     const std::string &snap_name, Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -279,8 +279,8 @@ template <typename I>
 void ImageWatcher<I>::notify_snap_unprotect(
     uint64_t request_id, const cls::rbd::SnapshotNamespace &snap_namespace,
     const std::string &snap_name, Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -295,8 +295,8 @@ template <typename I>
 void ImageWatcher<I>::notify_rebuild_object_map(uint64_t request_id,
                                                 ProgressContext &prog_ctx,
                                                 Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -310,8 +310,8 @@ template <typename I>
 void ImageWatcher<I>::notify_rename(uint64_t request_id,
                                     const std::string &image_name,
                                     Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -325,8 +325,8 @@ template <typename I>
 void ImageWatcher<I>::notify_update_features(uint64_t request_id,
                                              uint64_t features, bool enabled,
                                              Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -340,8 +340,8 @@ template <typename I>
 void ImageWatcher<I>::notify_migrate(uint64_t request_id,
                                      ProgressContext &prog_ctx,
                                      Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -354,8 +354,8 @@ template <typename I>
 void ImageWatcher<I>::notify_sparsify(uint64_t request_id, size_t sparse_size,
                                       ProgressContext &prog_ctx,
                                       Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -407,7 +407,7 @@ void ImageWatcher<I>::notify_quiesce(const AsyncRequestId &async_request_id,
                              << async_request_id << " attempts=" << attempts
                              << dendl;
 
-  ceph_assert(attempts > 0);
+  stone_assert(attempts > 0);
   auto notify_response = new watcher::NotifyResponse();
   auto on_notify = new LambdaContext(
     [notify_response=std::unique_ptr<watcher::NotifyResponse>(notify_response),
@@ -435,7 +435,7 @@ void ImageWatcher<I>::notify_quiesce(const AsyncRequestId &async_request_id,
             auto iter = bl.cbegin();
 
             ResponseMessage response_message;
-            using ceph::decode;
+            using stone::decode;
             decode(response_message, iter);
 
             if (response_message.result != -EOPNOTSUPP) {
@@ -476,8 +476,8 @@ void ImageWatcher<I>::notify_metadata_set(uint64_t request_id,
                                           const std::string &key,
                                           const std::string &value,
                                           Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -493,8 +493,8 @@ template <typename I>
 void ImageWatcher<I>::notify_metadata_remove(uint64_t request_id,
                                              const std::string &key,
                                              Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   AsyncRequestId async_request_id(get_client_id(), request_id);
@@ -531,7 +531,7 @@ void ImageWatcher<I>::cancel_async_requests() {
 
 template <typename I>
 void ImageWatcher<I>::set_owner_client_id(const ClientId& client_id) {
-  ceph_assert(ceph_mutex_is_locked(m_owner_client_id_lock));
+  stone_assert(stone_mutex_is_locked(m_owner_client_id_lock));
   m_owner_client_id = client_id;
   ldout(m_image_ctx.cct, 10) << this << " current lock owner: "
                              << m_owner_client_id << dendl;
@@ -570,13 +570,13 @@ void ImageWatcher<I>::notify_released_lock() {
 
 template <typename I>
 void ImageWatcher<I>::schedule_request_lock(bool use_timer, int timer_delay) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
 
   if (m_image_ctx.exclusive_lock == nullptr) {
     // exclusive lock dynamically disabled via image refresh
     return;
   }
-  ceph_assert(m_image_ctx.exclusive_lock &&
+  stone_assert(m_image_ctx.exclusive_lock &&
               !m_image_ctx.exclusive_lock->is_lock_owner());
 
   std::shared_lock watch_locker{this->m_watch_lock};
@@ -656,8 +656,8 @@ void ImageWatcher<I>::handle_request_lock(int r) {
 
 template <typename I>
 void ImageWatcher<I>::notify_lock_owner(Payload *payload, Context *on_finish) {
-  ceph_assert(on_finish != nullptr);
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(on_finish != nullptr);
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
 
   bufferlist bl;
   encode(NotifyMessage(payload), bl);
@@ -669,7 +669,7 @@ void ImageWatcher<I>::notify_lock_owner(Payload *payload, Context *on_finish) {
 
 template <typename I>
 bool ImageWatcher<I>::is_new_request(const AsyncRequestId &id) const {
-  ceph_assert(ceph_mutex_is_locked(m_async_request_lock));
+  stone_assert(stone_mutex_is_locked(m_async_request_lock));
 
   return m_async_pending.count(id) == 0 && m_async_complete.count(id) == 0;
 }
@@ -677,11 +677,11 @@ bool ImageWatcher<I>::is_new_request(const AsyncRequestId &id) const {
 template <typename I>
 bool ImageWatcher<I>::mark_async_request_complete(const AsyncRequestId &id,
                                                   int r) {
-  ceph_assert(ceph_mutex_is_locked(m_async_request_lock));
+  stone_assert(stone_mutex_is_locked(m_async_request_lock));
 
   bool found = m_async_pending.erase(id);
 
-  auto now = ceph_clock_now();
+  auto now = stone_clock_now();
 
   auto it = m_async_complete_expiration.begin();
   while (it != m_async_complete_expiration.end() && it->first < now) {
@@ -714,8 +714,8 @@ Context *ImageWatcher<I>::remove_async_request(const AsyncRequestId &id) {
 
 template <typename I>
 Context *ImageWatcher<I>::remove_async_request(const AsyncRequestId &id,
-                                               ceph::shared_mutex &lock) {
-  ceph_assert(ceph_mutex_is_locked(lock));
+                                               stone::shared_mutex &lock) {
+  stone_assert(stone_mutex_is_locked(lock));
 
   auto it = m_async_requests.find(id);
   if (it != m_async_requests.end()) {
@@ -758,8 +758,8 @@ template <typename I>
 void ImageWatcher<I>::notify_async_request(
     const AsyncRequestId &async_request_id, Payload *payload,
     ProgressContext& prog_ctx, Context *on_finish) {
-  ceph_assert(on_finish != nullptr);
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(on_finish != nullptr);
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
 
   ldout(m_image_ctx.cct, 10) << this << " async request: " << async_request_id
                              << dendl;
@@ -830,7 +830,7 @@ Context *ImageWatcher<I>::prepare_quiesce_request(
       it->second.first = ack_ctx;
     } else {
       auto it = m_async_complete.find(request);
-      ceph_assert(it != m_async_complete.end());
+      stone_assert(it != m_async_complete.end());
       m_task_finisher->queue(new C_ResponseMessage(ack_ctx), it->second);
       // reset complete request expiration time
       mark_async_request_complete(request, it->second);
@@ -1059,7 +1059,7 @@ bool ImageWatcher<I>::handle_payload(const RequestLockPayload &payload,
       exclusive_lock::OPERATION_REQUEST_TYPE_GENERAL, &r);
 
     if (accept_request) {
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       std::lock_guard owner_client_id_locker{m_owner_client_id_lock};
       if (!m_owner_client_id.is_valid()) {
         return true;
@@ -1460,7 +1460,7 @@ void ImageWatcher<I>::process_payload(uint64_t notify_id, uint64_t handle,
     complete = handle_payload(*(static_cast<MetadataUpdatePayload *>(payload)), ctx);
     break;
   default:
-    ceph_assert(payload->get_notify_op() == static_cast<NotifyOp>(-1));
+    stone_assert(payload->get_notify_op() == static_cast<NotifyOp>(-1));
     complete = handle_payload(*(static_cast<UnknownPayload *>(payload)), ctx);
   }
 
@@ -1514,7 +1514,7 @@ void ImageWatcher<I>::handle_error(uint64_t handle, int err) {
 
 template <typename I>
 void ImageWatcher<I>::handle_rewatch_complete(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   {
@@ -1544,7 +1544,7 @@ void ImageWatcher<I>::RemoteContext::finish(int r) {
 
 template <typename I>
 void ImageWatcher<I>::C_ResponseMessage::finish(int r) {
-  CephContext *cct = notify_ack->cct;
+  StoneContext *cct = notify_ack->cct;
   ldout(cct, 10) << this << " C_ResponseMessage: r=" << r << dendl;
 
   encode(ResponseMessage(r), notify_ack->out);

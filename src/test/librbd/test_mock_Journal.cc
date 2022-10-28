@@ -8,7 +8,7 @@
 #include "test/librbd/mock/MockJournalPolicy.h"
 #include "test/librbd/mock/io/MockObjectDispatch.h"
 #include "common/Cond.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/WorkQueue.h"
 #include "cls/journal/cls_journal_types.h"
 #include "journal/Journaler.h"
@@ -30,8 +30,8 @@
 #include <list>
 #include <boost/scope_exit.hpp>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 
 namespace librbd {
 
@@ -56,7 +56,7 @@ struct TypeTraits<MockJournalImageCtx> {
 struct MockReplay {
   static MockReplay *s_instance;
   static MockReplay &get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return *s_instance;
   }
 
@@ -100,7 +100,7 @@ MockReplay *MockReplay::s_instance = nullptr;
 struct MockRemove {
   static MockRemove *s_instance;
   static MockRemove &get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return *s_instance;
   }
 
@@ -130,7 +130,7 @@ MockRemove *MockRemove::s_instance = nullptr;
 struct MockCreate {
   static MockCreate *s_instance;
   static MockCreate &get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return *s_instance;
   }
 
@@ -168,10 +168,10 @@ public:
   static OpenRequest *s_instance;
   static OpenRequest *create(MockJournalImageCtx *image_ctx,
                              ::journal::MockJournalerProxy *journaler,
-                             ceph::mutex *lock, journal::ImageClientMeta *client_meta,
+                             stone::mutex *lock, journal::ImageClientMeta *client_meta,
                              uint64_t *tag_tid, journal::TagData *tag_data,
                              Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->tag_data = tag_data;
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -207,7 +207,7 @@ struct ObjectDispatch<MockJournalImageCtx> : public io::MockObjectDispatch {
 
   static ObjectDispatch* create(MockJournalImageCtx* image_ctx,
                                 Journal<MockJournalImageCtx>* journal) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -253,11 +253,11 @@ public:
 
   TestMockJournal() = default;
   ~TestMockJournal() override {
-    ceph_assert(m_commit_contexts.empty());
+    stone_assert(m_commit_contexts.empty());
   }
 
-  ceph::mutex m_lock = ceph::make_mutex("lock");
-  ceph::condition_variable m_cond;
+  stone::mutex m_lock = stone::make_mutex("lock");
+  stone::condition_variable m_cond;
   Contexts m_commit_contexts;
 
   struct C_ReplayAction : public Context {

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_ZFS_H
-#define CEPH_ZFS_H
+#ifndef STONE_ZFS_H
+#define STONE_ZFS_H
 
 // Simple wrapper to hide libzfs.h. (it conflicts with standard linux headers)
 class ZFS {

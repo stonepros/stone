@@ -1,0 +1,15 @@
+tasks:
+- exec:
+    mgr.x:
+      - systemctl stop stone-mgr.target
+      - sleep 5
+      - stone -s
+- exec:
+    mon.a:
+      - stone restful create-key admin
+      - stone restful create-self-signed-cert
+      - stone restful restart
+- workunit:
+    clients:
+      client.0:
+        - rest/test-restful.sh

@@ -2,7 +2,7 @@ meta:
 - desc: |
    librados C and C++ api tests
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - reached quota
       - \(REQUEST_SLOW\)

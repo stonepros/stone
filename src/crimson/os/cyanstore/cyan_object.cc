@@ -7,7 +7,7 @@ size_t Object::get_size() const {
   return data.length();
 }
 
-ceph::bufferlist Object::read(uint64_t offset, uint64_t len)
+stone::bufferlist Object::read(uint64_t offset, uint64_t len)
 {
   bufferlist ret;
   ret.substr_of(data, offset, len);

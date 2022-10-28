@@ -1,6 +1,6 @@
 tasks:
 - install:
-- ceph:
+- stone:
 - rgw:
     client.0:
       # force rgw_dns_name to be set with the fully qualified host name;
@@ -11,7 +11,7 @@ tasks:
        client.0:
            - rgw/test_rgw_orphan_list.sh
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         debug rgw: 20

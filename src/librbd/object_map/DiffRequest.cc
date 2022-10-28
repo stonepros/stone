@@ -10,7 +10,7 @@
 #include "osdc/Striper.h"
 #include <string>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::DiffRequest: " \
                            << this << " " << __func__ << ": "
@@ -24,7 +24,7 @@ template <typename I>
 void DiffRequest<I>::send() {
   auto cct = m_image_ctx->cct;
 
-  if (m_snap_id_start == CEPH_NOSNAP || m_snap_id_start > m_snap_id_end) {
+  if (m_snap_id_start == STONE_NOSNAP || m_snap_id_start > m_snap_id_end) {
     lderr(cct) << "invalid start/end snap ids: "
                << "snap_id_start=" << m_snap_id_start << ", "
                << "snap_id_end=" << m_snap_id_end << dendl;
@@ -56,8 +56,8 @@ void DiffRequest<I>::send() {
 
 template <typename I>
 void DiffRequest<I>::load_object_map(
-    std::shared_lock<ceph::shared_mutex>* image_locker) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx->image_lock));
+    std::shared_lock<stone::shared_mutex>* image_locker) {
+  stone_assert(stone_mutex_is_locked(m_image_ctx->image_lock));
 
   if (m_snap_ids.empty()) {
     image_locker->unlock();
@@ -85,7 +85,7 @@ void DiffRequest<I>::load_object_map(
   m_ignore_enoent = (m_current_snap_id != m_snap_id_start &&
                      m_current_snap_id != m_snap_id_end);
 
-  if (m_current_snap_id == CEPH_NOSNAP) {
+  if (m_current_snap_id == STONE_NOSNAP) {
     m_current_size = m_image_ctx->size;
   } else {
     auto snap_it = m_image_ctx->snap_info.find(m_current_snap_id);
@@ -135,7 +135,7 @@ void DiffRequest<I>::load_object_map(
   auto aio_comp = create_rados_callback<
     DiffRequest<I>, &DiffRequest<I>::handle_load_object_map>(this);
   r = m_image_ctx->md_ctx.aio_operate(oid, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

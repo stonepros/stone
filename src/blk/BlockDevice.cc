@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
   *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -41,7 +41,7 @@
 #include "include/compat.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_bdev
+#define dout_subsys stone_subsys_bdev
 #undef dout_prefix
 #define dout_prefix *_dout << "bdev "
 
@@ -79,7 +79,7 @@ uint64_t IOContext::get_num_ios() const
 
 void IOContext::release_running_aios()
 {
-  ceph_assert(!num_running);
+  stone_assert(!num_running);
 #if defined(HAVE_LIBAIO) || defined(HAVE_POSIXAIO)
   // release aio contexts (including pinned buffers).
   running_aios.clear();
@@ -135,7 +135,7 @@ BlockDevice::device_type_from_name(const std::string& blk_dev_name)
 }
 
 BlockDevice* BlockDevice::create_with_type(block_device_t device_type,
-  CephContext* cct, const std::string& path, aio_callback_t cb,
+  StoneContext* cct, const std::string& path, aio_callback_t cb,
   void *cbpriv, aio_callback_t d_cb, void *d_cbpriv)
 {
 
@@ -157,13 +157,13 @@ BlockDevice* BlockDevice::create_with_type(block_device_t device_type,
     return new HMSMRDevice(cct, cb, cbpriv, d_cb, d_cbpriv);
 #endif
   default:
-    ceph_abort_msg("unsupported device");
+    stone_abort_msg("unsupported device");
     return nullptr;
   }
 }
 
 BlockDevice *BlockDevice::create(
-    CephContext* cct, const string& path, aio_callback_t cb,
+    StoneContext* cct, const string& path, aio_callback_t cb,
     void *cbpriv, aio_callback_t d_cb, void *d_cbpriv)
 {
   const string blk_dev_name = cct->_conf.get_val<string>("bdev_type");

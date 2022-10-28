@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_MIRROR_IMAGE_MAP_LOAD_REQUEST_H
-#define CEPH_RBD_MIRROR_IMAGE_MAP_LOAD_REQUEST_H
+#ifndef STONE_RBD_MIRROR_IMAGE_MAP_LOAD_REQUEST_H
+#define STONE_RBD_MIRROR_IMAGE_MAP_LOAD_REQUEST_H
 
 #include "cls/rbd/cls_rbd_types.h"
 #include "include/rados/librados.hpp"
@@ -74,4 +74,4 @@ private:
 } // namespace mirror
 } // namespace rbd
 
-#endif // CEPH_RBD_MIRROR_IMAGE_MAP_LOAD_REQUEST_H
+#endif // STONE_RBD_MIRROR_IMAGE_MAP_LOAD_REQUEST_H

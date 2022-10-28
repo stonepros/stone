@@ -8,7 +8,7 @@
 #include "librbd/MirroringWatcher.h"
 #include "librbd/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::ImageStateUpdateRequest: " \
                            << this << " " << __func__ << ": "
@@ -27,8 +27,8 @@ ImageStateUpdateRequest<I>::ImageStateUpdateRequest(
     Context* on_finish)
   : m_io_ctx(io_ctx), m_image_id(image_id),
     m_mirror_image_state(mirror_image_state), m_mirror_image(mirror_image),
-    m_on_finish(on_finish), m_cct(static_cast<CephContext*>(m_io_ctx.cct())) {
-  ceph_assert(m_mirror_image_state != cls::rbd::MIRROR_IMAGE_STATE_DISABLED);
+    m_on_finish(on_finish), m_cct(static_cast<StoneContext*>(m_io_ctx.cct())) {
+  stone_assert(m_mirror_image_state != cls::rbd::MIRROR_IMAGE_STATE_DISABLED);
 }
 
 template <typename I>
@@ -51,7 +51,7 @@ void ImageStateUpdateRequest<I>::get_mirror_image() {
     ImageStateUpdateRequest<I>,
     &ImageStateUpdateRequest<I>::handle_get_mirror_image>(this);
   int r = m_io_ctx.aio_operate(RBD_MIRRORING, comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -95,7 +95,7 @@ void ImageStateUpdateRequest<I>::set_mirror_image() {
     ImageStateUpdateRequest<I>,
     &ImageStateUpdateRequest<I>::handle_set_mirror_image>(this);
   int r = m_io_ctx.aio_operate(RBD_MIRRORING, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 

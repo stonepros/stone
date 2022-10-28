@@ -1,10 +1,10 @@
 overrides:
-  ceph:
+  stone:
     conf:
       global:
         ms die on skipped message: false
 tasks:
-- ceph:
+- stone:
 - kclient:
 - workunit:
     clients:

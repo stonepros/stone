@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -38,9 +38,9 @@ using std::string;
 // logging is not functional when it is called. cerr output is lost
 // when the caller is daemonized but it will show if not (-f)
 //
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 #define dout_prefix *_dout
-#define dout_subsys ceph_subsys_
+#define dout_subsys stone_subsys_
 
 struct pidfh {
   int pf_fd;
@@ -225,7 +225,7 @@ int pidfile_write(std::string_view pid_file)
     return 0;
   }
 
-  ceph_assert(pfh == nullptr);
+  stone_assert(pfh == nullptr);
 
   pfh = new pidfh();
   if (atexit(pidfile_remove)) {

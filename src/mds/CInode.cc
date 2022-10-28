@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -39,20 +39,20 @@
 
 #include "common/config.h"
 #include "global/global_context.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "mds/MDSContinuation.h"
 #include "mds/InoTable.h"
-#include "cephfs_features.h"
+#include "stonefs_features.h"
 #include "osdc/Objecter.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << mdcache->mds->get_nodeid() << ".cache.ino(" << ino() << ") "
 
 void CInodeCommitOperation::update(ObjectOperation &op, inode_backtrace_t &bt) {
-  using ceph::encode;
+  using stone::encode;
 
   op.priority = priority;
   op.create(false);
@@ -77,22 +77,22 @@ protected:
   MDSRank *get_mds() override {return in->mdcache->mds;}
 public:
   explicit CInodeIOContext(CInode *in_) : in(in_) {
-    ceph_assert(in != NULL);
+    stone_assert(in != NULL);
   }
 };
 
 sr_t* const CInode::projected_inode::UNDEF_SRNODE = (sr_t*)(unsigned long)-1;
 
-LockType CInode::versionlock_type(CEPH_LOCK_IVERSION);
-LockType CInode::authlock_type(CEPH_LOCK_IAUTH);
-LockType CInode::linklock_type(CEPH_LOCK_ILINK);
-LockType CInode::dirfragtreelock_type(CEPH_LOCK_IDFT);
-LockType CInode::filelock_type(CEPH_LOCK_IFILE);
-LockType CInode::xattrlock_type(CEPH_LOCK_IXATTR);
-LockType CInode::snaplock_type(CEPH_LOCK_ISNAP);
-LockType CInode::nestlock_type(CEPH_LOCK_INEST);
-LockType CInode::flocklock_type(CEPH_LOCK_IFLOCK);
-LockType CInode::policylock_type(CEPH_LOCK_IPOLICY);
+LockType CInode::versionlock_type(STONE_LOCK_IVERSION);
+LockType CInode::authlock_type(STONE_LOCK_IAUTH);
+LockType CInode::linklock_type(STONE_LOCK_ILINK);
+LockType CInode::dirfragtreelock_type(STONE_LOCK_IDFT);
+LockType CInode::filelock_type(STONE_LOCK_IFILE);
+LockType CInode::xattrlock_type(STONE_LOCK_IXATTR);
+LockType CInode::snaplock_type(STONE_LOCK_ISNAP);
+LockType CInode::nestlock_type(STONE_LOCK_INEST);
+LockType CInode::flocklock_type(STONE_LOCK_IFLOCK);
+LockType CInode::policylock_type(STONE_LOCK_IPOLICY);
 
 std::string_view CInode::pin_name(int p) const
 {
@@ -125,17 +125,17 @@ std::string_view CInode::pin_name(int p) const
 //int cinode_pins[CINODE_NUM_PINS];  // counts
 ostream& CInode::print_db_line_prefix(ostream& out)
 {
-  return out << ceph_clock_now() << " mds." << mdcache->mds->get_nodeid() << ".cache.ino(" << ino() << ") ";
+  return out << stone_clock_now() << " mds." << mdcache->mds->get_nodeid() << ".cache.ino(" << ino() << ") ";
 }
 
 /*
  * write caps and lock ids
  */
 struct cinode_lock_info_t cinode_lock_info[] = {
-  { CEPH_LOCK_IFILE, CEPH_CAP_ANY_FILE_WR },
-  { CEPH_LOCK_IAUTH, CEPH_CAP_AUTH_EXCL },
-  { CEPH_LOCK_ILINK, CEPH_CAP_LINK_EXCL },
-  { CEPH_LOCK_IXATTR, CEPH_CAP_XATTR_EXCL },
+  { STONE_LOCK_IFILE, STONE_CAP_ANY_FILE_WR },
+  { STONE_LOCK_IAUTH, STONE_CAP_AUTH_EXCL },
+  { STONE_LOCK_ILINK, STONE_CAP_LINK_EXCL },
+  { STONE_LOCK_IXATTR, STONE_CAP_XATTR_EXCL },
 };
 int num_cinode_locks = sizeof(cinode_lock_info) / sizeof(cinode_lock_info[0]);
 
@@ -385,7 +385,7 @@ pair<bool,bool> CInode::split_need_snapflush(CInode *cowin, CInode *in)
   bool orig_need_flush = false;
   auto it = client_need_snapflush.lower_bound(cowin->first);
   while (it != client_need_snapflush.end() && it->first < in->first) {
-    ceph_assert(!it->second.empty());
+    stone_assert(!it->second.empty());
     if (cowin->last >= it->first) {
       cowin->auth_pin(this);
       cowin_need_flush = true;
@@ -416,7 +416,7 @@ void CInode::mark_dirty_rstat()
     } else {
       // under cross-MDS rename.
       // DIRTYRSTAT flag will get cleared when rename finishes
-      ceph_assert(state_test(STATE_AMBIGUOUSAUTH));
+      stone_assert(state_test(STATE_AMBIGUOUSAUTH));
     }
   }
 }
@@ -434,7 +434,7 @@ CInode::projected_inode CInode::project_inode(const MutationRef& mut,
 					      bool xattr, bool snap)
 {
   if (mut && mut->is_projected(this)) {
-    ceph_assert(!xattr && !snap);
+    stone_assert(!xattr && !snap);
     auto _inode = std::const_pointer_cast<mempool_inode>(projected_nodes.back().inode);
     return projected_inode(std::move(_inode), xattr_map_ptr());
   }
@@ -471,7 +471,7 @@ CInode::projected_inode CInode::project_inode(const MutationRef& mut,
 
 void CInode::pop_and_dirty_projected_inode(LogSegment *ls, const MutationRef& mut)
 {
-  ceph_assert(!projected_nodes.empty());
+  stone_assert(!projected_nodes.empty());
   auto front = std::move(projected_nodes.front());
   dout(15) << __func__ << " v" << front.inode->version << dendl;
 
@@ -534,14 +534,14 @@ const sr_t *CInode::get_projected_srnode() const {
 void CInode::project_snaprealm(sr_t *new_srnode)
 {
   dout(10) << __func__ << " " << new_srnode << dendl;
-  ceph_assert(projected_nodes.back().snapnode == projected_inode::UNDEF_SRNODE);
+  stone_assert(projected_nodes.back().snapnode == projected_inode::UNDEF_SRNODE);
   projected_nodes.back().snapnode = new_srnode;
   ++num_projected_srnodes;
 }
 
 void CInode::mark_snaprealm_global(sr_t *new_srnode)
 {
-  ceph_assert(!is_dir());
+  stone_assert(!is_dir());
   // 'last_destroyed' is no longer used, use it to store origin 'current_parent_since'
   new_srnode->last_destroyed = new_srnode->current_parent_since;
   new_srnode->current_parent_since = mdcache->get_global_snaprealm()->get_newest_seq() + 1;
@@ -576,7 +576,7 @@ void CInode::project_snaprealm_past_parent(SnapRealm *newparent)
  if parent DNE, we need to find what the parent actually is and fill that in */
 void CInode::record_snaprealm_past_parent(sr_t *new_snap, SnapRealm *newparent)
 {
-  ceph_assert(!new_snap->is_parent_global());
+  stone_assert(!new_snap->is_parent_global());
   SnapRealm *oldparent;
   if (!snaprealm) {
     oldparent = find_snaprealm();
@@ -602,7 +602,7 @@ void CInode::record_snaprealm_past_parent(sr_t *new_snap, SnapRealm *newparent)
 void CInode::record_snaprealm_parent_dentry(sr_t *new_snap, SnapRealm *oldparent,
 					    CDentry *dn, bool primary_dn)
 {
-  ceph_assert(new_snap->is_parent_global());
+  stone_assert(new_snap->is_parent_global());
 
   if (!oldparent)
     oldparent = dn->get_dir()->inode->find_snaprealm();
@@ -623,7 +623,7 @@ void CInode::record_snaprealm_parent_dentry(sr_t *new_snap, SnapRealm *oldparent
 
 void CInode::early_pop_projected_snaprealm()
 {
-  ceph_assert(!projected_nodes.empty());
+  stone_assert(!projected_nodes.empty());
   if (projected_nodes.front().snapnode != projected_inode::UNDEF_SRNODE) {
     pop_projected_snaprealm(projected_nodes.front().snapnode, true);
     projected_nodes.front().snapnode = projected_inode::UNDEF_SRNODE;
@@ -651,7 +651,7 @@ void CInode::pop_projected_snaprealm(sr_t *next_snaprealm, bool early)
       dout(10) << " realm " << *snaprealm << " parent " << *snaprealm->parent << dendl;
   } else {
     dout(10) << __func__ << (early ? " (early) null" : " null") << dendl;
-    ceph_assert(snaprealm);
+    stone_assert(snaprealm);
     snaprealm->merge_to(NULL);
   }
 }
@@ -667,9 +667,9 @@ __u32 InodeStoreBase::hash_dentry_name(std::string_view dn)
 {
   int which = inode->dir_layout.dl_dir_hash;
   if (!which)
-    which = CEPH_STR_HASH_LINUX;
-  ceph_assert(ceph_str_hash_valid(which));
-  return ceph_str_hash(which, dn.data(), dn.length());
+    which = STONE_STR_HASH_LINUX;
+  stone_assert(stone_str_hash_valid(which));
+  return stone_str_hash(which, dn.data(), dn.length());
 }
 
 frag_t InodeStoreBase::pick_dirfrag(std::string_view dn)
@@ -736,7 +736,7 @@ void CInode::verify_dirfrags()
       bad = true;
     }
   }
-  ceph_assert(!bad);
+  stone_assert(!bad);
 }
 
 void CInode::force_dirfrags()
@@ -782,13 +782,13 @@ CDir *CInode::get_approx_dirfrag(frag_t fg)
 
 CDir *CInode::get_or_open_dirfrag(MDCache *mdcache, frag_t fg)
 {
-  ceph_assert(is_dir());
+  stone_assert(is_dir());
 
   // have it?
   CDir *dir = get_dirfrag(fg);
   if (!dir) {
     // create it.
-    ceph_assert(is_auth() || mdcache->mds->is_any_replay());
+    stone_assert(is_auth() || mdcache->mds->is_any_replay());
     dir = new CDir(this, fg, mdcache, is_auth());
     add_dirfrag(dir);
   }
@@ -798,7 +798,7 @@ CDir *CInode::get_or_open_dirfrag(MDCache *mdcache, frag_t fg)
 CDir *CInode::add_dirfrag(CDir *dir)
 {
   auto em = dirfrags.emplace(std::piecewise_construct, std::forward_as_tuple(dir->dirfrag().frag), std::forward_as_tuple(dir));
-  ceph_assert(em.second);
+  stone_assert(em.second);
 
   if (stickydir_ref > 0) {
     dir->state_set(CDir::STATE_STICKY);
@@ -813,7 +813,7 @@ CDir *CInode::add_dirfrag(CDir *dir)
 void CInode::close_dirfrag(frag_t fg)
 {
   dout(14) << __func__ << " " << fg << dendl;
-  ceph_assert(dirfrags.count(fg));
+  stone_assert(dirfrags.count(fg));
   
   CDir *dir = dirfrags[fg];
   dir->remove_null_dentries();
@@ -834,7 +834,7 @@ void CInode::close_dirfrag(frag_t fg)
   for (const auto &p : dir->items)
     dout(14) << __func__ << " LEFTOVER dn " << *p.second << dendl;
 
-  ceph_assert(dir->get_num_ref() == 0);
+  stone_assert(dir->get_num_ref() == 0);
   delete dir;
   dirfrags.erase(fg);
 }
@@ -880,7 +880,7 @@ void CInode::get_stickydirs()
 
 void CInode::put_stickydirs()
 {
-  ceph_assert(stickydir_ref > 0);
+  stone_assert(stickydir_ref > 0);
   stickydir_ref--;
   if (stickydir_ref == 0) {
     put(PIN_STICKYDIRS);
@@ -960,7 +960,7 @@ bool CInode::is_ancestor_of(const CInode *other) const
       return true;
     const CDentry *pdn = other->get_oldest_parent_dn();
     if (!pdn) {
-      ceph_assert(other->is_base());
+      stone_assert(other->is_base());
       break;
     }
     other = pdn->get_dir()->get_inode();
@@ -975,7 +975,7 @@ bool CInode::is_projected_ancestor_of(const CInode *other) const
       return true;
     const CDentry *pdn = other->get_projected_parent_dn();
     if (!pdn) {
-      ceph_assert(other->is_base());
+      stone_assert(other->is_base());
       break;
     }
     other = pdn->get_dir()->get_inode();
@@ -1020,7 +1020,7 @@ void CInode::make_path(filepath& fp, bool projected) const
 {
   const CDentry *use_parent = projected ? get_projected_parent_dn() : parent;
   if (use_parent) {
-    ceph_assert(!is_base());
+    stone_assert(!is_base());
     use_parent->make_path(fp, projected);
   } else {
     fp = filepath(ino());
@@ -1042,7 +1042,7 @@ version_t CInode::pre_dirty()
     pv = _cdentry->pre_dirty(get_projected_version());
     dout(10) << "pre_dirty " << pv << " (current v " << get_inode()->version << ")" << dendl;
   } else {
-    ceph_assert(is_base());
+    stone_assert(is_base());
     pv = get_projected_version() + 1;
   }
   // force update backtrace for old format inode (see mempool_inode::decode)
@@ -1059,7 +1059,7 @@ void CInode::_mark_dirty(LogSegment *ls)
   if (!state_test(STATE_DIRTY)) {
     state_set(STATE_DIRTY);
     get(PIN_DIRTY);
-    ceph_assert(ls);
+    stone_assert(ls);
   }
   
   // move myself to this segment's dirty list
@@ -1079,7 +1079,7 @@ void CInode::mark_dirty(LogSegment *ls) {
   
   // only auth can get dirty.  "dirty" async data in replicas is relative to
   // filelock state, not the dirty flag.
-  ceph_assert(is_auth());
+  stone_assert(is_auth());
   
   // touch my private version
   _mark_dirty(ls);
@@ -1123,7 +1123,7 @@ object_t InodeStoreBase::get_object_name(inodeno_t ino, frag_t fg, std::string_v
 {
   char n[60];
   snprintf(n, sizeof(n), "%llx.%08llx", (long long unsigned)ino, (long long unsigned)fg);
-  ceph_assert(strlen(n) + suffix.size() < sizeof n);
+  stone_assert(strlen(n) + suffix.size() < sizeof n);
   strncat(n, suffix.data(), suffix.size());
   return object_t(n);
 }
@@ -1131,15 +1131,15 @@ object_t InodeStoreBase::get_object_name(inodeno_t ino, frag_t fg, std::string_v
 void CInode::store(MDSContext *fin)
 {
   dout(10) << __func__ << " " << get_version() << dendl;
-  ceph_assert(is_base());
+  stone_assert(is_base());
 
   if (snaprealm)
     purge_stale_snap_data(snaprealm->get_snaps());
 
   // encode
   bufferlist bl;
-  string magic = CEPH_FS_ONDISK_MAGIC;
-  using ceph::encode;
+  string magic = STONE_FS_ONDISK_MAGIC;
+  using stone::encode;
   encode(magic, bl);
   encode_store(bl, mdcache->mds->mdsmap->get_up_features());
 
@@ -1155,7 +1155,7 @@ void CInode::store(MDSContext *fin)
     new C_OnFinisher(new C_IO_Inode_Stored(this, get_version(), fin),
 		     mdcache->mds->finisher);
   mdcache->mds->objecter->mutate(oid, oloc, m, snapc,
-				 ceph::real_clock::now(), 0,
+				 stone::real_clock::now(), 0,
 				 newfin);
 }
 
@@ -1180,9 +1180,9 @@ void CInode::_stored(int r, version_t v, Context *fin)
 void CInode::flush(MDSContext *fin)
 {
   dout(10) << __func__ << " " << *this << dendl;
-  ceph_assert(is_auth() && can_auth_pin());
+  stone_assert(is_auth() && can_auth_pin());
 
-  MDSGatherBuilder gather(g_ceph_context);
+  MDSGatherBuilder gather(g_stone_context);
 
   if (is_dirty_parent()) {
     store_backtrace(gather.new_sub());
@@ -1208,7 +1208,7 @@ struct C_IO_Inode_Fetched : public CInodeIOContext {
   Context *fin;
   C_IO_Inode_Fetched(CInode *i, Context *f) : CInodeIOContext(i), fin(f) {}
   void finish(int r) override {
-    // Ignore 'r', because we fetch from two places, so r is usually CEPHFS_ENOENT
+    // Ignore 'r', because we fetch from two places, so r is usually STONEFS_ENOENT
     in->_fetched(bl, bl2, fin);
   }
   void print(ostream& out) const override {
@@ -1221,7 +1221,7 @@ void CInode::fetch(MDSContext *fin)
   dout(10) << __func__  << dendl;
 
   C_IO_Inode_Fetched *c = new C_IO_Inode_Fetched(this, fin);
-  C_GatherBuilder gather(g_ceph_context, new C_OnFinisher(c, mdcache->mds->finisher));
+  C_GatherBuilder gather(g_stone_context, new C_OnFinisher(c, mdcache->mds->finisher));
 
   object_t oid = CInode::get_object_name(ino(), frag_t(), "");
   object_locator_t oloc(mdcache->mds->get_metadata_pool());
@@ -1229,11 +1229,11 @@ void CInode::fetch(MDSContext *fin)
   // Old on-disk format: inode stored in xattr of a dirfrag
   ObjectOperation rd;
   rd.getxattr("inode", &c->bl, NULL);
-  mdcache->mds->objecter->read(oid, oloc, rd, CEPH_NOSNAP, (bufferlist*)NULL, 0, gather.new_sub());
+  mdcache->mds->objecter->read(oid, oloc, rd, STONE_NOSNAP, (bufferlist*)NULL, 0, gather.new_sub());
 
   // Current on-disk format: inode stored in a .inode object
   object_t oid2 = CInode::get_object_name(ino(), frag_t(), ".inode");
-  mdcache->mds->objecter->read(oid2, oloc, 0, 0, CEPH_NOSNAP, &c->bl2, 0, gather.new_sub());
+  mdcache->mds->objecter->read(oid2, oloc, 0, 0, STONE_NOSNAP, &c->bl2, 0, gather.new_sub());
 
   gather.activate();
 }
@@ -1248,21 +1248,21 @@ void CInode::_fetched(bufferlist& bl, bufferlist& bl2, Context *fin)
     p = bl.cbegin();
   } else {
     derr << "No data while reading inode " << ino() << dendl;
-    fin->complete(-CEPHFS_ENOENT);
+    fin->complete(-STONEFS_ENOENT);
     return;
   }
 
-  using ceph::decode;
+  using stone::decode;
   // Attempt decode
   try {
     string magic;
     decode(magic, p);
     dout(10) << " magic is '" << magic << "' (expecting '"
-             << CEPH_FS_ONDISK_MAGIC << "')" << dendl;
-    if (magic != CEPH_FS_ONDISK_MAGIC) {
-      dout(0) << "on disk magic '" << magic << "' != my magic '" << CEPH_FS_ONDISK_MAGIC
+             << STONE_FS_ONDISK_MAGIC << "')" << dendl;
+    if (magic != STONE_FS_ONDISK_MAGIC) {
+      dout(0) << "on disk magic '" << magic << "' != my magic '" << STONE_FS_ONDISK_MAGIC
               << "'" << dendl;
-      fin->complete(-CEPHFS_EINVAL);
+      fin->complete(-STONEFS_EINVAL);
     } else {
       decode_store(p);
       dout(10) << "_fetched " << *this << dendl;
@@ -1270,7 +1270,7 @@ void CInode::_fetched(bufferlist& bl, bufferlist& bl2, Context *fin)
     }
   } catch (buffer::error &err) {
     derr << "Corrupt inode " << ino() << ": " << err.what() << dendl;
-    fin->complete(-CEPHFS_EINVAL);
+    fin->complete(-STONEFS_EINVAL);
     return;
   }
 }
@@ -1329,7 +1329,7 @@ void CInode::_commit_ops(int r, C_GatherBuilder &gather_bld,
     object_locator_t oloc(op.get_pool());
     op.update(obj_op, bt);
     mdcache->mds->objecter->mutate(oid, oloc, obj_op, snapc,
-                                   ceph::real_clock::now(),
+                                   stone::real_clock::now(),
                                    0, gather_bld.new_sub());
   }
 }
@@ -1338,10 +1338,10 @@ void CInode::_store_backtrace(std::vector<CInodeCommitOperation> &ops_vec,
                               inode_backtrace_t &bt, int op_prio)
 {
   dout(10) << __func__ << " on " << *this << dendl;
-  ceph_assert(is_dirty_parent());
+  stone_assert(is_dirty_parent());
 
   if (op_prio < 0)
-    op_prio = CEPH_MSG_PRIO_DEFAULT;
+    op_prio = STONE_MSG_PRIO_DEFAULT;
 
   auth_pin(this);
 
@@ -1377,12 +1377,12 @@ void CInode::store_backtrace(MDSContext *fin, int op_prio)
 
   _store_backtrace(ops_vec, bt, op_prio);
 
-  C_GatherBuilder gather(g_ceph_context,
+  C_GatherBuilder gather(g_stone_context,
 			 new C_OnFinisher(
 			   new C_IO_Inode_StoredBacktrace(this, version, fin),
 			   mdcache->mds->finisher));
   _commit_ops(0, gather, ops_vec, bt);
-  ceph_assert(gather.has_subs());
+  stone_assert(gather.has_subs());
   gather.activate();
 }
 
@@ -1396,18 +1396,18 @@ void CInode::store_backtrace(CInodeCommitOperations &op, int op_prio)
 
 void CInode::_stored_backtrace(int r, version_t v, Context *fin)
 {
-  if (r == -CEPHFS_ENOENT) {
+  if (r == -STONEFS_ENOENT) {
     const int64_t pool = get_backtrace_pool();
     bool exists = mdcache->mds->objecter->with_osdmap(
         [pool](const OSDMap &osd_map) {
           return osd_map.have_pg_pool(pool);
         });
 
-    // This CEPHFS_ENOENT is because the pool doesn't exist (the user deleted it
+    // This STONEFS_ENOENT is because the pool doesn't exist (the user deleted it
     // out from under us), so the backtrace can never be written, so pretend
     // to succeed so that the user can proceed to e.g. delete the file.
     if (!exists) {
-      dout(4) << __func__ << " got CEPHFS_ENOENT: a data pool was deleted "
+      dout(4) << __func__ << " got STONEFS_ENOENT: a data pool was deleted "
                  "beneath us!" << dendl;
       r = 0;
     }
@@ -1445,7 +1445,7 @@ void CInode::mark_dirty_parent(LogSegment *ls, bool dirty_pool)
     dout(10) << __func__ << dendl;
     state_set(STATE_DIRTYPARENT);
     get(PIN_DIRTYPARENT);
-    ceph_assert(ls);
+    stone_assert(ls);
   }
   if (dirty_pool)
     state_set(STATE_DIRTYPOOL);
@@ -1473,19 +1473,19 @@ void CInode::verify_diri_backtrace(bufferlist &bl, int err)
 
   if (err == 0) {
     inode_backtrace_t backtrace;
-    using ceph::decode;
+    using stone::decode;
     decode(backtrace, bl);
     CDentry *pdn = get_parent_dn();
     if (backtrace.ancestors.empty() ||
 	backtrace.ancestors[0].dname != pdn->get_name() ||
 	backtrace.ancestors[0].dirino != pdn->get_dir()->ino())
-      err = -CEPHFS_EINVAL;
+      err = -STONEFS_EINVAL;
   }
 
   if (err) {
     MDSRank *mds = mdcache->mds;
     mds->clog->error() << "bad backtrace on directory inode " << ino();
-    ceph_assert(!"bad backtrace" == (g_conf()->mds_verify_backtrace > 1));
+    stone_assert(!"bad backtrace" == (g_conf()->mds_verify_backtrace > 1));
 
     mark_dirty_parent(mds->mdlog->get_current_segment(), false);
     mds->mdlog->flush();
@@ -1497,7 +1497,7 @@ void CInode::verify_diri_backtrace(bufferlist &bl, int err)
 
 
 void InodeStoreBase::encode_xattrs(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   if (xattrs)
     encode(*xattrs, bl);
   else
@@ -1505,7 +1505,7 @@ void InodeStoreBase::encode_xattrs(bufferlist &bl) const {
 }
 
 void InodeStoreBase::decode_xattrs(bufferlist::const_iterator &p) {
-  using ceph::decode;
+  using stone::decode;
   mempool_xattr_map tmp;
   decode_noshare(tmp, p);
   if (tmp.empty()) {
@@ -1516,7 +1516,7 @@ void InodeStoreBase::decode_xattrs(bufferlist::const_iterator &p) {
 }
 
 void InodeStoreBase::encode_old_inodes(bufferlist &bl, uint64_t features) const {
-  using ceph::encode;
+  using stone::encode;
   if (old_inodes)
     encode(*old_inodes, bl, features);
   else
@@ -1524,7 +1524,7 @@ void InodeStoreBase::encode_old_inodes(bufferlist &bl, uint64_t features) const 
 }
 
 void InodeStoreBase::decode_old_inodes(bufferlist::const_iterator &p) {
-  using ceph::decode;
+  using stone::decode;
   mempool_old_inode_map tmp;
   decode(tmp, p);
   if (tmp.empty()) {
@@ -1537,7 +1537,7 @@ void InodeStoreBase::decode_old_inodes(bufferlist::const_iterator &p) {
 void InodeStoreBase::encode_bare(bufferlist &bl, uint64_t features,
 				 const bufferlist *snap_blob) const
 {
-  using ceph::encode;
+  using stone::encode;
   encode(*inode, bl, features);
   if (inode->is_symlink())
     encode(symlink, bl);
@@ -1572,7 +1572,7 @@ void CInode::encode_store(bufferlist& bl, uint64_t features)
 void InodeStoreBase::decode_bare(bufferlist::const_iterator &bl,
 			      bufferlist& snap_blob, __u8 struct_v)
 {
-  using ceph::decode;
+  using stone::decode;
 
   auto _inode = allocate_inode();
   decode(*_inode, bl);
@@ -1632,16 +1632,16 @@ void CInode::decode_store(bufferlist::const_iterator& bl)
 SimpleLock* CInode::get_lock(int type)
 {
   switch (type) {
-    case CEPH_LOCK_IVERSION: return &versionlock;
-    case CEPH_LOCK_IFILE: return &filelock;
-    case CEPH_LOCK_IAUTH: return &authlock;
-    case CEPH_LOCK_ILINK: return &linklock;
-    case CEPH_LOCK_IDFT: return &dirfragtreelock;
-    case CEPH_LOCK_IXATTR: return &xattrlock;
-    case CEPH_LOCK_ISNAP: return &snaplock;
-    case CEPH_LOCK_INEST: return &nestlock;
-    case CEPH_LOCK_IFLOCK: return &flocklock;
-    case CEPH_LOCK_IPOLICY: return &policylock;
+    case STONE_LOCK_IVERSION: return &versionlock;
+    case STONE_LOCK_IFILE: return &filelock;
+    case STONE_LOCK_IAUTH: return &authlock;
+    case STONE_LOCK_ILINK: return &linklock;
+    case STONE_LOCK_IDFT: return &dirfragtreelock;
+    case STONE_LOCK_IXATTR: return &xattrlock;
+    case STONE_LOCK_ISNAP: return &snaplock;
+    case STONE_LOCK_INEST: return &nestlock;
+    case STONE_LOCK_IFLOCK: return &flocklock;
+    case STONE_LOCK_IPOLICY: return &policylock;
   }
   return 0;
 }
@@ -1665,7 +1665,7 @@ void CInode::encode_lock_iauth(bufferlist& bl)
 
 void CInode::decode_lock_iauth(bufferlist::const_iterator& p)
 {
-  ceph_assert(!is_auth());
+  stone_assert(!is_auth());
   auto _inode = allocate_inode(*get_inode());
   DECODE_START(1, p);
   decode(_inode->version, p);
@@ -1690,7 +1690,7 @@ void CInode::encode_lock_ilink(bufferlist& bl)
 
 void CInode::decode_lock_ilink(bufferlist::const_iterator& p)
 {
-  ceph_assert(!is_auth());
+  stone_assert(!is_auth());
   auto _inode = allocate_inode(*get_inode());
   DECODE_START(1, p);
   decode(_inode->version, p);
@@ -1756,7 +1756,7 @@ void CInode::decode_lock_idft(bufferlist::const_iterator& p)
       for (auto fg : authfrags) {
         if (!dirfragtree.is_leaf(fg)) {
           dout(10) << " forcing frag " << fg << " to leaf (split|merge)" << dendl;
-          dirfragtree.force_to_leaf(g_ceph_context, fg);
+          dirfragtree.force_to_leaf(g_stone_context, fg);
           dirfragtreelock.mark_dirty();  // ok bc we're auth and caller will handle
         }
       }
@@ -1769,7 +1769,7 @@ void CInode::decode_lock_idft(bufferlist::const_iterator& p)
       for (const auto &p : dirfrags) {
         if (!dirfragtree.is_leaf(p.first)) {
           dout(10) << " forcing open dirfrag " << p.first << " to leaf (racing with split|merge)" << dendl;
-          dirfragtree.force_to_leaf(g_ceph_context, p.first);
+          dirfragtree.force_to_leaf(g_stone_context, p.first);
         }
 	if (p.second->is_auth())
 	  p.second->state_clear(CDir::STATE_DIRTYDFT);
@@ -1886,7 +1886,7 @@ void CInode::decode_lock_ifile(bufferlist::const_iterator& p)
 
     CDir *dir = get_dirfrag(fg);
     if (is_auth()) {
-      ceph_assert(dir);                // i am auth; i had better have this dir open
+      stone_assert(dir);                // i am auth; i had better have this dir open
       dout(10) << fg << " first " << dir->first << " -> " << fgfirst
                << " on " << *dir << dendl;
       dir->first = fgfirst;
@@ -1992,7 +1992,7 @@ void CInode::decode_lock_inest(bufferlist::const_iterator& p)
     dout(10) << __func__ << " " << fg << " dirty_old_rstat " << dirty_old_rstat << dendl;
     CDir *dir = get_dirfrag(fg);
     if (is_auth()) {
-      ceph_assert(dir);                // i am auth; i had better have this dir open
+      stone_assert(dir);                // i am auth; i had better have this dir open
       dout(10) << fg << " first " << dir->first << " -> " << fgfirst
                << " on " << *dir << dendl;
       dir->first = fgfirst;
@@ -2033,7 +2033,7 @@ void CInode::encode_lock_ixattr(bufferlist& bl)
 
 void CInode::decode_lock_ixattr(bufferlist::const_iterator& p)
 {
-  ceph_assert(!is_auth());
+  stone_assert(!is_auth());
   auto _inode = allocate_inode(*get_inode());
   DECODE_START(1, p);
   decode(_inode->version, p);
@@ -2057,7 +2057,7 @@ void CInode::encode_lock_isnap(bufferlist& bl)
 
 void CInode::decode_lock_isnap(bufferlist::const_iterator& p)
 {
-  ceph_assert(!is_auth());
+  stone_assert(!is_auth());
   auto _inode = allocate_inode(*get_inode());
   DECODE_START(1, p);
   decode(_inode->version, p);
@@ -2079,7 +2079,7 @@ void CInode::encode_lock_iflock(bufferlist& bl)
 
 void CInode::decode_lock_iflock(bufferlist::const_iterator& p)
 {
-  ceph_assert(!is_auth());
+  stone_assert(!is_auth());
   auto _inode = allocate_inode(*get_inode());
   DECODE_START(1, p);
   decode(_inode->version, p);
@@ -2105,7 +2105,7 @@ void CInode::encode_lock_ipolicy(bufferlist& bl)
 
 void CInode::decode_lock_ipolicy(bufferlist::const_iterator& p)
 {
-  ceph_assert(!is_auth());
+  stone_assert(!is_auth());
   auto _inode = allocate_inode(*get_inode());
   DECODE_START(1, p);
   if (is_dir()) {
@@ -2139,44 +2139,44 @@ void CInode::encode_lock_state(int type, bufferlist& bl)
     encode(parent->first, bl);
 
   switch (type) {
-  case CEPH_LOCK_IAUTH:
+  case STONE_LOCK_IAUTH:
     encode_lock_iauth(bl);
     break;
 
-  case CEPH_LOCK_ILINK:
+  case STONE_LOCK_ILINK:
     encode_lock_ilink(bl);
     break;
 
-  case CEPH_LOCK_IDFT:
+  case STONE_LOCK_IDFT:
     encode_lock_idft(bl);
     break;
 
-  case CEPH_LOCK_IFILE:
+  case STONE_LOCK_IFILE:
     encode_lock_ifile(bl);
     break;
 
-  case CEPH_LOCK_INEST:
+  case STONE_LOCK_INEST:
     encode_lock_inest(bl);
     break;
     
-  case CEPH_LOCK_IXATTR:
+  case STONE_LOCK_IXATTR:
     encode_lock_ixattr(bl);
     break;
 
-  case CEPH_LOCK_ISNAP:
+  case STONE_LOCK_ISNAP:
     encode_lock_isnap(bl);
     break;
 
-  case CEPH_LOCK_IFLOCK:
+  case STONE_LOCK_IFLOCK:
     encode_lock_iflock(bl);
     break;
 
-  case CEPH_LOCK_IPOLICY:
+  case STONE_LOCK_IPOLICY:
     encode_lock_ipolicy(bl);
     break;
   
   default:
-    ceph_abort();
+    stone_abort();
   }
   ENCODE_FINISH(bl);
 }
@@ -2191,7 +2191,7 @@ void CInode::decode_lock_state(int type, const bufferlist& bl)
   utime_t tm;
 
   snapid_t newfirst;
-  using ceph::decode;
+  using stone::decode;
   decode(newfirst, p);
   if (!is_auth() && newfirst != first) {
     dout(10) << __func__ << " first " << first << " -> " << newfirst << dendl;
@@ -2206,44 +2206,44 @@ void CInode::decode_lock_state(int type, const bufferlist& bl)
   }
 
   switch (type) {
-  case CEPH_LOCK_IAUTH:
+  case STONE_LOCK_IAUTH:
     decode_lock_iauth(p);
     break;
 
-  case CEPH_LOCK_ILINK:
+  case STONE_LOCK_ILINK:
     decode_lock_ilink(p);
     break;
 
-  case CEPH_LOCK_IDFT:
+  case STONE_LOCK_IDFT:
     decode_lock_idft(p);
     break;
 
-  case CEPH_LOCK_IFILE:
+  case STONE_LOCK_IFILE:
     decode_lock_ifile(p);
     break;
 
-  case CEPH_LOCK_INEST:
+  case STONE_LOCK_INEST:
     decode_lock_inest(p);
     break;
 
-  case CEPH_LOCK_IXATTR:
+  case STONE_LOCK_IXATTR:
     decode_lock_ixattr(p);
     break;
 
-  case CEPH_LOCK_ISNAP:
+  case STONE_LOCK_ISNAP:
     decode_lock_isnap(p);
     break;
 
-  case CEPH_LOCK_IFLOCK:
+  case STONE_LOCK_IFLOCK:
     decode_lock_iflock(p);
     break;
 
-  case CEPH_LOCK_IPOLICY:
+  case STONE_LOCK_IPOLICY:
     decode_lock_ipolicy(p);
     break;
 
   default:
-    ceph_abort();
+    stone_abort();
   }
   DECODE_FINISH(p);
 }
@@ -2267,22 +2267,22 @@ void CInode::clear_scatter_dirty()
 void CInode::clear_dirty_scattered(int type)
 {
   dout(10) << __func__ << " " << type << " on " << *this << dendl;
-  ceph_assert(is_dir());
+  stone_assert(is_dir());
   switch (type) {
-  case CEPH_LOCK_IFILE:
+  case STONE_LOCK_IFILE:
     item_dirty_dirfrag_dir.remove_myself();
     break;
 
-  case CEPH_LOCK_INEST:
+  case STONE_LOCK_INEST:
     item_dirty_dirfrag_nest.remove_myself();
     break;
 
-  case CEPH_LOCK_IDFT:
+  case STONE_LOCK_IDFT:
     item_dirty_dirfrag_dirfragtree.remove_myself();
     break;
 
   default:
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -2295,7 +2295,7 @@ void CInode::clear_dirty_scattered(int type)
 void CInode::start_scatter(ScatterLock *lock)
 {
   dout(10) << __func__ << " " << *lock << " on " << *this << dendl;
-  ceph_assert(is_auth());
+  stone_assert(is_auth());
   const auto& pi = get_projected_inode();
 
   for (const auto &p : dirfrags) {
@@ -2308,15 +2308,15 @@ void CInode::start_scatter(ScatterLock *lock)
       continue;
 
     switch (lock->get_type()) {
-    case CEPH_LOCK_IFILE:
+    case STONE_LOCK_IFILE:
       finish_scatter_update(lock, dir, pi->dirstat.version, pf->accounted_fragstat.version);
       break;
 
-    case CEPH_LOCK_INEST:
+    case STONE_LOCK_INEST:
       finish_scatter_update(lock, dir, pi->rstat.version, pf->accounted_rstat.version);
       break;
 
-    case CEPH_LOCK_IDFT:
+    case STONE_LOCK_IDFT:
       dir->state_clear(CDir::STATE_DIRTYDFT);
       break;
     }
@@ -2342,7 +2342,7 @@ void CInode::finish_scatter_update(ScatterLock *lock, CDir *dir,
 				   version_t inode_version, version_t dir_accounted_version)
 {
   frag_t fg = dir->get_frag();
-  ceph_assert(dir->is_auth());
+  stone_assert(dir->is_auth());
 
   if (dir->is_frozen()) {
     dout(10) << __func__ << " " << fg << " frozen, marking " << *lock << " stale " << *dir << dendl;
@@ -2360,12 +2360,12 @@ void CInode::finish_scatter_update(ScatterLock *lock, CDir *dir,
 
       std::string_view ename;
       switch (lock->get_type()) {
-      case CEPH_LOCK_IFILE:
+      case STONE_LOCK_IFILE:
 	pf->fragstat.version = inode_version;
 	pf->accounted_fragstat = pf->fragstat;
 	ename = "lock ifile accounted scatter stat update";
 	break;
-      case CEPH_LOCK_INEST:
+      case STONE_LOCK_INEST:
 	pf->rstat.version = inode_version;
 	pf->accounted_rstat = pf->rstat;
 	ename = "lock inest accounted scatter stat update";
@@ -2378,7 +2378,7 @@ void CInode::finish_scatter_update(ScatterLock *lock, CDir *dir,
 
 	break;
       default:
-	ceph_abort();
+	stone_abort();
       }
 	
       EUpdate *le = new EUpdate(mdlog, ename);
@@ -2386,10 +2386,10 @@ void CInode::finish_scatter_update(ScatterLock *lock, CDir *dir,
       le->metablob.add_dir_context(dir);
       le->metablob.add_dir(dir, true);
       
-      ceph_assert(!dir->is_frozen());
+      stone_assert(!dir->is_frozen());
       mut->auth_pin(dir);
 
-      if (lock->get_type() == CEPH_LOCK_INEST && 
+      if (lock->get_type() == STONE_LOCK_INEST && 
 	  !is_auth() && lock->get_state() == LOCK_MIX) {
         dout(10) << __func__ << " finish assimilating dirty rstat on " 
           << *dir << dendl; 
@@ -2447,17 +2447,17 @@ void CInode::finish_scatter_gather_update(int type, MutationRef& mut)
   LogChannelRef clog = mdcache->mds->clog;
 
   dout(10) << __func__ << " " << type << " on " << *this << dendl;
-  ceph_assert(is_auth());
+  stone_assert(is_auth());
 
   switch (type) {
-  case CEPH_LOCK_IFILE:
+  case STONE_LOCK_IFILE:
     {
       fragtree_t tmpdft = dirfragtree;
       struct frag_info_t dirstat;
       bool dirstat_valid = true;
 
       // adjust summation
-      ceph_assert(is_auth());
+      stone_assert(is_auth());
       auto pi = _get_projected_inode();
 
       bool touched_mtime = false, touched_chattr = false;
@@ -2496,7 +2496,7 @@ void CInode::finish_scatter_gather_update(int type, MutationRef& mut)
 	    pf->fragstat.nsubdirs < 0) {
 	  clog->error() << "bad/negative dir size on "
 			<< dir->dirfrag() << " " << pf->fragstat;
-	  ceph_assert(!"bad/negative fragstat" == g_conf()->mds_verify_scatter);
+	  stone_assert(!"bad/negative fragstat" == g_conf()->mds_verify_scatter);
 
 	  auto _pf = const_cast<fnode_t*>(pf.get());
 	  if (pf->fragstat.nfiles < 0)
@@ -2513,7 +2513,7 @@ void CInode::finish_scatter_gather_update(int type, MutationRef& mut)
 	  dout(10) << fg << " updated accounted_fragstat " << pf->fragstat << " on " << *dir << dendl;
 	}
 
-	tmpdft.force_to_leaf(g_ceph_context, fg);
+	tmpdft.force_to_leaf(g_stone_context, fg);
 	dirstat.add(pf->fragstat);
       }
       if (touched_mtime)
@@ -2537,7 +2537,7 @@ void CInode::finish_scatter_gather_update(int type, MutationRef& mut)
 	  } else {
 	    clog->error() << "unmatched fragstat on " << ino() << ", inode has "
 			  << pi->dirstat << ", dirfrags have " << dirstat;
-	    ceph_assert(!"unmatched fragstat" == g_conf()->mds_verify_scatter);
+	    stone_assert(!"unmatched fragstat" == g_conf()->mds_verify_scatter);
 	  }
 	  // trust the dirfrags for now
 	  version_t v = pi->dirstat.version;
@@ -2555,7 +2555,7 @@ void CInode::finish_scatter_gather_update(int type, MutationRef& mut)
         make_path_string(path);
 	clog->error() << "Inconsistent statistics detected: fragstat on inode "
                       << ino() << " (" << path << "), inode has " << pi->dirstat;
-	ceph_assert(!"bad/negative fragstat" == g_conf()->mds_verify_scatter);
+	stone_assert(!"bad/negative fragstat" == g_conf()->mds_verify_scatter);
 
 	if (pi->dirstat.nfiles < 0)
 	  pi->dirstat.nfiles = 0;
@@ -2565,10 +2565,10 @@ void CInode::finish_scatter_gather_update(int type, MutationRef& mut)
     }
     break;
 
-  case CEPH_LOCK_INEST:
+  case STONE_LOCK_INEST:
     {
       // adjust summation
-      ceph_assert(is_auth());
+      stone_assert(is_auth());
 
       fragtree_t tmpdft = dirfragtree;
       nest_info_t rstat;
@@ -2613,7 +2613,7 @@ void CInode::finish_scatter_gather_update(int type, MutationRef& mut)
 	  dout(20) << fg << " accounted_rstat " << pf->accounted_rstat << dendl;
 	  dout(20) << fg << " dirty_old_rstat " << dir->dirty_old_rstat << dendl;
 	  mdcache->project_rstat_frag_to_inode(pf->rstat, pf->accounted_rstat,
-					       dir->first, CEPH_NOSNAP, this, true);
+					       dir->first, STONE_NOSNAP, this, true);
 	  for (auto &p : dir->dirty_old_rstat) {
 	    mdcache->project_rstat_frag_to_inode(p.second.rstat, p.second.accounted_rstat,
 						 p.second.first, p.first, this, true);
@@ -2633,7 +2633,7 @@ void CInode::finish_scatter_gather_update(int type, MutationRef& mut)
 	  dout(10) << fg << " updated accounted_rstat " << pf->rstat << " on " << *dir << dendl;
 	}
 
-	tmpdft.force_to_leaf(g_ceph_context, fg);
+	tmpdft.force_to_leaf(g_stone_context, fg);
 	rstat.add(pf->rstat);
       }
       dout(20) << " final rstat " << pi->rstat << dendl;
@@ -2654,7 +2654,7 @@ void CInode::finish_scatter_gather_update(int type, MutationRef& mut)
 	    clog->error() << "inconsistent rstat on inode " << ino()
                           << ", inode has " << pi->rstat
                           << ", directory fragments have " << rstat;
-	    ceph_assert(!"unmatched rstat" == g_conf()->mds_verify_scatter);
+	    stone_assert(!"unmatched rstat" == g_conf()->mds_verify_scatter);
 	  }
 	  // trust the dirfrag for now
 	  version_t v = pi->rstat.version;
@@ -2669,32 +2669,32 @@ void CInode::finish_scatter_gather_update(int type, MutationRef& mut)
     }
     break;
 
-  case CEPH_LOCK_IDFT:
+  case STONE_LOCK_IDFT:
     break;
 
   default:
-    ceph_abort();
+    stone_abort();
   }
 }
 
 void CInode::finish_scatter_gather_update_accounted(int type, EMetaBlob *metablob)
 {
   dout(10) << __func__ << " " << type << " on " << *this << dendl;
-  ceph_assert(is_auth());
+  stone_assert(is_auth());
 
   for (const auto &p : dirfrags) {
     CDir *dir = p.second;
     if (!dir->is_auth() || dir->get_version() == 0 || dir->is_frozen())
       continue;
     
-    if (type == CEPH_LOCK_IDFT)
+    if (type == STONE_LOCK_IDFT)
       continue;  // nothing to do.
 
-    if (type == CEPH_LOCK_INEST)
+    if (type == STONE_LOCK_INEST)
       dir->assimilate_dirty_rstat_inodes_finish(metablob);
 
     dout(10) << " journaling updated frag accounted_ on " << *dir << dendl;
-    ceph_assert(dir->is_projected());
+    stone_assert(dir->is_projected());
     metablob->add_dir(dir, true);
   }
 }
@@ -2791,7 +2791,7 @@ void CInode::maybe_finish_freeze_inode()
     return;
 
   dout(10) << "maybe_finish_freeze_inode - frozen" << dendl;
-  ceph_assert(auth_pins == auth_pin_freeze_allowance);
+  stone_assert(auth_pins == auth_pin_freeze_allowance);
   get(PIN_FROZEN);
   put(PIN_FREEZING);
   state_clear(STATE_FREEZING);
@@ -2806,10 +2806,10 @@ void CInode::maybe_finish_freeze_inode()
 bool CInode::freeze_inode(int auth_pin_allowance)
 {
   CDir *dir = get_parent_dir();
-  ceph_assert(dir);
+  stone_assert(dir);
 
-  ceph_assert(auth_pin_allowance > 0);  // otherwise we need to adjust parent's nested_auth_pins
-  ceph_assert(auth_pins >= auth_pin_allowance);
+  stone_assert(auth_pin_allowance > 0);  // otherwise we need to adjust parent's nested_auth_pins
+  stone_assert(auth_pins >= auth_pin_allowance);
   if (auth_pins == auth_pin_allowance && !dir->frozen_inode_suppressed) {
     dout(10) << "freeze_inode - frozen" << dendl;
     if (!state_test(STATE_FROZEN)) {
@@ -2831,8 +2831,8 @@ bool CInode::freeze_inode(int auth_pin_allowance)
     mdcache->mds->locker->invalidate_lock_caches(dir);
 
   const static int lock_types[] = {
-    CEPH_LOCK_IVERSION, CEPH_LOCK_IFILE, CEPH_LOCK_IAUTH, CEPH_LOCK_ILINK, CEPH_LOCK_IDFT,
-    CEPH_LOCK_IXATTR, CEPH_LOCK_ISNAP, CEPH_LOCK_INEST, CEPH_LOCK_IFLOCK, CEPH_LOCK_IPOLICY, 0
+    STONE_LOCK_IVERSION, STONE_LOCK_IFILE, STONE_LOCK_IAUTH, STONE_LOCK_ILINK, STONE_LOCK_IDFT,
+    STONE_LOCK_IXATTR, STONE_LOCK_ISNAP, STONE_LOCK_INEST, STONE_LOCK_IFLOCK, STONE_LOCK_IPOLICY, 0
   };
   for (int i = 0; lock_types[i]; ++i) {
     auto lock = get_lock(lock_types[i]);
@@ -2856,7 +2856,7 @@ void CInode::unfreeze_inode(MDSContext::vec& finished)
     put(PIN_FROZEN);
     get_parent_dir()->num_frozen_inodes--;
   } else 
-    ceph_abort();
+    stone_abort();
   take_waiting(WAIT_UNFREEZE, finished);
 }
 
@@ -2869,14 +2869,14 @@ void CInode::unfreeze_inode()
 
 void CInode::freeze_auth_pin()
 {
-  ceph_assert(state_test(CInode::STATE_FROZEN));
+  stone_assert(state_test(CInode::STATE_FROZEN));
   state_set(CInode::STATE_FROZENAUTHPIN);
   get_parent_dir()->num_frozen_inodes++;
 }
 
 void CInode::unfreeze_auth_pin()
 {
-  ceph_assert(state_test(CInode::STATE_FROZENAUTHPIN));
+  stone_assert(state_test(CInode::STATE_FROZENAUTHPIN));
   state_clear(CInode::STATE_FROZENAUTHPIN);
   get_parent_dir()->num_frozen_inodes--;
   if (!state_test(STATE_FREEZING|STATE_FROZEN)) {
@@ -2888,7 +2888,7 @@ void CInode::unfreeze_auth_pin()
 
 void CInode::clear_ambiguous_auth(MDSContext::vec& finished)
 {
-  ceph_assert(state_test(CInode::STATE_AMBIGUOUSAUTH));
+  stone_assert(state_test(CInode::STATE_AMBIGUOUSAUTH));
   state_clear(CInode::STATE_AMBIGUOUSAUTH);
   take_waiting(CInode::WAIT_SINGLEAUTH, finished);
 }
@@ -2940,7 +2940,7 @@ void CInode::auth_unpin(void *by)
 #ifdef MDS_AUTHPIN_SET
   {
     auto it = auth_pin_set.find(by);
-    ceph_assert(it != auth_pin_set.end());
+    stone_assert(it != auth_pin_set.end());
     auth_pin_set.erase(it);
   }
 #endif
@@ -2950,7 +2950,7 @@ void CInode::auth_unpin(void *by)
   
   dout(10) << "auth_unpin by " << by << " on " << *this << " now " << auth_pins << dendl;
   
-  ceph_assert(auth_pins >= 0);
+  stone_assert(auth_pins >= 0);
 
   if (parent)
     parent->adjust_nested_auth_pins(-1, by);
@@ -2990,7 +2990,7 @@ snapid_t CInode::get_oldest_snap()
 
 const CInode::mempool_old_inode& CInode::cow_old_inode(snapid_t follows, bool cow_head)
 {
-  ceph_assert(follows >= first);
+  stone_assert(follows >= first);
 
   const auto& pi = cow_head ? get_projected_inode() : get_previous_projected_inode();
   const auto& px = cow_head ? get_projected_xattrs() : get_previous_projected_xattrs();
@@ -3140,14 +3140,14 @@ SnapRealm *CInode::find_snaprealm() const
 void CInode::encode_snap_blob(bufferlist &snapbl)
 {
   if (snaprealm) {
-    using ceph::encode;
+    using stone::encode;
     encode(snaprealm->srnode, snapbl);
     dout(20) << __func__ << " " << *snaprealm << dendl;
   }
 }
 void CInode::decode_snap_blob(const bufferlist& snapbl)
 {
-  using ceph::decode;
+  using stone::decode;
   if (snapbl.length()) {
     open_snaprealm();
     auto old_flags = snaprealm->srnode.flags;
@@ -3160,8 +3160,8 @@ void CInode::decode_snap_blob(const bufferlist& snapbl)
     }
     dout(20) << __func__ << " " << *snaprealm << dendl;
   } else if (snaprealm &&
-	     !is_root() && !is_mdsdir()) { // see https://tracker.ceph.com/issues/42675
-    ceph_assert(mdcache->mds->is_any_replay());
+	     !is_root() && !is_mdsdir()) { // see https://tracker.stone.com/issues/42675
+    stone_assert(mdcache->mds->is_any_replay());
     snaprealm->merge_to(NULL);
   }
 }
@@ -3201,7 +3201,7 @@ client_t CInode::calc_ideal_loner()
     if (!p.second.is_stale() &&
 	(is_dir() ?
 	 !has_subtree_or_exporting_dirfrag() :
-	 (p.second.wanted() & (CEPH_CAP_ANY_WR|CEPH_CAP_FILE_RD)))) {
+	 (p.second.wanted() & (STONE_CAP_ANY_WR|STONE_CAP_FILE_RD)))) {
       if (n)
 	return -1;
       n++;
@@ -3226,14 +3226,14 @@ bool CInode::choose_ideal_loner()
       set_loner_cap(want_loner_cap);
       changed = true;
     } else
-      ceph_assert(loner_cap == want_loner_cap);
+      stone_assert(loner_cap == want_loner_cap);
   }
   return changed;
 }
 
 bool CInode::try_set_loner()
 {
-  ceph_assert(want_loner_cap >= 0);
+  stone_assert(want_loner_cap >= 0);
   if (loner_cap >= 0 && loner_cap != want_loner_cap)
     return false;
   set_loner_cap(want_loner_cap);
@@ -3274,10 +3274,10 @@ void CInode::choose_lock_state(SimpleLock *lock, int allissued)
     if (lock->is_xlocked()) {
       // do nothing here
     } else if (lock->get_state() != LOCK_MIX) {
-      if (issued & (CEPH_CAP_GEXCL | CEPH_CAP_GBUFFER))
+      if (issued & (STONE_CAP_GEXCL | STONE_CAP_GBUFFER))
 	lock->set_state(LOCK_EXCL);
-      else if (issued & CEPH_CAP_GWR) {
-        if (issued & (CEPH_CAP_GCACHE | CEPH_CAP_GSHARED))
+      else if (issued & STONE_CAP_GWR) {
+        if (issued & (STONE_CAP_GCACHE | STONE_CAP_GSHARED))
           lock->set_state(LOCK_EXCL);
         else
           lock->set_state(LOCK_MIX);
@@ -3292,14 +3292,14 @@ void CInode::choose_lock_state(SimpleLock *lock, int allissued)
   } else {
     // our states have already been chosen during rejoin.
     if (lock->is_xlocked())
-      ceph_assert(lock->get_state() == LOCK_LOCK);
+      stone_assert(lock->get_state() == LOCK_LOCK);
   }
 }
  
 void CInode::choose_lock_states(int dirty_caps)
 {
   int issued = get_caps_issued() | dirty_caps;
-  if (is_auth() && (issued & (CEPH_CAP_ANY_EXCL|CEPH_CAP_ANY_WR)))
+  if (is_auth() && (issued & (STONE_CAP_ANY_EXCL|STONE_CAP_ANY_WR)))
     choose_ideal_loner();
   choose_lock_state(&filelock, issued);
   choose_lock_state(&nestlock, issued);
@@ -3361,7 +3361,7 @@ void CInode::set_mds_caps_wanted(mds_rank_t mds, int32_t wanted)
 Capability *CInode::add_client_cap(client_t client, Session *session,
 				   SnapRealm *conrealm, bool new_inode)
 {
-  ceph_assert(last == CEPH_NOSNAP);
+  stone_assert(last == STONE_NOSNAP);
   if (client_caps.empty()) {
     get(PIN_CAPS);
     if (conrealm)
@@ -3379,7 +3379,7 @@ Capability *CInode::add_client_cap(client_t client, Session *session,
   uint64_t cap_id = new_inode ? 1 : ++mdcache->last_cap_id;
   auto ret = client_caps.emplace(std::piecewise_construct, std::forward_as_tuple(client),
                                  std::forward_as_tuple(this, session, cap_id));
-  ceph_assert(ret.second == true);
+  stone_assert(ret.second == true);
   Capability *cap = &ret.first->second;
 
   cap->client_follows = first-1;
@@ -3391,7 +3391,7 @@ Capability *CInode::add_client_cap(client_t client, Session *session,
 void CInode::remove_client_cap(client_t client)
 {
   auto it = client_caps.find(client);
-  ceph_assert(it != client_caps.end());
+  stone_assert(it != client_caps.end());
   Capability *cap = &it->second;
   
   cap->item_session_caps.remove_myself();
@@ -3452,7 +3452,7 @@ Capability *CInode::reconnect_cap(client_t client, const cap_reconnect_t& icr, S
     cap->issue_norevoke(icr.capinfo.issued);
     cap->reset_seq();
   }
-  cap->set_last_issue_stamp(ceph_clock_now());
+  cap->set_last_issue_stamp(stone_clock_now());
   return cap;
 }
 
@@ -3479,20 +3479,20 @@ void CInode::export_client_caps(map<client_t,Capability::Export>& cl)
 int CInode::get_caps_liked() const
 {
   if (is_dir())
-    return CEPH_CAP_PIN | CEPH_CAP_ANY_EXCL | CEPH_CAP_ANY_SHARED;  // but not, say, FILE_RD|WR|WRBUFFER
+    return STONE_CAP_PIN | STONE_CAP_ANY_EXCL | STONE_CAP_ANY_SHARED;  // but not, say, FILE_RD|WR|WRBUFFER
   else
-    return CEPH_CAP_ANY & ~CEPH_CAP_FILE_LAZYIO;
+    return STONE_CAP_ANY & ~STONE_CAP_FILE_LAZYIO;
 }
 
 int CInode::get_caps_allowed_ever() const
 {
   int allowed;
   if (is_dir())
-    allowed = CEPH_CAP_PIN | CEPH_CAP_ANY_EXCL | CEPH_CAP_ANY_SHARED;
+    allowed = STONE_CAP_PIN | STONE_CAP_ANY_EXCL | STONE_CAP_ANY_SHARED;
   else
-    allowed = CEPH_CAP_ANY;
+    allowed = STONE_CAP_ANY;
   return allowed & 
-    (CEPH_CAP_PIN |
+    (STONE_CAP_PIN |
      (filelock.gcaps_allowed_ever() << filelock.get_cap_shift()) |
      (authlock.gcaps_allowed_ever() << authlock.get_cap_shift()) |
      (xattrlock.gcaps_allowed_ever() << xattrlock.get_cap_shift()) |
@@ -3502,7 +3502,7 @@ int CInode::get_caps_allowed_ever() const
 int CInode::get_caps_allowed_by_type(int type) const
 {
   return 
-    CEPH_CAP_PIN |
+    STONE_CAP_PIN |
     (filelock.gcaps_allowed(type) << filelock.get_cap_shift()) |
     (authlock.gcaps_allowed(type) << authlock.get_cap_shift()) |
     (xattrlock.gcaps_allowed(type) << xattrlock.get_cap_shift()) |
@@ -3542,26 +3542,26 @@ int CInode::get_caps_allowed_for_client(Session *session, Capability *cap,
   }
 
   if (is_dir()) {
-    allowed &= ~CEPH_CAP_ANY_DIR_OPS;
-    if (cap && (allowed & CEPH_CAP_FILE_EXCL))
+    allowed &= ~STONE_CAP_ANY_DIR_OPS;
+    if (cap && (allowed & STONE_CAP_FILE_EXCL))
       allowed |= cap->get_lock_cache_allowed();
   } else {
-    if (file_i->inline_data.version == CEPH_INLINE_NONE &&
+    if (file_i->inline_data.version == STONE_INLINE_NONE &&
 	file_i->layout.pool_ns.empty()) {
       // noop
     } else if (cap) {
-      if ((file_i->inline_data.version != CEPH_INLINE_NONE &&
+      if ((file_i->inline_data.version != STONE_INLINE_NONE &&
 	   cap->is_noinline()) ||
 	  (!file_i->layout.pool_ns.empty() &&
 	   cap->is_nopoolns()))
-	allowed &= ~(CEPH_CAP_FILE_RD | CEPH_CAP_FILE_WR);
+	allowed &= ~(STONE_CAP_FILE_RD | STONE_CAP_FILE_WR);
     } else {
       auto& conn = session->get_connection();
-      if ((file_i->inline_data.version != CEPH_INLINE_NONE &&
-	   !conn->has_feature(CEPH_FEATURE_MDS_INLINE_DATA)) ||
+      if ((file_i->inline_data.version != STONE_INLINE_NONE &&
+	   !conn->has_feature(STONE_FEATURE_MDS_INLINE_DATA)) ||
 	  (!file_i->layout.pool_ns.empty() &&
-	   !conn->has_feature(CEPH_FEATURE_FS_FILE_LAYOUT_V2)))
-	allowed &= ~(CEPH_CAP_FILE_RD | CEPH_CAP_FILE_WR);
+	   !conn->has_feature(STONE_FEATURE_FS_FILE_LAYOUT_V2)))
+	allowed &= ~(STONE_CAP_FILE_RD | STONE_CAP_FILE_WR);
     }
   }
   return allowed;
@@ -3649,12 +3649,12 @@ void CInode::adjust_num_caps_notable(int d)
   }
 
   num_caps_notable +=d;
-  ceph_assert(num_caps_notable >= 0);
+  stone_assert(num_caps_notable >= 0);
 }
 
 void CInode::mark_clientwriteable()
 {
-  if (last != CEPH_NOSNAP)
+  if (last != STONE_NOSNAP)
     return;
   if (!state_test(STATE_CLIENTWRITEABLE)) {
     if (num_caps_notable == 0)
@@ -3681,7 +3681,7 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
 			     int getattr_caps)
 {
   client_t client = session->get_client();
-  ceph_assert(snapid);
+  stone_assert(snapid);
   
   bool valid = true;
 
@@ -3691,7 +3691,7 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
 
   const mempool_xattr_map *pxattrs = nullptr;
 
-  if (snapid != CEPH_NOSNAP) {
+  if (snapid != STONE_NOSNAP) {
 
     // for now at least, old_inodes is only defined/valid on the auth
     if (!is_auth())
@@ -3727,14 +3727,14 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
   utime_t snap_btime;
   std::map<std::string, std::string> snap_metadata;
   SnapRealm *realm = find_snaprealm();
-  if (snapid != CEPH_NOSNAP && realm) {
+  if (snapid != STONE_NOSNAP && realm) {
     // add snapshot timestamp vxattr
     map<snapid_t,const SnapInfo*> infomap;
     realm->get_snap_info(infomap,
                          snapid,  // min
                          snapid); // max
     if (!infomap.empty()) {
-      ceph_assert(infomap.size() == 1);
+      stone_assert(infomap.size() == 1);
       const SnapInfo *si = infomap.begin()->second;
       snap_btime = si->stamp;
       snap_metadata = si->metadata;
@@ -3762,7 +3762,7 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
 
   Capability *cap = get_client_cap(client);
   bool pfile = filelock.is_xlocked_by_client(client) || get_loner() == client;
-  //(cap && (cap->issued() & CEPH_CAP_FILE_EXCL));
+  //(cap && (cap->issued() & STONE_CAP_FILE_EXCL));
   bool pauth = authlock.is_xlocked_by_client(client) || get_loner() == client;
   bool plink = linklock.is_xlocked_by_client(client) || get_loner() == client;
   bool pxattr = xattrlock.is_xlocked_by_client(client) || get_loner() == client;
@@ -3795,11 +3795,11 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
   // inline data
   version_t inline_version = 0;
   bufferlist inline_data;
-  if (file_i->inline_data.version == CEPH_INLINE_NONE) {
-    inline_version = CEPH_INLINE_NONE;
+  if (file_i->inline_data.version == STONE_INLINE_NONE) {
+    inline_version = STONE_INLINE_NONE;
   } else if ((!cap && !no_caps) ||
 	     (cap && cap->client_inline_version < file_i->inline_data.version) ||
-	     (getattr_caps & CEPH_CAP_FILE_RD)) { // client requests inline data
+	     (getattr_caps & STONE_CAP_FILE_RD)) { // client requests inline data
     inline_version = file_i->inline_data.version;
     if (file_i->inline_data.length() > 0)
       file_i->inline_data.get_data(inline_data);
@@ -3820,12 +3820,12 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
   // xattr
   const mempool_inode *xattr_i = pxattr ? pi:oi;
 
-  using ceph::encode;
+  using stone::encode;
   // xattr
   version_t xattr_version;
   if ((!cap && !no_caps) ||
       (cap && cap->client_xattr_version < xattr_i->xattr_version) ||
-      (getattr_caps & CEPH_CAP_XATTR_SHARED)) { // client requests xattrs
+      (getattr_caps & STONE_CAP_XATTR_SHARED)) { // client requests xattrs
     if (!pxattrs)
       pxattrs = pxattr ? get_projected_xattrs().get() : get_xattrs().get();
     xattr_version = xattr_i->xattr_version;
@@ -3836,14 +3836,14 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
   // do we have room?
   if (max_bytes) {
     unsigned bytes =
-      8 + 8 + 4 + 8 + 8 + sizeof(ceph_mds_reply_cap) +
-      sizeof(struct ceph_file_layout) +
-      sizeof(struct ceph_timespec) * 3 + 4 + // ctime ~ time_warp_seq
+      8 + 8 + 4 + 8 + 8 + sizeof(stone_mds_reply_cap) +
+      sizeof(struct stone_file_layout) +
+      sizeof(struct stone_timespec) * 3 + 4 + // ctime ~ time_warp_seq
       8 + 8 + 8 + 4 + 4 + 4 + 4 + 4 + // size ~ nlink
-      8 + 8 + 8 + 8 + 8 + sizeof(struct ceph_timespec) + // dirstat.nfiles ~ rstat.rctime
+      8 + 8 + 8 + 8 + 8 + sizeof(struct stone_timespec) + // dirstat.nfiles ~ rstat.rctime
       sizeof(__u32) + sizeof(__u32) * 2 * dirfragtree._splits.size() + // dirfragtree
       sizeof(__u32) + symlink.length() + // symlink
-      sizeof(struct ceph_dir_layout); // dir_layout
+      sizeof(struct stone_dir_layout); // dir_layout
 
     if (xattr_version) {
       bytes += sizeof(__u32) + sizeof(__u32); // xattr buffer len + number entries
@@ -3858,16 +3858,16 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
       sizeof(version_t) + sizeof(__u32) + inline_data.length() + // inline data
       1 + 1 + 8 + 8 + 4 + // quota
       4 + layout.pool_ns.size() + // pool ns
-      sizeof(struct ceph_timespec) + 8; // btime + change_attr
+      sizeof(struct stone_timespec) + 8; // btime + change_attr
 
     if (bytes > max_bytes)
-      return -CEPHFS_ENOSPC;
+      return -STONEFS_ENOSPC;
   }
 
 
   // encode caps
-  struct ceph_mds_reply_cap ecap;
-  if (snapid != CEPH_NOSNAP) {
+  struct stone_mds_reply_cap ecap;
+  if (snapid != STONE_NOSNAP) {
     /*
      * snapped inodes (files or dirs) only get read-only caps.  always
      * issue everything possible, since it is read only.
@@ -3882,8 +3882,8 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
      * tracks caps per-snap and the mds does either per-interval or
      * multiversion.
      */
-    ecap.caps = valid ? get_caps_allowed_by_type(CAP_ANY) : CEPH_STAT_CAP_INODE;
-    if (last == CEPH_NOSNAP || is_any_caps())
+    ecap.caps = valid ? get_caps_allowed_by_type(CAP_ANY) : STONE_STAT_CAP_INODE;
+    if (last == STONE_NOSNAP || is_any_caps())
       ecap.caps = ecap.caps & get_caps_allowed_for_client(session, nullptr, file_i);
     ecap.seq = 0;
     ecap.mseq = 0;
@@ -3907,9 +3907,9 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
 	       << " seq " << cap->get_last_seq() << dendl;
     } else if (cap && cap->is_new() && !dir_realm) {
       // alway issue new caps to client, otherwise the caps get lost
-      ceph_assert(cap->is_stale());
-      ceph_assert(!cap->pending());
-      issue = CEPH_CAP_PIN;
+      stone_assert(cap->is_stale());
+      stone_assert(!cap->pending());
+      issue = STONE_CAP_PIN;
       cap->issue_norevoke(issue, true);
       dout(10) << "encode_inodestat issuing " << ccap_string(issue)
 	       << " seq " << cap->get_last_seq()
@@ -3918,7 +3918,7 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
 
     if (issue) {
       cap->set_last_issue();
-      cap->set_last_issue_stamp(ceph_clock_now());
+      cap->set_last_issue_stamp(stone_clock_now());
       ecap.caps = issue;
       ecap.wanted = cap->wanted();
       ecap.cap_id = cap->get_cap_id();
@@ -3934,13 +3934,13 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
       ecap.wanted = 0;
     }
   }
-  ecap.flags = is_auth() ? CEPH_CAP_FLAG_AUTH : 0;
+  ecap.flags = is_auth() ? STONE_CAP_FLAG_AUTH : 0;
   dout(10) << "encode_inodestat caps " << ccap_string(ecap.caps)
 	   << " seq " << ecap.seq << " mseq " << ecap.mseq
 	   << " xattrv " << xattr_version << dendl;
 
   if (inline_data.length() && cap) {
-    if ((cap->pending() | getattr_caps) & CEPH_CAP_FILE_SHARED) {
+    if ((cap->pending() | getattr_caps) & STONE_CAP_FILE_SHARED) {
       dout(10) << "including inline version " << inline_version << dendl;
       cap->client_inline_version = inline_version;
     } else {
@@ -3952,7 +3952,7 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
 
   // include those xattrs?
   if (xattr_version && cap) {
-    if ((cap->pending() | getattr_caps) & CEPH_CAP_XATTR_SHARED) {
+    if ((cap->pending() | getattr_caps) & STONE_CAP_XATTR_SHARED) {
       dout(10) << "including xattrs version " << xattr_version << dendl;
       cap->client_xattr_version = xattr_version;
     } else {
@@ -3977,9 +3977,9 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
   // The 'bl' should have enough pre-allocated memory in most cases.
   // Encoding xattrs directly into it can avoid the extra allocation.
   auto encode_xattrs = [xattr_version, pxattrs, &bl]() {
-    using ceph::encode;
+    using stone::encode;
     if (xattr_version) {
-      ceph_le32 xbl_len;
+      stone_le32 xbl_len;
       auto filler = bl.append_hole(sizeof(xbl_len));
       const auto starting_bl_len = bl.length();
       if (pxattrs)
@@ -3996,7 +3996,7 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
   /*
    * note: encoding matches MClientReply::InodeStat
    */
-  if (session->info.has_feature(CEPHFS_FEATURE_REPLY_ENCODING)) {
+  if (session->info.has_feature(STONEFS_FEATURE_REPLY_ENCODING)) {
     ENCODE_START(6, 1, bl);
     encode(oi->ino, bl);
     encode(snapid, bl);
@@ -4005,7 +4005,7 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
     encode(xattr_version, bl);
     encode(ecap, bl);
     {
-      ceph_file_layout legacy_layout;
+      stone_file_layout legacy_layout;
       layout.to_legacy(&legacy_layout);
       encode(legacy_layout, bl);
     }
@@ -4046,7 +4046,7 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
     ENCODE_FINISH(bl);
   }
   else {
-    ceph_assert(session->get_connection());
+    stone_assert(session->get_connection());
 
     encode(oi->ino, bl);
     encode(snapid, bl);
@@ -4055,7 +4055,7 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
     encode(xattr_version, bl);
     encode(ecap, bl);
     {
-      ceph_file_layout legacy_layout;
+      stone_file_layout legacy_layout;
       layout.to_legacy(&legacy_layout);
       encode(legacy_layout, bl);
     }
@@ -4080,22 +4080,22 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
     dirfragtree.encode(bl);
     encode(symlink, bl);
     auto& conn = session->get_connection();
-    if (conn->has_feature(CEPH_FEATURE_DIRLAYOUTHASH)) {
+    if (conn->has_feature(STONE_FEATURE_DIRLAYOUTHASH)) {
       encode(file_i->dir_layout, bl);
     }
     encode_xattrs();
-    if (conn->has_feature(CEPH_FEATURE_MDS_INLINE_DATA)) {
+    if (conn->has_feature(STONE_FEATURE_MDS_INLINE_DATA)) {
       encode(inline_version, bl);
       encode(inline_data, bl);
     }
-    if (conn->has_feature(CEPH_FEATURE_MDS_QUOTA)) {
+    if (conn->has_feature(STONE_FEATURE_MDS_QUOTA)) {
       const mempool_inode *policy_i = ppolicy ? pi : oi;
       encode(policy_i->quota, bl);
     }
-    if (conn->has_feature(CEPH_FEATURE_FS_FILE_LAYOUT_V2)) {
+    if (conn->has_feature(STONE_FEATURE_FS_FILE_LAYOUT_V2)) {
       encode(layout.pool_ns, bl);
     }
-    if (conn->has_feature(CEPH_FEATURE_FS_BTIME)) {
+    if (conn->has_feature(STONE_FEATURE_FS_BTIME)) {
       encode(any_i->btime, bl);
       encode(any_i->change_attr, bl);
     }
@@ -4106,11 +4106,11 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
 
 void CInode::encode_cap_message(const ref_t<MClientCaps> &m, Capability *cap)
 {
-  ceph_assert(cap);
+  stone_assert(cap);
 
   client_t client = cap->get_client();
 
-  bool pfile = filelock.is_xlocked_by_client(client) || (cap->issued() & CEPH_CAP_FILE_EXCL);
+  bool pfile = filelock.is_xlocked_by_client(client) || (cap->issued() & STONE_CAP_FILE_EXCL);
   bool pauth = authlock.is_xlocked_by_client(client);
   bool plink = linklock.is_xlocked_by_client(client);
   bool pxattr = xattrlock.is_xlocked_by_client(client);
@@ -4158,10 +4158,10 @@ void CInode::encode_cap_message(const ref_t<MClientCaps> &m, Capability *cap)
   i = plink ? pi:oi;
   m->head.nlink = i->nlink;
 
-  using ceph::encode;
+  using stone::encode;
   i = pxattr ? pi:oi;
   const auto& ix = pxattr ? get_projected_xattrs() : get_xattrs();
-  if ((cap->pending() & CEPH_CAP_XATTR_SHARED) &&
+  if ((cap->pending() & STONE_CAP_XATTR_SHARED) &&
       i->xattr_version > cap->client_xattr_version) {
     dout(10) << "    including xattrs v " << i->xattr_version << dendl;
     if (ix)
@@ -4212,7 +4212,7 @@ void CInode::_decode_base(bufferlist::const_iterator& p)
 
 void CInode::_encode_locks_full(bufferlist& bl)
 {
-  using ceph::encode;
+  using stone::encode;
   encode(authlock, bl);
   encode(linklock, bl);
   encode(dirfragtreelock, bl);
@@ -4227,7 +4227,7 @@ void CInode::_encode_locks_full(bufferlist& bl)
 }
 void CInode::_decode_locks_full(bufferlist::const_iterator& p)
 {
-  using ceph::decode;
+  using stone::decode;
   decode(authlock, p);
   decode(linklock, p);
   decode(dirfragtreelock, p);
@@ -4417,7 +4417,7 @@ void CInode::decode_import(bufferlist::const_iterator& p,
     frag_t fg;
     decode(fg, q);
     CDir *dir = get_dirfrag(fg);
-    ceph_assert(dir);  // we should have all bounds open
+    stone_assert(dir);  // we should have all bounds open
 
     // Only take the remote's fragstat/rstat if we are non-auth for
     // this dirfrag AND the lock is NOT in a scattered (MIX) state.
@@ -4619,14 +4619,14 @@ void CInode::validate_disk_state(CInode::validated_data *results,
 
       ObjectOperation fetch;
       fetch.getxattr("parent", bt, bt_r);
-      in->mdcache->mds->objecter->read(oid, object_locator_t(pool), fetch, CEPH_NOSNAP,
+      in->mdcache->mds->objecter->read(oid, object_locator_t(pool), fetch, STONE_NOSNAP,
 				       NULL, 0, fin);
       if (in->mdcache->mds->logger) {
         in->mdcache->mds->logger->inc(l_mds_openino_backtrace_fetch);
         in->mdcache->mds->logger->inc(l_mds_scrub_backtrace_fetch);
       }
 
-      using ceph::encode;
+      using stone::encode;
       if (!is_internal) {
         ObjectOperation scrub_tag;
         bufferlist tag_bl;
@@ -4634,7 +4634,7 @@ void CInode::validate_disk_state(CInode::validated_data *results,
         scrub_tag.setxattr("scrub_tag", tag_bl);
         SnapContext snapc;
         in->mdcache->mds->objecter->mutate(oid, object_locator_t(pool), scrub_tag, snapc,
-					   ceph::real_clock::now(),
+					   stone::real_clock::now(),
 					   0, NULL);
         if (in->mdcache->mds->logger)
           in->mdcache->mds->logger->inc(l_mds_scrub_set_tag);
@@ -4642,7 +4642,7 @@ void CInode::validate_disk_state(CInode::validated_data *results,
     }
 
     bool _start(int rval) {
-      ceph_assert(in->can_auth_pin());
+      stone_assert(in->can_auth_pin());
       in->auth_pin(this);
 
       if (in->is_dirty()) {
@@ -4696,7 +4696,7 @@ void CInode::validate_disk_state(CInode::validated_data *results,
       // extract the backtrace, and compare it to a newly-constructed one
       try {
         auto p = bl.cbegin();
-	using ceph::decode;
+	using stone::decode;
         decode(results->backtrace.ondisk_value, p);
         dout(10) << "decoded " << bl.length() << " bytes of backtrace successfully" << dendl;
       } catch (buffer::error&) {
@@ -4796,7 +4796,7 @@ next:
     }
 
     bool validate_directory_data() {
-      ceph_assert(in->is_dir());
+      stone_assert(in->is_dir());
 
       if (in->is_base()) {
 	if (!shadow_in) {
@@ -4871,7 +4871,7 @@ next:
       // check each dirfrag...
       for (const auto &p : in->dirfrags) {
 	CDir *dir = p.second;
-	ceph_assert(dir->get_version() > 0);
+	stone_assert(dir->get_version() > 0);
 	nest_info.add(dir->get_fnode()->accounted_rstat);
 	dir_info.add(dir->get_fnode()->accounted_fragstat);
       }
@@ -5132,7 +5132,7 @@ void CInode::dump(Formatter *f, int flags) const
 void CInode::scrub_info_create() const
 {
   dout(25) << __func__ << dendl;
-  ceph_assert(!scrub_infop);
+  stone_assert(!scrub_infop);
 
   // break out of const-land to set up implicit initial state
   CInode *me = const_cast<CInode*>(this);
@@ -5168,7 +5168,7 @@ void CInode::scrub_initialize(ScrubHeaderRef& header)
 
 void CInode::scrub_aborted() {
   dout(20) << __func__ << dendl;
-  ceph_assert(scrub_is_in_progress());
+  stone_assert(scrub_is_in_progress());
 
   scrub_infop->scrub_in_progress = false;
   scrub_infop->header->dec_num_pending();
@@ -5177,10 +5177,10 @@ void CInode::scrub_aborted() {
 
 void CInode::scrub_finished() {
   dout(20) << __func__ << dendl;
-  ceph_assert(scrub_is_in_progress());
+  stone_assert(scrub_is_in_progress());
 
   scrub_infop->last_scrub_version = get_version();
-  scrub_infop->last_scrub_stamp = ceph_clock_now();
+  scrub_infop->last_scrub_stamp = stone_clock_now();
   scrub_infop->last_scrub_dirty = true;
   scrub_infop->scrub_in_progress = false;
   scrub_infop->header->dec_num_pending();
@@ -5193,7 +5193,7 @@ int64_t CInode::get_backtrace_pool() const
   } else {
     // Files are required to have an explicit layout that specifies
     // a pool
-    ceph_assert(get_inode()->layout.pool_id != -1);
+    stone_assert(get_inode()->layout.pool_id != -1);
     return get_inode()->layout.pool_id;
   }
 }
@@ -5283,7 +5283,7 @@ void CInode::set_ephemeral_pin(bool dist, bool rand)
 	     << (rand ? " rand" : "") << ") pin on " << *this << dendl;
     if (!is_ephemerally_pinned()) {
       auto p = mdcache->export_ephemeral_pins.insert(this);
-      ceph_assert(p.second);
+      stone_assert(p.second);
     }
     state_set(state);
   }
@@ -5303,7 +5303,7 @@ void CInode::clear_ephemeral_pin(bool dist, bool rand)
     state_clear(state);
     if (!is_ephemerally_pinned()) {
       auto count = mdcache->export_ephemeral_pins.erase(this);
-      ceph_assert(count == 1);
+      stone_assert(count == 1);
     }
   }
 }
@@ -5335,7 +5335,7 @@ void CInode::maybe_ephemeral_rand(double threshold)
   if (threshold <= 0.0) {
     return;
   }
-  double n = ceph::util::generate_random_number(0.0, 1.0);
+  double n = stone::util::generate_random_number(0.0, 1.0);
 
   dout(15) << __func__ << " rand " << n << " <?= " << threshold
            << " " << *this << dendl;
@@ -5349,19 +5349,19 @@ void CInode::maybe_ephemeral_rand(double threshold)
 
 void CInode::setxattr_ephemeral_rand(double probability)
 {
-  ceph_assert(is_dir());
+  stone_assert(is_dir());
   _get_projected_inode()->export_ephemeral_random_pin = probability;
 }
 
 void CInode::setxattr_ephemeral_dist(bool val)
 {
-  ceph_assert(is_dir());
+  stone_assert(is_dir());
   _get_projected_inode()->export_ephemeral_distributed_pin = val;
 }
 
 void CInode::set_export_pin(mds_rank_t rank)
 {
-  ceph_assert(is_dir());
+  stone_assert(is_dir());
   _get_projected_inode()->export_pin = rank;
   maybe_export_pin(true);
 }

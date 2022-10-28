@@ -6,13 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/statvfs.h>
-#include "../../src/include/cephfs/libcephfs.h"
+#include "../../src/include/stonefs/libstonefs.h"
 
 #define MB64 (1<<26)
 
 int main(int argc, const char **argv)
 {
-        struct ceph_mount_info *cmount;
+        struct stone_mount_info *cmount;
         int ret, fd, len;
         char buf[1024];
 
@@ -21,49 +21,49 @@ int main(int argc, const char **argv)
                 exit(1);
         }
 
-        ret = ceph_create(&cmount, NULL);
+        ret = stone_create(&cmount, NULL);
         if (ret) {
-                fprintf(stderr, "ceph_create=%d\n", ret);
+                fprintf(stderr, "stone_create=%d\n", ret);
                 exit(1);
         }
 
-        ret = ceph_conf_read_file(cmount, argv[1]);
+        ret = stone_conf_read_file(cmount, argv[1]);
         if (ret) {
-                fprintf(stderr, "ceph_conf_read_file=%d\n", ret);
+                fprintf(stderr, "stone_conf_read_file=%d\n", ret);
                 exit(1);
         }
 
-        ret = ceph_conf_parse_argv(cmount, argc, argv);
+        ret = stone_conf_parse_argv(cmount, argc, argv);
         if (ret) {
-                fprintf(stderr, "ceph_conf_parse_argv=%d\n", ret);
+                fprintf(stderr, "stone_conf_parse_argv=%d\n", ret);
                 exit(1);
         }
 
-        ret = ceph_mount(cmount, NULL);
+        ret = stone_mount(cmount, NULL);
         if (ret) {
-                fprintf(stderr, "ceph_mount=%d\n", ret);
+                fprintf(stderr, "stone_mount=%d\n", ret);
                 exit(1);
         }
 
-        ret = ceph_chdir(cmount, "/");
+        ret = stone_chdir(cmount, "/");
         if (ret) {
-                fprintf(stderr, "ceph_chdir=%d\n", ret);
+                fprintf(stderr, "stone_chdir=%d\n", ret);
                 exit(1);
         }
 
-        fd = ceph_open(cmount, argv[2], O_CREAT|O_TRUNC|O_RDWR, 0777); 
+        fd = stone_open(cmount, argv[2], O_CREAT|O_TRUNC|O_RDWR, 0777); 
         if (fd < 0) {
-                fprintf(stderr, "ceph_open=%d\n", fd);
+                fprintf(stderr, "stone_open=%d\n", fd);
                 exit(1);
         }
 
         memset(buf, 'a', sizeof(buf));
 
-        len = ceph_write(cmount, fd, buf, sizeof(buf), 0);
+        len = stone_write(cmount, fd, buf, sizeof(buf), 0);
 
         fprintf(stdout, "wrote %d bytes\n", len);
 
-        ceph_shutdown(cmount);
+        stone_shutdown(cmount);
 
         return 0;
 }

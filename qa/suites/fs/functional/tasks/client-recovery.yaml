@@ -1,7 +1,7 @@
 # The task interferes with the network, so we need
 # to permit OSDs to complain about that.
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - evicting unresponsive client
       - but it is still running
@@ -9,7 +9,7 @@ overrides:
       - MDS_CLIENT_LATE_RELEASE
       - t responding to mclientcaps
 tasks:
-  - cephfs_test_runner:
+  - stonefs_test_runner:
       fail_on_skip: false
       modules:
-        - tasks.cephfs.test_client_recovery
+        - tasks.stonefs.test_client_recovery

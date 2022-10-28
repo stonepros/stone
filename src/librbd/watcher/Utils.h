@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_WATCHER_UTILS_H
-#define CEPH_LIBRBD_WATCHER_UTILS_H
+#ifndef STONE_LIBRBD_WATCHER_UTILS_H
+#define STONE_LIBRBD_WATCHER_UTILS_H
 
 #include "include/buffer_fwd.h"
 #include "include/encoding.h"
@@ -71,4 +71,4 @@ private:
 } // namespace watcher
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_WATCHER_UTILS_H
+#endif // STONE_LIBRBD_WATCHER_UTILS_H

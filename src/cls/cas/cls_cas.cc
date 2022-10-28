@@ -10,8 +10,8 @@
 #include "include/compat.h"
 #include "osd/osd_types.h"
 
-using ceph::bufferlist;
-using ceph::decode;
+using stone::bufferlist;
+using stone::decode;
 
 CLS_VER(1,0)
 CLS_NAME(cas)
@@ -37,7 +37,7 @@ static int chunk_read_refcount(
   try {
     auto iter = bl.cbegin();
     decode(*objr, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(0, "ERROR: chunk_read_refcount(): failed to decode refcount entry\n");
     return -EIO;
   }
@@ -73,7 +73,7 @@ static int chunk_create_or_get_ref(cls_method_context_t hctx,
   cls_cas_chunk_create_or_get_ref_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: failed to decode entry\n");
     return -EINVAL;
   }
@@ -125,7 +125,7 @@ static int chunk_get_ref(cls_method_context_t hctx,
   cls_cas_chunk_get_ref_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: failed to decode entry\n");
     return -EINVAL;
   }
@@ -157,7 +157,7 @@ static int chunk_put_ref(cls_method_context_t hctx,
   cls_cas_chunk_put_ref_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: failed to decode entry\n");
     return -EINVAL;
   }
@@ -194,7 +194,7 @@ static int references_chunk(cls_method_context_t hctx,
   try {
     decode (fp_oid, in_iter);
   }
-  catch (ceph::buffer::error& e) {
+  catch (stone::buffer::error& e) {
     return -EINVAL;
   }
   CLS_LOG(10, "fp_oid: %s \n", fp_oid.c_str());

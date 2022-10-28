@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_BUFFER_H
-#define CEPH_BUFFER_H
+#ifndef STONE_BUFFER_H
+#define STONE_BUFFER_H
 
 #if defined(__linux__) || defined(__FreeBSD__)
 #include <stdlib.h>
@@ -55,7 +55,7 @@
 #include "buffer_fwd.h"
 
 
-#ifdef __CEPH__
+#ifdef __STONE__
 # include "include/ceph_assert.h"
 #else
 # include <assert.h>
@@ -63,7 +63,7 @@
 
 #include "inline_memory.h"
 
-#define CEPH_BUFFER_API
+#define STONE_BUFFER_API
 
 #ifdef HAVE_SEASTAR
 namespace seastar {
@@ -99,7 +99,7 @@ struct unique_leakable_ptr : public std::unique_ptr<T, ceph::nop_delete<T>> {
   using std::unique_ptr<T, ceph::nop_delete<T>>::unique_ptr;
 };
 
-namespace buffer CEPH_BUFFER_API {
+namespace buffer STONE_BUFFER_API {
 inline namespace v15_2_0 {
 
 /// Actual definitions in common/error_code.h
@@ -163,7 +163,7 @@ struct error_code;
   /*
    * a buffer pointer.  references (a subsequence of) a raw buffer.
    */
-  class CEPH_BUFFER_API ptr {
+  class STONE_BUFFER_API ptr {
     friend class list;
   protected:
     raw *_raw;
@@ -269,12 +269,12 @@ struct error_code;
     bool is_aligned(unsigned align) const {
       return ((uintptr_t)c_str() & (align-1)) == 0;
     }
-    bool is_page_aligned() const { return is_aligned(CEPH_PAGE_SIZE); }
+    bool is_page_aligned() const { return is_aligned(STONE_PAGE_SIZE); }
     bool is_n_align_sized(unsigned align) const
     {
       return (length() % align) == 0;
     }
-    bool is_n_page_sized() const { return is_n_align_sized(CEPH_PAGE_SIZE); }
+    bool is_n_page_sized() const { return is_n_align_sized(STONE_PAGE_SIZE); }
     bool is_partial() const {
       return have_raw() && (start() > 0 || end() < raw_length());
     }
@@ -309,7 +309,7 @@ struct error_code;
 
     // modifiers
     void set_offset(unsigned o) {
-#ifdef __CEPH__
+#ifdef __STONE__
       ceph_assert(raw_length() >= o);
 #else
       assert(raw_length() >= o);
@@ -317,7 +317,7 @@ struct error_code;
       _off = o;
     }
     void set_length(unsigned l) {
-#ifdef __CEPH__
+#ifdef __STONE__
       ceph_assert(raw_length() >= l);
 #else
       assert(raw_length() >= l);
@@ -411,7 +411,7 @@ struct error_code;
    * list - the useful bit!
    */
 
-  class CEPH_BUFFER_API list {
+  class STONE_BUFFER_API list {
   public:
     // this the very low-level implementation of singly linked list
     // ceph::buffer::list is built on. We don't use intrusive slist
@@ -638,7 +638,7 @@ struct error_code;
     unsigned _len, _num;
 
     template <bool is_const>
-    class CEPH_BUFFER_API iterator_impl {
+    class STONE_BUFFER_API iterator_impl {
     protected:
       typedef typename std::conditional<is_const,
 					const list,
@@ -723,7 +723,7 @@ struct error_code;
   public:
     typedef iterator_impl<true> const_iterator;
 
-    class CEPH_BUFFER_API iterator : public iterator_impl<false> {
+    class STONE_BUFFER_API iterator : public iterator_impl<false> {
     public:
       iterator() = default;
       iterator(bl_t *l, unsigned o=0);
@@ -851,7 +851,7 @@ struct error_code;
 
       page_aligned_appender(list *l, unsigned min_pages)
 	: bl(*l),
-	  min_alloc(min_pages * CEPH_PAGE_SIZE) {
+	  min_alloc(min_pages * STONE_PAGE_SIZE) {
       }
 
       void _refill(size_t len);
@@ -1000,11 +1000,11 @@ struct error_code;
 	   it++) {
 	len += (*it).length();
       }
-#ifdef __CEPH__
+#ifdef __STONE__
       ceph_assert(len == _len);
 #else
       assert(len == _len);
-#endif // __CEPH__
+#endif // __STONE__
 #endif
       return _len;
     }
@@ -1183,7 +1183,7 @@ struct error_code;
     int send_fd(int fd) const;
     template<typename VectorT>
     void prepare_iov(VectorT *piov) const {
-#ifdef __CEPH__
+#ifdef __STONE__
       ceph_assert(_num <= IOV_MAX);
 #else
       assert(_num <= IOV_MAX);

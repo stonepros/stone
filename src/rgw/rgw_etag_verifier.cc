@@ -3,12 +3,12 @@
 
 #include "rgw_etag_verifier.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace rgw::putobj {
 
 int create_etag_verifier(const DoutPrefixProvider *dpp, 
-                         CephContext* cct, DataProcessor* filter,
+                         StoneContext* cct, DataProcessor* filter,
                          const bufferlist& manifest_bl,
                          const std::optional<RGWCompressionInfo>& compression,
                          etag_verifier_ptr& verifier)
@@ -89,15 +89,15 @@ int ETagVerifier_Atomic::process(bufferlist&& in, uint64_t logical_offset)
 
 void ETagVerifier_Atomic::calculate_etag()
 {
-  unsigned char m[CEPH_CRYPTO_MD5_DIGESTSIZE];
-  char calc_md5[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+  unsigned char m[STONE_CRYPTO_MD5_DIGESTSIZE];
+  char calc_md5[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
 
   /* Return early if ETag has already been calculated */
   if (!calculated_etag.empty())
     return;
 
   hash.Final(m);
-  buf_to_hex(m, CEPH_CRYPTO_MD5_DIGESTSIZE, calc_md5);
+  buf_to_hex(m, STONE_CRYPTO_MD5_DIGESTSIZE, calc_md5);
   calculated_etag = calc_md5;
   ldout(cct, 20) << "Single part object: " << " etag:" << calculated_etag
           << dendl;
@@ -105,8 +105,8 @@ void ETagVerifier_Atomic::calculate_etag()
 
 void ETagVerifier_MPU::process_end_of_MPU_part()
 {
-  unsigned char m[CEPH_CRYPTO_MD5_DIGESTSIZE];
-  char calc_md5_part[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+  unsigned char m[STONE_CRYPTO_MD5_DIGESTSIZE];
+  char calc_md5_part[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
   std::string calculated_etag_part;
 
   hash.Final(m);
@@ -114,7 +114,7 @@ void ETagVerifier_MPU::process_end_of_MPU_part()
   hash.Restart();
 
   if (cct->_conf->subsys.should_gather(dout_subsys, 20)) {
-    buf_to_hex(m, CEPH_CRYPTO_MD5_DIGESTSIZE, calc_md5_part);
+    buf_to_hex(m, STONE_CRYPTO_MD5_DIGESTSIZE, calc_md5_part);
     calculated_etag_part = calc_md5_part;
     ldout(cct, 20) << "Part etag: " << calculated_etag_part << dendl;
   }
@@ -166,8 +166,8 @@ void ETagVerifier_MPU::calculate_etag()
   constexpr auto digits10 = std::numeric_limits<uint32_t>::digits10;
   constexpr auto extra = 2 + digits10; // add "-%u\0" at the end
 
-  unsigned char m[CEPH_CRYPTO_MD5_DIGESTSIZE], mpu_m[CEPH_CRYPTO_MD5_DIGESTSIZE];
-  char final_etag_str[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + extra];
+  unsigned char m[STONE_CRYPTO_MD5_DIGESTSIZE], mpu_m[STONE_CRYPTO_MD5_DIGESTSIZE];
+  char final_etag_str[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + extra];
 
   /* Return early if ETag has already been calculated */
   if (!calculated_etag.empty())
@@ -178,9 +178,9 @@ void ETagVerifier_MPU::calculate_etag()
 
   /* Refer RGWCompleteMultipart::execute() for ETag calculation for MPU object */
   mpu_etag_hash.Final(mpu_m);
-  buf_to_hex(mpu_m, CEPH_CRYPTO_MD5_DIGESTSIZE, final_etag_str);
-  snprintf(&final_etag_str[CEPH_CRYPTO_MD5_DIGESTSIZE * 2],
-           sizeof(final_etag_str) - CEPH_CRYPTO_MD5_DIGESTSIZE * 2,
+  buf_to_hex(mpu_m, STONE_CRYPTO_MD5_DIGESTSIZE, final_etag_str);
+  snprintf(&final_etag_str[STONE_CRYPTO_MD5_DIGESTSIZE * 2],
+           sizeof(final_etag_str) - STONE_CRYPTO_MD5_DIGESTSIZE * 2,
            "-%u", parts);
 
   calculated_etag = final_etag_str;

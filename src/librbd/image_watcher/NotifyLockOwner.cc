@@ -9,7 +9,7 @@
 #include "librbd/watcher/Notifier.h"
 #include <map>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image_watcher::NotifyLockOwner: " \
                            << this << " " << __func__
@@ -33,16 +33,16 @@ void NotifyLockOwner::send() {
 }
 
 void NotifyLockOwner::send_notify() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
   m_notifier.notify(m_bl, &m_notify_response, create_context_callback<
     NotifyLockOwner, &NotifyLockOwner::handle_notify>(this));
 }
 
 void NotifyLockOwner::handle_notify(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": r=" << r << dendl;
 
   if (r < 0 && r != -ETIMEDOUT) {
@@ -76,7 +76,7 @@ void NotifyLockOwner::handle_notify(int r) {
     auto iter = response.cbegin();
 
     ResponseMessage response_message;
-    using ceph::decode;
+    using stone::decode;
     decode(response_message, iter);
 
     r = response_message.result;

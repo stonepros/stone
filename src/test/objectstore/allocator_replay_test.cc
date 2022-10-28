@@ -6,11 +6,11 @@
  */
 #include <iostream>
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
 #include "common/Cycles.h"
 #include "common/errno.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/admin_socket.h"
 #include "global/global_init.h"
 #include "os/bluestore/Allocator.h"
@@ -63,10 +63,10 @@ int replay_and_check_for_duplicate(char* fname)
       uint64_t offs, len;
       strtok(sp, " ~");
       token = strtok(nullptr, " ~");
-      ceph_assert(token);
+      stone_assert(token);
       offs = strtoul(token, nullptr, 16);
       token = strtok(nullptr, " ~");
-      ceph_assert(token);
+      stone_assert(token);
       len = strtoul(token, nullptr, 16);
       if (len == 0) {
 	std::cerr << "error: " << sp <<": " << s << std::endl;
@@ -104,10 +104,10 @@ int replay_and_check_for_duplicate(char* fname)
       uint64_t offs, len;
       strtok(sp, " ~");
       token = strtok(nullptr, " ~");
-      ceph_assert(token);
+      stone_assert(token);
       offs = strtoul(token, nullptr, 16);
       token = strtok(nullptr, " ~");
-      ceph_assert(token);
+      stone_assert(token);
       len = strtoul(token, nullptr, 16);
       if (len == 0) {
 	std::cerr << "error: " << sp <<": " << s << std::endl;
@@ -145,10 +145,10 @@ int replay_and_check_for_duplicate(char* fname)
       uint64_t want, alloc_unit;
       strtok(sp, " /");
       token = strtok(nullptr, " /");
-      ceph_assert(token);
+      stone_assert(token);
       want = strtoul(token, nullptr, 16);
       token = strtok(nullptr, " ~");
-      ceph_assert(token);
+      stone_assert(token);
       alloc_unit = strtoul(token, nullptr, 16);
       if (want == 0 || alloc_unit == 0) {
 	std::cerr << "error: allocate: " << s << std::endl;
@@ -206,16 +206,16 @@ int replay_and_check_for_duplicate(char* fname)
       uint64_t total, alloc_unit;
       strtok(sp, " /");
       token = strtok(nullptr, " /");
-      ceph_assert(token);
+      stone_assert(token);
       total = strtoul(token, nullptr, 16);
       token = strtok(nullptr, " /");
-      ceph_assert(token);
+      stone_assert(token);
       alloc_unit = strtoul(token, nullptr, 16);
       if (total == 0 || alloc_unit == 0) {
 	std::cerr << "error: invalid init: " << s << std::endl;
       return -1;
       }
-      alloc.reset(Allocator::create(g_ceph_context, alloc_type, total,
+      alloc.reset(Allocator::create(g_stone_context, alloc_type, total,
 				    alloc_unit));
       owned_by_app.insert(0, total);
 
@@ -229,7 +229,7 @@ int replay_and_check_for_duplicate(char* fname)
 
 /*
 * This replays allocator dump (in JSON) reported by 
-  "ceph daemon <osd> bluestore allocator dump <name>"
+  "stone daemon <osd> bluestore allocator dump <name>"
   command and applies custom method to it
 */
 int replay_free_dump_and_apply(char* fname,
@@ -249,30 +249,30 @@ int replay_free_dump_and_apply(char* fname,
   }
 
   JSONObj::data_val v;
-  ceph_assert(p.is_object());
+  stone_assert(p.is_object());
 
   auto *o = p.find_obj("allocator_type");
-  ceph_assert(o);
+  stone_assert(o);
   alloc_type = o->get_data_val().str;
 
   o = p.find_obj("allocator_name");
-  ceph_assert(o);
+  stone_assert(o);
   alloc_name = o->get_data_val().str;
 
   o = p.find_obj("capacity");
-  ceph_assert(o);
+  stone_assert(o);
   decode_json_obj(capacity, o);
   o = p.find_obj("alloc_unit");
-  ceph_assert(o);
+  stone_assert(o);
   decode_json_obj(alloc_unit, o);
 
   o = p.find_obj("extents");
-  ceph_assert(o);
-  ceph_assert(o->is_array());
+  stone_assert(o);
+  stone_assert(o->is_array());
   std::cout << "parsing completed!" << std::endl;
 
   unique_ptr<Allocator> alloc;
-  alloc.reset(Allocator::create(g_ceph_context, alloc_type,
+  alloc.reset(Allocator::create(g_stone_context, alloc_type,
     capacity, alloc_unit, alloc_name));
 
   auto it = o->find_first();
@@ -283,9 +283,9 @@ int replay_free_dump_and_apply(char* fname,
     string offset_str, length_str;
 
     bool b = JSONDecoder::decode_json("offset", offset_str, item_obj);
-    ceph_assert(b);
+    stone_assert(b);
     b = JSONDecoder::decode_json("length", length_str, item_obj);
-    ceph_assert(b);
+    stone_assert(b);
 
     char* p;
     offset = strtol(offset_str.c_str(), &p, 16);
@@ -303,10 +303,10 @@ int replay_free_dump_and_apply(char* fname,
 
 void dump_alloc(Allocator* alloc, const string& aname)
 {
-  AdminSocket* admin_socket = g_ceph_context->get_admin_socket();
-  ceph_assert(admin_socket);
+  AdminSocket* admin_socket = g_stone_context->get_admin_socket();
+  stone_assert(admin_socket);
 
-  ceph::bufferlist in, out;
+  stone::bufferlist in, out;
   ostringstream err;
 
   string cmd = "{\"prefix\": \"bluestore allocator dump " + aname + "\"}";
@@ -324,11 +324,11 @@ void dump_alloc(Allocator* alloc, const string& aname)
 int main(int argc, char **argv)
 {
   vector<const char*> args;
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.apply_changes(nullptr);
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.apply_changes(nullptr);
 
   if (argc < 3) {
     usage(argv[0]);
@@ -339,7 +339,7 @@ int main(int argc, char **argv)
   } else if (strcmp(argv[2], "free_dump") == 0) {
     return replay_free_dump_and_apply(argv[1],
       [&](Allocator* a, const string& aname) {
-        ceph_assert(a);
+        stone_assert(a);
         std::cout << "Fragmentation:" << a->get_fragmentation()
                   << std::endl;
         std::cout << "Fragmentation score:" << a->get_fragmentation_score()

@@ -104,7 +104,7 @@ class MissingLoc {
   spg_t pgid;
   MappingInfo *mapping_info;
   DoutPrefixProvider *dpp;
-  CephContext *cct;
+  StoneeContext *cct;
   std::set<pg_shard_t> empty_set;
  public:
   boost::scoped_ptr<IsPGReadablePredicate> is_readable;
@@ -113,7 +113,7 @@ class MissingLoc {
     spg_t pgid,
     MappingInfo *mapping_info,
     DoutPrefixProvider *dpp,
-    CephContext *cct)
+    StoneeContext *cct)
     : pgid(pgid), mapping_info(mapping_info), dpp(dpp), cct(cct) { }
   void set_backend_predicates(
     IsPGReadablePredicate *_is_readable,

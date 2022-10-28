@@ -12,9 +12,9 @@ if(WITH_RBD)
   add_subdirectory(rbd)
   add_dependencies(cython_modules cython_rbd)
 endif()
-if(WITH_CEPHFS)
-  add_subdirectory(cephfs)
-  add_dependencies(cython_modules cython_cephfs)
+if(WITH_STONEFS)
+  add_subdirectory(stonefs)
+  add_dependencies(cython_modules cython_stonefs)
 endif()
 if(WITH_RADOSGW)
   add_subdirectory(rgw)
@@ -37,9 +37,9 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 install(FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/ceph_argparse.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/ceph_daemon.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/ceph_volume_client.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/stone_argparse.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/stone_daemon.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/stone_volume_client.py
   DESTINATION ${PYTHON3_INSTDIR})
 
 if(WITH_MGR)
@@ -64,7 +64,7 @@ if(WITH_MGR)
     get_openssl_soversion(${OPENSSL_VERSION} OPENSSL)
     get_openssl_soversion(${PYSSL_VER} PYSSL)
     if(NOT (OPENSSL_SOVERSION VERSION_EQUAL PYSSL_SOVERSION))
-      message(FATAL_ERROR "Python and Ceph link to different OpenSSL versions: ${PYSSL_VER} vs ${OPENSSL_VERSION}")
+      message(FATAL_ERROR "Python and Stone link to different OpenSSL versions: ${PYSSL_VER} vs ${OPENSSL_VERSION}")
     endif()
   else()
     message(WARNING "could not determine ssl version of python crypto lib")

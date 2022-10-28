@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 Mirantis, Inc.
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_COMPRESSION_PLUGIN_SNAPPY_H
-#define CEPH_COMPRESSION_PLUGIN_SNAPPY_H
+#ifndef STONE_COMPRESSION_PLUGIN_SNAPPY_H
+#define STONE_COMPRESSION_PLUGIN_SNAPPY_H
 
 // -----------------------------------------------------------------------------
 #include "compressor/CompressionPlugin.h"
@@ -24,7 +24,7 @@ class CompressionPluginSnappy : public ceph::CompressionPlugin {
 
 public:
 
-  explicit CompressionPluginSnappy(CephContext* cct) : CompressionPlugin(cct)
+  explicit CompressionPluginSnappy(StoneeContext* cct) : CompressionPlugin(cct)
   {}
 
   int factory(CompressorRef *cs,

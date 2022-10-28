@@ -19,8 +19,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_TRANSFER_H_
-#define CEPH_TRANSFER_H_
+#ifndef STONE_TRANSFER_H_
+#define STONE_TRANSFER_H_
 
 // Helper functions for copying or moving multiple objects in an exception
 // safe manner, then destroying the sources.
@@ -61,4 +61,4 @@ inline void transfer_pass2(Alloc& a, T* from, T* to,
     a.destroy(from);
 }
 
-#endif /* CEPH_TRANSFER_H_ */
+#endif /* STONE_TRANSFER_H_ */

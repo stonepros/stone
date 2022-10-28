@@ -1,19 +1,19 @@
 tasks:
 - exec:
     mgr.x:
-      - mkdir -p /var/lib/ceph/mgr/ceph-x
-      - ceph auth get-or-create-key mgr.x mon 'allow profile mgr'
-      - ceph auth export mgr.x > /var/lib/ceph/mgr/ceph-x/keyring
-- ceph.restart:
+      - mkdir -p /var/lib/stone/mgr/stone-x
+      - stone auth get-or-create-key mgr.x mon 'allow profile mgr'
+      - stone auth export mgr.x > /var/lib/stone/mgr/stone-x/keyring
+- stone.restart:
     daemons: [mgr.x]
     wait-for-healthy: false
 - exec:
     osd.0:
-      - ceph osd require-osd-release luminous
-      - ceph osd set-require-min-compat-client luminous
-- ceph.healthy:
+      - stone osd require-osd-release luminous
+      - stone osd set-require-min-compat-client luminous
+- stone.healthy:
 overrides:
-  ceph:
+  stone:
     conf:
       mon:
         mon warn on osd down out interval zero: false

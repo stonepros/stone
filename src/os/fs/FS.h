@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OS_FS_H
-#define CEPH_OS_FS_H
+#ifndef STONE_OS_FS_H
+#define STONE_OS_FS_H
 
 #include <errno.h>
 #include <time.h>

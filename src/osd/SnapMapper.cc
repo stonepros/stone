@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -15,7 +15,7 @@
 #include "SnapMapper.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix *_dout << "snap_mapper."
 
@@ -26,10 +26,10 @@ using std::set;
 using std::string;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::timespan_str;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::timespan_str;
 
 const string SnapMapper::LEGACY_MAPPING_PREFIX = "MAP_";
 const string SnapMapper::MAPPING_PREFIX = "SNA_";
@@ -84,7 +84,7 @@ int OSDriver::get_next(
   ObjectMap::ObjectMapIterator iter =
     os->get_omap_iterator(ch, hoid);
   if (!iter) {
-    ceph_abort();
+    stone_abort();
     return -EINVAL;
   }
   iter->upper_bound(key);
@@ -127,7 +127,7 @@ pair<string, bufferlist> SnapMapper::to_raw(
 pair<snapid_t, hobject_t> SnapMapper::from_raw(
   const pair<std::string, bufferlist> &image)
 {
-  using ceph::decode;
+  using stone::decode;
   Mapping map;
   bufferlist bl(image.second);
   auto bp = bl.cbegin();
@@ -176,7 +176,7 @@ int SnapMapper::get_snaps(
   const hobject_t &oid,
   object_snaps *out)
 {
-  ceph_assert(check(oid));
+  stone_assert(check(oid));
   set<string> keys;
   map<string, bufferlist> got;
   keys.insert(to_object_key(oid));
@@ -195,7 +195,7 @@ int SnapMapper::get_snaps(
     dout(20) << __func__ << " " << oid << " " << out->snaps << dendl;
     if (out->snaps.empty()) {
       dout(1) << __func__ << " " << oid << " empty snapset" << dendl;
-      ceph_assert(!cct->_conf->osd_debug_verify_snaps);
+      stone_assert(!cct->_conf->osd_debug_verify_snaps);
     }
   } else {
     dout(20) << __func__ << " " << oid << " (out == NULL)" << dendl;
@@ -208,10 +208,10 @@ void SnapMapper::clear_snaps(
   MapCacher::Transaction<std::string, bufferlist> *t)
 {
   dout(20) << __func__ << " " << oid << dendl;
-  ceph_assert(check(oid));
+  stone_assert(check(oid));
   set<string> to_remove;
   to_remove.insert(to_object_key(oid));
-  if (g_conf()->subsys.should_gather<ceph_subsys_osd, 20>()) {
+  if (g_conf()->subsys.should_gather<stone_subsys_osd, 20>()) {
     for (auto& i : to_remove) {
       dout(20) << __func__ << " rm " << i << dendl;
     }
@@ -224,13 +224,13 @@ void SnapMapper::set_snaps(
   const object_snaps &in,
   MapCacher::Transaction<std::string, bufferlist> *t)
 {
-  ceph_assert(check(oid));
+  stone_assert(check(oid));
   map<string, bufferlist> to_set;
   bufferlist bl;
   encode(in, bl);
   to_set[to_object_key(oid)] = bl;
   dout(20) << __func__ << " " << oid << " " << in.snaps << dendl;
-  if (g_conf()->subsys.should_gather<ceph_subsys_osd, 20>()) {
+  if (g_conf()->subsys.should_gather<stone_subsys_osd, 20>()) {
     for (auto& i : to_set) {
       dout(20) << __func__ << " set " << i.first << dendl;
     }
@@ -247,7 +247,7 @@ int SnapMapper::update_snaps(
   dout(20) << __func__ << " " << oid << " " << new_snaps
 	   << " was " << (old_snaps_check ? *old_snaps_check : set<snapid_t>())
 	   << dendl;
-  ceph_assert(check(oid));
+  stone_assert(check(oid));
   if (new_snaps.empty())
     return remove_oid(oid, t);
 
@@ -257,7 +257,7 @@ int SnapMapper::update_snaps(
   if (r < 0 && r != -ENOENT)
     return r;
   if (old_snaps_check)
-    ceph_assert(out.snaps == *old_snaps_check);
+    stone_assert(out.snaps == *old_snaps_check);
 
   object_snaps in(oid, new_snaps);
   set_snaps(oid, in, t);
@@ -270,7 +270,7 @@ int SnapMapper::update_snaps(
       to_remove.insert(to_raw_key(make_pair(*i, oid)));
     }
   }
-  if (g_conf()->subsys.should_gather<ceph_subsys_osd, 20>()) {
+  if (g_conf()->subsys.should_gather<stone_subsys_osd, 20>()) {
     for (auto& i : to_remove) {
       dout(20) << __func__ << " rm " << i << dendl;
     }
@@ -285,15 +285,15 @@ void SnapMapper::add_oid(
   MapCacher::Transaction<std::string, bufferlist> *t)
 {
   dout(20) << __func__ << " " << oid << " " << snaps << dendl;
-  ceph_assert(!snaps.empty());
-  ceph_assert(check(oid));
+  stone_assert(!snaps.empty());
+  stone_assert(check(oid));
   {
     object_snaps out;
     int r = get_snaps(oid, &out);
     if (r != -ENOENT) {
       derr << __func__ << " found existing snaps mapped on " << oid
 	   << ", removing" << dendl;
-      ceph_assert(!cct->_conf->osd_debug_verify_snaps);
+      stone_assert(!cct->_conf->osd_debug_verify_snaps);
       remove_oid(oid, t);
     }
   }
@@ -307,7 +307,7 @@ void SnapMapper::add_oid(
        ++i) {
     to_add.insert(to_raw(make_pair(*i, oid)));
   }
-  if (g_conf()->subsys.should_gather<ceph_subsys_osd, 20>()) {
+  if (g_conf()->subsys.should_gather<stone_subsys_osd, 20>()) {
     for (auto& i : to_add) {
       dout(20) << __func__ << " set " << i.first << dendl;
     }
@@ -320,12 +320,12 @@ int SnapMapper::get_next_objects_to_trim(
   unsigned max,
   vector<hobject_t> *out)
 {
-  ceph_assert(out);
-  ceph_assert(out->empty());
+  stone_assert(out);
+  stone_assert(out->empty());
 
   // if max would be 0, we return ENOENT and the caller would mistakenly
   // trim the snaptrim queue
-  ceph_assert(max > 0);
+  stone_assert(max > 0);
   int r = 0;
   for (set<string>::iterator i = prefixes.begin();
        i != prefixes.end() && out->size() < max && r == 0;
@@ -346,12 +346,12 @@ int SnapMapper::get_next_objects_to_trim(
 	break; // Done with this prefix
       }
 
-      ceph_assert(is_mapping(next.first));
+      stone_assert(is_mapping(next.first));
 
       dout(20) << __func__ << " " << next.first << dendl;
       pair<snapid_t, hobject_t> next_decoded(from_raw(next));
-      ceph_assert(next_decoded.first == snap);
-      ceph_assert(check(next_decoded.second));
+      stone_assert(next_decoded.first == snap);
+      stone_assert(check(next_decoded.second));
 
       out->push_back(next_decoded.second);
       pos = next.first;
@@ -370,7 +370,7 @@ int SnapMapper::remove_oid(
   MapCacher::Transaction<std::string, bufferlist> *t)
 {
   dout(20) << __func__ << " " << oid << dendl;
-  ceph_assert(check(oid));
+  stone_assert(check(oid));
   return _remove_oid(oid, t);
 }
 
@@ -392,7 +392,7 @@ int SnapMapper::_remove_oid(
        ++i) {
     to_remove.insert(to_raw_key(make_pair(*i, oid)));
   }
-  if (g_conf()->subsys.should_gather<ceph_subsys_osd, 20>()) {
+  if (g_conf()->subsys.should_gather<stone_subsys_osd, 20>()) {
     for (auto& i : to_remove) {
       dout(20) << __func__ << " rm " << i << dendl;
     }
@@ -405,7 +405,7 @@ int SnapMapper::get_snaps(
   const hobject_t &oid,
   std::set<snapid_t> *snaps)
 {
-  ceph_assert(check(oid));
+  stone_assert(check(oid));
   object_snaps out;
   int r = get_snaps(oid, &out);
   if (r < 0)
@@ -431,13 +431,13 @@ void SnapMapper::make_purged_snap_key_value(
 {
   string k = make_purged_snap_key(pool, end - 1);
   auto& v = (*m)[k];
-  ceph::encode(pool, v);
-  ceph::encode(begin, v);
-  ceph::encode(end, v);
+  stone::encode(pool, v);
+  stone::encode(begin, v);
+  stone::encode(end, v);
 }
 
 int SnapMapper::_lookup_purged_snap(
-  CephContext *cct,
+  StoneContext *cct,
   ObjectStore *store,
   ObjectStore::CollectionHandle& ch,
   const ghobject_t& hoid,
@@ -473,7 +473,7 @@ int SnapMapper::_lookup_purged_snap(
 }
 
 void SnapMapper::record_purged_snaps(
-  CephContext *cct,
+  StoneContext *cct,
   ObjectStore *store,
   ObjectStore::CollectionHandle& ch,
   ghobject_t hoid,
@@ -542,9 +542,9 @@ bool SnapMapper::Scrubber::_parse_p()
   }
   bufferlist v = psit->value();
   auto p = v.cbegin();
-  ceph::decode(pool, p);
-  ceph::decode(begin, p);
-  ceph::decode(end, p);
+  stone::decode(pool, p);
+  stone::decode(begin, p);
+  stone::decode(end, p);
   dout(20) << __func__ << " purged_snaps pool " << pool
 	   << " [" << begin << "," << end << ")" << dendl;
   psit->next();
@@ -661,7 +661,7 @@ bool SnapMapper::is_legacy_mapping(const string &to_test)
 }
 
 int SnapMapper::convert_legacy(
-  CephContext *cct,
+  StoneContext *cct,
   ObjectStore *store,
   ObjectStore::CollectionHandle& ch,
   ghobject_t hoid,
@@ -674,7 +674,7 @@ int SnapMapper::convert_legacy(
     return -EIO;
   }
 
-  auto start = ceph::mono_clock::now();
+  auto start = stone::mono_clock::now();
 
   iter->upper_bound(SnapMapper::LEGACY_MAPPING_PREFIX);
   map<string,bufferlist> to_set;
@@ -695,7 +695,7 @@ int SnapMapper::convert_legacy(
       ObjectStore::Transaction t;
       t.omap_setkeys(ch->cid, hoid, to_set);
       int r = store->queue_transaction(ch, std::move(t));
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       to_set.clear();
       if (!valid) {
 	break;
@@ -704,7 +704,7 @@ int SnapMapper::convert_legacy(
     }
   }
 
-  auto end = ceph::mono_clock::now();
+  auto end = stone::mono_clock::now();
 
   dout(1) << __func__ << " converted " << n << " keys in "
 	  << timespan_str(end - start) << dendl;
@@ -718,7 +718,7 @@ int SnapMapper::convert_legacy(
 		      SnapMapper::LEGACY_MAPPING_PREFIX,
 		      end);
     int r = store->queue_transaction(ch, std::move(t));
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
   return 0;
 }

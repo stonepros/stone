@@ -15,7 +15,7 @@
 namespace {
   seastar::logger& logger()
   {
-    return crimson::get_logger(ceph_subsys_mgrc);
+    return crimson::get_logger(stone_subsys_mgrc);
   }
 }
 
@@ -70,7 +70,7 @@ void Client::ms_handle_connect(crimson::net::ConnectionRef c)
   gate.dispatch_in_background(__func__, *this, [this, c] {
     if (conn == c) {
       // ask for the mgrconfigure message
-      auto m = ceph::make_message<MMgrOpen>();
+      auto m = stone::make_message<MMgrOpen>();
       m->daemon_name = local_conf()->name.get_id();
       return conn->send(std::move(m));
     } else {
@@ -113,7 +113,7 @@ seastar::future<> Client::reconnect()
                      mgrmap.get_active_name());
       return;
     }
-    conn = msgr.connect(peer, CEPH_ENTITY_TYPE_MGR);
+    conn = msgr.connect(peer, STONE_ENTITY_TYPE_MGR);
   });
 }
 

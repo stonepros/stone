@@ -16,7 +16,7 @@ public:
     auto i = bl_buffers.begin();
     while (bl_len > 0)
     {
-      ceph_assert(i != bl_buffers.end());
+      stone_assert(i != bl_buffers.end());
       off_t len = std::min<off_t>(bl_len, i->length());
       sink.append(*i, 0, len);
       bl_len -= len;
@@ -93,7 +93,7 @@ TEST(Decompress, FixupRangePartial)
   blocks.emplace_back(compression_block{24, 18, 6});
 
   const bool partial = true;
-  RGWGetObj_Decompress decompress(g_ceph_context, &cs_info, partial, &cb);
+  RGWGetObj_Decompress decompress(g_stone_context, &cs_info, partial, &cb);
 
   // test translation from logical ranges to compressed ranges
   ASSERT_EQ(range_t(0, 5), fixup_range(&decompress, 0, 1));
@@ -112,7 +112,7 @@ TEST(Decompress, FixupRangePartial)
 TEST(Compress, LimitedChunkSize)
 {
   CompressorRef plugin;
-  plugin = Compressor::create(g_ceph_context, Compressor::COMP_ALG_ZLIB);
+  plugin = Compressor::create(g_stone_context, Compressor::COMP_ALG_ZLIB);
   ASSERT_NE(plugin.get(), nullptr);
 
   for (size_t s = 100 ; s < 10000000 ; s = s*5/4)
@@ -122,7 +122,7 @@ TEST(Compress, LimitedChunkSize)
     bl.append(bp);
 
     ut_put_sink c_sink;
-    RGWPutObj_Compress compressor(g_ceph_context, plugin, &c_sink);
+    RGWPutObj_Compress compressor(g_stone_context, plugin, &c_sink);
     compressor.process(std::move(bl), 0);
     compressor.process({}, s); // flush
 
@@ -133,7 +133,7 @@ TEST(Compress, LimitedChunkSize)
     cs_info.blocks = move(compressor.get_compression_blocks());
 
     ut_get_sink_size d_sink;
-    RGWGetObj_Decompress decompress(g_ceph_context, &cs_info, false, &d_sink);
+    RGWGetObj_Decompress decompress(g_stone_context, &cs_info, false, &d_sink);
 
     off_t f_begin = 0;
     off_t f_end = s - 1;
@@ -143,7 +143,7 @@ TEST(Compress, LimitedChunkSize)
     bufferlist empty;
     decompress.handle_data(empty, 0, 0);
 
-    ASSERT_LE(d_sink.get_size(), (size_t)g_ceph_context->_conf->rgw_max_chunk_size);
+    ASSERT_LE(d_sink.get_size(), (size_t)g_stone_context->_conf->rgw_max_chunk_size);
   }
 }
 
@@ -152,9 +152,9 @@ TEST(Compress, BillionZeros)
 {
   CompressorRef plugin;
   ut_put_sink c_sink;
-  plugin = Compressor::create(g_ceph_context, Compressor::COMP_ALG_ZLIB);
+  plugin = Compressor::create(g_stone_context, Compressor::COMP_ALG_ZLIB);
   ASSERT_NE(plugin.get(), nullptr);
-  RGWPutObj_Compress compressor(g_ceph_context, plugin, &c_sink);
+  RGWPutObj_Compress compressor(g_stone_context, plugin, &c_sink);
 
   constexpr size_t size = 1000000;
   bufferptr bp(size);
@@ -172,7 +172,7 @@ TEST(Compress, BillionZeros)
   cs_info.blocks = move(compressor.get_compression_blocks());
 
   ut_get_sink d_sink;
-  RGWGetObj_Decompress decompress(g_ceph_context, &cs_info, false, &d_sink);
+  RGWGetObj_Decompress decompress(g_stone_context, &cs_info, false, &d_sink);
 
   off_t f_begin = 0;
   off_t f_end = size*1000 - 1;

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_WATCHER_H
-#define CEPH_LIBRBD_WATCHER_H
+#ifndef STONE_LIBRBD_WATCHER_H
+#define STONE_LIBRBD_WATCHER_H
 
 #include "common/AsyncOpTracker.h"
 #include "common/ceph_mutex.h"
@@ -22,7 +22,7 @@ class Watcher {
 public:
   struct C_NotifyAck : public Context {
     Watcher *watcher;
-    CephContext *cct;
+    StoneContext *cct;
     uint64_t notify_id;
     uint64_t handle;
     bufferlist out;
@@ -74,7 +74,7 @@ protected:
   librados::IoCtx& m_ioctx;
   asio::ContextWQ *m_work_queue;
   std::string m_oid;
-  CephContext *m_cct;
+  StoneContext *m_cct;
   mutable ceph::shared_mutex m_watch_lock;
   uint64_t m_watch_handle;
   watcher::Notifier m_notifier;
@@ -180,4 +180,4 @@ private:
 
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_WATCHER_H
+#endif // STONE_LIBRBD_WATCHER_H

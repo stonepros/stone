@@ -13,19 +13,19 @@
 #include "common/config_cacher.h"
 
 class AuthRegistry : public md_config_obs_t {
-  CephContext *cct;
+  StoneContext *cct;
   mutable ceph::mutex lock = ceph::make_mutex("AuthRegistry::lock");
 
   std::map<int,AuthAuthorizeHandler*> authorize_handlers;
 
   bool _no_keyring_disabled_cephx = false;
 
-  // CEPH_AUTH_*
+  // STONE_AUTH_*
   std::vector<uint32_t> cluster_methods;
   std::vector<uint32_t> service_methods;
   std::vector<uint32_t> client_methods;
 
-  // CEPH_CON_MODE_*
+  // STONE_CON_MODE_*
   std::vector<uint32_t> mon_cluster_modes;
   std::vector<uint32_t> mon_service_modes;
   std::vector<uint32_t> mon_client_modes;
@@ -38,7 +38,7 @@ class AuthRegistry : public md_config_obs_t {
   void _refresh_config();
 
 public:
-  AuthRegistry(CephContext *cct);
+  AuthRegistry(StoneContext *cct);
   ~AuthRegistry();
 
   void refresh_config() {
@@ -61,11 +61,11 @@ public:
 		     const std::vector<uint32_t>& preferred_modes);
 
   static bool is_secure_method(uint32_t method) {
-    return (method == CEPH_AUTH_CEPHX);
+    return (method == STONE_AUTH_STONEX);
   }
 
   static bool is_secure_mode(uint32_t mode) {
-    return (mode == CEPH_CON_MODE_SECURE);
+    return (mode == STONE_CON_MODE_SECURE);
   }
 
   AuthAuthorizeHandler *get_handler(int peer_type, int method);

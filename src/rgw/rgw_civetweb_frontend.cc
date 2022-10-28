@@ -9,7 +9,7 @@
 #include "rgw_client_io_filters.h"
 #include "rgw_dmclock_sync_scheduler.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace dmc = rgw::dmclock;
 
@@ -66,7 +66,7 @@ int RGWCivetWebFrontend::process(struct mg_connection*  const conn)
 
   RGWRequest req(env.store->getRados()->get_new_req_id());
   int http_ret = 0;
-  ceph::coarse_real_clock::duration latency{};
+  stone::coarse_real_clock::duration latency{};
   //assert (scheduler != nullptr);
   int ret = process_request(env.store, env.rest, &req, env.uri_prefix,
                             *env.auth_registry, &client_io, env.olog,
@@ -117,7 +117,7 @@ int RGWCivetWebFrontend::run()
 
   /* Set run_as_user. This will cause civetweb to invoke setuid() and setgid()
    * based on pw_uid and pw_gid obtained from pw_name. */
-  std::string uid_string = g_ceph_context->get_set_uid_string();
+  std::string uid_string = g_stone_context->get_set_uid_string();
   if (! uid_string.empty()) {
     conf_map.emplace("run_as_user", std::move(uid_string));
   }

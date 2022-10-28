@@ -10,7 +10,7 @@
 #include "librbd/io/ObjectDispatchSpec.h"
 #include "librbd/io/ObjectDispatcherInterface.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::WriteAroundObjectDispatch: " \
                            << this << " " << __func__ << ": "
@@ -24,7 +24,7 @@ template <typename I>
 WriteAroundObjectDispatch<I>::WriteAroundObjectDispatch(
     I* image_ctx, size_t max_dirty, bool writethrough_until_flush)
   : m_image_ctx(image_ctx), m_init_max_dirty(max_dirty), m_max_dirty(max_dirty),
-    m_lock(ceph::make_mutex(util::unique_lock_name(
+    m_lock(stone::make_mutex(util::unique_lock_name(
       "librbd::cache::WriteAroundObjectDispatch::lock", this))) {
   if (writethrough_until_flush) {
     m_max_dirty = 0;
@@ -87,7 +87,7 @@ bool WriteAroundObjectDispatch<I>::discard(
 
 template <typename I>
 bool WriteAroundObjectDispatch<I>::write(
-    uint64_t object_no, uint64_t object_off, ceph::bufferlist&& data,
+    uint64_t object_no, uint64_t object_off, stone::bufferlist&& data,
     IOContext io_context, int op_flags, int write_flags,
     std::optional<uint64_t> assert_version,
     const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
@@ -104,7 +104,7 @@ bool WriteAroundObjectDispatch<I>::write(
 template <typename I>
 bool WriteAroundObjectDispatch<I>::write_same(
     uint64_t object_no, uint64_t object_off, uint64_t object_len,
-    io::LightweightBufferExtents&& buffer_extents, ceph::bufferlist&& data,
+    io::LightweightBufferExtents&& buffer_extents, stone::bufferlist&& data,
     IOContext io_context, int op_flags,
     const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
     uint64_t* journal_tid, io::DispatchResult* dispatch_result,
@@ -119,8 +119,8 @@ bool WriteAroundObjectDispatch<I>::write_same(
 
 template <typename I>
 bool WriteAroundObjectDispatch<I>::compare_and_write(
-    uint64_t object_no, uint64_t object_off, ceph::bufferlist&& cmp_data,
-    ceph::bufferlist&& write_data, IOContext io_context, int op_flags,
+    uint64_t object_no, uint64_t object_off, stone::bufferlist&& cmp_data,
+    stone::bufferlist&& write_data, IOContext io_context, int op_flags,
     const ZTracer::Trace &parent_trace, uint64_t* mismatch_offset,
     int* object_dispatch_flags, uint64_t* journal_tid,
     io::DispatchResult* dispatch_result, Context** on_finish,
@@ -269,10 +269,10 @@ void WriteAroundObjectDispatch<I>::unblock_overlapping_ios(
     uint64_t object_no, uint64_t object_off, uint64_t object_len,
     Contexts* unoptimized_io_dispatches) {
   auto cct = m_image_ctx->cct;
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   auto in_flight_extents_it = m_in_flight_extents.find(object_no);
-  ceph_assert(in_flight_extents_it != m_in_flight_extents.end());
+  stone_assert(in_flight_extents_it != m_in_flight_extents.end());
 
   auto& in_flight_object_extents = in_flight_extents_it->second;
   in_flight_object_extents.erase(object_off, object_len);
@@ -342,7 +342,7 @@ void WriteAroundObjectDispatch<I>::unblock_overlapping_ios(
 template <typename I>
 bool WriteAroundObjectDispatch<I>::can_dispatch_io(
     uint64_t tid, uint64_t length) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   if (m_in_flight_bytes == 0 || m_in_flight_bytes + length <= m_max_dirty) {
     // no in-flight IO or still under max write-around in-flight limit.
@@ -365,7 +365,7 @@ void WriteAroundObjectDispatch<I>::handle_in_flight_io_complete(
 
   m_lock.lock();
   m_in_flight_io_tids.erase(tid);
-  ceph_assert(m_in_flight_bytes >= object_len);
+  stone_assert(m_in_flight_bytes >= object_len);
   m_in_flight_bytes -= object_len;
 
   if (r < 0) {
@@ -433,7 +433,7 @@ void WriteAroundObjectDispatch<I>::handle_in_flight_flush_complete(
 
   // move the in-flight flush to the pending completion list
   auto it = m_in_flight_flushes.find(tid);
-  ceph_assert(it != m_in_flight_flushes.end());
+  stone_assert(it != m_in_flight_flushes.end());
 
   m_pending_flushes.emplace(it->first, it->second);
   m_in_flight_flushes.erase(it);
@@ -458,7 +458,7 @@ void WriteAroundObjectDispatch<I>::handle_in_flight_flush_complete(
 template <typename I>
 typename WriteAroundObjectDispatch<I>::QueuedIOs
 WriteAroundObjectDispatch<I>::collect_ready_ios() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   QueuedIOs queued_ios;
 
@@ -479,7 +479,7 @@ WriteAroundObjectDispatch<I>::collect_ready_ios() {
 template <typename I>
 typename WriteAroundObjectDispatch<I>::Contexts
 WriteAroundObjectDispatch<I>::collect_ready_flushes() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   Contexts ready_flushes;
   auto io_tid_it = m_queued_or_blocked_io_tids.begin();
@@ -502,7 +502,7 @@ WriteAroundObjectDispatch<I>::collect_ready_flushes() {
 template <typename I>
 typename WriteAroundObjectDispatch<I>::Contexts
 WriteAroundObjectDispatch<I>::collect_finished_flushes() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   Contexts finished_flushes;
   auto io_tid_it = m_in_flight_io_tids.begin();

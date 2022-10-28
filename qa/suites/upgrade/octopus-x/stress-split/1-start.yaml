@@ -2,10 +2,10 @@ tasks:
 - install:
     branch: octopus
 
-- cephadm:
-    image: quay.ceph.io/ceph-ci/ceph:octopus
-    cephadm_branch: octopus
-    cephadm_git_url: https://github.com/ceph/ceph
+- stoneadm:
+    image: quay.stone.io/stone-ci/stone:octopus
+    stoneadm_branch: octopus
+    stoneadm_git_url: https://github.com/stone/stone
     conf:
       osd:
         #set config option for which cls modules are allowed to be loaded / used
@@ -15,13 +15,13 @@ tasks:
     add_mons_via_daemon_add: true
     avoid_pacific_features: true
 
-- cephadm.shell:
+- stoneadm.shell:
     mon.a:
-      - ceph fs volume create foo
-      - ceph config set mon mon_warn_on_insecure_global_id_reclaim false --force
-      - ceph config set mon mon_warn_on_insecure_global_id_reclaim_allowed false --force
+      - stone fs volume create foo
+      - stone config set mon mon_warn_on_insecure_global_id_reclaim false --force
+      - stone config set mon mon_warn_on_insecure_global_id_reclaim_allowed false --force
 
-- ceph.healthy:
+- stone.healthy:
 
 - print: "**** upgrading first half of cluster, with stress ****"
 - parallel:
@@ -29,62 +29,62 @@ tasks:
     - first-half-sequence
 - print: "**** done upgrading first half of cluster ****"
 
-- ceph.healthy:
+- stone.healthy:
 
 - print: "**** applying stress + thrashing to mixed-version cluster ****"
 
 - parallel:
     - stress-tasks
 
-- ceph.healthy:
+- stone.healthy:
 
 - print: "**** finishing upgrade ****"
 - parallel:
     - second-half-tasks
     - second-half-sequence
 
-- ceph.healthy:
+- stone.healthy:
 
 
 #################
 
 first-half-sequence:
-- cephadm.shell:
+- stoneadm.shell:
     env: [sha1]
     mon.a:
-      - ceph config set mgr mgr/cephadm/daemon_cache_timeout 60
+      - stone config set mgr mgr/stoneadm/daemon_cache_timeout 60
 
-      - ceph orch upgrade start --image quay.ceph.io/ceph-ci/ceph:$sha1
-      - ceph orch ps
+      - stone orch upgrade start --image quay.stone.io/stone-ci/stone:$sha1
+      - stone orch ps
 
       - echo wait for minority of mons to upgrade
-      - while ! ceph mon versions | grep $sha1 ; do sleep 2 ; done
-      - ceph orch ps
-      - ceph orch upgrade pause
+      - while ! stone mon versions | grep $sha1 ; do sleep 2 ; done
+      - stone orch ps
+      - stone orch upgrade pause
       - sleep 60
-      - ceph orch upgrade resume
+      - stone orch upgrade resume
 
       - echo wait for majority of mons to upgrade
-      - "while ! ceph mon versions | grep $sha1 | egrep ': [23]' ; do sleep 2 ; done"
-      - ceph orch ps
-      - ceph orch upgrade pause
+      - "while ! stone mon versions | grep $sha1 | egrep ': [23]' ; do sleep 2 ; done"
+      - stone orch ps
+      - stone orch upgrade pause
       - sleep 60
-      - ceph orch upgrade resume
+      - stone orch upgrade resume
 
       - echo wait for all mons to upgrade
-      - "while ! ceph mon versions | grep $sha1 | grep ': 3' ; do sleep 2 ; done"
-      - ceph orch ps
-      - ceph orch upgrade pause
+      - "while ! stone mon versions | grep $sha1 | grep ': 3' ; do sleep 2 ; done"
+      - stone orch ps
+      - stone orch upgrade pause
       - sleep 60
-      - ceph orch upgrade resume
+      - stone orch upgrade resume
 
       - echo wait for half of osds to upgrade
-      - "while ! ceph osd versions | grep $sha1 | egrep ': [45678]'; do sleep 2 ; done"
-      - ceph orch upgrade pause
-      - ceph orch ps
+      - "while ! stone osd versions | grep $sha1 | egrep ': [45678]'; do sleep 2 ; done"
+      - stone orch upgrade pause
+      - stone orch ps
 
-      - ceph orch ps
-      - ceph versions
+      - stone orch ps
+      - stone versions
 
 
 #################
@@ -106,17 +106,17 @@ stress-tasks:
 
 second-half-sequence:
   sequential:
-    - cephadm.shell:
+    - stoneadm.shell:
         env: [sha1]
         mon.a:
-          - ceph orch upgrade resume
+          - stone orch upgrade resume
           - sleep 60
 
           - echo wait for upgrade to complete
-          - while ceph orch upgrade status | jq '.in_progress' | grep true ; do ceph orch ps ; ceph versions ; sleep 30 ; done
+          - while stone orch upgrade status | jq '.in_progress' | grep true ; do stone orch ps ; stone versions ; sleep 30 ; done
 
           - echo upgrade complete
-          - ceph orch ps
-          - ceph versions
-          - ceph versions | jq -e '.overall | length == 1'
-          - ceph versions | jq -e '.overall | keys' | grep $sha1
+          - stone orch ps
+          - stone versions
+          - stone versions | jq -e '.overall | length == 1'
+          - stone versions | jq -e '.overall | keys' | grep $sha1

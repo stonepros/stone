@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_OBJECT_MAP_H
-#define CEPH_LIBRBD_OBJECT_MAP_H
+#ifndef STONE_LIBRBD_OBJECT_MAP_H
+#define STONE_LIBRBD_OBJECT_MAP_H
 
 #include "include/int_types.h"
 #include "include/fs_types.h"
@@ -85,7 +85,7 @@ public:
     ceph_assert(start_object_no < end_object_no);
     std::unique_lock locker{m_lock};
 
-    if (snap_id == CEPH_NOSNAP) {
+    if (snap_id == STONE_NOSNAP) {
       end_object_no = std::min(end_object_no, m_object_map.size());
       if (start_object_no >= end_object_no) {
         return false;
@@ -173,4 +173,4 @@ private:
 
 extern template class librbd::ObjectMap<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_OBJECT_MAP_H
+#endif // STONE_LIBRBD_OBJECT_MAP_H

@@ -3,14 +3,14 @@
 
 #include "librbd/image/ValidatePoolRequest.h"
 #include "include/rados/librados.hpp"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/dout.h"
 #include "common/errno.h"
 #include "librbd/ImageCtx.h"
 #include "librbd/Utils.h"
 #include "librbd/asio/ContextWQ.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::ValidatePoolRequest: " \
                            << __func__ << ": "
@@ -32,7 +32,7 @@ using util::create_async_context_callback;
 template <typename I>
 ValidatePoolRequest<I>::ValidatePoolRequest(librados::IoCtx& io_ctx,
                                             Context *on_finish)
-    : m_cct(reinterpret_cast<CephContext*>(io_ctx.cct())),
+    : m_cct(reinterpret_cast<StoneContext*>(io_ctx.cct())),
       m_on_finish(on_finish) {
     // validatation should occur in default namespace
     m_io_ctx.dup(io_ctx);
@@ -57,7 +57,7 @@ void ValidatePoolRequest<I>::read_rbd_info() {
 
   m_out_bl.clear();
   int r = m_io_ctx.aio_operate(RBD_INFO, comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -137,7 +137,7 @@ void ValidatePoolRequest<I>::write_rbd_info() {
     ValidatePoolRequest<I>,
     &ValidatePoolRequest<I>::handle_write_rbd_info>(this);
   int r = m_io_ctx.aio_operate(RBD_INFO, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -199,7 +199,7 @@ void ValidatePoolRequest<I>::overwrite_rbd_info() {
     ValidatePoolRequest<I>,
     &ValidatePoolRequest<I>::handle_overwrite_rbd_info>(this);
   int r = m_io_ctx.aio_operate(RBD_INFO, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 

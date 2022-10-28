@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef __CEPH_LOG_LOG_H
-#define __CEPH_LOG_LOG_H
+#ifndef __STONE_LOG_LOG_H
+#define __STONE_LOG_LOG_H
 
 #include <boost/circular_buffer.hpp>
 

@@ -7,5 +7,5 @@ openstack:
 - machine:
     disk: 100 # GB
 log-rotate:
-  ceph-mds: 10G
-  ceph-osd: 10G
+  stone-mds: 10G
+  stone-osd: 10G

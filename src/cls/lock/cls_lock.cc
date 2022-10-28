@@ -29,7 +29,7 @@
 using std::map;
 using std::string;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 using namespace rados::cls::lock;
 
 CLS_VER(1,0)
@@ -69,14 +69,14 @@ static int read_lock(cls_method_context_t hctx,
   try {
     auto it = bl.cbegin();
     decode(*lock, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("error decoding %s", key.c_str());
     return -EIO;
   }
 
   /* now trim expired locks */
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
 
   auto iter = lock->lockers.begin();
 
@@ -102,7 +102,7 @@ static int read_lock(cls_method_context_t hctx,
 
 static int write_lock(cls_method_context_t hctx, const string& name, const lock_info_t& lock)
 {
-  using ceph::encode;
+  using stone::encode;
   string key = LOCK_PREFIX;
   key.append(name);
 
@@ -176,7 +176,7 @@ static int lock_obj(cls_method_context_t hctx,
   entity_inst_t inst;
   r = cls_get_request_origin(hctx, &inst);
   id.locker = inst.name;
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   /* check this early, before we check fail_if_exists, otherwise we might
    * remove the locker entry and not check it later */
@@ -221,7 +221,7 @@ static int lock_obj(cls_method_context_t hctx,
   linfo.tag = tag;
   utime_t expiration;
   if (!duration.is_zero()) {
-    expiration = ceph_clock_now();
+    expiration = stone_clock_now();
     expiration += duration;
 
   }
@@ -260,7 +260,7 @@ static int lock_op(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     return -EINVAL;
   }
 
@@ -305,7 +305,7 @@ static int remove_lock(cls_method_context_t hctx,
   lockers.erase(iter);
 
   if (cls_lock_is_ephemeral(linfo.lock_type)) {
-    ceph_assert(lockers.empty());
+    stone_assert(lockers.empty());
     r = clean_lock(hctx);
   } else {
     r = write_lock(hctx, name, linfo);
@@ -332,13 +332,13 @@ static int unlock_op(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     return -EINVAL;
   }
 
   entity_inst_t inst;
   int r = cls_get_request_origin(hctx, &inst);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   return remove_lock(hctx, op.name, inst.name, op.cookie);
 }
 
@@ -360,7 +360,7 @@ static int break_lock(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     return -EINVAL;
   }
 
@@ -386,7 +386,7 @@ static int get_info(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     return -EINVAL;
   }
 
@@ -467,7 +467,7 @@ int assert_locked(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     return -EINVAL;
   }
 
@@ -506,7 +506,7 @@ int assert_locked(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
 
   entity_inst_t inst;
   r = cls_get_request_origin(hctx, &inst);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   locker_id_t id;
   id.cookie = op.cookie;
@@ -539,7 +539,7 @@ int set_cookie(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     return -EINVAL;
   }
 
@@ -578,7 +578,7 @@ int set_cookie(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
 
   entity_inst_t inst;
   r = cls_get_request_origin(hctx, &inst);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   locker_id_t id;
   id.cookie = op.cookie;

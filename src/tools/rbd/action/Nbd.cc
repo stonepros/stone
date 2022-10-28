@@ -20,7 +20,7 @@ namespace po = boost::program_options;
 
 static int call_nbd_cmd(const po::variables_map &vm,
                         const std::vector<std::string> &args,
-                        const std::vector<std::string> &ceph_global_init_args) {
+                        const std::vector<std::string> &stone_global_init_args) {
   #if defined(__FreeBSD__) || defined(_WIN32)
   std::cerr << "rbd: nbd device is not supported" << std::endl;
   return -EOPNOTSUPP;
@@ -40,7 +40,7 @@ static int call_nbd_cmd(const po::variables_map &vm,
 
   SubProcess process(exe_path, SubProcess::KEEP, SubProcess::KEEP, SubProcess::KEEP);
 
-  for (auto &arg : ceph_global_init_args) {
+  for (auto &arg : stone_global_init_args) {
     process.add_cmd_arg(arg.c_str());
   }
 
@@ -116,7 +116,7 @@ int parse_options(const std::vector<std::string> &options,
 #endif
 
 int execute_list(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
 #if defined(__FreeBSD__) || defined(_WIN32)
   std::cerr << "rbd: nbd device is not supported" << std::endl;
   return -EOPNOTSUPP;
@@ -133,12 +133,12 @@ int execute_list(const po::variables_map &vm,
     args.push_back("--pretty-format");
   }
 
-  return call_nbd_cmd(vm, args, ceph_global_init_args);
+  return call_nbd_cmd(vm, args, stone_global_init_args);
 #endif
 }
 
 int execute_attach(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
 #if defined(__FreeBSD__) || defined(_WIN32)
   std::cerr << "rbd: nbd device is not supported" << std::endl;
   return -EOPNOTSUPP;
@@ -201,12 +201,12 @@ int execute_attach(const po::variables_map &vm,
     }
   }
 
-  return call_nbd_cmd(vm, args, ceph_global_init_args);
+  return call_nbd_cmd(vm, args, stone_global_init_args);
 #endif
 }
 
 int execute_detach(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
 #if defined(__FreeBSD__) || defined(_WIN32)
   std::cerr << "rbd: nbd device is not supported" << std::endl;
   return -EOPNOTSUPP;
@@ -242,12 +242,12 @@ int execute_detach(const po::variables_map &vm,
     }
   }
 
-  return call_nbd_cmd(vm, args, ceph_global_init_args);
+  return call_nbd_cmd(vm, args, stone_global_init_args);
 #endif
 }
 
 int execute_map(const po::variables_map &vm,
-                const std::vector<std::string> &ceph_global_init_args) {
+                const std::vector<std::string> &stone_global_init_args) {
 #if defined(__FreeBSD__) || defined(_WIN32)
   std::cerr << "rbd: nbd device is not supported" << std::endl;
   return -EOPNOTSUPP;
@@ -295,12 +295,12 @@ int execute_map(const po::variables_map &vm,
     }
   }
 
-  return call_nbd_cmd(vm, args, ceph_global_init_args);
+  return call_nbd_cmd(vm, args, stone_global_init_args);
 #endif
 }
 
 int execute_unmap(const po::variables_map &vm,
-                  const std::vector<std::string> &ceph_global_init_args) {
+                  const std::vector<std::string> &stone_global_init_args) {
 #if defined(__FreeBSD__) || defined(_WIN32)
   std::cerr << "rbd: nbd device is not supported" << std::endl;
   return -EOPNOTSUPP;
@@ -336,7 +336,7 @@ int execute_unmap(const po::variables_map &vm,
     }
   }
 
-  return call_nbd_cmd(vm, args, ceph_global_init_args);
+  return call_nbd_cmd(vm, args, stone_global_init_args);
 #endif
 }
 
@@ -346,10 +346,10 @@ void get_list_arguments_deprecated(po::options_description *positional,
 }
 
 int execute_list_deprecated(const po::variables_map &vm,
-                            const std::vector<std::string> &ceph_global_args) {
+                            const std::vector<std::string> &stone_global_args) {
   std::cerr << "rbd: 'nbd list' command is deprecated, "
             << "use 'device list -t nbd' instead" << std::endl;
-  return execute_list(vm, ceph_global_args);
+  return execute_list(vm, stone_global_args);
 }
 
 void get_map_arguments_deprecated(po::options_description *positional,
@@ -366,7 +366,7 @@ void get_map_arguments_deprecated(po::options_description *positional,
 }
 
 int execute_map_deprecated(const po::variables_map &vm_deprecated,
-                           const std::vector<std::string> &ceph_global_args) {
+                           const std::vector<std::string> &stone_global_args) {
   std::cerr << "rbd: 'nbd map' command is deprecated, "
             << "use 'device map -t nbd' instead" << std::endl;
 
@@ -394,7 +394,7 @@ int execute_map_deprecated(const po::variables_map &vm_deprecated,
 
   vm.at("options").value() = boost::any(opts);
 
-  return execute_map(vm, ceph_global_args);
+  return execute_map(vm, stone_global_args);
 }
 
 void get_unmap_arguments_deprecated(po::options_description *positional,
@@ -409,10 +409,10 @@ void get_unmap_arguments_deprecated(po::options_description *positional,
 }
 
 int execute_unmap_deprecated(const po::variables_map &vm,
-                             const std::vector<std::string> &ceph_global_args) {
+                             const std::vector<std::string> &stone_global_args) {
   std::cerr << "rbd: 'nbd unmap' command is deprecated, "
             << "use 'device unmap -t nbd' instead" << std::endl;
-  return execute_unmap(vm, ceph_global_args);
+  return execute_unmap(vm, stone_global_args);
 }
 
 Shell::Action action_show_deprecated(

@@ -1,11 +1,11 @@
 tasks:
 - exec:
     client.0:
-      - sudo ceph osd pool create datapool 4
+      - sudo stone osd pool create datapool 4
       - rbd pool init datapool
 
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         rbd default data pool: datapool

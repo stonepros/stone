@@ -1,4 +1,4 @@
-#include "auth/cephx/CephxKeyServer.h"
+#include "auth/stonex/StonexKeyServer.h"
 #include "common/errno.h"
 #include "mon/AuthMonitor.h"
 #include "mon/MonitorDBStore.h"
@@ -43,12 +43,12 @@ static void add_auth(KeyServerData::Incremental& auth_inc,
   AuthMonitor::Incremental inc;
   inc.inc_type = AuthMonitor::AUTH_DATA;
   encode(auth_inc, inc.auth_data);
-  inc.auth_type = CEPH_AUTH_CEPHX;
+  inc.auth_type = STONE_AUTH_STONEX;
 
   bufferlist bl;
   __u8 v = 1;
   encode(v, bl);
-  inc.encode(bl, CEPH_FEATURES_ALL);
+  inc.encode(bl, STONE_FEATURES_ALL);
 
   const string prefix("auth");
   auto last_committed = ms.get(prefix, "last_committed") + 1;
@@ -71,7 +71,7 @@ static int get_auth_inc(const string& keyring_path,
   // get the name
   EntityName entity;
   // assuming the entity name of OSD is "osd.<osd_id>"
-  entity.set(CEPH_ENTITY_TYPE_OSD, std::to_string(sb.whoami));
+  entity.set(STONE_ENTITY_TYPE_OSD, std::to_string(sb.whoami));
   auth_inc->name = entity;
 
   // read keyring from disk
@@ -183,7 +183,7 @@ int update_monitor(const OSDSuperblock& sb, MonitorDBStore& ms)
   case 0:
     return 0;
   default:
-    ceph_abort();
+    stone_abort();
   }
   string uuid = stringify(sb.cluster_fsid) + "\n";
   bufferlist bl;
@@ -257,7 +257,7 @@ int update_osdmap(ObjectStore& fs, OSDSuperblock& sb, MonitorDBStore& ms)
       OSDMap::Incremental inc;
       auto p = bl.cbegin();
       inc.decode(p);
-      features = inc.encode_features | CEPH_FEATURE_RESERVED;
+      features = inc.encode_features | STONE_FEATURE_RESERVED;
       if (osdmap.get_epoch() && e > 1) {
         if (osdmap.apply_incremental(inc)) {
           cerr << "bad fsid: "

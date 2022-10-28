@@ -14,7 +14,7 @@
 
 #include <atomic>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 extern void signal_shutdown();
 
@@ -119,7 +119,7 @@ void RGWLoadGenProcess::handle_request(const DoutPrefixProvider *dpp, RGWRequest
 
   RGWLoadGenRequestEnv env;
 
-  utime_t tm = ceph_clock_now();
+  utime_t tm = stone_clock_now();
 
   env.port = 80;
   env.content_length = req->content_length;

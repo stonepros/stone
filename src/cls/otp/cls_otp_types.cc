@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -15,7 +15,7 @@
 #include "objclass/objclass.h"
 #include "common/Formatter.h"
 #include "common/Clock.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "include/utime.h"
 
@@ -23,7 +23,7 @@
 
 using std::string;
 
-using ceph::Formatter;
+using stone::Formatter;
 
 using namespace rados::cls::otp;
 

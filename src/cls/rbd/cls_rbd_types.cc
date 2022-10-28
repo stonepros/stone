@@ -12,8 +12,8 @@ using std::istringstream;
 using std::ostringstream;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
 std::ostream& operator<<(std::ostream& os,
                          MirrorPeerDirection mirror_peer_direction) {
@@ -253,12 +253,12 @@ const std::string MirrorImageSiteStatus::LOCAL_MIRROR_UUID(""); // empty mirror 
 
 void MirrorImageSiteStatus::encode_meta(uint8_t version, bufferlist &bl) const {
   if (version >= 2) {
-    ceph::encode(mirror_uuid, bl);
+    stone::encode(mirror_uuid, bl);
   }
   cls::rbd::encode(state, bl);
-  ceph::encode(description, bl);
-  ceph::encode(last_update, bl);
-  ceph::encode(up, bl);
+  stone::encode(description, bl);
+  stone::encode(last_update, bl);
+  stone::encode(up, bl);
 }
 
 void MirrorImageSiteStatus::decode_meta(uint8_t version,
@@ -266,13 +266,13 @@ void MirrorImageSiteStatus::decode_meta(uint8_t version,
   if (version < 2) {
     mirror_uuid = LOCAL_MIRROR_UUID;
   } else {
-    ceph::decode(mirror_uuid, it);
+    stone::decode(mirror_uuid, it);
   }
 
   cls::rbd::decode(state, it);
-  ceph::decode(description, it);
+  stone::decode(description, it);
   ::decode(last_update, it);
-  ceph::decode(up, it);
+  stone::decode(up, it);
 }
 
 void MirrorImageSiteStatus::encode(bufferlist &bl) const {
@@ -704,14 +704,14 @@ void GroupSpec::generate_test_instances(std::list<GroupSpec *> &o) {
 }
 
 void GroupSnapshotNamespace::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(group_pool, bl);
   encode(group_id, bl);
   encode(group_snapshot_id, bl);
 }
 
 void GroupSnapshotNamespace::decode(bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(group_pool, it);
   decode(group_id, it);
   decode(group_snapshot_id, it);
@@ -724,13 +724,13 @@ void GroupSnapshotNamespace::dump(Formatter *f) const {
 }
 
 void TrashSnapshotNamespace::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(original_name, bl);
   encode(static_cast<uint32_t>(original_snapshot_namespace_type), bl);
 }
 
 void TrashSnapshotNamespace::decode(bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(original_name, it);
   uint32_t snap_type;
   decode(snap_type, it);
@@ -745,7 +745,7 @@ void TrashSnapshotNamespace::dump(Formatter *f) const {
 }
 
 void MirrorSnapshotNamespace::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(state, bl);
   encode(complete, bl);
   encode(mirror_peer_uuids, bl);
@@ -756,7 +756,7 @@ void MirrorSnapshotNamespace::encode(bufferlist& bl) const {
 }
 
 void MirrorSnapshotNamespace::decode(bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(state, it);
   decode(complete, it);
   decode(mirror_peer_uuids, it);
@@ -791,7 +791,7 @@ public:
 
   template <typename T>
   inline void operator()(const T& t) const {
-    using ceph::encode;
+    using stone::encode;
     encode(static_cast<uint32_t>(T::SNAPSHOT_NAMESPACE_TYPE), m_bl);
     t.encode(m_bl);
   }
@@ -826,7 +826,7 @@ public:
     t.dump(m_formatter);
   }
 private:
-  ceph::Formatter *m_formatter;
+  stone::Formatter *m_formatter;
   std::string m_key;
 };
 
@@ -889,7 +889,7 @@ void SnapshotInfo::generate_test_instances(std::list<SnapshotInfo*> &o) {
                                "12345", 123, {123456, 0}, 429));
   o.push_back(new SnapshotInfo(1ULL,
                                MirrorSnapshotNamespace{MIRROR_SNAPSHOT_STATE_PRIMARY,
-                                                       {"1", "2"}, "", CEPH_NOSNAP},
+                                                       {"1", "2"}, "", STONE_NOSNAP},
                                "snap1", 123, {123456, 0}, 12));
   o.push_back(new SnapshotInfo(1ULL,
                                MirrorSnapshotNamespace{MIRROR_SNAPSHOT_STATE_NON_PRIMARY,
@@ -943,10 +943,10 @@ void SnapshotNamespace::generate_test_instances(std::list<SnapshotNamespace*> &o
   o.push_back(new SnapshotNamespace(TrashSnapshotNamespace()));
   o.push_back(new SnapshotNamespace(MirrorSnapshotNamespace(MIRROR_SNAPSHOT_STATE_PRIMARY,
                                                             {"peer uuid"},
-                                                            "", CEPH_NOSNAP)));
+                                                            "", STONE_NOSNAP)));
   o.push_back(new SnapshotNamespace(MirrorSnapshotNamespace(MIRROR_SNAPSHOT_STATE_PRIMARY_DEMOTED,
                                                             {"peer uuid"},
-                                                            "", CEPH_NOSNAP)));
+                                                            "", STONE_NOSNAP)));
   o.push_back(new SnapshotNamespace(MirrorSnapshotNamespace(MIRROR_SNAPSHOT_STATE_NON_PRIMARY,
                                                             {"peer uuid"},
                                                             "uuid", 123)));
@@ -1037,7 +1037,7 @@ std::ostream& operator<<(std::ostream& os, MirrorSnapshotState type) {
 }
 
 void ImageSnapshotSpec::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   ENCODE_START(1, 1, bl);
   encode(pool, bl);
   encode(image_id, bl);
@@ -1046,7 +1046,7 @@ void ImageSnapshotSpec::encode(bufferlist& bl) const {
 }
 
 void ImageSnapshotSpec::decode(bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   DECODE_START(1, it);
   decode(pool, it);
   decode(image_id, it);
@@ -1066,7 +1066,7 @@ void ImageSnapshotSpec::generate_test_instances(std::list<ImageSnapshotSpec *> &
 }
 
 void GroupSnapshot::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   ENCODE_START(1, 1, bl);
   encode(id, bl);
   encode(name, bl);
@@ -1076,7 +1076,7 @@ void GroupSnapshot::encode(bufferlist& bl) const {
 }
 
 void GroupSnapshot::decode(bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   DECODE_START(1, it);
   decode(id, it);
   decode(name, it);

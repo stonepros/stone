@@ -39,17 +39,17 @@ int main(int argc, char **argv)
   }
   
  
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   while (loop++ < count) {
     int ret = safe_write(fd, buf, bsize);
     if (ret)
-      ceph_abort();
+      stone_abort();
     //if ((loop % 100) == 0) 
     //fprintf(stderr, ".");
   }
   ::fsync(fd);
   ::close(fd);
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   end -= start;
 
 

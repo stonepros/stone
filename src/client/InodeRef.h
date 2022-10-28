@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CLIENT_INODEREF_H
-#define CEPH_CLIENT_INODEREF_H
+#ifndef STONE_CLIENT_INODEREF_H
+#define STONE_CLIENT_INODEREF_H
 
 #include <boost/intrusive_ptr.hpp>
 class Inode;

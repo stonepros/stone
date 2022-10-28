@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,10 +12,10 @@
  * 
  */
 
-class CephFuse {
+class StoneeFuse {
 public:
-  CephFuse(Client *c, int fd);
-  ~CephFuse();
+  StoneeFuse(Client *c, int fd);
+  ~StoneeFuse();
   int init(int argc, const char *argv[]);
   int start();
   int mount();
@@ -24,5 +24,5 @@ public:
   class Handle;
   std::string get_mount_point() const;
 private:
-  CephFuse::Handle *_handle;
+  StoneeFuse::Handle *_handle;
 };

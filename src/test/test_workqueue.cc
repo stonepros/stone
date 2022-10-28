@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
 
 #include "common/WorkQueue.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 
 TEST(WorkQueue, StartStop)
 {
-  ThreadPool tp(g_ceph_context, "foo", "tp_foo", 10, "");
+  ThreadPool tp(g_stone_context, "foo", "tp_foo", 10, "");
   
   tp.start();
   tp.pause();
@@ -18,7 +18,7 @@ TEST(WorkQueue, StartStop)
 
 TEST(WorkQueue, Resize)
 {
-  ThreadPool tp(g_ceph_context, "bar", "tp_bar", 2, "filestore_op_threads");
+  ThreadPool tp(g_stone_context, "bar", "tp_bar", 2, "filestore_op_threads");
   
   tp.start();
 

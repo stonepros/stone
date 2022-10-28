@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_TEST_LIBRBD_MOCK_IMAGE_CTX_H
-#define CEPH_TEST_LIBRBD_MOCK_IMAGE_CTX_H
+#ifndef STONE_TEST_LIBRBD_MOCK_IMAGE_CTX_H
+#define STONE_TEST_LIBRBD_MOCK_IMAGE_CTX_H
 
 #include "include/rados/librados.hpp"
 #include "test/librbd/mock/MockContextWQ.h"
@@ -229,11 +229,11 @@ struct MockImageCtx {
   IOContext duplicate_data_io_context();
 
   static void set_timer_instance(MockSafeTimer *timer, ceph::mutex *timer_lock);
-  static void get_timer_instance(CephContext *cct, MockSafeTimer **timer,
+  static void get_timer_instance(StoneeContext *cct, MockSafeTimer **timer,
                                  ceph::mutex **timer_lock);
 
   ImageCtx *image_ctx;
-  CephContext *cct;
+  StoneeContext *cct;
   PerfCounters *perfcounter;
 
   cls::rbd::SnapshotNamespace snap_namespace;
@@ -340,4 +340,4 @@ struct MockImageCtx {
 
 } // namespace librbd
 
-#endif // CEPH_TEST_LIBRBD_MOCK_IMAGE_CTX_H
+#endif // STONE_TEST_LIBRBD_MOCK_IMAGE_CTX_H

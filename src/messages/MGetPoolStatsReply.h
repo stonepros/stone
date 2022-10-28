@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MGETPOOLSTATSREPLY_H
-#define CEPH_MGETPOOLSTATSREPLY_H
+#ifndef STONE_MGETPOOLSTATSREPLY_H
+#define STONE_MGETPOOLSTATSREPLY_H
 
 class MGetPoolStatsReply final : public PaxosServiceMessage {
   static constexpr int HEAD_VERSION = 2;

@@ -15,7 +15,7 @@
 
 #include <boost/variant.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::api::Snapshot: " << __func__ << ": "
 
@@ -28,11 +28,11 @@ namespace {
 
 class GetGroupVisitor : public boost::static_visitor<int> {
 public:
-  CephContext* cct;
+  StoneContext* cct;
   librados::IoCtx *image_ioctx;
   snap_group_namespace_t *group_snap;
 
-  explicit GetGroupVisitor(CephContext* cct, librados::IoCtx *_image_ioctx,
+  explicit GetGroupVisitor(StoneContext* cct, librados::IoCtx *_image_ioctx,
                            snap_group_namespace_t *group_snap)
     : cct(cct), image_ioctx(_image_ioctx), group_snap(group_snap) {};
 
@@ -270,7 +270,7 @@ int Snapshot<I>::get_id(I *ictx, const std::string& snap_name, uint64_t *snap_id
 
     std::shared_lock image_locker{ictx->image_lock};
     *snap_id = ictx->get_snap_id(cls::rbd::UserSnapshotNamespace(), snap_name);
-    if (*snap_id == CEPH_NOSNAP)
+    if (*snap_id == STONE_NOSNAP)
       return -ENOENT;
 
     return 0;
@@ -306,7 +306,7 @@ int Snapshot<I>::exists(I *ictx, const cls::rbd::SnapshotNamespace& snap_namespa
     return r;
 
   std::shared_lock l{ictx->image_lock};
-  *exists = ictx->get_snap_id(snap_namespace, snap_name) != CEPH_NOSNAP;
+  *exists = ictx->get_snap_id(snap_namespace, snap_name) != STONE_NOSNAP;
   return 0;
 }
 
@@ -364,7 +364,7 @@ int Snapshot<I>::remove(I *ictx, const char *snap_name, uint32_t flags,
     }
     if (protect) {
       lderr(ictx->cct) << "snapshot is still protected after unprotection" << dendl;
-      ceph_abort();
+      stone_abort();
     }
   }
 
@@ -378,7 +378,7 @@ int Snapshot<I>::remove(I *ictx, const char *snap_name, uint32_t flags,
 template <typename I>
 int Snapshot<I>::get_timestamp(I *ictx, uint64_t snap_id, struct timespec *timestamp) {
   auto snap_it = ictx->snap_info.find(snap_id);
-  ceph_assert(snap_it != ictx->snap_info.end());
+  stone_assert(snap_it != ictx->snap_info.end());
   utime_t time = snap_it->second.timestamp;
   time.to_timespec(timestamp);
   return 0;
@@ -411,7 +411,7 @@ int Snapshot<I>::is_protected(I *ictx, const char *snap_name, bool *protect) {
 
   std::shared_lock l{ictx->image_lock};
   snap_t snap_id = ictx->get_snap_id(cls::rbd::UserSnapshotNamespace(), snap_name);
-  if (snap_id == CEPH_NOSNAP)
+  if (snap_id == STONE_NOSNAP)
     return -ENOENT;
   bool is_unprotected;
   r = ictx->is_snap_unprotected(snap_id, &is_unprotected);
@@ -432,7 +432,7 @@ int Snapshot<I>::get_namespace(I *ictx, const char *snap_name,
     return r;
   std::shared_lock l{ictx->image_lock};
   snap_t snap_id = ictx->get_snap_id(*snap_namespace, snap_name);
-  if (snap_id == CEPH_NOSNAP)
+  if (snap_id == STONE_NOSNAP)
     return -ENOENT;
   r = ictx->get_snap_namespace(snap_id, snap_namespace);
   return r;

@@ -10,7 +10,7 @@
 
 #include "msg/async/AsyncMessenger.h"
 
-Messenger *Messenger::create_client_messenger(CephContext *cct, std::string lname)
+Messenger *Messenger::create_client_messenger(StoneContext *cct, std::string lname)
 {
   std::string public_msgr_type = cct->_conf->ms_public_type.empty() ? cct->_conf.get_val<std::string>("ms_type") : cct->_conf->ms_public_type;
   auto nonce = get_random_nonce();
@@ -21,26 +21,26 @@ Messenger *Messenger::create_client_messenger(CephContext *cct, std::string lnam
 uint64_t Messenger::get_pid_nonce()
 {
   uint64_t nonce = getpid();
-  if (nonce == 1 || getenv("CEPH_USE_RANDOM_NONCE")) {
+  if (nonce == 1 || getenv("STONE_USE_RANDOM_NONCE")) {
     // we're running in a container; use a random number instead!
-    nonce = ceph::util::generate_random_number<uint64_t>();
+    nonce = stone::util::generate_random_number<uint64_t>();
   }
   return nonce;
 }
 
 uint64_t Messenger::get_random_nonce()
 {
-  return ceph::util::generate_random_number<uint64_t>();
+  return stone::util::generate_random_number<uint64_t>();
 }
 
-Messenger *Messenger::create(CephContext *cct, const std::string &type,
+Messenger *Messenger::create(StoneContext *cct, const std::string &type,
 			     entity_name_t name, std::string lname,
 			     uint64_t nonce)
 {
   int r = -1;
   if (type == "random") {
     r = 0;
-    //r = ceph::util::generate_random_number(0, 1);
+    //r = stone::util::generate_random_number(0, 1);
   }
   if (r == 0 || type.find("async") != std::string::npos)
     return new AsyncMessenger(cct, name, type, std::move(lname), nonce);
@@ -54,10 +54,10 @@ Messenger *Messenger::create(CephContext *cct, const std::string &type,
  */
 static int get_default_crc_flags(const ConfigProxy&);
 
-Messenger::Messenger(CephContext *cct_, entity_name_t w)
+Messenger::Messenger(StoneContext *cct_, entity_name_t w)
   : trace_endpoint("0.0.0.0", 0, "Messenger"),
     my_name(w),
-    default_send_priority(CEPH_MSG_PRIO_DEFAULT),
+    default_send_priority(STONE_MSG_PRIO_DEFAULT),
     started(false),
     magic(0),
     socket_priority(-1),

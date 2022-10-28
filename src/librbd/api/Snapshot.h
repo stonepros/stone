@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_API_SNAPSHOT_H
-#define CEPH_LIBRBD_API_SNAPSHOT_H
+#ifndef STONE_LIBRBD_API_SNAPSHOT_H
+#define STONE_LIBRBD_API_SNAPSHOT_H
 
 #include "include/rbd/librbd.hpp"
 #include "cls/rbd/cls_rbd_types.h"
@@ -64,4 +64,4 @@ struct Snapshot {
 
 extern template class librbd::api::Snapshot<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_API_SNAPSHOT_H
+#endif // STONE_LIBRBD_API_SNAPSHOT_H

@@ -10,7 +10,7 @@
 using std::list;
 using std::string;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 void cls_refcount_get(librados::ObjectWriteOperation& op, const string& tag, bool implicit_ref)
 {
@@ -55,7 +55,7 @@ int cls_refcount_read(librados::IoCtx& io_ctx, string& oid, list<string> *refs, 
   try {
     auto iter = out.cbegin();
     decode(ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 

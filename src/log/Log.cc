@@ -8,7 +8,7 @@
 #include "common/Graylog.h"
 #include "common/valgrind.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/compat.h"
 #include "include/on_exit.h"
 
@@ -27,7 +27,7 @@
 
 #define MAX_LOG_BUF 65536
 
-namespace ceph {
+namespace stone {
 namespace logging {
 
 static OnExitManager exit_callbacks;
@@ -54,7 +54,7 @@ Log::~Log()
     *m_indirect_this = nullptr;
   }
 
-  ceph_assert(!is_started());
+  stone_assert(!is_started());
   if (m_fd >= 0)
     VOID_TEMP_FAILURE_RETRY(::close(m_fd));
 }
@@ -278,7 +278,7 @@ void Log::_flush(EntryVector& t, bool crash)
       memcpy(pos + used, str.data(), str.size());
       used += str.size();
       pos[used] = '\0';
-      ceph_assert((used + 1 /* '\n' */) < allocated);
+      stone_assert((used + 1 /* '\n' */) < allocated);
 
       if (do_syslog) {
         syslog(LOG_USER|LOG_INFO, "%s", pos);
@@ -381,7 +381,7 @@ void Log::dump_recent()
   for (const auto pthread_id : recent_pthread_ids)
   {
     char pthread_name[16] = {0}; //limited by 16B include terminating null byte.
-    ceph_pthread_getname(pthread_id, pthread_name, sizeof(pthread_name));
+    stone_pthread_getname(pthread_id, pthread_name, sizeof(pthread_name));
     _log_message(fmt::format("  {} / {}",
 			     tid_to_int(pthread_id), pthread_name), true);
   }
@@ -399,7 +399,7 @@ void Log::dump_recent()
 
 void Log::start()
 {
-  ceph_assert(!is_started());
+  stone_assert(!is_started());
   {
     std::scoped_lock lock(m_queue_mutex);
     m_stop = false;
@@ -461,5 +461,5 @@ void Log::reset_segv()
   m_inject_segv = false;
 }
 
-} // ceph::logging::
-} // ceph::
+} // stone::logging::
+} // stone::

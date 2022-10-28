@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -25,19 +25,19 @@
 
 #include "messages/MLock.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << dir->mdcache->mds->get_nodeid() << ".cache.den(" << dir->dirfrag() << " " << name << ") "
 
 
 ostream& CDentry::print_db_line_prefix(ostream& out)
 {
-  return out << ceph_clock_now() << " mds." << dir->mdcache->mds->get_nodeid() << ".cache.den(" << dir->ino() << " " << name << ") ";
+  return out << stone_clock_now() << " mds." << dir->mdcache->mds->get_nodeid() << ".cache.den(" << dir->ino() << " " << name << ") ";
 }
 
-LockType CDentry::lock_type(CEPH_LOCK_DN);
-LockType CDentry::versionlock_type(CEPH_LOCK_DVERSION);
+LockType CDentry::lock_type(STONE_LOCK_DN);
+LockType CDentry::versionlock_type(STONE_LOCK_DVERSION);
 
 
 // CDentry
@@ -49,9 +49,9 @@ ostream& operator<<(ostream& out, const CDentry& dn)
   
   out << "[dentry " << path;
   
-  if (true || dn.first != 0 || dn.last != CEPH_NOSNAP) {
+  if (true || dn.first != 0 || dn.last != STONE_NOSNAP) {
     out << " [" << dn.first << ",";
-    if (dn.last == CEPH_NOSNAP) 
+    if (dn.last == STONE_NOSNAP) 
       out << "head";
     else
       out << dn.last;
@@ -178,7 +178,7 @@ void CDentry::_mark_dirty(LogSegment *ls)
     get(PIN_DIRTY);
     dir->inc_num_dirty();
     dir->dirty_dentries.push_back(&item_dir_dirty);
-    ceph_assert(ls);
+    stone_assert(ls);
   }
   if (ls) 
     ls->dirty_dentries.push_back(&item_dirty);
@@ -189,7 +189,7 @@ void CDentry::mark_dirty(version_t pv, LogSegment *ls)
   dout(10) << __func__ << " " << *this << dendl;
 
   // i now live in this new dir version
-  ceph_assert(pv <= projected_version);
+  stone_assert(pv <= projected_version);
   version = pv;
   _mark_dirty(ls);
 
@@ -201,7 +201,7 @@ void CDentry::mark_dirty(version_t pv, LogSegment *ls)
 void CDentry::mark_clean() 
 {
   dout(10) << __func__ << " " << *this << dendl;
-  ceph_assert(is_dirty());
+  stone_assert(is_dirty());
 
   // not always true for recalc_auth_bits during resolve finish
   //assert(dir->get_version() == 0 || version <= dir->get_version());  // hmm?
@@ -234,7 +234,7 @@ void CDentry::make_path_string(string& s, bool projected) const
 
 void CDentry::make_path(filepath& fp, bool projected) const
 {
-  ceph_assert(dir);
+  stone_assert(dir);
   dir->inode->make_path(fp, projected);
   fp.push_dentry(get_name());
 }
@@ -246,8 +246,8 @@ void CDentry::make_path(filepath& fp, bool projected) const
  */
 void CDentry::link_remote(CDentry::linkage_t *dnl, CInode *in)
 {
-  ceph_assert(dnl->is_remote());
-  ceph_assert(in->ino() == dnl->get_remote_ino());
+  stone_assert(dnl->is_remote());
+  stone_assert(in->ino() == dnl->get_remote_ino());
   dnl->inode = in;
 
   if (dnl == &linkage)
@@ -259,8 +259,8 @@ void CDentry::link_remote(CDentry::linkage_t *dnl, CInode *in)
 
 void CDentry::unlink_remote(CDentry::linkage_t *dnl)
 {
-  ceph_assert(dnl->is_remote());
-  ceph_assert(dnl->inode);
+  stone_assert(dnl->is_remote());
+  stone_assert(dnl->inode);
   
   if (dnl == &linkage)
     dnl->inode->remove_remote_parent(this);
@@ -302,7 +302,7 @@ void CDentry::push_projected_linkage(CInode *inode)
 
 CDentry::linkage_t *CDentry::pop_projected_linkage()
 {
-  ceph_assert(projected.size());
+  stone_assert(projected.size());
   
   linkage_t& n = projected.front();
 
@@ -325,9 +325,9 @@ CDentry::linkage_t *CDentry::pop_projected_linkage()
     }
   }
 
-  ceph_assert(n.inode == linkage.inode);
-  ceph_assert(n.remote_ino == linkage.remote_ino);
-  ceph_assert(n.remote_d_type == linkage.remote_d_type);
+  stone_assert(n.inode == linkage.inode);
+  stone_assert(n.remote_ino == linkage.remote_ino);
+  stone_assert(n.remote_d_type == linkage.remote_d_type);
 
   projected.pop_front();
 
@@ -341,7 +341,7 @@ CDentry::linkage_t *CDentry::pop_projected_linkage()
 
 int CDentry::get_num_dir_auth_pins() const
 {
-  ceph_assert(!is_projected());
+  stone_assert(!is_projected());
   if (get_linkage()->is_primary())
     return auth_pins + get_linkage()->get_inode()->get_num_auth_pins();
   return auth_pins;
@@ -349,7 +349,7 @@ int CDentry::get_num_dir_auth_pins() const
 
 bool CDentry::can_auth_pin(int *err_ret) const
 {
-  ceph_assert(dir);
+  stone_assert(dir);
   return dir->can_auth_pin(err_ret);
 }
 
@@ -375,7 +375,7 @@ void CDentry::auth_unpin(void *by)
 #ifdef MDS_AUTHPIN_SET
   {
     auto it = auth_pin_set.find(by);
-    ceph_assert(it != auth_pin_set.end());
+    stone_assert(it != auth_pin_set.end());
     auth_pin_set.erase(it);
   }
 #endif
@@ -384,7 +384,7 @@ void CDentry::auth_unpin(void *by)
     put(PIN_AUTHPIN);
 
   dout(10) << "auth_unpin by " << by << " on " << *this << " now " << auth_pins << dendl;
-  ceph_assert(auth_pins >= 0);
+  stone_assert(auth_pins >= 0);
 
   dir->adjust_nested_auth_pins(-1, by);
 }
@@ -433,7 +433,7 @@ void CDentry::encode_lock_state(int type, bufferlist& bl)
   else if (linkage.is_null()) {
     // encode nothing.
   }
-  else ceph_abort();
+  else stone_abort();
 }
 
 void CDentry::decode_lock_state(int type, const bufferlist& bl)
@@ -445,13 +445,13 @@ void CDentry::decode_lock_state(int type, const bufferlist& bl)
 
   if (!is_auth() && newfirst != first) {
     dout(10) << __func__ << " first " << first << " -> " << newfirst << dendl;
-    ceph_assert(newfirst > first);
+    stone_assert(newfirst > first);
     first = newfirst;
   }
 
   if (p.end()) {
     // null
-    ceph_assert(linkage.is_null());
+    stone_assert(linkage.is_null());
     return;
   }
 
@@ -474,7 +474,7 @@ void CDentry::decode_lock_state(int type, const bufferlist& bl)
     }
     break;
   default: 
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -500,7 +500,7 @@ ClientLease *CDentry::add_client_lease(client_t c, Session *session)
 
 void CDentry::remove_client_lease(ClientLease *l, Locker *locker) 
 {
-  ceph_assert(l->parent == this);
+  stone_assert(l->parent == this);
 
   bool gather = false;
 
@@ -555,7 +555,7 @@ void CDentry::encode_remote(inodeno_t& ino, unsigned char d_type,
 
 void CDentry::decode_remote(char icode, inodeno_t& ino, unsigned char& d_type,
                             mempool::mds_co::string& alternate_name,
-                            ceph::buffer::list::const_iterator& bl)
+                            stone::buffer::list::const_iterator& bl)
 {
   if (icode == 'l') {
     DECODE_START(2, bl);
@@ -567,12 +567,12 @@ void CDentry::decode_remote(char icode, inodeno_t& ino, unsigned char& d_type,
   } else if (icode == 'L') {
     decode(ino, bl);
     decode(d_type, bl);
-  } else ceph_assert(0);
+  } else stone_assert(0);
 }
 
 void CDentry::dump(Formatter *f) const
 {
-  ceph_assert(f != NULL);
+  stone_assert(f != NULL);
 
   filepath path;
   make_path(path);
@@ -638,7 +638,7 @@ std::string CDentry::linkage_t::get_remote_d_type_string() const
     case S_IFDIR: return "dir";
     case S_IFCHR: return "chr";
     case S_IFIFO: return "fifo";
-    default: ceph_abort(); return "";
+    default: stone_abort(); return "";
   }
 }
 

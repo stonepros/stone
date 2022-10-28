@@ -3,20 +3,20 @@
 
 #include <boost/bind/bind.hpp>
 #include "common/debug.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "CacheServer.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_immutable_obj_cache
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_immutable_obj_cache
 #undef dout_prefix
-#define dout_prefix *_dout << "ceph::cache::CacheServer: " << this << " " \
+#define dout_prefix *_dout << "stone::cache::CacheServer: " << this << " " \
                            << __func__ << ": "
 
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
-CacheServer::CacheServer(CephContext* cct, const std::string& file,
+CacheServer::CacheServer(StoneContext* cct, const std::string& file,
                          ProcessMsg processmsg)
   : cct(cct), m_server_process_msg(processmsg),
     m_local_path(file), m_acceptor(m_io_service) {}
@@ -103,4 +103,4 @@ void CacheServer::handle_accept(CacheSessionPtr new_session,
 }
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone

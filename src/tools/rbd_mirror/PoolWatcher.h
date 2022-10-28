@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_MIRROR_POOL_WATCHER_H
-#define CEPH_RBD_MIRROR_POOL_WATCHER_H
+#ifndef STONE_RBD_MIRROR_POOL_WATCHER_H
+#define STONE_RBD_MIRROR_POOL_WATCHER_H
 
 #include <map>
 #include <memory>
@@ -158,4 +158,4 @@ private:
 
 extern template class rbd::mirror::PoolWatcher<librbd::ImageCtx>;
 
-#endif // CEPH_RBD_MIRROR_POOL_WATCHER_H
+#endif // STONE_RBD_MIRROR_POOL_WATCHER_H

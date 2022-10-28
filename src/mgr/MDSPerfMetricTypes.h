@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MGR_MDS_PERF_METRIC_TYPES_H
-#define CEPH_MGR_MDS_PERF_METRIC_TYPES_H
+#ifndef STONE_MGR_MDS_PERF_METRIC_TYPES_H
+#define STONE_MGR_MDS_PERF_METRIC_TYPES_H
 
 #include <regex>
 #include <vector>
@@ -351,4 +351,4 @@ struct MDSPerfMetricReport {
 WRITE_CLASS_DENC(MDSPerfMetrics)
 WRITE_CLASS_DENC(MDSPerfMetricReport)
 
-#endif // CEPH_MGR_MDS_PERF_METRIC_TYPES_H
+#endif // STONE_MGR_MDS_PERF_METRIC_TYPES_H

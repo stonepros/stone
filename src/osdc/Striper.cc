@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 Inktank
  *
@@ -21,7 +21,7 @@
 #include "common/config.h"
 #include "common/debug.h"
 
-#define dout_subsys ceph_subsys_striper
+#define dout_subsys stone_subsys_striper
 #undef dout_prefix
 #define dout_prefix *_dout << "striper "
 
@@ -29,7 +29,7 @@ using std::make_pair;
 using std::map;
 using std::pair;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 namespace {
 
@@ -52,8 +52,8 @@ struct OrderByObject {
 
 template <typename I>
 void add_partial_sparse_result(
-    CephContext *cct,
-    std::map<uint64_t, std::pair<ceph::buffer::list, uint64_t> >* partial,
+    StoneContext *cct,
+    std::map<uint64_t, std::pair<stone::buffer::list, uint64_t> >* partial,
     uint64_t* total_intended_len, bufferlist& bl, I* it, const I& end_it,
     uint64_t* bl_off, uint64_t tofs, uint64_t tlen) {
   ldout(cct, 30) << " be " << tofs << "~" << tlen << dendl;
@@ -95,7 +95,7 @@ void add_partial_sparse_result(
       }
     }
 
-    ceph_assert(s->first <= *bl_off);
+    stone_assert(s->first <= *bl_off);
     size_t left = (s->first + s->second) - *bl_off;
     size_t actual = std::min<size_t>(left, tlen);
 
@@ -118,7 +118,7 @@ void add_partial_sparse_result(
 
 } // anonymous namespace
 
-void Striper::file_to_extents(CephContext *cct, const char *object_format,
+void Striper::file_to_extents(StoneContext *cct, const char *object_format,
 			      const file_layout_t *layout,
 			      uint64_t offset, uint64_t len,
 			      uint64_t trunc_size,
@@ -149,7 +149,7 @@ void Striper::file_to_extents(CephContext *cct, const char *object_format,
 }
 
 void Striper::file_to_extents(
-  CephContext *cct, const char *object_format,
+  StoneContext *cct, const char *object_format,
   const file_layout_t *layout,
   uint64_t offset, uint64_t len,
   uint64_t trunc_size,
@@ -179,11 +179,11 @@ void Striper::file_to_extents(
 }
 
 void Striper::file_to_extents(
-    CephContext *cct, const file_layout_t *layout, uint64_t offset,
+    StoneContext *cct, const file_layout_t *layout, uint64_t offset,
     uint64_t len, uint64_t trunc_size, uint64_t buffer_offset,
     striper::LightweightObjectExtents* object_extents) {
   ldout(cct, 10) << "file_to_extents " << offset << "~" << len << dendl;
-  ceph_assert(len > 0);
+  stone_assert(len > 0);
 
   /*
    * we want only one extent per object!  this means that each extent
@@ -194,7 +194,7 @@ void Striper::file_to_extents(
   __u32 object_size = layout->object_size;
   __u32 su = layout->stripe_unit;
   __u32 stripe_count = layout->stripe_count;
-  ceph_assert(object_size >= su);
+  stone_assert(object_size >= su);
   if (stripe_count == 1) {
     ldout(cct, 20) << " sc is one, reset su to os" << dendl;
     su = object_size;
@@ -251,7 +251,7 @@ void Striper::file_to_extents(
         ldout(cct, 20) << " added new " << *ex << dendl;
     } else {
       ex = &(*rev_it);
-      ceph_assert(ex->offset + ex->length == x_offset);
+      stone_assert(ex->offset + ex->length == x_offset);
 
       ldout(cct, 20) << " adding in to " << *ex << dendl;
       ex->length += x_len;
@@ -269,7 +269,7 @@ void Striper::file_to_extents(
   }
 }
 
-void Striper::extent_to_file(CephContext *cct, file_layout_t *layout,
+void Striper::extent_to_file(StoneContext *cct, file_layout_t *layout,
 			   uint64_t objectno, uint64_t off, uint64_t len,
 			   std::vector<pair<uint64_t, uint64_t> >& extents)
 {
@@ -279,7 +279,7 @@ void Striper::extent_to_file(CephContext *cct, file_layout_t *layout,
   __u32 object_size = layout->object_size;
   __u32 su = layout->stripe_unit;
   __u32 stripe_count = layout->stripe_count;
-  ceph_assert(object_size >= su);
+  stone_assert(object_size >= su);
   uint64_t stripes_per_object = object_size / su;
   ldout(cct, 20) << " stripes_per_object " << stripes_per_object << dendl;
 
@@ -306,7 +306,7 @@ void Striper::extent_to_file(CephContext *cct, file_layout_t *layout,
   }
 }
 
-uint64_t Striper::object_truncate_size(CephContext *cct,
+uint64_t Striper::object_truncate_size(StoneContext *cct,
 				       const file_layout_t *layout,
 				       uint64_t objectno, uint64_t trunc_size)
 {
@@ -317,7 +317,7 @@ uint64_t Striper::object_truncate_size(CephContext *cct,
     __u32 object_size = layout->object_size;
     __u32 su = layout->stripe_unit;
     __u32 stripe_count = layout->stripe_count;
-    ceph_assert(object_size >= su);
+    stone_assert(object_size >= su);
     uint64_t stripes_per_object = object_size / su;
 
     uint64_t objectsetno = objectno / stripe_count;
@@ -362,14 +362,14 @@ uint64_t Striper::get_num_objects(const file_layout_t& layout,
   return num_periods * stripe_count - remainder_objs;
 }
 
-uint64_t Striper::get_file_offset(CephContext *cct,
+uint64_t Striper::get_file_offset(StoneContext *cct,
         const file_layout_t *layout, uint64_t objectno, uint64_t off) {
   ldout(cct, 10) << "get_file_offset " << objectno << " " << off  << dendl;
 
   __u32 object_size = layout->object_size;
   __u32 su = layout->stripe_unit;
   __u32 stripe_count = layout->stripe_count;
-  ceph_assert(object_size >= su);
+  stone_assert(object_size >= su);
   uint64_t stripes_per_object = object_size / su;
   ldout(cct, 20) << " stripes_per_object " << stripes_per_object << dendl;
 
@@ -385,7 +385,7 @@ uint64_t Striper::get_file_offset(CephContext *cct,
 // StripedReadResult
 
 void Striper::StripedReadResult::add_partial_result(
-  CephContext *cct, bufferlist& bl,
+  StoneContext *cct, bufferlist& bl,
   const std::vector<pair<uint64_t,uint64_t> >& buffer_extents)
 {
   ldout(cct, 10) << "add_partial_result(" << this << ") " << bl.length()
@@ -400,7 +400,7 @@ void Striper::StripedReadResult::add_partial_result(
 }
 
 void Striper::StripedReadResult::add_partial_result(
-  CephContext *cct, bufferlist&& bl,
+  StoneContext *cct, bufferlist&& bl,
   const striper::LightweightBufferExtents& buffer_extents)
 {
   ldout(cct, 10) << "add_partial_result(" << this << ") " << bl.length()
@@ -419,7 +419,7 @@ void Striper::StripedReadResult::add_partial_result(
 }
 
 void Striper::StripedReadResult::add_partial_sparse_result(
-  CephContext *cct, bufferlist& bl, const map<uint64_t, uint64_t>& bl_map,
+  StoneContext *cct, bufferlist& bl, const map<uint64_t, uint64_t>& bl_map,
   uint64_t bl_off, const std::vector<pair<uint64_t,uint64_t> >& buffer_extents)
 {
   ldout(cct, 10) << "add_partial_sparse_result(" << this << ") " << bl.length()
@@ -439,7 +439,7 @@ void Striper::StripedReadResult::add_partial_sparse_result(
 }
 
 void Striper::StripedReadResult::add_partial_sparse_result(
-    CephContext *cct, ceph::buffer::list&& bl,
+    StoneContext *cct, stone::buffer::list&& bl,
     const std::vector<std::pair<uint64_t, uint64_t>>& bl_map, uint64_t bl_off,
     const striper::LightweightBufferExtents& buffer_extents) {
   ldout(cct, 10) << "add_partial_sparse_result(" << this << ") " << bl.length()
@@ -458,7 +458,7 @@ void Striper::StripedReadResult::add_partial_sparse_result(
   }
 }
 
-void Striper::StripedReadResult::assemble_result(CephContext *cct,
+void Striper::StripedReadResult::assemble_result(StoneContext *cct,
 						 bufferlist& bl,
 						 bool zero_tail)
 {
@@ -483,10 +483,10 @@ void Striper::StripedReadResult::assemble_result(CephContext *cct,
   partial.clear();
 }
 
-void Striper::StripedReadResult::assemble_result(CephContext *cct, char *buffer, size_t length)
+void Striper::StripedReadResult::assemble_result(StoneContext *cct, char *buffer, size_t length)
 {
 
-  ceph_assert(buffer && length == total_intended_len);
+  stone_assert(buffer && length == total_intended_len);
 
   map<uint64_t,pair<bufferlist,uint64_t> >::reverse_iterator p = partial.rbegin();
   if (p == partial.rend())
@@ -499,11 +499,11 @@ void Striper::StripedReadResult::assemble_result(CephContext *cct, char *buffer,
     ldout(cct, 20) << "assemble_result(" << this << ") " << p->first << "~" << p->second.second
 		   << " " << p->second.first.length() << " bytes"
 		   << dendl;
-    ceph_assert(p->first == end - p->second.second);
+    stone_assert(p->first == end - p->second.second);
     end = p->first;
 
     size_t len = p->second.first.length();
-    ceph_assert(curr >= p->second.second);
+    stone_assert(curr >= p->second.second);
     curr -= p->second.second;
     if (len < p->second.second) {
       if (len)
@@ -516,11 +516,11 @@ void Striper::StripedReadResult::assemble_result(CephContext *cct, char *buffer,
     ++p;
   }
   partial.clear();
-  ceph_assert(curr == 0);
+  stone_assert(curr == 0);
 }
 
 uint64_t Striper::StripedReadResult::assemble_result(
-    CephContext *cct, std::map<uint64_t, uint64_t> *extent_map,
+    StoneContext *cct, std::map<uint64_t, uint64_t> *extent_map,
     bufferlist *bl)
 {
   ldout(cct, 10) << "assemble_result(" << this << ")" << dendl;

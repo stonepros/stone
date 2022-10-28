@@ -10,7 +10,7 @@
 #include "librbd/api/Config.h"
 #include "librbd/image/GetMetadataRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::PoolMetadata: " << __func__ << ": "
 
@@ -20,9 +20,9 @@ namespace api {
 namespace {
 
 void update_pool_timestamp(librados::IoCtx& io_ctx) {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
 
-  auto now = ceph_clock_now();
+  auto now = stone_clock_now();
   std::string cmd =
     R"({)"
       R"("prefix": "config set", )"
@@ -46,7 +46,7 @@ void update_pool_timestamp(librados::IoCtx& io_ctx) {
 template <typename I>
 int PoolMetadata<I>::get(librados::IoCtx& io_ctx,
                      const std::string &key, std::string *value) {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
 
   int r = cls_client::metadata_get(&io_ctx, RBD_INFO, key, value);
   if (r < 0 && r != -ENOENT) {
@@ -60,7 +60,7 @@ int PoolMetadata<I>::get(librados::IoCtx& io_ctx,
 template <typename I>
 int PoolMetadata<I>::set(librados::IoCtx& io_ctx, const std::string &key,
                          const std::string &value) {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
 
   bool need_update_pool_timestamp = false;
 
@@ -81,7 +81,7 @@ int PoolMetadata<I>::set(librados::IoCtx& io_ctx, const std::string &key,
     need_update_pool_timestamp = true;
   }
 
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   bl.append(value);
 
   int r = cls_client::metadata_set(&io_ctx, RBD_INFO, {{key, bl}});
@@ -100,7 +100,7 @@ int PoolMetadata<I>::set(librados::IoCtx& io_ctx, const std::string &key,
 
 template <typename I>
 int PoolMetadata<I>::remove(librados::IoCtx& io_ctx, const std::string &key) {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
 
   std::string value;
   int r = cls_client::metadata_get(&io_ctx, RBD_INFO, key, &value);
@@ -132,8 +132,8 @@ int PoolMetadata<I>::remove(librados::IoCtx& io_ctx, const std::string &key) {
 template <typename I>
 int PoolMetadata<I>::list(librados::IoCtx& io_ctx, const std::string &start,
                           uint64_t max,
-                          std::map<std::string, ceph::bufferlist> *pairs) {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+                          std::map<std::string, stone::bufferlist> *pairs) {
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
 
   pairs->clear();
   C_SaferCond ctx;

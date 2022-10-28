@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -23,13 +23,13 @@
 
 struct RadosEnv : public ::testing::Environment {
  public:
-  static constexpr auto poolname = "ceph_test_rgw_throttle";
+  static constexpr auto poolname = "stone_test_rgw_throttle";
 
   static std::optional<RGWSI_RADOS> rados;
 
   void SetUp() override {
-    rados.emplace(g_ceph_context);
-    const NoDoutPrefix no_dpp(g_ceph_context, 1);
+    rados.emplace(g_stone_context);
+    const NoDoutPrefix no_dpp(g_stone_context, 1);
     ASSERT_EQ(0, rados->start(null_yield, &no_dpp));
     int r = rados->pool({poolname}).create();
     if (r == -EEXIST)
@@ -50,8 +50,8 @@ class RadosFixture : public ::testing::Test {
  protected:
   RGWSI_RADOS::Obj make_obj(const std::string& oid) {
     auto obj = RadosEnv::rados->obj({{RadosEnv::poolname}, oid});
-    const NoDoutPrefix no_dpp(g_ceph_context, 1);
-    ceph_assert_always(0 == obj.open(&no_dpp));
+    const NoDoutPrefix no_dpp(g_stone_context, 1);
+    stone_assert_always(0 == obj.open(&no_dpp));
     return obj;
   }
 };
@@ -75,9 +75,9 @@ auto wait_on(scoped_completion& c) {
   return [&c] (Aio* aio, AioResult& r) { c.aio = aio; c.result = &r; };
 }
 
-auto wait_for(boost::asio::io_context& context, ceph::timespan duration) {
+auto wait_for(boost::asio::io_context& context, stone::timespan duration) {
   return [&context, duration] (Aio* aio, AioResult& r) {
-    using Clock = ceph::coarse_mono_clock;
+    using Clock = stone::coarse_mono_clock;
     using Timer = boost::asio::basic_waitable_timer<Clock>;
     auto t = std::make_unique<Timer>(context);
     t->expires_after(duration);

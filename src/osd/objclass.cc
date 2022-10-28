@@ -2,8 +2,8 @@
 // vim: ts=8 sw=2 smarttab
 
 #include <cstdarg>
-#include "common/ceph_context.h"
-#include "common/ceph_releases.h"
+#include "common/stone_context.h"
+#include "common/stone_releases.h"
 #include "common/config.h"
 #include "common/debug.h"
 
@@ -22,10 +22,10 @@ using std::set;
 using std::string;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::real_time;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::real_time;
 
 
 int cls_call(cls_method_context_t hctx, const char *cls, const char *method,
@@ -37,7 +37,7 @@ int cls_call(cls_method_context_t hctx, const char *cls, const char *method,
   OSDOp& op = nops[0];
   int r;
 
-  op.op.op = CEPH_OSD_OP_CALL;
+  op.op.op = STONE_OSD_OP_CALL;
   op.op.cls.class_len = strlen(cls);
   op.op.cls.method_len = strlen(method);
   op.op.cls.indata_len = datalen;
@@ -65,7 +65,7 @@ int cls_getxattr(cls_method_context_t hctx, const char *name,
   OSDOp& op = nops[0];
   int r;
 
-  op.op.op = CEPH_OSD_OP_GETXATTR;
+  op.op.op = STONE_OSD_OP_GETXATTR;
   op.op.xattr.name_len = strlen(name);
   op.indata.append(name, op.op.xattr.name_len);
   r = (*pctx)->pg->do_osd_ops(*pctx, nops);
@@ -89,7 +89,7 @@ int cls_setxattr(cls_method_context_t hctx, const char *name,
   OSDOp& op = nops[0];
   int r;
 
-  op.op.op = CEPH_OSD_OP_SETXATTR;
+  op.op.op = STONE_OSD_OP_SETXATTR;
   op.op.xattr.name_len = strlen(name);
   op.op.xattr.value_len = val_len;
   op.indata.append(name, op.op.xattr.name_len);
@@ -104,7 +104,7 @@ int cls_read(cls_method_context_t hctx, int ofs, int len,
 {
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(1);
-  ops[0].op.op = CEPH_OSD_OP_SYNC_READ;
+  ops[0].op.op = STONE_OSD_OP_SYNC_READ;
   ops[0].op.extent.offset = ofs;
   ops[0].op.extent.length = len;
   int r = (*pctx)->pg->do_osd_ops(*pctx, ops);
@@ -131,8 +131,8 @@ int cls_cxx_create(cls_method_context_t hctx, bool exclusive)
 {
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(1);
-  ops[0].op.op = CEPH_OSD_OP_CREATE;
-  ops[0].op.flags = (exclusive ? CEPH_OSD_OP_FLAG_EXCL : 0);
+  ops[0].op.op = STONE_OSD_OP_CREATE;
+  ops[0].op.flags = (exclusive ? STONE_OSD_OP_FLAG_EXCL : 0);
   return (*pctx)->pg->do_osd_ops(*pctx, ops);
 }
 
@@ -140,7 +140,7 @@ int cls_cxx_remove(cls_method_context_t hctx)
 {
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(1);
-  ops[0].op.op = CEPH_OSD_OP_DELETE;
+  ops[0].op.op = STONE_OSD_OP_DELETE;
   return (*pctx)->pg->do_osd_ops(*pctx, ops);
 }
 
@@ -149,7 +149,7 @@ int cls_cxx_stat(cls_method_context_t hctx, uint64_t *size, time_t *mtime)
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(1);
   int ret;
-  ops[0].op.op = CEPH_OSD_OP_STAT;
+  ops[0].op.op = STONE_OSD_OP_STAT;
   ret = (*pctx)->pg->do_osd_ops(*pctx, ops);
   if (ret < 0)
     return ret;
@@ -159,7 +159,7 @@ int cls_cxx_stat(cls_method_context_t hctx, uint64_t *size, time_t *mtime)
   try {
     decode(s, iter);
     decode(ut, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
   if (size)
@@ -169,12 +169,12 @@ int cls_cxx_stat(cls_method_context_t hctx, uint64_t *size, time_t *mtime)
   return 0;
 }
 
-int cls_cxx_stat2(cls_method_context_t hctx, uint64_t *size, ceph::real_time *mtime)
+int cls_cxx_stat2(cls_method_context_t hctx, uint64_t *size, stone::real_time *mtime)
 {
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(1);
   int ret;
-  ops[0].op.op = CEPH_OSD_OP_STAT;
+  ops[0].op.op = STONE_OSD_OP_STAT;
   ret = (*pctx)->pg->do_osd_ops(*pctx, ops);
   if (ret < 0)
     return ret;
@@ -184,7 +184,7 @@ int cls_cxx_stat2(cls_method_context_t hctx, uint64_t *size, ceph::real_time *mt
   try {
     decode(s, iter);
     decode(ut, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
   if (size)
@@ -200,7 +200,7 @@ int cls_cxx_read2(cls_method_context_t hctx, int ofs, int len,
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(1);
   int ret;
-  ops[0].op.op = CEPH_OSD_OP_SYNC_READ;
+  ops[0].op.op = STONE_OSD_OP_SYNC_READ;
   ops[0].op.extent.offset = ofs;
   ops[0].op.extent.length = len;
   ops[0].op.flags = op_flags;
@@ -216,7 +216,7 @@ int cls_cxx_write2(cls_method_context_t hctx, int ofs, int len,
 {
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(1);
-  ops[0].op.op = CEPH_OSD_OP_WRITE;
+  ops[0].op.op = STONE_OSD_OP_WRITE;
   ops[0].op.extent.offset = ofs;
   ops[0].op.extent.length = len;
   ops[0].op.flags = op_flags;
@@ -228,7 +228,7 @@ int cls_cxx_write_full(cls_method_context_t hctx, bufferlist *inbl)
 {
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(1);
-  ops[0].op.op = CEPH_OSD_OP_WRITEFULL;
+  ops[0].op.op = STONE_OSD_OP_WRITEFULL;
   ops[0].op.extent.offset = 0;
   ops[0].op.extent.length = inbl->length();
   ops[0].indata = *inbl;
@@ -239,10 +239,10 @@ int cls_cxx_replace(cls_method_context_t hctx, int ofs, int len, bufferlist *inb
 {
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(2);
-  ops[0].op.op = CEPH_OSD_OP_TRUNCATE;
+  ops[0].op.op = STONE_OSD_OP_TRUNCATE;
   ops[0].op.extent.offset = 0;
   ops[0].op.extent.length = 0;
-  ops[1].op.op = CEPH_OSD_OP_WRITE;
+  ops[1].op.op = STONE_OSD_OP_WRITE;
   ops[1].op.extent.offset = ofs;
   ops[1].op.extent.length = len;
   ops[1].indata = *inbl;
@@ -253,7 +253,7 @@ int cls_cxx_truncate(cls_method_context_t hctx, int ofs)
 {
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(1);
-  ops[0].op.op = CEPH_OSD_OP_TRUNCATE;
+  ops[0].op.op = STONE_OSD_OP_TRUNCATE;
   ops[0].op.extent.offset = ofs;
   ops[0].op.extent.length = 0;
   return (*pctx)->pg->do_osd_ops(*pctx, ops);
@@ -263,7 +263,7 @@ int cls_cxx_write_zero(cls_method_context_t hctx, int ofs, int len)
 {
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(1);
-  ops[0].op.op = CEPH_OSD_OP_ZERO;
+  ops[0].op.op = STONE_OSD_OP_ZERO;
   ops[0].op.extent.offset = ofs;
   ops[0].op.extent.length = len;
   return (*pctx)->pg->do_osd_ops(*pctx, ops);
@@ -277,7 +277,7 @@ int cls_cxx_getxattr(cls_method_context_t hctx, const char *name,
   OSDOp& op = nops[0];
   int r;
 
-  op.op.op = CEPH_OSD_OP_GETXATTR;
+  op.op.op = STONE_OSD_OP_GETXATTR;
   op.op.xattr.name_len = strlen(name);
   op.indata.append(name, op.op.xattr.name_len);
   r = (*pctx)->pg->do_osd_ops(*pctx, nops);
@@ -295,7 +295,7 @@ int cls_cxx_getxattrs(cls_method_context_t hctx, map<string, bufferlist> *attrse
   OSDOp& op = nops[0];
   int r;
 
-  op.op.op = CEPH_OSD_OP_GETXATTRS;
+  op.op.op = STONE_OSD_OP_GETXATTRS;
   r = (*pctx)->pg->do_osd_ops(*pctx, nops);
   if (r < 0)
     return r;
@@ -303,7 +303,7 @@ int cls_cxx_getxattrs(cls_method_context_t hctx, map<string, bufferlist> *attrse
   auto iter = op.outdata.cbegin();
   try {
     decode(*attrset, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
   return 0;
@@ -317,7 +317,7 @@ int cls_cxx_setxattr(cls_method_context_t hctx, const char *name,
   OSDOp& op = nops[0];
   int r;
 
-  op.op.op = CEPH_OSD_OP_SETXATTR;
+  op.op.op = STONE_OSD_OP_SETXATTR;
   op.op.xattr.name_len = strlen(name);
   op.op.xattr.value_len = inbl->length();
   op.indata.append(name, op.op.xattr.name_len);
@@ -331,7 +331,7 @@ int cls_cxx_snap_revert(cls_method_context_t hctx, snapid_t snapid)
 {
   PrimaryLogPG::OpContext **pctx = (PrimaryLogPG::OpContext **)hctx;
   vector<OSDOp> ops(1);
-  ops[0].op.op = CEPH_OSD_OP_ROLLBACK;
+  ops[0].op.op = STONE_OSD_OP_ROLLBACK;
   ops[0].op.snap.snapid = snapid;
   return (*pctx)->pg->do_osd_ops(*pctx, ops);
 }
@@ -352,7 +352,7 @@ int cls_cxx_map_get_all_vals(cls_method_context_t hctx, map<string, bufferlist>*
   encode(max, op.indata);
   encode(filter_prefix, op.indata);
 
-  op.op.op = CEPH_OSD_OP_OMAPGETVALS;
+  op.op.op = STONE_OSD_OP_OMAPGETVALS;
   
   ret = (*pctx)->pg->do_osd_ops(*pctx, ops);
   if (ret < 0)
@@ -362,7 +362,7 @@ int cls_cxx_map_get_all_vals(cls_method_context_t hctx, map<string, bufferlist>*
   try {
     decode(*vals, iter);
     decode(*more, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
   return vals->size();
@@ -380,7 +380,7 @@ int cls_cxx_map_get_keys(cls_method_context_t hctx, const string &start_obj,
   encode(start_obj, op.indata);
   encode(max_to_get, op.indata);
 
-  op.op.op = CEPH_OSD_OP_OMAPGETKEYS;
+  op.op.op = STONE_OSD_OP_OMAPGETKEYS;
 
   ret = (*pctx)->pg->do_osd_ops(*pctx, ops);
   if (ret < 0)
@@ -390,7 +390,7 @@ int cls_cxx_map_get_keys(cls_method_context_t hctx, const string &start_obj,
   try {
     decode(*keys, iter);
     decode(*more, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
   return keys->size();
@@ -409,7 +409,7 @@ int cls_cxx_map_get_vals(cls_method_context_t hctx, const string &start_obj,
   encode(max_to_get, op.indata);
   encode(filter_prefix, op.indata);
 
-  op.op.op = CEPH_OSD_OP_OMAPGETVALS;
+  op.op.op = STONE_OSD_OP_OMAPGETVALS;
   
   ret = (*pctx)->pg->do_osd_ops(*pctx, ops);
   if (ret < 0)
@@ -419,7 +419,7 @@ int cls_cxx_map_get_vals(cls_method_context_t hctx, const string &start_obj,
   try {
     decode(*vals, iter);
     decode(*more, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
   return vals->size();
@@ -431,7 +431,7 @@ int cls_cxx_map_read_header(cls_method_context_t hctx, bufferlist *outbl)
   vector<OSDOp> ops(1);
   OSDOp& op = ops[0];
   int ret;
-  op.op.op = CEPH_OSD_OP_OMAPGETHEADER;
+  op.op.op = STONE_OSD_OP_OMAPGETHEADER;
   ret = (*pctx)->pg->do_osd_ops(*pctx, ops);
   if (ret < 0)
     return ret;
@@ -453,7 +453,7 @@ int cls_cxx_map_get_val(cls_method_context_t hctx, const string &key,
   k.insert(key);
   encode(k, op.indata);
 
-  op.op.op = CEPH_OSD_OP_OMAPGETVALSBYKEYS;
+  op.op.op = STONE_OSD_OP_OMAPGETVALSBYKEYS;
   ret = (*pctx)->pg->do_osd_ops(*pctx, ops);
   if (ret < 0)
     return ret;
@@ -468,7 +468,7 @@ int cls_cxx_map_get_val(cls_method_context_t hctx, const string &key,
       return -ENOENT;
 
     *outbl = iter->second;
-  } catch (ceph::buffer::error& e) {
+  } catch (stone::buffer::error& e) {
     return -EIO;
   }
   return 0;
@@ -485,7 +485,7 @@ int cls_cxx_map_get_vals_by_keys(cls_method_context_t hctx,
 
   encode(keys, op.indata);
 
-  op.op.op = CEPH_OSD_OP_OMAPGETVALSBYKEYS;
+  op.op.op = STONE_OSD_OP_OMAPGETVALSBYKEYS;
   ret = (*pctx)->pg->do_osd_ops(*pctx, ops);
   if (ret < 0)
     return ret;
@@ -510,7 +510,7 @@ int cls_cxx_map_set_val(cls_method_context_t hctx, const string &key,
   m[key] = *inbl;
   encode(m, update_bl);
 
-  op.op.op = CEPH_OSD_OP_OMAPSETVALS;
+  op.op.op = STONE_OSD_OP_OMAPSETVALS;
 
   return (*pctx)->pg->do_osd_ops(*pctx, ops);
 }
@@ -524,7 +524,7 @@ int cls_cxx_map_set_vals(cls_method_context_t hctx,
   bufferlist& update_bl = op.indata;
   encode(*map, update_bl);
 
-  op.op.op = CEPH_OSD_OP_OMAPSETVALS;
+  op.op.op = STONE_OSD_OP_OMAPSETVALS;
 
   return (*pctx)->pg->do_osd_ops(*pctx, ops);
 }
@@ -535,7 +535,7 @@ int cls_cxx_map_clear(cls_method_context_t hctx)
   vector<OSDOp> ops(1);
   OSDOp& op = ops[0];
 
-  op.op.op = CEPH_OSD_OP_OMAPCLEAR;
+  op.op.op = STONE_OSD_OP_OMAPCLEAR;
 
   return (*pctx)->pg->do_osd_ops(*pctx, ops);
 }
@@ -547,7 +547,7 @@ int cls_cxx_map_write_header(cls_method_context_t hctx, bufferlist *inbl)
   OSDOp& op = ops[0];
   op.indata = std::move(*inbl);
 
-  op.op.op = CEPH_OSD_OP_OMAPSETHEADER;
+  op.op.op = STONE_OSD_OP_OMAPSETHEADER;
 
   return (*pctx)->pg->do_osd_ops(*pctx, ops);
 }
@@ -564,7 +564,7 @@ int cls_cxx_map_remove_range(cls_method_context_t hctx,
   ::encode(key_begin, update_bl);
   ::encode(key_end, update_bl);
 
-  op.op.op = CEPH_OSD_OP_OMAPRMKEYRANGE;
+  op.op.op = STONE_OSD_OP_OMAPRMKEYRANGE;
 
   return (*pctx)->pg->do_osd_ops(*pctx, ops);
 }
@@ -580,7 +580,7 @@ int cls_cxx_map_remove_key(cls_method_context_t hctx, const string &key)
 
   encode(to_rm, update_bl);
 
-  op.op.op = CEPH_OSD_OP_OMAPRMKEYS;
+  op.op.op = STONE_OSD_OP_OMAPRMKEYS;
 
   return (*pctx)->pg->do_osd_ops(*pctx, ops);
 }
@@ -593,7 +593,7 @@ int cls_cxx_list_watchers(cls_method_context_t hctx,
   OSDOp& op = nops[0];
   int r;
 
-  op.op.op = CEPH_OSD_OP_LIST_WATCHERS;
+  op.op.op = STONE_OSD_OP_LIST_WATCHERS;
   r = (*pctx)->pg->do_osd_ops(*pctx, nops);
   if (r < 0)
     return r;
@@ -601,7 +601,7 @@ int cls_cxx_list_watchers(cls_method_context_t hctx,
   auto iter = op.outdata.cbegin();
   try {
     decode(*watchers, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
   return 0;
@@ -634,13 +634,13 @@ uint64_t cls_get_client_features(cls_method_context_t hctx)
   return ctx->op->get_req()->get_connection()->get_features();
 }
 
-ceph_release_t cls_get_required_osd_release(cls_method_context_t hctx)
+stone_release_t cls_get_required_osd_release(cls_method_context_t hctx)
 {
   PrimaryLogPG::OpContext *ctx = *(PrimaryLogPG::OpContext **)hctx;
   return ctx->pg->get_osdmap()->require_osd_release;
 }
 
-ceph_release_t cls_get_min_compatible_client(cls_method_context_t hctx)
+stone_release_t cls_get_min_compatible_client(cls_method_context_t hctx)
 {
   PrimaryLogPG::OpContext *ctx = *(PrimaryLogPG::OpContext **)hctx;
   return ctx->pg->get_osdmap()->get_require_min_compat_client();
@@ -665,13 +665,13 @@ int cls_cxx_chunk_write_and_set(cls_method_context_t hctx, int ofs, int len,
   char method[] = "chunk_set";
 
   vector<OSDOp> ops(2);
-  ops[0].op.op = CEPH_OSD_OP_WRITE;
+  ops[0].op.op = STONE_OSD_OP_WRITE;
   ops[0].op.extent.offset = ofs;
   ops[0].op.extent.length = len;
   ops[0].op.flags = op_flags;
   ops[0].indata = *write_inbl;
 
-  ops[1].op.op = CEPH_OSD_OP_CALL;
+  ops[1].op.op = STONE_OSD_OP_CALL;
   ops[1].op.cls.class_len = strlen(cname);
   ops[1].op.cls.method_len = strlen(method);
   ops[1].op.cls.indata_len = set_len;

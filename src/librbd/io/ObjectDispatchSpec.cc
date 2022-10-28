@@ -24,7 +24,7 @@ void ObjectDispatchSpec::C_Dispatcher::complete(int r) {
     break;
   case DISPATCH_RESULT_INVALID:
   case DISPATCH_RESULT_RESTART:
-    ceph_abort();
+    stone_abort();
     break;
   }
 }
@@ -39,7 +39,7 @@ void ObjectDispatchSpec::send() {
 }
 
 void ObjectDispatchSpec::fail(int r) {
-  ceph_assert(r < 0);
+  stone_assert(r < 0);
   dispatcher_ctx.complete(r);
 }
 

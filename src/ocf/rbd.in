@@ -18,9 +18,9 @@ prefix=@prefix@
 
 # Defaults
 OCF_RESKEY_pool_default="rbd"
-OCF_RESKEY_cephconf_default="@sysconfdir@/@PACKAGE_TARNAME@/@PACKAGE_TARNAME@.conf"
+OCF_RESKEY_stoneconf_default="@sysconfdir@/@PACKAGE_TARNAME@/@PACKAGE_TARNAME@.conf"
 : ${OCF_RESKEY_pool=${OCF_RESKEY_pool_default}}
-: ${OCF_RESKEY_cephconf=${OCF_RESKEY_cephconf_default}}
+: ${OCF_RESKEY_stoneconf=${OCF_RESKEY_stoneconf_default}}
 
 rbd_meta_data() {
     cat <<EOF
@@ -61,12 +61,12 @@ resource. Maps and unmaps RBDs as needed.
       <shortdesc lang="en">Snapshot name</shortdesc>
       <content type="string"/>
     </parameter>
-    <parameter name="cephconf" unique="0" required="0">
+    <parameter name="stoneconf" unique="0" required="0">
       <longdesc lang="en">
-      Location of the Ceph configuration file
+      Location of the Stone configuration file
       </longdesc>
-      <shortdesc lang="en">Ceph configuration file</shortdesc>
-      <content type="string" default="${OCF_RESKEY_cephconf_default}"/>
+      <shortdesc lang="en">Stone configuration file</shortdesc>
+      <content type="string" default="${OCF_RESKEY_stoneconf_default}"/>
     </parameter>
     <parameter name="mon" unique="0" required="0">
       <longdesc lang="en">
@@ -80,7 +80,7 @@ resource. Maps and unmaps RBDs as needed.
     <parameter name="user" unique="0" required="0">
       <longdesc lang="en">
       Username to use when mapping the device. Required
-      if Ceph authentication is enabled on the monitor.
+      if Stone authentication is enabled on the monitor.
       </longdesc>
       <shortdesc lang="en">Authentication username</shortdesc>
       <content type="string"/>
@@ -88,7 +88,7 @@ resource. Maps and unmaps RBDs as needed.
     <parameter name="secret" unique="0" required="0">
       <longdesc lang="en">
       File containing an authentication secret. Required
-      if Ceph authentication is enabled on the monitor.
+      if Stone authentication is enabled on the monitor.
       </longdesc>
       <shortdesc lang="en">Authentication secret file</shortdesc>
       <content type="string"/>
@@ -117,8 +117,8 @@ EOF
 get_rbd_options() {
     local rbd_options
 
-    if [ -n "${OCF_RESKEY_cephconf}" ]; then
-        rbd_options="$rbd_options -c ${OCF_RESKEY_cephconf}"
+    if [ -n "${OCF_RESKEY_stoneconf}" ]; then
+        rbd_options="$rbd_options -c ${OCF_RESKEY_stoneconf}"
     fi
     if [ -n "${OCF_RESKEY_mon}" ]; then
         rbd_options="$rbd_options -m ${OCF_RESKEY_mon}"

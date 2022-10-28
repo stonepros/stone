@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_LIBRBD_IMAGECTX_H
-#define CEPH_LIBRBD_IMAGECTX_H
+#ifndef STONE_LIBRBD_IMAGECTX_H
+#define STONE_LIBRBD_IMAGECTX_H
 
 #include "include/int_types.h"
 
@@ -85,7 +85,7 @@ namespace librbd {
 
     static const string METADATA_CONF_PREFIX;
 
-    CephContext *cct;
+    StoneContext *cct;
     ConfigProxy config;
     std::set<std::string> config_overrides;
 
@@ -96,7 +96,7 @@ namespace librbd {
                                         // a format librados can understand
     std::map<librados::snap_t, SnapInfo> snap_info;
     std::map<SnapKey, librados::snap_t, SnapKeyComparator> snap_ids;
-    uint64_t open_snap_id = CEPH_NOSNAP;
+    uint64_t open_snap_id = STONE_NOSNAP;
     uint64_t snap_id;
     bool snap_exists; // false if our snap_id was deleted
     // whether the image was opened read-only. cannot be changed after opening
@@ -354,7 +354,7 @@ namespace librbd {
     IOContext get_data_io_context() const;
     IOContext duplicate_data_io_context() const;
 
-    static void get_timer_instance(CephContext *cct, SafeTimer **timer,
+    static void get_timer_instance(StoneContext *cct, SafeTimer **timer,
                                    ceph::mutex **timer_lock);
 
   private:

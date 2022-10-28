@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stonee - scalable distributed file system
 *
 * Copyright (C) 2012 New Dream Network
 *
@@ -38,7 +38,7 @@ public:
 		 char *meta_obj_buf)
       : m_pgid(pgid),
 	m_cid(m_pgid),
-	m_meta_obj(hobject_t(sobject_t(object_t(meta_obj_buf), CEPH_NOSNAP))),
+	m_meta_obj(hobject_t(sobject_t(object_t(meta_obj_buf), STONE_NOSNAP))),
 	m_ch(ch),
 	m_next_object_id(0) {
       m_meta_obj.hobj.pool = m_pgid.pool();

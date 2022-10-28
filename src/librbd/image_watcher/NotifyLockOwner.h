@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IMAGE_WATCHER_NOTIFY_LOCK_OWNER_H
-#define CEPH_LIBRBD_IMAGE_WATCHER_NOTIFY_LOCK_OWNER_H
+#ifndef STONE_LIBRBD_IMAGE_WATCHER_NOTIFY_LOCK_OWNER_H
+#define STONE_LIBRBD_IMAGE_WATCHER_NOTIFY_LOCK_OWNER_H
 
 #include "include/buffer.h"
 #include "librbd/watcher/Types.h"
@@ -47,4 +47,4 @@ private:
 } // namespace image_watcher
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_IMAGE_WATCHER_NOTIFY_LOCK_OWNER_H
+#endif // STONE_LIBRBD_IMAGE_WATCHER_NOTIFY_LOCK_OWNER_H

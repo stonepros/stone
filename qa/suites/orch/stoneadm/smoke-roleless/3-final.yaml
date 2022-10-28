@@ -1,0 +1,10 @@
+tasks:
+- stoneadm.shell:
+    host.a:
+      - stat -c '%u %g' /var/log/stone | grep '167 167'
+      - stone orch status
+      - stone orch ps
+      - stone orch ls
+      - stone orch host ls
+      - stone orch device ls
+      - stone orch ls | grep '^osd.all-available-devices '

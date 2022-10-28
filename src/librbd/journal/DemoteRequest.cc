@@ -12,7 +12,7 @@
 #include "librbd/asio/ContextWQ.h"
 #include "librbd/journal/OpenRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::journal::DemoteRequest: " << this \
                            << " " << __func__ << ": "
@@ -26,12 +26,12 @@ using librbd::util::create_context_callback;
 template <typename I>
 DemoteRequest<I>::DemoteRequest(I &image_ctx, Context *on_finish)
   : m_image_ctx(image_ctx), m_on_finish(on_finish),
-    m_lock(ceph::make_mutex("DemoteRequest::m_lock")) {
+    m_lock(stone::make_mutex("DemoteRequest::m_lock")) {
 }
 
 template <typename I>
 DemoteRequest<I>::~DemoteRequest() {
-  ceph_assert(m_journaler == nullptr);
+  stone_assert(m_journaler == nullptr);
 }
 
 template <typename I>
@@ -41,7 +41,7 @@ void DemoteRequest<I>::send() {
 
 template <typename I>
 void DemoteRequest<I>::open_journaler() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   m_journaler = new Journaler(m_image_ctx.md_ctx, m_image_ctx.id,
@@ -57,7 +57,7 @@ void DemoteRequest<I>::open_journaler() {
 
 template <typename I>
 void DemoteRequest<I>::handle_open_journaler(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -77,7 +77,7 @@ void DemoteRequest<I>::handle_open_journaler(int r) {
 
 template <typename I>
 void DemoteRequest<I>::allocate_tag() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   cls::journal::Client client;
@@ -112,7 +112,7 @@ void DemoteRequest<I>::allocate_tag() {
 
 template <typename I>
 void DemoteRequest<I>::handle_allocate_tag(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -128,7 +128,7 @@ void DemoteRequest<I>::handle_allocate_tag(int r) {
 
 template <typename I>
 void DemoteRequest<I>::append_event() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   EventEntry event_entry{DemotePromoteEvent{}, {}};
@@ -146,7 +146,7 @@ void DemoteRequest<I>::append_event() {
 
 template <typename I>
 void DemoteRequest<I>::handle_append_event(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -162,7 +162,7 @@ void DemoteRequest<I>::handle_append_event(int r) {
 
 template <typename I>
 void DemoteRequest<I>::commit_event() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   m_journaler->committed(m_future);
@@ -174,7 +174,7 @@ void DemoteRequest<I>::commit_event() {
 
 template <typename I>
 void DemoteRequest<I>::handle_commit_event(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -188,7 +188,7 @@ void DemoteRequest<I>::handle_commit_event(int r) {
 
 template <typename I>
 void DemoteRequest<I>::stop_append() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   auto ctx = create_context_callback<
@@ -198,7 +198,7 @@ void DemoteRequest<I>::stop_append() {
 
 template <typename I>
 void DemoteRequest<I>::handle_stop_append(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -213,7 +213,7 @@ void DemoteRequest<I>::handle_stop_append(int r) {
 
 template <typename I>
 void DemoteRequest<I>::shut_down_journaler() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   Context *ctx = create_async_context_callback(
@@ -224,7 +224,7 @@ void DemoteRequest<I>::shut_down_journaler() {
 
 template <typename I>
 void DemoteRequest<I>::handle_shut_down_journaler(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -242,7 +242,7 @@ void DemoteRequest<I>::finish(int r) {
     r = m_ret_val;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

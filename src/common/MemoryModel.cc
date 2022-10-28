@@ -7,9 +7,9 @@
 
 #include <fstream>
 
-#define dout_subsys ceph_subsys_
+#define dout_subsys stone_subsys_
 
-MemoryModel::MemoryModel(CephContext *cct_)
+MemoryModel::MemoryModel(StoneContext *cct_)
   : cct(cct_)
 {
 }

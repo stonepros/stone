@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stone - scalable distributed file system
 *
 * Copyright (C) 2011 New Dream Network
 *
@@ -21,7 +21,7 @@
 #include <sys/mman.h>
 #endif
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 /* We put our cross-process semaphore into a page of memory mapped with mmap. */
 struct cross_process_sem_data_t
@@ -81,7 +81,7 @@ wait()
     int err = errno;
     if (err == -EINTR)
       continue;
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -90,7 +90,7 @@ post()
 {
   int ret = sem_post(&m_data->sem);
   if (ret == -1) {
-    ceph_abort();
+    stone_abort();
   }
 }
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -41,8 +41,8 @@
 #include "common/errno.h"
 #include "common/pick_address.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr.server " << __func__ << " "
 using namespace TOPNSPC::common;
@@ -62,22 +62,22 @@ DaemonServer::DaemonServer(MonClient *monc_,
 			   PyModuleRegistry &py_modules_,
 			   LogChannelRef clog_,
 			   LogChannelRef audit_clog_)
-    : Dispatcher(g_ceph_context),
-      client_byte_throttler(new Throttle(g_ceph_context, "mgr_client_bytes",
+    : Dispatcher(g_stone_context),
+      client_byte_throttler(new Throttle(g_stone_context, "mgr_client_bytes",
 					 g_conf().get_val<Option::size_t>("mgr_client_bytes"))),
-      client_msg_throttler(new Throttle(g_ceph_context, "mgr_client_messages",
+      client_msg_throttler(new Throttle(g_stone_context, "mgr_client_messages",
 					g_conf().get_val<uint64_t>("mgr_client_messages"))),
-      osd_byte_throttler(new Throttle(g_ceph_context, "mgr_osd_bytes",
+      osd_byte_throttler(new Throttle(g_stone_context, "mgr_osd_bytes",
 				      g_conf().get_val<Option::size_t>("mgr_osd_bytes"))),
-      osd_msg_throttler(new Throttle(g_ceph_context, "mgr_osd_messsages",
+      osd_msg_throttler(new Throttle(g_stone_context, "mgr_osd_messsages",
 				     g_conf().get_val<uint64_t>("mgr_osd_messages"))),
-      mds_byte_throttler(new Throttle(g_ceph_context, "mgr_mds_bytes",
+      mds_byte_throttler(new Throttle(g_stone_context, "mgr_mds_bytes",
 				      g_conf().get_val<Option::size_t>("mgr_mds_bytes"))),
-      mds_msg_throttler(new Throttle(g_ceph_context, "mgr_mds_messsages",
+      mds_msg_throttler(new Throttle(g_stone_context, "mgr_mds_messsages",
 				     g_conf().get_val<uint64_t>("mgr_mds_messages"))),
-      mon_byte_throttler(new Throttle(g_ceph_context, "mgr_mon_bytes",
+      mon_byte_throttler(new Throttle(g_stone_context, "mgr_mon_bytes",
 				      g_conf().get_val<Option::size_t>("mgr_mon_bytes"))),
-      mon_msg_throttler(new Throttle(g_ceph_context, "mgr_mon_messsages",
+      mon_msg_throttler(new Throttle(g_stone_context, "mgr_mon_messsages",
 				     g_conf().get_val<uint64_t>("mgr_mon_messages"))),
       msgr(nullptr),
       monc(monc_),
@@ -88,7 +88,7 @@ DaemonServer::DaemonServer(MonClient *monc_,
       clog(clog_),
       audit_clog(audit_clog_),
       pgmap_ready(false),
-      timer(g_ceph_context, lock),
+      timer(g_stone_context, lock),
       shutting_down(false),
       tick_event(nullptr),
       osd_perf_metric_collector_listener(this),
@@ -109,7 +109,7 @@ int DaemonServer::init(uint64_t gid, entity_addrvec_t client_addrs)
   // Initialize Messenger
   std::string public_msgr_type = g_conf()->ms_public_type.empty() ?
     g_conf().get_val<std::string>("ms_type") : g_conf()->ms_public_type;
-  msgr = Messenger::create(g_ceph_context, public_msgr_type,
+  msgr = Messenger::create(g_stone_context, public_msgr_type,
 			   entity_name_t::MGR(gid),
 			   "mgr",
 			   Messenger::get_pid_nonce());
@@ -134,7 +134,7 @@ int DaemonServer::init(uint64_t gid, entity_addrvec_t client_addrs)
 			      mon_msg_throttler.get());
 
   entity_addrvec_t addrs;
-  int r = pick_addresses(cct, CEPH_PICK_ADDRESS_PUBLIC, &addrs);
+  int r = pick_addresses(cct, STONE_PICK_ADDRESS_PUBLIC, &addrs);
   if (r < 0) {
     return r;
   }
@@ -154,7 +154,7 @@ int DaemonServer::init(uint64_t gid, entity_addrvec_t client_addrs)
   msgr->set_auth_server(monc);
   monc->set_handle_authentication_dispatcher(this);
 
-  started_at = ceph_clock_now();
+  started_at = stone_clock_now();
 
   std::lock_guard l(lock);
   timer.init();
@@ -172,7 +172,7 @@ entity_addrvec_t DaemonServer::get_myaddrs() const
 
 int DaemonServer::ms_handle_authentication(Connection *con)
 {
-  auto s = ceph::make_ref<MgrSession>(cct);
+  auto s = stone::make_ref<MgrSession>(cct);
   con->set_priv(s);
   s->inst.addr = con->get_peer_addr();
   s->entity_name = con->peer_name;
@@ -206,7 +206,7 @@ int DaemonServer::ms_handle_authentication(Connection *con)
              << " has caps " << s->caps << " '" << str << "'" << dendl;
   }
 
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_OSD) {
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_OSD) {
     std::lock_guard l(lock);
     s->osd_id = atoi(s->entity_name.get_id().c_str());
     dout(10) << "registering osd." << s->osd_id << " session "
@@ -219,7 +219,7 @@ int DaemonServer::ms_handle_authentication(Connection *con)
 
 bool DaemonServer::ms_handle_reset(Connection *con)
 {
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_OSD) {
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_OSD) {
     auto priv = con->get_priv();
     auto session = static_cast<MgrSession*>(priv.get());
     if (!session) {
@@ -270,7 +270,7 @@ bool DaemonServer::ms_dispatch2(const ref_t<Message>& m)
   };
 }
 
-void DaemonServer::dump_pg_ready(ceph::Formatter *f)
+void DaemonServer::dump_pg_ready(stone::Formatter *f)
 {
   f->dump_bool("pg_ready", pgmap_ready.load());
 }
@@ -327,7 +327,7 @@ void DaemonServer::tick()
 // fire after all modules have had a chance to set their health checks.
 void DaemonServer::schedule_tick_locked(double delay_sec)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   if (tick_event) {
     timer.cancel_event(tick_event);
@@ -404,7 +404,7 @@ static DaemonKey key_from_service(
   if (!service_name.empty()) {
     return DaemonKey{service_name, daemon_name};
   } else {
-    return DaemonKey{ceph_entity_type_name(peer_type), daemon_name};
+    return DaemonKey{stone_entity_type_name(peer_type), daemon_name};
   }
 }
 
@@ -426,7 +426,7 @@ void DaemonServer::fetch_missing_metadata(const DaemonKey& key,
       oss << "{\"prefix\": \"mon metadata\", \"id\": \""
 	  << key.name << "\"}";
     } else {
-      ceph_abort();
+      stone_abort();
     }
     monc->start_mon_command({oss.str()}, {}, &c->outbl, &c->outs, c);
   }
@@ -458,7 +458,7 @@ bool DaemonServer::handle_open(const ref_t<MMgrOpen>& m)
       daemon->service_daemon = true;
       daemon_state.insert(daemon);
     } else {
-      /* A normal Ceph daemon has connected but we are or should be waiting on
+      /* A normal Stone daemon has connected but we are or should be waiting on
        * metadata for it. Close the session so that it tries to reconnect.
        */
       dout(2) << "ignoring open from " << key << " " << con->get_peer_addr()
@@ -483,7 +483,7 @@ bool DaemonServer::handle_open(const ref_t<MMgrOpen>& m)
     if (m->service_daemon) {
       daemon->service_status = m->daemon_status;
 
-      utime_t now = ceph_clock_now();
+      utime_t now = stone_clock_now();
       auto [d, added] = pending_service_map.get_daemon(m->service_name,
 						       m->daemon_name);
       if (added || d->gid != (uint64_t)m->get_source().num()) {
@@ -568,7 +568,7 @@ bool DaemonServer::handle_report(const ref_t<MMgrReport>& m)
   if (!m->service_name.empty()) {
     key.type = m->service_name;
   } else {
-    key.type = ceph_entity_type_name(m->get_connection()->get_peer_type());
+    key.type = stone_entity_type_name(m->get_connection()->get_peer_type());
   }
   key.name = m->daemon_name;
 
@@ -630,7 +630,7 @@ bool DaemonServer::handle_report(const ref_t<MMgrReport>& m)
     }
 
     // Update the DaemonState
-    ceph_assert(daemon != nullptr);
+    stone_assert(daemon != nullptr);
     {
       std::lock_guard l(daemon->lock);
       auto &daemon_counters = daemon->perf_counters;
@@ -644,7 +644,7 @@ bool DaemonServer::handle_report(const ref_t<MMgrReport>& m)
                  << " ignored " << daemon->ignored_mon_config << dendl;
       }
 
-      utime_t now = ceph_clock_now();
+      utime_t now = stone_clock_now();
       if (daemon->service_daemon) {
         if (m->daemon_status) {
           daemon->service_status_stamp = now;
@@ -671,7 +671,7 @@ bool DaemonServer::handle_report(const ref_t<MMgrReport>& m)
   // if there are any schema updates, notify the python modules
   /* no users currently
   if (!m->declare_types.empty() || !m->undeclare_types.empty()) {
-    py_modules.notify_all("perf_schema_update", ceph::to_string(key));
+    py_modules.notify_all("perf_schema_update", stone::to_string(key));
   }
   */
 
@@ -745,7 +745,7 @@ bool DaemonServer::_allowed_command(
   bool cmd_x = this_cmd->requires_perm('x');
 
   bool capable = s->caps.is_capable(
-    g_ceph_context,
+    g_stone_context,
     s->entity_name,
     service, module, prefix, param_str_map,
     cmd_r, cmd_w, cmd_x,
@@ -763,19 +763,19 @@ bool DaemonServer::_allowed_command(
  */
 class CommandContext {
 public:
-  ceph::ref_t<MCommand> m_tell;
-  ceph::ref_t<MMgrCommand> m_mgr;
+  stone::ref_t<MCommand> m_tell;
+  stone::ref_t<MMgrCommand> m_mgr;
   const std::vector<std::string>& cmd;  ///< ref into m_tell or m_mgr
   const bufferlist& data;               ///< ref into m_tell or m_mgr
   bufferlist odata;
   cmdmap_t cmdmap;
 
-  explicit CommandContext(ceph::ref_t<MCommand> m)
+  explicit CommandContext(stone::ref_t<MCommand> m)
     : m_tell{std::move(m)},
       cmd(m_tell->cmd),
       data(m_tell->get_data()) {
   }
-  explicit CommandContext(ceph::ref_t<MMgrCommand> m)
+  explicit CommandContext(stone::ref_t<MMgrCommand> m)
     : m_mgr{std::move(m)},
       cmd(m_mgr->cmd),
       data(m_mgr->get_data()) {
@@ -866,7 +866,7 @@ void DaemonServer::log_access_denied(
                      << "entity='" << session->entity_name << "' "
                      << "cmd=" << cmdctx->cmd << ":  access denied";
   ss << "access denied: does your client key have mgr caps? "
-        "See http://docs.ceph.com/en/latest/mgr/administrator/"
+        "See http://docs.stone.com/en/latest/mgr/administrator/"
         "#client-authentication";
 }
 
@@ -1152,7 +1152,7 @@ bool DaemonServer::_handle_command(
     // only include state from services that are in the persisted service map
     f->open_object_section("service_status");
     for (auto& [type, service] : pending_service_map.services) {
-      if (ServiceMap::is_normal_ceph_entity(type)) {
+      if (ServiceMap::is_normal_stone_entity(type)) {
         continue;
       }
 
@@ -1160,7 +1160,7 @@ bool DaemonServer::_handle_command(
       for (auto& q : service.daemons) {
 	f->open_object_section(q.first.c_str());
 	DaemonKey key{type, q.first};
-	ceph_assert(daemon_state.exists(key));
+	stone_assert(daemon_state.exists(key));
 	auto daemon = daemon_state.get(key);
 	std::lock_guard l(daemon->lock);
 	f->dump_stream("status_stamp") << daemon->service_status_stamp;
@@ -1398,7 +1398,7 @@ bool DaemonServer::_handle_command(
         } else {
           // legacy
           auto q = pgs_by_primary.find(primary);
-          ceph_assert(q != pgs_by_primary.end());
+          stone_assert(q != pgs_by_primary.end());
           con->send_message(new MOSDScrub(monc->get_fsid(),
                                           q->second,
                                           prefix == "osd pool repair",
@@ -1531,7 +1531,7 @@ bool DaemonServer::_handle_command(
         if (!pool_name.empty()) {
           poolid = osdmap.lookup_pg_pool_name(pool_name);
           if (poolid < 0) {
-            ceph_assert(poolid == -ENOENT);
+            stone_assert(poolid == -ENOENT);
             ss << "unrecognized pool '" << pool_name << "'";
             return -ENOENT;
           }
@@ -1893,7 +1893,7 @@ bool DaemonServer::_handle_command(
           }
           break;
         default:
-          ceph_abort_msg("actual_op value is not supported");
+          stone_abort_msg("actual_op value is not supported");
         }
 	pgs.push_back(i);
       } // for
@@ -2002,14 +2002,14 @@ bool DaemonServer::_handle_command(
 	    f->open_object_section("value");
 	    f->dump_string("name", i.first);
 	    f->dump_string("value", i.second.rbegin()->second);
-	    f->dump_string("source", ceph_conf_level_name(
+	    f->dump_string("source", stone_conf_level_name(
 			     i.second.rbegin()->first));
 	    if (i.second.size() > 1) {
 	      f->open_array_section("overrides");
 	      auto j = i.second.rend();
 	      for (--j; j != i.second.rbegin(); --j) {
 		f->open_object_section("value");
-		f->dump_string("source", ceph_conf_level_name(j->first));
+		f->dump_string("source", stone_conf_level_name(j->first));
 		f->dump_string("value", j->second);
 		f->close_section();
 	      }
@@ -2022,17 +2022,17 @@ bool DaemonServer::_handle_command(
 	  } else {
 	    tbl << i.first;
 	    tbl << i.second.rbegin()->second;
-	    tbl << ceph_conf_level_name(i.second.rbegin()->first);
+	    tbl << stone_conf_level_name(i.second.rbegin()->first);
 	    if (i.second.size() > 1) {
 	      list<string> ov;
 	      auto j = i.second.rend();
 	      for (--j; j != i.second.rbegin(); --j) {
 		if (j->second == i.second.rbegin()->second) {
-		  ov.push_front(string("(") + ceph_conf_level_name(j->first) +
+		  ov.push_front(string("(") + stone_conf_level_name(j->first) +
 				string("[") + j->second + string("]") +
 				string(")"));
 		} else {
-                  ov.push_front(ceph_conf_level_name(j->first) +
+                  ov.push_front(stone_conf_level_name(j->first) +
                                 string("[") + j->second + string("]"));
 
 		}
@@ -2060,14 +2060,14 @@ bool DaemonServer::_handle_command(
 	    // have config
 	    if (f) {
 	      f->dump_string("value", j->second.rbegin()->second);
-	      f->dump_string("source", ceph_conf_level_name(
+	      f->dump_string("source", stone_conf_level_name(
 			       j->second.rbegin()->first));
 	      if (j->second.size() > 1) {
 		f->open_array_section("overrides");
 		auto k = j->second.rend();
 		for (--k; k != j->second.rbegin(); --k) {
 		  f->open_object_section("value");
-		  f->dump_string("source", ceph_conf_level_name(k->first));
+		  f->dump_string("source", stone_conf_level_name(k->first));
 		  f->dump_string("value", k->second);
 		  f->close_section();
 		}
@@ -2079,17 +2079,17 @@ bool DaemonServer::_handle_command(
 	      f->close_section();
 	    } else {
 	      tbl << j->second.rbegin()->second;
-	      tbl << ceph_conf_level_name(j->second.rbegin()->first);
+	      tbl << stone_conf_level_name(j->second.rbegin()->first);
 	      if (j->second.size() > 1) {
 		list<string> ov;
 		auto k = j->second.rend();
 		for (--k; k != j->second.rbegin(); --k) {
 		  if (k->second == j->second.rbegin()->second) {
-		    ov.push_front(string("(") + ceph_conf_level_name(k->first) +
+		    ov.push_front(string("(") + stone_conf_level_name(k->first) +
 				  string("[") + k->second + string("]") +
 				  string(")"));
 		  } else {
-                    ov.push_front(ceph_conf_level_name(k->first) +
+                    ov.push_front(stone_conf_level_name(k->first) +
                                   string("[") + k->second + string("]"));
 		  }
 		}
@@ -2104,11 +2104,11 @@ bool DaemonServer::_handle_command(
 	    // only have default
 	    if (f) {
 	      f->dump_string("value", i.second);
-	      f->dump_string("source", ceph_conf_level_name(CONF_DEFAULT));
+	      f->dump_string("source", stone_conf_level_name(CONF_DEFAULT));
 	      f->close_section();
 	    } else {
 	      tbl << i.second;
-	      tbl << ceph_conf_level_name(CONF_DEFAULT);
+	      tbl << stone_conf_level_name(CONF_DEFAULT);
 	      tbl << "";
 	      tbl << "";
 	      tbl << TextTable::endrow;
@@ -2141,7 +2141,7 @@ bool DaemonServer::_handle_command(
       tbl.define_column("DAEMONS", TextTable::LEFT, TextTable::LEFT);
       tbl.define_column("WEAR", TextTable::RIGHT, TextTable::RIGHT);
       tbl.define_column("LIFE EXPECTANCY", TextTable::LEFT, TextTable::LEFT);
-      auto now = ceph_clock_now();
+      auto now = stone_clock_now();
       daemon_state.with_devices([&tbl, now](const DeviceState& dev) {
 	  string h;
 	  for (auto& i : dev.attachments) {
@@ -2197,7 +2197,7 @@ bool DaemonServer::_handle_command(
 	  tbl.define_column("HOST:DEV", TextTable::LEFT, TextTable::LEFT);
 	  tbl.define_column("EXPECTED FAILURE", TextTable::LEFT,
 			    TextTable::LEFT);
-	  auto now = ceph_clock_now();
+	  auto now = stone_clock_now();
 	  for (auto& i : dm->devices) {
 	    daemon_state.with_device(
 	      i.first, [&tbl, now] (const DeviceState& dev) {
@@ -2243,7 +2243,7 @@ bool DaemonServer::_handle_command(
       tbl.define_column("DEV", TextTable::LEFT, TextTable::LEFT);
       tbl.define_column("DAEMONS", TextTable::LEFT, TextTable::LEFT);
       tbl.define_column("EXPECTED FAILURE", TextTable::LEFT, TextTable::LEFT);
-      auto now = ceph_clock_now();
+      auto now = stone_clock_now();
       for (auto& devid : devids) {
 	daemon_state.with_device(
 	  devid, [&tbl, &host, now] (const DeviceState& dev) {
@@ -2318,7 +2318,7 @@ bool DaemonServer::_handle_command(
       daemon_state.with_device_create(
 	devid,
 	[from, to, &meta] (DeviceState& dev) {
-	  dev.set_life_expectancy(from, to, ceph_clock_now());
+	  dev.set_life_expectancy(from, to, stone_clock_now());
 	  meta = dev.metadata;
 	});
       json_spirit::Object json_object;
@@ -2372,7 +2372,7 @@ bool DaemonServer::_handle_command(
     return true;
   } else {
     if (!pgmap_ready) {
-      ss << "Warning: due to ceph-mgr restart, some PG states may not be up to date\n";
+      ss << "Warning: due to stone-mgr restart, some PG states may not be up to date\n";
     }
     if (f) {
        f->open_object_section("pg_info");
@@ -2415,10 +2415,10 @@ bool DaemonServer::_handle_command(
     // Validate that the module is enabled
     auto& py_handler_name = py_command.module_name;
     PyModuleRef module = py_modules.get_module(py_handler_name);
-    ceph_assert(module);
+    stone_assert(module);
     if (!module->is_enabled()) {
       ss << "Module '" << py_handler_name << "' is not enabled (required by "
-            "command '" << prefix << "'): use `ceph mgr module enable "
+            "command '" << prefix << "'): use `stone mgr module enable "
             << py_handler_name << "` to enable it";
       dout(4) << ss.str() << dendl;
       cmdctx->reply(-EOPNOTSUPP, ss);
@@ -2474,7 +2474,7 @@ bool DaemonServer::_handle_command(
 
 void DaemonServer::_prune_pending_service_map()
 {
-  utime_t cutoff = ceph_clock_now();
+  utime_t cutoff = stone_clock_now();
   cutoff -= g_conf().get_val<double>("mgr_service_beacon_grace");
   auto p = pending_service_map.services.begin();
   while (p != pending_service_map.services.end()) {
@@ -2482,7 +2482,7 @@ void DaemonServer::_prune_pending_service_map()
     while (q != p->second.daemons.end()) {
       DaemonKey key{p->first, q->first};
       if (!daemon_state.exists(key)) {
-        if (ServiceMap::is_normal_ceph_entity(p->first)) {
+        if (ServiceMap::is_normal_stone_entity(p->first)) {
           dout(10) << "daemon " << key << " in service map but not in daemon state "
                    << "index -- force pruning" << dendl;
           q = p->second.daemons.erase(q);
@@ -2499,7 +2499,7 @@ void DaemonServer::_prune_pending_service_map()
       std::lock_guard l(daemon->lock);
       if (daemon->last_service_beacon == utime_t()) {
 	// we must have just restarted; assume they are alive now.
-	daemon->last_service_beacon = ceph_clock_now();
+	daemon->last_service_beacon = stone_clock_now();
 	++q;
 	continue;
       }
@@ -2524,7 +2524,7 @@ void DaemonServer::_prune_pending_service_map()
 void DaemonServer::send_report()
 {
   if (!pgmap_ready) {
-    if (ceph_clock_now() - started_at > g_conf().get_val<int64_t>("mgr_stats_period") * 4.0) {
+    if (stone_clock_now() - started_at > g_conf().get_val<int64_t>("mgr_stats_period") * 4.0) {
       pgmap_ready = true;
       reported_osds.clear();
       dout(1) << "Giving up on OSDs that haven't reported yet, sending "
@@ -2536,7 +2536,7 @@ void DaemonServer::send_report()
     }
   }
 
-  auto m = ceph::make_message<MMonMgrReport>();
+  auto m = stone::make_message<MMonMgrReport>();
   m->gid = monc->get_global_id();
   py_modules.get_health_checks(&m->health_checks);
   py_modules.get_progress_events(&m->progress_events);
@@ -2547,8 +2547,8 @@ void DaemonServer::send_report()
       if (pending_service_map.epoch) {
 	_prune_pending_service_map();
 	if (pending_service_map_dirty >= pending_service_map.epoch) {
-	  pending_service_map.modified = ceph_clock_now();
-	  encode(pending_service_map, m->service_map_bl, CEPH_FEATURES_ALL);
+	  pending_service_map.modified = stone_clock_now();
+	  encode(pending_service_map, m->service_map_bl, STONE_FEATURES_ALL);
 	  dout(10) << "sending service_map e" << pending_service_map.epoch
 		   << dendl;
 	  pending_service_map.epoch++;
@@ -2558,10 +2558,10 @@ void DaemonServer::send_report()
       cluster_state.with_osdmap([&](const OSDMap& osdmap) {
 	  // FIXME: no easy way to get mon features here.  this will do for
 	  // now, though, as long as we don't make a backward-incompat change.
-	  pg_map.encode_digest(osdmap, m->get_data(), CEPH_FEATURES_ALL);
+	  pg_map.encode_digest(osdmap, m->get_data(), STONE_FEATURES_ALL);
 	  dout(10) << pg_map << dendl;
 
-	  pg_map.get_health_checks(g_ceph_context, osdmap,
+	  pg_map.get_health_checks(g_stone_context, osdmap,
 				   &m->health_checks);
 
 	  dout(10) << m->health_checks.checks.size() << " health checks"
@@ -2571,7 +2571,7 @@ void DaemonServer::send_report()
 	  jf.dump_object("health_checks", m->health_checks);
 	  jf.flush(*_dout);
 	  *_dout << dendl;
-          if (osdmap.require_osd_release >= ceph_release_t::luminous) {
+          if (osdmap.require_osd_release >= stone_release_t::luminous) {
               clog->debug() << "pgmap v" << pg_map.version << ": " << pg_map;
           }
 	});
@@ -2862,7 +2862,7 @@ void DaemonServer::adjust_pgs()
 		       << " next " << next << dendl;
 	      if (p.get_pgp_num_target() == p.get_pg_num_target() &&
 		  p.get_pgp_num_target() < p.get_pg_num()) {
-		// since pgp_num is tracking pg_num, ceph is handling
+		// since pgp_num is tracking pg_num, stone is handling
 		// pgp_num.  so, be responsible: don't let pgp_num get
 		// too far out ahead of merges (if we are merging).
 		// this avoids moving lots of unmerged pgs onto a
@@ -2942,14 +2942,14 @@ void DaemonServer::got_service_map()
 	// we we already active and therefore must have persisted it,
 	// which means ours is the same or newer.
 	dout(10) << "got updated map e" << service_map.epoch << dendl;
-	ceph_assert(pending_service_map.epoch > service_map.epoch);
+	stone_assert(pending_service_map.epoch > service_map.epoch);
       }
     });
 
   // cull missing daemons, populate new ones
   std::set<std::string> types;
   for (auto& [type, service] : pending_service_map.services) {
-    if (ServiceMap::is_normal_ceph_entity(type)) {
+    if (ServiceMap::is_normal_stone_entity(type)) {
       continue;
     }
 
@@ -3037,7 +3037,7 @@ void DaemonServer::handle_conf_change(const ConfigProxy& conf,
 
 void DaemonServer::_send_configure(ConnectionRef c)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   auto configure = make_message<MMgrConfigure>();
   configure->stats_period = g_conf().get_val<int64_t>("mgr_stats_period");

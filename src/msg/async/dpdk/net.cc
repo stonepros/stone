@@ -20,7 +20,7 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -33,13 +33,13 @@
 #include "DPDKStack.h"
 
 #include "common/dout.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_dpdk
+#define dout_subsys stone_subsys_dpdk
 #undef dout_prefix
 #define dout_prefix *_dout << "net "
 
-interface::interface(CephContext *cct, std::shared_ptr<DPDKDevice> dev, EventCenter *center)
+interface::interface(StoneContext *cct, std::shared_ptr<DPDKDevice> dev, EventCenter *center)
     : cct(cct), _dev(dev),
       _rx(_dev->receive(
           center->get_id(),
@@ -81,7 +81,7 @@ subscription<Packet, ethernet_address> interface::register_l3(
     std::function<bool (forward_hash&, Packet& p, size_t)> forward)
 {
   auto i = _proto_map.emplace(std::piecewise_construct, std::make_tuple(uint16_t(proto_num)), std::forward_as_tuple(std::move(forward)));
-  ceph_assert(i.second);
+  stone_assert(i.second);
   l3_rx_stream& l3_rx = i.first->second;
   return l3_rx.packet_stream.listen(std::move(next));
 }

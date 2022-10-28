@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 CERN (Switzerland)
  *                                                                                                                                                                                                            * Author: Andreas-Joachim Peters <Andreas.Joachim.Peters@cern.ch>                                                                                                                                            *
@@ -16,7 +16,7 @@
 #include <string.h>
 #include "arch/intel.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 // -----------------------------------------------------------------------------
 
@@ -41,9 +41,9 @@ vector_xor(vector_op_t* cw,
            vector_op_t* ew)
 // -----------------------------------------------------------------------------
 {
-  ceph_assert(is_aligned(cw, EC_ISA_VECTOR_OP_WORDSIZE));
-  ceph_assert(is_aligned(dw, EC_ISA_VECTOR_OP_WORDSIZE));
-  ceph_assert(is_aligned(ew, EC_ISA_VECTOR_OP_WORDSIZE));
+  stone_assert(is_aligned(cw, EC_ISA_VECTOR_OP_WORDSIZE));
+  stone_assert(is_aligned(dw, EC_ISA_VECTOR_OP_WORDSIZE));
+  stone_assert(is_aligned(ew, EC_ISA_VECTOR_OP_WORDSIZE));
   while (cw < ew) {
     *dw++ ^= *cw++;
   }
@@ -90,7 +90,7 @@ region_xor(unsigned char** src,
       is_aligned(parity, EC_ISA_VECTOR_OP_WORDSIZE)) {
 
 #ifdef __x86_64__
-    if (ceph_arch_intel_sse2) {
+    if (stone_arch_intel_sse2) {
       // -----------------------------
       // use SSE2 region xor function
       // -----------------------------
@@ -142,7 +142,7 @@ region_sse2_xor(char** src,
 // -----------------------------------------------------------------------------
 {
 #ifdef __x86_64__
-  ceph_assert(!(size % EC_ISA_VECTOR_SSE2_WORDSIZE));
+  stone_assert(!(size % EC_ISA_VECTOR_SSE2_WORDSIZE));
   unsigned char* p;
   int d, l;
   unsigned i;

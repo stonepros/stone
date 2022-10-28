@@ -591,7 +591,7 @@ class PgScrubber : public ScrubPgIF, public ScrubMachineListener {
   /// Returns epoch of current osdmap
   epoch_t get_osdmap_epoch() const { return get_osdmap()->get_epoch(); }
 
-  CephContext* get_pg_cct() const { return m_pg->cct; }
+  StoneeContext* get_pg_cct() const { return m_pg->cct; }
 
   // collected statistics
   int m_shallow_errors{0};

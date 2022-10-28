@@ -26,13 +26,13 @@ Inode::~Inode()
   if (!oset.objects.empty()) {
     lsubdout(client->cct, client, 0) << __func__ << ": leftover objects on inode 0x"
       << std::hex << ino << std::dec << dendl;
-    ceph_assert(oset.objects.empty());
+    stone_assert(oset.objects.empty());
   }
 
   if (!delegations.empty()) {
     lsubdout(client->cct, client, 0) << __func__ << ": leftover delegations on inode 0x"
       << std::hex << ino << std::dec << dendl;
-    ceph_assert(delegations.empty());
+    stone_assert(delegations.empty());
   }
 }
 
@@ -91,7 +91,7 @@ void Inode::make_long_path(filepath& p)
 {
   if (!dentries.empty()) {
     Dentry *dn = get_first_parent();
-    ceph_assert(dn->dir && dn->dir->parent_inode);
+    stone_assert(dn->dir && dn->dir->parent_inode);
     dn->dir->parent_inode->make_long_path(p);
     p.push_dentry(dn->name);
   } else if (snapdir_parent) {
@@ -104,7 +104,7 @@ void Inode::make_short_path(filepath& p)
 {
   if (!dentries.empty()) {
     Dentry *dn = get_first_parent();
-    ceph_assert(dn->dir && dn->dir->parent_inode);
+    stone_assert(dn->dir && dn->dir->parent_inode);
     p = filepath(dn->name, dn->dir->parent_inode->ino);
   } else if (snapdir_parent) {
     make_nosnap_relative_path(p);
@@ -119,7 +119,7 @@ void Inode::make_short_path(filepath& p)
  */
 void Inode::make_nosnap_relative_path(filepath& p)
 {
-  if (snapid == CEPH_NOSNAP) {
+  if (snapid == STONE_NOSNAP) {
     p = filepath(ino);
   } else if (snapdir_parent) {
     snapdir_parent->make_nosnap_relative_path(p);
@@ -127,7 +127,7 @@ void Inode::make_nosnap_relative_path(filepath& p)
     p.push_dentry(empty);
   } else if (!dentries.empty()) {
     Dentry *dn = get_first_parent();
-    ceph_assert(dn->dir && dn->dir->parent_inode);
+    stone_assert(dn->dir && dn->dir->parent_inode);
     dn->dir->parent_inode->make_nosnap_relative_path(p);
     p.push_dentry(dn->name);
   } else {
@@ -142,14 +142,14 @@ void Inode::get_open_ref(int mode)
     client->inc_opened_inodes();
   }
   open_by_mode[mode]++;
-  break_deleg(!(mode & CEPH_FILE_MODE_WR));
+  break_deleg(!(mode & STONE_FILE_MODE_WR));
 }
 
 bool Inode::put_open_ref(int mode)
 {
   //cout << "open_by_mode[" << mode << "] " << open_by_mode[mode] << " -> " << (open_by_mode[mode]-1) << std::endl;
   auto& ref = open_by_mode.at(mode);
-  ceph_assert(ref > 0);
+  stone_assert(ref > 0);
   client->dec_opened_files();
   if (--ref == 0) {
     client->dec_opened_inodes();
@@ -181,7 +181,7 @@ int Inode::put_cap_ref(int cap)
       int c = 1 << n;
       if (cap_refs[c] <= 0) {
 	lderr(client->cct) << "put_cap_ref " << ccap_string(c) << " went negative on " << *this << dendl;
-	ceph_assert(cap_refs[c] > 0);
+	stone_assert(cap_refs[c] > 0);
       }
       if (--cap_refs[c] == 0)
         last |= c;
@@ -203,9 +203,9 @@ bool Inode::cap_is_valid(const Cap &cap) const
   /*cout << "cap_gen     " << cap->session-> cap_gen << std::endl
     << "session gen " << cap->gen << std::endl
     << "cap expire  " << cap->session->cap_ttl << std::endl
-    << "cur time    " << ceph_clock_now(cct) << std::endl;*/
+    << "cur time    " << stone_clock_now(cct) << std::endl;*/
   if ((cap.session->cap_gen <= cap.gen)
-      && (ceph_clock_now() < cap.session->cap_ttl)) {
+      && (stone_clock_now() < cap.session->cap_ttl)) {
     return true;
   }
   return false;
@@ -316,15 +316,15 @@ int Inode::caps_file_wanted()
   int want = 0;
   for (const auto &[mode, cnt] : open_by_mode)
     if (cnt)
-      want |= ceph_caps_for_mode(mode);
+      want |= stone_caps_for_mode(mode);
   return want;
 }
 
 int Inode::caps_wanted()
 {
   int want = caps_file_wanted() | caps_used();
-  if (want & CEPH_CAP_FILE_BUFFER)
-    want |= CEPH_CAP_FILE_EXCL;
+  if (want & STONE_CAP_FILE_BUFFER)
+    want |= STONE_CAP_FILE_EXCL;
   return want;
 }
 
@@ -366,7 +366,7 @@ const UserPerm* Inode::get_best_perms()
 bool Inode::have_valid_size()
 {
   // RD+RDCACHE or WR+WRBUFFER => valid size
-  if (caps_issued() & (CEPH_CAP_FILE_SHARED | CEPH_CAP_FILE_EXCL))
+  if (caps_issued() & (STONE_CAP_FILE_SHARED | STONE_CAP_FILE_EXCL))
     return true;
   return false;
 }
@@ -377,7 +377,7 @@ Dir *Inode::open_dir()
   if (!dir) {
     dir = new Dir(this);
     lsubdout(client->cct, client, 15) << "open_dir " << dir << " on " << this << dendl;
-    ceph_assert(dentries.size() < 2); // dirs can't be hard-linked
+    stone_assert(dentries.size() < 2); // dirs can't be hard-linked
     if (!dentries.empty())
       get_first_parent()->get();      // pin dentry
     iget();                  // pin inode
@@ -484,7 +484,7 @@ void Inode::dump(Formatter *f) const
   if (flushing_caps) {
     f->dump_stream("flushings_caps") << ccap_string(flushing_caps);
     f->open_object_section("flushing_cap_tid");
-    for (map<ceph_tid_t, int>::const_iterator p = flushing_cap_tids.begin();
+    for (map<stone_tid_t, int>::const_iterator p = flushing_cap_tids.begin();
 	 p != flushing_cap_tids.end();
 	 ++p) {
       string n(ccap_string(p->second));
@@ -641,7 +641,7 @@ bool Inode::delegations_broken(bool skip_read)
     Delegation& deleg = delegations.front();
     lsubdout(client->cct, client, 10) <<
 	__func__ << ": read delegs only on " << *this << dendl;
-    if (deleg.get_type() == CEPH_FILE_MODE_RD) {
+    if (deleg.get_type() == STONE_FILE_MODE_RD) {
 	return true;
     }
   }
@@ -672,7 +672,7 @@ void Inode::break_deleg(bool skip_read)
  * conflicts and we have the right caps, allocate a new delegation, fill it
  * out and return 0. Return an error if we can't get one for any reason.
  */
-int Inode::set_deleg(Fh *fh, unsigned type, ceph_deleg_cb_t cb, void *priv)
+int Inode::set_deleg(Fh *fh, unsigned type, stone_deleg_cb_t cb, void *priv)
 {
   lsubdout(client->cct, client, 10) <<
 	  __func__ << ": inode " << *this << dendl;
@@ -682,32 +682,32 @@ int Inode::set_deleg(Fh *fh, unsigned type, ceph_deleg_cb_t cb, void *priv)
    * allow it, with an unusual error to make it clear.
    */
   if (!client->get_deleg_timeout())
-    return -CEPHFS_ETIME;
+    return -STONEFS_ETIME;
 
   // Just say no if we have any recalled delegs still outstanding
   if (has_recalled_deleg()) {
     lsubdout(client->cct, client, 10) << __func__ <<
 	  ": has_recalled_deleg" << dendl;
-    return -CEPHFS_EAGAIN;
+    return -STONEFS_EAGAIN;
   }
 
   // check vs. currently open files on this inode
   switch (type) {
-  case CEPH_DELEGATION_RD:
+  case STONE_DELEGATION_RD:
     if (open_count_for_write()) {
       lsubdout(client->cct, client, 10) << __func__ <<
 	    ": open for write" << dendl;
-      return -CEPHFS_EAGAIN;
+      return -STONEFS_EAGAIN;
     }
     break;
-  case CEPH_DELEGATION_WR:
+  case STONE_DELEGATION_WR:
     if (open_count() > 1) {
       lsubdout(client->cct, client, 10) << __func__ << ": open" << dendl;
-      return -CEPHFS_EAGAIN;
+      return -STONEFS_EAGAIN;
     }
     break;
   default:
-    return -CEPHFS_EINVAL;
+    return -STONEFS_EINVAL;
   }
 
   /*
@@ -724,11 +724,11 @@ int Inode::set_deleg(Fh *fh, unsigned type, ceph_deleg_cb_t cb, void *priv)
    * In the future, we may need to add a way to have this request caps more
    * aggressively -- for instance, to handle WANT_DELEGATION for NFSv4.1+.
    */
-  int need = ceph_deleg_caps_for_type(type);
+  int need = stone_deleg_caps_for_type(type);
   if (!caps_issued_mask(need)) {
     lsubdout(client->cct, client, 10) << __func__ << ": cap mismatch, have="
       << ccap_string(caps_issued()) << " need=" << ccap_string(need) << dendl;
-    return -CEPHFS_EAGAIN;
+    return -STONEFS_EAGAIN;
   }
 
   for (list<Delegation>::iterator d = delegations.begin();

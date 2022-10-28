@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -33,7 +33,7 @@ namespace fs = std::experimental::filesystem;
 #include <sys/stat.h>
 #include <sys/types.h>
 
-using ceph::bufferlist;
+using stone::bufferlist;
 using std::cerr;
 using std::ostringstream;
 
@@ -132,7 +132,7 @@ const char * const trivial_conf_4 = "log dir = \"barbaz\"\n";
 const char * const simple_conf_1 = "\
 ; here's a comment\n\
 [global]\n\
-        keyring = .my_ceph_keyring\n\
+        keyring = .my_stone_keyring\n\
 \n\
 [mds]\n\
 	log dir = out\n\
@@ -332,7 +332,7 @@ TEST(ConfUtils, ReadFiles1) {
 
   std::string val;
   ASSERT_EQ(cf1.read("global", "keyring", val), 0);
-  ASSERT_EQ(val, ".my_ceph_keyring");
+  ASSERT_EQ(val, ".my_stone_keyring");
 
   ASSERT_EQ(cf1.read("mds", "profiling logger dir", val), 0);
   ASSERT_EQ(val, "wowsers");
@@ -431,17 +431,17 @@ TEST(ConfUtils, Overrides) {
   std::ostringstream warn;
   std::string override_conf_1_f(next_tempfile(override_config_1));
 
-  conf->name.set(CEPH_ENTITY_TYPE_MON, "0");
+  conf->name.set(STONE_ENTITY_TYPE_MON, "0");
   conf.parse_config_files(override_conf_1_f.c_str(), &warn, 0);
   ASSERT_FALSE(conf.has_parse_error());
   ASSERT_EQ(conf->log_file, "global_log");
 
-  conf->name.set(CEPH_ENTITY_TYPE_MDS, "a");
+  conf->name.set(STONE_ENTITY_TYPE_MDS, "a");
   conf.parse_config_files(override_conf_1_f.c_str(), &warn, 0);
   ASSERT_FALSE(conf.has_parse_error());
   ASSERT_EQ(conf->log_file, "mds_log");
 
-  conf->name.set(CEPH_ENTITY_TYPE_OSD, "0");
+  conf->name.set(STONE_ENTITY_TYPE_OSD, "0");
   conf.parse_config_files(override_conf_1_f.c_str(), &warn, 0);
   ASSERT_FALSE(conf.has_parse_error());
   ASSERT_EQ(conf->log_file, "osd0_log");
@@ -452,7 +452,7 @@ TEST(ConfUtils, DupKey) {
   std::ostringstream warn;
   std::string dup_key_config_f(next_tempfile(dup_key_config_1));
 
-  conf->name.set(CEPH_ENTITY_TYPE_MDS, "a");
+  conf->name.set(STONE_ENTITY_TYPE_MDS, "a");
   conf.parse_config_files(dup_key_config_f.c_str(), &warn, 0);
   ASSERT_FALSE(conf.has_parse_error());
   ASSERT_EQ(conf->log_file, string("3"));

@@ -11,9 +11,9 @@
 #include <boost/bind/bind.hpp>
 
 // re-include our assert to clobber the system one; fix dout:
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 namespace librbd {
 
@@ -47,7 +47,7 @@ struct C_UnwatchAndFlush : public Context {
 
       librados::AioCompletion *aio_comp = create_rados_callback(this);
       r = rados.aio_watch_flush(aio_comp);
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       aio_comp->release();
       return;
     }
@@ -81,7 +81,7 @@ Watcher::C_NotifyAck::C_NotifyAck(Watcher *watcher, uint64_t notify_id,
 
 void Watcher::C_NotifyAck::finish(int r) {
   ldout(cct, 10) << "r=" << r << dendl;
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   watcher->acknowledge_notify(notify_id, handle, out);
 }
 
@@ -92,8 +92,8 @@ void Watcher::C_NotifyAck::finish(int r) {
 Watcher::Watcher(librados::IoCtx& ioctx, asio::ContextWQ *work_queue,
                           const string& oid)
   : m_ioctx(ioctx), m_work_queue(work_queue), m_oid(oid),
-    m_cct(reinterpret_cast<CephContext *>(ioctx.cct())),
-    m_watch_lock(ceph::make_shared_mutex(
+    m_cct(reinterpret_cast<StoneContext *>(ioctx.cct())),
+    m_watch_lock(stone::make_shared_mutex(
       util::unique_lock_name("librbd::Watcher::m_watch_lock", this))),
     m_watch_handle(0), m_notifier(work_queue, ioctx, oid),
     m_watch_state(WATCH_STATE_IDLE), m_watch_ctx(*this) {
@@ -101,21 +101,21 @@ Watcher::Watcher(librados::IoCtx& ioctx, asio::ContextWQ *work_queue,
 
 Watcher::~Watcher() {
   std::shared_lock l{m_watch_lock};
-  ceph_assert(is_unregistered(m_watch_lock));
+  stone_assert(is_unregistered(m_watch_lock));
 }
 
 void Watcher::register_watch(Context *on_finish) {
   ldout(m_cct, 10) << dendl;
 
   std::unique_lock watch_locker{m_watch_lock};
-  ceph_assert(is_unregistered(m_watch_lock));
+  stone_assert(is_unregistered(m_watch_lock));
   m_watch_state = WATCH_STATE_REGISTERING;
   m_watch_blocklisted = false;
 
   librados::AioCompletion *aio_comp = create_rados_callback(
     new C_RegisterWatch(this, on_finish));
   int r = m_ioctx.aio_watch(m_oid, aio_comp, &m_watch_handle, &m_watch_ctx);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -126,7 +126,7 @@ void Watcher::handle_register_watch(int r, Context *on_finish) {
   Context *unregister_watch_ctx = nullptr;
   {
     std::unique_lock watch_locker{m_watch_lock};
-    ceph_assert(m_watch_state == WATCH_STATE_REGISTERING);
+    stone_assert(m_watch_state == WATCH_STATE_REGISTERING);
 
     m_watch_state = WATCH_STATE_IDLE;
     if (r < 0) {
@@ -164,7 +164,7 @@ void Watcher::unregister_watch(Context *on_finish) {
       ldout(m_cct, 10) << "delaying unregister until register completed"
                        << dendl;
 
-      ceph_assert(m_unregister_watch_ctx == nullptr);
+      stone_assert(m_unregister_watch_ctx == nullptr);
       m_unregister_watch_ctx = new LambdaContext([this, on_finish](int r) {
           unregister_watch(on_finish);
         });
@@ -173,7 +173,7 @@ void Watcher::unregister_watch(Context *on_finish) {
       librados::AioCompletion *aio_comp = create_rados_callback(
         new C_UnwatchAndFlush(m_ioctx, on_finish));
       int r = m_ioctx.aio_unwatch(m_watch_handle, aio_comp);
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       aio_comp->release();
 
       m_watch_handle = 0;
@@ -204,7 +204,7 @@ void Watcher::block_notifies(Context *on_finish) {
 
 void Watcher::unblock_notifies() {
   std::unique_lock locker{m_watch_lock};
-  ceph_assert(m_blocked_count > 0);
+  stone_assert(m_blocked_count > 0);
   --m_blocked_count;
   ldout(m_cct, 5) << "blocked_count=" << m_blocked_count << dendl;
 }
@@ -220,7 +220,7 @@ std::string Watcher::get_oid() const {
 
 void Watcher::set_oid(const string& oid) {
   std::unique_lock watch_locker{m_watch_lock};
-  ceph_assert(is_unregistered(m_watch_lock));
+  stone_assert(is_unregistered(m_watch_lock));
 
   m_oid = oid;
 }
@@ -254,7 +254,7 @@ void Watcher::rewatch() {
   Context *unregister_watch_ctx = nullptr;
   {
     std::unique_lock watch_locker{m_watch_lock};
-    ceph_assert(m_watch_state == WATCH_STATE_REWATCHING);
+    stone_assert(m_watch_state == WATCH_STATE_REWATCHING);
 
     if (m_unregister_watch_ctx != nullptr) {
       m_watch_state = WATCH_STATE_IDLE;
@@ -280,7 +280,7 @@ void Watcher::handle_rewatch(int r) {
   Context *unregister_watch_ctx = nullptr;
   {
     std::unique_lock watch_locker{m_watch_lock};
-    ceph_assert(m_watch_state == WATCH_STATE_REWATCHING);
+    stone_assert(m_watch_state == WATCH_STATE_REWATCHING);
 
     m_watch_blocklisted = false;
     if (m_unregister_watch_ctx != nullptr) {
@@ -322,7 +322,7 @@ void Watcher::handle_rewatch_callback(int r) {
   Context *unregister_watch_ctx = nullptr;
   {
     std::unique_lock watch_locker{m_watch_lock};
-    ceph_assert(m_watch_state == WATCH_STATE_REWATCHING);
+    stone_assert(m_watch_state == WATCH_STATE_REWATCHING);
 
     if (m_unregister_watch_ctx != nullptr) {
       m_watch_state = WATCH_STATE_IDLE;

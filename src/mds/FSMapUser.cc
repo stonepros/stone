@@ -1,6 +1,6 @@
 #include "FSMapUser.h"
 
-void FSMapUser::encode(ceph::buffer::list& bl, uint64_t features) const
+void FSMapUser::encode(stone::buffer::list& bl, uint64_t features) const
 {
   ENCODE_START(1, 1, bl);
   encode(epoch, bl);
@@ -12,7 +12,7 @@ void FSMapUser::encode(ceph::buffer::list& bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void FSMapUser::decode(ceph::buffer::list::const_iterator& p)
+void FSMapUser::decode(stone::buffer::list::const_iterator& p)
 {
   DECODE_START(1, p);
   decode(epoch, p);
@@ -25,7 +25,7 @@ void FSMapUser::decode(ceph::buffer::list::const_iterator& p)
   DECODE_FINISH(p);
 }
 
-void FSMapUser::fs_info_t::encode(ceph::buffer::list& bl, uint64_t features) const
+void FSMapUser::fs_info_t::encode(stone::buffer::list& bl, uint64_t features) const
 {
   ENCODE_START(1, 1, bl);
   encode(cid, bl);
@@ -33,7 +33,7 @@ void FSMapUser::fs_info_t::encode(ceph::buffer::list& bl, uint64_t features) con
   ENCODE_FINISH(bl);
 }
 
-void FSMapUser::fs_info_t::decode(ceph::buffer::list::const_iterator& p)
+void FSMapUser::fs_info_t::decode(stone::buffer::list::const_iterator& p)
 {
   DECODE_START(1, p);
   decode(cid, p);
@@ -47,9 +47,9 @@ void FSMapUser::generate_test_instances(std::list<FSMapUser*>& ls)
   m->epoch = 2;
   m->legacy_client_fscid = 1;
   m->filesystems[1].cid = 1;
-  m->filesystems[2].name = "cephfs2";
+  m->filesystems[2].name = "stonefs2";
   m->filesystems[2].cid = 2;
-  m->filesystems[1].name = "cephfs1";
+  m->filesystems[1].name = "stonefs1";
   ls.push_back(m);
 }
 
@@ -62,7 +62,7 @@ void FSMapUser::print(std::ostream& out) const
     out << " id " <<  p.second.cid << " name " << p.second.name << std::endl;
 }
 
-void FSMapUser::print_summary(ceph::Formatter *f, std::ostream *out)
+void FSMapUser::print_summary(stone::Formatter *f, std::ostream *out)
 {
   std::map<mds_role_t,std::string> by_rank;
   std::map<std::string,int> by_state;

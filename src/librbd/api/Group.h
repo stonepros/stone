@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_API_GROUP_H
-#define CEPH_LIBRBD_API_GROUP_H
+#ifndef STONE_LIBRBD_API_GROUP_H
+#define STONE_LIBRBD_API_GROUP_H
 
 #include "include/rbd/librbd.hpp"
 #include "include/rados/librados_fwd.hpp"
@@ -57,4 +57,4 @@ struct Group {
 
 extern template class librbd::api::Group<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_API_GROUP_H
+#endif // STONE_LIBRBD_API_GROUP_H

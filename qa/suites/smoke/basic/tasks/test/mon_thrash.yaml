@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - reached quota
       - mons down
@@ -24,7 +24,7 @@ overrides:
         ms inject socket failures: 2500
         mon client directed command retry: 5
 tasks:
-- ceph:
+- stone:
     fs: xfs
 - mon_thrash:
     revive_delay: 90

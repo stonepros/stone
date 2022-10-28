@@ -12,7 +12,7 @@
 #include "librbd/asio/ContextWQ.h"
 #include "osdc/Striper.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::deep_copy::SnapshotCopyRequest: " \
                            << this << " " << __func__ << ": "
@@ -33,7 +33,7 @@ const std::string &get_snapshot_name(I *image_ctx, librados::snap_t snap_id) {
 					  librados::snap_t> &pair) {
     return pair.second == snap_id;
   });
-  ceph_assert(snap_it != image_ctx->snap_ids.end());
+  stone_assert(snap_it != image_ctx->snap_ids.end());
   return snap_it->first.second;
 }
 
@@ -57,8 +57,8 @@ SnapshotCopyRequest<I>::SnapshotCopyRequest(I *src_image_ctx,
     m_src_snap_id_end(src_snap_id_end), m_dst_snap_id_start(dst_snap_id_start),
     m_flatten(flatten), m_work_queue(work_queue), m_snap_seqs_result(snap_seqs),
     m_snap_seqs(*snap_seqs), m_on_finish(on_finish), m_cct(dst_image_ctx->cct),
-    m_lock(ceph::make_mutex(unique_lock_name("SnapshotCopyRequest::m_lock", this))) {
-  ceph_assert((m_src_snap_id_start == 0 && m_dst_snap_id_start == 0) ||
+    m_lock(stone::make_mutex(unique_lock_name("SnapshotCopyRequest::m_lock", this))) {
+  stone_assert((m_src_snap_id_start == 0 && m_dst_snap_id_start == 0) ||
               (m_src_snap_id_start > 0 && m_dst_snap_id_start > 0));
 
   // snap ids ordered from oldest to newest
@@ -72,7 +72,7 @@ SnapshotCopyRequest<I>::SnapshotCopyRequest(I *src_image_ctx,
                         dst_image_ctx->snaps.end());
   m_dst_image_ctx->image_lock.unlock_shared();
 
-  if (m_src_snap_id_end != CEPH_NOSNAP) {
+  if (m_src_snap_id_end != STONE_NOSNAP) {
     m_src_snap_ids.erase(m_src_snap_ids.upper_bound(m_src_snap_id_end),
                          m_src_snap_ids.end());
   }
@@ -110,7 +110,7 @@ template <typename I>
 void SnapshotCopyRequest<I>::send_snap_unprotect() {
 
   SnapIdSet::iterator snap_id_it = m_dst_snap_ids.begin();
-  if (m_prev_snap_id != CEPH_NOSNAP) {
+  if (m_prev_snap_id != STONE_NOSNAP) {
     snap_id_it = m_dst_snap_ids.upper_bound(m_prev_snap_id);
   } else if (m_dst_snap_id_start > 0) {
     snap_id_it = m_dst_snap_ids.upper_bound(m_dst_snap_id_start);
@@ -178,7 +178,7 @@ void SnapshotCopyRequest<I>::send_snap_unprotect() {
 
   if (snap_id_it == m_dst_snap_ids.end()) {
     // no destination snapshots to unprotect
-    m_prev_snap_id = CEPH_NOSNAP;
+    m_prev_snap_id = STONE_NOSNAP;
     send_snap_remove();
     return;
   }
@@ -237,7 +237,7 @@ void SnapshotCopyRequest<I>::handle_snap_unprotect(int r) {
 template <typename I>
 void SnapshotCopyRequest<I>::send_snap_remove() {
   SnapIdSet::iterator snap_id_it = m_dst_snap_ids.begin();
-  if (m_prev_snap_id != CEPH_NOSNAP) {
+  if (m_prev_snap_id != STONE_NOSNAP) {
     snap_id_it = m_dst_snap_ids.upper_bound(m_prev_snap_id);
   } else if (m_dst_snap_id_start > 0) {
     snap_id_it = m_dst_snap_ids.upper_bound(m_dst_snap_id_start);
@@ -276,7 +276,7 @@ void SnapshotCopyRequest<I>::send_snap_remove() {
 
   if (snap_id_it == m_dst_snap_ids.end()) {
     // no destination snapshots to delete
-    m_prev_snap_id = CEPH_NOSNAP;
+    m_prev_snap_id = STONE_NOSNAP;
     send_snap_create();
     return;
   }
@@ -325,7 +325,7 @@ void SnapshotCopyRequest<I>::handle_snap_remove(int r) {
 template <typename I>
 void SnapshotCopyRequest<I>::send_snap_create() {
   SnapIdSet::iterator snap_id_it = m_src_snap_ids.begin();
-  if (m_prev_snap_id != CEPH_NOSNAP) {
+  if (m_prev_snap_id != STONE_NOSNAP) {
     snap_id_it = m_src_snap_ids.upper_bound(m_prev_snap_id);
   } else if (m_src_snap_id_start > 0) {
     snap_id_it = m_src_snap_ids.upper_bound(m_src_snap_id_start);
@@ -354,14 +354,14 @@ void SnapshotCopyRequest<I>::send_snap_create() {
       } else if (src_snap_id == m_src_snap_id_end) {
         // ... map it to destination HEAD since it's not a user snapshot that we
         // will create (e.g. MirrorSnapshotNamespace)
-        m_snap_seqs[src_snap_id] = CEPH_NOSNAP;
+        m_snap_seqs[src_snap_id] = STONE_NOSNAP;
       }
     }
   }
 
   if (snap_id_it == m_src_snap_ids.end()) {
     // no source snapshots to create
-    m_prev_snap_id = CEPH_NOSNAP;
+    m_prev_snap_id = STONE_NOSNAP;
     send_snap_protect();
     return;
   }
@@ -430,11 +430,11 @@ void SnapshotCopyRequest<I>::handle_snap_create(int r) {
     return;
   }
 
-  ceph_assert(m_prev_snap_id != CEPH_NOSNAP);
+  stone_assert(m_prev_snap_id != STONE_NOSNAP);
 
   auto snap_it = m_dst_image_ctx->snap_ids.find(
       {cls::rbd::UserSnapshotNamespace(), m_snap_name});
-  ceph_assert(snap_it != m_dst_image_ctx->snap_ids.end());
+  stone_assert(snap_it != m_dst_image_ctx->snap_ids.end());
   librados::snap_t dst_snap_id = snap_it->second;
 
   ldout(m_cct, 20) << "mapping source snap id " << m_prev_snap_id << " to "
@@ -447,7 +447,7 @@ void SnapshotCopyRequest<I>::handle_snap_create(int r) {
 template <typename I>
 void SnapshotCopyRequest<I>::send_snap_protect() {
   SnapIdSet::iterator snap_id_it = m_src_snap_ids.begin();
-  if (m_prev_snap_id != CEPH_NOSNAP) {
+  if (m_prev_snap_id != STONE_NOSNAP) {
     snap_id_it = m_src_snap_ids.upper_bound(m_prev_snap_id);
   } else if (m_src_snap_id_start > 0) {
     snap_id_it = m_src_snap_ids.upper_bound(m_src_snap_id_start);
@@ -476,10 +476,10 @@ void SnapshotCopyRequest<I>::send_snap_protect() {
 
     // if destination snapshot is not protected, protect it
     auto snap_seq_it = m_snap_seqs.find(src_snap_id);
-    ceph_assert(snap_seq_it != m_snap_seqs.end());
-    if (snap_seq_it->second == CEPH_NOSNAP) {
+    stone_assert(snap_seq_it != m_snap_seqs.end());
+    if (snap_seq_it->second == STONE_NOSNAP) {
       // implies src end snapshot is mapped to a non-copyable snapshot
-      ceph_assert(src_snap_id == m_src_snap_id_end);
+      stone_assert(src_snap_id == m_src_snap_id_end);
       break;
     }
 
@@ -502,7 +502,7 @@ void SnapshotCopyRequest<I>::send_snap_protect() {
 
   if (snap_id_it == m_src_snap_ids.end()) {
     // no destination snapshots to protect
-    m_prev_snap_id = CEPH_NOSNAP;
+    m_prev_snap_id = STONE_NOSNAP;
     send_set_head();
     return;
   }
@@ -550,9 +550,9 @@ void SnapshotCopyRequest<I>::handle_snap_protect(int r) {
 template <typename I>
 void SnapshotCopyRequest<I>::send_set_head() {
   auto snap_seq_it = m_snap_seqs.find(m_src_snap_id_end);
-  if (m_src_snap_id_end != CEPH_NOSNAP &&
+  if (m_src_snap_id_end != STONE_NOSNAP &&
       (snap_seq_it == m_snap_seqs.end() ||
-       snap_seq_it->second != CEPH_NOSNAP)) {
+       snap_seq_it->second != STONE_NOSNAP)) {
     // not copying to src nor dst HEAD revision
     finish(0);
     return;
@@ -705,8 +705,8 @@ Context *SnapshotCopyRequest<I>::start_lock_op(int* r) {
 }
 
 template <typename I>
-Context *SnapshotCopyRequest<I>::start_lock_op(ceph::shared_mutex &owner_lock, int* r) {
-  ceph_assert(ceph_mutex_is_locked(m_dst_image_ctx->owner_lock));
+Context *SnapshotCopyRequest<I>::start_lock_op(stone::shared_mutex &owner_lock, int* r) {
+  stone_assert(stone_mutex_is_locked(m_dst_image_ctx->owner_lock));
   if (m_dst_image_ctx->exclusive_lock == nullptr) {
     return new LambdaContext([](int r) {});
   }

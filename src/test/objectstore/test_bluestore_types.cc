@@ -5,10 +5,10 @@
 #include "os/bluestore/bluestore_types.h"
 #include "gtest/gtest.h"
 #include "include/stringify.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "os/bluestore/BlueStore.h"
 #include "os/bluestore/AvlAllocator.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "global/global_context.h"
 #include "perfglue/heap_profiler.h"
@@ -100,18 +100,18 @@ TEST(sb_info_space_efficient_map_t, size) {
   const size_t num_shared = 10000000;
   sb_info_space_efficient_map_t sb_info;
 
-  BlueStore store(g_ceph_context, "", 4096);
+  BlueStore store(g_stone_context, "", 4096);
   BlueStore::OnodeCacheShard* oc = BlueStore::OnodeCacheShard::create(
-    g_ceph_context, "lru", NULL);
+    g_stone_context, "lru", NULL);
   BlueStore::BufferCacheShard* bc = BlueStore::BufferCacheShard::create(
-    g_ceph_context, "lru", NULL);
+    g_stone_context, "lru", NULL);
 
-  auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+  auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
 
   for (size_t i = 0; i < num_shared; i++) {
     auto& sbi = sb_info.add_or_adopt(i);
     // primarily to silent the 'unused' warning
-    ceph_assert(sbi.pool_id == sb_info_t::INVALID_POOL_ID);
+    stone_assert(sbi.pool_id == sb_info_t::INVALID_POOL_ID);
   }
   dump_mempools();
 }
@@ -391,12 +391,12 @@ TEST(bluestore_blob_t, csum_bench)
        ++csum_type) {
     bluestore_blob_t b;
     b.init_csum(csum_type, 12, bl.length());
-    ceph::mono_clock::time_point start = ceph::mono_clock::now();
+    stone::mono_clock::time_point start = stone::mono_clock::now();
     for (int i = 0; i<count; ++i) {
       b.calc_csum(0, bl);
     }
-    ceph::mono_clock::time_point end = ceph::mono_clock::now();
-    auto dur = std::chrono::duration_cast<ceph::timespan>(end - start);
+    stone::mono_clock::time_point end = stone::mono_clock::now();
+    auto dur = std::chrono::duration_cast<stone::timespan>(end - start);
     double mbsec = (double)count * (double)bl.length() / 1000000.0 / (double)dur.count() * 1000000000.0;
     cout << "csum_type " << Checksummer::get_csum_type_string(csum_type)
 	 << ", " << dur << " seconds, "
@@ -407,13 +407,13 @@ TEST(bluestore_blob_t, csum_bench)
 TEST(Blob, put_ref)
 {
   {
-    BlueStore store(g_ceph_context, "", 4096);
+    BlueStore store(g_stone_context, "", 4096);
     BlueStore::OnodeCacheShard *oc = BlueStore::OnodeCacheShard::create(
-      g_ceph_context, "lru", NULL);
+      g_stone_context, "lru", NULL);
     BlueStore::BufferCacheShard *bc = BlueStore::BufferCacheShard::create(
-      g_ceph_context, "lru", NULL);
+      g_stone_context, "lru", NULL);
 
-    auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+    auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
     BlueStore::Blob b;
     b.shared_blob = new BlueStore::SharedBlob(coll.get());
     b.dirty_blob().allocated_test(bluestore_pextent_t(0x40715000, 0x2000));
@@ -439,12 +439,12 @@ TEST(Blob, put_ref)
   }
 
   unsigned mas = 4096;
-  BlueStore store(g_ceph_context, "", 8192);
+  BlueStore store(g_stone_context, "", 8192);
   BlueStore::OnodeCacheShard *oc = BlueStore::OnodeCacheShard::create(
-    g_ceph_context, "lru", NULL);
+    g_stone_context, "lru", NULL);
   BlueStore::BufferCacheShard *bc = BlueStore::BufferCacheShard::create(
-    g_ceph_context, "lru", NULL);
-  auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+    g_stone_context, "lru", NULL);
+  auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
 
   {
     BlueStore::Blob B;
@@ -874,13 +874,13 @@ TEST(Blob, put_ref)
                                      // alignment caused by min_alloc_size = 0x2000
   }
   {
-    BlueStore store(g_ceph_context, "", 0x4000);
+    BlueStore store(g_stone_context, "", 0x4000);
     BlueStore::OnodeCacheShard *oc = BlueStore::OnodeCacheShard::create(
-      g_ceph_context, "lru", NULL);
+      g_stone_context, "lru", NULL);
     BlueStore::BufferCacheShard *bc = BlueStore::BufferCacheShard::create(
-      g_ceph_context, "lru", NULL);
+      g_stone_context, "lru", NULL);
 
-    auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+    auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
     BlueStore::Blob B;
     B.shared_blob = new BlueStore::SharedBlob(coll.get());
     bluestore_blob_t& b = B.dirty_blob();
@@ -963,12 +963,12 @@ TEST(bluestore_blob_t, prune_tail)
 
 TEST(Blob, split)
 {
-  BlueStore store(g_ceph_context, "", 4096);
+  BlueStore store(g_stone_context, "", 4096);
     BlueStore::OnodeCacheShard *oc = BlueStore::OnodeCacheShard::create(
-      g_ceph_context, "lru", NULL);
+      g_stone_context, "lru", NULL);
     BlueStore::BufferCacheShard *bc = BlueStore::BufferCacheShard::create(
-      g_ceph_context, "lru", NULL);
-  auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+      g_stone_context, "lru", NULL);
+  auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
   {
     BlueStore::Blob L, R;
     L.shared_blob = new BlueStore::SharedBlob(coll.get());
@@ -1017,12 +1017,12 @@ TEST(Blob, split)
 
 TEST(Blob, legacy_decode)
 {
-  BlueStore store(g_ceph_context, "", 4096);
+  BlueStore store(g_stone_context, "", 4096);
   BlueStore::OnodeCacheShard *oc = BlueStore::OnodeCacheShard::create(
-    g_ceph_context, "lru", NULL);
+    g_stone_context, "lru", NULL);
   BlueStore::BufferCacheShard *bc = BlueStore::BufferCacheShard::create(
-    g_ceph_context, "lru", NULL);
-  auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+    g_stone_context, "lru", NULL);
+  auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
   bufferlist bl, bl2;
   {
     BlueStore::Blob B;
@@ -1097,13 +1097,13 @@ TEST(Blob, legacy_decode)
 
 TEST(ExtentMap, seek_lextent)
 {
-  BlueStore store(g_ceph_context, "", 4096);
+  BlueStore store(g_stone_context, "", 4096);
   BlueStore::OnodeCacheShard *oc = BlueStore::OnodeCacheShard::create(
-    g_ceph_context, "lru", NULL);
+    g_stone_context, "lru", NULL);
   BlueStore::BufferCacheShard *bc = BlueStore::BufferCacheShard::create(
-    g_ceph_context, "lru", NULL);
+    g_stone_context, "lru", NULL);
 
-  auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+  auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
   BlueStore::Onode onode(coll.get(), ghobject_t(), "");
   BlueStore::ExtentMap em(&onode);
   BlueStore::BlobRef br(new BlueStore::Blob);
@@ -1150,12 +1150,12 @@ TEST(ExtentMap, seek_lextent)
 
 TEST(ExtentMap, has_any_lextents)
 {
-  BlueStore store(g_ceph_context, "", 4096);
+  BlueStore store(g_stone_context, "", 4096);
   BlueStore::OnodeCacheShard *oc = BlueStore::OnodeCacheShard::create(
-    g_ceph_context, "lru", NULL);
+    g_stone_context, "lru", NULL);
   BlueStore::BufferCacheShard *bc = BlueStore::BufferCacheShard::create(
-    g_ceph_context, "lru", NULL);
-  auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+    g_stone_context, "lru", NULL);
+  auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
   BlueStore::Onode onode(coll.get(), ghobject_t(), "");
   BlueStore::ExtentMap em(&onode);
   BlueStore::BlobRef b(new BlueStore::Blob);
@@ -1208,13 +1208,13 @@ void erase_and_delete(BlueStore::ExtentMap& em, size_t v)
 
 TEST(ExtentMap, compress_extent_map)
 {
-  BlueStore store(g_ceph_context, "", 4096);
+  BlueStore store(g_stone_context, "", 4096);
   BlueStore::OnodeCacheShard *oc = BlueStore::OnodeCacheShard::create(
-    g_ceph_context, "lru", NULL);
+    g_stone_context, "lru", NULL);
   BlueStore::BufferCacheShard *bc = BlueStore::BufferCacheShard::create(
-    g_ceph_context, "lru", NULL);
+    g_stone_context, "lru", NULL);
   
-  auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+  auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
   BlueStore::Onode onode(coll.get(), ghobject_t(), "");
   BlueStore::ExtentMap em(&onode);
   BlueStore::BlobRef b1(new BlueStore::Blob);
@@ -1276,12 +1276,12 @@ void clear_and_dispose(BlueStore::old_extent_map_t& old_em)
 TEST(GarbageCollector, BasicTest)
 {
   BlueStore::OnodeCacheShard *oc = BlueStore::OnodeCacheShard::create(
-    g_ceph_context, "lru", NULL);
+    g_stone_context, "lru", NULL);
   BlueStore::BufferCacheShard *bc = BlueStore::BufferCacheShard::create(
-    g_ceph_context, "lru", NULL);
+    g_stone_context, "lru", NULL);
 
-  BlueStore store(g_ceph_context, "", 4096);
-  auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+  BlueStore store(g_stone_context, "", 4096);
+  auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
   BlueStore::Onode onode(coll.get(), ghobject_t(), "");
   BlueStore::ExtentMap em(&onode);
 
@@ -1310,7 +1310,7 @@ TEST(GarbageCollector, BasicTest)
     -> blob3<raw, len_on_disk=4096, llen=4096>
   */  
   {
-    BlueStore::GarbageCollector gc(g_ceph_context);
+    BlueStore::GarbageCollector gc(g_stone_context);
     int64_t saving;
     BlueStore::BlobRef b1(new BlueStore::Blob);
     BlueStore::BlobRef b2(new BlueStore::Blob);
@@ -1369,13 +1369,13 @@ TEST(GarbageCollector, BasicTest)
     -> blob1<compressed, len_on_disk=0x20000, llen=0x40000>
   */  
   {
-    BlueStore store(g_ceph_context, "", 0x10000);
-    auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+    BlueStore store(g_stone_context, "", 0x10000);
+    auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
     BlueStore::Onode onode(coll.get(), ghobject_t(), "");
     BlueStore::ExtentMap em(&onode);
 
     BlueStore::old_extent_map_t old_extents;
-    BlueStore::GarbageCollector gc(g_ceph_context);
+    BlueStore::GarbageCollector gc(g_stone_context);
     int64_t saving;
     BlueStore::BlobRef b1(new BlueStore::Blob);
     BlueStore::BlobRef b2(new BlueStore::Blob);
@@ -1448,7 +1448,7 @@ TEST(GarbageCollector, BasicTest)
     -> blob2<compressed, len_on_disk=0x2000, llen=0x4000>
   */  
   {
-    BlueStore::GarbageCollector gc(g_ceph_context);
+    BlueStore::GarbageCollector gc(g_stone_context);
     int64_t saving;
     BlueStore::BlobRef b1(new BlueStore::Blob);
     BlueStore::BlobRef b2(new BlueStore::Blob);
@@ -1496,13 +1496,13 @@ TEST(GarbageCollector, BasicTest)
    -> blob1<compressed, len_on_disk=0x10000, llen=0x20000>
   */  
   {
-    BlueStore store(g_ceph_context, "", 0x10000);
-    auto coll = ceph::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
+    BlueStore store(g_stone_context, "", 0x10000);
+    auto coll = stone::make_ref<BlueStore::Collection>(&store, oc, bc, coll_t());
     BlueStore::Onode onode(coll.get(), ghobject_t(), "");
     BlueStore::ExtentMap em(&onode);
 
     BlueStore::old_extent_map_t old_extents;
-    BlueStore::GarbageCollector gc(g_ceph_context);
+    BlueStore::GarbageCollector gc(g_stone_context);
     int64_t saving;
     BlueStore::BlobRef b0(new BlueStore::Blob);
     BlueStore::BlobRef b1(new BlueStore::Blob);
@@ -1759,7 +1759,7 @@ TEST(bluestore_blob_t, unused)
 }
 // This UT is primarily intended to show how repair procedure
 // causes erroneous write to INVALID_OFFSET which is reported in
-// https://tracker.ceph.com/issues/51682
+// https://tracker.stone.com/issues/51682
 // Basic map_any functionality is tested as well though.
 //
 TEST(bluestore_blob_t, wrong_map_bl_in_51682)
@@ -1875,10 +1875,10 @@ TEST(shared_blob_2hash_tracker_t, basic_test)
 int main(int argc, char **argv) {
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

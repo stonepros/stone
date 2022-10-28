@@ -7,7 +7,7 @@
 
 #include "rgw/rgw_tools.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 int RGWSI_SysObj_Core_GetObjState::get_rados_obj(const DoutPrefixProvider *dpp,
                                                  RGWSI_RADOS *rados_svc,
@@ -149,7 +149,7 @@ int RGWSI_SysObj_Core::raw_stat(const DoutPrefixProvider *dpp, const rgw_raw_obj
   if (psize)
     *psize = size;
   if (pmtime)
-    *pmtime = ceph::real_clock::from_timespec(mtime_ts);
+    *pmtime = stone::real_clock::from_timespec(mtime_ts);
 
   return 0;
 }
@@ -181,7 +181,7 @@ int RGWSI_SysObj_Core::stat(RGWSysObjectCtxBase& obj_ctx,
     } else {
       rgw_filter_attrset(astate->attrset, RGW_ATTR_PREFIX, attrs);
     }
-    if (cct->_conf->subsys.should_gather<ceph_subsys_rgw, 20>()) {
+    if (cct->_conf->subsys.should_gather<stone_subsys_rgw, 20>()) {
       map<string, bufferlist>::iterator iter;
       for (iter = attrs->begin(); iter != attrs->end(); ++iter) {
         ldpp_dout(dpp, 20) << "Read xattr: " << iter->first << dendl;

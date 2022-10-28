@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -170,7 +170,7 @@ void write(R::RADOS& r, const std::vector<std::string>& p, s::yield_context y)
     if (len == 0)
       break; // Nothin' to do.
 
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     bl.append(buffer::create_static(len, buf.get()));
     R::WriteOp op;
     op.write(curoff, std::move(bl));
@@ -204,7 +204,7 @@ void read(R::RADOS& r, const std::vector<std::string>& p, s::yield_context y)
   }
 
   std::size_t off = 0;
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   while (auto toread = std::max(len - off, io_size)) {
     R::ReadOp op;
     op.read(off, toread, &bl);

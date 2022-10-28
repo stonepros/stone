@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -22,7 +22,7 @@ extern "C" {
 #include "galois.h"
 }
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 extern "C" int jerasure_init(int count, int *words)
 {

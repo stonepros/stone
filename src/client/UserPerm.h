@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_CLIENT_USERPERM_H
-#define CEPH_CLIENT_USERPERM_H
+#ifndef STONE_CLIENT_USERPERM_H
+#define STONE_CLIENT_USERPERM_H
 
 struct UserPerm
 {

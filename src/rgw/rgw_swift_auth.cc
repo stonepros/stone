@@ -12,7 +12,7 @@
 #include "rgw_swift_auth.h"
 #include "rgw_rest.h"
 
-#include "common/ceph_crypto.h"
+#include "common/stone_crypto.h"
 #include "common/Clock.h"
 
 #include "include/random.h"
@@ -22,12 +22,12 @@
 #include "rgw_sal_rados.h"
 #include "include/str_list.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 #define DEFAULT_SWIFT_PREFIX "/swift"
 
-using namespace ceph::crypto;
+using namespace stone::crypto;
 
 
 namespace rgw {
@@ -142,7 +142,7 @@ std::string TempURLEngine::convert_from_iso8601(std::string expires) const
 bool TempURLEngine::is_expired(const std::string& expires) const
 {
   string err;
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
   const uint64_t expiration = (uint64_t)strict_strtoll(expires.c_str(),
                                                        10, &err);
   if (!err.empty()) {
@@ -184,9 +184,9 @@ class TempURLEngine::SignatureHelper
 {
 private:
   static constexpr uint32_t output_size =
-    CEPH_CRYPTO_HMACSHA1_DIGESTSIZE * 2 + 1;
+    STONE_CRYPTO_HMACSHA1_DIGESTSIZE * 2 + 1;
 
-  unsigned char dest[CEPH_CRYPTO_HMACSHA1_DIGESTSIZE]; // 20
+  unsigned char dest[STONE_CRYPTO_HMACSHA1_DIGESTSIZE]; // 20
   char dest_str[output_size];
 
 public:
@@ -197,7 +197,7 @@ public:
                    const std::string_view& path,
                    const std::string& expires) {
 
-    using ceph::crypto::HMACSHA1;
+    using stone::crypto::HMACSHA1;
     using UCHARPTR = const unsigned char*;
 
     HMACSHA1 hmac((UCHARPTR) key.c_str(), key.size());
@@ -467,27 +467,27 @@ static int build_token(const string& swift_user,
                        const utime_t& expiration,
                        bufferlist& bl)
 {
-  using ceph::encode;
+  using stone::encode;
   encode(swift_user, bl);
   encode(nonce, bl);
   encode(expiration, bl);
 
-  bufferptr p(CEPH_CRYPTO_HMACSHA1_DIGESTSIZE);
+  bufferptr p(STONE_CRYPTO_HMACSHA1_DIGESTSIZE);
 
   char buf[bl.length() * 2 + 1];
   buf_to_hex((const unsigned char *)bl.c_str(), bl.length(), buf);
   dout(20) << "build_token token=" << buf << dendl;
 
-  char k[CEPH_CRYPTO_HMACSHA1_DIGESTSIZE];
+  char k[STONE_CRYPTO_HMACSHA1_DIGESTSIZE];
   // FIPS zeroization audit 20191116: this memset is not intended to
   // wipe out a secret after use.
   memset(k, 0, sizeof(k));
   const char *s = key.c_str();
   for (int i = 0; i < (int)key.length(); i++, s++) {
-    k[i % CEPH_CRYPTO_HMACSHA1_DIGESTSIZE] |= *s;
+    k[i % STONE_CRYPTO_HMACSHA1_DIGESTSIZE] |= *s;
   }
   calc_hmac_sha1(k, sizeof(k), bl.c_str(), bl.length(), p.c_str());
-  ::ceph::crypto::zeroize_for_security(k, sizeof(k));
+  ::stone::crypto::zeroize_for_security(k, sizeof(k));
 
   bl.append(p);
 
@@ -495,12 +495,12 @@ static int build_token(const string& swift_user,
 
 }
 
-static int encode_token(CephContext *cct, string& swift_user, string& key,
+static int encode_token(StoneContext *cct, string& swift_user, string& key,
 			bufferlist& bl)
 {
-  const auto nonce = ceph::util::generate_random_number<uint64_t>();
+  const auto nonce = stone::util::generate_random_number<uint64_t>();
 
-  utime_t expiration = ceph_clock_now();
+  utime_t expiration = stone_clock_now();
   expiration += cct->_conf->rgw_swift_token_expiration;
 
   return build_token(swift_user, key, nonce, expiration, bl);
@@ -536,13 +536,13 @@ SignedTokenEngine::authenticate(const DoutPrefixProvider* dpp,
     throw -EINVAL;
   }
 
-  ceph::bufferptr p(etoken_len/2);
+  stone::bufferptr p(etoken_len/2);
   int ret = hex_to_buf(etoken.c_str(), p.c_str(), etoken_len);
   if (ret < 0) {
     throw ret;
   }
 
-  ceph::bufferlist tok_bl;
+  stone::bufferlist tok_bl;
   tok_bl.append(p);
 
   uint64_t nonce;
@@ -552,7 +552,7 @@ SignedTokenEngine::authenticate(const DoutPrefixProvider* dpp,
   try {
     auto iter = tok_bl.cbegin();
 
-    using ceph::decode;
+    using stone::decode;
     decode(swift_user, iter);
     decode(nonce, iter);
     decode(expiration, iter);
@@ -561,7 +561,7 @@ SignedTokenEngine::authenticate(const DoutPrefixProvider* dpp,
     throw -EINVAL;
   }
 
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
   if (expiration < now) {
     ldpp_dout(dpp, 0) << "NOTICE: old timed out token was used now=" << now
 	          << " token.expiration=" << expiration

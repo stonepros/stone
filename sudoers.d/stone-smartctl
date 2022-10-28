@@ -1,0 +1,4 @@
+## allow stone daemons (which run as user stone) to collect device health metrics
+
+stone ALL=NOPASSWD: /usr/sbin/smartctl -x --json=o /dev/*
+stone ALL=NOPASSWD: /usr/sbin/nvme * smart-log-add --json /dev/*

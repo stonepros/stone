@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat, Inc.
  *
@@ -24,11 +24,11 @@
 #include "include/rados/rgw_file.h"
 
 #include "gtest/gtest.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 namespace {
   librgw_t rgw = nullptr;
@@ -225,7 +225,7 @@ TEST(LibRGW, LIST_OBJECTS) {
     /* list objects via readdir, bucketwise */
     using std::get;
 
-    ldout(g_ceph_context, 0) << __func__ << " readdir on bucket "
+    ldout(g_stone_context, 0) << __func__ << " readdir on bucket "
 			     << bucket_name << dendl;
     bool eof = false;
     uint64_t offset = 0;
@@ -455,49 +455,49 @@ int main(int argc, char *argv[])
   }
 
   for (auto arg_iter = args.begin(); arg_iter != args.end();) {
-    if (ceph_argparse_witharg(args, arg_iter, &val, "--access",
+    if (stone_argparse_witharg(args, arg_iter, &val, "--access",
 			      (char*) nullptr)) {
       access_key = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--secret",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--secret",
 				     (char*) nullptr)) {
       secret_key = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--uid",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--uid",
 				     (char*) nullptr)) {
       uid = val;
-    } else if (ceph_argparse_witharg(args, arg_iter, &val, "--bn",
+    } else if (stone_argparse_witharg(args, arg_iter, &val, "--bn",
 				     (char*) nullptr)) {
       bucket_name = val;
-    } else if (ceph_argparse_flag(args, arg_iter, "--get",
+    } else if (stone_argparse_flag(args, arg_iter, "--get",
 					    (char*) nullptr)) {
       do_get = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--stat",
+    } else if (stone_argparse_flag(args, arg_iter, "--stat",
 					    (char*) nullptr)) {
       do_stat = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--put",
+    } else if (stone_argparse_flag(args, arg_iter, "--put",
 					    (char*) nullptr)) {
       do_put = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--bulk",
+    } else if (stone_argparse_flag(args, arg_iter, "--bulk",
 					    (char*) nullptr)) {
       do_bulk = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--writev",
+    } else if (stone_argparse_flag(args, arg_iter, "--writev",
 					    (char*) nullptr)) {
       do_writev = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--readv",
+    } else if (stone_argparse_flag(args, arg_iter, "--readv",
 					    (char*) nullptr)) {
       do_readv = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--verify",
+    } else if (stone_argparse_flag(args, arg_iter, "--verify",
 					    (char*) nullptr)) {
       do_verify = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--delete",
+    } else if (stone_argparse_flag(args, arg_iter, "--delete",
 					    (char*) nullptr)) {
       do_delete = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--prelist",
+    } else if (stone_argparse_flag(args, arg_iter, "--prelist",
 					    (char*) nullptr)) {
       do_pre_list = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--create",
+    } else if (stone_argparse_flag(args, arg_iter, "--create",
 					    (char*) nullptr)) {
       do_create = true;
-    } else if (ceph_argparse_flag(args, arg_iter, "--hexdump",
+    } else if (stone_argparse_flag(args, arg_iter, "--hexdump",
 					    (char*) nullptr)) {
       do_hexdump = true;
     } else {

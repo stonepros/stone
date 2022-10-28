@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_OSDC_STRIPER_TYPES_H
-#define CEPH_OSDC_STRIPER_TYPES_H
+#ifndef STONE_OSDC_STRIPER_TYPES_H
+#define STONE_OSDC_STRIPER_TYPES_H
 
 #include "include/types.h"
 #include <boost/container/small_vector.hpp>
@@ -45,4 +45,4 @@ inline std::ostream& operator<<(std::ostream& os,
 
 } // namespace striper
 
-#endif // CEPH_OSDC_STRIPER_TYPES_H
+#endif // STONE_OSDC_STRIPER_TYPES_H

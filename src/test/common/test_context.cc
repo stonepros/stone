@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -22,15 +22,15 @@
 #include "gtest/gtest.h"
 #include "include/types.h"
 #include "include/msgr.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config_proxy.h"
 #include "log/Log.h"
 
-TEST(CephContext, do_command)
+TEST(StoneContext, do_command)
 {
-  CephContext *cct = (new CephContext(CEPH_ENTITY_TYPE_CLIENT))->get();
+  StoneContext *cct = (new StoneContext(STONE_ENTITY_TYPE_CLIENT))->get();
 
-  cct->_conf->cluster = "ceph";
+  cct->_conf->cluster = "stone";
 
   string key("key");
   string value("value");
@@ -90,11 +90,11 @@ TEST(CephContext, do_command)
   cct->put();
 }
 
-TEST(CephContext, experimental_features)
+TEST(StoneContext, experimental_features)
 {
-  CephContext *cct = (new CephContext(CEPH_ENTITY_TYPE_CLIENT))->get();
+  StoneContext *cct = (new StoneContext(STONE_ENTITY_TYPE_CLIENT))->get();
 
-  cct->_conf->cluster = "ceph";
+  cct->_conf->cluster = "stone";
 
   ASSERT_FALSE(cct->check_experimental_feature_enabled("foo"));
   ASSERT_FALSE(cct->check_experimental_feature_enabled("bar"));
@@ -137,7 +137,7 @@ TEST(CephContext, experimental_features)
  *   make unittest_context &&
  *    valgrind \
  *    --max-stackframe=20000000 --tool=memcheck \
- *   ./unittest_context # --gtest_filter=CephContext.*
+ *   ./unittest_context # --gtest_filter=StoneContext.*
  * "
  * End:
  */

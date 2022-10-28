@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 
-#ifndef CEPH_OBJEXP_H
-#define CEPH_OBJEXP_H
+#ifndef STONE_OBJEXP_H
+#define STONE_OBJEXP_H
 
 #include <atomic>
 #include <string>
@@ -151,4 +151,4 @@ public:
   void start_processor();
   void stop_processor();
 };
-#endif /* CEPH_OBJEXP_H */
+#endif /* STONE_OBJEXP_H */

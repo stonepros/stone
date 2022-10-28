@@ -1,7 +1,7 @@
 
 tasks:
   - install:
-  - ceph:
+  - stone:
       config:
         global:
           osd pool default size : 3
@@ -20,6 +20,6 @@ tasks:
         - \(OSDMAP_FLAGS\)
         - replacing it with standby
         - No standby daemons available
-  - cephfs_test_runner:
+  - stonefs_test_runner:
       modules:
         - tasks.mgr.test_progress

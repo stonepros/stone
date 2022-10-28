@@ -2,14 +2,14 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "include/rados/librados.hpp"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/Finisher.h"
 #include "librados/AioCompletionImpl.h"
 
 
 constexpr int max_completions = 10'000'000;
 int completed = 0;
-auto cct = (new CephContext(CEPH_ENTITY_TYPE_CLIENT))->get();
+auto cct = (new StoneContext(STONE_ENTITY_TYPE_CLIENT))->get();
 Finisher f(cct);
 
 void completion_cb(librados::completion_t cb, void* arg) {

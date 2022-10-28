@@ -1,0 +1,17 @@
+tasks:
+- stoneadm.shell:
+    host.a:
+      - |
+        set -e
+        set -x
+        stone orch ps
+        stone orch device ls
+        DEVID=$(stone device ls | grep osd.1 | awk '{print $1}')
+        HOST=$(stone orch device ls | grep $DEVID | awk '{print $1}')
+        DEV=$(stone orch device ls | grep $DEVID | awk '{print $2}')
+        echo "host $HOST, dev $DEV, devid $DEVID"
+        stone orch osd rm 1
+        while stone orch osd rm status | grep ^1 ; do sleep 5 ; done
+        stone orch device zap $HOST $DEV --force
+        stone orch daemon add osd $HOST:$DEV
+        while ! stone osd dump | grep osd.1 | grep up ; do sleep 5 ; done

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -13,8 +13,8 @@
  *  version 2.1 of the License, or (at your option) any later version.
  * 
  */
-#ifndef __CEPH_TYPES_H
-#define __CEPH_TYPES_H
+#ifndef __STONE_TYPES_H
+#define __STONE_TYPES_H
 
 #include <include/types.h>
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "rgw_op.h"
 #include "rgw_user.h"
@@ -9,13 +9,13 @@
 #include "rgw_sal_rados.h"
 
 #include "include/str_list.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "services/svc_zone.h"
 #include "services/svc_sys_obj.h"
 #include "rgw_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 class RGWOp_User_List : public RGWRESTOp {
 

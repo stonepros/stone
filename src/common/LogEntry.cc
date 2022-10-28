@@ -14,10 +14,10 @@ using std::make_pair;
 using std::pair;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::Formatter;
 
 // ----
 // LogEntryKey
@@ -72,7 +72,7 @@ int clog_type_to_syslog_level(clog_type t)
     case CLOG_SEC:
       return LOG_CRIT;
     default:
-      ceph_abort();
+      stone_abort();
       return 0;
   }
 }
@@ -182,7 +182,7 @@ string clog_type_to_string(clog_type t)
     case CLOG_SEC:
       return "crit";
     default:
-      ceph_abort();
+      stone_abort();
       return 0;
   }
 }

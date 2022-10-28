@@ -73,7 +73,7 @@ static string _get_required_osd_release(Rados& cluster)
   string cmd = string("{\"prefix\": \"osd dump\",\"format\":\"json\"}");
   bufferlist outbl;
   int r = cluster.mon_command(cmd, inbl, &outbl, NULL);
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
   string outstr(outbl.c_str(), outbl.length());
   json_spirit::Value v;
   if (!json_spirit::read(outstr, v)) {
@@ -100,7 +100,7 @@ void manifest_set_chunk(Rados& cluster, librados::IoCtx& src_ioctx,
 {
   ObjectReadOperation op;
   op.set_chunk(src_offset, length, src_ioctx, src_oid, 0,
-      CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+      STONE_OSD_OP_FLAG_WITH_REFERENCE);
   librados::AioCompletion *completion = cluster.aio_create_completion();
   ASSERT_EQ(0, tgt_ioctx.aio_operate(tgt_oid, completion, &op,
 	    librados::OPERATION_IGNORE_CACHE, NULL));
@@ -109,8 +109,8 @@ void manifest_set_chunk(Rados& cluster, librados::IoCtx& src_ioctx,
   completion->release();
 }
 
-#include "common/ceph_crypto.h"
-using ceph::crypto::SHA1;
+#include "common/stone_crypto.h"
+using stone::crypto::SHA1;
 #include "rgw/rgw_common.h"
 
 void check_fp_oid_refcount(librados::IoCtx& ioctx, std::string foid, uint64_t count,
@@ -119,17 +119,17 @@ void check_fp_oid_refcount(librados::IoCtx& ioctx, std::string foid, uint64_t co
   bufferlist t;
   int size = foid.length();
   if (fp_algo == "sha1") {
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     SHA1 sha1_gen;
     sha1_gen.Update((const unsigned char *)foid.c_str(), size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     ioctx.getxattr(p_str, CHUNK_REFCOUNT_ATTR, t);
   } else if (fp_algo.empty()) {
     ioctx.getxattr(foid, CHUNK_REFCOUNT_ATTR, t);
   } else if (!fp_algo.empty()) {
-    ceph_assert(0 == "unrecognized fingerprint algorithm");
+    stone_assert(0 == "unrecognized fingerprint algorithm");
   }
 
   chunk_refs_t refs;
@@ -145,13 +145,13 @@ void check_fp_oid_refcount(librados::IoCtx& ioctx, std::string foid, uint64_t co
 string get_fp_oid(string oid, std::string fp_algo = NULL)
 {
   if (fp_algo == "sha1") {
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     SHA1 sha1_gen;
     int size = oid.length();
     sha1_gen.Update((const unsigned char *)oid.c_str(), size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     return string(p_str);
   } 
  
@@ -175,7 +175,7 @@ void is_intended_refcount_state(librados::IoCtx& src_ioctx,
       auto iter = t.cbegin();
       decode(refs, iter);
     } catch (buffer::error& err) {
-      ceph_assert(0);
+      stone_assert(0);
     }
     dst_refcount = refs.count();
   }
@@ -1281,7 +1281,7 @@ TEST_F(LibRadosTwoPoolsPP, EvictSnap) {
   ioctx.selfmanaged_snap_remove(my_snaps[0]);
 }
 
-// this test case reproduces http://tracker.ceph.com/issues/8629
+// this test case reproduces http://tracker.stone.com/issues/8629
 TEST_F(LibRadosTwoPoolsPP, EvictSnap2) {
   // create object
   {
@@ -1357,7 +1357,7 @@ TEST_F(LibRadosTwoPoolsPP, EvictSnap2) {
   }
 }
 
-//This test case reproduces http://tracker.ceph.com/issues/17445
+//This test case reproduces http://tracker.stone.com/issues/17445
 TEST_F(LibRadosTwoPoolsPP, ListSnap){
   // Create object
   {
@@ -1482,7 +1482,7 @@ TEST_F(LibRadosTwoPoolsPP, ListSnap){
   }
 
   // Do list-snaps
-  ioctx.snap_set_read(CEPH_SNAPDIR);
+  ioctx.snap_set_read(STONE_SNAPDIR);
   {
     snap_set_t snap_set;
     int snap_ret;
@@ -2330,8 +2330,8 @@ TEST_F(LibRadosTwoPoolsPP, FlushTryFlushRaces) {
 
 
 IoCtx *read_ioctx = 0;
-ceph::mutex test_lock = ceph::make_mutex("FlushReadRaces::lock");
-ceph::condition_variable cond;
+stone::mutex test_lock = stone::make_mutex("FlushReadRaces::lock");
+stone::condition_variable cond;
 int max_reads = 100;
 int num_reads = 0; // in progress
 
@@ -2477,17 +2477,17 @@ TEST_F(LibRadosTwoPoolsPP, HitSetRead) {
   cache_ioctx.set_namespace("");
 
   // keep reading until we see our object appear in the HitSet
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   utime_t hard_stop = start + utime_t(600, 0);
 
   while (true) {
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     ASSERT_TRUE(now < hard_stop);
 
     string name = "foo";
     uint32_t hash; 
     ASSERT_EQ(0, cache_ioctx.get_object_hash_position2(name, &hash));
-    hobject_t oid(sobject_t(name, CEPH_NOSNAP), "", hash,
+    hobject_t oid(sobject_t(name, STONE_NOSNAP), "", hash,
 		  cluster.pool_lookup(cache_pool_name.c_str()), "");
 
     bufferlist bl;
@@ -2524,7 +2524,7 @@ static int _get_pg_num(Rados& cluster, string pool_name)
     + string("\",\"var\": \"pg_num\",\"format\": \"json\"}");
   bufferlist outbl;
   int r = cluster.mon_command(cmd, inbl, &outbl, NULL);
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
   string outstr(outbl.c_str(), outbl.length());
   json_spirit::Value v;
   if (!json_spirit::read(outstr, v)) {
@@ -2552,23 +2552,23 @@ int make_hitset(Rados& cluster, librados::IoCtx& cache_ioctx, int num_pg,
   for (int i=0; i<num; ++i) {
     bufferlist bl;
     bl.append("a");
-    ceph_assert(0 == cache_ioctx.write(stringify(i), bl, 1, 0));
+    stone_assert(0 == cache_ioctx.write(stringify(i), bl, 1, 0));
   }
 
   // get HitSets
   for (int i=0; i<pg; ++i) {
     list< pair<time_t,time_t> > ls;
     AioCompletion *c = librados::Rados::aio_create_completion();
-    ceph_assert(0 == cache_ioctx.hit_set_list(i, c, &ls));
+    stone_assert(0 == cache_ioctx.hit_set_list(i, c, &ls));
     c->wait_for_complete();
     c->release();
     std::cout << "pg " << i << " ls " << ls << std::endl;
-    ceph_assert(!ls.empty());
+    stone_assert(!ls.empty());
 
     // get the latest
     c = librados::Rados::aio_create_completion();
     bufferlist bl;
-    ceph_assert(0 == cache_ioctx.hit_set_get(i, c, ls.back().first, &bl));
+    stone_assert(0 == cache_ioctx.hit_set_get(i, c, ls.back().first, &bl));
     c->wait_for_complete();
     c->release();
 
@@ -2592,7 +2592,7 @@ int make_hitset(Rados& cluster, librados::IoCtx& cache_ioctx, int num_pg,
 
 TEST_F(LibRadosTwoPoolsPP, HitSetWrite) {
   int num_pg = _get_pg_num(cluster, pool_name);
-  ceph_assert(num_pg > 0);
+  stone_assert(num_pg > 0);
 
   // make it a tier
   bufferlist inbl;
@@ -2628,7 +2628,7 @@ TEST_F(LibRadosTwoPoolsPP, HitSetWrite) {
     string n = stringify(i);
     uint32_t hash;
     ASSERT_EQ(0, cache_ioctx.get_object_hash_position2(n, &hash));
-    hobject_t oid(sobject_t(n, CEPH_NOSNAP), "", hash,
+    hobject_t oid(sobject_t(n, STONE_NOSNAP), "", hash,
 		  cluster.pool_lookup(cache_pool_name.c_str()), "");
     std::cout << "checking for " << oid << std::endl;
     bool found = false;
@@ -2676,7 +2676,7 @@ TEST_F(LibRadosTwoPoolsPP, HitSetTrim) {
   cache_ioctx.set_namespace("");
 
   // do a bunch of writes and make sure the hitsets rotate
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   utime_t hard_stop = start + utime_t(count * period * 50, 0);
 
   time_t first = 0;
@@ -2684,7 +2684,7 @@ TEST_F(LibRadosTwoPoolsPP, HitSetTrim) {
     string name = "foo";
     uint32_t hash; 
     ASSERT_EQ(0, cache_ioctx.get_object_hash_position2(name, &hash));
-    hobject_t oid(sobject_t(name, CEPH_NOSNAP), "", hash, -1, "");
+    hobject_t oid(sobject_t(name, STONE_NOSNAP), "", hash, -1, "");
 
     bufferlist bl;
     bl.append("f");
@@ -2709,7 +2709,7 @@ TEST_F(LibRadosTwoPoolsPP, HitSetTrim) {
       }
     }
 
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     ASSERT_TRUE(now < hard_stop);
 
     sleep(1);
@@ -3217,7 +3217,7 @@ TEST_F(LibRadosTwoPoolsPP, ManifestRefRead) {
   // set-redirect
   {
     ObjectWriteOperation op;
-    op.set_redirect("bar", cache_ioctx, 0, CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+    op.set_redirect("bar", cache_ioctx, 0, STONE_OSD_OP_FLAG_WITH_REFERENCE);
     librados::AioCompletion *completion = cluster.aio_create_completion();
     ASSERT_EQ(0, ioctx.aio_operate("foo", completion, &op));
     completion->wait_for_complete();
@@ -3227,7 +3227,7 @@ TEST_F(LibRadosTwoPoolsPP, ManifestRefRead) {
   // set-chunk
   {
     ObjectReadOperation op;
-    op.set_chunk(0, 2, cache_ioctx, "bar-chunk", 0, CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+    op.set_chunk(0, 2, cache_ioctx, "bar-chunk", 0, STONE_OSD_OP_FLAG_WITH_REFERENCE);
     librados::AioCompletion *completion = cluster.aio_create_completion();
     ASSERT_EQ(0, ioctx.aio_operate("foo-chunk", completion, &op,
 	      librados::OPERATION_IGNORE_CACHE, NULL));
@@ -3308,7 +3308,7 @@ TEST_F(LibRadosTwoPoolsPP, ManifestUnset) {
   // set-redirect
   {
     ObjectWriteOperation op;
-    op.set_redirect("bar", cache_ioctx, 0, CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+    op.set_redirect("bar", cache_ioctx, 0, STONE_OSD_OP_FLAG_WITH_REFERENCE);
     librados::AioCompletion *completion = cluster.aio_create_completion();
     ASSERT_EQ(0, ioctx.aio_operate("foo", completion, &op));
     completion->wait_for_complete();
@@ -3318,7 +3318,7 @@ TEST_F(LibRadosTwoPoolsPP, ManifestUnset) {
   // set-chunk
   {
     ObjectReadOperation op;
-    op.set_chunk(0, 2, cache_ioctx, "bar-chunk", 0, CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+    op.set_chunk(0, 2, cache_ioctx, "bar-chunk", 0, STONE_OSD_OP_FLAG_WITH_REFERENCE);
     librados::AioCompletion *completion = cluster.aio_create_completion();
     ASSERT_EQ(0, ioctx.aio_operate("foo-chunk", completion, &op,
 	      librados::OPERATION_IGNORE_CACHE, NULL));
@@ -3407,8 +3407,8 @@ TEST_F(LibRadosTwoPoolsPP, ManifestUnset) {
   cluster.wait_for_latest_osdmap();
 }
 
-#include "common/ceph_crypto.h"
-using ceph::crypto::SHA1;
+#include "common/stone_crypto.h"
+using stone::crypto::SHA1;
 #include "rgw/rgw_common.h"
 TEST_F(LibRadosTwoPoolsPP, ManifestDedupRefRead) {
   // skip test if not yet nautilus
@@ -3550,11 +3550,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("er");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"er", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     cache_ioctx.getxattr(p_str, CHUNK_REFCOUNT_ATTR, t);
     chunk_refs_t refs;
     try {
@@ -3616,11 +3616,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("er");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"er", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     cache_ioctx.getxattr(p_str, CHUNK_REFCOUNT_ATTR, t);
     chunk_refs_t refs;
     try {
@@ -3668,11 +3668,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("hi");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"hi", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     is_intended_refcount_state(ioctx, "foo", cache_ioctx, p_str, 1);
   }
 
@@ -3681,11 +3681,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("er");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"er", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     cache_ioctx.getxattr(p_str, CHUNK_REFCOUNT_ATTR, t);
     chunk_refs_t refs;
     try {
@@ -3713,11 +3713,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("hi");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"hi", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     is_intended_refcount_state(ioctx, "foo", cache_ioctx, p_str, 1);
   }
 
@@ -3736,11 +3736,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("bb");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"bb", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     is_intended_refcount_state(ioctx, "foo", cache_ioctx, p_str, 1);
   }
 
@@ -3758,11 +3758,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("bb");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"bb", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     is_intended_refcount_state(ioctx, "foo", cache_ioctx, p_str, 1);
   }
 
@@ -3771,11 +3771,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("hi");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"hi", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     is_intended_refcount_state(ioctx, "foo", cache_ioctx, p_str, 1);
   }
 }
@@ -3921,11 +3921,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount2) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("ab");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"ab", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     cache_ioctx.getxattr(p_str, CHUNK_REFCOUNT_ATTR, t);
     chunk_refs_t refs;
     try {
@@ -3942,11 +3942,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount2) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("cd");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"cd", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     cache_ioctx.getxattr(p_str, CHUNK_REFCOUNT_ATTR, t);
     chunk_refs_t refs;
     try {
@@ -3963,11 +3963,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount2) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("BB");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"BB", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     cache_ioctx.getxattr(p_str, CHUNK_REFCOUNT_ATTR, t);
     chunk_refs_t refs;
     try {
@@ -3994,11 +3994,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestSnapRefcount2) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("BB");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"BB", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     is_intended_refcount_state(ioctx, "foo", cache_ioctx, p_str, 0);
   }
 }
@@ -4324,11 +4324,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestCheckRefcountWhenModification) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("ai");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"ai", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     is_intended_refcount_state(ioctx, "foo", cache_ioctx, p_str, 0);
   }
 
@@ -4377,11 +4377,11 @@ TEST_F(LibRadosTwoPoolsPP, ManifestCheckRefcountWhenModification) {
     bufferlist t;
     SHA1 sha1_gen;
     int size = strlen("Er");
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1];
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1];
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     sha1_gen.Update((const unsigned char *)"Er", size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     is_intended_refcount_state(ioctx, "foo", cache_ioctx, p_str, 0);
   }
 }
@@ -4801,7 +4801,7 @@ TEST_F(LibRadosTwoPoolsPP, DedupFlushRead) {
   {
     ObjectReadOperation op;
     op.set_chunk(0, 2, ioctx, "bar-chunk", 0,
-		CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+		STONE_OSD_OP_FLAG_WITH_REFERENCE);
     librados::AioCompletion *completion = cluster.aio_create_completion();
     ASSERT_EQ(0, cache_ioctx.aio_operate("foo-chunk", completion, &op,
 	      librados::OPERATION_IGNORE_CACHE, NULL));
@@ -4829,13 +4829,13 @@ TEST_F(LibRadosTwoPoolsPP, DedupFlushRead) {
   chunk.substr_of(gbl, chunks[1].first, chunks[1].second);
   string tgt_oid;
   {
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     SHA1 sha1_gen;
     int size = chunk.length();
     sha1_gen.Update((const unsigned char *)chunk.c_str(), size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     tgt_oid = string(p_str);
   }
 
@@ -4877,13 +4877,13 @@ TEST_F(LibRadosTwoPoolsPP, DedupFlushRead) {
   bufferlist chunk_512;
   chunk_512.substr_of(gbl, chunks[3].first, chunks[3].second);
   {
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     SHA1 sha1_gen;
     int size = chunk_512.length();
     sha1_gen.Update((const unsigned char *)chunk_512.c_str(), size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     tgt_oid = string(p_str);
   }
 
@@ -4925,13 +4925,13 @@ TEST_F(LibRadosTwoPoolsPP, DedupFlushRead) {
   bufferlist chunk_16384;
   chunk_16384.substr_of(gbl, chunks[0].first, chunks[0].second);
   {
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     SHA1 sha1_gen;
     int size = chunk_16384.length();
     sha1_gen.Update((const unsigned char *)chunk_16384.c_str(), size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     tgt_oid = string(p_str);
   }
   // read and verify the chunked object
@@ -4967,7 +4967,7 @@ TEST_F(LibRadosTwoPoolsPP, DedupFlushRead) {
   {
     ObjectReadOperation op;
     op.set_chunk(0, 2, ioctx, "bar-chunk", 0,
-		CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+		STONE_OSD_OP_FLAG_WITH_REFERENCE);
     librados::AioCompletion *completion = cluster.aio_create_completion();
     ASSERT_EQ(0, cache_ioctx.aio_operate("foo-chunk", completion, &op,
 	      librados::OPERATION_IGNORE_CACHE, NULL));
@@ -4994,13 +4994,13 @@ TEST_F(LibRadosTwoPoolsPP, DedupFlushRead) {
   bufferlist small_chunk;
   small_chunk.substr_of(gbl, chunks[1].first, chunks[1].second);
   {
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     SHA1 sha1_gen;
     int size = small_chunk.length();
     sha1_gen.Update((const unsigned char *)small_chunk.c_str(), size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     tgt_oid = string(p_str);
   }
   // read and verify the chunked object
@@ -5163,13 +5163,13 @@ TEST_F(LibRadosTwoPoolsPP, ManifestFlushSnap) {
   chunk.substr_of(gbl, chunks[1].first, chunks[1].second);
   string tgt_oid;
   {
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     SHA1 sha1_gen;
     int size = chunk.length();
     sha1_gen.Update((const unsigned char *)chunk.c_str(), size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     tgt_oid = string(p_str);
   }
   // read and verify the chunked object
@@ -5239,7 +5239,7 @@ TEST_F(LibRadosTwoPoolsPP, ManifestFlushDupCount) {
   {
     ObjectReadOperation op;
     op.set_chunk(0, 2, ioctx, "bar", 0,
-		CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+		STONE_OSD_OP_FLAG_WITH_REFERENCE);
     librados::AioCompletion *completion = cluster.aio_create_completion();
     ASSERT_EQ(0, cache_ioctx.aio_operate("foo", completion, &op,
 	      librados::OPERATION_IGNORE_CACHE, NULL));
@@ -5327,14 +5327,14 @@ TEST_F(LibRadosTwoPoolsPP, ManifestFlushDupCount) {
   string tgt_oid;
   // check chunk's refcount
   {
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     bufferlist t;
     SHA1 sha1_gen;
     int size = chunk.length();
     sha1_gen.Update((const unsigned char *)chunk.c_str(), size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     tgt_oid = string(p_str);
     ioctx.getxattr(p_str, CHUNK_REFCOUNT_ATTR, t);
     chunk_refs_t refs;
@@ -5351,14 +5351,14 @@ TEST_F(LibRadosTwoPoolsPP, ManifestFlushDupCount) {
   chunk2.substr_of(gbl, chunks[0].first, chunks[0].second);
   // check chunk's refcount
   {
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     bufferlist t;
     SHA1 sha1_gen;
     int size = chunk2.length();
     sha1_gen.Update((const unsigned char *)chunk2.c_str(), size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     tgt_oid = string(p_str);
     ioctx.getxattr(p_str, CHUNK_REFCOUNT_ATTR, t);
     chunk_refs_t refs;
@@ -5399,14 +5399,14 @@ TEST_F(LibRadosTwoPoolsPP, ManifestFlushDupCount) {
   chunk3.substr_of(gbl, chunks[0].first, chunks[0].second);
   // check chunk's refcount
   {
-    unsigned char fingerprint[CEPH_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
-    char p_str[CEPH_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
+    unsigned char fingerprint[STONE_CRYPTO_SHA1_DIGESTSIZE + 1] = {0};
+    char p_str[STONE_CRYPTO_SHA1_DIGESTSIZE*2+1] = {0};
     bufferlist t;
     SHA1 sha1_gen;
     int size = chunk2.length();
     sha1_gen.Update((const unsigned char *)chunk2.c_str(), size);
     sha1_gen.Final(fingerprint);
-    buf_to_hex(fingerprint, CEPH_CRYPTO_SHA1_DIGESTSIZE, p_str);
+    buf_to_hex(fingerprint, STONE_CRYPTO_SHA1_DIGESTSIZE, p_str);
     is_intended_refcount_state(cache_ioctx, "foo", ioctx, p_str, 0);
   }
 }
@@ -5458,7 +5458,7 @@ TEST_F(LibRadosTwoPoolsPP, TierFlushDuringFlush) {
   {
     ObjectReadOperation op;
     op.set_chunk(0, 2, ioctx, "bar", 0,
-		CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+		STONE_OSD_OP_FLAG_WITH_REFERENCE);
     librados::AioCompletion *completion = cluster.aio_create_completion();
     ASSERT_EQ(0, cache_ioctx.aio_operate("foo", completion, &op,
 	      librados::OPERATION_IGNORE_CACHE, NULL));
@@ -6832,7 +6832,7 @@ TEST_F(LibRadosTwoPoolsECPP, FailedFlush) {
     if( !completed ) {
       cache_ioctx.aio_cancel(completion); 
       std::cerr << "Most probably test case will hang here, please reset manually" << std::endl;
-      ASSERT_TRUE(completed); //in fact we are locked forever at test case shutdown unless fix for http://tracker.ceph.com/issues/14511 is applied. Seems there is no workaround for that
+      ASSERT_TRUE(completed); //in fact we are locked forever at test case shutdown unless fix for http://tracker.stone.com/issues/14511 is applied. Seems there is no workaround for that
     }
     completion->release();
   }
@@ -7780,17 +7780,17 @@ TEST_F(LibRadosTwoPoolsECPP, HitSetRead) {
   cache_ioctx.set_namespace("");
 
   // keep reading until we see our object appear in the HitSet
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   utime_t hard_stop = start + utime_t(600, 0);
 
   while (true) {
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     ASSERT_TRUE(now < hard_stop);
 
     string name = "foo";
     uint32_t hash;
     ASSERT_EQ(0, cache_ioctx.get_object_hash_position2(name, &hash));
-    hobject_t oid(sobject_t(name, CEPH_NOSNAP), "", hash,
+    hobject_t oid(sobject_t(name, STONE_NOSNAP), "", hash,
 		  cluster.pool_lookup(cache_pool_name.c_str()), "");
 
     bufferlist bl;
@@ -7823,7 +7823,7 @@ TEST_F(LibRadosTwoPoolsECPP, HitSetRead) {
 #if 0
 TEST_F(LibRadosTierECPP, HitSetWrite) {
   int num_pg = _get_pg_num(cluster, pool_name);
-  ceph_assert(num_pg > 0);
+  stone_assert(num_pg > 0);
 
   // enable hitset tracking for this pool
   bufferlist inbl;
@@ -7880,7 +7880,7 @@ TEST_F(LibRadosTierECPP, HitSetWrite) {
   for (int i=0; i<1000; ++i) {
     string n = stringify(i);
     uint32_t hash = ioctx.get_object_hash_position(n);
-    hobject_t oid(sobject_t(n, CEPH_NOSNAP), "", hash,
+    hobject_t oid(sobject_t(n, STONE_NOSNAP), "", hash,
 		  cluster.pool_lookup(pool_name.c_str()), "");
     std::cout << "checking for " << oid << std::endl;
     bool found = false;
@@ -7923,7 +7923,7 @@ TEST_F(LibRadosTwoPoolsECPP, HitSetTrim) {
   cache_ioctx.set_namespace("");
 
   // do a bunch of writes and make sure the hitsets rotate
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   utime_t hard_stop = start + utime_t(count * period * 50, 0);
 
   time_t first = 0;
@@ -7935,7 +7935,7 @@ TEST_F(LibRadosTwoPoolsECPP, HitSetTrim) {
     string name = "foo";
     uint32_t hash;
     ASSERT_EQ(0, cache_ioctx.get_object_hash_position2(name, &hash));
-    hobject_t oid(sobject_t(name, CEPH_NOSNAP), "", hash, -1, "");
+    hobject_t oid(sobject_t(name, STONE_NOSNAP), "", hash, -1, "");
 
     bufferlist bl;
     bl.append(buf, bsize);
@@ -7960,7 +7960,7 @@ TEST_F(LibRadosTwoPoolsECPP, HitSetTrim) {
       }
     }
 
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     ASSERT_TRUE(now < hard_stop);
 
     sleep(1);
@@ -8537,7 +8537,7 @@ TEST_F(LibRadosTwoPoolsPP, PropagateBaseTierError) {
   encode(static_cast<uint32_t>(1U), test_omap_bl);
 
   ObjectWriteOperation op2;
-  op2.omap_cmp({{"somekey", {test_omap_bl, CEPH_OSD_CMPXATTR_OP_EQ}}}, nullptr);
+  op2.omap_cmp({{"somekey", {test_omap_bl, STONE_OSD_CMPXATTR_OP_EQ}}}, nullptr);
   op2.omap_set({{"somekey", test_omap_bl}});
 
   ASSERT_EQ(-ECANCELED, ioctx.operate("propagate-base-tier-error", &op2));

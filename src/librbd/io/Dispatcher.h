@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IO_DISPATCHER_H
-#define CEPH_LIBRBD_IO_DISPATCHER_H
+#ifndef STONE_LIBRBD_IO_DISPATCHER_H
+#define STONE_LIBRBD_IO_DISPATCHER_H
 
 #include "include/int_types.h"
 #include "include/Context.h"
@@ -249,4 +249,4 @@ private:
 #undef dout_prefix
 #define dout_prefix *_dout
 
-#endif // CEPH_LIBRBD_IO_DISPATCHER_H
+#endif // STONE_LIBRBD_IO_DISPATCHER_H

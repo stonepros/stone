@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat
  *
@@ -31,7 +31,7 @@ ConnectionReport *ConnectionTracker::reports(int p)
 {
   auto i = peer_reports.find(p);
   if (i == peer_reports.end()) {
-    ceph_assert(p != rank);
+    stone_assert(p != rank);
     auto[j,k] = peer_reports.insert(std::pair<int,ConnectionReport>(p,ConnectionReport()));
     i = j;
   }
@@ -158,13 +158,13 @@ void ConnectionTracker::notify_rank_removed(int rank_removed)
   auto ci = my_reports.current.upper_bound(rank_removed);
   auto hi = my_reports.history.upper_bound(rank_removed);
   while (ci != my_reports.current.end()) {
-    ceph_assert(ci->first == hi->first);
+    stone_assert(ci->first == hi->first);
     my_reports.current[ci->first - 1] = ci->second;
     my_reports.history[hi->first - 1] = hi->second;
     my_reports.current.erase(ci++);
     my_reports.history.erase(hi++);
   }
-  ceph_assert((my_reports.current.size() == starting_size) ||
+  stone_assert((my_reports.current.size() == starting_size) ||
 	      (my_reports.current.size() + 1 == starting_size));
 
   // now move ranks down one in peer_reports
@@ -174,7 +174,7 @@ void ConnectionTracker::notify_rank_removed(int rank_removed)
     peer_reports[pi->first - 1] = pi->second;
     peer_reports.erase(pi++);
   }
-  ceph_assert((peer_reports.size() == starting_size) ||
+  stone_assert((peer_reports.size() == starting_size) ||
 	      (peer_reports.size() + 1 == starting_size));
 
   if (rank_removed < rank) {
@@ -217,7 +217,7 @@ const bufferlist& ConnectionTracker::get_encoded_bl()
   return encoding;
 }
 
-void ConnectionReport::dump(ceph::Formatter *f) const
+void ConnectionReport::dump(stone::Formatter *f) const
 {
   f->dump_int("rank", rank);
   f->dump_int("epoch", epoch);
@@ -244,7 +244,7 @@ void ConnectionReport::generate_test_instances(std::list<ConnectionReport*>& o)
   o.back()->history[0] = .4;
 }
 
-void ConnectionTracker::dump(ceph::Formatter *f) const
+void ConnectionTracker::dump(stone::Formatter *f) const
 {
   f->dump_int("rank", rank);
   f->dump_int("epoch", epoch);

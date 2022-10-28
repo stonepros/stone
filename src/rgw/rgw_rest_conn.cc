@@ -8,9 +8,9 @@
 
 #include "services/svc_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
-RGWRESTConn::RGWRESTConn(CephContext *_cct, RGWSI_Zone *zone_svc,
+RGWRESTConn::RGWRESTConn(StoneContext *_cct, RGWSI_Zone *zone_svc,
                          const string& _remote_id,
                          const list<string>& remote_endpoints,
                          HostStyle _host_style)
@@ -24,7 +24,7 @@ RGWRESTConn::RGWRESTConn(CephContext *_cct, RGWSI_Zone *zone_svc,
   }
 }
 
-RGWRESTConn::RGWRESTConn(CephContext *_cct, RGWSI_Zone *zone_svc,
+RGWRESTConn::RGWRESTConn(StoneContext *_cct, RGWSI_Zone *zone_svc,
                          const string& _remote_id,
                          const list<string>& remote_endpoints,
                          RGWAccessKey _cred,

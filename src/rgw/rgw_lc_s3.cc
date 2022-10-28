@@ -12,15 +12,15 @@
 #include "rgw_lc_s3.h"
 
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 static bool check_date(const string& _date)
 {
-  boost::optional<ceph::real_time> date = ceph::from_iso_8601(_date);
+  boost::optional<stone::real_time> date = stone::from_iso_8601(_date);
   if (boost::none == date) {
     return false;
   }
-  struct timespec time = ceph::real_clock::to_timespec(*date);
+  struct timespec time = stone::real_clock::to_timespec(*date);
   if (time.tv_sec % (24*60*60) || time.tv_nsec) {
     return false;
   }

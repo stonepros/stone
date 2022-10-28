@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
  *
@@ -13,7 +13,7 @@
  *
  */
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/strtol.h"
 #include "rgw_rest.h"
 #include "rgw_op.h"
@@ -31,11 +31,11 @@
 #include "services/svc_bilog_rados.h"
 
 #include "common/errno.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 #define LOG_CLASS_LIST_MAX_ENTRIES (1000)
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 void RGWOp_MDLog_List::execute(optional_yield y) {
   string   period = s->info.args.get("period");
@@ -348,7 +348,7 @@ void RGWOp_MDLog_Notify::execute(optional_yield y) {
     return;
   }
 
-  if (store->ctx()->_conf->subsys.should_gather<ceph_subsys_rgw, 20>()) {
+  if (store->ctx()->_conf->subsys.should_gather<stone_subsys_rgw, 20>()) {
     for (set<int>::iterator iter = updated_shards.begin(); iter != updated_shards.end(); ++iter) {
       ldpp_dout(this, 20) << __func__ << "(): updated shard=" << *iter << dendl;
     }
@@ -701,7 +701,7 @@ void RGWOp_DATALog_Notify::execute(optional_yield y) {
     return;
   }
 
-  if (store->ctx()->_conf->subsys.should_gather<ceph_subsys_rgw, 20>()) {
+  if (store->ctx()->_conf->subsys.should_gather<stone_subsys_rgw, 20>()) {
     for (map<int, set<string> >::iterator iter = updated_shards.begin(); iter != updated_shards.end(); ++iter) {
       ldpp_dout(this, 20) << __func__ << "(): updated shard=" << iter->first << dendl;
       set<string>& keys = iter->second;

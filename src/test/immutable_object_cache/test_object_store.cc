@@ -24,20 +24,20 @@ namespace fs = std::experimental::filesystem;
 
 #include "tools/immutable_object_cache/ObjectCacheStore.h"
 
-using namespace ceph::immutable_obj_cache;
+using namespace stone::immutable_obj_cache;
 
-std::string test_cache_path("/tmp/test_ceph_immutable_shared_cache");
+std::string test_cache_path("/tmp/test_stone_immutable_shared_cache");
 
 class TestObjectStore : public ::testing::Test {
 public:
   ObjectCacheStore* m_object_cache_store;
   librados::Rados* m_test_rados;
-  CephContext* m_ceph_context;
+  StoneContext* m_stone_context;
   librados::IoCtx m_local_io_ctx;
   std::string m_temp_pool_name;
   std::string m_temp_volume_name;
 
-  TestObjectStore(): m_object_cache_store(nullptr), m_test_rados(nullptr), m_ceph_context(nullptr){}
+  TestObjectStore(): m_object_cache_store(nullptr), m_test_rados(nullptr), m_stone_context(nullptr){}
 
   ~TestObjectStore(){}
 
@@ -58,8 +58,8 @@ public:
     ASSERT_EQ(0, m_test_rados->pool_create(m_temp_pool_name.c_str()));
     ASSERT_EQ(0, m_test_rados->ioctx_create(m_temp_pool_name.c_str(), m_local_io_ctx));
     m_temp_volume_name = "test_volume";
-    m_ceph_context = reinterpret_cast<CephContext*>(m_test_rados->cct());
-    m_object_cache_store = new ObjectCacheStore(m_ceph_context);
+    m_stone_context = reinterpret_cast<StoneContext*>(m_test_rados->cct());
+    m_object_cache_store = new ObjectCacheStore(m_stone_context);
   }
 
   void init_object_cache_store(std::string pool_name, std::string vol_name,

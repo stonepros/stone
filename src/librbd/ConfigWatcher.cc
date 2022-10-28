@@ -13,7 +13,7 @@
 #include <vector>
 #include <boost/algorithm/string/predicate.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::ConfigWatcher: " \
                            << __func__ << ": "
@@ -27,7 +27,7 @@ struct ConfigWatcher<I>::Observer : public md_config_obs_t {
   std::deque<std::string> m_config_key_strs;
   mutable std::vector<const char*> m_config_keys;
 
-  Observer(CephContext* cct, ConfigWatcher<I>* config_watcher)
+  Observer(StoneContext* cct, ConfigWatcher<I>* config_watcher)
     : m_config_watcher(config_watcher) {
     const std::string rbd_key_prefix("rbd_");
     auto& schema = cct->_conf.get_schema();
@@ -48,7 +48,7 @@ struct ConfigWatcher<I>::Observer : public md_config_obs_t {
   }
 
   const char** get_tracked_conf_keys() const override {
-    ceph_assert(!m_config_keys.empty());
+    stone_assert(!m_config_keys.empty());
     return &m_config_keys[0];
   }
 
@@ -65,7 +65,7 @@ ConfigWatcher<I>::ConfigWatcher(I& image_ctx)
 
 template <typename I>
 ConfigWatcher<I>::~ConfigWatcher() {
-  ceph_assert(m_observer == nullptr);
+  stone_assert(m_observer == nullptr);
 }
 
 template <typename I>
@@ -82,7 +82,7 @@ void ConfigWatcher<I>::shut_down() {
   auto cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
-  ceph_assert(m_observer != nullptr);
+  stone_assert(m_observer != nullptr);
   cct->_conf.remove_observer(m_observer);
 
   delete m_observer;

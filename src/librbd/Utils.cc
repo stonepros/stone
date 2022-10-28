@@ -19,7 +19,7 @@
 #include <bitset>
 #include <random>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::util::" << __func__ << ": "
 
@@ -79,7 +79,7 @@ std::string generate_image_id(librados::IoCtx &ioctx) {
   return id;
 }
 
-uint64_t get_rbd_default_features(CephContext* cct)
+uint64_t get_rbd_default_features(StoneContext* cct)
 {
   auto value = cct->_conf.get_val<std::string>("rbd_default_features");
   return librbd::rbd_features_from_string(value, nullptr);
@@ -133,7 +133,7 @@ int create_ioctx(librados::IoCtx& src_io_ctx, const std::string& pool_desc,
                  int64_t pool_id,
                  const std::optional<std::string>& pool_namespace,
                  librados::IoCtx* dst_io_ctx) {
-  auto cct = (CephContext *)src_io_ctx.cct();
+  auto cct = (StoneContext *)src_io_ctx.cct();
 
   librados::Rados rados(src_io_ctx);
   int r = rados.ioctx_create2(pool_id, *dst_io_ctx);
@@ -155,7 +155,7 @@ int create_ioctx(librados::IoCtx& src_io_ctx, const std::string& pool_desc,
   return 0;
 }
 
-int snap_create_flags_api_to_internal(CephContext *cct, uint32_t api_flags,
+int snap_create_flags_api_to_internal(StoneContext *cct, uint32_t api_flags,
                                       uint64_t *internal_flags) {
   *internal_flags = 0;
 
@@ -187,7 +187,7 @@ uint32_t get_default_snap_create_flags(ImageCtx *ictx) {
   } else if (mode == "skip") {
     return RBD_SNAP_CREATE_SKIP_QUIESCE;
   } else {
-    ceph_abort_msg("invalid rbd_default_snapshot_quiesce_mode");
+    stone_abort_msg("invalid rbd_default_snapshot_quiesce_mode");
   }
 }
 
@@ -216,7 +216,7 @@ bool is_config_key_uri(const std::string& uri) {
 
 int get_config_key(librados::Rados& rados, const std::string& uri,
                    std::string* value) {
-  auto cct = reinterpret_cast<CephContext*>(rados.cct());
+  auto cct = reinterpret_cast<StoneContext*>(rados.cct());
 
   if (!is_config_key_uri(uri)) {
     return -EINVAL;

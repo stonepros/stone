@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -21,7 +21,7 @@
 
 using namespace std;
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
 #include "common/Cycles.h"
 #include "global/global_init.h"
@@ -153,7 +153,7 @@ class PerfCase {
 
   ghobject_t create_object() {
     bufferlist bl = generate_random(100, 1);
-    return ghobject_t(hobject_t(string("obj_")+string(bl.c_str()), string(), rand() & 2 ? CEPH_NOSNAP : rand(), rand() & 0xFF, 0, ""));
+    return ghobject_t(hobject_t(string("obj_")+string(bl.c_str()), string(), rand() & 2 ? STONE_NOSNAP : rand(), rand() & 0xFF, 0, ""));
   }
 
 
@@ -244,11 +244,11 @@ int main(int argc, char **argv)
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.apply_changes(nullptr);
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.apply_changes(nullptr);
   Cycles::init();
 
   cerr << "args: " << args << std::endl;

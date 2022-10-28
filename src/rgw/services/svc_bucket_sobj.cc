@@ -15,7 +15,7 @@
 #include "rgw/rgw_tools.h"
 #include "rgw/rgw_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #define RGW_BUCKET_INSTANCE_MD_PREFIX ".bucket.meta."
 
@@ -136,7 +136,7 @@ public:
   }
 };
 
-RGWSI_Bucket_SObj::RGWSI_Bucket_SObj(CephContext *cct): RGWSI_Bucket(cct) {
+RGWSI_Bucket_SObj::RGWSI_Bucket_SObj(StoneContext *cct): RGWSI_Bucket(cct) {
 }
 
 RGWSI_Bucket_SObj::~RGWSI_Bucket_SObj() {

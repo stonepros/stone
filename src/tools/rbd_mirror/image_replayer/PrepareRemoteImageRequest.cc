@@ -19,8 +19,8 @@
 #include "tools/rbd_mirror/image_replayer/journal/StateBuilder.h"
 #include "tools/rbd_mirror/image_replayer/snapshot/StateBuilder.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::" \
                            << "PrepareRemoteImageRequest: " << this << " " \
@@ -147,7 +147,7 @@ template <typename I>
 void PrepareRemoteImageRequest<I>::get_client() {
   dout(10) << dendl;
 
-  auto cct = static_cast<CephContext *>(m_local_io_ctx.cct());
+  auto cct = static_cast<StoneContext *>(m_local_io_ctx.cct());
   ::journal::Settings journal_settings;
   journal_settings.commit_interval = cct->_conf.get_val<double>(
     "rbd_mirror_journal_commit_age");
@@ -156,7 +156,7 @@ void PrepareRemoteImageRequest<I>::get_client() {
   ContextWQ* context_wq;
   librbd::Journal<>::get_work_queue(cct, &context_wq);
 
-  ceph_assert(m_remote_journaler == nullptr);
+  stone_assert(m_remote_journaler == nullptr);
   m_remote_journaler = new Journaler(context_wq, m_threads->timer,
                                      &m_threads->timer_lock, m_remote_io_ctx,
                                      m_remote_image_id, m_local_mirror_uuid,
@@ -239,7 +239,7 @@ void PrepareRemoteImageRequest<I>::finalize_journal_state_builder(
     // already verified that it's a matching builder in
     // 'handle_get_mirror_info'
     state_builder = dynamic_cast<journal::StateBuilder<I>*>(*m_state_builder);
-    ceph_assert(state_builder != nullptr);
+    stone_assert(state_builder != nullptr);
   } else {
     state_builder = journal::StateBuilder<I>::create(m_global_image_id);
     *m_state_builder = state_builder;
@@ -258,7 +258,7 @@ void PrepareRemoteImageRequest<I>::finalize_snapshot_state_builder() {
   snapshot::StateBuilder<I>* state_builder = nullptr;
   if (*m_state_builder != nullptr) {
     state_builder = dynamic_cast<snapshot::StateBuilder<I>*>(*m_state_builder);
-    ceph_assert(state_builder != nullptr);
+    stone_assert(state_builder != nullptr);
   } else {
     state_builder = snapshot::StateBuilder<I>::create(m_global_image_id);
     *m_state_builder = state_builder;

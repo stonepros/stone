@@ -16,7 +16,7 @@
 #include "include/linux_fiemap.h"
 #include "include/color.h"
 #include "include/buffer.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include <iostream>
 #include <fstream>
@@ -29,7 +29,7 @@
 #include "ZFSFileStoreBackend.h"
 
 #define dout_context cct()
-#define dout_subsys ceph_subsys_filestore
+#define dout_subsys stone_subsys_filestore
 #undef dout_prefix
 #define dout_prefix *_dout << "zfsfilestorebackend(" << get_basedir_path() << ") "
 
@@ -150,7 +150,7 @@ static int list_checkpoints_callback(ZFS::Handle *zh, void *data)
   list<string> *ls = static_cast<list<string> *>(data);
   string str = ZFS::get_name(zh);
   size_t pos = str.find('@');
-  ceph_assert(pos != string::npos && pos + 1 != str.length());
+  stone_assert(pos != string::npos && pos + 1 != str.length());
   ls->push_back(str.substr(pos + 1));
   return 0;
 }

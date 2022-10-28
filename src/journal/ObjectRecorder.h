@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_JOURNAL_OBJECT_RECORDER_H
-#define CEPH_JOURNAL_OBJECT_RECORDER_H
+#ifndef STONE_JOURNAL_OBJECT_RECORDER_H
+#define STONE_JOURNAL_OBJECT_RECORDER_H
 
 #include "include/utime.h"
 #include "include/Context.h"
@@ -56,7 +56,7 @@ public:
   }
   bool close();
 
-  inline CephContext *cct() const {
+  inline StoneeContext *cct() const {
     return m_cct;
   }
 
@@ -97,7 +97,7 @@ private:
   librados::IoCtx m_ioctx;
   std::string m_oid;
   uint64_t m_object_number;
-  CephContext *m_cct = nullptr;
+  StoneeContext *m_cct = nullptr;
 
   ContextWQ *m_op_work_queue;
 
@@ -157,4 +157,4 @@ private:
 
 } // namespace journal
 
-#endif // CEPH_JOURNAL_OBJECT_RECORDER_H
+#endif // STONE_JOURNAL_OBJECT_RECORDER_H

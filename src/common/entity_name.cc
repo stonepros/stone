@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -13,7 +13,7 @@
  */
 
 #include "common/entity_name.h"
-#include "common/ceph_strings.h"
+#include "common/stone_strings.h"
 
 #include <sstream>
 
@@ -21,12 +21,12 @@ using std::string;
 
 
 const std::array<EntityName::str_to_entity_type_t, 6> EntityName::STR_TO_ENTITY_TYPE = {{
-  { CEPH_ENTITY_TYPE_AUTH, "auth" },
-  { CEPH_ENTITY_TYPE_MON, "mon" },
-  { CEPH_ENTITY_TYPE_OSD, "osd" },
-  { CEPH_ENTITY_TYPE_MDS, "mds" },
-  { CEPH_ENTITY_TYPE_MGR, "mgr" },
-  { CEPH_ENTITY_TYPE_CLIENT, "client" },
+  { STONE_ENTITY_TYPE_AUTH, "auth" },
+  { STONE_ENTITY_TYPE_MON, "mon" },
+  { STONE_ENTITY_TYPE_OSD, "osd" },
+  { STONE_ENTITY_TYPE_MDS, "mds" },
+  { STONE_ENTITY_TYPE_MGR, "mgr" },
+  { STONE_ENTITY_TYPE_CLIENT, "client" },
 }};
 
 const std::string& EntityName::
@@ -64,7 +64,7 @@ set(uint32_t type_, std::string_view id_)
 
   if (type) {
     std::ostringstream oss;
-    oss << ceph_entity_type_name(type_) << "." << id_;
+    oss << stone_entity_type_name(type_) << "." << id_;
     type_id = oss.str();
   } else {
     type_id.clear();
@@ -74,8 +74,8 @@ set(uint32_t type_, std::string_view id_)
 int EntityName::
 set(std::string_view type_, std::string_view id_)
 {
-  uint32_t t = str_to_ceph_entity_type(type_);
-  if (t == CEPH_ENTITY_TYPE_ANY)
+  uint32_t t = str_to_stone_entity_type(type_);
+  if (t == STONE_ENTITY_TYPE_ANY)
     return -EINVAL;
   set(t, id_);
   return 0;
@@ -109,13 +109,13 @@ void EntityName::set_name(entity_name_t n)
 const char* EntityName::
 get_type_str() const
 {
-  return ceph_entity_type_name(type);
+  return stone_entity_type_name(type);
 }
 
 std::string_view EntityName::
 get_type_name() const
 {
-  return ceph_entity_type_name(type);
+  return stone_entity_type_name(type);
 }
 
 const std::string &EntityName::
@@ -144,14 +144,14 @@ get_valid_types_as_str()
   return out.str();
 }
 
-uint32_t EntityName::str_to_ceph_entity_type(std::string_view s)
+uint32_t EntityName::str_to_stone_entity_type(std::string_view s)
 {
   size_t i;
   for (i = 0; i < STR_TO_ENTITY_TYPE.size(); ++i) {
     if (s == STR_TO_ENTITY_TYPE[i].str)
       return STR_TO_ENTITY_TYPE[i].type;
   }
-  return CEPH_ENTITY_TYPE_ANY;
+  return STONE_ENTITY_TYPE_ANY;
 }
 
 bool operator<(const EntityName& a, const EntityName& b)

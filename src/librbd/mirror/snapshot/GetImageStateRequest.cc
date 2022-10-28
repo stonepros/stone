@@ -9,7 +9,7 @@
 #include "librbd/mirror/snapshot/Types.h"
 #include "librbd/mirror/snapshot/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::snapshot::GetImageStateRequest: " \
@@ -29,7 +29,7 @@ void GetImageStateRequest<I>::send() {
 
 template <typename I>
 void GetImageStateRequest<I>::read_object() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
 
   auto oid = util::image_state_object_name(m_image_ctx, m_snap_id,
                                            m_object_index);
@@ -43,13 +43,13 @@ void GetImageStateRequest<I>::read_object() {
     GetImageStateRequest<I>,
     &GetImageStateRequest<I>::handle_read_object>(this);
   int r = m_image_ctx->md_ctx.aio_operate(oid, comp, &op, nullptr);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void GetImageStateRequest<I>::handle_read_object(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -64,7 +64,7 @@ void GetImageStateRequest<I>::handle_read_object(int r) {
   if (m_object_index == 0) {
     ImageStateHeader header;
     try {
-      using ceph::decode;
+      using stone::decode;
       decode(header, iter);
     } catch (const buffer::error &err) {
       lderr(cct) << "failed to decode image state object header" << dendl;
@@ -90,12 +90,12 @@ void GetImageStateRequest<I>::handle_read_object(int r) {
 
 template <typename I>
 void GetImageStateRequest<I>::finish(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r == 0) {
     try {
-      using ceph::decode;
+      using stone::decode;
       decode(*m_image_state, m_state_bl);
     } catch (const buffer::error &err) {
       lderr(cct) << "failed to decode image state" << dendl;

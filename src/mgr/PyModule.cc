@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 John Spray <john.spray@redhat.com>
  *
@@ -21,8 +21,8 @@
 
 #include "common/debug.h"
 #include "common/errno.h"
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr[py] "
@@ -39,7 +39,7 @@ std::string PyModule::mgr_store_prefix = "mgr/";
 #include <boost/python/object.hpp>
 #undef BOOST_BIND_GLOBAL_PLACEHOLDERS
 #include <boost/algorithm/string/predicate.hpp>
-#include "include/ceph_assert.h"  // boost clobbers this
+#include "include/stone_assert.h"  // boost clobbers this
 // decode a Python exception into a string
 std::string handle_pyerror()
 {
@@ -93,8 +93,8 @@ std::string peek_pyerror()
 {
   PyObject *ptype, *pvalue, *ptraceback;
   PyErr_Fetch(&ptype, &pvalue, &ptraceback);
-  ceph_assert(ptype);
-  ceph_assert(pvalue);
+  stone_assert(ptype);
+  stone_assert(pvalue);
   PyObject *pvalue_str = PyObject_Str(pvalue);
   std::string exc_msg = PyUnicode_AsUTF8(pvalue_str);
   Py_DECREF(pvalue_str);
@@ -127,9 +127,9 @@ namespace {
     {nullptr, nullptr, 0, nullptr}
   };
 
-  static PyModuleDef ceph_logger_module = {
+  static PyModuleDef stone_logger_module = {
     PyModuleDef_HEAD_INIT,
-    "ceph_logger",
+    "stone_logger",
     nullptr,
     -1,
     log_methods,
@@ -196,12 +196,12 @@ std::string PyModule::get_site_packages()
   // CPython doesn't auto-add site-packages dirs to sys.path for us,
   // but it does provide a module that we can ask for them.
   auto site_module = PyImport_ImportModule("site");
-  ceph_assert(site_module);
+  stone_assert(site_module);
 
   auto site_packages_fn = PyObject_GetAttrString(site_module, "getsitepackages");
   if (site_packages_fn != nullptr) {
     auto site_packages_list = PyObject_CallObject(site_packages_fn, nullptr);
-    ceph_assert(site_packages_list);
+    stone_assert(site_packages_list);
 
     auto n = PyList_Size(site_packages_list);
     for (Py_ssize_t i = 0; i < n; ++i) {
@@ -219,7 +219,7 @@ std::string PyModule::get_site_packages()
     // run inside virtualenvs :-/
 
     auto site_packages_fn = PyObject_GetAttrString(site_module, "addsitepackages");
-    ceph_assert(site_packages_fn);
+    stone_assert(site_packages_fn);
 
     auto known_paths = PySet_New(nullptr);
     auto pArgs = PyTuple_Pack(1, known_paths);
@@ -229,9 +229,9 @@ std::string PyModule::get_site_packages()
     Py_DECREF(site_packages_fn);
 
     auto sys_module = PyImport_ImportModule("sys");
-    ceph_assert(sys_module);
+    stone_assert(sys_module);
     auto sys_path = PyObject_GetAttrString(sys_module, "path");
-    ceph_assert(sys_path);
+    stone_assert(sys_path);
 
     dout(1) << "sys.path:" << dendl;
     auto n = PyList_Size(sys_path);
@@ -255,22 +255,22 @@ std::string PyModule::get_site_packages()
   return site_packages.str();
 }
 
-PyObject* PyModule::init_ceph_logger()
+PyObject* PyModule::init_stone_logger()
 {
-  auto py_logger = PyModule_Create(&ceph_logger_module);
+  auto py_logger = PyModule_Create(&stone_logger_module);
   PySys_SetObject("stderr", py_logger);
   PySys_SetObject("stdout", py_logger);
   return py_logger;
 }
 
-PyObject* PyModule::init_ceph_module()
+PyObject* PyModule::init_stone_module()
 {
   static PyMethodDef module_methods[] = {
     {nullptr, nullptr, 0, nullptr}
   };
-  static PyModuleDef ceph_module_def = {
+  static PyModuleDef stone_module_def = {
     PyModuleDef_HEAD_INIT,
-    "ceph_module",
+    "stone_module",
     nullptr,
     -1,
     module_methods,
@@ -279,8 +279,8 @@ PyObject* PyModule::init_ceph_module()
     nullptr,
     nullptr
   };
-  PyObject *ceph_module = PyModule_Create(&ceph_module_def);
-  ceph_assert(ceph_module != nullptr);
+  PyObject *stone_module = PyModule_Create(&stone_module_def);
+  stone_assert(stone_module != nullptr);
   std::map<const char*, PyTypeObject*> classes{
     {{"BaseMgrModule", &BaseMgrModuleType},
      {"BaseMgrStandbyModule", &BaseMgrStandbyModuleType},
@@ -291,18 +291,18 @@ PyObject* PyModule::init_ceph_module()
   for (auto [name, type] : classes) {
     type->tp_new = PyType_GenericNew;
     if (PyType_Ready(type) < 0) {
-      ceph_abort();
+      stone_abort();
     }
     Py_INCREF(type);
 
-    PyModule_AddObject(ceph_module, name, (PyObject *)type);
+    PyModule_AddObject(stone_module, name, (PyObject *)type);
   }
-  return ceph_module;
+  return stone_module;
 }
 
 int PyModule::load(PyThreadState *pMainThreadState)
 {
-  ceph_assert(pMainThreadState != nullptr);
+  stone_assert(pMainThreadState != nullptr);
 
   // Configure sub-interpreter
   {
@@ -317,7 +317,7 @@ int PyModule::load(PyThreadState *pMainThreadState)
       pMyThreadState.set(thread_state);
       // Some python modules do not cope with an unpopulated argv, so lets
       // fake one.  This step also picks up site-packages into sys.path.
-      const wchar_t *argv[] = {L"ceph-mgr"};
+      const wchar_t *argv[] = {L"stone-mgr"};
       PySys_SetArgv(1, (wchar_t**)argv);
       // Configure sys.path to include mgr_module_path
       string paths = (g_conf().get_val<std::string>("mgr_module_path") + ':' +
@@ -435,7 +435,7 @@ int PyModule::walk_dict_list(
   const size_t list_size = PyList_Size(command_list);
   for (size_t i = 0; i < list_size; ++i) {
     PyObject *command = PyList_GetItem(command_list, i);
-    ceph_assert(command != nullptr);
+    stone_assert(command != nullptr);
 
     if (!PyDict_Check(command)) {
       derr << "Module " << get_name() << " has non-dict entry "
@@ -486,7 +486,7 @@ int PyModule::load_notify_types()
   const size_t list_size = PyList_Size(ls);
   for (size_t i = 0; i < list_size; ++i) {
     PyObject *notify_type = PyList_GetItem(ls, i);
-    ceph_assert(notify_type != nullptr);
+    stone_assert(notify_type != nullptr);
 
     if (!PyObject_TypeCheck(notify_type, &PyUnicode_Type)) {
       derr << "Module " << get_name() << " has non-string entry in NOTIFY_TYPES list"
@@ -519,17 +519,17 @@ int PyModule::load_commands()
     ModuleCommand command;
 
     PyObject *pCmd = PyDict_GetItemString(pCommand, "cmd");
-    ceph_assert(pCmd != nullptr);
+    stone_assert(pCmd != nullptr);
     command.cmdstring = PyUnicode_AsUTF8(pCmd);
 
     dout(20) << "loaded command " << command.cmdstring << dendl;
 
     PyObject *pDesc = PyDict_GetItemString(pCommand, "desc");
-    ceph_assert(pDesc != nullptr);
+    stone_assert(pDesc != nullptr);
     command.helpstring = PyUnicode_AsUTF8(pDesc);
 
     PyObject *pPerm = PyDict_GetItemString(pCommand, "perm");
-    ceph_assert(pPerm != nullptr);
+    stone_assert(pPerm != nullptr);
     command.perm = PyUnicode_AsUTF8(pPerm);
 
     command.polling = false;
@@ -556,7 +556,7 @@ int PyModule::load_options()
     MgrMap::ModuleOption option;
     PyObject *p;
     p = PyDict_GetItemString(pOption, "name");
-    ceph_assert(p != nullptr);
+    stone_assert(p != nullptr);
     option.name = PyUnicode_AsUTF8(p);
     option.type = Option::TYPE_STR;
     p = PyDict_GetItemString(pOption, "type");

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson
@@ -35,11 +35,11 @@
 #include "cls_fifo_legacy.h"
 
 namespace rgw::cls::fifo {
-static constexpr auto dout_subsys = ceph_subsys_objclass;
-namespace cb = ceph::buffer;
+static constexpr auto dout_subsys = stone_subsys_objclass;
+namespace cb = stone::buffer;
 namespace fifo = rados::cls::fifo;
 
-using ceph::from_error_code;
+using stone::from_error_code;
 
 inline constexpr auto MAX_RACE_RETRIES = 10;
 
@@ -190,7 +190,7 @@ void push_part(lr::IoCtx& ioctx, const std::string& oid, std::string_view tag,
   encode(pp, in);
   op.exec(fifo::op::CLASS, fifo::op::PUSH_PART, in);
   auto r = ioctx.aio_operate(oid, c, &op, lr::OPERATION_RETURNVEC);
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
 }
 
 void trim_part(lr::ObjectWriteOperation* op,
@@ -251,7 +251,7 @@ int list_part(const DoutPrefixProvider *dpp, lr::IoCtx& ioctx, const std::string
 }
 
 struct list_entry_completion : public lr::ObjectOperationCompletion {
-  CephContext* cct;
+  StoneContext* cct;
   int* r_out;
   std::vector<fifo::part_list_entry>* entries;
   bool* more;
@@ -259,7 +259,7 @@ struct list_entry_completion : public lr::ObjectOperationCompletion {
   std::string* ptag;
   std::uint64_t tid;
 
-  list_entry_completion(CephContext* cct, int* r_out, std::vector<fifo::part_list_entry>* entries,
+  list_entry_completion(StoneContext* cct, int* r_out, std::vector<fifo::part_list_entry>* entries,
 			bool* more, bool* full_part, std::string* ptag,
 			std::uint64_t tid)
     : cct(cct), r_out(r_out), entries(entries), more(more),
@@ -290,7 +290,7 @@ struct list_entry_completion : public lr::ObjectOperationCompletion {
   }
 };
 
-lr::ObjectReadOperation list_part(CephContext* cct,
+lr::ObjectReadOperation list_part(StoneContext* cct,
 				  std::optional<std::string_view> tag,
 				  std::uint64_t ofs,
 				  std::uint64_t max_entries,
@@ -347,11 +347,11 @@ int get_part_info(const DoutPrefixProvider *dpp, lr::IoCtx& ioctx, const std::st
 }
 
 struct partinfo_completion : public lr::ObjectOperationCompletion {
-  CephContext* cct;
+  StoneContext* cct;
   int* rp;
   fifo::part_header* h;
   std::uint64_t tid;
-  partinfo_completion(CephContext* cct, int* rp, fifo::part_header* h,
+  partinfo_completion(StoneContext* cct, int* rp, fifo::part_header* h,
 		      std::uint64_t tid) :
     cct(cct), rp(rp), h(h), tid(tid) {
   }
@@ -378,7 +378,7 @@ struct partinfo_completion : public lr::ObjectOperationCompletion {
   }
 };
 
-lr::ObjectReadOperation get_part_info(CephContext* cct,
+lr::ObjectReadOperation get_part_info(StoneContext* cct,
 				      fifo::part_header* header,
 				      std::uint64_t tid, int* r = 0)
 {
@@ -411,12 +411,12 @@ std::optional<marker> FIFO::to_marker(std::string_view s)
   auto num = s.substr(0, pos);
   auto ofs = s.substr(pos + 1);
 
-  auto n = ceph::parse<decltype(m.num)>(num);
+  auto n = stone::parse<decltype(m.num)>(num);
   if (!n) {
     return std::nullopt;
   }
   m.num = *n;
-  auto o = ceph::parse<decltype(m.ofs)>(ofs);
+  auto o = stone::parse<decltype(m.ofs)>(ofs);
   if (!o) {
     return std::nullopt;
   }
@@ -427,7 +427,7 @@ std::optional<marker> FIFO::to_marker(std::string_view s)
 std::string FIFO::generate_tag() const
 {
   static constexpr auto HEADER_TAG_SIZE = 16;
-  return gen_rand_alphanumeric_plain(static_cast<CephContext*>(ioctx.cct()),
+  return gen_rand_alphanumeric_plain(static_cast<StoneContext*>(ioctx.cct()),
 				     HEADER_TAG_SIZE);
 }
 
@@ -1150,7 +1150,7 @@ void FIFO::trim_part(int64_t part_num, uint64_t ofs,
   l.unlock();
   rgw::cls::fifo::trim_part(&op, tag, ofs, exclusive);
   auto r = ioctx.aio_operate(part_oid, c, &op);
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
 }
 
 int FIFO::open(const DoutPrefixProvider *dpp, lr::IoCtx ioctx, std::string oid, std::unique_ptr<FIFO>* fifo,
@@ -1975,7 +1975,7 @@ void FIFO::get_part_info(int64_t part_num,
   l.unlock();
   auto op = rgw::cls::fifo::get_part_info(cct, header, tid);
   auto r = ioctx.aio_operate(part_oid, c, &op, nullptr);
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
 }
 
 struct InfoGetter : Completion<InfoGetter> {
@@ -2018,7 +2018,7 @@ struct InfoGetter : Completion<InfoGetter> {
       l.unlock();
       r = fifo->ioctx.aio_operate(oid, call(std::move(p)), &op,
 				  nullptr);
-      ceph_assert(r >= 0);
+      stone_assert(r >= 0);
       return;
     }
 
@@ -2079,7 +2079,7 @@ private:
     auto oid = fifo->info.part_oid(part_num);
     l.unlock();
     auto r = fifo->ioctx.aio_operate(oid, call(std::move(p)), &op);
-    ceph_assert(r >= 0);
+    stone_assert(r >= 0);
     return;
   }
 
@@ -2094,7 +2094,7 @@ private:
     auto oid = fifo->info.part_oid(part_num);
     l.unlock();
     auto r = fifo->ioctx.aio_operate(oid, call(std::move(p)), &op);
-    ceph_assert(r >= 0);
+    stone_assert(r >= 0);
     return;
   }
 

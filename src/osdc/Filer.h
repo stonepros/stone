@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_FILER_H
-#define CEPH_FILER_H
+#ifndef STONE_FILER_H
+#define STONE_FILER_H
 
 /*** Filer
  *
@@ -46,7 +46,7 @@ class Finisher;
 /**** Filer interface ***/
 
 class Filer {
-  CephContext *cct;
+  StoneeContext *cct;
   Objecter   *objecter;
   Finisher   *finisher;
 
@@ -297,4 +297,4 @@ private:
 		 uint64_t start_from, uint64_t *end);
 };
 
-#endif // !CEPH_FILER_H
+#endif // !STONE_FILER_H

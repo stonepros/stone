@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-#ifndef _CEPH_UUID_H
-#define _CEPH_UUID_H
+#ifndef _STONE_UUID_H
+#define _STONE_UUID_H
 
 /*
  * Thin C++ wrapper around libuuid.

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc.
  *
@@ -76,8 +76,8 @@
  * stuck, and the uplayer will knew what next to do quickly.
  */
 
-#ifndef CEPH_RWRef_Posix__H
-#define CEPH_RWRef_Posix__H
+#ifndef STONE_RWRef_Posix__H
+#define STONE_RWRef_Posix__H
 
 #include <string>
 #include "include/ceph_assert.h"
@@ -241,4 +241,4 @@ private:
   bool is_reader = true;
 };
 
-#endif // !CEPH_RWRef_Posix__H
+#endif // !STONE_RWRef_Posix__H

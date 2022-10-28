@@ -1,7 +1,7 @@
 overrides:
   check-counter:
     dry_run: true
-  ceph:
+  stone:
     log-ignorelist:
       - evicting unresponsive client
       - RECENT_CRASH
@@ -9,8 +9,8 @@ overrides:
 tasks:
 - exec:
     mon.a:
-      - ceph config set mgr mgr/crash/warn_recent_interval 0
-- cephfs_test_runner:
+      - stone config set mgr mgr/crash/warn_recent_interval 0
+- stonefs_test_runner:
     fail_on_skip: false
     modules:
-      - tasks.cephfs.test_snapshots
+      - tasks.stonefs.test_snapshots

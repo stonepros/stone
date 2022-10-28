@@ -13,14 +13,14 @@
 #include "global/global_init.h"
 
 #include "common/strtol.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_filestore
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_filestore
 
 static void usage()
 {
-  cout << "usage: ceph_objectstore_bench [flags]\n"
+  cout << "usage: stone_objectstore_bench [flags]\n"
       "	 --size\n"
       "	       total size in bytes\n"
       "	 --block-size\n"
@@ -104,11 +104,11 @@ void osbench_worker(ObjectStore *os, const Config &cfg,
   dout(0) << "Writing " << cfg.size
       << " in blocks of " << cfg.block_size << dendl;
 
-  ceph_assert(starting_offset < cfg.size);
-  ceph_assert(starting_offset % cfg.block_size == 0);
+  stone_assert(starting_offset < cfg.size);
+  stone_assert(starting_offset % cfg.block_size == 0);
 
   ObjectStore::CollectionHandle ch = os->open_collection(cid);
-  ceph_assert(ch);
+  stone_assert(ch);
 
   for (int i = 0; i < cfg.repeats; ++i) {
     uint64_t offset = starting_offset;
@@ -157,38 +157,38 @@ int main(int argc, const char *argv[])
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
 
-  auto cct = global_init(nullptr, args, CEPH_ENTITY_TYPE_OSD,
+  auto cct = global_init(nullptr, args, STONE_ENTITY_TYPE_OSD,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
 
   std::string val;
   vector<const char*>::iterator i = args.begin();
   while (i != args.end()) {
-    if (ceph_argparse_double_dash(args, i))
+    if (stone_argparse_double_dash(args, i))
       break;
 
-    if (ceph_argparse_witharg(args, i, &val, "--size", (char*)nullptr)) {
+    if (stone_argparse_witharg(args, i, &val, "--size", (char*)nullptr)) {
       std::string err;
       if (!cfg.size.parse(val, &err)) {
         derr << "error parsing size: " << err << dendl;
         exit(1);
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--block-size", (char*)nullptr)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--block-size", (char*)nullptr)) {
       std::string err;
       if (!cfg.block_size.parse(val, &err)) {
         derr << "error parsing block-size: " << err << dendl;
         exit(1);
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--repeats", (char*)nullptr)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--repeats", (char*)nullptr)) {
       cfg.repeats = atoi(val.c_str());
-    } else if (ceph_argparse_witharg(args, i, &val, "--threads", (char*)nullptr)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--threads", (char*)nullptr)) {
       cfg.threads = atoi(val.c_str());
-    } else if (ceph_argparse_flag(args, i, "--multi-object", (char*)nullptr)) {
+    } else if (stone_argparse_flag(args, i, "--multi-object", (char*)nullptr)) {
       cfg.multi_object = true;
     } else {
       derr << "Error: can't understand argument: " << *i << "\n" << dendl;
@@ -196,7 +196,7 @@ int main(int argc, const char *argv[])
     }
   }
 
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   // create object store
   dout(0) << "objectstore " << g_conf()->osd_objectstore << dendl;
@@ -208,7 +208,7 @@ int main(int argc, const char *argv[])
   dout(0) << "threads " << cfg.threads << dendl;
 
   auto os = std::unique_ptr<ObjectStore>(
-      ObjectStore::create(g_ceph_context,
+      ObjectStore::create(g_stone_context,
                           g_conf()->osd_objectstore,
                           g_conf()->osd_data,
                           g_conf()->osd_journal));
@@ -278,20 +278,20 @@ int main(int argc, const char *argv[])
     for (int i = 0; i < cfg.threads; i++) {
       std::stringstream oss;
       oss << "osbench-thread-" << i;
-      oids.emplace_back(hobject_t(sobject_t(oss.str(), CEPH_NOSNAP)));
+      oids.emplace_back(hobject_t(sobject_t(oss.str(), STONE_NOSNAP)));
 
       ObjectStore::Transaction t;
       t.touch(cid, oids[i]);
       int r = os->queue_transaction(ch, std::move(t));
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
     }
   } else {
-    oids.emplace_back(hobject_t(sobject_t("osbench", CEPH_NOSNAP)));
+    oids.emplace_back(hobject_t(sobject_t("osbench", STONE_NOSNAP)));
 
     ObjectStore::Transaction t;
     t.touch(cid, oids.back());
     int r = os->queue_transaction(ch, std::move(t));
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
 
   // run the worker threads

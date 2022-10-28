@@ -20,8 +20,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_MSG_PACKET_H_
-#define CEPH_MSG_PACKET_H_
+#ifndef STONE_MSG_PACKET_H_
+#define STONE_MSG_PACKET_H_
 
 #include <vector>
 #include <algorithm>
@@ -547,4 +547,4 @@ inline Packet Packet::share(size_t offset, size_t len) {
   return n;
 }
 
-#endif /* CEPH_MSG_PACKET_H_ */
+#endif /* STONE_MSG_PACKET_H_ */

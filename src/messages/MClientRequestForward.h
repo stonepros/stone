@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MCLIENTREQUESTFORWARD_H
-#define CEPH_MCLIENTREQUESTFORWARD_H
+#ifndef STONE_MCLIENTREQUESTFORWARD_H
+#define STONE_MCLIENTREQUESTFORWARD_H
 
 #include "msg/Message.h"
 
@@ -26,10 +26,10 @@ private:
 
 protected:
   MClientRequestForward()
-    : SafeMessage{CEPH_MSG_CLIENT_REQUEST_FORWARD},
+    : SafeMessage{STONE_MSG_CLIENT_REQUEST_FORWARD},
       dest_mds(-1), num_fwd(-1), client_must_resend(false) {}
   MClientRequestForward(ceph_tid_t t, int dm, int nf, bool cmr) :
-    SafeMessage{CEPH_MSG_CLIENT_REQUEST_FORWARD},
+    SafeMessage{STONE_MSG_CLIENT_REQUEST_FORWARD},
     dest_mds(dm), num_fwd(nf), client_must_resend(cmr) {
     ceph_assert(client_must_resend);
     header.tid = t;

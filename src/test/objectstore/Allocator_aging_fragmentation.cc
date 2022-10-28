@@ -9,7 +9,7 @@
 #include <gtest/gtest.h>
 #include <boost/random/triangle_distribution.hpp>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Cond.h"
 #include "common/errno.h"
 #include "include/stringify.h"
@@ -21,8 +21,8 @@
 typedef boost::mt11213b gen_type;
 
 #include "common/debug.h"
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_
 
 struct Scenario {
   uint64_t capacity;
@@ -155,7 +155,7 @@ void AllocTest::init_alloc(const std::string& allocator_name, int64_t size, uint
   this->capacity = size;
   this->alloc_unit = min_alloc_size;
   rng.seed(0);
-  alloc.reset(Allocator::create(g_ceph_context, allocator_name, size,
+  alloc.reset(Allocator::create(g_stone_context, allocator_name, size,
 				min_alloc_size));
   at.reset(new AllocTracker());
 }
@@ -229,12 +229,12 @@ void AllocTest::doAgingTest(
     uint64_t high_mark, uint64_t low_mark, uint32_t iterations, double leak_factor)
 {
   assert(isp2(alloc_unit));
-  g_ceph_context->_conf->bdev_block_size = alloc_unit;
+  g_stone_context->_conf->bdev_block_size = alloc_unit;
   PExtentVector allocated, tmp;
   init_alloc(allocator_name, capacity, alloc_unit);
   alloc->init_add_free(0, capacity);
 
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   level = 0;
   allocs = 0;
   fragmented = 0;
@@ -244,7 +244,7 @@ void AllocTest::doAgingTest(
   do_fill(high_mark, size_generator, leak_factor); //initial fill with data
   if (verbose) std::cout << "    fragmented allocs=" << 100.0 * fragmented / allocs << "%" <<
         " #frags=" << ( fragmented != 0 ? double(fragments) / fragmented : 0 )<<
-        " time=" << (ceph_clock_now() - start) * 1000 << "ms" << std::endl;
+        " time=" << (stone_clock_now() - start) * 1000 << "ms" << std::endl;
 
   for (uint32_t i=0; i < iterations; i++)
   {
@@ -254,20 +254,20 @@ void AllocTest::doAgingTest(
     total_fragments = 0;
 
     uint64_t level_previous = level;
-    start = ceph_clock_now();
+    start = stone_clock_now();
     if (verbose) std::cout << "ADDING CAPACITY " << i + 1 << std::endl;
     do_free(low_mark); //simulates adding new capacity to cluster
     if (verbose) std::cout << "    level change: " <<
 	double(level_previous) / capacity * 100 << "% -> " <<
 	double(level) / capacity * 100 << "% time=" <<
-	(ceph_clock_now() - start) * 1000 << "ms" << std::endl;
+	(stone_clock_now() - start) * 1000 << "ms" << std::endl;
 
-    start = ceph_clock_now();
+    start = stone_clock_now();
     if (verbose) std::cout << "APPENDING " << i + 1 << std::endl;
     do_fill(high_mark, size_generator, leak_factor); //only creating elements
     if (verbose) std::cout << "    fragmented allocs=" << 100.0 * fragmented / allocs << "%" <<
         " #frags=" << ( fragmented != 0 ? double(fragments) / fragmented : 0 ) <<
-        " time=" << (ceph_clock_now() - start) * 1000 << "ms" << std::endl;
+        " time=" << (stone_clock_now() - start) * 1000 << "ms" << std::endl;
   }
   double frag_score = alloc->get_fragmentation_score();
   do_free(0);
@@ -276,7 +276,7 @@ void AllocTest::doAgingTest(
 
   std::cout << "    fragmented allocs=" << 100.0 * fragmented / allocs << "%" <<
         " #frags=" << ( fragmented != 0 ? double(fragments) / fragmented : 0 ) <<
-        " time=" << (ceph_clock_now() - start) * 1000 << "ms" <<
+        " time=" << (stone_clock_now() - start) * 1000 << "ms" <<
         " frag.score=" << frag_score << " after free frag.score=" << free_frag_score << std::endl;
 
   uint64_t sum = 0;
@@ -295,7 +295,7 @@ void AllocTest::doAgingTest(
   r.tests_cnt ++;
   r.fragmented_percent += 100.0 * fragmented / allocs;
   r.fragments_count += ( fragmented != 0 ? double(fragments) / fragmented : 2 );
-  r.time += ceph_clock_now() - start;
+  r.time += stone_clock_now() - start;
   r.frag_score += frag_score;
 }
 

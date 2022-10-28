@@ -2,8 +2,8 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 
-#ifndef CEPH_RGW_AUTH_H
-#define CEPH_RGW_AUTH_H
+#ifndef STONE_RGW_AUTH_H
+#define STONE_RGW_AUTH_H
 
 #include <functional>
 #include <ostream>
@@ -734,4 +734,4 @@ uint32_t rgw_perms_from_aclspec_default_strategy(
   const rgw::auth::Identity::aclspec_t& aclspec,
   const DoutPrefixProvider *dpp);
 
-#endif /* CEPH_RGW_AUTH_H */
+#endif /* STONE_RGW_AUTH_H */

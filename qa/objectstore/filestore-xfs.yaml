@@ -1,11 +1,11 @@
 overrides:
-  ceph:
+  stone:
     fs: xfs
     conf:
       osd:
         osd objectstore: filestore
         osd sloppy crc: true
-  ceph-deploy:
+  stone-deploy:
     fs: xfs
     filestore: True
     conf:

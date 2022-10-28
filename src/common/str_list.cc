@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2009-2010 Dreamhost
  *
@@ -18,7 +18,7 @@ using std::string;
 using std::vector;
 using std::set;
 using std::list;
-using ceph::for_each_substr;
+using stone::for_each_substr;
 
 void get_str_list(const string& str, const char *delims, list<string>& str_list)
 {

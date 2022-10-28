@@ -18,8 +18,8 @@
 #include "rgw_sal_rados.h"
 #include "services/svc_zone.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 static const char* AWS_SNS_NS("https://sns.amazonaws.com/doc/2010-03-31/");
 
@@ -494,7 +494,7 @@ void RGWPSCreateNotif_ObjStore_S3::execute(optional_yield y) {
 
   ps.emplace(store, s->owner.get_id().tenant);
   auto b = ps->get_bucket(bucket_info.bucket);
-  ceph_assert(b);
+  stone_assert(b);
   std::string data_bucket_prefix = "";
   std::string data_oid_prefix = "";
   bool push_only = true;
@@ -637,7 +637,7 @@ void RGWPSDeleteNotif_ObjStore_S3::execute(optional_yield y) {
 
   ps.emplace(store, s->owner.get_id().tenant);
   auto b = ps->get_bucket(bucket_info.bucket);
-  ceph_assert(b);
+  stone_assert(b);
 
   // get all topics on a bucket
   rgw_pubsub_bucket_topics bucket_topics;
@@ -736,7 +736,7 @@ public:
 void RGWPSListNotifs_ObjStore_S3::execute(optional_yield y) {
   ps.emplace(store, s->owner.get_id().tenant);
   auto b = ps->get_bucket(bucket_info.bucket);
-  ceph_assert(b);
+  stone_assert(b);
   
   // get all topics on a bucket
   rgw_pubsub_bucket_topics bucket_topics;

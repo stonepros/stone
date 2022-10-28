@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -27,7 +27,7 @@
 
 #include <boost/assign/list_of.hpp>
 
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 #include "include/encoding.h"
 #include "include/stringify.h"
 extern "C" {
@@ -50,59 +50,59 @@ using std::string;
 using std::unique_ptr;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::decode_nohead;
-using ceph::encode;
-using ceph::encode_nohead;
-using ceph::Formatter;
-using ceph::make_timespan;
-using ceph::JSONFormatter;
+using stone::bufferlist;
+using stone::decode;
+using stone::decode_nohead;
+using stone::encode;
+using stone::encode_nohead;
+using stone::Formatter;
+using stone::make_timespan;
+using stone::JSONFormatter;
 
 using namespace std::literals;
 
-const char *ceph_osd_flag_name(unsigned flag)
+const char *stone_osd_flag_name(unsigned flag)
 {
   switch (flag) {
-  case CEPH_OSD_FLAG_ACK: return "ack";
-  case CEPH_OSD_FLAG_ONNVRAM: return "onnvram";
-  case CEPH_OSD_FLAG_ONDISK: return "ondisk";
-  case CEPH_OSD_FLAG_RETRY: return "retry";
-  case CEPH_OSD_FLAG_READ: return "read";
-  case CEPH_OSD_FLAG_WRITE: return "write";
-  case CEPH_OSD_FLAG_ORDERSNAP: return "ordersnap";
-  case CEPH_OSD_FLAG_PEERSTAT_OLD: return "peerstat_old";
-  case CEPH_OSD_FLAG_BALANCE_READS: return "balance_reads";
-  case CEPH_OSD_FLAG_PARALLELEXEC: return "parallelexec";
-  case CEPH_OSD_FLAG_PGOP: return "pgop";
-  case CEPH_OSD_FLAG_EXEC: return "exec";
-  case CEPH_OSD_FLAG_EXEC_PUBLIC: return "exec_public";
-  case CEPH_OSD_FLAG_LOCALIZE_READS: return "localize_reads";
-  case CEPH_OSD_FLAG_RWORDERED: return "rwordered";
-  case CEPH_OSD_FLAG_IGNORE_CACHE: return "ignore_cache";
-  case CEPH_OSD_FLAG_SKIPRWLOCKS: return "skiprwlocks";
-  case CEPH_OSD_FLAG_IGNORE_OVERLAY: return "ignore_overlay";
-  case CEPH_OSD_FLAG_FLUSH: return "flush";
-  case CEPH_OSD_FLAG_MAP_SNAP_CLONE: return "map_snap_clone";
-  case CEPH_OSD_FLAG_ENFORCE_SNAPC: return "enforce_snapc";
-  case CEPH_OSD_FLAG_REDIRECTED: return "redirected";
-  case CEPH_OSD_FLAG_KNOWN_REDIR: return "known_if_redirected";
-  case CEPH_OSD_FLAG_FULL_TRY: return "full_try";
-  case CEPH_OSD_FLAG_FULL_FORCE: return "full_force";
-  case CEPH_OSD_FLAG_IGNORE_REDIRECT: return "ignore_redirect";
-  case CEPH_OSD_FLAG_RETURNVEC: return "returnvec";
+  case STONE_OSD_FLAG_ACK: return "ack";
+  case STONE_OSD_FLAG_ONNVRAM: return "onnvram";
+  case STONE_OSD_FLAG_ONDISK: return "ondisk";
+  case STONE_OSD_FLAG_RETRY: return "retry";
+  case STONE_OSD_FLAG_READ: return "read";
+  case STONE_OSD_FLAG_WRITE: return "write";
+  case STONE_OSD_FLAG_ORDERSNAP: return "ordersnap";
+  case STONE_OSD_FLAG_PEERSTAT_OLD: return "peerstat_old";
+  case STONE_OSD_FLAG_BALANCE_READS: return "balance_reads";
+  case STONE_OSD_FLAG_PARALLELEXEC: return "parallelexec";
+  case STONE_OSD_FLAG_PGOP: return "pgop";
+  case STONE_OSD_FLAG_EXEC: return "exec";
+  case STONE_OSD_FLAG_EXEC_PUBLIC: return "exec_public";
+  case STONE_OSD_FLAG_LOCALIZE_READS: return "localize_reads";
+  case STONE_OSD_FLAG_RWORDERED: return "rwordered";
+  case STONE_OSD_FLAG_IGNORE_CACHE: return "ignore_cache";
+  case STONE_OSD_FLAG_SKIPRWLOCKS: return "skiprwlocks";
+  case STONE_OSD_FLAG_IGNORE_OVERLAY: return "ignore_overlay";
+  case STONE_OSD_FLAG_FLUSH: return "flush";
+  case STONE_OSD_FLAG_MAP_SNAP_CLONE: return "map_snap_clone";
+  case STONE_OSD_FLAG_ENFORCE_SNAPC: return "enforce_snapc";
+  case STONE_OSD_FLAG_REDIRECTED: return "redirected";
+  case STONE_OSD_FLAG_KNOWN_REDIR: return "known_if_redirected";
+  case STONE_OSD_FLAG_FULL_TRY: return "full_try";
+  case STONE_OSD_FLAG_FULL_FORCE: return "full_force";
+  case STONE_OSD_FLAG_IGNORE_REDIRECT: return "ignore_redirect";
+  case STONE_OSD_FLAG_RETURNVEC: return "returnvec";
   default: return "???";
   }
 }
 
-string ceph_osd_flag_string(unsigned flags)
+string stone_osd_flag_string(unsigned flags)
 {
   string s;
   for (unsigned i=0; i<32; ++i) {
     if (flags & (1u<<i)) {
       if (s.length())
 	s += "+";
-      s += ceph_osd_flag_name(1u << i);
+      s += stone_osd_flag_name(1u << i);
     }
   }
   if (s.length())
@@ -110,36 +110,36 @@ string ceph_osd_flag_string(unsigned flags)
   return string("-");
 }
 
-const char * ceph_osd_op_flag_name(unsigned flag)
+const char * stone_osd_op_flag_name(unsigned flag)
 {
   const char *name;
 
   switch(flag) {
-    case CEPH_OSD_OP_FLAG_EXCL:
+    case STONE_OSD_OP_FLAG_EXCL:
       name = "excl";
       break;
-    case CEPH_OSD_OP_FLAG_FAILOK:
+    case STONE_OSD_OP_FLAG_FAILOK:
       name = "failok";
       break;
-    case CEPH_OSD_OP_FLAG_FADVISE_RANDOM:
+    case STONE_OSD_OP_FLAG_FADVISE_RANDOM:
       name = "fadvise_random";
       break;
-    case CEPH_OSD_OP_FLAG_FADVISE_SEQUENTIAL:
+    case STONE_OSD_OP_FLAG_FADVISE_SEQUENTIAL:
       name = "fadvise_sequential";
       break;
-    case CEPH_OSD_OP_FLAG_FADVISE_WILLNEED:
+    case STONE_OSD_OP_FLAG_FADVISE_WILLNEED:
       name = "favise_willneed";
       break;
-    case CEPH_OSD_OP_FLAG_FADVISE_DONTNEED:
+    case STONE_OSD_OP_FLAG_FADVISE_DONTNEED:
       name = "fadvise_dontneed";
       break;
-    case CEPH_OSD_OP_FLAG_FADVISE_NOCACHE:
+    case STONE_OSD_OP_FLAG_FADVISE_NOCACHE:
       name = "fadvise_nocache";
       break;
-    case CEPH_OSD_OP_FLAG_WITH_REFERENCE:
+    case STONE_OSD_OP_FLAG_WITH_REFERENCE:
       name = "with_reference";
       break;
-    case CEPH_OSD_OP_FLAG_BYPASS_CLEAN_CACHE:
+    case STONE_OSD_OP_FLAG_BYPASS_CLEAN_CACHE:
       name = "bypass_clean_cache";
       break;
     default:
@@ -149,14 +149,14 @@ const char * ceph_osd_op_flag_name(unsigned flag)
   return name;
 }
 
-string ceph_osd_op_flag_string(unsigned flags)
+string stone_osd_op_flag_string(unsigned flags)
 {
   string s;
   for (unsigned i=0; i<32; ++i) {
     if (flags & (1u<<i)) {
       if (s.length())
 	s += "+";
-      s += ceph_osd_op_flag_name(1u << i);
+      s += stone_osd_op_flag_name(1u << i);
     }
   }
   if (s.length())
@@ -164,14 +164,14 @@ string ceph_osd_op_flag_string(unsigned flags)
   return string("-");
 }
 
-string ceph_osd_alloc_hint_flag_string(unsigned flags)
+string stone_osd_alloc_hint_flag_string(unsigned flags)
 {
   string s;
   for (unsigned i=0; i<32; ++i) {
     if (flags & (1u<<i)) {
       if (s.length())
 	s += "+";
-      s += ceph_osd_alloc_hint_flag_name(1u << i);
+      s += stone_osd_alloc_hint_flag_name(1u << i);
     }
   }
   if (s.length())
@@ -179,14 +179,14 @@ string ceph_osd_alloc_hint_flag_string(unsigned flags)
   return string("-");
 }
 
-void pg_shard_t::encode(ceph::buffer::list &bl) const
+void pg_shard_t::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(1, 1, bl);
   encode(osd, bl);
   encode(shard, bl);
   ENCODE_FINISH(bl);
 }
-void pg_shard_t::decode(ceph::buffer::list::const_iterator &bl)
+void pg_shard_t::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(1, bl);
   decode(osd, bl);
@@ -236,10 +236,10 @@ void osd_reqid_t::generate_test_instances(list<osd_reqid_t*>& o)
 
 // -- object_locator_t --
 
-void object_locator_t::encode(ceph::buffer::list& bl) const
+void object_locator_t::encode(stone::buffer::list& bl) const
 {
   // verify that nobody's corrupted the locator
-  ceph_assert(hash == -1 || key.empty());
+  stone_assert(hash == -1 || key.empty());
   __u8 encode_compat = 3;
   ENCODE_START(6, encode_compat, bl);
   encode(pool, bl);
@@ -253,7 +253,7 @@ void object_locator_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH_NEW_COMPAT(bl, encode_compat);
 }
 
-void object_locator_t::decode(ceph::buffer::list::const_iterator& p)
+void object_locator_t::decode(stone::buffer::list::const_iterator& p)
 {
   DECODE_START_LEGACY_COMPAT_LEN(6, 3, 3, p);
   if (struct_v < 2) {
@@ -276,7 +276,7 @@ void object_locator_t::decode(ceph::buffer::list::const_iterator& p)
     hash = -1;
   DECODE_FINISH(p);
   // verify that nobody's corrupted the locator
-  ceph_assert(hash == -1 || key.empty());
+  stone_assert(hash == -1 || key.empty());
 }
 
 void object_locator_t::dump(Formatter *f) const
@@ -298,7 +298,7 @@ void object_locator_t::generate_test_instances(list<object_locator_t*>& o)
 }
 
 // -- request_redirect_t --
-void request_redirect_t::encode(ceph::buffer::list& bl) const
+void request_redirect_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(1, 1, bl);
   encode(redirect_locator, bl);
@@ -308,7 +308,7 @@ void request_redirect_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void request_redirect_t::decode(ceph::buffer::list::const_iterator& bl)
+void request_redirect_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START(1, bl);
   uint32_t legacy_osd_instructions_len;
@@ -347,7 +347,7 @@ void objectstore_perf_stat_t::dump(Formatter *f) const
   f->dump_unsigned("apply_latency_ns", os_apply_latency_ns);
 }
 
-void objectstore_perf_stat_t::encode(ceph::buffer::list &bl, uint64_t features) const
+void objectstore_perf_stat_t::encode(stone::buffer::list &bl, uint64_t features) const
 {
   uint8_t target_v = 2;
   if (!HAVE_FEATURE(features, OS_PERF_STAT_NS)) {
@@ -367,7 +367,7 @@ void objectstore_perf_stat_t::encode(ceph::buffer::list &bl, uint64_t features) 
   ENCODE_FINISH(bl);
 }
 
-void objectstore_perf_stat_t::decode(ceph::buffer::list::const_iterator &bl)
+void objectstore_perf_stat_t::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(2, bl);
   if (struct_v >= 2) {
@@ -495,7 +495,7 @@ void osd_stat_t::dump_ping_time(Formatter *f) const
   f->close_section(); // network_ping_time
 }
 
-void osd_stat_t::encode(ceph::buffer::list &bl, uint64_t features) const
+void osd_stat_t::encode(stone::buffer::list &bl, uint64_t features) const
 {
   ENCODE_START(14, 2, bl);
 
@@ -562,7 +562,7 @@ void osd_stat_t::encode(ceph::buffer::list &bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void osd_stat_t::decode(ceph::buffer::list::const_iterator &bl)
+void osd_stat_t::decode(stone::buffer::list::const_iterator &bl)
 {
   int64_t kb, kb_used,kb_avail;
   int64_t kb_used_data, kb_used_omap, kb_used_meta;
@@ -767,13 +767,13 @@ pg_t pg_t::get_ancestor(unsigned old_pg_num) const
   int old_bits = cbits(old_pg_num);
   int old_mask = (1 << old_bits) - 1;
   pg_t ret = *this;
-  ret.m_seed = ceph_stable_mod(m_seed, old_pg_num, old_mask);
+  ret.m_seed = stone_stable_mod(m_seed, old_pg_num, old_mask);
   return ret;
 }
 
 bool pg_t::is_split(unsigned old_pg_num, unsigned new_pg_num, set<pg_t> *children) const
 {
-  //ceph_assert(m_seed < old_pg_num);
+  //stone_assert(m_seed < old_pg_num);
   if (m_seed >= old_pg_num) {
     // degenerate case
     return false;
@@ -793,7 +793,7 @@ bool pg_t::is_split(unsigned old_pg_num, unsigned new_pg_num, set<pg_t> *childre
 	continue;
       if (s >= new_pg_num)
 	break;
-      if ((unsigned)ceph_stable_mod(s, old_pg_num, old_mask) == m_seed) {
+      if ((unsigned)stone_stable_mod(s, old_pg_num, old_mask) == m_seed) {
 	split = true;
 	if (children)
 	  children->insert(pg_t(s, m_pool));
@@ -805,7 +805,7 @@ bool pg_t::is_split(unsigned old_pg_num, unsigned new_pg_num, set<pg_t> *childre
     int old_bits = cbits(old_pg_num);
     int old_mask = (1 << old_bits) - 1;
     for (unsigned x = old_pg_num; x < new_pg_num; ++x) {
-      unsigned o = ceph_stable_mod(x, old_pg_num, old_mask);
+      unsigned o = stone_stable_mod(x, old_pg_num, old_mask);
       if (o == m_seed) {
 	split = true;
 	children->insert(pg_t(x, m_pool));
@@ -818,11 +818,11 @@ bool pg_t::is_split(unsigned old_pg_num, unsigned new_pg_num, set<pg_t> *childre
 unsigned pg_t::get_split_bits(unsigned pg_num) const {
   if (pg_num == 1)
     return 0;
-  ceph_assert(pg_num > 1);
+  stone_assert(pg_num > 1);
 
   // Find unique p such that pg_num \in [2^(p-1), 2^p)
   unsigned p = cbits(pg_num);
-  ceph_assert(p); // silence coverity #751330 
+  stone_assert(p); // silence coverity #751330 
 
   if ((m_seed % (1<<(p-1))) < (pg_num % (1<<(p-1))))
     return p;
@@ -852,7 +852,7 @@ bool pg_t::is_merge_source(
 pg_t pg_t::get_parent() const
 {
   unsigned bits = cbits(m_seed);
-  ceph_assert(bits);
+  stone_assert(bits);
   pg_t retval = *this;
   retval.m_seed &= ~((~0)<<(bits - 1));
   return retval;
@@ -873,10 +873,10 @@ hobject_t pg_t::get_hobj_end(unsigned pg_num) const
   uint64_t rev_start = hobject_t::_reverse_bits(m_seed);
   uint64_t rev_end = (rev_start | (0xffffffff >> bits)) + 1;
   if (rev_end >= 0x100000000) {
-    ceph_assert(rev_end == 0x100000000);
+    stone_assert(rev_end == 0x100000000);
     return hobject_t::get_max();
   } else {
-    return hobject_t(object_t(), string(), CEPH_NOSNAP,
+    return hobject_t(object_t(), string(), STONE_NOSNAP,
 		   hobject_t::_reverse_bits(rev_end), m_pool,
 		   string());
   }
@@ -935,7 +935,7 @@ void coll_t::calc_str()
     _str = pgid.calc_name(_str_buff + spg_t::calc_name_buf_size - 1, "PMET_");
     break;
   default:
-    ceph_abort_msg("unknown collection type");
+    stone_abort_msg("unknown collection type");
   }
 }
 
@@ -946,7 +946,7 @@ bool coll_t::parse(const std::string& s)
     pgid = spg_t();
     removal_seq = 0;
     calc_str();
-    ceph_assert(s == _str);
+    stone_assert(s == _str);
     return true;
   }
   if (s.find("_head") == s.length() - 5 &&
@@ -954,7 +954,7 @@ bool coll_t::parse(const std::string& s)
     type = TYPE_PG;
     removal_seq = 0;
     calc_str();
-    ceph_assert(s == _str);
+    stone_assert(s == _str);
     return true;
   }
   if (s.find("_TEMP") == s.length() - 5 &&
@@ -962,15 +962,15 @@ bool coll_t::parse(const std::string& s)
     type = TYPE_PG_TEMP;
     removal_seq = 0;
     calc_str();
-    ceph_assert(s == _str);
+    stone_assert(s == _str);
     return true;
   }
   return false;
 }
 
-void coll_t::encode(ceph::buffer::list& bl) const
+void coll_t::encode(stone::buffer::list& bl) const
 {
-  using ceph::encode;
+  using stone::encode;
   // when changing this, remember to update encoded_size() too.
   if (is_temp()) {
     // can't express this as v2...
@@ -982,7 +982,7 @@ void coll_t::encode(ceph::buffer::list& bl) const
     encode(struct_v, bl);
     encode((__u8)type, bl);
     encode(pgid, bl);
-    snapid_t snap = CEPH_NOSNAP;
+    snapid_t snap = STONE_NOSNAP;
     encode(snap, bl);
   }
 }
@@ -1002,7 +1002,7 @@ size_t coll_t::encoded_size() const
       r += sizeof(__u8);
       // 2. pgid
       //  - encoding header
-      r += sizeof(ceph_le32) + 2 * sizeof(__u8);
+      r += sizeof(stone_le32) + 2 * sizeof(__u8);
       // - pg_t
       r += sizeof(__u8) + sizeof(uint64_t) + 2 * sizeof(uint32_t);
       // - shard_id_t
@@ -1014,9 +1014,9 @@ size_t coll_t::encoded_size() const
   return r;
 }
 
-void coll_t::decode(ceph::buffer::list::const_iterator& bl)
+void coll_t::decode(stone::buffer::list::const_iterator& bl)
 {
-  using ceph::decode;
+  using stone::decode;
   __u8 struct_v;
   decode(struct_v, bl);
   switch (struct_v) {
@@ -1274,10 +1274,10 @@ void pool_snap_info_t::dump(Formatter *f) const
   f->dump_string("name", name);
 }
 
-void pool_snap_info_t::encode(ceph::buffer::list& bl, uint64_t features) const
+void pool_snap_info_t::encode(stone::buffer::list& bl, uint64_t features) const
 {
-  using ceph::encode;
-  if ((features & CEPH_FEATURE_PGPOOL3) == 0) {
+  using stone::encode;
+  if ((features & STONE_FEATURE_PGPOOL3) == 0) {
     __u8 struct_v = 1;
     encode(struct_v, bl);
     encode(snapid, bl);
@@ -1292,7 +1292,7 @@ void pool_snap_info_t::encode(ceph::buffer::list& bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void pool_snap_info_t::decode(ceph::buffer::list::const_iterator& bl)
+void pool_snap_info_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(2, 2, 2, bl);
   decode(snapid, bl);
@@ -1374,7 +1374,7 @@ bool pool_opts_t::is_opt_name(const std::string& name)
 pool_opts_t::opt_desc_t pool_opts_t::get_opt_desc(const std::string& name)
 {
   auto i = opt_mapping.find(name);
-  ceph_assert(i != opt_mapping.end());
+  stone_assert(i != opt_mapping.end());
   return i->second;
 }
 
@@ -1386,7 +1386,7 @@ bool pool_opts_t::is_set(pool_opts_t::key_t key) const
 const pool_opts_t::value_t& pool_opts_t::get(pool_opts_t::key_t key) const
 {
   auto i = opts.find(key);
-  ceph_assert(i != opts.end());
+  stone_assert(i != opts.end());
   return i->second;
 }
 
@@ -1439,7 +1439,7 @@ void pool_opts_t::dump(Formatter* f) const
 
 class pool_opts_encoder_t : public boost::static_visitor<> {
 public:
-  explicit pool_opts_encoder_t(ceph::buffer::list& bl_, uint64_t features)
+  explicit pool_opts_encoder_t(stone::buffer::list& bl_, uint64_t features)
     : bl(bl_),
       features(features) {}
 
@@ -1461,11 +1461,11 @@ public:
   }
 
 private:
-  ceph::buffer::list& bl;
+  stone::buffer::list& bl;
   uint64_t features;
 };
 
-void pool_opts_t::encode(ceph::buffer::list& bl, uint64_t features) const
+void pool_opts_t::encode(stone::buffer::list& bl, uint64_t features) const
 {
   unsigned v = 2;
   if (!HAVE_FEATURE(features, SERVER_NAUTILUS)) {
@@ -1481,7 +1481,7 @@ void pool_opts_t::encode(ceph::buffer::list& bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void pool_opts_t::decode(ceph::buffer::list::const_iterator& bl)
+void pool_opts_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START(1, bl);
   __u32 n;
@@ -1510,7 +1510,7 @@ void pool_opts_t::decode(ceph::buffer::list::const_iterator& bl)
       decode(d, bl);
       opts[static_cast<key_t>(k)] = d;
     } else {
-      ceph_assert(!"invalid type");
+      stone_assert(!"invalid type");
     }
   }
   DECODE_FINISH(bl);
@@ -1532,7 +1532,7 @@ ostream& operator<<(ostream& out, const pool_opts_t& opts)
 
 // -- pg_pool_t --
 
-const char *pg_pool_t::APPLICATION_NAME_CEPHFS("cephfs");
+const char *pg_pool_t::APPLICATION_NAME_STONEFS("stonefs");
 const char *pg_pool_t::APPLICATION_NAME_RBD("rbd");
 const char *pg_pool_t::APPLICATION_NAME_RGW("rgw");
 
@@ -1713,7 +1713,7 @@ snapid_t pg_pool_t::snap_exists(std::string_view s) const
 
 void pg_pool_t::add_snap(const char *n, utime_t stamp)
 {
-  ceph_assert(!is_unmanaged_snaps_mode());
+  stone_assert(!is_unmanaged_snaps_mode());
   flags |= FLAG_POOL_SNAPS;
   snapid_t s = get_snap_seq() + 1;
   snap_seq = s;
@@ -1724,7 +1724,7 @@ void pg_pool_t::add_snap(const char *n, utime_t stamp)
 
 uint64_t pg_pool_t::add_unmanaged_snap(bool preoctopus_compat)
 {
-  ceph_assert(!is_pool_snaps_mode());
+  stone_assert(!is_pool_snaps_mode());
   if (snap_seq == 0) {
     if (preoctopus_compat) {
       // kludge for pre-mimic tracking of pool vs selfmanaged snaps.  after
@@ -1741,14 +1741,14 @@ uint64_t pg_pool_t::add_unmanaged_snap(bool preoctopus_compat)
 
 void pg_pool_t::remove_snap(snapid_t s)
 {
-  ceph_assert(snaps.count(s));
+  stone_assert(snaps.count(s));
   snaps.erase(s);
   snap_seq = snap_seq + 1;
 }
 
 void pg_pool_t::remove_unmanaged_snap(snapid_t s, bool preoctopus_compat)
 {
-  ceph_assert(is_unmanaged_snaps_mode());
+  stone_assert(is_unmanaged_snaps_mode());
   ++snap_seq;
   if (preoctopus_compat) {
     removed_snaps.insert(s);
@@ -1771,19 +1771,19 @@ SnapContext pg_pool_t::get_snap_context() const
 uint32_t pg_pool_t::hash_key(const string& key, const string& ns) const
 {
  if (ns.empty()) 
-    return ceph_str_hash(object_hash, key.data(), key.length());
+    return stone_str_hash(object_hash, key.data(), key.length());
   int nsl = ns.length();
   int len = key.length() + nsl + 1;
   char buf[len];
   memcpy(&buf[0], ns.data(), nsl);
   buf[nsl] = '\037';
   memcpy(&buf[nsl+1], key.data(), key.length());
-  return ceph_str_hash(object_hash, &buf[0], len);
+  return stone_str_hash(object_hash, &buf[0], len);
 }
 
 uint32_t pg_pool_t::raw_hash_to_pg(uint32_t v) const
 {
-  return ceph_stable_mod(v, pg_num, pg_num_mask);
+  return stone_stable_mod(v, pg_num, pg_num_mask);
 }
 
 /*
@@ -1791,7 +1791,7 @@ uint32_t pg_pool_t::raw_hash_to_pg(uint32_t v) const
  */
 pg_t pg_pool_t::raw_pg_to_pg(pg_t pg) const
 {
-  pg.set_ps(ceph_stable_mod(pg.ps(), pg_num, pg_num_mask));
+  pg.set_ps(stone_stable_mod(pg.ps(), pg_num, pg_num_mask));
   return pg;
 }
   
@@ -1806,14 +1806,14 @@ ps_t pg_pool_t::raw_pg_to_pps(pg_t pg) const
     // Hash the pool id so that pool PGs do not overlap.
     return
       crush_hash32_2(CRUSH_HASH_RJENKINS1,
-		     ceph_stable_mod(pg.ps(), pgp_num, pgp_num_mask),
+		     stone_stable_mod(pg.ps(), pgp_num, pgp_num_mask),
 		     pg.pool());
   } else {
     // Legacy behavior; add ps and pool together.  This is not a great
     // idea because the PGs from each pool will essentially overlap on
     // top of each other: 0.5 == 1.4 == 2.3 == ...
     return
-      ceph_stable_mod(pg.ps(), pgp_num, pgp_num_mask) +
+      stone_stable_mod(pg.ps(), pgp_num, pgp_num_mask) +
       pg.pool();
   }
 }
@@ -1835,11 +1835,11 @@ uint32_t pg_pool_t::get_random_pg_position(pg_t pg, uint32_t seed) const
   return r;
 }
 
-void pg_pool_t::encode(ceph::buffer::list& bl, uint64_t features) const
+void pg_pool_t::encode(stone::buffer::list& bl, uint64_t features) const
 {
-  using ceph::encode;
-  if ((features & CEPH_FEATURE_PGPOOL3) == 0) {
-    // this encoding matches the old struct ceph_pg_pool
+  using stone::encode;
+  if ((features & STONE_FEATURE_PGPOOL3) == 0) {
+    // this encoding matches the old struct stone_pg_pool
     __u8 struct_v = 2;
     encode(struct_v, bl);
     encode(type, bl);
@@ -1867,7 +1867,7 @@ void pg_pool_t::encode(ceph::buffer::list& bl, uint64_t features) const
     return;
   }
 
-  if ((features & CEPH_FEATURE_OSDENC) == 0) {
+  if ((features & STONE_FEATURE_OSDENC) == 0) {
     __u8 struct_v = 4;
     encode(struct_v, bl);
     encode(type, bl);
@@ -1890,7 +1890,7 @@ void pg_pool_t::encode(ceph::buffer::list& bl, uint64_t features) const
     return;
   }
 
-  if ((features & CEPH_FEATURE_OSD_POOLRESEND) == 0) {
+  if ((features & STONE_FEATURE_OSD_POOLRESEND) == 0) {
     // we simply added last_force_op_resend here, which is a fully
     // backward compatible change.  however, encoding the same map
     // differently between monitors triggers scrub noise (even though
@@ -1942,7 +1942,7 @@ void pg_pool_t::encode(ceph::buffer::list& bl, uint64_t features) const
   uint8_t v = 30;
   // NOTE: any new encoding dependencies must be reflected by
   // SIGNIFICANT_FEATURES
-  if (!(features & CEPH_FEATURE_NEW_OSDOP_ENCODING)) {
+  if (!(features & STONE_FEATURE_NEW_OSDOP_ENCODING)) {
     // this was the first post-hammer thing we added; if it's missing, encode
     // like hammer.
     v = 21;
@@ -2053,7 +2053,7 @@ void pg_pool_t::encode(ceph::buffer::list& bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void pg_pool_t::decode(ceph::buffer::list::const_iterator& bl)
+void pg_pool_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(30, 5, 5, bl);
   decode(type, bl);
@@ -2470,10 +2470,10 @@ void object_stat_sum_t::dump(Formatter *f) const
   f->dump_int("num_objects_repaired", num_objects_repaired);
 }
 
-void object_stat_sum_t::encode(ceph::buffer::list& bl) const
+void object_stat_sum_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(20, 14, bl);
-#if defined(CEPH_LITTLE_ENDIAN)
+#if defined(STONE_LITTLE_ENDIAN)
   bl.append((char *)(&num_bytes), sizeof(object_stat_sum_t));
 #else
   encode(num_bytes, bl);
@@ -2520,12 +2520,12 @@ void object_stat_sum_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void object_stat_sum_t::decode(ceph::buffer::list::const_iterator& bl)
+void object_stat_sum_t::decode(stone::buffer::list::const_iterator& bl)
 {
   bool decode_finish = false;
   static const int STAT_SUM_DECODE_VERSION = 20;
   DECODE_START(STAT_SUM_DECODE_VERSION, bl);
-#if defined(CEPH_LITTLE_ENDIAN)
+#if defined(STONE_LITTLE_ENDIAN)
   if (struct_v == STAT_SUM_DECODE_VERSION) {
     bl.copy(sizeof(object_stat_sum_t), (char*)(&num_bytes));
     decode_finish = true;
@@ -2773,7 +2773,7 @@ void object_stat_collection_t::dump(Formatter *f) const
   f->close_section();
 }
 
-void object_stat_collection_t::encode(ceph::buffer::list& bl) const
+void object_stat_collection_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(2, 2, bl);
   encode(sum, bl);
@@ -2781,7 +2781,7 @@ void object_stat_collection_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void object_stat_collection_t::decode(ceph::buffer::list::const_iterator& bl)
+void object_stat_collection_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(2, 2, 2, bl);
   decode(sum, bl);
@@ -2911,7 +2911,7 @@ void pg_stat_t::dump_brief(Formatter *f) const
   f->dump_int("acting_primary", acting_primary);
 }
 
-void pg_stat_t::encode(ceph::buffer::list &bl) const
+void pg_stat_t::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(26, 22, bl);
   encode(version, bl);
@@ -2964,7 +2964,7 @@ void pg_stat_t::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void pg_stat_t::decode(ceph::buffer::list::const_iterator &bl)
+void pg_stat_t::decode(stone::buffer::list::const_iterator &bl)
 {
   bool tmp;
   uint32_t old_state;
@@ -3223,10 +3223,10 @@ void pool_stat_t::dump(Formatter *f) const
   f->dump_int("num_store_stats", num_store_stats);
 }
 
-void pool_stat_t::encode(ceph::buffer::list &bl, uint64_t features) const
+void pool_stat_t::encode(stone::buffer::list &bl, uint64_t features) const
 {
-  using ceph::encode;
-  if ((features & CEPH_FEATURE_OSDENC) == 0) {
+  using stone::encode;
+  if ((features & STONE_FEATURE_OSDENC) == 0) {
     __u8 v = 4;
     encode(v, bl);
     encode(stats, bl);
@@ -3246,7 +3246,7 @@ void pool_stat_t::encode(ceph::buffer::list &bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void pool_stat_t::decode(ceph::buffer::list::const_iterator &bl)
+void pool_stat_t::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(7, 5, 5, bl);
   if (struct_v >= 4) {
@@ -3314,7 +3314,7 @@ void pool_stat_t::generate_test_instances(list<pool_stat_t*>& o)
 
 // -- pg_history_t --
 
-void pg_history_t::encode(ceph::buffer::list &bl) const
+void pg_history_t::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(10, 4, bl);
   encode(epoch_created, bl);
@@ -3337,7 +3337,7 @@ void pg_history_t::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void pg_history_t::decode(ceph::buffer::list::const_iterator &bl)
+void pg_history_t::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(10, 4, 4, bl);
   decode(epoch_created, bl);
@@ -3439,7 +3439,7 @@ void pg_history_t::generate_test_instances(list<pg_history_t*>& o)
 
 // -- pg_info_t --
 
-void pg_info_t::encode(ceph::buffer::list &bl) const
+void pg_info_t::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(32, 26, bl);
   encode(pgid.pgid, bl);
@@ -3460,7 +3460,7 @@ void pg_info_t::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void pg_info_t::decode(ceph::buffer::list::const_iterator &bl)
+void pg_info_t::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(32, bl);
   decode(pgid.pgid, bl);
@@ -3557,7 +3557,7 @@ void pg_info_t::generate_test_instances(list<pg_info_t*>& o)
 }
 
 // -- pg_notify_t --
-void pg_notify_t::encode(ceph::buffer::list &bl) const
+void pg_notify_t::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(3, 2, bl);
   encode(query_epoch, bl);
@@ -3569,7 +3569,7 @@ void pg_notify_t::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void pg_notify_t::decode(ceph::buffer::list::const_iterator &bl)
+void pg_notify_t::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(3, bl);
   decode(query_epoch, bl);
@@ -3620,7 +3620,7 @@ ostream &operator<<(ostream &lhs, const pg_notify_t &notify)
 
 // -- pg_interval_t --
 
-void PastIntervals::pg_interval_t::encode(ceph::buffer::list& bl) const
+void PastIntervals::pg_interval_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(4, 2, bl);
   encode(first, bl);
@@ -3633,7 +3633,7 @@ void PastIntervals::pg_interval_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void PastIntervals::pg_interval_t::decode(ceph::buffer::list::const_iterator& bl)
+void PastIntervals::pg_interval_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(4, 2, 2, bl);
   decode(first, bl);
@@ -3723,14 +3723,14 @@ struct compact_interval_t {
     f->dump_stream("acting") << acting;
     f->close_section();
   }
-  void encode(ceph::buffer::list &bl) const {
+  void encode(stone::buffer::list &bl) const {
     ENCODE_START(1, 1, bl);
     encode(first, bl);
     encode(last, bl);
     encode(acting, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator &bl) {
+  void decode(stone::buffer::list::const_iterator &bl) {
     DECODE_START(1, bl);
     decode(first, bl);
     decode(last, bl);
@@ -3788,7 +3788,7 @@ public:
     bool ec_pool, const PastIntervals::pg_interval_t &interval) override {
     if (first == 0)
       first = interval.first;
-    ceph_assert(interval.last > last);
+    stone_assert(interval.last > last);
     last = interval.last;
     set<pg_shard_t> acting;
     for (unsigned i = 0; i < interval.acting.size(); ++i) {
@@ -3822,7 +3822,7 @@ public:
 	       << "] all_participants=" << all_participants
 	       << " intervals=" << intervals << ")";
   }
-  void encode(ceph::buffer::list &bl) const override {
+  void encode(stone::buffer::list &bl) const override {
     ENCODE_START(1, 1, bl);
     encode(first, bl);
     encode(last, bl);
@@ -3830,7 +3830,7 @@ public:
     encode(intervals, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator &bl) override {
+  void decode(stone::buffer::list::const_iterator &bl) override {
     DECODE_START(1, bl);
     decode(first, bl);
     decode(last, bl);
@@ -3932,7 +3932,7 @@ ostream& operator<<(ostream& out, const PastIntervals::PriorSet &i)
 	     << ")";
 }
 
-void PastIntervals::decode(ceph::buffer::list::const_iterator &bl)
+void PastIntervals::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(1, bl);
   __u8 type = 0;
@@ -3941,7 +3941,7 @@ void PastIntervals::decode(ceph::buffer::list::const_iterator &bl)
   case 0:
     break;
   case 1:
-    ceph_abort_msg("pi_simple_rep support removed post-luminous");
+    stone_abort_msg("pi_simple_rep support removed post-luminous");
     break;
   case 2:
     past_intervals.reset(new pi_compact_rep);
@@ -4057,10 +4057,10 @@ bool PastIntervals::is_new_interval(
 		    pi->get_pg_num(),
 		    plast->get_pg_num_pending(),
 		    pi->get_pg_num_pending(),
-		    lastmap->test_flag(CEPH_OSDMAP_SORTBITWISE),
-		    osdmap->test_flag(CEPH_OSDMAP_SORTBITWISE),
-		    lastmap->test_flag(CEPH_OSDMAP_RECOVERY_DELETES),
-		    osdmap->test_flag(CEPH_OSDMAP_RECOVERY_DELETES),
+		    lastmap->test_flag(STONE_OSDMAP_SORTBITWISE),
+		    osdmap->test_flag(STONE_OSDMAP_SORTBITWISE),
+		    lastmap->test_flag(STONE_OSDMAP_RECOVERY_DELETES),
+		    osdmap->test_flag(STONE_OSDMAP_RECOVERY_DELETES),
 		    plast->peering_crush_bucket_count, pi->peering_crush_bucket_count,
 		    plast->peering_crush_bucket_target, pi->peering_crush_bucket_target,
 		    plast->peering_crush_bucket_barrier, pi->peering_crush_bucket_barrier,
@@ -4131,8 +4131,8 @@ bool PastIntervals::check_new_interval(
   //  NOTE: a change in the up set primary triggers an interval
   //  change, even though the interval members in the pg_interval_t
   //  do not change.
-  ceph_assert(past_intervals);
-  ceph_assert(past_intervals->past_intervals);
+  stone_assert(past_intervals);
+  stone_assert(past_intervals->past_intervals);
   if (is_new_interval(
 	old_acting_primary,
 	new_acting_primary,
@@ -4148,7 +4148,7 @@ bool PastIntervals::check_new_interval(
     pg_interval_t i;
     i.first = same_interval_since;
     i.last = osdmap->get_epoch() - 1;
-    ceph_assert(i.first <= i.last);
+    stone_assert(i.first <= i.last);
     i.acting = old_acting;
     i.up = old_up;
     i.primary = old_acting_primary;
@@ -4159,7 +4159,7 @@ bool PastIntervals::check_new_interval(
       if (*p != CRUSH_ITEM_NONE)
 	++num_acting;
 
-    ceph_assert(lastmap->get_pools().count(pgid.pool()));
+    stone_assert(lastmap->get_pools().count(pgid.pool()));
     const pg_pool_t& old_pg_pool = lastmap->get_pools().find(pgid.pool())->second;
     set<pg_shard_t> old_acting_shards;
     old_pg_pool.convert_to_pg_shards(old_acting, &old_acting_shards);
@@ -4290,7 +4290,7 @@ ostream& operator<<(ostream& out, const PastIntervals::pg_interval_t& i)
 
 // -- pg_query_t --
 
-void pg_query_t::encode(ceph::buffer::list &bl, uint64_t features) const {
+void pg_query_t::encode(stone::buffer::list &bl, uint64_t features) const {
   ENCODE_START(3, 3, bl);
   encode(type, bl);
   encode(since, bl);
@@ -4301,7 +4301,7 @@ void pg_query_t::encode(ceph::buffer::list &bl, uint64_t features) const {
   ENCODE_FINISH(bl);
 }
 
-void pg_query_t::decode(ceph::buffer::list::const_iterator &bl) {
+void pg_query_t::decode(stone::buffer::list::const_iterator &bl) {
   DECODE_START(3, bl);
   decode(type, bl);
   decode(since, bl);
@@ -4419,7 +4419,7 @@ void ObjectModDesc::visit(Visitor *visitor) const
 	break;
       }
       case SETATTRS: {
-	map<string, std::optional<ceph::buffer::list> > attrs;
+	map<string, std::optional<stone::buffer::list> > attrs;
 	decode(attrs, bp);
 	visitor->setattrs(attrs);
 	break;
@@ -4455,12 +4455,12 @@ void ObjectModDesc::visit(Visitor *visitor) const
 	break;
       }
       default:
-	ceph_abort_msg("Invalid rollback code");
+	stone_abort_msg("Invalid rollback code");
       }
       DECODE_FINISH(bp);
     }
   } catch (...) {
-    ceph_abort_msg("Invalid encoding");
+    stone_abort_msg("Invalid encoding");
   }
 }
 
@@ -4473,7 +4473,7 @@ struct DumpVisitor : public ObjectModDesc::Visitor {
     f->dump_unsigned("old_size", old_size);
     f->close_section();
   }
-  void setattrs(map<string, std::optional<ceph::buffer::list> > &attrs) override {
+  void setattrs(map<string, std::optional<stone::buffer::list> > &attrs) override {
     f->open_object_section("op");
     f->dump_string("code", "SETATTRS");
     f->open_array_section("attrs");
@@ -4533,7 +4533,7 @@ void ObjectModDesc::dump(Formatter *f) const
 
 void ObjectModDesc::generate_test_instances(list<ObjectModDesc*>& o)
 {
-  map<string, std::optional<ceph::buffer::list> > attrs;
+  map<string, std::optional<stone::buffer::list> > attrs;
   attrs[OI_ATTR];
   attrs[SS_ATTR];
   attrs["asdf"];
@@ -4552,7 +4552,7 @@ void ObjectModDesc::generate_test_instances(list<ObjectModDesc*>& o)
   o.back()->append(1000);
 }
 
-void ObjectModDesc::encode(ceph::buffer::list &_bl) const
+void ObjectModDesc::encode(stone::buffer::list &_bl) const
 {
   ENCODE_START(max_required_version, max_required_version, _bl);
   encode(can_local_rollback, _bl);
@@ -4560,14 +4560,14 @@ void ObjectModDesc::encode(ceph::buffer::list &_bl) const
   encode(bl, _bl);
   ENCODE_FINISH(_bl);
 }
-void ObjectModDesc::decode(ceph::buffer::list::const_iterator &_bl)
+void ObjectModDesc::decode(stone::buffer::list::const_iterator &_bl)
 {
   DECODE_START(2, _bl);
   max_required_version = struct_v;
   decode(can_local_rollback, _bl);
   decode(rollback_info_completed, _bl);
   decode(bl, _bl);
-  // ensure bl does not pin a larger ceph::buffer in memory
+  // ensure bl does not pin a larger stone::buffer in memory
   bl.rebuild();
   bl.reassign_to_mempool(mempool::mempool_osd_pglog);
   DECODE_FINISH(_bl);
@@ -4655,7 +4655,7 @@ bool ObjectCleanRegions::object_is_exist() const
 void ObjectCleanRegions::encode(bufferlist &bl) const
 {
   ENCODE_START(1, 1, bl);
-  using ceph::encode;
+  using stone::encode;
   encode(clean_offsets, bl);
   encode(clean_omap, bl);
   encode(new_object, bl);
@@ -4665,7 +4665,7 @@ void ObjectCleanRegions::encode(bufferlist &bl) const
 void ObjectCleanRegions::decode(bufferlist::const_iterator &bl)
 {
   DECODE_START(1, bl);
-  using ceph::decode;
+  using stone::decode;
   decode(clean_offsets, bl);
   decode(clean_omap, bl);
   decode(new_object, bl);
@@ -4704,30 +4704,30 @@ string pg_log_entry_t::get_key_name() const
   return version.get_key_name();
 }
 
-void pg_log_entry_t::encode_with_checksum(ceph::buffer::list& bl) const
+void pg_log_entry_t::encode_with_checksum(stone::buffer::list& bl) const
 {
-  using ceph::encode;
-  ceph::buffer::list ebl(sizeof(*this)*2);
+  using stone::encode;
+  stone::buffer::list ebl(sizeof(*this)*2);
   this->encode(ebl);
   __u32 crc = ebl.crc32c(0);
   encode(ebl, bl);
   encode(crc, bl);
 }
 
-void pg_log_entry_t::decode_with_checksum(ceph::buffer::list::const_iterator& p)
+void pg_log_entry_t::decode_with_checksum(stone::buffer::list::const_iterator& p)
 {
-  using ceph::decode;
-  ceph::buffer::list bl;
+  using stone::decode;
+  stone::buffer::list bl;
   decode(bl, p);
   __u32 crc;
   decode(crc, p);
   if (crc != bl.crc32c(0))
-    throw ceph::buffer::malformed_input("bad checksum on pg_log_entry_t");
+    throw stone::buffer::malformed_input("bad checksum on pg_log_entry_t");
   auto q = bl.cbegin();
   this->decode(q);
 }
 
-void pg_log_entry_t::encode(ceph::buffer::list &bl) const
+void pg_log_entry_t::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(14, 4, bl);
   encode(op, bl);
@@ -4765,7 +4765,7 @@ void pg_log_entry_t::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void pg_log_entry_t::decode(ceph::buffer::list::const_iterator &bl)
+void pg_log_entry_t::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(14, 4, 4, bl);
   decode(op, bl);
@@ -4803,7 +4803,7 @@ void pg_log_entry_t::decode(ceph::buffer::list::const_iterator &bl)
   if (struct_v >= 7 ||  // for v >= 7, this is for all ops.
       op == CLONE) {    // for v < 7, it's only present for CLONE.
     decode(snaps, bl);
-    // ensure snaps does not pin a larger ceph::buffer in memory
+    // ensure snaps does not pin a larger stone::buffer in memory
     snaps.rebuild();
     snaps.reassign_to_mempool(mempool::mempool_osd_pglog);
   }
@@ -4869,10 +4869,10 @@ void pg_log_entry_t::dump(Formatter *f) const
   }
   if (snaps.length() > 0) {
     vector<snapid_t> v;
-    ceph::buffer::list c = snaps;
+    stone::buffer::list c = snaps;
     auto p = c.cbegin();
     try {
-      using ceph::decode;
+      using stone::decode;
       decode(v, p);
     } catch (...) {
       v.clear();
@@ -4917,7 +4917,7 @@ ostream& operator<<(ostream& out, const pg_log_entry_t& e)
   }
   if (e.snaps.length()) {
     vector<snapid_t> snaps;
-    ceph::buffer::list c = e.snaps;
+    stone::buffer::list c = e.snaps;
     auto p = c.cbegin();
     try {
       decode(snaps, p);
@@ -4942,7 +4942,7 @@ std::string pg_log_dup_t::get_key_name() const
   return key;
 }
 
-void pg_log_dup_t::encode(ceph::buffer::list &bl) const
+void pg_log_dup_t::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(2, 1, bl);
   encode(reqid, bl);
@@ -4953,7 +4953,7 @@ void pg_log_dup_t::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void pg_log_dup_t::decode(ceph::buffer::list::const_iterator &bl)
+void pg_log_dup_t::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(2, bl);
   decode(reqid, bl);
@@ -5043,7 +5043,7 @@ void pg_log_t::filter_log(spg_t import_pgid, const OSDMap &curmap,
   }
 }
 
-void pg_log_t::encode(ceph::buffer::list& bl) const
+void pg_log_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(7, 3, bl);
   encode(head, bl);
@@ -5055,7 +5055,7 @@ void pg_log_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
  
-void pg_log_t::decode(ceph::buffer::list::const_iterator &bl, int64_t pool)
+void pg_log_t::decode(stone::buffer::list::const_iterator &bl, int64_t pool)
 {
   DECODE_START_LEGACY_COMPAT_LEN(7, 3, 3, bl);
   decode(head, bl);
@@ -5121,7 +5121,7 @@ void pg_log_t::generate_test_instances(list<pg_log_t*>& o)
     o.back()->log.push_back(**p);
 }
 
-static void _handle_dups(CephContext* cct, pg_log_t &target, const pg_log_t &other, unsigned maxdups)
+static void _handle_dups(StoneContext* cct, pg_log_t &target, const pg_log_t &other, unsigned maxdups)
 {
   auto earliest_dup_version =
 	        target.head.version < maxdups ? 0u : target.head.version - maxdups + 1;
@@ -5137,7 +5137,7 @@ static void _handle_dups(CephContext* cct, pg_log_t &target, const pg_log_t &oth
   }
 
   for (auto i = other.log.cbegin(); i != other.log.cend(); ++i) {
-    ceph_assert(i->version > other.tail);
+    stone_assert(i->version > other.tail);
     if (i->version > target.tail)
       break;
     if (i->version.version >= earliest_dup_version) {
@@ -5150,14 +5150,14 @@ static void _handle_dups(CephContext* cct, pg_log_t &target, const pg_log_t &oth
 }
 
 
-void pg_log_t::copy_after(CephContext* cct, const pg_log_t &other, eversion_t v)
+void pg_log_t::copy_after(StoneContext* cct, const pg_log_t &other, eversion_t v)
 {
   can_rollback_to = other.can_rollback_to;
   head = other.head;
   tail = other.tail;
   lgeneric_subdout(cct, osd, 20) << __func__ << " v " << v << dendl;
   for (auto i = other.log.crbegin(); i != other.log.crend(); ++i) {
-    ceph_assert(i->version > other.tail);
+    stone_assert(i->version > other.tail);
     if (i->version <= v) {
       // make tail accurate.
       tail = i->version;
@@ -5169,7 +5169,7 @@ void pg_log_t::copy_after(CephContext* cct, const pg_log_t &other, eversion_t v)
   _handle_dups(cct, *this, other, cct->_conf->osd_pg_log_dups_tracked);
 }
 
-void pg_log_t::copy_up_to(CephContext* cct, const pg_log_t &other, int max)
+void pg_log_t::copy_up_to(StoneContext* cct, const pg_log_t &other, int max)
 {
   can_rollback_to = other.can_rollback_to;
   int n = 0;
@@ -5177,7 +5177,7 @@ void pg_log_t::copy_up_to(CephContext* cct, const pg_log_t &other, int max)
   tail = other.tail;
   lgeneric_subdout(cct, osd, 20) << __func__ << " max " << max << dendl;
   for (auto i = other.log.crbegin(); i != other.log.crend(); ++i) {
-    ceph_assert(i->version > other.tail);
+    stone_assert(i->version > other.tail);
     if (n++ >= max) {
       tail = i->version;
       break;
@@ -5213,7 +5213,7 @@ ostream& operator<<(ostream& out, const pg_missing_item& i)
 
 // -- object_copy_cursor_t --
 
-void object_copy_cursor_t::encode(ceph::buffer::list& bl) const
+void object_copy_cursor_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(1, 1, bl);
   encode(attr_complete, bl);
@@ -5224,7 +5224,7 @@ void object_copy_cursor_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void object_copy_cursor_t::decode(ceph::buffer::list::const_iterator &bl)
+void object_copy_cursor_t::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(1, bl);
   decode(attr_complete, bl);
@@ -5262,7 +5262,7 @@ void object_copy_cursor_t::generate_test_instances(list<object_copy_cursor_t*>& 
 
 // -- object_copy_data_t --
 
-void object_copy_data_t::encode(ceph::buffer::list& bl, uint64_t features) const
+void object_copy_data_t::encode(stone::buffer::list& bl, uint64_t features) const
 {
   ENCODE_START(8, 5, bl);
   encode(size, bl);
@@ -5284,7 +5284,7 @@ void object_copy_data_t::encode(ceph::buffer::list& bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void object_copy_data_t::decode(ceph::buffer::list::const_iterator& bl)
+void object_copy_data_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START(8, bl);
   if (struct_v < 5) {
@@ -5298,11 +5298,11 @@ void object_copy_data_t::decode(ceph::buffer::list::const_iterator& bl)
     decode(attrs, bl);
     decode(data, bl);
     {
-      map<string,ceph::buffer::list> omap;
+      map<string,stone::buffer::list> omap;
       decode(omap, bl);
       omap_data.clear();
       if (!omap.empty()) {
-	using ceph::encode;
+	using stone::encode;
 	encode(omap, omap_data);
       }
     }
@@ -5366,18 +5366,18 @@ void object_copy_data_t::generate_test_instances(list<object_copy_data_t*>& o)
   o.push_back(new object_copy_data_t());
   o.back()->size = 1234;
   o.back()->mtime.set_from_double(1234);
-  ceph::buffer::ptr bp("there", 5);
-  ceph::buffer::list bl;
+  stone::buffer::ptr bp("there", 5);
+  stone::buffer::list bl;
   bl.push_back(bp);
   o.back()->attrs["hello"] = bl;
-  ceph::buffer::ptr bp2("not", 3);
-  ceph::buffer::list bl2;
+  stone::buffer::ptr bp2("not", 3);
+  stone::buffer::list bl2;
   bl2.push_back(bp2);
-  map<string,ceph::buffer::list> omap;
+  map<string,stone::buffer::list> omap;
   omap["why"] = bl2;
-  using ceph::encode;
+  using stone::encode;
   encode(omap, o.back()->omap_data);
-  ceph::buffer::ptr databp("iamsomedatatocontain", 20);
+  stone::buffer::ptr databp("iamsomedatatocontain", 20);
   o.back()->data.push_back(databp);
   o.back()->omap_header.append("this is an omap header");
   o.back()->snaps.push_back(123);
@@ -5391,7 +5391,7 @@ void object_copy_data_t::dump(Formatter *f) const
   f->close_section(); // cursor
   f->dump_int("size", size);
   f->dump_stream("mtime") << mtime;
-  /* we should really print out the attrs here, but ceph::buffer::list
+  /* we should really print out the attrs here, but stone::buffer::list
      const-correctness prevents that */
   f->dump_int("attrs_size", attrs.size());
   f->dump_int("flags", flags);
@@ -5423,7 +5423,7 @@ void object_copy_data_t::dump(Formatter *f) const
 
 // -- pg_create_t --
 
-void pg_create_t::encode(ceph::buffer::list &bl) const
+void pg_create_t::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(1, 1, bl);
   encode(created, bl);
@@ -5432,7 +5432,7 @@ void pg_create_t::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void pg_create_t::decode(ceph::buffer::list::const_iterator &bl)
+void pg_create_t::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(1, bl);
   decode(created, bl);
@@ -5457,7 +5457,7 @@ void pg_create_t::generate_test_instances(list<pg_create_t*>& o)
 
 // -- pg_hit_set_info_t --
 
-void pg_hit_set_info_t::encode(ceph::buffer::list& bl) const
+void pg_hit_set_info_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(2, 1, bl);
   encode(begin, bl);
@@ -5467,7 +5467,7 @@ void pg_hit_set_info_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void pg_hit_set_info_t::decode(ceph::buffer::list::const_iterator& p)
+void pg_hit_set_info_t::decode(stone::buffer::list::const_iterator& p)
 {
   DECODE_START(2, p);
   decode(begin, p);
@@ -5500,7 +5500,7 @@ void pg_hit_set_info_t::generate_test_instances(list<pg_hit_set_info_t*>& ls)
 
 // -- pg_hit_set_history_t --
 
-void pg_hit_set_history_t::encode(ceph::buffer::list& bl) const
+void pg_hit_set_history_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(1, 1, bl);
   encode(current_last_update, bl);
@@ -5516,7 +5516,7 @@ void pg_hit_set_history_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void pg_hit_set_history_t::decode(ceph::buffer::list::const_iterator& p)
+void pg_hit_set_history_t::decode(stone::buffer::list::const_iterator& p)
 {
   DECODE_START(1, p);
   decode(current_last_update, p);
@@ -5554,7 +5554,7 @@ void pg_hit_set_history_t::generate_test_instances(list<pg_hit_set_history_t*>& 
 
 // -- OSDSuperblock --
 
-void OSDSuperblock::encode(ceph::buffer::list &bl) const
+void OSDSuperblock::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(9, 5, bl);
   encode(cluster_fsid, bl);
@@ -5574,7 +5574,7 @@ void OSDSuperblock::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void OSDSuperblock::decode(ceph::buffer::list::const_iterator &bl)
+void OSDSuperblock::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(9, 5, 5, bl);
   if (struct_v < 3) {
@@ -5590,7 +5590,7 @@ void OSDSuperblock::decode(ceph::buffer::list::const_iterator &bl)
   if (struct_v >= 2) {
     compat_features.decode(bl);
   } else { //upgrade it!
-    compat_features.incompat.insert(CEPH_OSD_FEATURE_INCOMPAT_BASE);
+    compat_features.incompat.insert(STONE_OSD_FEATURE_INCOMPAT_BASE);
   }
   decode(clean_thru, bl);
   decode(mounted, bl);
@@ -5649,7 +5649,7 @@ void OSDSuperblock::generate_test_instances(list<OSDSuperblock*>& o)
 
 // -- SnapSet --
 
-void SnapSet::encode(ceph::buffer::list& bl) const
+void SnapSet::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(3, 2, bl);
   encode(seq, bl);
@@ -5662,7 +5662,7 @@ void SnapSet::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void SnapSet::decode(ceph::buffer::list::const_iterator& bl)
+void SnapSet::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(3, 2, 2, bl);
   decode(seq, bl);
@@ -5778,11 +5778,11 @@ void SnapSet::from_snap_set(const librados::snap_set_t& ss, bool legacy)
 
 uint64_t SnapSet::get_clone_bytes(snapid_t clone) const
 {
-  ceph_assert(clone_size.count(clone));
+  stone_assert(clone_size.count(clone));
   uint64_t size = clone_size.find(clone)->second;
-  ceph_assert(clone_overlap.count(clone));
+  stone_assert(clone_overlap.count(clone));
   const interval_set<uint64_t> &overlap = clone_overlap.find(clone)->second;
-  ceph_assert(size >= (uint64_t)overlap.size());
+  stone_assert(size >= (uint64_t)overlap.size());
   return size - overlap.size();
 }
 
@@ -5805,7 +5805,7 @@ SnapSet SnapSet::get_filtered(const pg_pool_t &pinfo) const
 
 // -- watch_info_t --
 
-void watch_info_t::encode(ceph::buffer::list& bl, uint64_t features) const
+void watch_info_t::encode(stone::buffer::list& bl, uint64_t features) const
 {
   ENCODE_START(4, 3, bl);
   encode(cookie, bl);
@@ -5814,7 +5814,7 @@ void watch_info_t::encode(ceph::buffer::list& bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void watch_info_t::decode(ceph::buffer::list::const_iterator& bl)
+void watch_info_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(4, 3, 3, bl);
   decode(cookie, bl);
@@ -5858,7 +5858,7 @@ void watch_info_t::generate_test_instances(list<watch_info_t*>& o)
 
 // -- chunk_info_t --
 
-void chunk_info_t::encode(ceph::buffer::list& bl) const
+void chunk_info_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(1, 1, bl);
   encode(offset, bl);
@@ -5869,7 +5869,7 @@ void chunk_info_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void chunk_info_t::decode(ceph::buffer::list::const_iterator& bl)
+void chunk_info_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START(1, bl);
   decode(offset, bl);
@@ -6090,7 +6090,7 @@ void object_manifest_t::calc_refs_to_drop_on_removal(
   }
 }
 
-void object_manifest_t::encode(ceph::buffer::list& bl) const
+void object_manifest_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(1, 1, bl);
   encode(type, bl);
@@ -6103,12 +6103,12 @@ void object_manifest_t::encode(ceph::buffer::list& bl) const
       encode(chunk_map, bl);
       break;
     default:
-      ceph_abort();
+      stone_abort();
   }
   ENCODE_FINISH(bl);
 }
 
-void object_manifest_t::decode(ceph::buffer::list::const_iterator& bl)
+void object_manifest_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START(1, bl);
   decode(type, bl);
@@ -6121,7 +6121,7 @@ void object_manifest_t::decode(ceph::buffer::list::const_iterator& bl)
       decode(chunk_map, bl);
       break;
     default:
-      ceph_abort();
+      stone_abort();
   }
   DECODE_FINISH(bl);
 }
@@ -6180,7 +6180,7 @@ void object_info_t::copy_user_bits(const object_info_t& other)
   omap_digest = other.omap_digest;
 }
 
-void object_info_t::encode(ceph::buffer::list& bl, uint64_t features) const
+void object_info_t::encode(stone::buffer::list& bl, uint64_t features) const
 {
   object_locator_t myoloc(soid);
   map<entity_name_t, watch_info_t> old_watchers;
@@ -6196,7 +6196,7 @@ void object_info_t::encode(ceph::buffer::list& bl, uint64_t features) const
   encode(last_reqid, bl);
   encode(size, bl);
   encode(mtime, bl);
-  if (soid.snap == CEPH_NOSNAP)
+  if (soid.snap == STONE_NOSNAP)
     encode(osd_reqid_t(), bl);  // used to be wrlock_by
   else
     encode((uint32_t)0, bl);    // was legacy_snaps
@@ -6224,7 +6224,7 @@ void object_info_t::encode(ceph::buffer::list& bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void object_info_t::decode(ceph::buffer::list::const_iterator& bl)
+void object_info_t::decode(stone::buffer::list::const_iterator& bl)
 {
   object_locator_t myoloc;
   DECODE_START_LEGACY_COMPAT_LEN(17, 8, 8, bl);
@@ -6240,7 +6240,7 @@ void object_info_t::decode(ceph::buffer::list::const_iterator& bl)
   decode(last_reqid, bl);
   decode(size, bl);
   decode(mtime, bl);
-  if (soid.snap == CEPH_NOSNAP) {
+  if (soid.snap == STONE_NOSNAP) {
     osd_reqid_t wrlock_by;
     decode(wrlock_by, bl);
   } else {
@@ -6383,7 +6383,7 @@ ostream& operator<<(ostream& out, const object_info_t& oi)
 }
 
 // -- ObjectRecovery --
-void ObjectRecoveryProgress::encode(ceph::buffer::list &bl) const
+void ObjectRecoveryProgress::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(1, 1, bl);
   encode(first, bl);
@@ -6394,7 +6394,7 @@ void ObjectRecoveryProgress::encode(ceph::buffer::list &bl) const
   ENCODE_FINISH(bl);
 }
 
-void ObjectRecoveryProgress::decode(ceph::buffer::list::const_iterator &bl)
+void ObjectRecoveryProgress::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(1, bl);
   decode(first, bl);
@@ -6447,7 +6447,7 @@ void ObjectRecoveryProgress::dump(Formatter *f) const
   f->dump_string("omap_recovered_to", omap_recovered_to);
 }
 
-void ObjectRecoveryInfo::encode(ceph::buffer::list &bl, uint64_t features) const
+void ObjectRecoveryInfo::encode(stone::buffer::list &bl, uint64_t features) const
 {
   ENCODE_START(3, 1, bl);
   encode(soid, bl);
@@ -6461,7 +6461,7 @@ void ObjectRecoveryInfo::encode(ceph::buffer::list &bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void ObjectRecoveryInfo::decode(ceph::buffer::list::const_iterator &bl,
+void ObjectRecoveryInfo::decode(stone::buffer::list::const_iterator &bl,
 				int64_t pool)
 {
   DECODE_START(3, bl);
@@ -6495,7 +6495,7 @@ void ObjectRecoveryInfo::generate_test_instances(
   list<ObjectRecoveryInfo*>& o)
 {
   o.push_back(new ObjectRecoveryInfo);
-  o.back()->soid = hobject_t(sobject_t("key", CEPH_NOSNAP));
+  o.back()->soid = hobject_t(sobject_t("key", STONE_NOSNAP));
   o.back()->version = eversion_t(0,0);
   o.back()->size = 100;
   o.back()->object_exist = false;
@@ -6546,17 +6546,17 @@ void PushReplyOp::generate_test_instances(list<PushReplyOp*> &o)
   o.push_back(new PushReplyOp);
   o.back()->soid = hobject_t(sobject_t("asdf", 2));
   o.push_back(new PushReplyOp);
-  o.back()->soid = hobject_t(sobject_t("asdf", CEPH_NOSNAP));
+  o.back()->soid = hobject_t(sobject_t("asdf", STONE_NOSNAP));
 }
 
-void PushReplyOp::encode(ceph::buffer::list &bl) const
+void PushReplyOp::encode(stone::buffer::list &bl) const
 {
   ENCODE_START(1, 1, bl);
   encode(soid, bl);
   ENCODE_FINISH(bl);
 }
 
-void PushReplyOp::decode(ceph::buffer::list::const_iterator &bl)
+void PushReplyOp::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(1, bl);
   decode(soid, bl);
@@ -6580,7 +6580,7 @@ ostream& operator<<(ostream& out, const PushReplyOp &op)
   return op.print(out);
 }
 
-uint64_t PushReplyOp::cost(CephContext *cct) const
+uint64_t PushReplyOp::cost(StoneContext *cct) const
 {
 
   return cct->_conf->osd_push_per_object_cost +
@@ -6595,11 +6595,11 @@ void PullOp::generate_test_instances(list<PullOp*> &o)
   o.back()->soid = hobject_t(sobject_t("asdf", 2));
   o.back()->recovery_info.version = eversion_t(3, 10);
   o.push_back(new PullOp);
-  o.back()->soid = hobject_t(sobject_t("asdf", CEPH_NOSNAP));
+  o.back()->soid = hobject_t(sobject_t("asdf", STONE_NOSNAP));
   o.back()->recovery_info.version = eversion_t(0, 0);
 }
 
-void PullOp::encode(ceph::buffer::list &bl, uint64_t features) const
+void PullOp::encode(stone::buffer::list &bl, uint64_t features) const
 {
   ENCODE_START(1, 1, bl);
   encode(soid, bl);
@@ -6608,7 +6608,7 @@ void PullOp::encode(ceph::buffer::list &bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void PullOp::decode(ceph::buffer::list::const_iterator &bl)
+void PullOp::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(1, bl);
   decode(soid, bl);
@@ -6646,7 +6646,7 @@ ostream& operator<<(ostream& out, const PullOp &op)
   return op.print(out);
 }
 
-uint64_t PullOp::cost(CephContext *cct) const
+uint64_t PullOp::cost(StoneContext *cct) const
 {
   return cct->_conf->osd_push_per_object_cost +
     cct->_conf->osd_recovery_max_chunk;
@@ -6660,11 +6660,11 @@ void PushOp::generate_test_instances(list<PushOp*> &o)
   o.back()->soid = hobject_t(sobject_t("asdf", 2));
   o.back()->version = eversion_t(3, 10);
   o.push_back(new PushOp);
-  o.back()->soid = hobject_t(sobject_t("asdf", CEPH_NOSNAP));
+  o.back()->soid = hobject_t(sobject_t("asdf", STONE_NOSNAP));
   o.back()->version = eversion_t(0, 0);
 }
 
-void PushOp::encode(ceph::buffer::list &bl, uint64_t features) const
+void PushOp::encode(stone::buffer::list &bl, uint64_t features) const
 {
   ENCODE_START(1, 1, bl);
   encode(soid, bl);
@@ -6680,7 +6680,7 @@ void PushOp::encode(ceph::buffer::list &bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void PushOp::decode(ceph::buffer::list::const_iterator &bl)
+void PushOp::decode(stone::buffer::list::const_iterator &bl)
 {
   DECODE_START(1, bl);
   decode(soid, bl);
@@ -6743,7 +6743,7 @@ ostream& operator<<(ostream& out, const PushOp &op)
   return op.print(out);
 }
 
-uint64_t PushOp::cost(CephContext *cct) const
+uint64_t PushOp::cost(StoneContext *cct) const
 {
   uint64_t cost = data_included.size();
   for (auto i = omap_entries.cbegin(); i != omap_entries.cend(); ++i) {
@@ -6757,7 +6757,7 @@ uint64_t PushOp::cost(CephContext *cct) const
 
 void ScrubMap::merge_incr(const ScrubMap &l)
 {
-  ceph_assert(valid_through == l.incr_since);
+  stone_assert(valid_through == l.incr_since);
   valid_through = l.valid_through;
 
   for (auto p = l.objects.cbegin(); p != l.objects.cend(); ++p){
@@ -6772,19 +6772,19 @@ void ScrubMap::merge_incr(const ScrubMap &l)
   }
 }          
 
-void ScrubMap::encode(ceph::buffer::list& bl) const
+void ScrubMap::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(3, 2, bl);
   encode(objects, bl);
   encode((__u32)0, bl); // used to be attrs; now deprecated
-  ceph::buffer::list old_logbl;  // not used
+  stone::buffer::list old_logbl;  // not used
   encode(old_logbl, bl);
   encode(valid_through, bl);
   encode(incr_since, bl);
   ENCODE_FINISH(bl);
 }
 
-void ScrubMap::decode(ceph::buffer::list::const_iterator& bl, int64_t pool)
+void ScrubMap::decode(stone::buffer::list::const_iterator& bl, int64_t pool)
 {
   DECODE_START_LEGACY_COMPAT_LEN(3, 2, 2, bl);
   decode(objects, bl);
@@ -6792,7 +6792,7 @@ void ScrubMap::decode(ceph::buffer::list::const_iterator& bl, int64_t pool)
     map<string,string> attrs;  // deprecated
     decode(attrs, bl);
   }
-  ceph::buffer::list old_logbl;   // not used
+  stone::buffer::list old_logbl;   // not used
   decode(old_logbl, bl);
   decode(valid_through, bl);
   decode(incr_since, bl);
@@ -6843,7 +6843,7 @@ void ScrubMap::generate_test_instances(list<ScrubMap*>& o)
 
 // -- ScrubMap::object --
 
-void ScrubMap::object::encode(ceph::buffer::list& bl) const
+void ScrubMap::object::encode(stone::buffer::list& bl) const
 {
   bool compat_read_error = read_error || ec_hash_mismatch || ec_size_mismatch;
   ENCODE_START(10, 7, bl);
@@ -6869,7 +6869,7 @@ void ScrubMap::object::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void ScrubMap::object::decode(ceph::buffer::list::const_iterator& bl)
+void ScrubMap::object::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START(10, bl);
   decode(size, bl);
@@ -6937,71 +6937,71 @@ void ScrubMap::object::generate_test_instances(list<object*>& o)
   o.back()->negative = true;
   o.push_back(new object);
   o.back()->size = 123;
-  o.back()->attrs["foo"] = ceph::buffer::copy("foo", 3);
-  o.back()->attrs["bar"] = ceph::buffer::copy("barval", 6);
+  o.back()->attrs["foo"] = stone::buffer::copy("foo", 3);
+  o.back()->attrs["bar"] = stone::buffer::copy("barval", 6);
 }
 
 // -- OSDOp --
 
 ostream& operator<<(ostream& out, const OSDOp& op)
 {
-  out << ceph_osd_op_name(op.op.op);
-  if (ceph_osd_op_type_data(op.op.op)) {
+  out << stone_osd_op_name(op.op.op);
+  if (stone_osd_op_type_data(op.op.op)) {
     // data extent
     switch (op.op.op) {
-    case CEPH_OSD_OP_ASSERT_VER:
+    case STONE_OSD_OP_ASSERT_VER:
       out << " v" << op.op.assert_ver.ver;
       break;
-    case CEPH_OSD_OP_TRUNCATE:
+    case STONE_OSD_OP_TRUNCATE:
       out << " " << op.op.extent.offset;
       break;
-    case CEPH_OSD_OP_MASKTRUNC:
-    case CEPH_OSD_OP_TRIMTRUNC:
+    case STONE_OSD_OP_MASKTRUNC:
+    case STONE_OSD_OP_TRIMTRUNC:
       out << " " << op.op.extent.truncate_seq << "@"
 	  << (int64_t)op.op.extent.truncate_size;
       break;
-    case CEPH_OSD_OP_ROLLBACK:
+    case STONE_OSD_OP_ROLLBACK:
       out << " " << snapid_t(op.op.snap.snapid);
       break;
-    case CEPH_OSD_OP_WATCH:
-      out << " " << ceph_osd_watch_op_name(op.op.watch.op)
+    case STONE_OSD_OP_WATCH:
+      out << " " << stone_osd_watch_op_name(op.op.watch.op)
 	  << " cookie " << op.op.watch.cookie;
       if (op.op.watch.gen)
 	out << " gen " << op.op.watch.gen;
       break;
-    case CEPH_OSD_OP_NOTIFY:
+    case STONE_OSD_OP_NOTIFY:
       out << " cookie " << op.op.notify.cookie;
       break;
-    case CEPH_OSD_OP_COPY_GET:
+    case STONE_OSD_OP_COPY_GET:
       out << " max " << op.op.copy_get.max;
       break;
-    case CEPH_OSD_OP_COPY_FROM:
+    case STONE_OSD_OP_COPY_FROM:
       out << " ver " << op.op.copy_from.src_version;
       break;
-    case CEPH_OSD_OP_SETALLOCHINT:
+    case STONE_OSD_OP_SETALLOCHINT:
       out << " object_size " << op.op.alloc_hint.expected_object_size
           << " write_size " << op.op.alloc_hint.expected_write_size;
       break;
-    case CEPH_OSD_OP_READ:
-    case CEPH_OSD_OP_SPARSE_READ:
-    case CEPH_OSD_OP_SYNC_READ:
-    case CEPH_OSD_OP_WRITE:
-    case CEPH_OSD_OP_WRITEFULL:
-    case CEPH_OSD_OP_ZERO:
-    case CEPH_OSD_OP_APPEND:
-    case CEPH_OSD_OP_MAPEXT:
-    case CEPH_OSD_OP_CMPEXT:
+    case STONE_OSD_OP_READ:
+    case STONE_OSD_OP_SPARSE_READ:
+    case STONE_OSD_OP_SYNC_READ:
+    case STONE_OSD_OP_WRITE:
+    case STONE_OSD_OP_WRITEFULL:
+    case STONE_OSD_OP_ZERO:
+    case STONE_OSD_OP_APPEND:
+    case STONE_OSD_OP_MAPEXT:
+    case STONE_OSD_OP_CMPEXT:
       out << " " << op.op.extent.offset << "~" << op.op.extent.length;
       if (op.op.extent.truncate_seq)
 	out << " [" << op.op.extent.truncate_seq << "@"
 	    << (int64_t)op.op.extent.truncate_size << "]";
       if (op.op.flags)
-	out << " [" << ceph_osd_op_flag_string(op.op.flags) << "]";
+	out << " [" << stone_osd_op_flag_string(op.op.flags) << "]";
     default:
       // don't show any arg info
       break;
     }
-  } else if (ceph_osd_op_type_attr(op.op.op)) {
+  } else if (stone_osd_op_type_attr(op.op.op)) {
     // xattr name
     if (op.op.xattr.name_len && op.indata.length()) {
       out << " ";
@@ -7009,10 +7009,10 @@ ostream& operator<<(ostream& out, const OSDOp& op)
     }
     if (op.op.xattr.value_len)
       out << " (" << op.op.xattr.value_len << ")";
-    if (op.op.op == CEPH_OSD_OP_CMPXATTR)
+    if (op.op.op == STONE_OSD_OP_CMPXATTR)
       out << " op " << (int)op.op.xattr.cmp_op
 	  << " mode " << (int)op.op.xattr.cmp_mode;
-  } else if (ceph_osd_op_type_exec(op.op.op)) {
+  } else if (stone_osd_op_type_exec(op.op.op)) {
     // class.method
     if (op.op.cls.class_len && op.indata.length()) {
       out << " ";
@@ -7020,20 +7020,20 @@ ostream& operator<<(ostream& out, const OSDOp& op)
       out << ".";
       op.indata.write(op.op.cls.class_len, op.op.cls.method_len, out);
     }
-  } else if (ceph_osd_op_type_pg(op.op.op)) {
+  } else if (stone_osd_op_type_pg(op.op.op)) {
     switch (op.op.op) {
-    case CEPH_OSD_OP_PGLS:
-    case CEPH_OSD_OP_PGLS_FILTER:
-    case CEPH_OSD_OP_PGNLS:
-    case CEPH_OSD_OP_PGNLS_FILTER:
+    case STONE_OSD_OP_PGLS:
+    case STONE_OSD_OP_PGLS_FILTER:
+    case STONE_OSD_OP_PGNLS:
+    case STONE_OSD_OP_PGNLS_FILTER:
       out << " start_epoch " << op.op.pgls.start_epoch;
       break;
-    case CEPH_OSD_OP_PG_HITSET_LS:
+    case STONE_OSD_OP_PG_HITSET_LS:
       break;
-    case CEPH_OSD_OP_PG_HITSET_GET:
+    case STONE_OSD_OP_PG_HITSET_GET:
       out << " " << utime_t(op.op.hit_set_get.stamp);
       break;
-    case CEPH_OSD_OP_SCRUBLS:
+    case STONE_OSD_OP_SCRUBLS:
       break;
     }
   }
@@ -7047,7 +7047,7 @@ ostream& operator<<(ostream& out, const OSDOp& op)
 }
 
 
-void OSDOp::split_osd_op_vector_out_data(vector<OSDOp>& ops, ceph::buffer::list& in)
+void OSDOp::split_osd_op_vector_out_data(vector<OSDOp>& ops, stone::buffer::list& in)
 {
   auto datap = in.begin();
   for (unsigned i = 0; i < ops.size(); i++) {
@@ -7057,7 +7057,7 @@ void OSDOp::split_osd_op_vector_out_data(vector<OSDOp>& ops, ceph::buffer::list&
   }
 }
 
-void OSDOp::merge_osd_op_vector_out_data(vector<OSDOp>& ops, ceph::buffer::list& out)
+void OSDOp::merge_osd_op_vector_out_data(vector<OSDOp>& ops, stone::buffer::list& out)
 {
   for (unsigned i = 0; i < ops.size(); i++) {
     ops[i].op.payload_len = ops[i].outdata.length();
@@ -7068,7 +7068,7 @@ void OSDOp::merge_osd_op_vector_out_data(vector<OSDOp>& ops, ceph::buffer::list&
 }
 
 int prepare_info_keymap(
-  CephContext* cct,
+  StoneContext* cct,
   map<string,bufferlist> *km,
   string *key_to_remove,
   epoch_t epoch,
@@ -7094,7 +7094,7 @@ int prepare_info_keymap(
     pg_fast_info_t fast;
     fast.populate_from(info);
     bool did = fast.try_apply_to(&last_written_info);
-    ceph_assert(did);  // we verified last_update increased above
+    stone_assert(did);  // we verified last_update increased above
     if (info == last_written_info) {
       encode(fast, (*km)[string(fastinfo_key)]);
       if (logger)
@@ -7144,14 +7144,14 @@ int prepare_info_keymap(
 }
 
 void create_pg_collection(
-  ceph::os::Transaction& t, spg_t pgid, int bits)
+  stone::os::Transaction& t, spg_t pgid, int bits)
 {
   coll_t coll(pgid);
   t.create_collection(coll, bits);
 }
 
 void init_pg_ondisk(
-  ceph::os::Transaction& t,
+  stone::os::Transaction& t,
   spg_t pgid,
   const pg_pool_t *pool)
 {
@@ -7163,7 +7163,7 @@ void init_pg_ondisk(
     uint64_t expected_num_objects_pg = pool->expected_num_objects / pg_num;
     encode(pg_num, hint);
     encode(expected_num_objects_pg, hint);
-    uint32_t hint_type = ceph::os::Transaction::COLL_HINT_EXPECTED_NUM_OBJECTS;
+    uint32_t hint_type = stone::os::Transaction::COLL_HINT_EXPECTED_NUM_OBJECTS;
     t.collection_hint(coll, hint_type, hint);
   }
 
@@ -7183,19 +7183,19 @@ PGLSFilter::~PGLSFilter()
 {
 }
 
-int PGLSPlainFilter::init(ceph::bufferlist::const_iterator &params)
+int PGLSPlainFilter::init(stone::bufferlist::const_iterator &params)
 {
   try {
     decode(xattr, params);
     decode(val, params);
-  } catch (ceph::buffer::error &e) {
+  } catch (stone::buffer::error &e) {
     return -EINVAL;
   }
   return 0;
 }
 
 bool PGLSPlainFilter::filter(const hobject_t& obj,
-                             const ceph::bufferlist& xattr_data) const
+                             const stone::bufferlist& xattr_data) const
 {
   return xattr_data.contents_equal(val.c_str(), val.size());
 }

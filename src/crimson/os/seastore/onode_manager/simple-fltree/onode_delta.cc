@@ -84,8 +84,8 @@ delta_t delta_t::trim_right(unsigned n)
   return delta;
 }
 
-delta_t delta_t::insert_front(ceph::buffer::ptr keys,
-                              ceph::buffer::ptr cells)
+delta_t delta_t::insert_front(stone::buffer::ptr keys,
+                              stone::buffer::ptr cells)
 {
   delta_t delta{op_t::insert_front};
   delta.keys = std::move(keys);
@@ -93,8 +93,8 @@ delta_t delta_t::insert_front(ceph::buffer::ptr keys,
   return delta;
 }
 
-delta_t delta_t::insert_back(ceph::buffer::ptr keys,
-                             ceph::buffer::ptr cells)
+delta_t delta_t::insert_back(stone::buffer::ptr keys,
+                             stone::buffer::ptr cells)
 {
   delta_t delta{op_t::insert_back};
   delta.keys = std::move(keys);
@@ -109,9 +109,9 @@ delta_t delta_t::remove_from(unsigned slot)
   return delta;
 }
 
-void delta_t::encode(ceph::bufferlist& bl)
+void delta_t::encode(stone::bufferlist& bl)
 {
-  using ceph::encode;
+  using stone::encode;
   switch (op) {
   case op_t::insert_onode:
     [[fallthrough]];
@@ -150,8 +150,8 @@ void delta_t::encode(ceph::bufferlist& bl)
   }
 }
 
-void delta_t::decode(ceph::bufferlist::const_iterator& p) {
-  using ceph::decode;
+void delta_t::decode(stone::bufferlist::const_iterator& p) {
+  using stone::decode;
   decode(op, p);
   switch (op) {
   case op_t::insert_onode:

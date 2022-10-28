@@ -22,7 +22,7 @@ struct MockTestImageCtx : public MockImageCtx {
                                   const std::string &image_id,
                                   const char *snap, librados::IoCtx& p,
                                   bool read_only) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -57,7 +57,7 @@ public:
                                MockTestImageCtx *image_ctx,
                                ContextWQ *op_work_queue, bool force,
                                ProgressContext &prog_ctx, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -146,7 +146,7 @@ public:
                            const std::string& parent_header_name,
                            const cls::rbd::SnapshotInfo& snap_info, int r) {
 
-    using ceph::encode;
+    using stone::encode;
     EXPECT_CALL(mock_io_ctx_impl,
                 exec(parent_header_name, _, StrEq("rbd"),
                      StrEq("snapshot_get"), _, _, _, _))
@@ -190,7 +190,7 @@ public:
                         librados::MockTestMemIoCtxImpl &mock_io_ctx_impl,
                         const cls::rbd::TrashImageSpec& trash_spec,
                         int r) {
-    using ceph::encode;
+    using stone::encode;
     EXPECT_CALL(mock_io_ctx_impl,
                 exec(RBD_TRASH, _, StrEq("rbd"),
                      StrEq("trash_get"), _, _, _, _))

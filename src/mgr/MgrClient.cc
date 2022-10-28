@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -32,30 +32,30 @@
 using std::string;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::make_message;
-using ceph::ref_cast;
-using ceph::ref_t;
+using stone::bufferlist;
+using stone::make_message;
+using stone::ref_cast;
+using stone::ref_t;
 
-#define dout_subsys ceph_subsys_mgrc
+#define dout_subsys stone_subsys_mgrc
 #undef dout_prefix
 #define dout_prefix *_dout << "mgrc " << __func__ << " "
 
-MgrClient::MgrClient(CephContext *cct_, Messenger *msgr_, MonMap *monmap_)
+MgrClient::MgrClient(StoneContext *cct_, Messenger *msgr_, MonMap *monmap_)
   : Dispatcher(cct_),
     cct(cct_),
     msgr(msgr_),
     monmap(monmap_),
     timer(cct_, lock)
 {
-  ceph_assert(cct != nullptr);
+  stone_assert(cct != nullptr);
 }
 
 void MgrClient::init()
 {
   std::lock_guard l(lock);
 
-  ceph_assert(msgr != nullptr);
+  stone_assert(msgr != nullptr);
 
   timer.init();
   initialized = true;
@@ -83,7 +83,7 @@ void MgrClient::shutdown()
     m->daemon_name = daemon_name;
     m->service_name = service_name;
     session->con->send_message2(m);
-    auto timeout = ceph::make_timespan(cct->_conf.get_val<double>(
+    auto timeout = stone::make_timespan(cct->_conf.get_val<double>(
 			      "mgr_client_service_daemon_unregister_timeout"));
     shutdown_cond.wait_for(l, timeout);
   }
@@ -107,7 +107,7 @@ bool MgrClient::ms_dispatch2(const ref_t<Message>& m)
   case MSG_MGR_CLOSE:
     return handle_mgr_close(ref_cast<MMgrClose>(m));
   case MSG_COMMAND_REPLY:
-    if (m->get_source().type() == CEPH_ENTITY_TYPE_MGR) {
+    if (m->get_source().type() == STONE_ENTITY_TYPE_MGR) {
       MCommandReply *c = static_cast<MCommandReply*>(m.get());
       handle_command_reply(c->get_tid(), c->get_data(), c->rs, c->r);
       return true;
@@ -115,7 +115,7 @@ bool MgrClient::ms_dispatch2(const ref_t<Message>& m)
       return false;
     }
   case MSG_MGR_COMMAND_REPLY:
-    if (m->get_source().type() == CEPH_ENTITY_TYPE_MGR) {
+    if (m->get_source().type() == STONE_ENTITY_TYPE_MGR) {
       MMgrCommandReply *c = static_cast<MMgrCommandReply*>(m.get());
       handle_command_reply(c->get_tid(), c->get_data(), c->rs, c->r);
       return true;
@@ -130,7 +130,7 @@ bool MgrClient::ms_dispatch2(const ref_t<Message>& m)
 
 void MgrClient::reconnect()
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   if (session) {
     ldout(cct, 4) << "Terminating session with "
@@ -152,7 +152,7 @@ void MgrClient::reconnect()
   if (!clock_t::is_zero(last_connect_attempt)) {
     auto now = clock_t::now();
     auto when = last_connect_attempt +
-      ceph::make_timespan(
+      stone::make_timespan(
         cct->_conf.get_val<double>("mgr_connect_retry_interval"));
     if (now < when) {
       if (!connect_retry_callback) {
@@ -178,7 +178,7 @@ void MgrClient::reconnect()
   last_connect_attempt = clock_t::now();
 
   session.reset(new MgrSessionState());
-  session->con = msgr->connect_to(CEPH_ENTITY_TYPE_MGR,
+  session->con = msgr->connect_to(STONE_ENTITY_TYPE_MGR,
 				  map.get_active_addrs());
 
   if (service_daemon) {
@@ -188,7 +188,7 @@ void MgrClient::reconnect()
 
   // Don't send an open if we're just a client (i.e. doing
   // command-sending, not stats etc)
-  if (msgr->get_mytype() != CEPH_ENTITY_TYPE_CLIENT || service_daemon) {
+  if (msgr->get_mytype() != STONE_ENTITY_TYPE_CLIENT || service_daemon) {
     _send_open();
   }
 
@@ -218,8 +218,8 @@ void MgrClient::reconnect()
 	{},
 	HAVE_FEATURE(map.active_mgr_features, SERVER_OCTOPUS));
     }
-    ceph_assert(session);
-    ceph_assert(session->con);
+    stone_assert(session);
+    stone_assert(session->con);
     session->con->send_message2(std::move(m));
     ++p;
   }
@@ -247,7 +247,7 @@ void MgrClient::_send_open()
 
 bool MgrClient::handle_mgr_map(ref_t<MMgrMap> m)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   ldout(cct, 20) << *m << dendl;
 
@@ -297,8 +297,8 @@ void MgrClient::_send_stats()
 
 void MgrClient::_send_report()
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
-  ceph_assert(session);
+  stone_assert(stone_mutex_is_locked_by_me(lock));
+  stone_assert(session);
   report_callback = nullptr;
 
   auto report = make_message<MMgrReport>();
@@ -427,7 +427,7 @@ void MgrClient::_send_pgstats()
 
 bool MgrClient::handle_mgr_configure(ref_t<MMgrConfigure> m)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   ldout(cct, 20) << *m << dendl;
 
@@ -541,7 +541,7 @@ bool MgrClient::handle_command_reply(
   const std::string& rs,
   int r)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   ldout(cct, 20) << "tid " << tid << " r " << r << dendl;
 
@@ -585,7 +585,7 @@ int MgrClient::service_daemon_register(
   daemon_dirty_status = true;
 
   // late register?
-  if (msgr->get_mytype() == CEPH_ENTITY_TYPE_CLIENT && session && session->con) {
+  if (msgr->get_mytype() == STONE_ENTITY_TYPE_CLIENT && session && session->con) {
     _send_open();
   }
 

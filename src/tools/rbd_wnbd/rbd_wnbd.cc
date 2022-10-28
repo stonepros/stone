@@ -31,7 +31,7 @@
 
 #include "common/Formatter.h"
 #include "common/TextTable.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/config.h"
 #include "common/debug.h"
 #include "common/dout.h"
@@ -48,8 +48,8 @@
 
 #include <shellapi.h>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd-wnbd: "
 
@@ -166,7 +166,7 @@ bool WNBDActiveDiskIterator::get(Config *cfg)
 
 RegistryDiskIterator::RegistryDiskIterator()
 {
-  reg_key = new RegistryKey(g_ceph_context, HKEY_LOCAL_MACHINE,
+  reg_key = new RegistryKey(g_stone_context, HKEY_LOCAL_MACHINE,
                             SERVICE_REG_KEY, false);
   if (!reg_key->hKey) {
     if (!reg_key->missingKey)
@@ -293,12 +293,12 @@ int send_map_request(std::string arguments) {
   if (!success) {
     DWORD err = GetLastError();
     derr << "Could not send device map request. "
-         << "Make sure that the ceph service is running. "
+         << "Make sure that the stone service is running. "
          << "Error: " << win32_strerror(err) << dendl;
     return -EINVAL;
   }
   if (reply.status) {
-    derr << "The ceph service failed to map the image. Error: "
+    derr << "The stone service failed to map the image. Error: "
          << reply.status << dendl;
   }
 
@@ -503,7 +503,7 @@ int save_config_to_registry(Config* cfg)
   strKey.append("\\");
   strKey.append(cfg->devpath);
   auto reg_key = RegistryKey(
-    g_ceph_context, HKEY_LOCAL_MACHINE, strKey.c_str(), true);
+    g_stone_context, HKEY_LOCAL_MACHINE, strKey.c_str(), true);
   if (!reg_key.hKey) {
       return -EINVAL;
   }
@@ -534,7 +534,7 @@ int remove_config_from_registry(Config* cfg)
   strKey.append("\\");
   strKey.append(cfg->devpath);
   return RegistryKey::remove(
-    g_ceph_context, HKEY_LOCAL_MACHINE, strKey.c_str());
+    g_stone_context, HKEY_LOCAL_MACHINE, strKey.c_str());
 }
 
 int load_mapping_config_from_registry(string devpath, Config* cfg)
@@ -543,7 +543,7 @@ int load_mapping_config_from_registry(string devpath, Config* cfg)
   strKey.append("\\");
   strKey.append(devpath);
   auto reg_key = RegistryKey(
-    g_ceph_context, HKEY_LOCAL_MACHINE, strKey.c_str(), false);
+    g_stone_context, HKEY_LOCAL_MACHINE, strKey.c_str(), false);
   if (!reg_key.hKey) {
     if (reg_key.missingKey)
       return -ENOENT;
@@ -655,8 +655,8 @@ int disconnect_all_mappings(
 {
   // Although not generally recommended, soft_disconnect_timeout can be 0,
   // which means infinite timeout.
-  ceph_assert(soft_disconnect_timeout >= 0);
-  ceph_assert(worker_count > 0);
+  stone_assert(soft_disconnect_timeout >= 0);
+  stone_assert(worker_count > 0);
   int64_t timeout_ms = soft_disconnect_timeout * 1000;
 
   Config cfg;
@@ -725,7 +725,7 @@ class RBDService : public ServiceBase {
                int _service_start_timeout,
                int _image_map_timeout,
                bool _remap_failure_fatal)
-      : ServiceBase(g_ceph_context)
+      : ServiceBase(g_stone_context)
       , hard_disconnect(_hard_disconnect)
       , soft_disconnect_timeout(_soft_disconnect_timeout)
       , thread_count(_thread_count)
@@ -742,7 +742,7 @@ class RBDService : public ServiceBase {
           dout(5) << "Received device connect request. Command line: "
                   << (char*)request->arguments << dendl;
           // TODO: use the configured service map timeout.
-          // TODO: add ceph.conf options.
+          // TODO: add stone.conf options.
           return map_device_using_suprocess(
             (char*)request->arguments, DEFAULT_MAP_TIMEOUT_MS);
         default:
@@ -795,8 +795,8 @@ exit:
     }
 
     // We have to support Windows server 2016. Unix sockets only work on
-    // WS 2019, so we can't use the Ceph admin socket abstraction.
-    // Getting the Ceph admin sockets to work with Windows named pipes
+    // WS 2019, so we can't use the Stone admin socket abstraction.
+    // Getting the Stone admin sockets to work with Windows named pipes
     // would require quite a few changes.
     static DWORD accept_pipe_connection() {
       DWORD err = 0;
@@ -916,7 +916,7 @@ Map options:
   --device <device path>  Optional mapping unique identifier
   --exclusive             Forbid writes by other clients
   --read-only             Map read-only
-  --non-persistent        Do not recreate the mapping when the Ceph service
+  --non-persistent        Do not recreate the mapping when the Stone service
                           restarts. By default, mappings are persistent
   --io-req-workers        The number of workers that dispatch IO requests.
                           Default: 4
@@ -994,7 +994,7 @@ int construct_devpath_if_missing(Config* cfg)
   return 0;
 }
 
-boost::intrusive_ptr<CephContext> do_global_init(
+boost::intrusive_ptr<StoneContext> do_global_init(
   int argc, const char *argv[], Config *cfg)
 {
   std::vector<const char*> args;
@@ -1020,18 +1020,18 @@ boost::intrusive_ptr<CephContext> do_global_init(
       break;
   }
 
-  global_pre_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, code_env, flags);
+  global_pre_init(NULL, args, STONE_ENTITY_TYPE_CLIENT, code_env, flags);
   // Avoid cluttering the console when spawning a mapping that will run
   // in the background.
   if (g_conf()->daemonize && cfg->parent_pipe.empty()) {
     flags |= CINIT_FLAG_NO_DAEMON_ACTIONS;
   }
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          code_env, flags, FALSE);
 
   // There's no fork on Windows, we should be safe calling this anytime.
-  common_init_finish(g_ceph_context);
-  global_init_chdir(g_ceph_context);
+  common_init_finish(g_stone_context);
+  global_init_chdir(g_stone_context);
 
   return cct;
 }
@@ -1054,7 +1054,7 @@ static int do_map(Config *cfg)
 
   dout(0) << "Mapping RBD image: " << cfg->devpath << dendl;
 
-  r = rados.init_with_context(g_ceph_context);
+  r = rados.init_with_context(g_stone_context);
   if (r < 0) {
     derr << "rbd-wnbd: couldn't initialize rados: " << cpp_strerror(r)
          << dendl;
@@ -1117,7 +1117,7 @@ static int do_map(Config *cfg)
   // mappings. This allows us to easily retrieve mapping details such
   // as the rbd pool or admin socket path.
   // We're cleaning up the registry entry when the non-persistent mapping
-  // gets disconnected or when the ceph service restarts.
+  // gets disconnected or when the stone service restarts.
   r = save_config_to_registry(cfg);
   if (r < 0)
     goto close_ret;
@@ -1156,7 +1156,7 @@ static int do_map(Config *cfg)
     if (parent_pipe_handle != INVALID_HANDLE_VALUE)
       CloseHandle(parent_pipe_handle);
 
-    global_init_postfork_finish(g_ceph_context);
+    global_init_postfork_finish(g_stone_context);
   }
 
   handler->wait();
@@ -1239,7 +1239,7 @@ static int parse_imgpath(const std::string &imgpath, Config *cfg,
 
 static int do_list_mapped_devices(const std::string &format, bool pretty_format)
 {
-  std::unique_ptr<ceph::Formatter> f;
+  std::unique_ptr<stone::Formatter> f;
   TextTable tbl;
 
   if (format == "json") {
@@ -1310,7 +1310,7 @@ static int do_list_mapped_devices(const std::string &format, bool pretty_format)
 static int do_show_mapped_device(std::string format, bool pretty_format,
                                  std::string devpath)
 {
-  std::unique_ptr<ceph::Formatter> f;
+  std::unique_ptr<stone::Formatter> f;
   TextTable tbl;
 
   if (format.empty() || format == "plain") {
@@ -1401,8 +1401,8 @@ static int parse_args(std::vector<const char*>& args,
 {
   std::string conf_file_list;
   std::string cluster;
-  CephInitParameters iparams = ceph_argparse_early_args(
-          args, CEPH_ENTITY_TYPE_CLIENT, &cluster, &conf_file_list);
+  StoneInitParameters iparams = stone_argparse_early_args(
+          args, STONE_ENTITY_TYPE_CLIENT, &cluster, &conf_file_list);
 
   ConfigProxy config{false};
   config->name = iparams.name;
@@ -1413,7 +1413,7 @@ static int parse_args(std::vector<const char*>& args,
   } else {
     config.parse_config_files(nullptr, nullptr, 0);
   }
-  config.parse_env(CEPH_ENTITY_TYPE_CLIENT);
+  config.parse_env(STONE_ENTITY_TYPE_CLIENT);
   config.parse_argv(args);
   cfg->poolname = config.get_val<std::string>("rbd_default_pool");
 
@@ -1425,30 +1425,30 @@ static int parse_args(std::vector<const char*>& args,
   // to specific commands, for example the disconnect timeout. Luckily,
   // this is enforced by the "rbd device" wrapper.
   for (i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_flag(args, i, "-h", "--help", (char*)NULL)) {
+    if (stone_argparse_flag(args, i, "-h", "--help", (char*)NULL)) {
       return HELP_INFO;
-    } else if (ceph_argparse_flag(args, i, "-v", "--version", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "-v", "--version", (char*)NULL)) {
       return VERSION_INFO;
-    } else if (ceph_argparse_witharg(args, i, &cfg->devpath, "--device", (char *)NULL)) {
-    } else if (ceph_argparse_witharg(args, i, &cfg->format, err, "--format",
+    } else if (stone_argparse_witharg(args, i, &cfg->devpath, "--device", (char *)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &cfg->format, err, "--format",
                                      (char *)NULL)) {
-    } else if (ceph_argparse_flag(args, i, "--read-only", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--read-only", (char *)NULL)) {
       cfg->readonly = true;
-    } else if (ceph_argparse_flag(args, i, "--exclusive", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--exclusive", (char *)NULL)) {
       cfg->exclusive = true;
-    } else if (ceph_argparse_flag(args, i, "--non-persistent", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--non-persistent", (char *)NULL)) {
       cfg->persistent = false;
-    } else if (ceph_argparse_flag(args, i, "--pretty-format", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--pretty-format", (char *)NULL)) {
       cfg->pretty_format = true;
-    } else if (ceph_argparse_flag(args, i, "--remap-failure-fatal", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--remap-failure-fatal", (char *)NULL)) {
       cfg->remap_failure_fatal = true;
-    } else if (ceph_argparse_witharg(args, i, &cfg->parent_pipe, err,
+    } else if (stone_argparse_witharg(args, i, &cfg->parent_pipe, err,
                                      "--pipe-name", (char *)NULL)) {
       if (!err.str().empty()) {
         *err_msg << "rbd-wnbd: " << err.str();
         return -EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, (int*)&cfg->wnbd_log_level,
+    } else if (stone_argparse_witharg(args, i, (int*)&cfg->wnbd_log_level,
                                      err, "--wnbd-log-level", (char *)NULL)) {
       if (!err.str().empty()) {
         *err_msg << "rbd-wnbd: " << err.str();
@@ -1458,7 +1458,7 @@ static int parse_args(std::vector<const char*>& args,
         *err_msg << "rbd-wnbd: Invalid argument for wnbd-log-level";
         return -EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, (int*)&cfg->io_req_workers,
+    } else if (stone_argparse_witharg(args, i, (int*)&cfg->io_req_workers,
                                      err, "--io-req-workers", (char *)NULL)) {
       if (!err.str().empty()) {
         *err_msg << "rbd-wnbd: " << err.str();
@@ -1468,7 +1468,7 @@ static int parse_args(std::vector<const char*>& args,
         *err_msg << "rbd-wnbd: Invalid argument for io-req-workers";
         return -EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, (int*)&cfg->io_reply_workers,
+    } else if (stone_argparse_witharg(args, i, (int*)&cfg->io_reply_workers,
                                      err, "--io-reply-workers", (char *)NULL)) {
       if (!err.str().empty()) {
         *err_msg << "rbd-wnbd: " << err.str();
@@ -1478,7 +1478,7 @@ static int parse_args(std::vector<const char*>& args,
         *err_msg << "rbd-wnbd: Invalid argument for io-reply-workers";
         return -EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, (int*)&cfg->service_thread_count,
+    } else if (stone_argparse_witharg(args, i, (int*)&cfg->service_thread_count,
                                      err, "--service-thread-count", (char *)NULL)) {
       if (!err.str().empty()) {
         *err_msg << "rbd-wnbd: " << err.str();
@@ -1488,12 +1488,12 @@ static int parse_args(std::vector<const char*>& args,
         *err_msg << "rbd-wnbd: Invalid argument for service-thread-count";
         return -EINVAL;
       }
-    } else if (ceph_argparse_flag(args, i, "--hard-disconnect", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--hard-disconnect", (char *)NULL)) {
       cfg->hard_disconnect = true;
-    } else if (ceph_argparse_flag(args, i,
+    } else if (stone_argparse_flag(args, i,
                                   "--no-hard-disconnect-fallback", (char *)NULL)) {
       cfg->hard_disconnect_fallback = false;
-    } else if (ceph_argparse_witharg(args, i,
+    } else if (stone_argparse_witharg(args, i,
                                      (int*)&cfg->soft_disconnect_timeout,
                                      err, "--soft-disconnect-timeout",
                                      (char *)NULL)) {
@@ -1505,7 +1505,7 @@ static int parse_args(std::vector<const char*>& args,
         *err_msg << "rbd-wnbd: Invalid argument for soft-disconnect-timeout";
         return -EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i,
+    } else if (stone_argparse_witharg(args, i,
                                      (int*)&cfg->service_start_timeout,
                                      err, "--start-timeout",
                                      (char *)NULL)) {
@@ -1517,7 +1517,7 @@ static int parse_args(std::vector<const char*>& args,
         *err_msg << "rbd-wnbd: Invalid argument for start-timeout";
         return -EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i,
+    } else if (stone_argparse_witharg(args, i,
                                      (int*)&cfg->image_map_timeout,
                                      err, "--map-timeout",
                                      (char *)NULL)) {

@@ -7,7 +7,7 @@
 #include "librbd/api/Namespace.h"
 #include "librbd/ImageCtx.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::api::Namespace: " << __func__ << ": "
 
@@ -31,7 +31,7 @@ const std::list<std::string> POOL_OBJECTS {
 template <typename I>
 int Namespace<I>::create(librados::IoCtx& io_ctx, const std::string& name)
 {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
   ldout(cct, 5) << "name=" << name << dendl;
 
   if (name.empty()) {
@@ -47,7 +47,7 @@ int Namespace<I>::create(librados::IoCtx& io_ctx, const std::string& name)
     return r;
   }
 
-  if (require_osd_release < CEPH_RELEASE_NAUTILUS) {
+  if (require_osd_release < STONE_RELEASE_NAUTILUS) {
     ldout(cct, 1) << "namespace support requires nautilus or later OSD"
                   << dendl;
     return -ENOSYS;
@@ -90,7 +90,7 @@ rollback:
 template <typename I>
 int Namespace<I>::remove(librados::IoCtx& io_ctx, const std::string& name)
 {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
   ldout(cct, 5) << "name=" << name << dendl;
 
   if (name.empty()) {
@@ -171,7 +171,7 @@ rollback:
 template <typename I>
 int Namespace<I>::list(IoCtx& io_ctx, vector<string> *names)
 {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
   ldout(cct, 5) << dendl;
 
   librados::IoCtx default_ns_ctx;
@@ -205,7 +205,7 @@ int Namespace<I>::list(IoCtx& io_ctx, vector<string> *names)
 template <typename I>
 int Namespace<I>::exists(librados::IoCtx& io_ctx, const std::string& name, bool *exists)
 {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
   ldout(cct, 5) << "name=" << name << dendl;
 
   *exists = false;

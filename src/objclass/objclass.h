@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_OBJCLASS_H
-#define CEPH_OBJCLASS_H
+#ifndef STONE_OBJCLASS_H
+#define STONE_OBJCLASS_H
 
 #ifdef __cplusplus
 
@@ -149,10 +149,10 @@ extern void cls_cxx_subop_version(cls_method_context_t hctx, std::string *s);
 extern int cls_get_snapset_seq(cls_method_context_t hctx, uint64_t *snap_seq);
 
 /* These are also defined in rados.h and librados.h. Keep them in sync! */
-#define CEPH_OSD_TMAP_HDR 'h'
-#define CEPH_OSD_TMAP_SET 's'
-#define CEPH_OSD_TMAP_CREATE 'c'
-#define CEPH_OSD_TMAP_RM 'r'
+#define STONE_OSD_TMAP_HDR 'h'
+#define STONE_OSD_TMAP_SET 's'
+#define STONE_OSD_TMAP_CREATE 'c'
+#define STONE_OSD_TMAP_RM 'r'
 
 int cls_cxx_chunk_write_and_set(cls_method_context_t hctx, int ofs, int len,
                    ceph::buffer::list *write_inbl, uint32_t op_flags, ceph::buffer::list *set_inbl,

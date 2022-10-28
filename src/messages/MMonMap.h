@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MMONMAP_H
-#define CEPH_MMONMAP_H
+#ifndef STONE_MMONMAP_H
+#define STONE_MMONMAP_H
 
 #include "include/encoding.h"
 #include "include/ceph_features.h"
@@ -25,8 +25,8 @@ class MMonMap final : public Message {
 public:
   ceph::buffer::list monmapbl;
 
-  MMonMap() : Message{CEPH_MSG_MON_MAP} { }
-  explicit MMonMap(ceph::buffer::list &bl) : Message{CEPH_MSG_MON_MAP} {
+  MMonMap() : Message{STONE_MSG_MON_MAP} { }
+  explicit MMonMap(ceph::buffer::list &bl) : Message{STONE_MSG_MON_MAP} {
     monmapbl = std::move(bl);
   }
 private:
@@ -37,8 +37,8 @@ public:
 
   void encode_payload(uint64_t features) override { 
     if (monmapbl.length() &&
-	((features & CEPH_FEATURE_MONENC) == 0 ||
-	 (features & CEPH_FEATURE_MSG_ADDR2) == 0)) {
+	((features & STONE_FEATURE_MONENC) == 0 ||
+	 (features & STONE_FEATURE_MSG_ADDR2) == 0)) {
       // reencode old-format monmap
       MonMap t;
       t.decode(monmapbl);

@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_FILESTORE_H
-#define CEPH_FILESTORE_H
+#ifndef STONE_FILESTORE_H
+#define STONE_FILESTORE_H
 
 #include "include/types.h"
 
@@ -63,7 +63,7 @@
 
 class FileStoreBackend;
 
-#define CEPH_FS_FEATURE_INCOMPAT_SHARDS CompatSet::Feature(1, "sharded objects")
+#define STONE_FS_FEATURE_INCOMPAT_SHARDS CompatSet::Feature(1, "sharded objects")
 
 enum {
   l_filestore_first = 84000,

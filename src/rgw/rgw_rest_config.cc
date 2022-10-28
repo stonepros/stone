@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
  *
@@ -13,7 +13,7 @@
  *
  */
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/strtol.h"
 #include "rgw_rest.h"
 #include "rgw_op.h"
@@ -23,15 +23,15 @@
 #include "rgw_client_io.h"
 #include "rgw_sal_rados.h"
 #include "common/errno.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "services/svc_zone.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 void RGWOp_ZoneGroupMap_Get::execute(optional_yield y) {
-  op_ret = zonegroup_map.read(this, g_ceph_context, store->svc()->sysobj, y);
+  op_ret = zonegroup_map.read(this, g_stone_context, store->svc()->sysobj, y);
   if (op_ret < 0) {
     ldpp_dout(this, 5) << "failed to read zone_group map" << dendl;
   }

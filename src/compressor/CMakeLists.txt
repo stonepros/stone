@@ -8,7 +8,7 @@ add_library(compressor_objs OBJECT ${compressor_srcs})
 
 ## compressor plugins
 
-set(compressor_plugin_dir ${CEPH_INSTALL_PKGLIBDIR}/compressor)
+set(compressor_plugin_dir ${STONE_INSTALL_PKGLIBDIR}/compressor)
 
 add_subdirectory(snappy)
 add_subdirectory(zlib)
@@ -27,18 +27,18 @@ if(HAVE_QATZIP)
   target_link_libraries(compressor PRIVATE ${QATZIP_LIBRARIES})
 endif()
 
-set(ceph_compressor_libs
-    ceph_snappy
-    ceph_zlib
-    ceph_zstd)
+set(stone_compressor_libs
+    stone_snappy
+    stone_zlib
+    stone_zstd)
 
 if(HAVE_LZ4)
-  list(APPEND ceph_compressor_libs ceph_lz4)
+  list(APPEND stone_compressor_libs stone_lz4)
 endif()
 
 if(HAVE_BROTLI)
-  list(APPEND ceph_compressor_libs ceph_brotli)
+  list(APPEND stone_compressor_libs stone_brotli)
 endif()
 
 add_custom_target(compressor_plugins DEPENDS
-    ${ceph_compressor_libs})
+    ${stone_compressor_libs})

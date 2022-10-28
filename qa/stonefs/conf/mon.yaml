@@ -1,0 +1,5 @@
+overrides:
+  stone:
+    conf:
+      mon:
+        mon op complaint time: 120

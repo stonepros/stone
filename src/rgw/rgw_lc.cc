@@ -39,8 +39,8 @@
 #include "services/svc_zone.h"
 #include "services/svc_tier_rados.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 const char* LC_STATUS[] = {
       "UNINITIAL",
@@ -113,7 +113,7 @@ bool RGWLifecycleConfiguration::_add_rule(const LCRule& rule)
     op.expiration = rule.get_expiration().get_days();
   }
   if (rule.get_expiration().has_date()) {
-    op.expiration_date = ceph::from_iso_8601(rule.get_expiration().get_date());
+    op.expiration_date = stone::from_iso_8601(rule.get_expiration().get_date());
   }
   if (rule.get_noncur_expiration().has_days()) {
     op.noncur_expiration = rule.get_noncur_expiration().get_days();
@@ -127,7 +127,7 @@ bool RGWLifecycleConfiguration::_add_rule(const LCRule& rule)
     if (elem.second.has_days()) {
       action.days = elem.second.get_days();
     } else {
-      action.date = ceph::from_iso_8601(elem.second.get_date());
+      action.date = stone::from_iso_8601(elem.second.get_date());
     }
     action.storage_class
       = rgw_placement_rule::get_canonical_storage_class(elem.first);
@@ -136,7 +136,7 @@ bool RGWLifecycleConfiguration::_add_rule(const LCRule& rule)
   for (const auto &elem : rule.get_noncur_transitions()) {
     transition_action action;
     action.days = elem.second.get_days();
-    action.date = ceph::from_iso_8601(elem.second.get_date());
+    action.date = stone::from_iso_8601(elem.second.get_date());
     action.storage_class = elem.first;
     op.noncur_transitions.emplace(elem.first, std::move(action));
   }
@@ -211,7 +211,7 @@ bool RGWLifecycleConfiguration::valid()
 
 void *RGWLC::LCWorker::entry() {
   do {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     if (should_work(start)) {
       ldpp_dout(dpp, 2) << "life cycle: start" << dendl;
       int r = lc->process(this, false /* once */);
@@ -224,7 +224,7 @@ void *RGWLC::LCWorker::entry() {
     if (lc->going_down())
       break;
 
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     int secs = schedule_next_start_time(start, end);
     utime_t next;
     next.set_from_double(end + secs);
@@ -239,7 +239,7 @@ void *RGWLC::LCWorker::entry() {
   return NULL;
 }
 
-void RGWLC::initialize(CephContext *_cct, rgw::sal::RGWRadosStore *_store) {
+void RGWLC::initialize(StoneContext *_cct, rgw::sal::RGWRadosStore *_store) {
   cct = _cct;
   store = _store;
   sal_lc = store->get_lifecycle();
@@ -271,7 +271,7 @@ bool RGWLC::if_already_run_today(time_t start_date)
 {
   struct tm bdt;
   time_t begin_of_day;
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   localtime_r(&start_date, &bdt);
 
   if (cct->_conf->rgw_lc_debug_interval > 0) {
@@ -318,7 +318,7 @@ int RGWLC::bucket_lc_prepare(int index, LCWorker* worker)
       return ret;
 
     for (auto& entry : entries) {
-      entry.start_time = ceph_clock_now();
+      entry.start_time = stone_clock_now();
       entry.status = lc_uninitial; // lc_uninitial? really?
       ret = sal_lc->set_entry(obj_names[index], entry);
       if (ret < 0) {
@@ -337,21 +337,21 @@ int RGWLC::bucket_lc_prepare(int index, LCWorker* worker)
   return 0;
 }
 
-static bool obj_has_expired(CephContext *cct, ceph::real_time mtime, int days,
-			    ceph::real_time *expire_time = nullptr)
+static bool obj_has_expired(StoneContext *cct, stone::real_time mtime, int days,
+			    stone::real_time *expire_time = nullptr)
 {
   double timediff, cmp;
   utime_t base_time;
   if (cct->_conf->rgw_lc_debug_interval <= 0) {
     /* Normal case, run properly */
     cmp = double(days)*24*60*60;
-    base_time = ceph_clock_now().round_to_day();
+    base_time = stone_clock_now().round_to_day();
   } else {
     /* We're in debug mode; Treat each rgw_lc_debug_interval seconds as a day */
     cmp = double(days)*cct->_conf->rgw_lc_debug_interval;
-    base_time = ceph_clock_now();
+    base_time = stone_clock_now();
   }
-  auto tt_mtime = ceph::real_clock::to_time_t(mtime);
+  auto tt_mtime = stone::real_clock::to_time_t(mtime);
   timediff = base_time - tt_mtime;
 
   if (expire_time) {
@@ -392,8 +392,8 @@ static bool pass_object_lock_check(rgw::sal::RGWStore* store, rgw::sal::RGWObjec
 			       << dendl;
         return false;
       }
-      if (ceph::real_clock::to_time_t(retention.get_retain_until_date()) >
-	  ceph_clock_now()) {
+      if (stone::real_clock::to_time_t(retention.get_retain_until_date()) >
+	  stone_clock_now()) {
         return false;
       }
     }
@@ -523,11 +523,11 @@ class LCRuleOp;
 class WorkQ;
 
 struct lc_op_ctx {
-  CephContext *cct;
+  StoneContext *cct;
   op_env env;
   rgw_bucket_dir_entry o;
   boost::optional<std::string> next_key_name;
-  ceph::real_time effective_mtime;
+  stone::real_time effective_mtime;
 
   rgw::sal::RGWRadosStore *store;
   rgw::sal::RGWBucket* bucket;
@@ -541,7 +541,7 @@ struct lc_op_ctx {
 
   lc_op_ctx(op_env& env, rgw_bucket_dir_entry& o,
 	    boost::optional<std::string> next_key_name,
-	    ceph::real_time effective_mtime,
+	    stone::real_time effective_mtime,
 	    const DoutPrefixProvider *dpp, WorkQ* wq)
     : cct(env.store->ctx()), env(env), o(o), next_key_name(next_key_name),
       effective_mtime(effective_mtime),
@@ -598,7 +598,7 @@ class LCOpAction {
 public:
   virtual ~LCOpAction() {}
 
-  virtual bool check(lc_op_ctx& oc, ceph::real_time *exp_time, const DoutPrefixProvider *dpp) {
+  virtual bool check(lc_op_ctx& oc, stone::real_time *exp_time, const DoutPrefixProvider *dpp) {
     return false;
   }
 
@@ -637,7 +637,7 @@ class LCOpRule {
 
   op_env env;
   boost::optional<std::string> next_key_name;
-  ceph::real_time effective_mtime;
+  stone::real_time effective_mtime;
 
   std::vector<shared_ptr<LCOpFilter> > filters; // n.b., sharing ovhd
   std::vector<shared_ptr<LCOpAction> > actions;
@@ -767,7 +767,7 @@ private:
 
 class RGWLC::WorkPool
 {
-  using TVector = ceph::containers::tiny_vector<WorkQ, 3>;
+  using TVector = stone::containers::tiny_vector<WorkQ, 3>;
   TVector wqs;
   uint64_t ix;
 
@@ -806,7 +806,7 @@ public:
   }
 }; /* WorkPool */
 
-RGWLC::LCWorker::LCWorker(const DoutPrefixProvider* dpp, CephContext *cct,
+RGWLC::LCWorker::LCWorker(const DoutPrefixProvider* dpp, StoneContext *cct,
 			  RGWLC *lc, int ix)
   : dpp(dpp), cct(cct), lc(lc), ix(ix)
 {
@@ -1020,7 +1020,7 @@ class LCOpAction_CurrentExpiration : public LCOpAction {
 public:
   LCOpAction_CurrentExpiration(op_env& env) {}
 
-  bool check(lc_op_ctx& oc, ceph::real_time *exp_time, const DoutPrefixProvider *dpp) override {
+  bool check(lc_op_ctx& oc, stone::real_time *exp_time, const DoutPrefixProvider *dpp) override {
     auto& o = oc.o;
     if (!o.is_current()) {
       ldpp_dout(dpp, 20) << __func__ << "(): key=" << o.key
@@ -1055,8 +1055,8 @@ public:
 			  << oc.wq->thr_name() << dendl;
         return false;
       }
-      is_expired = ceph_clock_now() >=
-	ceph::real_clock::to_time_t(*op.expiration_date);
+      is_expired = stone_clock_now() >=
+	stone::real_clock::to_time_t(*op.expiration_date);
       *exp_time = *op.expiration_date;
     } else {
       is_expired = obj_has_expired(oc.cct, mtime, op.expiration, exp_time);
@@ -1109,7 +1109,7 @@ public:
   LCOpAction_NonCurrentExpiration(op_env& env)
     {}
 
-  bool check(lc_op_ctx& oc, ceph::real_time *exp_time, const DoutPrefixProvider *dpp) override {
+  bool check(lc_op_ctx& oc, stone::real_time *exp_time, const DoutPrefixProvider *dpp) override {
     auto& o = oc.o;
     if (o.is_current()) {
       ldpp_dout(dpp, 20) << __func__ << "(): key=" << o.key
@@ -1154,7 +1154,7 @@ class LCOpAction_DMExpiration : public LCOpAction {
 public:
   LCOpAction_DMExpiration(op_env& env) {}
 
-  bool check(lc_op_ctx& oc, ceph::real_time *exp_time, const DoutPrefixProvider *dpp) override {
+  bool check(lc_op_ctx& oc, stone::real_time *exp_time, const DoutPrefixProvider *dpp) override {
     auto& o = oc.o;
     if (!o.is_delete_marker()) {
       ldpp_dout(dpp, 20) << __func__ << "(): key=" << o.key
@@ -1201,12 +1201,12 @@ class LCOpAction_Transition : public LCOpAction {
 
 protected:
   virtual bool check_current_state(bool is_current) = 0;
-  virtual ceph::real_time get_effective_mtime(lc_op_ctx& oc) = 0;
+  virtual stone::real_time get_effective_mtime(lc_op_ctx& oc) = 0;
 public:
   LCOpAction_Transition(const transition_action& _transition)
     : transition(_transition) {}
 
-  bool check(lc_op_ctx& oc, ceph::real_time *exp_time, const DoutPrefixProvider *dpp) override {
+  bool check(lc_op_ctx& oc, stone::real_time *exp_time, const DoutPrefixProvider *dpp) override {
     auto& o = oc.o;
 
     if (o.is_delete_marker()) {
@@ -1226,8 +1226,8 @@ public:
 			  << oc.wq->thr_name() << dendl;
         return false;
       }
-      is_expired = ceph_clock_now() >=
-	ceph::real_clock::to_time_t(*transition.date);
+      is_expired = stone_clock_now() >=
+	stone::real_clock::to_time_t(*transition.date);
       *exp_time = *transition.date;
     } else {
       is_expired = obj_has_expired(oc.cct, mtime, transition.days, exp_time);
@@ -1289,7 +1289,7 @@ protected:
     return is_current;
   }
 
-  ceph::real_time get_effective_mtime(lc_op_ctx& oc) override {
+  stone::real_time get_effective_mtime(lc_op_ctx& oc) override {
     return oc.o.meta.mtime;
   }
 public:
@@ -1312,7 +1312,7 @@ protected:
     return !is_current;
   }
 
-  ceph::real_time get_effective_mtime(lc_op_ctx& oc) override {
+  stone::real_time get_effective_mtime(lc_op_ctx& oc) override {
     return oc.effective_mtime;
   }
 public:
@@ -1712,7 +1712,7 @@ int RGWLC::process(int index, int max_lock_secs, LCWorker* worker,
 							obj_names[index],
 							std::string());
   do {
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     //string = bucket_name:bucket_id, start_time, int = LC_BUCKET_STATUS
     rgw::sal::Lifecycle::LCEntry entry;
     if (max_lock_secs <= 0)
@@ -1932,14 +1932,14 @@ void RGWLifecycleConfiguration::generate_test_instances(
   o.push_back(new RGWLifecycleConfiguration);
 }
 
-static inline void get_lc_oid(CephContext *cct,
+static inline void get_lc_oid(StoneContext *cct,
 			      const string& shard_id, string *oid)
 {
   int max_objs =
     (cct->_conf->rgw_lc_max_objs > HASH_PRIME ? HASH_PRIME :
      cct->_conf->rgw_lc_max_objs);
   /* n.b. review hash algo */
-  int index = ceph_str_hash_linux(shard_id.c_str(),
+  int index = stone_str_hash_linux(shard_id.c_str(),
 				  shard_id.size()) % HASH_PRIME % max_objs;
   *oid = lc_oid_prefix;
   char buf[32];
@@ -1958,7 +1958,7 @@ static int guard_lc_modify(const DoutPrefixProvider *dpp,
 			   rgw::sal::Lifecycle* sal_lc,
 			   const rgw_bucket& bucket, const string& cookie,
 			   const F& f) {
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
 
   string shard_id = get_lc_shard_name(bucket);
 
@@ -2118,10 +2118,10 @@ std::string s3_expiration_header(
   DoutPrefixProvider* dpp,
   const rgw_obj_key& obj_key,
   const RGWObjTags& obj_tagset,
-  const ceph::real_time& mtime,
+  const stone::real_time& mtime,
   const std::map<std::string, buffer::list>& bucket_attrs)
 {
-  CephContext* cct = dpp->get_cct();
+  StoneContext* cct = dpp->get_cct();
   RGWLifecycleConfiguration config(cct);
   std::string hdr{""};
 
@@ -2141,7 +2141,7 @@ std::string s3_expiration_header(
 
   /* dump tags at debug level 16 */
   RGWObjTags::tag_map_t obj_tag_map = obj_tagset.get_tags();
-  if (cct->_conf->subsys.should_gather(ceph_subsys_rgw, 16)) {
+  if (cct->_conf->subsys.should_gather(stone_subsys_rgw, 16)) {
     for (const auto& elt : obj_tag_map) {
       ldout(cct, 16) << __func__
 		     <<  "() key=" << elt.first << " val=" << elt.second
@@ -2149,7 +2149,7 @@ std::string s3_expiration_header(
     }
   }
 
-  boost::optional<ceph::real_time> expiration_date;
+  boost::optional<stone::real_time> expiration_date;
   boost::optional<std::string> rule_id;
 
   const auto& rule_map = config.get_rule_map();
@@ -2211,19 +2211,19 @@ std::string s3_expiration_header(
     }
 
     // compute a uniform expiration date
-    boost::optional<ceph::real_time> rule_expiration_date;
+    boost::optional<stone::real_time> rule_expiration_date;
     const LCExpiration& rule_expiration =
       (obj_key.instance.empty()) ? expiration : noncur_expiration;
 
     if (rule_expiration.has_date()) {
       rule_expiration_date =
-	boost::optional<ceph::real_time>(
-	  ceph::from_iso_8601(rule.get_expiration().get_date()));
+	boost::optional<stone::real_time>(
+	  stone::from_iso_8601(rule.get_expiration().get_date()));
     } else {
       if (rule_expiration.has_days()) {
 	rule_expiration_date =
-	  boost::optional<ceph::real_time>(
-	    mtime + make_timespan(double(rule_expiration.get_days())*24*60*60 - ceph::real_clock::to_time_t(mtime)%(24*60*60) + 24*60*60));
+	  boost::optional<stone::real_time>(
+	    mtime + make_timespan(double(rule_expiration.get_days())*24*60*60 - stone::real_clock::to_time_t(mtime)%(24*60*60) + 24*60*60));
       }
     }
 
@@ -2232,7 +2232,7 @@ std::string s3_expiration_header(
       if ((! expiration_date) ||
 	  (*expiration_date > *rule_expiration_date)) {
       expiration_date =
-	boost::optional<ceph::real_time>(rule_expiration_date);
+	boost::optional<stone::real_time>(rule_expiration_date);
       rule_id = boost::optional<std::string>(id);
       }
     }
@@ -2242,7 +2242,7 @@ std::string s3_expiration_header(
   if (expiration_date && rule_id) {
     // Fri, 23 Dec 2012 00:00:00 GMT
     char exp_buf[100];
-    time_t exp = ceph::real_clock::to_time_t(*expiration_date);
+    time_t exp = stone::real_clock::to_time_t(*expiration_date);
     if (std::strftime(exp_buf, sizeof(exp_buf),
 		      "%a, %d %b %Y %T %Z", std::gmtime(&exp))) {
       hdr = fmt::format("expiry-date=\"{0}\", rule-id=\"{1}\"", exp_buf,
@@ -2261,12 +2261,12 @@ std::string s3_expiration_header(
 bool s3_multipart_abort_header(
   DoutPrefixProvider* dpp,
   const rgw_obj_key& obj_key,
-  const ceph::real_time& mtime,
+  const stone::real_time& mtime,
   const std::map<std::string, buffer::list>& bucket_attrs,
-  ceph::real_time& abort_date,
+  stone::real_time& abort_date,
   std::string& rule_id)
 {
-  CephContext* cct = dpp->get_cct();
+  StoneContext* cct = dpp->get_cct();
   RGWLifecycleConfiguration config(cct);
 
   const auto& aiter = bucket_attrs.find(RGW_ATTR_LC);
@@ -2283,7 +2283,7 @@ bool s3_multipart_abort_header(
     return false;
   } /* catch */
 
-  std::optional<ceph::real_time> abort_date_tmp;
+  std::optional<stone::real_time> abort_date_tmp;
   std::optional<std::string_view> rule_id_tmp;
   const auto& rule_map = config.get_rule_map();
   for (const auto& ri : rule_map) {
@@ -2299,10 +2299,10 @@ bool s3_multipart_abort_header(
       continue;
     }
 
-    std::optional<ceph::real_time> rule_abort_date;
+    std::optional<stone::real_time> rule_abort_date;
     if (mp_expiration.has_days()) {
-      rule_abort_date = std::optional<ceph::real_time>(
-              mtime + make_timespan(mp_expiration.get_days()*24*60*60 - ceph::real_clock::to_time_t(mtime)%(24*60*60) + 24*60*60));
+      rule_abort_date = std::optional<stone::real_time>(
+              mtime + make_timespan(mp_expiration.get_days()*24*60*60 - stone::real_clock::to_time_t(mtime)%(24*60*60) + 24*60*60));
     }
 
     // update earliest abort date
@@ -2310,7 +2310,7 @@ bool s3_multipart_abort_header(
       if ((! abort_date_tmp) ||
           (*abort_date_tmp > *rule_abort_date)) {
         abort_date_tmp =
-                std::optional<ceph::real_time>(rule_abort_date);
+                std::optional<stone::real_time>(rule_abort_date);
         rule_id_tmp = std::optional<std::string_view>(id);
       }
     }

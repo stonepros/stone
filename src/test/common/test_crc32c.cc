@@ -18,10 +18,10 @@
 TEST(Crc32c, Small) {
   const char *a = "foo bar baz";
   const char *b = "whiz bang boom";
-  ASSERT_EQ(4119623852u, ceph_crc32c(0, (unsigned char *)a, strlen(a)));
-  ASSERT_EQ(881700046u, ceph_crc32c(1234, (unsigned char *)a, strlen(a)));
-  ASSERT_EQ(2360230088u, ceph_crc32c(0, (unsigned char *)b, strlen(b)));
-  ASSERT_EQ(3743019208u, ceph_crc32c(5678, (unsigned char *)b, strlen(b)));
+  ASSERT_EQ(4119623852u, stone_crc32c(0, (unsigned char *)a, strlen(a)));
+  ASSERT_EQ(881700046u, stone_crc32c(1234, (unsigned char *)a, strlen(a)));
+  ASSERT_EQ(2360230088u, stone_crc32c(0, (unsigned char *)b, strlen(b)));
+  ASSERT_EQ(3743019208u, stone_crc32c(5678, (unsigned char *)b, strlen(b)));
 }
 
 TEST(Crc32c, PartialWord) {
@@ -29,8 +29,8 @@ TEST(Crc32c, PartialWord) {
   const char *b = (const char *)malloc(35);
   memset((void *)a, 1, 5);
   memset((void *)b, 1, 35);
-  ASSERT_EQ(2715569182u, ceph_crc32c(0, (unsigned char *)a, 5));
-  ASSERT_EQ(440531800u, ceph_crc32c(0, (unsigned char *)b, 35));
+  ASSERT_EQ(2715569182u, stone_crc32c(0, (unsigned char *)a, 5));
+  ASSERT_EQ(440531800u, stone_crc32c(0, (unsigned char *)b, 35));
   free((void*)a);
   free((void*)b);
 }
@@ -39,8 +39,8 @@ TEST(Crc32c, Big) {
   int len = 4096000;
   char *a = (char *)malloc(len);
   memset(a, 1, len);
-  ASSERT_EQ(31583199u, ceph_crc32c(0, (unsigned char *)a, len));
-  ASSERT_EQ(1400919119u, ceph_crc32c(1234, (unsigned char *)a, len));
+  ASSERT_EQ(31583199u, stone_crc32c(0, (unsigned char *)a, len));
+  ASSERT_EQ(1400919119u, stone_crc32c(1234, (unsigned char *)a, len));
   free(a);
 }
 
@@ -53,43 +53,43 @@ TEST(Crc32c, Performance) {
   std::cout << "calculating crc" << std::endl;
 
   {
-    utime_t start = ceph_clock_now();
-    unsigned val = ceph_crc32c(0, (unsigned char *)a, len);
-    utime_t end = ceph_clock_now();
+    utime_t start = stone_clock_now();
+    unsigned val = stone_crc32c(0, (unsigned char *)a, len);
+    utime_t end = stone_clock_now();
     float rate = (float)len / (float)(1024*1024) / (float)(end - start);
     std::cout << "best choice = " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(261108528u, val);
   }
   {
-    utime_t start = ceph_clock_now();
-    unsigned val = ceph_crc32c(0xffffffff, (unsigned char *)a, len);
-    utime_t end = ceph_clock_now();
+    utime_t start = stone_clock_now();
+    unsigned val = stone_crc32c(0xffffffff, (unsigned char *)a, len);
+    utime_t end = stone_clock_now();
     float rate = (float)len / (float)(1024*1024) / (float)(end - start);
     std::cout << "best choice 0xffffffff = " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(3895876243u, val);
   }
   {
-    utime_t start = ceph_clock_now();
-    unsigned val = ceph_crc32c_sctp(0, (unsigned char *)a, len);
-    utime_t end = ceph_clock_now();
+    utime_t start = stone_clock_now();
+    unsigned val = stone_crc32c_sctp(0, (unsigned char *)a, len);
+    utime_t end = stone_clock_now();
     float rate = (float)len / (float)(1024*1024) / (float)(end - start);
     std::cout << "sctp = " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(261108528u, val);
   }
   {
-    utime_t start = ceph_clock_now();
-    unsigned val = ceph_crc32c_intel_baseline(0, (unsigned char *)a, len);
-    utime_t end = ceph_clock_now();
+    utime_t start = stone_clock_now();
+    unsigned val = stone_crc32c_intel_baseline(0, (unsigned char *)a, len);
+    utime_t end = stone_clock_now();
     float rate = (float)len / (float)(1024*1024) / (float)(end - start);
     std::cout << "intel baseline = " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(261108528u, val);
   }
 #if defined(__arm__) || defined(__aarch64__)
-  if (ceph_arch_aarch64_crc32) // Skip if CRC32C instructions are not defined.
+  if (stone_arch_aarch64_crc32) // Skip if CRC32C instructions are not defined.
   {
-    utime_t start = ceph_clock_now();
-    unsigned val = ceph_crc32c_aarch64(0, (unsigned char *)a, len);
-    utime_t end = ceph_clock_now();
+    utime_t start = stone_clock_now();
+    unsigned val = stone_crc32c_aarch64(0, (unsigned char *)a, len);
+    utime_t end = stone_clock_now();
     float rate = (float)len / (float)(1024*1024) / (float)(end - start);
     std::cout << "aarch64 = " << rate << " MB/sec" << std::endl;
     ASSERT_EQ(261108528u, val);
@@ -172,7 +172,7 @@ TEST(Crc32c, Range) {
   uint32_t crc = 0;
   uint32_t *check = crc_check_table;
   for (int i = 0 ; i < len; i++, check++) {
-    crc = ceph_crc32c(crc, b+i, len-i);
+    crc = stone_crc32c(crc, b+i, len-i);
     ASSERT_EQ(crc, *check);
   }
   free(b);
@@ -253,7 +253,7 @@ TEST(Crc32c, RangeZero) {
                        all the results are going to be zero */
   uint32_t *check = crc_zero_check_table;
   for (int i = 0 ; i < len; i++, check++) {
-    crc = ceph_crc32c(crc, b+i, len-i);
+    crc = stone_crc32c(crc, b+i, len-i);
     ASSERT_EQ(crc, *check);
   }
   free(b);
@@ -266,7 +266,7 @@ TEST(Crc32c, RangeNull) {
   uint32_t *check = crc_zero_check_table;
 
   for (int i = 0 ; i < len; i++, check++) {
-    crc = ceph_crc32c(crc, NULL, len-i);
+    crc = stone_crc32c(crc, NULL, len-i);
     ASSERT_EQ(crc, *check);
   }
 }
@@ -278,10 +278,10 @@ double estimate_clock_resolution()
   utime_t end;
   std::set<double> S;
   for(int j=10; j<200; j+=1) {
-    start = ceph_clock_now();
+    start = stone_clock_now();
     for (int i=0; i<j; i++)
       p[i]=1;
-    end = ceph_clock_now();
+    end = stone_clock_now();
     S.insert((double)(end - start));
   }
   auto head = S.begin();
@@ -312,26 +312,26 @@ TEST(Crc32c, zeros_performance_compare) {
   for (size_t scale=1; scale < 31; scale++)
   {
     size_t size = (1<<scale) + rand()%(1<<scale);
-    pre_start = ceph_clock_now();
-    start = ceph_clock_now();
-    uint32_t crc_a = ceph_crc32c(111, nullptr, size);
-    end = ceph_clock_now();
+    pre_start = stone_clock_now();
+    start = stone_clock_now();
+    uint32_t crc_a = stone_crc32c(111, nullptr, size);
+    end = stone_clock_now();
     time_adjusted = (end - start) - (start - pre_start);
     std::cout << "regular  method. size=" << size << " time= " << (double)(end-start)
         << " at " << (double)size/(1024*1024)/(time_adjusted) << " MB/sec"
         << " error=" << resolution / time_adjusted * 100 << "%" << std::endl;
 
-    pre_start = ceph_clock_now();
-    start = ceph_clock_now();
+    pre_start = stone_clock_now();
+    start = stone_clock_now();
 #ifdef HAVE_POWER8
-    uint32_t crc_b = ceph_crc32c_zeros(111, size);
+    uint32_t crc_b = stone_crc32c_zeros(111, size);
 #else
-    uint32_t crc_b = ceph_crc32c_func(111, nullptr, size);
+    uint32_t crc_b = stone_crc32c_func(111, nullptr, size);
 #endif
-    end = ceph_clock_now();
+    end = stone_clock_now();
     time_adjusted = (end - start) - (start - pre_start);
 #ifdef HAVE_POWER8
-    std::cout << "ceph_crc32c_zeros method. size=" << size << " time=" 
+    std::cout << "stone_crc32c_zeros method. size=" << size << " time=" 
         << (double)(end-start) << " at " << (double)size/(1024*1024)/(time_adjusted) 
         << " MB/sec" << " error=" << resolution / time_adjusted * 100 << "%" 
         << std::endl;
@@ -349,16 +349,16 @@ TEST(Crc32c, zeros_performance) {
   utime_t start;
   utime_t end;
 
-  start = ceph_clock_now();
+  start = stone_clock_now();
   for (size_t i=0; i<ITER; i++)
   {
     for (size_t scale=1; scale < 31; scale++)
     {
       size_t size = (1<<scale) + rand() % (1<<scale);
-      ceph_crc32c(rand(), nullptr, size);
+      stone_crc32c(rand(), nullptr, size);
     }
   }
-  end = ceph_clock_now();
+  end = stone_clock_now();
   std::cout << "iterations="<< ITER*31 << " time=" << (double)(end-start) << std::endl;
 
 }

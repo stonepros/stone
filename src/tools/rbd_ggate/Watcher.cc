@@ -6,8 +6,8 @@
 #include "Driver.h"
 #include "Watcher.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::ggate::Watcher: " << this \
                            << " " << __func__ << ": "

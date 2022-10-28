@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MCLIENTLEASE_H
-#define CEPH_MCLIENTLEASE_H
+#ifndef STONE_MCLIENTLEASE_H
+#define STONE_MCLIENTLEASE_H
 
 #include <string_view>
 
@@ -33,13 +33,13 @@ public:
   snapid_t get_last() const { return snapid_t(h.last); }
 
 protected:
-  MClientLease() : SafeMessage(CEPH_MSG_CLIENT_LEASE) {}
+  MClientLease() : SafeMessage(STONE_MSG_CLIENT_LEASE) {}
   MClientLease(const MClientLease& m) :
-    SafeMessage(CEPH_MSG_CLIENT_LEASE),
+    SafeMessage(STONE_MSG_CLIENT_LEASE),
     h(m.h),
     dname(m.dname) {}
   MClientLease(int ac, ceph_seq_t seq, int m, uint64_t i, uint64_t sf, uint64_t sl) :
-    SafeMessage(CEPH_MSG_CLIENT_LEASE) {
+    SafeMessage(STONE_MSG_CLIENT_LEASE) {
     h.action = ac;
     h.seq = seq;
     h.mask = m;
@@ -49,7 +49,7 @@ protected:
     h.duration_ms = 0;
   }
   MClientLease(int ac, ceph_seq_t seq, int m, uint64_t i, uint64_t sf, uint64_t sl, std::string_view d) :
-    SafeMessage(CEPH_MSG_CLIENT_LEASE),
+    SafeMessage(STONE_MSG_CLIENT_LEASE),
     dname(d) {
     h.action = ac;
     h.seq = seq;
@@ -68,7 +68,7 @@ public:
 	<< " seq " << get_seq()
 	<< " mask " << get_mask();
     out << " " << get_ino();
-    if (h.last != CEPH_NOSNAP)
+    if (h.last != STONE_NOSNAP)
       out << " [" << snapid_t(h.first) << "," << snapid_t(h.last) << "]";
     if (dname.length())
       out << "/" << dname;

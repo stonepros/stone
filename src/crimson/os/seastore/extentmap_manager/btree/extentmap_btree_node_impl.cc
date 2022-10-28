@@ -15,7 +15,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 }
 
@@ -113,7 +113,7 @@ ExtMapInnerNode::make_balanced_ret
 ExtMapInnerNode::make_balanced(ext_context_t ec, ExtMapNodeRef _right, bool prefer_left)
 {
   logger().debug("{}: {}", "ExtMapInnerNode", __func__);
-  ceph_assert(_right->get_type() == type);
+  stone_assert(_right->get_type() == type);
   return extmap_alloc_2extents<ExtMapInnerNode>(ec, EXTMAP_BLOCK_SIZE)
     .safe_then([this,  _right, prefer_left] (auto &&replacement_pair){
       auto [replacement_left, replacement_right] = replacement_pair;
@@ -136,7 +136,7 @@ ExtMapInnerNode::split_entry(ext_context_t ec, objaddr_t lo,
     auto mut_iter = mut->iter_idx(iter->get_offset());
     return mut->split_entry(ec, lo, mut_iter, entry);
   }
-  ceph_assert(!at_max_capacity());
+  stone_assert(!at_max_capacity());
   return entry->make_split_children(ec)
     .safe_then([this, ec, lo, iter, entry] (auto tuple){
     auto [left, right, pivot] = tuple;
@@ -222,7 +222,7 @@ ExtMapInnerNode::get_containing_child(objaddr_t lo)
     if (i.contains(lo))
       return i;
   }
-  ceph_assert(0 == "invalid");
+  stone_assert(0 == "invalid");
   return end();
 }
 
@@ -257,7 +257,7 @@ ExtMapLeafNode::find_lextent(ext_context_t ec, objaddr_t lo, extent_len_t len)
 ExtMapLeafNode::insert_ret
 ExtMapLeafNode::insert(ext_context_t ec, objaddr_t lo, lext_map_val_t val)
 {
-  ceph_assert(!at_max_capacity());
+  stone_assert(!at_max_capacity());
   if (!is_pending()) {
     auto mut = ec.tm.get_mutable_extent(ec.t, this)->cast<ExtMapLeafNode>();
     return mut->insert(ec, lo, val);
@@ -326,7 +326,7 @@ ExtMapLeafNode::make_balanced_ret
 ExtMapLeafNode::make_balanced(ext_context_t ec, ExtMapNodeRef _right, bool prefer_left)
 {
   logger().debug("{}: {}", "ExtMapLeafNode", __func__);
-  ceph_assert(_right->get_type() == type);
+  stone_assert(_right->get_type() == type);
   return extmap_alloc_2extents<ExtMapLeafNode>(ec, EXTMAP_BLOCK_SIZE)
     .safe_then([this, _right, prefer_left] (auto &&replacement_pair) {
       auto [replacement_left, replacement_right] = replacement_pair;
@@ -352,7 +352,7 @@ ExtMapLeafNode::get_leaf_entries(objaddr_t addr, extent_len_t len)
 TransactionManager::read_extent_ertr::future<ExtMapNodeRef>
 extmap_load_extent(ext_context_t ec, laddr_t laddr, depth_t depth)
 {
-  ceph_assert(depth > 0);
+  stone_assert(depth > 0);
   if (depth > 1) {
     return ec.tm.read_extents<ExtMapInnerNode>(ec.t, laddr, EXTMAP_BLOCK_SIZE).safe_then(
       [](auto&& extents) {

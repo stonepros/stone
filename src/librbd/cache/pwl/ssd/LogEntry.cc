@@ -4,7 +4,7 @@
 #include "librbd/cache/ImageWriteback.h"
 #include "librbd/cache/pwl/ssd/LogEntry.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::ssd::WriteLogEntry: " \
                            << this << " " <<  __func__ << ": "
@@ -43,7 +43,7 @@ unsigned int WriteLogEntry::get_aligned_data_size() const {
 
 void WriteLogEntry::writeback_bl(
     librbd::cache::ImageWritebackInterface &image_writeback,
-    Context *ctx, ceph::bufferlist&& bl) {
+    Context *ctx, stone::bufferlist&& bl) {
     image_writeback.aio_write({{ram_entry.image_offset_bytes,
                                 ram_entry.write_bytes}},
                                std::move(bl), 0, ctx);
@@ -51,7 +51,7 @@ void WriteLogEntry::writeback_bl(
 
 void WriteSameLogEntry::writeback_bl(
     librbd::cache::ImageWritebackInterface &image_writeback,
-    Context *ctx, ceph::bufferlist &&bl) {
+    Context *ctx, stone::bufferlist &&bl) {
     image_writeback.aio_writesame(ram_entry.image_offset_bytes,
                                   ram_entry.write_bytes,
                                   std::move(bl), 0, ctx);

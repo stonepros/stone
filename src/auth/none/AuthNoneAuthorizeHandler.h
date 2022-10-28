@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -12,15 +12,15 @@
  * 
  */
 
-#ifndef CEPH_AUTHNONEAUTHORIZEHANDLER_H
-#define CEPH_AUTHNONEAUTHORIZEHANDLER_H
+#ifndef STONE_AUTHNONEAUTHORIZEHANDLER_H
+#define STONE_AUTHNONEAUTHORIZEHANDLER_H
 
 #include "auth/AuthAuthorizeHandler.h"
 #include "include/common_fwd.h"
 
 struct AuthNoneAuthorizeHandler : public AuthAuthorizeHandler {
   bool verify_authorizer(
-    CephContext *cct,
+    StoneContext *cct,
     const KeyStore& keys,
     const ceph::buffer::list& authorizer_data,
     size_t connection_secret_required_len,

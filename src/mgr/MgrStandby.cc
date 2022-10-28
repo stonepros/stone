@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -31,29 +31,29 @@
 
 #include "MgrStandby.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr " << __func__ << " "
 
 
 MgrStandby::MgrStandby(int argc, const char **argv) :
-  Dispatcher(g_ceph_context),
-  monc{g_ceph_context, poolctx},
+  Dispatcher(g_stone_context),
+  monc{g_stone_context, poolctx},
   client_messenger(Messenger::create(
-		     g_ceph_context,
+		     g_stone_context,
 		     cct->_conf.get_val<std::string>("ms_type"),
 		     entity_name_t::MGR(),
 		     "mgr",
 		     Messenger::get_pid_nonce())),
-  objecter{g_ceph_context, client_messenger.get(), &monc, poolctx},
+  objecter{g_stone_context, client_messenger.get(), &monc, poolctx},
   client{client_messenger.get(), &monc, &objecter},
-  mgrc(g_ceph_context, client_messenger.get(), &monc.monmap),
-  log_client(g_ceph_context, client_messenger.get(), &monc.monmap, LogClient::NO_FLAGS),
+  mgrc(g_stone_context, client_messenger.get(), &monc.monmap),
+  log_client(g_stone_context, client_messenger.get(), &monc.monmap, LogClient::NO_FLAGS),
   clog(log_client.create_channel(CLOG_CHANNEL_CLUSTER)),
   audit_clog(log_client.create_channel(CLOG_CHANNEL_AUDIT)),
-  finisher(g_ceph_context, "MgrStandby", "mgrsb-fin"),
-  timer(g_ceph_context, lock),
+  finisher(g_stone_context, "MgrStandby", "mgrsb-fin"),
+  timer(g_stone_context, lock),
   py_module_registry(clog),
   active_mgr(nullptr),
   orig_argc(argc),
@@ -140,8 +140,8 @@ int MgrStandby::init()
 
   monc.sub_want("mgrmap", 0, 0);
 
-  monc.set_want_keys(CEPH_ENTITY_TYPE_MON|CEPH_ENTITY_TYPE_OSD
-      |CEPH_ENTITY_TYPE_MDS|CEPH_ENTITY_TYPE_MGR);
+  monc.set_want_keys(STONE_ENTITY_TYPE_MON|STONE_ENTITY_TYPE_OSD
+      |STONE_ENTITY_TYPE_MDS|STONE_ENTITY_TYPE_MGR);
   monc.set_messenger(client_messenger.get());
 
   // We must register our config callback before calling init(), so
@@ -197,7 +197,7 @@ int MgrStandby::init()
   timer.init();
 
   py_module_registry.init();
-  mgr_perf_start(g_ceph_context);
+  mgr_perf_start(g_stone_context);
 
 
   tick();
@@ -208,7 +208,7 @@ int MgrStandby::init()
 
 void MgrStandby::send_beacon()
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
   dout(20) << state_str() << dendl;
 
   auto modules = py_module_registry.get_modules();
@@ -240,9 +240,9 @@ void MgrStandby::send_beacon()
   map<string,string> metadata;
   metadata["addr"] = client_messenger->get_myaddr_legacy().ip_only_to_str();
   metadata["addrs"] = stringify(client_messenger->get_myaddrs());
-  collect_sys_info(&metadata, g_ceph_context);
+  collect_sys_info(&metadata, g_stone_context);
 
-  auto m = ceph::make_message<MMgrBeacon>(monc.get_fsid(),
+  auto m = stone::make_message<MMgrBeacon>(monc.get_fsid(),
 				 monc.get_global_id(),
                                  g_conf()->name.get_id(),
                                  addrs,
@@ -250,7 +250,7 @@ void MgrStandby::send_beacon()
 				 std::move(module_info),
 				 std::move(metadata),
                                  std::move(clients),
-				 CEPH_FEATURES_ALL);
+				 STONE_FEATURES_ALL);
 
   if (available) {
     if (!available_in_map) {
@@ -316,7 +316,7 @@ void MgrStandby::shutdown()
   // to touch references to the things we're about to tear down
   finisher.wait_for_empty();
   finisher.stop();
-  mgr_perf_stop(g_ceph_context);
+  mgr_perf_stop(g_stone_context);
 }
 
 void MgrStandby::respawn()
@@ -324,9 +324,9 @@ void MgrStandby::respawn()
   // --- WARNING TO FUTURE COPY/PASTERS ---
   // You must also add a call like
   //
-  //   ceph_pthread_setname(pthread_self(), "ceph-mgr");
+  //   stone_pthread_setname(pthread_self(), "stone-mgr");
   //
-  // to main() so that /proc/$pid/stat field 2 contains "(ceph-mgr)"
+  // to main() so that /proc/$pid/stat field 2 contains "(stone-mgr)"
   // instead of "(exe)", so that killall (and log rotation) will work.
 
   char *new_argv[orig_argc+1];
@@ -346,7 +346,7 @@ void MgrStandby::respawn()
     /* Print CWD for the user's interest */
     char buf[PATH_MAX];
     char *cwd = getcwd(buf, sizeof(buf));
-    ceph_assert(cwd);
+    stone_assert(cwd);
     dout(1) << " cwd " << cwd << dendl;
 
     /* Fall back to a best-effort: just running in our CWD */
@@ -363,7 +363,7 @@ void MgrStandby::respawn()
 
   derr << "respawn execv " << orig_argv[0]
        << " failed with " << cpp_strerror(errno) << dendl;
-  ceph_abort();
+  stone_abort();
 }
 
 void MgrStandby::_update_log_config()

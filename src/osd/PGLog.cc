@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -17,7 +17,7 @@
 
 #include "PGLog.h"
 #include "include/unordered_map.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 using std::make_pair;
 using std::map;
@@ -25,12 +25,12 @@ using std::ostream;
 using std::set;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, this)
 
@@ -54,13 +54,13 @@ void PGLog::IndexedLog::split_out_child(
 }
 
 void PGLog::IndexedLog::trim(
-  CephContext* cct,
+  StoneContext* cct,
   eversion_t s,
   set<eversion_t> *trimmed,
   set<string>* trimmed_dups,
   eversion_t *write_from_dups)
 {
-  ceph_assert(s <= can_rollback_to);
+  stone_assert(s <= can_rollback_to);
   if (complete_to != log.end())
     lgeneric_subdout(cct, osd, 20) << " complete_to " << complete_to->version << dendl;
 
@@ -154,7 +154,7 @@ ostream& PGLog::IndexedLog::print(ostream& out) const
     out << *p << " " <<
       (logged_object(p->soid) ? "indexed" : "NOT INDEXED") <<
       std::endl;
-    ceph_assert(!p->reqid_is_indexed() || logged_req(p->reqid));
+    stone_assert(!p->reqid_is_indexed() || logged_req(p->reqid));
   }
 
   for (auto p = dups.begin(); p != dups.end(); ++p) {
@@ -198,7 +198,7 @@ void PGLog::trim(
     // Don't assert for async_recovery_targets or backfill_targets
     // or whenever there are missing items
     if (transaction_applied && !async && (missing.num_missing() == 0))
-      ceph_assert(trim_to <= info.last_complete);
+      stone_assert(trim_to <= info.last_complete);
 
     dout(10) << "trim " << log << " to " << trim_to << dendl;
     log.trim(cct, trim_to, &trimmed, &trimmed_dups, &write_from_dups);
@@ -366,9 +366,9 @@ void PGLog::merge_log(pg_info_t &oinfo, pg_log_t&& olog, pg_shard_t fromosd,
   // Check preconditions
 
   // If our log is empty, the incoming log needs to have not been trimmed.
-  ceph_assert(!log.null() || olog.tail == eversion_t());
+  stone_assert(!log.null() || olog.tail == eversion_t());
   // The logs must overlap.
-  ceph_assert(log.head >= olog.tail && olog.head >= log.tail);
+  stone_assert(log.head >= olog.tail && olog.head >= log.tail);
 
   for (auto i = missing.get_items().begin();
        i != missing.get_items().end();
@@ -603,9 +603,9 @@ void PGLog::check() {
       derr << "    " << *i << dendl;
     }
   }
-  ceph_assert(log.log.size() == log_keys_debug.size());
+  stone_assert(log.log.size() == log_keys_debug.size());
   for (auto i = log.log.begin(); i != log.log.end(); ++i) {
-    ceph_assert(log_keys_debug.count(i->get_key_name()));
+    stone_assert(log_keys_debug.count(i->get_key_name()));
   }
 }
 
@@ -751,7 +751,7 @@ void PGLog::_write_log_and_missing_wo_missing(
 	 ++i) {
       if (i->first[0] == '_')
 	continue;
-      ceph_assert(!log_keys_debug->count(i->first));
+      stone_assert(!log_keys_debug->count(i->first));
       log_keys_debug->insert(i->first);
     }
   }
@@ -833,7 +833,7 @@ void PGLog::_write_log_and_missing(
     string key = t.get_key_name();
     if (log_keys_debug) {
       auto it = log_keys_debug->find(key);
-      ceph_assert(it != log_keys_debug->end());
+      stone_assert(it != log_keys_debug->end());
       log_keys_debug->erase(it);
     }
     to_remove.emplace(std::move(key));
@@ -880,7 +880,7 @@ void PGLog::_write_log_and_missing(
 	 ++i) {
       if (i->first[0] == '_')
 	continue;
-      ceph_assert(!log_keys_debug->count(i->first));
+      stone_assert(!log_keys_debug->count(i->first));
       log_keys_debug->insert(i->first);
     }
   }
@@ -938,7 +938,7 @@ void PGLog::_write_log_and_missing(
       if (!missing.is_missing(obj, &item)) {
 	to_remove.insert(key);
       } else {
-	encode(make_pair(obj, item), (*km)[key], CEPH_FEATUREMASK_SERVER_OCTOPUS);
+	encode(make_pair(obj, item), (*km)[key], STONE_FEATUREMASK_SERVER_OCTOPUS);
       }
     });
   if (require_rollback) {
@@ -1036,14 +1036,14 @@ namespace {
     void process_entry(crimson::os::FuturizedStore::OmapIteratorRef &p) {
       if (p->key()[0] == '_')
         return;
-      //Copy ceph::buffer::list before creating iterator
+      //Copy stone::buffer::list before creating iterator
       auto bl = p->value();
       auto bp = bl.cbegin();
       if (p->key() == "divergent_priors") {
         decode(divergent_priors, bp);
         ldpp_dout(dpp, 20) << "read_log_and_missing " << divergent_priors.size()
                            << " divergent_priors" << dendl;
-        ceph_assert("crimson shouldn't have had divergent_priors" == 0);
+        stone_assert("crimson shouldn't have had divergent_priors" == 0);
       } else if (p->key() == "can_rollback_to") {
         decode(on_disk_can_rollback_to, bp);
       } else if (p->key() == "rollback_info_trimmed_to") {
@@ -1056,14 +1056,14 @@ namespace {
         decode(oid, bp);
         decode(item, bp);
         if (item.is_delete()) {
-          ceph_assert(missing.may_include_deletes);
+          stone_assert(missing.may_include_deletes);
         }
         missing.add(oid, std::move(item));
       } else if (p->key().substr(0, 4) == std::string("dup_")) {
         pg_log_dup_t dup;
         decode(dup, bp);
         if (!dups.empty()) {
-          ceph_assert(dups.back().version < dup.version);
+          stone_assert(dups.back().version < dup.version);
         }
         dups.push_back(dup);
       } else {
@@ -1072,8 +1072,8 @@ namespace {
         ldpp_dout(dpp, 20) << "read_log_and_missing " << e << dendl;
         if (!entries.empty()) {
           pg_log_entry_t last_e(entries.back());
-          ceph_assert(last_e.version.version < e.version.version);
-          ceph_assert(last_e.version.epoch <= e.version.epoch);
+          stone_assert(last_e.version.version < e.version.version);
+          stone_assert(last_e.version.epoch <= e.version.epoch);
         }
         entries.push_back(e);
         if (log_keys_debug)

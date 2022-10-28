@@ -20,11 +20,11 @@ int main(int argc, char **argv)
 {
 	char *fn;
 	int fd, err;
-	struct ceph_ioctl_layout l;
-	struct ceph_ioctl_dataloc dl;
+	struct stone_ioctl_layout l;
+	struct stone_ioctl_dataloc dl;
 
 	if (argc < 3) {
-		printf("usage: ceph_test_ioctls <filename> <offset>\n");
+		printf("usage: stone_test_ioctls <filename> <offset>\n");
 		return 1;
 	}
 	fn = argv[1];
@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 	}
 
 	/* get layout */
-        err = ioctl(fd, CEPH_IOC_GET_LAYOUT, (unsigned long)&l);
+        err = ioctl(fd, STONE_IOC_GET_LAYOUT, (unsigned long)&l);
         if (err < 0) {
                 perror("ioctl IOC_GET_LAYOUT error");
                 return 1;
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
         /* set layout */
         l.stripe_unit = 1048576;
         l.stripe_count = 2;
-        err = ioctl(fd, CEPH_IOC_SET_LAYOUT, (unsigned long)&l);
+        err = ioctl(fd, STONE_IOC_SET_LAYOUT, (unsigned long)&l);
         if (err < 0) {
                perror("ioctl IOC_SET_LAYOUT error");
                return 1;
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
 	printf("file %s\n", fn);
 	/* get layout again */
-	err = ioctl(fd, CEPH_IOC_GET_LAYOUT, (unsigned long)&l);
+	err = ioctl(fd, STONE_IOC_GET_LAYOUT, (unsigned long)&l);
 	if (err < 0) {
 		perror("ioctl IOC_GET_LAYOUT error");
 		return 1;
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 
 	/* dataloc */
 	dl.file_offset = atoll(argv[2]);
-	err = ioctl(fd, CEPH_IOC_GET_DATALOC, (unsigned long)&dl);
+	err = ioctl(fd, STONE_IOC_GET_DATALOC, (unsigned long)&dl);
 	if (err < 0) {
 		perror("ioctl IOC_GET_DATALOC error");
 		return 1;
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 
         l.object_size = 1048576;
         l.stripe_count = 1;
-        err = ioctl(fd, CEPH_IOC_SET_LAYOUT_POLICY, (unsigned long)&l);
+        err = ioctl(fd, STONE_IOC_SET_LAYOUT_POLICY, (unsigned long)&l);
         if (err < 0) {
                perror("ioctl IOC_SET_LAYOUT_POLICY error");
                return 1;
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
                 perror("couldn't open file");
                 return 1;
         }
-        err = ioctl(fd, CEPH_IOC_GET_LAYOUT, (unsigned long)&l);
+        err = ioctl(fd, STONE_IOC_GET_LAYOUT, (unsigned long)&l);
         if (err < 0) {
                 perror("ioctl IOC_GET_LAYOUT error");
                 return 1;

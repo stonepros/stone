@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat
  *
@@ -16,7 +16,7 @@
 #include <optional>
 #include <gtest/gtest.h>
 
-namespace ceph::async {
+namespace stone::async {
 
 using executor_type = boost::asio::io_context::executor_type;
 using unique_lock = std::unique_lock<SharedMutex<executor_type>>;
@@ -425,4 +425,4 @@ TEST(SharedMutex, cancel)
   EXPECT_THROW(f2.get(), boost::system::system_error);
 }
 
-} // namespace ceph::async
+} // namespace stone::async

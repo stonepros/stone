@@ -6,7 +6,7 @@
 
 #include "include/neorados/RADOS.hpp"
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/dout.h"
 #include "common/errno.h"
 #include "common/perf_counters.h"
@@ -40,7 +40,7 @@
 #include "osdc/Striper.h"
 #include <boost/algorithm/string/predicate.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::ImageCtx: "
 
@@ -50,7 +50,7 @@ using std::set;
 using std::string;
 using std::vector;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 using librados::snap_t;
 using librados::IoCtx;
 
@@ -58,11 +58,11 @@ namespace librbd {
 
 namespace {
 
-class SafeTimerSingleton : public CommonSafeTimer<ceph::mutex> {
+class SafeTimerSingleton : public CommonSafeTimer<stone::mutex> {
 public:
-  ceph::mutex lock = ceph::make_mutex("librbd::SafeTimerSingleton::lock");
+  stone::mutex lock = stone::make_mutex("librbd::SafeTimerSingleton::lock");
 
-  explicit SafeTimerSingleton(CephContext *cct)
+  explicit SafeTimerSingleton(StoneContext *cct)
       : SafeTimer(cct, lock, true) {
     init();
   }
@@ -84,10 +84,10 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
 
   ImageCtx::ImageCtx(const string &image_name, const string &image_id,
 		     const char *snap, IoCtx& p, bool ro)
-    : cct((CephContext*)p.cct()),
+    : cct((StoneContext*)p.cct()),
       config(cct->_conf),
       perfcounter(NULL),
-      snap_id(CEPH_NOSNAP),
+      snap_id(STONE_NOSNAP),
       snap_exists(true),
       read_only(ro),
       read_only_flags(ro ? IMAGE_READ_ONLY_FLAG_USER : 0U),
@@ -99,11 +99,11 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
       md_ctx(duplicate_io_ctx(p)),
       image_watcher(NULL),
       journal(NULL),
-      owner_lock(ceph::make_shared_mutex(util::unique_lock_name("librbd::ImageCtx::owner_lock", this))),
-      image_lock(ceph::make_shared_mutex(util::unique_lock_name("librbd::ImageCtx::image_lock", this))),
-      timestamp_lock(ceph::make_shared_mutex(util::unique_lock_name("librbd::ImageCtx::timestamp_lock", this))),
-      async_ops_lock(ceph::make_mutex(util::unique_lock_name("librbd::ImageCtx::async_ops_lock", this))),
-      copyup_list_lock(ceph::make_mutex(util::unique_lock_name("librbd::ImageCtx::copyup_list_lock", this))),
+      owner_lock(stone::make_shared_mutex(util::unique_lock_name("librbd::ImageCtx::owner_lock", this))),
+      image_lock(stone::make_shared_mutex(util::unique_lock_name("librbd::ImageCtx::image_lock", this))),
+      timestamp_lock(stone::make_shared_mutex(util::unique_lock_name("librbd::ImageCtx::timestamp_lock", this))),
+      async_ops_lock(stone::make_mutex(util::unique_lock_name("librbd::ImageCtx::async_ops_lock", this))),
+      copyup_list_lock(stone::make_mutex(util::unique_lock_name("librbd::ImageCtx::copyup_list_lock", this))),
       extra_read_flags(0),
       old_format(false),
       order(0), size(0), features(0),
@@ -153,12 +153,12 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   ImageCtx::~ImageCtx() {
     ldout(cct, 10) << this << " " << __func__ << dendl;
 
-    ceph_assert(config_watcher == nullptr);
-    ceph_assert(image_watcher == NULL);
-    ceph_assert(exclusive_lock == NULL);
-    ceph_assert(object_map == NULL);
-    ceph_assert(journal == NULL);
-    ceph_assert(asok_hook == NULL);
+    stone_assert(config_watcher == nullptr);
+    stone_assert(image_watcher == NULL);
+    stone_assert(exclusive_lock == NULL);
+    stone_assert(object_map == NULL);
+    stone_assert(journal == NULL);
+    stone_assert(asok_hook == NULL);
 
     if (perfcounter) {
       perf_stop();
@@ -182,8 +182,8 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   }
 
   void ImageCtx::init() {
-    ceph_assert(!header_oid.empty());
-    ceph_assert(old_format || !id.empty());
+    stone_assert(!header_oid.empty());
+    stone_assert(old_format || !id.empty());
 
     asok_hook = new LibrbdAdminSocketHook(this);
 
@@ -197,7 +197,7 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
     trace_endpoint.copy_name(pname);
     perf_start(pname);
 
-    ceph_assert(image_watcher == NULL);
+    stone_assert(image_watcher == NULL);
     image_watcher = new ImageWatcher<>(*this);
   }
 
@@ -293,11 +293,11 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
     perfcounter = plb.create_perf_counters();
     cct->get_perfcounters_collection()->add(perfcounter);
 
-    perfcounter->tset(l_librbd_opened_time, ceph_clock_now());
+    perfcounter->tset(l_librbd_opened_time, stone_clock_now());
   }
 
   void ImageCtx::perf_stop() {
-    ceph_assert(perfcounter);
+    stone_assert(perfcounter);
     cct->get_perfcounters_collection()->remove(perfcounter);
     delete perfcounter;
   }
@@ -323,9 +323,9 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   }
 
   int ImageCtx::snap_set(uint64_t in_snap_id) {
-    ceph_assert(ceph_mutex_is_wlocked(image_lock));
+    stone_assert(stone_mutex_is_wlocked(image_lock));
     auto it = snap_info.find(in_snap_id);
-    if (in_snap_id != CEPH_NOSNAP && it != snap_info.end()) {
+    if (in_snap_id != STONE_NOSNAP && it != snap_info.end()) {
       snap_id = in_snap_id;
       snap_namespace = it->second.snap_namespace;
       snap_name = it->second.name;
@@ -341,8 +341,8 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
 
   void ImageCtx::snap_unset()
   {
-    ceph_assert(ceph_mutex_is_wlocked(image_lock));
-    snap_id = CEPH_NOSNAP;
+    stone_assert(stone_mutex_is_wlocked(image_lock));
+    snap_id = STONE_NOSNAP;
     snap_namespace = {};
     snap_name = "";
     snap_exists = true;
@@ -355,17 +355,17 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   snap_t ImageCtx::get_snap_id(const cls::rbd::SnapshotNamespace& in_snap_namespace,
                                const string& in_snap_name) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     auto it = snap_ids.find({in_snap_namespace, in_snap_name});
     if (it != snap_ids.end()) {
       return it->second;
     }
-    return CEPH_NOSNAP;
+    return STONE_NOSNAP;
   }
 
   const SnapInfo* ImageCtx::get_snap_info(snap_t in_snap_id) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     map<snap_t, SnapInfo>::const_iterator it =
       snap_info.find(in_snap_id);
     if (it != snap_info.end())
@@ -376,7 +376,7 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   int ImageCtx::get_snap_name(snap_t in_snap_id,
 			      string *out_snap_name) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     const SnapInfo *info = get_snap_info(in_snap_id);
     if (info) {
       *out_snap_name = info->name;
@@ -388,7 +388,7 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   int ImageCtx::get_snap_namespace(snap_t in_snap_id,
 				   cls::rbd::SnapshotNamespace *out_snap_namespace) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     const SnapInfo *info = get_snap_info(in_snap_id);
     if (info) {
       *out_snap_namespace = info->snap_namespace;
@@ -410,7 +410,7 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
 
   uint64_t ImageCtx::get_current_size() const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     return size;
   }
 
@@ -455,20 +455,20 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
 
   void ImageCtx::set_access_timestamp(utime_t at)
   {
-    ceph_assert(ceph_mutex_is_wlocked(timestamp_lock));
+    stone_assert(stone_mutex_is_wlocked(timestamp_lock));
     access_timestamp = at;
   }
 
   void ImageCtx::set_modify_timestamp(utime_t mt)
   {
-    ceph_assert(ceph_mutex_is_locked(timestamp_lock));
+    stone_assert(stone_mutex_is_locked(timestamp_lock));
     modify_timestamp = mt;
   }
 
   int ImageCtx::is_snap_protected(snap_t in_snap_id,
 				  bool *is_protected) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     const SnapInfo *info = get_snap_info(in_snap_id);
     if (info) {
       *is_protected =
@@ -481,7 +481,7 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   int ImageCtx::is_snap_unprotected(snap_t in_snap_id,
 				    bool *is_unprotected) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     const SnapInfo *info = get_snap_info(in_snap_id);
     if (info) {
       *is_unprotected =
@@ -498,7 +498,7 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
                           uint8_t protection_status, uint64_t flags,
                           utime_t timestamp)
   {
-    ceph_assert(ceph_mutex_is_wlocked(image_lock));
+    stone_assert(stone_mutex_is_wlocked(image_lock));
     snaps.push_back(id);
     SnapInfo info(in_snap_name, in_snap_namespace,
 		  in_size, parent, protection_status, flags, timestamp);
@@ -510,7 +510,7 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
 			 string in_snap_name,
 			 snap_t id)
   {
-    ceph_assert(ceph_mutex_is_wlocked(image_lock));
+    stone_assert(stone_mutex_is_wlocked(image_lock));
     snaps.erase(std::remove(snaps.begin(), snaps.end(), id), snaps.end());
     snap_info.erase(id);
     snap_ids.erase({in_snap_namespace, in_snap_name});
@@ -518,8 +518,8 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
 
   uint64_t ImageCtx::get_image_size(snap_t in_snap_id) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
-    if (in_snap_id == CEPH_NOSNAP) {
+    stone_assert(stone_mutex_is_locked(image_lock));
+    if (in_snap_id == STONE_NOSNAP) {
       if (!resize_reqs.empty() &&
           resize_reqs.front()->shrinking()) {
         return resize_reqs.front()->get_image_size();
@@ -547,7 +547,7 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   }
 
   uint64_t ImageCtx::get_object_count(snap_t in_snap_id) const {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     uint64_t image_size = get_image_size(in_snap_id);
     return Striper::get_num_objects(layout, image_size);
   }
@@ -559,9 +559,9 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   }
 
   bool ImageCtx::test_features(uint64_t in_features,
-                               const ceph::shared_mutex &in_image_lock) const
+                               const stone::shared_mutex &in_image_lock) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     return ((features & in_features) == in_features);
   }
 
@@ -572,16 +572,16 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   }
 
   bool ImageCtx::test_op_features(uint64_t in_op_features,
-                                  const ceph::shared_mutex &in_image_lock) const
+                                  const stone::shared_mutex &in_image_lock) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     return ((op_features & in_op_features) == in_op_features);
   }
 
   int ImageCtx::get_flags(librados::snap_t _snap_id, uint64_t *_flags) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
-    if (_snap_id == CEPH_NOSNAP) {
+    stone_assert(stone_mutex_is_locked(image_lock));
+    if (_snap_id == STONE_NOSNAP) {
       *_flags = flags;
       return 0;
     }
@@ -602,10 +602,10 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
 
   int ImageCtx::test_flags(librados::snap_t in_snap_id,
                            uint64_t flags,
-                           const ceph::shared_mutex &in_image_lock,
+                           const stone::shared_mutex &in_image_lock,
                            bool *flags_set) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     uint64_t snap_flags;
     int r = get_flags(in_snap_id, &snap_flags);
     if (r < 0) {
@@ -617,9 +617,9 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
 
   int ImageCtx::update_flags(snap_t in_snap_id, uint64_t flag, bool enabled)
   {
-    ceph_assert(ceph_mutex_is_wlocked(image_lock));
+    stone_assert(stone_mutex_is_wlocked(image_lock));
     uint64_t *_flags;
-    if (in_snap_id == CEPH_NOSNAP) {
+    if (in_snap_id == STONE_NOSNAP) {
       _flags = &flags;
     } else {
       map<snap_t, SnapInfo>::iterator it = snap_info.find(in_snap_id);
@@ -639,8 +639,8 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
 
   const ParentImageInfo* ImageCtx::get_parent_info(snap_t in_snap_id) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
-    if (in_snap_id == CEPH_NOSNAP)
+    stone_assert(stone_mutex_is_locked(image_lock));
+    if (in_snap_id == STONE_NOSNAP)
       return &parent_md;
     const SnapInfo *info = get_snap_info(in_snap_id);
     if (info)
@@ -669,12 +669,12 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
     const auto info = get_parent_info(in_snap_id);
     if (info)
       return info->spec.snap_id;
-    return CEPH_NOSNAP;
+    return STONE_NOSNAP;
   }
 
   int ImageCtx::get_parent_overlap(snap_t in_snap_id, uint64_t *overlap) const
   {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
+    stone_assert(stone_mutex_is_locked(image_lock));
     const auto info = get_parent_info(in_snap_id);
     if (info) {
       *overlap = info->overlap;
@@ -684,7 +684,7 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   }
 
   void ImageCtx::register_watch(Context *on_finish) {
-    ceph_assert(image_watcher != NULL);
+    stone_assert(image_watcher != NULL);
     image_watcher->register_watch(on_finish);
   }
 
@@ -818,7 +818,7 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
     librados::Rados rados(md_ctx);
     int8_t require_osd_release;
     int r = rados.get_min_compatible_osd(&require_osd_release);
-    if (r == 0 && require_osd_release >= CEPH_RELEASE_OCTOPUS) {
+    if (r == 0 && require_osd_release >= STONE_RELEASE_OCTOPUS) {
       read_flags = 0;
       auto read_policy = config.get_val<std::string>("rbd_read_from_replica_policy");
       if (read_policy == "balance") {
@@ -902,27 +902,27 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   }
 
   exclusive_lock::Policy *ImageCtx::get_exclusive_lock_policy() const {
-    ceph_assert(ceph_mutex_is_locked(owner_lock));
-    ceph_assert(exclusive_lock_policy != nullptr);
+    stone_assert(stone_mutex_is_locked(owner_lock));
+    stone_assert(exclusive_lock_policy != nullptr);
     return exclusive_lock_policy;
   }
 
   void ImageCtx::set_exclusive_lock_policy(exclusive_lock::Policy *policy) {
-    ceph_assert(ceph_mutex_is_wlocked(owner_lock));
-    ceph_assert(policy != nullptr);
+    stone_assert(stone_mutex_is_wlocked(owner_lock));
+    stone_assert(policy != nullptr);
     delete exclusive_lock_policy;
     exclusive_lock_policy = policy;
   }
 
   journal::Policy *ImageCtx::get_journal_policy() const {
-    ceph_assert(ceph_mutex_is_locked(image_lock));
-    ceph_assert(journal_policy != nullptr);
+    stone_assert(stone_mutex_is_locked(image_lock));
+    stone_assert(journal_policy != nullptr);
     return journal_policy;
   }
 
   void ImageCtx::set_journal_policy(journal::Policy *policy) {
-    ceph_assert(ceph_mutex_is_wlocked(image_lock));
-    ceph_assert(policy != nullptr);
+    stone_assert(stone_mutex_is_wlocked(image_lock));
+    stone_assert(policy != nullptr);
     delete journal_policy;
     journal_policy = policy;
   }
@@ -930,7 +930,7 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
   void ImageCtx::rebuild_data_io_context() {
     auto ctx = std::make_shared<neorados::IOContext>(
       data_ctx.get_id(), data_ctx.get_namespace());
-    if (snap_id != CEPH_NOSNAP) {
+    if (snap_id != STONE_NOSNAP) {
       ctx->read_snap(snap_id);
     }
     if (!snapc.snaps.empty()) {
@@ -954,8 +954,8 @@ librados::IoCtx duplicate_io_ctx(librados::IoCtx& io_ctx) {
     return std::make_shared<neorados::IOContext>(*ctx);
   }
 
-  void ImageCtx::get_timer_instance(CephContext *cct, SafeTimer **timer,
-                                    ceph::mutex **timer_lock) {
+  void ImageCtx::get_timer_instance(StoneContext *cct, SafeTimer **timer,
+                                    stone::mutex **timer_lock) {
     auto safe_timer_singleton =
       &cct->lookup_or_create_singleton_object<SafeTimerSingleton>(
 	"librbd::journal::safe_timer", false, cct);

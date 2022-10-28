@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stonee - scalable distributed file system
 *
 * Copyright (C) 2012 New Dream Network
 *
@@ -34,7 +34,7 @@ class DeterministicOpSequence : public TestObjectStoreState {
   virtual void generate(int seed, int num_txs);
 
   static ghobject_t get_txn_object(coll_t cid) {
-    ghobject_t oid(hobject_t(sobject_t("txn", CEPH_NOSNAP)));
+    ghobject_t oid(hobject_t(sobject_t("txn", STONE_NOSNAP)));
     spg_t pgid;
     bool r = cid.is_pg(&pgid);
     if (r) {

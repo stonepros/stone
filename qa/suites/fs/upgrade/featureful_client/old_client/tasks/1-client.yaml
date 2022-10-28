@@ -1,5 +1,5 @@
 tasks:
-- ceph-fuse:
+- stone-fuse:
 - print: "**** done nautilus client"
 - workunit:
     clients:

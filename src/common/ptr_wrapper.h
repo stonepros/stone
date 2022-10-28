@@ -3,7 +3,7 @@
 // vim: ts=8 sw=2 smarttab
 
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *

@@ -25,7 +25,7 @@ struct MockTestImageCtx : public librbd::MockImageCtx {
 struct MockTrashWatcher {
   static MockTrashWatcher *s_instance;
   static MockTrashWatcher &get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return *s_instance;
   }
 
@@ -49,7 +49,7 @@ struct TrashWatcher<MockTestImageCtx> {
   }
 
   static TrashWatcher<MockTestImageCtx> &get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return *s_instance;
   }
 
@@ -81,7 +81,7 @@ namespace mirror {
 template <>
 struct Threads<librbd::MockTestImageCtx> {
   MockSafeTimer *timer;
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
 
   MockContextWQ *work_queue;
 
@@ -123,7 +123,7 @@ public:
 
   struct MockListener : TrashListener {
     MOCK_METHOD2(handle_trash_image, void(const std::string&,
-					  const ceph::real_clock::time_point&));
+					  const stone::real_clock::time_point&));
   };
 
   void expect_work_queue(MockThreads &mock_threads) {

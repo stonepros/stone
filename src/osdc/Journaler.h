@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -54,8 +54,8 @@
  *
  */
 
-#ifndef CEPH_JOURNALER_H
-#define CEPH_JOURNALER_H
+#ifndef STONE_JOURNALER_H
+#define STONE_JOURNALER_H
 
 #include <list>
 #include <map>
@@ -211,7 +211,7 @@ public:
 
 private:
   // me
-  CephContext *cct;
+  StoneeContext *cct;
   std::mutex lock;
   const std::string name;
   typedef std::lock_guard<std::mutex> lock_guard;
@@ -392,7 +392,7 @@ private:
   C_OnFinisher *wrap_finisher(Context *c);
 
   uint32_t write_iohint; // the fadvise flags for write op, see
-			 // CEPH_OSD_OP_FADIVSE_*
+			 // STONE_OSD_OP_FADIVSE_*
 
 public:
   Journaler(const std::string &name_, inodeno_t ino_, int64_t pool,

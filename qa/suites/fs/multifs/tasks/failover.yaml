@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - Replacing daemon mds
       - \(MDS_INSUFFICIENT_STANDBY\)
@@ -7,14 +7,14 @@ overrides:
       - \(MDS_UP_LESS_THAN_MAX\)
       - \(MDS_DAMAGE\)
       - \(FS_DEGRADED\)
-  ceph-fuse:
+  stone-fuse:
     disabled: true
 tasks:
   - exec:
       mon.a:
-        - ceph config set mgr mgr/crash/warn_recent_interval 0
-  - cephfs_test_runner:
+        - stone config set mgr mgr/crash/warn_recent_interval 0
+  - stonefs_test_runner:
       fail_on_skip: false
       modules:
-        - tasks.cephfs.test_failover
+        - tasks.stonefs.test_failover
 

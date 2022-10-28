@@ -33,7 +33,7 @@ int aio_queue_t::submit_batch(aio_iter begin, aio_iter end,
     ++left;
     ++cur;
   }
-  ceph_assert(aios_size >= left);
+  stone_assert(aios_size >= left);
   int done = 0;
   while (left > 0) {
 #if defined(HAVE_LIBAIO)
@@ -62,7 +62,7 @@ int aio_queue_t::submit_batch(aio_iter begin, aio_iter end,
       }
       return r;
     }
-    ceph_assert(r > 0);
+    stone_assert(r > 0);
     done += r;
     left -= r;
     attempts = 16;

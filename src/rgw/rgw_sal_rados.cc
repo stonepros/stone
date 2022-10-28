@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc.
  *
@@ -39,7 +39,7 @@
 
 #include "rgw_pubsub.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace rgw::sal {
 
@@ -66,7 +66,7 @@ int RGWRadosUser::list_buckets(const DoutPrefixProvider *dpp, const string& mark
 }
 
 RGWBucket* RGWRadosUser::create_bucket(rgw_bucket& bucket,
-				       ceph::real_time creation_time)
+				       stone::real_time creation_time)
 {
   return NULL;
 }
@@ -281,7 +281,7 @@ int RGWRadosBucket::link(const DoutPrefixProvider *dpp, RGWUser* new_user, optio
   rgw_ep_info ep_data{ep, ep_attrs};
 
   return store->ctl()->bucket->link_bucket(new_user->get_user(), info.bucket,
-					   ceph::real_time(), y, dpp, true, &ep_data);
+					   stone::real_time(), y, dpp, true, &ep_data);
 }
 
 int RGWRadosBucket::unlink(RGWUser* new_user, optional_yield y)
@@ -297,7 +297,7 @@ int RGWRadosBucket::chown(RGWUser* new_user, RGWUser* old_user, optional_yield y
 			   old_user->get_display_name(), obj_marker, y, dpp);
 }
 
-int RGWRadosBucket::put_instance_info(const DoutPrefixProvider *dpp, bool exclusive, ceph::real_time _mtime)
+int RGWRadosBucket::put_instance_info(const DoutPrefixProvider *dpp, bool exclusive, stone::real_time _mtime)
 {
   mtime = _mtime;
   return store->getRados()->put_bucket_instance_info(info, exclusive, mtime, &attrs, dpp);
@@ -327,7 +327,7 @@ int RGWRadosBucket::set_instance_attrs(const DoutPrefixProvider *dpp, RGWAttrs& 
 				attrs, &get_info().objv_tracker, y, dpp);
 }
 
-int RGWRadosBucket::try_refresh_info(const DoutPrefixProvider *dpp, ceph::real_time *pmtime)
+int RGWRadosBucket::try_refresh_info(const DoutPrefixProvider *dpp, stone::real_time *pmtime)
 {
   return store->getRados()->try_refresh_bucket_info(info, pmtime, dpp, &attrs);
 }
@@ -537,7 +537,7 @@ bool RGWRadosObject::is_expired() {
       return false;
     }
 
-    if (delete_at <= ceph_clock_now() && !delete_at.is_zero()) {
+    if (delete_at <= stone_clock_now() && !delete_at.is_zero()) {
       return true;
     }
   }
@@ -704,7 +704,7 @@ int RGWRadosObject::delete_object(const DoutPrefixProvider *dpp,
 				  RGWObjectCtx* obj_ctx,
 				  ACLOwner obj_owner,
 				  ACLOwner bucket_owner,
-				  ceph::real_time unmod_since,
+				  stone::real_time unmod_since,
 				  bool high_precision_time,
 				  uint64_t epoch,
 				  std::string& version_id,
@@ -741,10 +741,10 @@ int RGWRadosObject::copy_object(RGWObjectCtx& obj_ctx,
 				rgw::sal::RGWBucket* dest_bucket,
 				rgw::sal::RGWBucket* src_bucket,
 				const rgw_placement_rule& dest_placement,
-				ceph::real_time *src_mtime,
-				ceph::real_time *mtime,
-				const ceph::real_time *mod_ptr,
-				const ceph::real_time *unmod_ptr,
+				stone::real_time *src_mtime,
+				stone::real_time *mtime,
+				const stone::real_time *mod_ptr,
+				const stone::real_time *unmod_ptr,
 				bool high_precision_time,
 				const char *if_match,
 				const char *if_nomatch,
@@ -753,7 +753,7 @@ int RGWRadosObject::copy_object(RGWObjectCtx& obj_ctx,
 				RGWAttrs& attrs,
 				RGWObjCategory category,
 				uint64_t olh_epoch,
-				boost::optional<ceph::real_time> delete_at,
+				boost::optional<stone::real_time> delete_at,
 				string *version_id,
 				string *tag,
 				string *etag,
@@ -911,7 +911,7 @@ int RGWRadosStore::get_bucket(const DoutPrefixProvider *dpp, RGWUser* u, const s
 }
 
 static int decode_policy(const DoutPrefixProvider *dpp,
-                         CephContext *cct,
+                         StoneContext *cct,
                          bufferlist& bl,
                          RGWAccessControlPolicy *policy)
 {
@@ -922,7 +922,7 @@ static int decode_policy(const DoutPrefixProvider *dpp,
     ldpp_dout(dpp, 0) << "ERROR: could not decode policy, caught buffer::error" << dendl;
     return -EIO;
   }
-  if (cct->_conf->subsys.should_gather<ceph_subsys_rgw, 15>()) {
+  if (cct->_conf->subsys.should_gather<stone_subsys_rgw, 15>()) {
     ldpp_dout(dpp, 15) << __func__ << " Read AccessControlPolicy";
     RGWAccessControlPolicy_S3 *s3policy = static_cast<RGWAccessControlPolicy_S3 *>(policy);
     s3policy->to_xml(*_dout);
@@ -1089,7 +1089,7 @@ int RGWRadosStore::create_bucket(const DoutPrefixProvider *dpp,
     JSONDecoder::decode_json("object_ver", objv, &jp);
     JSONDecoder::decode_json("bucket_info", master_info, &jp);
     ldpp_dout(dpp, 20) << "parsed: objv.tag=" << objv.tag << " objv.ver=" << objv.ver << dendl;
-    std::time_t ctime = ceph::real_clock::to_time_t(master_info.creation_time);
+    std::time_t ctime = stone::real_clock::to_time_t(master_info.creation_time);
     ldpp_dout(dpp, 20) << "got creation time: << " << std::put_time(std::localtime(&ctime), "%F %T") << dendl;
     pmaster_bucket= &master_info.bucket;
     creation_time = master_info.creation_time;
@@ -1296,7 +1296,7 @@ LCSerializer* RadosLifecycle::get_serializer(const std::string& lock_name, const
 
 } // namespace rgw::sal
 
-rgw::sal::RGWRadosStore *RGWStoreManager::init_storage_provider(const DoutPrefixProvider *dpp, CephContext *cct, bool use_gc_thread, bool use_lc_thread, bool quota_threads, bool run_sync_thread, bool run_reshard_thread, bool use_cache, bool use_gc)
+rgw::sal::RGWRadosStore *RGWStoreManager::init_storage_provider(const DoutPrefixProvider *dpp, StoneContext *cct, bool use_gc_thread, bool use_lc_thread, bool quota_threads, bool run_sync_thread, bool run_reshard_thread, bool use_cache, bool use_gc)
 {
   RGWRados *rados = new RGWRados;
   rgw::sal::RGWRadosStore *store = new rgw::sal::RGWRadosStore();
@@ -1319,7 +1319,7 @@ rgw::sal::RGWRadosStore *RGWStoreManager::init_storage_provider(const DoutPrefix
   return store;
 }
 
-rgw::sal::RGWRadosStore *RGWStoreManager::init_raw_storage_provider(const DoutPrefixProvider *dpp, CephContext *cct)
+rgw::sal::RGWRadosStore *RGWStoreManager::init_raw_storage_provider(const DoutPrefixProvider *dpp, StoneContext *cct)
 {
   RGWRados *rados = new RGWRados;
   rgw::sal::RGWRadosStore *store = new rgw::sal::RGWRadosStore();

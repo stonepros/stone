@@ -21,7 +21,7 @@ using crimson::common::local_conf;
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -79,7 +79,7 @@ Heartbeat::start_messenger(crimson::net::Messenger& msgr,
   }, crimson::net::Messenger::bind_ertr::all_same_way(
       [] (const std::error_code& e) {
     logger().error("heartbeat messenger try_bind(): address range is unavailable.");
-    ceph_abort();
+    stone_abort();
   }));
 }
 
@@ -465,7 +465,7 @@ void Heartbeat::Connection::connect()
 {
   assert(!conn);
   auto addr = listener.get_peer_addr(type);
-  conn = msgr.connect(addr, entity_name_t(CEPH_ENTITY_TYPE_OSD, peer));
+  conn = msgr.connect(addr, entity_name_t(STONE_ENTITY_TYPE_OSD, peer));
   if (conn->is_connected()) {
     set_connected();
   }
@@ -523,7 +523,7 @@ Heartbeat::Peer::~Peer()
 }
 
 void Heartbeat::Peer::send_heartbeat(
-    clock::time_point now, ceph::signedspan mnow,
+    clock::time_point now, stone::signedspan mnow,
     std::vector<seastar::future<>>& futures)
 {
   session.set_tx(now);
@@ -603,7 +603,7 @@ void Heartbeat::Peer::on_disconnected()
 
 void Heartbeat::Peer::do_send_heartbeat(
     Heartbeat::clock::time_point now,
-    ceph::signedspan mnow,
+    stone::signedspan mnow,
     std::vector<seastar::future<>>* futures)
 {
   const utime_t sent_stamp{now};

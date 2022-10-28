@@ -13,7 +13,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 }
 
@@ -123,7 +123,7 @@ BtreeLBAManager::alloc_extent(
 	});
     }).safe_then([this, &t, len, addr](auto allocation_pair) {
       auto &[laddr, extent] = allocation_pair;
-      ceph_assert(laddr != L_ADDR_MAX);
+      stone_assert(laddr != L_ADDR_MAX);
       return insert_mapping(
 	t,
 	extent,
@@ -180,7 +180,7 @@ btree_range_pin_t &BtreeLBAManager::get_pin(CachedExtent &e)
     return static_cast<BtreeLBAPin &>(
       e.cast<LogicalCachedExtent>()->get_pin()).pin;
   } else {
-    ceph_abort_msg("impossible");
+    stone_abort_msg("impossible");
   }
 }
 
@@ -191,7 +191,7 @@ static depth_t get_depth(const CachedExtent &e)
   } else if (e.is_logical()) {
     return 0;
   } else {
-    ceph_assert(0 == "currently impossible");
+    stone_assert(0 == "currently impossible");
     return 0;
   }
 }
@@ -370,7 +370,7 @@ BtreeLBAManager::rewrite_extent_ret BtreeLBAManager::rewrite_extent(
       [prev_addr = lextent->get_paddr(), addr = nlextent->get_paddr()](
 	const lba_map_val_t &in) {
 	lba_map_val_t ret = in;
-	ceph_assert(in.paddr == prev_addr);
+	stone_assert(in.paddr == prev_addr);
 	ret.paddr = addr;
 	return ret;
       }).safe_then([nlextent](auto e) {}).handle_error(
@@ -424,7 +424,7 @@ BtreeLBAManager::get_physical_extent_if_live(
   laddr_t laddr,
   segment_off_t len)
 {
-  ceph_assert(is_lba_node(type));
+  stone_assert(is_lba_node(type));
   return cache.get_extent_by_type(
     t,
     type,
@@ -511,7 +511,7 @@ BtreeLBAManager::update_refcount_ret BtreeLBAManager::update_refcount(
     addr,
     [delta](const lba_map_val_t &in) {
       lba_map_val_t out = in;
-      ceph_assert((int)out.refcount + delta >= 0);
+      stone_assert((int)out.refcount + delta >= 0);
       out.refcount += delta;
       return out;
     }).safe_then([](auto result) {
@@ -550,7 +550,7 @@ BtreeLBAManager::update_internal_mapping(
 	auto mut_croot = cache.duplicate_for_write(t, croot);
 	croot = mut_croot->cast<RootBlock>();
       }
-      ceph_assert(laddr == 0);
+      stone_assert(laddr == 0);
       auto old_paddr = croot->get_root().lba_root_addr;
       croot->get_root().lba_root_addr = paddr;
       return update_internal_mapping_ret(

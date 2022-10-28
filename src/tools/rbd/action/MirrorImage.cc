@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -138,12 +138,12 @@ int execute_enable_disable(const po::variables_map &vm, bool enable,
 }
 
 int execute_disable(const po::variables_map &vm,
-                    const std::vector<std::string> &ceph_global_init_args) {
+                    const std::vector<std::string> &stone_global_init_args) {
   return execute_enable_disable(vm, false, vm["force"].as<bool>());
 }
 
 int execute_enable(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   return execute_enable_disable(vm, true, false);
 }
 
@@ -155,7 +155,7 @@ void get_arguments_promote(po::options_description *positional,
 }
 
 int execute_promote(const po::variables_map &vm,
-                    const std::vector<std::string> &ceph_global_init_args) {
+                    const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -196,7 +196,7 @@ int execute_promote(const po::variables_map &vm,
 }
 
 int execute_demote(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -235,7 +235,7 @@ int execute_demote(const po::variables_map &vm,
 }
 
 int execute_resync(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -280,7 +280,7 @@ void get_status_arguments(po::options_description *positional,
 }
 
 int execute_status(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   at::Format::Formatter formatter;
   int r = utils::get_formatter(vm, &formatter);
   if (r < 0) {
@@ -353,7 +353,7 @@ int execute_status(const po::variables_map &vm,
   if (local_site_r >= 0 && local_status.up) {
     r = image.mirror_image_get_instance_id(&instance_id);
     if (r == -EOPNOTSUPP) {
-      std::cerr << "rbd: newer release of Ceph OSDs required to map image "
+      std::cerr << "rbd: newer release of Stone OSDs required to map image "
                 << "to rbd-mirror daemon instance" << std::endl;
       // not fatal
     } else if (r < 0 && r != -ENOENT) {
@@ -526,7 +526,7 @@ void get_snapshot_arguments(po::options_description *positional,
 }
 
 int execute_snapshot(const po::variables_map &vm,
-                     const std::vector<std::string> &ceph_global_init_args) {
+                     const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;

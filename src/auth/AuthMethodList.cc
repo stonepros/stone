@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -18,10 +18,10 @@
 
 #include "AuthMethodList.h"
 
-const static int dout_subsys = ceph_subsys_auth;
+const static int dout_subsys = stone_subsys_auth;
 
 
-AuthMethodList::AuthMethodList(CephContext *cct, std::string str)
+AuthMethodList::AuthMethodList(StoneContext *cct, std::string str)
 {
   std::list<std::string> sup_list;
   get_str_list(str, sup_list);
@@ -30,20 +30,20 @@ AuthMethodList::AuthMethodList(CephContext *cct, std::string str)
   }
   for (auto iter = sup_list.begin(); iter != sup_list.end(); ++iter) {
     ldout(cct, 5) << "adding auth protocol: " << *iter << dendl;
-    if (iter->compare("cephx") == 0) {
-      auth_supported.push_back(CEPH_AUTH_CEPHX);
+    if (iter->compare("stonex") == 0) {
+      auth_supported.push_back(STONE_AUTH_STONEX);
     } else if (iter->compare("none") == 0) {
-      auth_supported.push_back(CEPH_AUTH_NONE);
+      auth_supported.push_back(STONE_AUTH_NONE);
     } else if (iter->compare("gss") == 0) {
-      auth_supported.push_back(CEPH_AUTH_GSS);
+      auth_supported.push_back(STONE_AUTH_GSS);
     } else {
-      auth_supported.push_back(CEPH_AUTH_UNKNOWN);
+      auth_supported.push_back(STONE_AUTH_UNKNOWN);
       lderr(cct) << "WARNING: unknown auth protocol defined: " << *iter << dendl;
     }
   }
   if (auth_supported.empty()) {
-    lderr(cct) << "WARNING: no auth protocol defined, use 'cephx' by default" << dendl;
-    auth_supported.push_back(CEPH_AUTH_CEPHX);
+    lderr(cct) << "WARNING: no auth protocol defined, use 'stonex' by default" << dendl;
+    auth_supported.push_back(STONE_AUTH_STONEX);
   }
 }
 
@@ -57,7 +57,7 @@ int AuthMethodList::pick(const std::set<__u32>& supported)
   for (auto p = supported.rbegin(); p != supported.rend(); ++p)
     if (is_supported_auth(*p))
       return *p;
-  return CEPH_AUTH_UNKNOWN;
+  return STONE_AUTH_UNKNOWN;
 }
 
 void AuthMethodList::remove_supported_auth(int auth_type)

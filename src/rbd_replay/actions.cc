@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Adam Crume <adamcrume@gmail.com>
  *
@@ -18,7 +18,7 @@
 #include "PendingIO.hpp"
 #include "rbd_replay_debug.hpp"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 using namespace rbd_replay;
 
@@ -109,7 +109,7 @@ void StopThreadAction::perform(ActionCtx &ctx) {
 void AioReadAction::perform(ActionCtx &worker) {
   dout(ACTION_LEVEL) << "Performing " << *this << dendl;
   librbd::Image *image = worker.get_image(m_action.imagectx_id);
-  ceph_assert(image);
+  stone_assert(image);
   PendingIO::ptr io(new PendingIO(pending_io_id(), worker));
   worker.add_pending(io);
   int r = image->aio_read(m_action.offset, m_action.length, io->bufferlist(), &io->completion());

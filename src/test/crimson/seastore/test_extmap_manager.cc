@@ -17,7 +17,7 @@ using namespace crimson::os::seastore;
 
 namespace {
   [[maybe_unused]] seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_test);
+    return crimson::get_logger(stone_subsys_test);
   }
 }
 

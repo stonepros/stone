@@ -358,7 +358,7 @@ struct TestDeepCopy : public TestFixture {
     uint64_t initial_size, size;
     {
       std::shared_lock src_locker{m_src_ictx->image_lock};
-      size = initial_size = m_src_ictx->get_image_size(CEPH_NOSNAP);
+      size = initial_size = m_src_ictx->get_image_size(STONE_NOSNAP);
     }
 
     int nsnaps = 4;
@@ -429,7 +429,7 @@ struct TestDeepCopy : public TestFixture {
         ASSERT_EQ(0, m_src_ictx->operations->resize(new_size, true, no_op));
         {
           std::shared_lock src_locker{m_src_ictx->image_lock};
-          size = m_src_ictx->get_image_size(CEPH_NOSNAP);
+          size = m_src_ictx->get_image_size(STONE_NOSNAP);
         }
         ASSERT_EQ(new_size, size);
       }

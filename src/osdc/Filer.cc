@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -30,7 +30,7 @@
 #include "common/Finisher.h"
 #include "common/config.h"
 
-#define dout_subsys ceph_subsys_filer
+#define dout_subsys stone_subsys_filer
 #undef dout_prefix
 #define dout_prefix *_dout << objecter->messenger->get_myname() << ".filer "
 
@@ -44,13 +44,13 @@ public:
   Probe *probe;
   object_t oid;
   uint64_t size;
-  ceph::real_time mtime;
+  stone::real_time mtime;
   C_Probe(Filer *f, Probe *p, object_t o) : filer(f), probe(p), oid(o),
 					    size(0) {}
   void finish(int r) override {
     if (r == -ENOENT) {
       r = 0;
-      ceph_assert(size == 0);
+      stone_assert(size == 0);
     }
 
     bool probe_complete;
@@ -61,7 +61,7 @@ public:
       }
 
       probe_complete = filer->_probed(probe, oid, size, mtime, pl);
-      ceph_assert(!pl.owns_lock());
+      stone_assert(!pl.owns_lock());
     }
     if (probe_complete) {
       probe->onfinish->complete(probe->err);
@@ -75,7 +75,7 @@ int Filer::probe(inodeno_t ino,
 		 snapid_t snapid,
 		 uint64_t start_from,
 		 uint64_t *end, // LB, when !fwd
-		 ceph::real_time *pmtime,
+		 stone::real_time *pmtime,
 		 bool fwd,
 		 int flags,
 		 Context *onfinish)
@@ -85,7 +85,7 @@ int Filer::probe(inodeno_t ino,
 	   << " starting from " << start_from
 	   << dendl;
 
-  ceph_assert(snapid);  // (until there is a non-NOSNAP write)
+  stone_assert(snapid);  // (until there is a non-NOSNAP write)
 
   Probe *probe = new Probe(ino, *layout, snapid, start_from, end, pmtime,
 			   flags, fwd, onfinish);
@@ -108,7 +108,7 @@ int Filer::probe(inodeno_t ino,
 	   << " starting from " << start_from
 	   << dendl;
 
-  ceph_assert(snapid);  // (until there is a non-NOSNAP write)
+  stone_assert(snapid);  // (until there is a non-NOSNAP write)
 
   Probe *probe = new Probe(ino, *layout, snapid, start_from, end, pmtime,
 			   flags, fwd, onfinish);
@@ -127,7 +127,7 @@ int Filer::probe_impl(Probe* probe, const file_layout_t *layout,
     if (start_from % period)
       probe->probing_len += period - (start_from % period);
   } else {
-    ceph_assert(start_from > *end);
+    stone_assert(start_from > *end);
     if (start_from % period)
       probe->probing_len -= period - (start_from % period);
     probe->probing_off -= probe->probing_len;
@@ -135,7 +135,7 @@ int Filer::probe_impl(Probe* probe, const file_layout_t *layout,
 
   Probe::unique_lock pl(probe->lock);
   _probe(probe, pl);
-  ceph_assert(!pl.owns_lock());
+  stone_assert(!pl.owns_lock());
 
   return 0;
 }
@@ -147,7 +147,7 @@ int Filer::probe_impl(Probe* probe, const file_layout_t *layout,
  */
 void Filer::_probe(Probe *probe, Probe::unique_lock& pl)
 {
-  ceph_assert(pl.owns_lock() && pl.mutex() == &probe->lock);
+  stone_assert(pl.owns_lock() && pl.mutex() == &probe->lock);
 
   ldout(cct, 10) << "_probe " << hex << probe->ino << dec
 		 << " " << probe->probing_off << "~" << probe->probing_len
@@ -171,7 +171,7 @@ void Filer::_probe(Probe *probe, Probe::unique_lock& pl)
        i != stat_extents.end(); ++i) {
     C_Probe *c = new C_Probe(this, probe, i->oid);
     objecter->stat(i->oid, i->oloc, probe->snapid, &c->size, &c->mtime,
-		   probe->flags | CEPH_OSD_FLAG_RWORDERED,
+		   probe->flags | STONE_OSD_FLAG_RWORDERED,
 		   new C_OnFinisher(c, finisher));
   }
 }
@@ -182,9 +182,9 @@ void Filer::_probe(Probe *probe, Probe::unique_lock& pl)
  * @return true if probe is complete and Probe object may be freed.
  */
 bool Filer::_probed(Probe *probe, const object_t& oid, uint64_t size,
-		    ceph::real_time mtime, Probe::unique_lock& pl)
+		    stone::real_time mtime, Probe::unique_lock& pl)
 {
-  ceph_assert(pl.owns_lock() && pl.mutex() == &probe->lock);
+  stone_assert(pl.owns_lock() && pl.mutex() == &probe->lock);
 
   ldout(cct, 10) << "_probed " << probe->ino << " object " << oid
 	   << " has size " << size << " mtime " << mtime << dendl;
@@ -193,7 +193,7 @@ bool Filer::_probed(Probe *probe, const object_t& oid, uint64_t size,
   if (mtime > probe->max_mtime)
     probe->max_mtime = mtime;
 
-  ceph_assert(probe->ops.count(oid));
+  stone_assert(probe->ops.count(oid));
   probe->ops.erase(oid);
 
   if (!probe->ops.empty()) {
@@ -221,7 +221,7 @@ bool Filer::_probed(Probe *probe, const object_t& oid, uint64_t size,
 		   << dendl;
 
     if (!probe->found_size) {
-      ceph_assert(probe->known_size[p->oid] <= shouldbe);
+      stone_assert(probe->known_size[p->oid] <= shouldbe);
 
       if ((probe->fwd && probe->known_size[p->oid] == shouldbe) ||
 	  (!probe->fwd && probe->known_size[p->oid] == 0 &&
@@ -263,23 +263,23 @@ bool Filer::_probed(Probe *probe, const object_t& oid, uint64_t size,
     uint64_t period = probe->layout.get_period();
     if (probe->fwd) {
       probe->probing_off += probe->probing_len;
-      ceph_assert(probe->probing_off % period == 0);
+      stone_assert(probe->probing_off % period == 0);
       probe->probing_len = period;
     } else {
       // previous period.
-      ceph_assert(probe->probing_off % period == 0);
+      stone_assert(probe->probing_off % period == 0);
       probe->probing_len = period;
       probe->probing_off -= period;
     }
     _probe(probe, pl);
-    ceph_assert(!pl.owns_lock());
+    stone_assert(!pl.owns_lock());
     return false;
   } else if (probe->pmtime) {
     ldout(cct, 10) << "_probed found mtime " << probe->max_mtime << dendl;
     *probe->pmtime = probe->max_mtime;
   } else if (probe->pumtime) {
     ldout(cct, 10) << "_probed found mtime " << probe->max_mtime << dendl;
-    *probe->pumtime = ceph::real_clock::to_ceph_timespec(probe->max_mtime);
+    *probe->pumtime = stone::real_clock::to_stone_timespec(probe->max_mtime);
   }
   // done!
   pl.unlock();
@@ -297,13 +297,13 @@ struct PurgeRange {
   file_layout_t layout;
   SnapContext snapc;
   uint64_t first, num;
-  ceph::real_time mtime;
+  stone::real_time mtime;
   int flags;
   Context *oncommit;
   int uncommitted;
   int err = 0;
   PurgeRange(inodeno_t i, const file_layout_t& l, const SnapContext& sc,
-	     uint64_t fo, uint64_t no, ceph::real_time t, int fl,
+	     uint64_t fo, uint64_t no, stone::real_time t, int fl,
 	     Context *fin)
     : ino(i), layout(l), snapc(sc), first(fo), num(no), mtime(t), flags(fl),
       oncommit(fin), uncommitted(0) {}
@@ -313,11 +313,11 @@ int Filer::purge_range(inodeno_t ino,
 		       const file_layout_t *layout,
 		       const SnapContext& snapc,
 		       uint64_t first_obj, uint64_t num_obj,
-		       ceph::real_time mtime,
+		       stone::real_time mtime,
 		       int flags,
 		       Context *oncommit)
 {
-  ceph_assert(num_obj > 0);
+  stone_assert(num_obj > 0);
 
   // single object?  easy!
   if (num_obj == 1) {
@@ -389,7 +389,7 @@ struct TruncRange {
   inodeno_t ino;
   file_layout_t layout;
   SnapContext snapc;
-  ceph::real_time mtime;
+  stone::real_time mtime;
   int flags;
   Context *oncommit;
   int uncommitted;
@@ -397,7 +397,7 @@ struct TruncRange {
   uint64_t length;
   uint32_t truncate_seq;
   TruncRange(inodeno_t i, const file_layout_t& l, const SnapContext& sc,
-	     ceph::real_time t, int fl, Context *fin,
+	     stone::real_time t, int fl, Context *fin,
 	     uint64_t off, uint64_t len, uint32_t ts)
     : ino(i), layout(l), snapc(sc), mtime(t), flags(fl), oncommit(fin),
       uncommitted(0), offset(off), length(len), truncate_seq(ts) {}
@@ -409,7 +409,7 @@ void Filer::truncate(inodeno_t ino,
 		     uint64_t offset,
 		     uint64_t len,
 		     __u32 truncate_seq,
-		     ceph::real_time mtime,
+		     stone::real_time mtime,
 		     int flags,
 		     Context *oncommit)
 {
@@ -419,7 +419,7 @@ void Filer::truncate(inodeno_t ino,
     vector<ObjectExtent> extents;
     Striper::file_to_extents(cct, ino, layout, offset, len, 0, extents);
     osdc_opvec ops(1);
-    ops[0].op.op = CEPH_OSD_OP_TRIMTRUNC;
+    ops[0].op.op = STONE_OSD_OP_TRIMTRUNC;
     ops[0].op.extent.truncate_seq = truncate_seq;
     ops[0].op.extent.truncate_size = extents[0].offset;
     objecter->_modify(extents[0].oid, extents[0].oloc, ops, mtime, snapc,
@@ -478,7 +478,7 @@ void Filer::_do_truncate_range(TruncRange *tr, int fin)
   // Issue objecter ops outside tr->lock to avoid lock dependency loop
   for (const auto& p : extents) {
     osdc_opvec ops(1);
-    ops[0].op.op = CEPH_OSD_OP_TRIMTRUNC;
+    ops[0].op.op = STONE_OSD_OP_TRIMTRUNC;
     ops[0].op.extent.truncate_size = p.offset;
     ops[0].op.extent.truncate_seq = tr->truncate_seq;
     objecter->_modify(p.oid, p.oloc, ops, tr->mtime, tr->snapc, tr->flags,

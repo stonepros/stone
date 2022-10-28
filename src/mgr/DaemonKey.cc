@@ -26,7 +26,7 @@ std::ostream& operator<<(std::ostream& os, const DaemonKey& key)
   return os << key.type << '.' << key.name;
 }
 
-namespace ceph {
+namespace stone {
 std::string to_string(const DaemonKey& key)
 {
   return key.type + '.' + key.name;

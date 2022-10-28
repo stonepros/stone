@@ -8,8 +8,8 @@
 #include "mgr/MDSPerfMetricTypes.h"
 #include "mgr/MDSPerfMetricCollector.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr.mds_perf_metric_collector " << __func__ << " "
 
@@ -51,6 +51,6 @@ int MDSPerfMetricCollector::get_counters(PerfCollector *collector) {
 }
 
 void MDSPerfMetricCollector::get_delayed_ranks(std::set<mds_rank_t> *ranks) {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   *ranks = delayed_ranks;
 }

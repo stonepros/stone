@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Indian Institute of Science <office.ece@iisc.ac.in>
  *
@@ -21,14 +21,14 @@
 
 #include "common/debug.h"
 #include "erasure-code/ErasureCodePlugin.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/str_map.h"
 #include "include/stringify.h"
 #include "osd/osd_types.h"
 
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_osd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 
@@ -36,7 +36,7 @@
 #define talloc(type, num) (type *) malloc(sizeof(type)*(num))
 
 using namespace std;
-using namespace ceph;
+using namespace stone;
 static ostream& _prefix(std::ostream* _dout)
 {
   return *_dout << "ErasureCodeClay: ";
@@ -167,7 +167,7 @@ int ErasureCodeClay::decode_chunks(const set<int> &want_to_read,
     if (chunks.count(i) == 0) {
       erasures.insert(i < k ? i : i+nu);
     }
-    ceph_assert(decoded->count(i) > 0);
+    stone_assert(decoded->count(i) > 0);
     coded_chunks[i < k ? i : i+nu] = (*decoded)[i];
   }
   int chunk_size = coded_chunks[0].length();
@@ -354,9 +354,9 @@ int ErasureCodeClay::minimum_to_repair(const set<int> &want_to_read,
     }
   } else {
     dout(0) << "minimum_to_repair: shouldn't have come here" << dendl;
-    ceph_assert(0);
+    stone_assert(0);
   }
-  ceph_assert(minimum->size() == (unsigned)d);
+  stone_assert(minimum->size() == (unsigned)d);
   return 0;
 }
 
@@ -397,7 +397,7 @@ int ErasureCodeClay::repair(const set<int> &want_to_read,
 			    map<int, bufferlist> *repaired, int chunk_size)
 {
 
-  ceph_assert((want_to_read.size() == 1) && (chunks.size() == (unsigned)d));
+  stone_assert((want_to_read.size() == 1) && (chunks.size() == (unsigned)d));
 
   int repair_sub_chunk_no = get_repair_sub_chunk_count(want_to_read);
   vector<pair<int, int>> repair_sub_chunks_ind;
@@ -408,7 +408,7 @@ int ErasureCodeClay::repair(const set<int> &want_to_read,
   unsigned sub_chunksize = repair_blocksize/repair_sub_chunk_no;
   unsigned chunksize = sub_chunk_no*sub_chunksize;
 
-  ceph_assert(chunksize == (unsigned)chunk_size);
+  stone_assert(chunksize == (unsigned)chunk_size);
 
   map<int, bufferlist> recovered_data;
   map<int, bufferlist> helper_data;
@@ -444,7 +444,7 @@ int ErasureCodeClay::repair(const set<int> &want_to_read,
     helper_data[i].push_back(ptr);
   }
 
-  ceph_assert(helper_data.size()+aloof_nodes.size()+recovered_data.size() ==
+  stone_assert(helper_data.size()+aloof_nodes.size()+recovered_data.size() ==
 	      (unsigned) q*t);
 
   int r = repair_one_lost_chunk(recovered_data, aloof_nodes,
@@ -490,7 +490,7 @@ int ErasureCodeClay::repair_one_lost_chunk(map<int, bufferlist> &recovered_data,
       for (auto node : aloof_nodes) {
         if (node % q == z_vec[node / q]) order++;
       }
-      ceph_assert(order > 0);
+      stone_assert(order > 0);
       ordered_planes[order].insert(j);
       // to keep track of a sub chunk within helper buffer recieved
       repair_plane_to_ind[j] = plane_ind;
@@ -515,7 +515,7 @@ int ErasureCodeClay::repair_one_lost_chunk(map<int, bufferlist> &recovered_data,
     count++;
     (void)bl;  // silence -Wunused-variable
   }
-  ceph_assert(count == 1);
+  stone_assert(count == 1);
 
   set<int> erasures;
   for (int i = 0; i < q; i++) {
@@ -565,11 +565,11 @@ int ErasureCodeClay::repair_one_lost_chunk(map<int, bufferlist> &recovered_data,
 	      }
 	      pft.erasure_code->decode_chunks(pft_erasures, known_subchunks, &pftsubchunks);
 	    } else {
-	      ceph_assert(helper_data.count(node_sw) > 0);
-	      ceph_assert(repair_plane_to_ind.count(z) > 0);
+	      stone_assert(helper_data.count(node_sw) > 0);
+	      stone_assert(repair_plane_to_ind.count(z) > 0);
 	      if (z_vec[y] != x){
 		pft_erasures.insert(i2);
-		ceph_assert(repair_plane_to_ind.count(z_sw) > 0);
+		stone_assert(repair_plane_to_ind.count(z_sw) > 0);
 		known_subchunks[i0].substr_of(helper_data[node_xy], repair_plane_to_ind[z]*sub_chunksize, sub_chunksize);
 		known_subchunks[i1].substr_of(helper_data[node_sw], repair_plane_to_ind[z_sw]*sub_chunksize, sub_chunksize);
 		pftsubchunks[i0] = known_subchunks[i0];
@@ -591,7 +591,7 @@ int ErasureCodeClay::repair_one_lost_chunk(map<int, bufferlist> &recovered_data,
 	  }
 	} // x
       } // y
-      ceph_assert(erasures.size() <= (unsigned)m);
+      stone_assert(erasures.size() <= (unsigned)m);
       decode_uncoupled(erasures, z, sub_chunksize);
 
       for (auto i : erasures) {
@@ -619,9 +619,9 @@ int ErasureCodeClay::repair_one_lost_chunk(map<int, bufferlist> &recovered_data,
 		   sub_chunksize);
 	    count_retrieved_sub_chunks++;
 	  } else {
-	    ceph_assert(y == lost_chunk / q);
-	    ceph_assert(node_sw == lost_chunk);
-	    ceph_assert(helper_data.count(i) > 0);
+	    stone_assert(y == lost_chunk / q);
+	    stone_assert(node_sw == lost_chunk);
+	    stone_assert(helper_data.count(i) > 0);
 	    pft_erasures.insert(i1);
 	    known_subchunks[i0].substr_of(helper_data[i], repair_plane_to_ind[z]*sub_chunksize, sub_chunksize);
 	    known_subchunks[i2].substr_of(U_buf[i], z*sub_chunksize, sub_chunksize);
@@ -650,10 +650,10 @@ int ErasureCodeClay::decode_layered(set<int> &erased_chunks,
   int num_erasures = erased_chunks.size();
 
   int size = (*chunks)[0].length();
-  ceph_assert(size%sub_chunk_no == 0);
+  stone_assert(size%sub_chunk_no == 0);
   int sc_size = size / sub_chunk_no;
 
-  ceph_assert(num_erasures > 0);
+  stone_assert(num_erasures > 0);
 
   for (int i = k+nu; (num_erasures < m) && (i < q*t); i++) {
     if ([[maybe_unused]] auto [it, added] = erased_chunks.emplace(i); added) {
@@ -661,7 +661,7 @@ int ErasureCodeClay::decode_layered(set<int> &erased_chunks,
       (void)it;  // silence -Wunused-variable
     }
   }
-  ceph_assert(num_erasures == m);
+  stone_assert(num_erasures == m);
 
   int max_iscore = get_max_iscore(erased_chunks);
   int order[sub_chunk_no];
@@ -694,8 +694,8 @@ int ErasureCodeClay::decode_layered(set<int> &erased_chunks,
             if (erased_chunks.count(node_sw) == 0) {
 	      recover_type1_erasure(chunks, x, y, z, z_vec, sc_size);
 	    } else if (z_vec[y] < x){
-              ceph_assert(erased_chunks.count(node_sw) > 0);
-              ceph_assert(z_vec[y] != x);
+              stone_assert(erased_chunks.count(node_sw) > 0);
+              stone_assert(z_vec[y] != x);
               get_coupled_from_uncoupled(chunks, x, y, z, z_vec, sc_size);
 	    }
 	  } else {
@@ -821,7 +821,7 @@ void ErasureCodeClay::get_coupled_from_uncoupled(map<int, bufferlist>* chunks,
   int node_sw = y*q+z_vec[y];
   int z_sw = z + (x - z_vec[y]) * pow_int(q,t-1-y);
 
-  ceph_assert(z_vec[y] < x);
+  stone_assert(z_vec[y] < x);
   map<int, bufferlist> uncoupled_subchunks;
   uncoupled_subchunks[2].substr_of(U_buf[node_xy], z * sc_size, sc_size);
   uncoupled_subchunks[3].substr_of(U_buf[node_sw], z_sw * sc_size, sc_size);

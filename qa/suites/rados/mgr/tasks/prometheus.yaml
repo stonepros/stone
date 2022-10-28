@@ -1,7 +1,7 @@
 
 tasks:
   - install:
-  - ceph:
+  - stone:
       # tests may leave mgrs broken, so don't try and call into them
       # to invoke e.g. pg dump during teardown.
       wait-for-scrub: false
@@ -11,6 +11,6 @@ tasks:
         - \(PG_
         - replacing it with standby
         - No standby daemons available
-  - cephfs_test_runner:
+  - stonefs_test_runner:
       modules:
         - tasks.mgr.test_prometheus

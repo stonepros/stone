@@ -1,18 +1,18 @@
 overrides:
-  ceph:
+  stone:
     conf:
       global:
         ms die on skipped message: false
 tasks:
 - install:
     branch: dumpling
-- ceph:
+- stone:
 - parallel:
    - user-workload
    - kclient-workload
 user-workload:
   sequential:
-  - ceph-fuse: [client.0]
+  - stone-fuse: [client.0]
   - workunit:
       clients:
          client.0:

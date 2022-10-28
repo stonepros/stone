@@ -1,5 +1,5 @@
-#ifndef CEPH_SECRET_H
-#define CEPH_SECRET_H
+#ifndef STONE_SECRET_H
+#define STONE_SECRET_H
 
 #ifdef __cplusplus
 extern "C" {

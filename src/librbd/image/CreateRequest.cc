@@ -2,10 +2,10 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "librbd/image/CreateRequest.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/dout.h"
 #include "common/errno.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "cls/rbd/cls_rbd_client.h"
 #include "osdc/Striper.h"
 #include "librbd/Features.h"
@@ -22,7 +22,7 @@
 #include "journal/Journaler.h"
 
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::CreateRequest: " << __func__ \
                            << ": "
@@ -35,7 +35,7 @@ using util::create_context_callback;
 
 namespace {
 
-int validate_features(CephContext *cct, uint64_t features) {
+int validate_features(StoneContext *cct, uint64_t features) {
   if (features & ~RBD_FEATURES_ALL) {
     lderr(cct) << "librbd does not support requested features." << dendl;
     return -ENOSYS;
@@ -63,7 +63,7 @@ int validate_features(CephContext *cct, uint64_t features) {
   return 0;
 }
 
-int validate_striping(CephContext *cct, uint8_t order, uint64_t stripe_unit,
+int validate_striping(StoneContext *cct, uint8_t order, uint64_t stripe_unit,
                       uint64_t stripe_count) {
   if ((stripe_unit && !stripe_count) ||
       (!stripe_unit && stripe_count)) {
@@ -80,7 +80,7 @@ int validate_striping(CephContext *cct, uint8_t order, uint64_t stripe_unit,
   return 0;
 }
 
-bool validate_layout(CephContext *cct, uint64_t size, file_layout_t &layout) {
+bool validate_layout(StoneContext *cct, uint64_t size, file_layout_t &layout) {
   if (!librbd::ObjectMap<>::is_compatible(layout, size)) {
     lderr(cct) << "image size not compatible with object map" << dendl;
     return false;
@@ -103,7 +103,7 @@ int get_image_option(const ImageOptions &image_options, int option,
 } // anonymous namespace
 
 template<typename I>
-int CreateRequest<I>::validate_order(CephContext *cct, uint8_t order) {
+int CreateRequest<I>::validate_order(StoneContext *cct, uint8_t order) {
   if (order > 25 || order < 12) {
     lderr(cct) << "order must be in the range [12, 25]" << dendl;
     return -EDOM;
@@ -134,11 +134,11 @@ CreateRequest<I>::CreateRequest(const ConfigProxy& config, IoCtx &ioctx,
     m_op_work_queue(op_work_queue), m_on_finish(on_finish) {
 
   m_io_ctx.dup(ioctx);
-  m_cct = reinterpret_cast<CephContext *>(m_io_ctx.cct());
+  m_cct = reinterpret_cast<StoneContext *>(m_io_ctx.cct());
 
   m_id_obj = util::id_obj_name(m_image_name);
   m_header_obj = util::header_name(m_image_id);
-  m_objmap_name = ObjectMap<>::object_map_name(m_image_id, CEPH_NOSNAP);
+  m_objmap_name = ObjectMap<>::object_map_name(m_image_id, STONE_NOSNAP);
   if (!non_primary_global_image_id.empty() &&
       (m_create_flags & CREATE_FLAG_MIRROR_ENABLE_MASK) == 0) {
     m_create_flags |= CREATE_FLAG_FORCE_MIRROR_ENABLE;
@@ -318,7 +318,7 @@ void CreateRequest<I>::add_image_to_directory() {
   librados::AioCompletion *comp =
     create_rados_callback<klass, &klass::handle_add_image_to_directory>(this);
   int r = m_io_ctx.aio_operate(RBD_DIRECTORY, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -358,7 +358,7 @@ void CreateRequest<I>::create_id_object() {
   librados::AioCompletion *comp =
     create_rados_callback<klass, &klass::handle_create_id_object>(this);
   int r = m_io_ctx.aio_operate(m_id_obj, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -401,7 +401,7 @@ void CreateRequest<I>::negotiate_features() {
 
   m_outbl.clear();
   int r = m_io_ctx.aio_operate(RBD_DIRECTORY, comp, &op, &m_outbl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -429,7 +429,7 @@ void CreateRequest<I>::handle_negotiate_features(int r) {
 template<typename I>
 void CreateRequest<I>::create_image() {
   ldout(m_cct, 15) << dendl;
-  ceph_assert(m_data_pool.empty() || m_data_pool_id != -1);
+  stone_assert(m_data_pool.empty() || m_data_pool_id != -1);
 
   ostringstream oss;
   oss << RBD_DATA_PREFIX;
@@ -453,7 +453,7 @@ void CreateRequest<I>::create_image() {
   librados::AioCompletion *comp =
     create_rados_callback<klass, &klass::handle_create_image>(this);
   int r = m_io_ctx.aio_operate(m_header_obj, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -492,7 +492,7 @@ void CreateRequest<I>::set_stripe_unit_count() {
   librados::AioCompletion *comp =
     create_rados_callback<klass, &klass::handle_set_stripe_unit_count>(this);
   int r = m_io_ctx.aio_operate(m_header_obj, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -528,7 +528,7 @@ void CreateRequest<I>::object_map_resize() {
   librados::AioCompletion *comp =
     create_rados_callback<klass, &klass::handle_object_map_resize>(this);
   int r = m_io_ctx.aio_operate(m_objmap_name, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -565,7 +565,7 @@ void CreateRequest<I>::fetch_mirror_mode() {
     create_rados_callback<klass, &klass::handle_fetch_mirror_mode>(this);
   m_outbl.clear();
   int r = m_io_ctx.aio_operate(RBD_MIRRORING, comp, &op, &m_outbl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -738,7 +738,7 @@ void CreateRequest<I>::remove_object_map() {
   librados::AioCompletion *comp =
     create_rados_callback<klass, &klass::handle_remove_object_map>(this);
   int r = m_io_ctx.aio_remove(m_objmap_name, comp);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -762,7 +762,7 @@ void CreateRequest<I>::remove_header_object() {
   librados::AioCompletion *comp =
     create_rados_callback<klass, &klass::handle_remove_header_object>(this);
   int r = m_io_ctx.aio_remove(m_header_obj, comp);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -786,7 +786,7 @@ void CreateRequest<I>::remove_id_object() {
   librados::AioCompletion *comp =
     create_rados_callback<klass, &klass::handle_remove_id_object>(this);
   int r = m_io_ctx.aio_remove(m_id_obj, comp);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -813,7 +813,7 @@ void CreateRequest<I>::remove_from_dir() {
   librados::AioCompletion *comp =
     create_rados_callback<klass, &klass::handle_remove_from_dir>(this);
   int r = m_io_ctx.aio_operate(RBD_DIRECTORY, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 

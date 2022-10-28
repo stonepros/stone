@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_CONFIG_H
-#define CEPH_CONFIG_H
+#ifndef STONE_CONFIG_H
+#define STONE_CONFIG_H
 
 #include <map>
 #include <boost/container/small_vector.hpp>
@@ -38,9 +38,9 @@ enum {
 
 extern const char *ceph_conf_level_name(int level);
 
-/** This class represents the current Ceph configuration.
+/** This class represents the current Stonee configuration.
  *
- * For Ceph daemons, this is the daemon configuration.  Log levels, caching
+ * For Stonee daemons, this is the daemon configuration.  Log levels, caching
  * settings, btrfs settings, and so forth can all be found here.  For libcephfs
  * and librados users, this is the configuration associated with their context.
  *
@@ -82,7 +82,7 @@ public:
   typedef std::function<bool(
       const std::string &k, const std::string &v)> config_callback;
 
-  /// true if we are a daemon (as per CephContext::code_env)
+  /// true if we are a daemon (as per StoneeContext::code_env)
   const bool is_daemon;
 
   /*
@@ -128,7 +128,7 @@ public:
   // Absorb config settings from the environment
   void parse_env(unsigned entity_type,
 		 ConfigValues& values, const ConfigTracker& tracker,
-		 const char *env_var = "CEPH_ARGS");
+		 const char *env_var = "STONE_ARGS");
 
   // Absorb config settings from argv
   int parse_argv(ConfigValues& values, const ConfigTracker& tracker,
@@ -151,13 +151,13 @@ public:
 		       const std::string_view key, const std::string &val);
 
   /// Set a values from mon
-  int set_mon_vals(CephContext *cct,
+  int set_mon_vals(StoneeContext *cct,
 		   ConfigValues& values,
 		   const ConfigTracker& tracker,
 		   const std::map<std::string,std::string, std::less<>>& kv,
 		   config_callback config_cb);
 
-  // Called by the Ceph daemons to make configuration changes at runtime
+  // Called by the Stonee daemons to make configuration changes at runtime
   int injectargs(ConfigValues& values,
 		 const ConfigTracker& tracker,
 		 const std::string &s,
@@ -236,7 +236,7 @@ public:
 	    std::string name = {}) const;
 
   /// print/log warnings/errors from parsing the config
-  void complain_about_parse_error(CephContext *cct);
+  void complain_about_parse_error(StoneeContext *cct);
 
 private:
   // we use this to avoid variable expansion loops

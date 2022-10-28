@@ -9,7 +9,7 @@
 #include "common/dout.h"
 #include "librbd/asio/ContextWQ.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::AsioEngine: " \
                            << this << " " << __func__ << ": "

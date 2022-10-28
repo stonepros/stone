@@ -23,7 +23,7 @@ public:
   AllocTest(): alloc(0) { }
   void init_alloc(int64_t size, uint64_t min_alloc_size) {
     std::cout << "Creating alloc type " << string(GetParam()) << " \n";
-    alloc.reset(Allocator::create(g_ceph_context, string(GetParam()), size,
+    alloc.reset(Allocator::create(g_stone_context, string(GetParam()), size,
 				  min_alloc_size));
   }
 
@@ -368,9 +368,9 @@ TEST_P(AllocTest, test_dump_fragmentation_score)
         }
       } else {
 	//free
-	ceph_assert(allocated.size() > 0);
+	stone_assert(allocated.size() > 0);
 	size_t item = rng() % allocated.size();
-	ceph_assert(allocated[item].length > 0);
+	stone_assert(allocated[item].length > 0);
 	allocated_cnt -= allocated[item].length;
 	interval_set<uint64_t> release_set;
 	release_set.insert(allocated[item].offset, allocated[item].length);
@@ -382,7 +382,7 @@ TEST_P(AllocTest, test_dump_fragmentation_score)
 
     size_t free_sum = 0;
     auto iterated_allocation = [&](size_t off, size_t len) {
-      ceph_assert(len > 0);
+      stone_assert(len > 0);
       free_sum += len;
     };
     alloc->dump(iterated_allocation);
@@ -430,7 +430,7 @@ TEST_P(AllocTest, test_alloc_bug_24598)
 }
 
 //Verifies issue from
-//http://tracker.ceph.com/issues/40703
+//http://tracker.stone.com/issues/40703
 //
 TEST_P(AllocTest, test_alloc_big2)
 {

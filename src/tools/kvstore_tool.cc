@@ -31,7 +31,7 @@ StoreTool::StoreTool(const string& type,
     exit(1);
 #endif
   } else {
-    auto db_ptr = KeyValueDB::create(g_ceph_context, type, path);
+    auto db_ptr = KeyValueDB::create(g_stone_context, type, path);
     if (!to_repair) {
       if (int r = db_ptr->open(std::cerr); r < 0) {
         cerr << "failed to open type " << type << " path " << path << ": "
@@ -45,7 +45,7 @@ StoreTool::StoreTool(const string& type,
 
 int StoreTool::load_bluestore(const string& path, bool to_repair)
 {
-    auto bluestore = new BlueStore(g_ceph_context, path);
+    auto bluestore = new BlueStore(g_stone_context, path);
     KeyValueDB *db_ptr;
     int r = bluestore->open_db_environment(&db_ptr, to_repair);
     if (r < 0) {
@@ -111,7 +111,7 @@ void StoreTool::list(const string& prefix, const bool do_crc,
 
 bool StoreTool::exists(const string& prefix)
 {
-  ceph_assert(!prefix.empty());
+  stone_assert(!prefix.empty());
   KeyValueDB::WholeSpaceIterator iter = db->get_wholespace_iterator();
   iter->seek_to_first(prefix);
   return (iter->valid() && (iter->raw_key().first == prefix));
@@ -119,7 +119,7 @@ bool StoreTool::exists(const string& prefix)
 
 bool StoreTool::exists(const string& prefix, const string& key)
 {
-  ceph_assert(!prefix.empty());
+  stone_assert(!prefix.empty());
 
   if (key.empty()) {
     return exists(prefix);
@@ -133,7 +133,7 @@ bufferlist StoreTool::get(const string& prefix,
 			  const string& key,
 			  bool& exists)
 {
-  ceph_assert(!prefix.empty() && !key.empty());
+  stone_assert(!prefix.empty() && !key.empty());
 
   map<string,bufferlist> result;
   std::set<std::string> keys;
@@ -162,9 +162,9 @@ uint64_t StoreTool::get_size()
 
 bool StoreTool::set(const string &prefix, const string &key, bufferlist &val)
 {
-  ceph_assert(!prefix.empty());
-  ceph_assert(!key.empty());
-  ceph_assert(val.length() > 0);
+  stone_assert(!prefix.empty());
+  stone_assert(!key.empty());
+  stone_assert(val.length() > 0);
 
   KeyValueDB::Transaction tx = db->get_transaction();
   tx->set(prefix, key, val);
@@ -175,8 +175,8 @@ bool StoreTool::set(const string &prefix, const string &key, bufferlist &val)
 
 bool StoreTool::rm(const string& prefix, const string& key)
 {
-  ceph_assert(!prefix.empty());
-  ceph_assert(!key.empty());
+  stone_assert(!prefix.empty());
+  stone_assert(!key.empty());
 
   KeyValueDB::Transaction tx = db->get_transaction();
   tx->rmkey(prefix, key);
@@ -187,7 +187,7 @@ bool StoreTool::rm(const string& prefix, const string& key)
 
 bool StoreTool::rm_prefix(const string& prefix)
 {
-  ceph_assert(!prefix.empty());
+  stone_assert(!prefix.empty());
 
   KeyValueDB::Transaction tx = db->get_transaction();
   tx->rmkeys_by_prefix(prefix);
@@ -239,7 +239,7 @@ int StoreTool::copy_store_to(const string& type, const string& other_path,
 
   // open or create a leveldb store at @p other_path
   boost::scoped_ptr<KeyValueDB> other;
-  KeyValueDB *other_ptr = KeyValueDB::create(g_ceph_context,
+  KeyValueDB *other_ptr = KeyValueDB::create(g_stone_context,
 					     other_type,
 					     other_path);
   if (int err = other_ptr->create_and_open(std::cerr); err < 0) {

@@ -1,0 +1,12 @@
+meta:
+- desc: "test basic stone admin commands"
+tasks:
+- ssh_keys:
+- print: "**** done ssh_keys"
+- stone-deploy:
+- print: "**** done stone-deploy"
+- workunit:
+     clients:
+        client.0:
+           - stone-tests/stone-admin-commands.sh
+- print: "**** done stone-tests/stone-admin-commands.sh"

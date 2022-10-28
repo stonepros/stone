@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_ASYNC_COMPLETION_H
-#define CEPH_ASYNC_COMPLETION_H
+#ifndef STONE_ASYNC_COMPLETION_H
+#define STONE_ASYNC_COMPLETION_H
 
 #include "include/Context.h"
 
@@ -43,4 +43,4 @@ private:
 
 } // namespace ceph
 
-#endif // CEPH_ASYNC_COMPLETION_H
+#endif // STONE_ASYNC_COMPLETION_H

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_PG_H
-#define CEPH_PG_H
+#ifndef STONE_PG_H
+#define STONE_PG_H
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/container/flat_set.hpp>
@@ -192,7 +192,7 @@ public:
 
   // -- methods --
   std::ostream& gen_prefix(std::ostream& out) const override;
-  CephContext *get_cct() const override {
+  StoneeContext *get_cct() const override {
     return cct;
   }
   unsigned get_subsys() const override {
@@ -741,7 +741,7 @@ public:
   OSDShard *osd_shard = nullptr;
   OSDShardPGSlot *pg_slot = nullptr;
 protected:
-  CephContext *cct;
+  StoneeContext *cct;
 
   // locking and reference counting.
   // I destroy myself when the reference count hits zero.
@@ -750,7 +750,7 @@ protected:
   // put() should be called on destruction of some previously copied pointer.
   // unlock() when done with the current pointer (_most common_).
   mutable ceph::mutex _lock = ceph::make_mutex("PG::_lock");
-#ifndef CEPH_DEBUG_MUTEX
+#ifndef STONE_DEBUG_MUTEX
   mutable std::thread::id locked_by;
 #endif
   std::atomic<unsigned int> ref{0};

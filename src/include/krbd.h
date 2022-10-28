@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Inktank Storage, Inc.
  *
@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef CEPH_KRBD_H
-#define CEPH_KRBD_H
+#ifndef STONE_KRBD_H
+#define STONE_KRBD_H
 
 #include "rados/librados.h"
 
@@ -94,4 +94,4 @@ int krbd_showmapped(struct krbd_ctx *ctx, ceph::Formatter *f);
 
 #endif /* __cplusplus */
 
-#endif /* CEPH_KRBD_H */
+#endif /* STONE_KRBD_H */

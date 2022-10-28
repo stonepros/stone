@@ -29,7 +29,7 @@ class LockRequest<MockObjectMapImageCtx> {
 public:
   static LockRequest *s_instance;
   static LockRequest *create(MockObjectMapImageCtx &image_ctx, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -84,7 +84,7 @@ public:
   }
 
   void expect_object_map_load(MockObjectMapImageCtx &mock_image_ctx,
-                              ceph::BitVector<2> *object_map, uint64_t snap_id,
+                              stone::BitVector<2> *object_map, uint64_t snap_id,
                               int r) {
     std::string oid(ObjectMap<>::object_map_name(mock_image_ctx.id, snap_id));
     auto &expect = EXPECT_CALL(get_mock_io_ctx(mock_image_ctx.md_ctx),
@@ -93,7 +93,7 @@ public:
     if (r < 0) {
       expect.WillOnce(Return(r));
     } else {
-      ceph_assert(object_map);
+      stone_assert(object_map);
       object_map->set_crc_enabled(false);
 
       bufferlist bl;
@@ -136,7 +136,7 @@ public:
   }
 
   void init_object_map(MockObjectMapImageCtx &mock_image_ctx,
-                       ceph::BitVector<2> *object_map) {
+                       stone::BitVector<2> *object_map) {
     uint64_t num_objs = Striper::get_num_objects(
       mock_image_ctx.layout, mock_image_ctx.image_ctx->size);
     object_map->resize(num_objs);
@@ -154,22 +154,22 @@ TEST_F(TestMockObjectMapRefreshRequest, SuccessHead) {
 
   MockObjectMapImageCtx mock_image_ctx(*ictx);
 
-  ceph::BitVector<2> on_disk_object_map;
+  stone::BitVector<2> on_disk_object_map;
   init_object_map(mock_image_ctx, &on_disk_object_map);
 
   C_SaferCond ctx;
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   MockLockRequest mock_lock_request;
   MockRefreshRequest *req = new MockRefreshRequest(
-    mock_image_ctx, &object_map_lock, &object_map, CEPH_NOSNAP, &ctx);
+    mock_image_ctx, &object_map_lock, &object_map, STONE_NOSNAP, &ctx);
 
   InSequence seq;
-  expect_get_image_size(mock_image_ctx, CEPH_NOSNAP,
+  expect_get_image_size(mock_image_ctx, STONE_NOSNAP,
                         mock_image_ctx.image_ctx->size);
   expect_object_map_lock(mock_image_ctx, mock_lock_request);
-  expect_object_map_load(mock_image_ctx, &on_disk_object_map, CEPH_NOSNAP, 0);
-  expect_get_image_size(mock_image_ctx, CEPH_NOSNAP,
+  expect_object_map_load(mock_image_ctx, &on_disk_object_map, STONE_NOSNAP, 0);
+  expect_get_image_size(mock_image_ctx, STONE_NOSNAP,
                         mock_image_ctx.image_ctx->size);
   req->send();
   ASSERT_EQ(0, ctx.wait());
@@ -185,12 +185,12 @@ TEST_F(TestMockObjectMapRefreshRequest, SuccessSnapshot) {
 
   MockObjectMapImageCtx mock_image_ctx(*ictx);
 
-  ceph::BitVector<2> on_disk_object_map;
+  stone::BitVector<2> on_disk_object_map;
   init_object_map(mock_image_ctx, &on_disk_object_map);
 
   C_SaferCond ctx;
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   MockRefreshRequest *req = new MockRefreshRequest(
     mock_image_ctx, &object_map_lock, &object_map, TEST_SNAP_ID, &ctx);
 
@@ -214,12 +214,12 @@ TEST_F(TestMockObjectMapRefreshRequest, LoadError) {
 
   MockObjectMapImageCtx mock_image_ctx(*ictx);
 
-  ceph::BitVector<2> on_disk_object_map;
+  stone::BitVector<2> on_disk_object_map;
   init_object_map(mock_image_ctx, &on_disk_object_map);
 
   C_SaferCond ctx;
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   MockRefreshRequest *req = new MockRefreshRequest(
     mock_image_ctx, &object_map_lock, &object_map, TEST_SNAP_ID, &ctx);
 
@@ -245,12 +245,12 @@ TEST_F(TestMockObjectMapRefreshRequest, LoadInvalidateError) {
 
   MockObjectMapImageCtx mock_image_ctx(*ictx);
 
-  ceph::BitVector<2> on_disk_object_map;
+  stone::BitVector<2> on_disk_object_map;
   init_object_map(mock_image_ctx, &on_disk_object_map);
 
   C_SaferCond ctx;
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   MockRefreshRequest *req = new MockRefreshRequest(
     mock_image_ctx, &object_map_lock, &object_map, TEST_SNAP_ID, &ctx);
 
@@ -276,12 +276,12 @@ TEST_F(TestMockObjectMapRefreshRequest, LoadCorrupt) {
 
   MockObjectMapImageCtx mock_image_ctx(*ictx);
 
-  ceph::BitVector<2> on_disk_object_map;
+  stone::BitVector<2> on_disk_object_map;
   init_object_map(mock_image_ctx, &on_disk_object_map);
 
   C_SaferCond ctx;
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   MockRefreshRequest *req = new MockRefreshRequest(
     mock_image_ctx, &object_map_lock, &object_map, TEST_SNAP_ID, &ctx);
 
@@ -309,14 +309,14 @@ TEST_F(TestMockObjectMapRefreshRequest, TooSmall) {
 
   MockObjectMapImageCtx mock_image_ctx(*ictx);
 
-  ceph::BitVector<2> on_disk_object_map;
+  stone::BitVector<2> on_disk_object_map;
   init_object_map(mock_image_ctx, &on_disk_object_map);
 
-  ceph::BitVector<2> small_object_map;
+  stone::BitVector<2> small_object_map;
 
   C_SaferCond ctx;
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   MockRefreshRequest *req = new MockRefreshRequest(
     mock_image_ctx, &object_map_lock, &object_map, TEST_SNAP_ID, &ctx);
 
@@ -343,14 +343,14 @@ TEST_F(TestMockObjectMapRefreshRequest, TooSmallInvalidateError) {
 
   MockObjectMapImageCtx mock_image_ctx(*ictx);
 
-  ceph::BitVector<2> on_disk_object_map;
+  stone::BitVector<2> on_disk_object_map;
   init_object_map(mock_image_ctx, &on_disk_object_map);
 
-  ceph::BitVector<2> small_object_map;
+  stone::BitVector<2> small_object_map;
 
   C_SaferCond ctx;
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   MockRefreshRequest *req = new MockRefreshRequest(
     mock_image_ctx, &object_map_lock, &object_map, TEST_SNAP_ID, &ctx);
 
@@ -376,15 +376,15 @@ TEST_F(TestMockObjectMapRefreshRequest, TooLarge) {
 
   MockObjectMapImageCtx mock_image_ctx(*ictx);
 
-  ceph::BitVector<2> on_disk_object_map;
+  stone::BitVector<2> on_disk_object_map;
   init_object_map(mock_image_ctx, &on_disk_object_map);
 
-  ceph::BitVector<2> large_object_map;
+  stone::BitVector<2> large_object_map;
   large_object_map.resize(on_disk_object_map.size() * 2);
 
   C_SaferCond ctx;
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   MockRefreshRequest *req = new MockRefreshRequest(
     mock_image_ctx, &object_map_lock, &object_map, TEST_SNAP_ID, &ctx);
 
@@ -406,14 +406,14 @@ TEST_F(TestMockObjectMapRefreshRequest, ResizeError) {
 
   MockObjectMapImageCtx mock_image_ctx(*ictx);
 
-  ceph::BitVector<2> on_disk_object_map;
+  stone::BitVector<2> on_disk_object_map;
   init_object_map(mock_image_ctx, &on_disk_object_map);
 
-  ceph::BitVector<2> small_object_map;
+  stone::BitVector<2> small_object_map;
 
   C_SaferCond ctx;
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   MockRefreshRequest *req = new MockRefreshRequest(
     mock_image_ctx, &object_map_lock, &object_map, TEST_SNAP_ID, &ctx);
 
@@ -440,12 +440,12 @@ TEST_F(TestMockObjectMapRefreshRequest, LargeImageError) {
 
   MockObjectMapImageCtx mock_image_ctx(*ictx);
 
-  ceph::BitVector<2> on_disk_object_map;
+  stone::BitVector<2> on_disk_object_map;
   init_object_map(mock_image_ctx, &on_disk_object_map);
 
   C_SaferCond ctx;
-  ceph::shared_mutex object_map_lock = ceph::make_shared_mutex("lock");
-  ceph::BitVector<2> object_map;
+  stone::shared_mutex object_map_lock = stone::make_shared_mutex("lock");
+  stone::BitVector<2> object_map;
   MockRefreshRequest *req = new MockRefreshRequest(
     mock_image_ctx, &object_map_lock, &object_map, TEST_SNAP_ID, &ctx);
 

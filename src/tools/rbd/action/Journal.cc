@@ -6,7 +6,7 @@
 #include "tools/rbd/Utils.h"
 #include "common/Cond.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/errno.h"
 #include "common/safe_io.h"
 #include "include/stringify.h"
@@ -806,7 +806,7 @@ public:
 		<< std::endl;
       return false;
     }
-    ceph_assert(entry_size > 0);
+    stone_assert(entry_size > 0);
     // Read entry.
     r = bl.read_fd(m_fd, entry_size);
     if (r < 0) {
@@ -952,7 +952,7 @@ void get_info_arguments(po::options_description *positional,
 }
 
 int execute_info(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -992,7 +992,7 @@ void get_status_arguments(po::options_description *positional,
 }
 
 int execute_status(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -1030,7 +1030,7 @@ void get_reset_arguments(po::options_description *positional,
 }
 
 int execute_reset(const po::variables_map &vm,
-                  const std::vector<std::string> &ceph_global_init_args) {
+                  const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -1065,7 +1065,7 @@ void get_client_disconnect_arguments(po::options_description *positional,
 }
 
 int execute_client_disconnect(const po::variables_map &vm,
-                              const std::vector<std::string> &ceph_global_init_args) {
+                              const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -1104,7 +1104,7 @@ void get_inspect_arguments(po::options_description *positional,
 }
 
 int execute_inspect(const po::variables_map &vm,
-                    const std::vector<std::string> &ceph_global_init_args) {
+                    const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -1141,7 +1141,7 @@ void get_export_arguments(po::options_description *positional,
 }
 
 int execute_export(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -1184,7 +1184,7 @@ void get_import_arguments(po::options_description *positional,
 }
 
 int execute_import(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   std::string path;
   size_t arg_index = 0;
   int r = utils::get_path(vm, &arg_index, &path);

@@ -3,8 +3,8 @@
 
 #include "common/Formatter.h"
 #include "common/TextTable.h"
-#include "common/ceph_context.h"
-#include "common/ceph_json.h"
+#include "common/stone_context.h"
+#include "common/stone_json.h"
 #include "common/escape.h"
 #include "common/errno.h"
 #include "common/options.h"
@@ -88,7 +88,7 @@ int get_key(const po::variables_map &vm, size_t *arg_index,
   }
 
   std::string value;
-  int r = g_ceph_context->_conf.get_val(key->c_str(), &value);
+  int r = g_stone_context->_conf.get_val(key->c_str(), &value);
   if (r < 0) {
     std::cerr << "rbd: invalid config key: " << *key << std::endl;
     return -EINVAL;
@@ -199,7 +199,7 @@ void get_global_get_arguments(po::options_description *positional,
 }
 
 int execute_global_get(const po::variables_map &vm,
-                       const std::vector<std::string> &ceph_global_init_args) {
+                       const std::vector<std::string> &stone_global_init_args) {
   std::string config_entity;
   int r = get_config_entity(vm, &config_entity);
   if (r < 0) {
@@ -245,7 +245,7 @@ void get_global_set_arguments(po::options_description *positional,
 }
 
 int execute_global_set(const po::variables_map &vm,
-                     const std::vector<std::string> &ceph_global_init_args) {
+                     const std::vector<std::string> &stone_global_init_args) {
   std::string config_entity;
   int r = get_config_entity(vm, &config_entity);
   if (r < 0) {
@@ -292,7 +292,7 @@ void get_global_remove_arguments(po::options_description *positional,
 
 int execute_global_remove(
     const po::variables_map &vm,
-    const std::vector<std::string> &ceph_global_init_args) {
+    const std::vector<std::string> &stone_global_init_args) {
   std::string config_entity;
   int r = get_config_entity(vm, &config_entity);
   if (r < 0) {
@@ -336,7 +336,7 @@ void get_global_list_arguments(po::options_description *positional,
 }
 
 int execute_global_list(const po::variables_map &vm,
-                        const std::vector<std::string> &ceph_global_init_args) {
+                        const std::vector<std::string> &stone_global_init_args) {
   std::string config_entity;
   int r = get_config_entity(vm, &config_entity);
   if (r < 0) {
@@ -405,7 +405,7 @@ void get_pool_get_arguments(po::options_description *positional,
 }
 
 int execute_pool_get(const po::variables_map &vm,
-                     const std::vector<std::string> &ceph_global_init_args) {
+                     const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   int r = get_pool(vm, &pool_name);
   if (r < 0) {
@@ -453,7 +453,7 @@ void get_pool_set_arguments(po::options_description *positional,
 }
 
 int execute_pool_set(const po::variables_map &vm,
-                     const std::vector<std::string> &ceph_global_init_args) {
+                     const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   int r = get_pool(vm, &pool_name);
   if (r < 0) {
@@ -494,7 +494,7 @@ void get_pool_remove_arguments(po::options_description *positional,
 }
 
 int execute_pool_remove(const po::variables_map &vm,
-                        const std::vector<std::string> &ceph_global_init_args) {
+                        const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   int r = get_pool(vm, &pool_name);
   if (r < 0) {
@@ -533,7 +533,7 @@ void get_pool_list_arguments(po::options_description *positional,
 }
 
 int execute_pool_list(const po::variables_map &vm,
-                      const std::vector<std::string> &ceph_global_init_args) {
+                      const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   int r = get_pool(vm, &pool_name);
   if (r < 0) {
@@ -602,7 +602,7 @@ void get_image_get_arguments(po::options_description *positional,
 }
 
 int execute_image_get(const po::variables_map &vm,
-                      const std::vector<std::string> &ceph_global_init_args) {
+                      const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -657,7 +657,7 @@ void get_image_set_arguments(po::options_description *positional,
 }
 
 int execute_image_set(const po::variables_map &vm,
-                      const std::vector<std::string> &ceph_global_init_args) {
+                      const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -710,7 +710,7 @@ void get_image_remove_arguments(po::options_description *positional,
 
 int execute_image_remove(
     const po::variables_map &vm,
-    const std::vector<std::string> &ceph_global_init_args) {
+    const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -756,7 +756,7 @@ void get_image_list_arguments(po::options_description *positional,
 }
 
 int execute_image_list(const po::variables_map &vm,
-                       const std::vector<std::string> &ceph_global_init_args) {
+                       const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;

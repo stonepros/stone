@@ -8,8 +8,8 @@
 #include "librbd/Utils.h"
 #include <map>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::pool_watcher::RefreshImagesRequest " \
                            << this << " " << __func__ << ": "
@@ -40,7 +40,7 @@ void RefreshImagesRequest<I>::mirror_image_list() {
     RefreshImagesRequest<I>,
     &RefreshImagesRequest<I>::handle_mirror_image_list>(this);
   int r = m_remote_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

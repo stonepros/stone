@@ -16,7 +16,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/construct.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::SnapshotRollbackRequest: "
 
@@ -42,7 +42,7 @@ public:
 
   int send() override {
     I &image_ctx = this->m_image_ctx;
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 20) << "C_RollbackObject: " << __func__ << ": object_num="
                    << m_object_num << dendl;
 
@@ -115,7 +115,7 @@ void SnapshotRollbackRequest<I>::send_op() {
 template <typename I>
 void SnapshotRollbackRequest<I>::send_block_writes() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   m_blocking_writes = true;
@@ -127,7 +127,7 @@ void SnapshotRollbackRequest<I>::send_block_writes() {
 template <typename I>
 Context *SnapshotRollbackRequest<I>::handle_block_writes(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -147,7 +147,7 @@ void SnapshotRollbackRequest<I>::send_resize_image() {
   {
     std::shared_lock owner_locker{image_ctx.owner_lock};
     std::shared_lock image_locker{image_ctx.image_lock};
-    current_size = image_ctx.get_image_size(CEPH_NOSNAP);
+    current_size = image_ctx.get_image_size(STONE_NOSNAP);
   }
 
   m_head_num_objects = Striper::get_num_objects(image_ctx.layout, current_size);
@@ -157,7 +157,7 @@ void SnapshotRollbackRequest<I>::send_resize_image() {
     return;
   }
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   std::shared_lock owner_locker{image_ctx.owner_lock};
@@ -172,7 +172,7 @@ void SnapshotRollbackRequest<I>::send_resize_image() {
 template <typename I>
 Context *SnapshotRollbackRequest<I>::handle_resize_image(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -191,7 +191,7 @@ void SnapshotRollbackRequest<I>::send_get_snap_object_map() {
 
   uint64_t flags = 0;
   bool object_map_enabled;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   {
     std::shared_lock owner_locker{image_ctx.owner_lock};
     std::shared_lock image_locker{image_ctx.image_lock};
@@ -225,7 +225,7 @@ void SnapshotRollbackRequest<I>::send_get_snap_object_map() {
 template <typename I>
 Context *SnapshotRollbackRequest<I>::handle_get_snap_object_map(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -247,7 +247,7 @@ void SnapshotRollbackRequest<I>::send_rollback_object_map() {
     std::shared_lock owner_locker{image_ctx.owner_lock};
     std::shared_lock image_locker{image_ctx.image_lock};
     if (image_ctx.object_map != nullptr) {
-      CephContext *cct = image_ctx.cct;
+      StoneContext *cct = image_ctx.cct;
       ldout(cct, 5) << this << " " << __func__ << dendl;
 
       Context *ctx = create_context_callback<
@@ -264,14 +264,14 @@ void SnapshotRollbackRequest<I>::send_rollback_object_map() {
 template <typename I>
 Context *SnapshotRollbackRequest<I>::handle_rollback_object_map(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
     lderr(cct) << this << " " << __func__ << ": failed to roll back object "
                << "map: " << cpp_strerror(*result) << dendl;
 
-    ceph_assert(m_object_map == nullptr);
+    stone_assert(m_object_map == nullptr);
     apply();
     return this->create_context_finisher(*result);
   }
@@ -283,7 +283,7 @@ Context *SnapshotRollbackRequest<I>::handle_rollback_object_map(int *result) {
 template <typename I>
 void SnapshotRollbackRequest<I>::send_rollback_objects() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   std::shared_lock owner_locker{image_ctx.owner_lock};
@@ -310,7 +310,7 @@ void SnapshotRollbackRequest<I>::send_rollback_objects() {
 template <typename I>
 Context *SnapshotRollbackRequest<I>::handle_rollback_objects(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result == -ERESTART) {
@@ -339,10 +339,10 @@ Context *SnapshotRollbackRequest<I>::send_refresh_object_map() {
     return send_invalidate_cache();
   }
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
-  m_object_map = image_ctx.create_object_map(CEPH_NOSNAP);
+  m_object_map = image_ctx.create_object_map(STONE_NOSNAP);
 
   Context *ctx = create_context_callback<
     SnapshotRollbackRequest<I>,
@@ -354,7 +354,7 @@ Context *SnapshotRollbackRequest<I>::send_refresh_object_map() {
 template <typename I>
 Context *SnapshotRollbackRequest<I>::handle_refresh_object_map(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -376,7 +376,7 @@ Context *SnapshotRollbackRequest<I>::send_invalidate_cache() {
 
   apply();
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   if(m_object_map != nullptr) {
@@ -397,7 +397,7 @@ Context *SnapshotRollbackRequest<I>::send_invalidate_cache() {
 template <typename I>
 Context *SnapshotRollbackRequest<I>::handle_invalidate_cache(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {

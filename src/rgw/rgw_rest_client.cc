@@ -11,8 +11,8 @@
 #include "include/str_list.h"
 #include "rgw_crypt_sanitize.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 int RGWHTTPSimpleRequest::get_status()
 {
@@ -99,13 +99,13 @@ int RGWHTTPSimpleRequest::receive_header(void *ptr, size_t len)
 
 static void get_new_date_str(string& date_str)
 {
-  date_str = rgw_to_asctime(ceph_clock_now());
+  date_str = rgw_to_asctime(stone_clock_now());
 }
 
 static void get_gmt_date_str(string& date_str)
 {
-  auto now_time = ceph::real_clock::now();
-  time_t rawtime = ceph::real_clock::to_time_t(now_time);
+  auto now_time = stone::real_clock::now();
+  time_t rawtime = stone::real_clock::to_time_t(now_time);
 
   char buffer[80];
 
@@ -233,14 +233,14 @@ void RGWHTTPSimpleRequest::get_out_headers(map<string, string> *pheaders)
   out_headers.clear();
 }
 
-static int sign_request(const DoutPrefixProvider *dpp, CephContext *cct, RGWAccessKey& key, RGWEnv& env, req_info& info)
+static int sign_request(const DoutPrefixProvider *dpp, StoneContext *cct, RGWAccessKey& key, RGWEnv& env, req_info& info)
 {
   /* don't sign if no key is provided */
   if (key.key.empty()) {
     return 0;
   }
 
-  if (cct->_conf->subsys.should_gather<ceph_subsys_rgw, 20>()) {
+  if (cct->_conf->subsys.should_gather<stone_subsys_rgw, 20>()) {
     for (const auto& i: env.get_map()) {
       ldout(cct, 20) << "> " << i.first << " -> " << rgw::crypt_sanitize::x_meta_map{i.first, i.second} << dendl;
     }
@@ -644,7 +644,7 @@ void set_str_from_headers(map<string, string>& out_headers, const string& header
   }
 }
 
-static int parse_rgwx_mtime(CephContext *cct, const string& s, ceph::real_time *rt)
+static int parse_rgwx_mtime(StoneContext *cct, const string& s, stone::real_time *rt)
 {
   string err;
   vector<string> vec;
@@ -906,7 +906,7 @@ int RGWHTTPStreamRWRequest::receive_data(void *ptr, size_t len, bool *pause)
       in_data.clear();
     } else {
       /* partial read */
-      ceph_assert(in_data.length() <= orig_in_data_len);
+      stone_assert(in_data.length() <= orig_in_data_len);
       len = ret;
       bufferlist bl;
       size_t left_to_read = orig_in_data_len - len;

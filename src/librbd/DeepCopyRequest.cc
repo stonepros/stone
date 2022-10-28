@@ -12,7 +12,7 @@
 #include "librbd/deep_copy/SnapshotCopyRequest.h"
 #include "librbd/internal.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::DeepCopyRequest: " \
                            << this << " " << __func__ << ": "
@@ -42,13 +42,13 @@ DeepCopyRequest<I>::DeepCopyRequest(I *src_image_ctx, I *dst_image_ctx,
     m_flatten(flatten), m_object_number(object_number),
     m_work_queue(work_queue), m_snap_seqs(snap_seqs), m_handler(handler),
     m_on_finish(on_finish), m_cct(dst_image_ctx->cct),
-    m_lock(ceph::make_mutex(unique_lock_name("DeepCopyRequest::m_lock", this))) {
+    m_lock(stone::make_mutex(unique_lock_name("DeepCopyRequest::m_lock", this))) {
 }
 
 template <typename I>
 DeepCopyRequest<I>::~DeepCopyRequest() {
-  ceph_assert(m_snapshot_copy_request == nullptr);
-  ceph_assert(m_image_copy_request == nullptr);
+  stone_assert(m_snapshot_copy_request == nullptr);
+  stone_assert(m_image_copy_request == nullptr);
 }
 
 template <typename I>
@@ -137,8 +137,8 @@ void DeepCopyRequest<I>::handle_copy_snapshots(int r) {
     return;
   }
 
-  if (m_src_snap_id_end == CEPH_NOSNAP) {
-    (*m_snap_seqs)[CEPH_NOSNAP] = CEPH_NOSNAP;
+  if (m_src_snap_id_end == STONE_NOSNAP) {
+    (*m_snap_seqs)[STONE_NOSNAP] = STONE_NOSNAP;
   }
 
   send_copy_image();
@@ -205,14 +205,14 @@ void DeepCopyRequest<I>::send_copy_object_map() {
     send_copy_metadata();
     return;
   }
-  if (m_src_snap_id_end == CEPH_NOSNAP) {
+  if (m_src_snap_id_end == STONE_NOSNAP) {
     m_dst_image_ctx->image_lock.unlock_shared();
     m_dst_image_ctx->owner_lock.unlock_shared();
     send_refresh_object_map();
     return;
   }
 
-  ceph_assert(m_dst_image_ctx->object_map != nullptr);
+  stone_assert(m_dst_image_ctx->object_map != nullptr);
 
   ldout(m_cct, 20) << dendl;
 
@@ -234,7 +234,7 @@ void DeepCopyRequest<I>::send_copy_object_map() {
       handle_copy_object_map(r);
       finish_op_ctx->complete(0);
     });
-  ceph_assert(m_snap_seqs->count(m_src_snap_id_end) > 0);
+  stone_assert(m_snap_seqs->count(m_src_snap_id_end) > 0);
   librados::snap_t copy_snap_id = (*m_snap_seqs)[m_src_snap_id_end];
   m_dst_image_ctx->object_map->rollback(copy_snap_id, ctx);
   m_dst_image_ctx->image_lock.unlock_shared();
@@ -277,7 +277,7 @@ void DeepCopyRequest<I>::send_refresh_object_map() {
       handle_refresh_object_map(r);
       finish_op_ctx->complete(0);
     });
-  m_object_map = m_dst_image_ctx->create_object_map(CEPH_NOSNAP);
+  m_object_map = m_dst_image_ctx->create_object_map(STONE_NOSNAP);
   m_object_map->open(ctx);
 }
 
@@ -338,7 +338,7 @@ int DeepCopyRequest<I>::validate_copy_points() {
     return -EINVAL;
   }
 
-  if (m_src_snap_id_end != CEPH_NOSNAP &&
+  if (m_src_snap_id_end != STONE_NOSNAP &&
       m_src_image_ctx->snap_info.find(m_src_snap_id_end) ==
       m_src_image_ctx->snap_info.end()) {
     lderr(m_cct) << "invalid end snap_id " << m_src_snap_id_end << dendl;

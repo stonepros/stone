@@ -9,8 +9,8 @@
 
 #include <atomic>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 RGWKMIPManager *rgw_kmip_manager;
 
@@ -61,7 +61,7 @@ RGWKMIPTransceiver::~RGWKMIPTransceiver()
     outlist->strings = 0;
   }
   if (outkey->data) {
-    ::ceph::crypto::zeroize_for_security(outkey->data, outkey->keylen);
+    ::stone::crypto::zeroize_for_security(outkey->data, outkey->keylen);
     free(outkey->data);
     outkey->data = 0;
   }

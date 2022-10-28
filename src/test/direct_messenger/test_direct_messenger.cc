@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 
 #include "DirectMessenger.h"
 #include "FastStrategy.h"
@@ -20,7 +20,7 @@
 class MockDispatcher : public Dispatcher {
   std::function<void(Message*)> callback;
  public:
-  MockDispatcher(CephContext *cct, std::function<void(Message*)> callback)
+  MockDispatcher(StoneContext *cct, std::function<void(Message*)> callback)
     : Dispatcher(cct), callback(std::move(callback)) {}
   bool ms_handle_reset(Connection *con) override { return false; }
   void ms_handle_remote_reset(Connection *con) override {}
@@ -35,7 +35,7 @@ class MockDispatcher : public Dispatcher {
 /// test synchronous dispatch of messenger and connection interfaces
 TEST(DirectMessenger, SyncDispatch)
 {
-  auto cct = g_ceph_context;
+  auto cct = g_stone_context;
 
   // use FastStrategy for synchronous dispatch
   DirectMessenger client(cct, entity_name_t::CLIENT(1),
@@ -115,7 +115,7 @@ TEST(DirectMessenger, SyncDispatch)
 /// test asynchronous dispatch of messenger and connection interfaces
 TEST(DirectMessenger, AsyncDispatch)
 {
-  auto cct = g_ceph_context;
+  auto cct = g_stone_context;
 
   // use QueueStrategy for async replies
   DirectMessenger client(cct, entity_name_t::CLIENT(1),
@@ -205,7 +205,7 @@ TEST(DirectMessenger, AsyncDispatch)
 /// test that wait() blocks until shutdown()
 TEST(DirectMessenger, WaitShutdown)
 {
-  auto cct = g_ceph_context;
+  auto cct = g_stone_context;
 
   // test wait() with both Queue- and FastStrategy
   DirectMessenger client(cct, entity_name_t::CLIENT(1),
@@ -254,7 +254,7 @@ TEST(DirectMessenger, WaitShutdown)
 /// test connection and messenger interfaces after mark_down()
 TEST(DirectMessenger, MarkDown)
 {
-  auto cct = g_ceph_context;
+  auto cct = g_stone_context;
 
   DirectMessenger client(cct, entity_name_t::CLIENT(1),
                          "client", 0, new FastStrategy());
@@ -294,7 +294,7 @@ TEST(DirectMessenger, MarkDown)
 /// test connection and messenger interfaces after shutdown()
 TEST(DirectMessenger, SendShutdown)
 {
-  auto cct = g_ceph_context;
+  auto cct = g_stone_context;
 
   // put client on the heap so we can free it early
   std::unique_ptr<DirectMessenger> client{
@@ -342,7 +342,7 @@ TEST(DirectMessenger, SendShutdown)
 /// test connection and messenger interfaces after bind()
 TEST(DirectMessenger, Bind)
 {
-  auto cct = g_ceph_context;
+  auto cct = g_stone_context;
 
   DirectMessenger client(cct, entity_name_t::CLIENT(1),
                          "client", 0, new FastStrategy());
@@ -393,7 +393,7 @@ TEST(DirectMessenger, Bind)
 /// test connection and messenger interfaces before calls to set_direct_peer()
 TEST(DirectMessenger, StartWithoutPeer)
 {
-  auto cct = g_ceph_context;
+  auto cct = g_stone_context;
 
   DirectMessenger client(cct, entity_name_t::CLIENT(1),
                          "client", 0, new FastStrategy());
@@ -427,7 +427,7 @@ int main(int argc, char **argv)
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(nullptr, args, CEPH_ENTITY_TYPE_ANY,
+  auto cct = global_init(nullptr, args, STONE_ENTITY_TYPE_ANY,
                          CODE_ENVIRONMENT_DAEMON,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
   common_init_finish(cct.get());

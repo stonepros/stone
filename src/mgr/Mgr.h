@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 John Spray <john.spray@inktank.com>
  *
@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  */
 
-#ifndef CEPH_MGR_H_
-#define CEPH_MGR_H_
+#ifndef STONE_MGR_H_
+#define STONE_MGR_H_
 
 // Python.h comes first because otherwise it clobbers ceph's assert
 #include <Python.h>

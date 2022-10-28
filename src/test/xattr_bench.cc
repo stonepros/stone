@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,8 +20,8 @@
 #include <sstream>
 #include "os/filestore/FileStore.h"
 #include "include/Context.h"
-#include "common/ceph_argparse.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_argparse.h"
+#include "common/stone_mutex.h"
 #include "common/Cond.h"
 #include "global/global_init.h"
 #include <boost/scoped_ptr.hpp>
@@ -49,12 +49,12 @@ typename T::iterator rand_choose(T &cont) {
 
 class OnApplied : public Context {
 public:
-  ceph::mutex *lock;
-  ceph::condition_variable *cond;
+  stone::mutex *lock;
+  stone::condition_variable *cond;
   int *in_progress;
   ObjectStore::Transaction *t;
-  OnApplied(ceph::mutex *lock,
-	    ceph::condition_variable *cond,
+  OnApplied(stone::mutex *lock,
+	    stone::condition_variable *cond,
 	    int *in_progress,
 	    ObjectStore::Transaction *t)
     : lock(lock), cond(cond),
@@ -84,8 +84,8 @@ uint64_t do_run(ObjectStore *store, int attrsize, int numattrs,
 		int run,
 		int transsize, int ops,
 		ostream &out) {
-  ceph::mutex lock = ceph::make_mutex("lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("lock");
+  stone::condition_variable cond;
   int in_flight = 0;
   ObjectStore::Sequencer osr(__func__);
   ObjectStore::Transaction t;
@@ -98,7 +98,7 @@ uint64_t do_run(ObjectStore *store, int attrsize, int numattrs,
       stringstream obj_str;
       obj_str << i;
       t.touch(coll,
-	      ghobject_t(hobject_t(sobject_t(obj_str.str(), CEPH_NOSNAP))));
+	      ghobject_t(hobject_t(sobject_t(obj_str.str(), STONE_NOSNAP))));
       objects.insert(obj_str.str());
     }
     collections[coll] = make_pair(objects, new ObjectStore::Sequencer(coll.to_str()));
@@ -126,7 +126,7 @@ uint64_t do_run(ObjectStore *store, int attrsize, int numattrs,
 	stringstream ss;
 	ss << i << ", " << j << ", " << *obj;
 	t->setattr(iter->first,
-		   ghobject_t(hobject_t(sobject_t(*obj, CEPH_NOSNAP))),
+		   ghobject_t(hobject_t(sobject_t(*obj, STONE_NOSNAP))),
 		   ss.str().c_str(),
 		   bl);
       }
@@ -150,15 +150,15 @@ int main(int argc, char **argv) {
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage(argv[0]);
     exit(0);
   }
 
-  auto cct = global_init(0, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(0, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   std::cerr << "args: " << args << std::endl;
   if (args.size() < 3) {
@@ -173,8 +173,8 @@ int main(int argc, char **argv) {
 						     store_dev));
 
   std::cerr << "mkfs starting" << std::endl;
-  ceph_assert(!store->mkfs());
-  ceph_assert(!store->mount());
+  stone_assert(!store->mkfs());
+  stone_assert(!store->mount());
   std::cerr << "mounted" << std::endl;
 
   std::cerr << "attrsize\tnumattrs\ttranssize\tops\ttime" << std::endl;

@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Inktank Storage, Inc.
  *
@@ -38,7 +38,7 @@
 #include "common/secret.h"
 #include "common/TextTable.h"
 #include "common/Thread.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/stringify.h"
 #include "include/krbd.h"
 #include "mon/MonMap.h"
@@ -66,7 +66,7 @@ DEFINE_UDEV_UPTR(enumerate)  /* udev_enumerate_uptr */
 DEFINE_UDEV_UPTR(device)  /* udev_device_uptr */
 
 struct krbd_ctx {
-  CephContext *cct;
+  StoneContext *cct;
   struct udev *udev;
   uint32_t flags;  /* KRBD_CTX_F_* */
 };
@@ -185,7 +185,7 @@ static int have_minor_attr(void)
   return access("/sys/module/rbd/parameters/single_major", F_OK) == 0;
 }
 
-static int build_map_buf(CephContext *cct, const krbd_spec& spec,
+static int build_map_buf(StoneContext *cct, const krbd_spec& spec,
                          const string& options, string *pbuf)
 {
   bool msgr2 = false;
@@ -232,7 +232,7 @@ static int build_map_buf(CephContext *cct, const krbd_spec& spec,
   auto auth_client_required =
     cct->_conf.get_val<std::string>("auth_client_required");
   if (auth_client_required != "none") {
-    r = keyring.from_ceph_context(cct);
+    r = keyring.from_stone_context(cct);
     auto keyfile = cct->_conf.get_val<std::string>("keyfile");
     auto key = cct->_conf.get_val<std::string>("key");
     if (r == -ENOENT && keyfile.empty() && key.empty())
@@ -298,19 +298,19 @@ static std::pair<int, bool> wait_for_mapping(int sysfs_r_fd, udev_monitor *mon,
 
   for (;;) {
     if (poll(fds, 2, -1) < 0) {
-      ceph_abort_msgf("poll failed: %d", -errno);
+      stone_abort_msgf("poll failed: %d", -errno);
     }
 
     if (fds[0].revents) {
       r = safe_read_exact(sysfs_r_fd, &sysfs_r, sizeof(sysfs_r));
       if (r < 0) {
-        ceph_abort_msgf("safe_read_exact failed: %d", r);
+        stone_abort_msgf("safe_read_exact failed: %d", r);
       }
       if (sysfs_r < 0) {
         return std::make_pair(sysfs_r, false);
       }
       if (udev_r != INT_MAX) {
-        ceph_assert(!sysfs_r);
+        stone_assert(!sysfs_r);
         return std::make_pair(udev_r, true);
       }
       fds[0].fd = -1;
@@ -323,7 +323,7 @@ static std::pair<int, bool> wait_for_mapping(int sysfs_r_fd, udev_monitor *mon,
           if (errno != EINTR && errno != EAGAIN) {
             udev_r = -errno;
             if (sysfs_r != INT_MAX) {
-              ceph_assert(!sysfs_r);
+              stone_assert(!sysfs_r);
               return std::make_pair(udev_r, true);
             }
             fds[1].fd = -1;
@@ -333,7 +333,7 @@ static std::pair<int, bool> wait_for_mapping(int sysfs_r_fd, udev_monitor *mon,
         if (udev_device_handler(std::move(dev))) {
           udev_r = 0;
           if (sysfs_r != INT_MAX) {
-            ceph_assert(!sysfs_r);
+            stone_assert(!sysfs_r);
             return std::make_pair(udev_r, true);
           }
           fds[1].fd = -1;
@@ -384,9 +384,9 @@ public:
           *m_pdevnode = std::move(m_devnode);
           *m_majnum = udev_device_get_property_value(p.get(), "MAJOR");
           *m_minnum = udev_device_get_property_value(p.get(), "MINOR");
-          ceph_assert(*m_majnum == udev_device_get_sysattr_value(
+          stone_assert(*m_majnum == udev_device_get_sysattr_value(
                           m_bus_dev.get(), "major"));
-          ceph_assert(!have_minor_attr() ||
+          stone_assert(!have_minor_attr() ||
                       *m_minnum == udev_device_get_sysattr_value(
                           m_bus_dev.get(), "minor"));
           return true;
@@ -481,7 +481,7 @@ static int do_map(krbd_ctx *ctx, const krbd_spec& spec, const string& buf,
     int sysfs_r = sysfs_write_rbd_add(buf);
     int r = safe_write(sysfs_r_fd, &sysfs_r, sizeof(sysfs_r));
     if (r < 0) {
-      ceph_abort_msgf("safe_write failed: %d", r);
+      stone_abort_msgf("safe_write failed: %d", r);
     }
   });
 
@@ -513,7 +513,7 @@ static int do_map(krbd_ctx *ctx, const krbd_spec& spec, const string& buf,
    * and in some cases can even lead to data loss, depending on higher
    * level logic and orchestration layers involved.
    */
-  ceph_assert(mapped);
+  stone_assert(mapped);
   if (stat(pname->c_str(), &sb) < 0 || !S_ISBLK(sb.st_mode)) {
     std::cerr << "rbd: mapping succeeded but " << *pname
               << " is not accessible, is host /dev mounted?" << std::endl;
@@ -541,7 +541,7 @@ static int map_image(struct krbd_ctx *ctx, const krbd_spec& spec,
    * Modprobe rbd kernel module.  If it supports single-major device
    * number allocation scheme, make sure it's turned on.
    *
-   * Do this before calling build_map_buf() - it wants "ceph" key type
+   * Do this before calling build_map_buf() - it wants "stone" key type
    * registered.
    */
   if (access("/sys/bus/rbd", F_OK) != 0) {
@@ -608,7 +608,7 @@ retry:
     return -ENOENT;
 
   /* make sure there is only one match */
-  ceph_assert(!udev_list_entry_get_next(l));
+  stone_assert(!udev_list_entry_get_next(l));
 
   auto dev = dev_from_list_entry(udev, l);
   if (!dev)
@@ -835,7 +835,7 @@ static int do_unmap(krbd_ctx *ctx, dev_t devno, const string& buf)
       } else {
         int r = safe_write(sysfs_r_fd, &sysfs_r, sizeof(sysfs_r));
         if (r < 0) {
-          ceph_abort_msgf("safe_write failed: %d", r);
+          stone_abort_msgf("safe_write failed: %d", r);
         }
         break;
       }
@@ -1060,7 +1060,7 @@ extern "C" int krbd_create_from_context(rados_config_t cct, uint32_t flags,
 {
   struct krbd_ctx *ctx = new struct krbd_ctx();
 
-  ctx->cct = reinterpret_cast<CephContext *>(cct);
+  ctx->cct = reinterpret_cast<StoneContext *>(cct);
   ctx->udev = udev_new();
   if (!ctx->udev) {
     delete ctx;

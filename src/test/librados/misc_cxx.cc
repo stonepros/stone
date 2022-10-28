@@ -162,7 +162,7 @@ void set_completion_complete(rados_completion_t cb, void *arg)
 }
 
 TEST_F(LibRadosMiscPP, BadFlagsPP) {
-  unsigned badflags = CEPH_OSD_FLAG_PARALLELEXEC;
+  unsigned badflags = STONE_OSD_FLAG_PARALLELEXEC;
   {
     bufferlist bl;
     bl.append("data");
@@ -200,7 +200,7 @@ TEST_F(LibRadosMiscPP, Operate1PP) {
   {
     bufferlist bl;
     bl.append(val1);
-    o2.cmpxattr("key1", CEPH_OSD_CMPXATTR_OP_EQ, bl);
+    o2.cmpxattr("key1", STONE_OSD_CMPXATTR_OP_EQ, bl);
     o2.rmxattr("key1");
   }
   ASSERT_EQ(-ECANCELED, ioctx.operate("foo", &o2));
@@ -208,7 +208,7 @@ TEST_F(LibRadosMiscPP, Operate1PP) {
   {
     bufferlist bl;
     bl.append(val1);
-    o3.cmpxattr("key1", CEPH_OSD_CMPXATTR_OP_EQ, bl);
+    o3.cmpxattr("key1", STONE_OSD_CMPXATTR_OP_EQ, bl);
   }
   ASSERT_EQ(-ECANCELED, ioctx.operate("foo", &o3));
 }
@@ -707,11 +707,11 @@ public:
 
 typedef ::testing::Types<
     LibRadosChecksumParams<LIBRADOS_CHECKSUM_TYPE_XXHASH32,
-			   Checksummer::xxhash32, ceph_le32>,
+			   Checksummer::xxhash32, stone_le32>,
     LibRadosChecksumParams<LIBRADOS_CHECKSUM_TYPE_XXHASH64,
-			   Checksummer::xxhash64, ceph_le64>,
+			   Checksummer::xxhash64, stone_le64>,
     LibRadosChecksumParams<LIBRADOS_CHECKSUM_TYPE_CRC32C,
-			   Checksummer::crc32c, ceph_le32>
+			   Checksummer::crc32c, stone_le32>
   > LibRadosChecksumTypes;
 
 TYPED_TEST_SUITE(LibRadosChecksum, LibRadosChecksumTypes);
@@ -861,7 +861,7 @@ TEST_F(LibRadosMiscPP, Applications) {
 
 TEST_F(LibRadosMiscECPP, CompareExtentRange) {
   bufferlist bl1;
-  bl1.append("ceph");
+  bl1.append("stone");
   ObjectWriteOperation write;
   write.write(0, bl1);
   ASSERT_EQ(0, ioctx.operate("foo", &write));
@@ -884,7 +884,7 @@ TEST_F(LibRadosMiscPP, MinCompatOSD) {
   int8_t require_osd_release;
   ASSERT_EQ(0, cluster.get_min_compatible_osd(&require_osd_release));
   ASSERT_LE(-1, require_osd_release);
-  ASSERT_GT(CEPH_RELEASE_MAX, require_osd_release);
+  ASSERT_GT(STONE_RELEASE_MAX, require_osd_release);
 }
 
 TEST_F(LibRadosMiscPP, MinCompatClient) {
@@ -893,10 +893,10 @@ TEST_F(LibRadosMiscPP, MinCompatClient) {
   ASSERT_EQ(0, cluster.get_min_compatible_client(&min_compat_client,
                                                  &require_min_compat_client));
   ASSERT_LE(-1, min_compat_client);
-  ASSERT_GT(CEPH_RELEASE_MAX, min_compat_client);
+  ASSERT_GT(STONE_RELEASE_MAX, min_compat_client);
 
   ASSERT_LE(-1, require_min_compat_client);
-  ASSERT_GT(CEPH_RELEASE_MAX, require_min_compat_client);
+  ASSERT_GT(STONE_RELEASE_MAX, require_min_compat_client);
 }
 
 TEST_F(LibRadosMiscPP, Conf) {

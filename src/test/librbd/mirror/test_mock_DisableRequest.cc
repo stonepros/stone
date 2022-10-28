@@ -34,7 +34,7 @@ struct PromoteRequest<librbd::MockTestImageCtx> {
   static PromoteRequest *s_instance;
   static PromoteRequest *create(librbd::MockTestImageCtx *, bool force,
                                 Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -62,7 +62,7 @@ struct GetInfoRequest<librbd::MockTestImageCtx> {
                                 PromotionState *promotion_state,
                                 std::string* primary_mirror_uuid,
                                 Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->mirror_image = mirror_image;
     s_instance->promotion_state = promotion_state;
     s_instance->on_finish = on_finish;
@@ -86,7 +86,7 @@ struct ImageRemoveRequest<librbd::MockTestImageCtx> {
       const std::string& global_image_id,
       const std::string& image_id,
       Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -109,7 +109,7 @@ struct ImageStateUpdateRequest<librbd::MockTestImageCtx> {
       cls::rbd::MirrorImageState mirror_image_state,
       const cls::rbd::MirrorImage& mirror_image,
       Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -134,7 +134,7 @@ struct PromoteRequest<librbd::MockTestImageCtx> {
   static PromoteRequest *create(librbd::MockTestImageCtx*,
                                 const std::string& global_image_id,
                                 Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -223,7 +223,7 @@ public:
                                   const std::set<cls::journal::Client> &clients,
                                   int r) {
     bufferlist bl;
-    using ceph::encode;
+    using stone::encode;
     encode(clients, bl);
 
     EXPECT_CALL(get_mock_io_ctx(mock_image_ctx.md_ctx),
@@ -237,7 +237,7 @@ public:
                                         const std::string &client_id,
                                         int r) {
     bufferlist bl;
-    using ceph::encode;
+    using stone::encode;
     encode(client_id, bl);
 
     EXPECT_CALL(get_mock_io_ctx(mock_image_ctx.md_ctx),
@@ -280,7 +280,7 @@ public:
 
   template <typename T>
   bufferlist encode(const T &t) {
-    using ceph::encode;
+    using stone::encode;
     bufferlist bl;
     encode(t, bl);
     return bl;

@@ -1,5 +1,5 @@
-#ifndef CEPH_COMMON_SCTP_CRC32_H
-#define CEPH_COMMON_SCTP_CRC32_H
+#ifndef STONE_COMMON_SCTP_CRC32_H
+#define STONE_COMMON_SCTP_CRC32_H
 
 #ifdef __cplusplus
 extern "C" {

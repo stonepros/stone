@@ -8,7 +8,7 @@
 
 #include "rgw/rgw_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 class RGW_MB_Handler_Module_OTP : public RGWSI_MBSObj_Handler_Module {
   RGWSI_Zone *zone_svc;
@@ -44,7 +44,7 @@ public:
   }
 };
 
-RGWSI_OTP::RGWSI_OTP(CephContext *cct): RGWServiceInstance(cct) {
+RGWSI_OTP::RGWSI_OTP(StoneContext *cct): RGWServiceInstance(cct) {
 }
 
 RGWSI_OTP::~RGWSI_OTP() {

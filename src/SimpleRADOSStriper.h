@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2021 Red Hat, Inc.
  *
@@ -36,7 +36,7 @@ public:
 
   static inline const uint64_t object_size = 22; /* power of 2 */
   static inline const uint64_t min_growth = (1<<27); /* 128 MB */
-  static int config_logger(CephContext* cct, std::string_view name, std::shared_ptr<PerfCounters>* l);
+  static int config_logger(StoneeContext* cct, std::string_view name, std::shared_ptr<PerfCounters>* l);
 
   SimpleRADOSStriper() = default;
   SimpleRADOSStriper(librados::IoCtx _ioctx, std::string _oid)

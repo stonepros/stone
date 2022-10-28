@@ -14,7 +14,7 @@ public:
   using JournalRecorderPtr = std::unique_ptr<journal::JournalRecorder,
 					     std::function<void(journal::JournalRecorder*)>>;
   JournalRecorderPtr create_recorder(
-      const std::string &oid, const ceph::ref_t<journal::JournalMetadata>& metadata) {
+      const std::string &oid, const stone::ref_t<journal::JournalMetadata>& metadata) {
     JournalRecorderPtr recorder{
       new journal::JournalRecorder(m_ioctx, oid + ".", metadata, 0),
       [](journal::JournalRecorder* recorder) {

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 SUSE LINUX GmbH
  *
@@ -16,10 +16,10 @@
 #include "common/dns_resolve.h"
 #include "common/debug.h"
 
-#define dout_subsys ceph_subsys_
+#define dout_subsys stone_subsys_
 
 
-namespace ceph {
+namespace stone {
 
 int ResolvHWrapper::res_query(const char *hostname, int cls,
     int type, u_char *buf, int bufsz) {
@@ -36,26 +36,26 @@ DNSResolver::~DNSResolver()
   delete resolv_h;
 }
 
-int DNSResolver::resolve_cname(CephContext *cct, const string& hostname,
+int DNSResolver::resolve_cname(StoneContext *cct, const string& hostname,
     string *cname, bool *found)
 {
   return -ENOTSUP;
 }
 
-int DNSResolver::resolve_ip_addr(CephContext *cct, const string& hostname,
+int DNSResolver::resolve_ip_addr(StoneContext *cct, const string& hostname,
     entity_addr_t *addr)
 {
   return -ENOTSUP;
 }
 
-int DNSResolver::resolve_srv_hosts(CephContext *cct, const string& service_name,
+int DNSResolver::resolve_srv_hosts(StoneContext *cct, const string& service_name,
     const SRV_Protocol trans_protocol,
     map<string, DNSResolver::Record> *srv_hosts)
 {
   return this->resolve_srv_hosts(cct, service_name, trans_protocol, "", srv_hosts);
 }
 
-int DNSResolver::resolve_srv_hosts(CephContext *cct, const string& service_name,
+int DNSResolver::resolve_srv_hosts(StoneContext *cct, const string& service_name,
     const SRV_Protocol trans_protocol, const string& domain,
     map<string, DNSResolver::Record> *srv_hosts)
 {

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Adam Crume <adamcrume@gmail.com>
  *
@@ -15,7 +15,7 @@
 #include "PendingIO.hpp"
 #include "rbd_replay_debug.hpp"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 using namespace rbd_replay;
 

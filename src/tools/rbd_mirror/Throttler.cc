@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -18,8 +18,8 @@
 #include "common/errno.h"
 #include "librbd/Utils.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::Throttler:: " << this \
                            << " " << __func__ << ": "
@@ -28,10 +28,10 @@ namespace rbd {
 namespace mirror {
 
 template <typename I>
-Throttler<I>::Throttler(CephContext *cct, const std::string &config_key)
+Throttler<I>::Throttler(StoneContext *cct, const std::string &config_key)
   : m_cct(cct), m_config_key(config_key),
     m_config_keys{m_config_key.c_str(), nullptr},
-    m_lock(ceph::make_mutex(
+    m_lock(stone::make_mutex(
       librbd::util::unique_lock_name("rbd::mirror::Throttler", this))),
     m_max_concurrent_ops(cct->_conf.get_val<uint64_t>(m_config_key)) {
   dout(20) << m_config_key << "=" << m_max_concurrent_ops << dendl;
@@ -43,8 +43,8 @@ Throttler<I>::~Throttler() {
   m_cct->_conf.remove_observer(this);
 
   std::lock_guard locker{m_lock};
-  ceph_assert(m_inflight_ops.empty());
-  ceph_assert(m_queue.empty());
+  stone_assert(m_inflight_ops.empty());
+  stone_assert(m_queue.empty());
 }
 
 template <typename I>
@@ -67,7 +67,7 @@ void Throttler<I>::start_op(const std::string &ns,
       r = -ENOENT;
     } else if (m_max_concurrent_ops == 0 ||
                m_inflight_ops.size() < m_max_concurrent_ops) {
-      ceph_assert(m_queue.empty());
+      stone_assert(m_queue.empty());
       m_inflight_ops.insert(id);
       dout(20) << "ready to start op for " << id << " ["
                << m_inflight_ops.size() << "/" << m_max_concurrent_ops << "]"
@@ -131,7 +131,7 @@ void Throttler<I>::finish_op(const std::string &ns,
     if (m_inflight_ops.size() < m_max_concurrent_ops && !m_queue.empty()) {
       auto id = m_queue.front();
       auto it = m_queued_ops.find(id);
-      ceph_assert(it != m_queued_ops.end());
+      stone_assert(it != m_queued_ops.end());
       m_inflight_ops.insert(id);
       dout(20) << "ready to start op for " << id << " ["
                << m_inflight_ops.size() << "/" << m_max_concurrent_ops << "]"
@@ -198,7 +198,7 @@ void Throttler<I>::set_max_concurrent_ops(uint32_t max) {
                << m_inflight_ops.size() << "/" << m_max_concurrent_ops << "]"
                << dendl;
       auto it = m_queued_ops.find(id);
-      ceph_assert(it != m_queued_ops.end());
+      stone_assert(it != m_queued_ops.end());
       ops.push_back(it->second);
       m_queued_ops.erase(it);
       m_queue.pop_front();
@@ -211,7 +211,7 @@ void Throttler<I>::set_max_concurrent_ops(uint32_t max) {
 }
 
 template <typename I>
-void Throttler<I>::print_status(ceph::Formatter *f) {
+void Throttler<I>::print_status(stone::Formatter *f) {
   dout(20) << dendl;
 
   std::lock_guard locker{m_lock};

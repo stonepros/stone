@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -39,7 +39,7 @@ void Trace::start()
   fs->open(filename);
   if (!fs->is_open()) {
     //generic_dout(0) << "** unable to open trace file " << filename << dendl;
-    ceph_abort();
+    stone_abort();
   }
   //generic_dout(2) << "opened traced file '" << filename << "'" << dendl;
   

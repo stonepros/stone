@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -22,12 +22,12 @@ using Clock = RGWReshardWait::Clock;
 
 TEST(ReshardWait, wait_block)
 {
-  constexpr ceph::timespan wait_duration = 10ms;
+  constexpr stone::timespan wait_duration = 10ms;
   RGWReshardWait waiter(wait_duration);
 
   const auto start = Clock::now();
   EXPECT_EQ(0, waiter.wait(null_yield));
-  const ceph::timespan elapsed = Clock::now() - start;
+  const stone::timespan elapsed = Clock::now() - start;
 
   EXPECT_LE(wait_duration, elapsed); // waited at least 10ms
   waiter.stop();
@@ -35,8 +35,8 @@ TEST(ReshardWait, wait_block)
 
 TEST(ReshardWait, stop_block)
 {
-  constexpr ceph::timespan short_duration = 10ms;
-  constexpr ceph::timespan long_duration = 10s;
+  constexpr stone::timespan short_duration = 10ms;
+  constexpr stone::timespan long_duration = 10s;
 
   RGWReshardWait long_waiter(long_duration);
   RGWReshardWait short_waiter(short_duration);
@@ -51,7 +51,7 @@ TEST(ReshardWait, stop_block)
   long_waiter.stop(); // cancel long waiter
 
   thread.join();
-  const ceph::timespan elapsed = Clock::now() - start;
+  const stone::timespan elapsed = Clock::now() - start;
 
   EXPECT_LE(short_duration, elapsed); // waited at least 10ms
   EXPECT_GT(long_duration, elapsed); // waited less than 10s
@@ -60,7 +60,7 @@ TEST(ReshardWait, stop_block)
 
 TEST(ReshardWait, wait_yield)
 {
-  constexpr ceph::timespan wait_duration = 50ms;
+  constexpr stone::timespan wait_duration = 50ms;
   RGWReshardWait waiter(wait_duration);
 
   boost::asio::io_context context;
@@ -74,7 +74,7 @@ TEST(ReshardWait, wait_yield)
 
   EXPECT_EQ(1u, context.run_one()); // timeout
   EXPECT_TRUE(context.stopped());
-  const ceph::timespan elapsed = Clock::now() - start;
+  const stone::timespan elapsed = Clock::now() - start;
 
   EXPECT_LE(wait_duration, elapsed); // waited at least 10ms
   waiter.stop();
@@ -82,8 +82,8 @@ TEST(ReshardWait, wait_yield)
 
 TEST(ReshardWait, stop_yield)
 {
-  constexpr ceph::timespan short_duration = 50ms;
-  constexpr ceph::timespan long_duration = 10s;
+  constexpr stone::timespan short_duration = 50ms;
+  constexpr stone::timespan long_duration = 10s;
 
   RGWReshardWait long_waiter(long_duration);
   RGWReshardWait short_waiter(short_duration);
@@ -104,7 +104,7 @@ TEST(ReshardWait, stop_yield)
 
   EXPECT_EQ(1u, context.run_one_for(short_duration)); // timeout
   EXPECT_TRUE(context.stopped());
-  const ceph::timespan elapsed = Clock::now() - start;
+  const stone::timespan elapsed = Clock::now() - start;
 
   EXPECT_LE(short_duration, elapsed); // waited at least 10ms
   EXPECT_GT(long_duration, elapsed); // waited less than 10s
@@ -113,8 +113,8 @@ TEST(ReshardWait, stop_yield)
 
 TEST(ReshardWait, stop_multiple)
 {
-  constexpr ceph::timespan short_duration = 50ms;
-  constexpr ceph::timespan long_duration = 10s;
+  constexpr stone::timespan short_duration = 50ms;
+  constexpr stone::timespan long_duration = 10s;
 
   RGWReshardWait long_waiter(long_duration);
   RGWReshardWait short_waiter(short_duration);
@@ -156,7 +156,7 @@ TEST(ReshardWait, stop_multiple)
   for (auto& thread : threads) {
     thread.join();
   }
-  const ceph::timespan elapsed = Clock::now() - start;
+  const stone::timespan elapsed = Clock::now() - start;
 
   EXPECT_LE(short_duration, elapsed); // waited at least 10ms
   EXPECT_GT(long_duration, elapsed); // waited less than 10s

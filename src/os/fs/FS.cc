@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -113,7 +113,7 @@ int FS::copy_file_range(int to_fd, uint64_t to_offset,
 			int from_fd,
 			uint64_t from_offset, uint64_t from_len)
 {
-  ceph_abort_msg("write me");
+  stone_abort_msg("write me");
 }
 
 int FS::zero(int fd, uint64_t offset, uint64_t length)
@@ -151,7 +151,7 @@ int FS::zero(int fd, uint64_t offset, uint64_t length)
 
   */
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
-# ifdef CEPH_HAVE_FALLOCATE
+# ifdef STONE_HAVE_FALLOCATE
 #  ifdef FALLOC_FL_KEEP_SIZE
   // first try fallocate
   r = fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, offset, length);
@@ -168,7 +168,7 @@ int FS::zero(int fd, uint64_t offset, uint64_t length)
 
   {
     // fall back to writing zeros
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     bl.append_zero(length);
     r = ::lseek64(fd, offset, SEEK_SET);
     if (r < 0) {

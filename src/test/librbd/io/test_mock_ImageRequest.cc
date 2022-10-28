@@ -103,11 +103,11 @@ struct TestMockIoImageRequest : public TestMockFixture {
     if (needs_update) {
       mock_image_ctx.mtime_update_interval = 5;
       EXPECT_CALL(mock_image_ctx, get_modify_timestamp())
-        .WillOnce(Return(ceph_clock_now() - utime_t(10,0)));
+        .WillOnce(Return(stone_clock_now() - utime_t(10,0)));
     } else {
       mock_image_ctx.mtime_update_interval = 600;
       EXPECT_CALL(mock_image_ctx, get_modify_timestamp())
-        .WillOnce(Return(ceph_clock_now()));
+        .WillOnce(Return(stone_clock_now()));
     }
   }
 
@@ -170,7 +170,7 @@ TEST_F(TestMockIoImageRequest, AioWriteModifyTimestamp) {
 
   mock_image_ctx.mtime_update_interval = 5;
 
-  utime_t dummy = ceph_clock_now();
+  utime_t dummy = stone_clock_now();
   dummy -= utime_t(10,0);
 
   EXPECT_CALL(mock_image_ctx, get_modify_timestamp())
@@ -230,7 +230,7 @@ TEST_F(TestMockIoImageRequest, AioReadAccessTimestamp) {
 
   mock_image_ctx.atime_update_interval = 5;
 
-  utime_t dummy = ceph_clock_now();
+  utime_t dummy = stone_clock_now();
   dummy -= utime_t(10,0);
 
   EXPECT_CALL(mock_image_ctx, get_access_timestamp())
@@ -540,7 +540,7 @@ TEST_F(TestMockIoImageRequest, ListSnaps) {
   AioCompletion *aio_comp = AioCompletion::create_and_start(
     &aio_comp_ctx, ictx, AIO_TYPE_GENERIC);
   MockImageListSnapsRequest mock_image_list_snaps_request(
-    mock_image_ctx, aio_comp, {{0, 16384}, {16384, 16384}}, {0, CEPH_NOSNAP},
+    mock_image_ctx, aio_comp, {{0, 16384}, {16384, 16384}}, {0, STONE_NOSNAP},
     0, &snapshot_delta, {});
   {
     std::shared_lock owner_locker{mock_image_ctx.owner_lock};

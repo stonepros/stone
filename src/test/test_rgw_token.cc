@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat, Inc.
  *
@@ -18,14 +18,14 @@
 #include <string>
 
 #include "common/config.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "gtest/gtest.h"
 #include "rgw/rgw_token.h"
 #include "rgw/rgw_b64.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace {
 
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
   env_to_vec(args);
 
   for (auto arg_iter = args.begin(); arg_iter != args.end();) {
-    if (ceph_argparse_flag(args, arg_iter, "--verbose",
+    if (stone_argparse_flag(args, arg_iter, "--verbose",
 			      (char*) nullptr)) {
       verbose = true;
     } else {

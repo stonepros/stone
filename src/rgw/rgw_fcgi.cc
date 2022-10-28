@@ -30,7 +30,7 @@ void RGWFCGX::flush()
   FCGX_FFlush(fcgx->out);
 }
 
-int RGWFCGX::init_env(CephContext* const cct)
+int RGWFCGX::init_env(StoneContext* const cct)
 {
   env.init(cct, (char **)fcgx->envp);
   return 0;

@@ -22,7 +22,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -31,7 +31,7 @@ namespace crimson::osd {
 OpsExecuter::call_errorator::future<> OpsExecuter::do_op_call(OSDOp& osd_op)
 {
   std::string cname, mname;
-  ceph::bufferlist indata;
+  stone::bufferlist indata;
   try {
     auto bp = std::begin(osd_op.indata);
     bp.copy(osd_op.op.cls.class_len, cname);
@@ -81,7 +81,7 @@ OpsExecuter::call_errorator::future<> OpsExecuter::do_op_call(OSDOp& osd_op)
   const auto prev_wr = num_write;
   return seastar::async(
     [this, method, indata=std::move(indata)]() mutable {
-      ceph::bufferlist outdata;
+      stone::bufferlist outdata;
       auto cls_context = reinterpret_cast<cls_method_context_t>(this);
       const auto ret = method->exec(cls_context, indata, outdata);
       return std::make_pair(ret, std::move(outdata));
@@ -105,7 +105,7 @@ OpsExecuter::call_errorator::future<> OpsExecuter::do_op_call(OSDOp& osd_op)
         osd_op.rval = -EIO;
         return crimson::ct_error::input_output_error::make();
       }
-      // ceph-osd has this implemented in `PrimaryLogPG::execute_ctx`,
+      // stone-osd has this implemented in `PrimaryLogPG::execute_ctx`,
       // grep for `ignore_out_data`.
       using crimson::common::local_conf;
       if (op_info.allows_returnvec() &&
@@ -153,7 +153,7 @@ static watch_info_t create_watch_info(const OSDOp& osd_op,
 OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_watch_subop_watch(
   OSDOp& osd_op,
   ObjectState& os,
-  ceph::os::Transaction& txn)
+  stone::os::Transaction& txn)
 {
   struct connect_ctx_t {
     ObjectContext::watch_key_t key;
@@ -195,7 +195,7 @@ OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_watch_subop_watch(
 OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_watch_subop_reconnect(
   OSDOp& osd_op,
   ObjectState& os,
-  ceph::os::Transaction& txn)
+  stone::os::Transaction& txn)
 {
   const entity_name_t& entity = get_message().get_reqid().name;
   const auto& cookie = osd_op.op.watch.cookie;
@@ -210,7 +210,7 @@ OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_watch_subop_reconnect(
 OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_watch_subop_unwatch(
   OSDOp& osd_op,
   ObjectState& os,
-  ceph::os::Transaction& txn)
+  stone::os::Transaction& txn)
 {
   logger().info("{}", __func__);
 
@@ -250,7 +250,7 @@ OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_watch_subop_unwatch(
 OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_watch_subop_ping(
   OSDOp& osd_op,
   ObjectState& os,
-  ceph::os::Transaction& txn)
+  stone::os::Transaction& txn)
 {
   const entity_name_t& entity = get_message().get_reqid().name;
   const auto& cookie = osd_op.op.watch.cookie;
@@ -267,30 +267,30 @@ OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_watch_subop_ping(
     return crimson::ct_error::timed_out::make();
   }
   logger().info("found existing watch by {}", entity);
-  it->second->got_ping(ceph_clock_now());
+  it->second->got_ping(stone_clock_now());
   return seastar::now();
 }
 
 OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_watch(
   OSDOp& osd_op,
   ObjectState& os,
-  ceph::os::Transaction& txn)
+  stone::os::Transaction& txn)
 {
   logger().debug("{}", __func__);
   if (!os.exists) {
     return crimson::ct_error::enoent::make();
   }
   switch (osd_op.op.watch.op) {
-    case CEPH_OSD_WATCH_OP_WATCH:
+    case STONE_OSD_WATCH_OP_WATCH:
       return do_op_watch_subop_watch(osd_op, os, txn);
-    case CEPH_OSD_WATCH_OP_RECONNECT:
+    case STONE_OSD_WATCH_OP_RECONNECT:
       return do_op_watch_subop_reconnect(osd_op, os, txn);
-    case CEPH_OSD_WATCH_OP_PING:
+    case STONE_OSD_WATCH_OP_PING:
       return do_op_watch_subop_ping(osd_op, os, txn);
-    case CEPH_OSD_WATCH_OP_UNWATCH:
+    case STONE_OSD_WATCH_OP_UNWATCH:
       return do_op_watch_subop_unwatch(osd_op, os, txn);
-    case CEPH_OSD_WATCH_OP_LEGACY_WATCH:
-      logger().warn("ignoring CEPH_OSD_WATCH_OP_LEGACY_WATCH");
+    case STONE_OSD_WATCH_OP_LEGACY_WATCH:
+      logger().warn("ignoring STONE_OSD_WATCH_OP_LEGACY_WATCH");
       return crimson::ct_error::invarg::make();
   }
   logger().warn("unrecognized WATCH subop: {}", osd_op.op.watch.op);
@@ -330,9 +330,9 @@ OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_notify(
       try {
         auto bp = osd_op.indata.cbegin();
         uint32_t ver; // obsolete
-        ceph::decode(ver, bp);
-        ceph::decode(ctx.ninfo.timeout, bp);
-        ceph::decode(ctx.ninfo.bl, bp);
+        stone::decode(ver, bp);
+        stone::decode(ctx.ninfo.timeout, bp);
+        stone::decode(ctx.ninfo.bl, bp);
       } catch (const buffer::error&) {
         ctx.ninfo.timeout = 0;
       }
@@ -343,7 +343,7 @@ OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_notify(
       ctx.ninfo.notify_id = get_next_notify_id(ctx.epoch);
       ctx.ninfo.cookie = osd_op.op.notify.cookie;
       // return our unique notify id to the client
-      ceph::encode(ctx.ninfo.notify_id, osd_op.outdata);
+      stone::encode(ctx.ninfo.notify_id, osd_op.outdata);
       return seastar::now();
     },
     [] (auto&& ctx, ObjectContextRef obc) {
@@ -373,7 +373,7 @@ OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_notify_ack(
     const entity_name_t entity;
     uint64_t watch_cookie;
     uint64_t notify_id;
-    ceph::bufferlist reply_bl;
+    stone::bufferlist reply_bl;
 
     notifyack_ctx_t(const MOSDOp& msg) : entity(msg.get_reqid().name) {
     }
@@ -382,13 +382,13 @@ OpsExecuter::watch_errorator::future<> OpsExecuter::do_op_notify_ack(
     [&] (auto& ctx) -> watch_errorator::future<> {
       try {
         auto bp = osd_op.indata.cbegin();
-        ceph::decode(ctx.notify_id, bp);
-        ceph::decode(ctx.watch_cookie, bp);
+        stone::decode(ctx.notify_id, bp);
+        stone::decode(ctx.watch_cookie, bp);
         if (!bp.end()) {
-          ceph::decode(ctx.reply_bl, bp);
+          stone::decode(ctx.reply_bl, bp);
         }
       } catch (const buffer::error&) {
-        // here we behave differently than ceph-osd. For historical reasons,
+        // here we behave differently than stone-osd. For historical reasons,
         // it falls back to using `osd_op.op.watch.cookie` as `ctx.notify_id`.
         // crimson just returns EINVAL if the data cannot be decoded.
         return crimson::ct_error::invarg::make();
@@ -429,110 +429,110 @@ OpsExecuter::execute_op(OSDOp& osd_op)
   // of each op.
   logger().debug(
     "handling op {} on object {}",
-    ceph_osd_op_name(osd_op.op.op),
+    stone_osd_op_name(osd_op.op.op),
     get_target());
-  switch (const ceph_osd_op& op = osd_op.op; op.op) {
-  case CEPH_OSD_OP_SYNC_READ:
+  switch (const stone_osd_op& op = osd_op.op; op.op) {
+  case STONE_OSD_OP_SYNC_READ:
     [[fallthrough]];
-  case CEPH_OSD_OP_READ:
+  case STONE_OSD_OP_READ:
     return do_read_op([&osd_op] (auto& backend, const auto& os) {
       return backend.read(os, osd_op);
     });
-  case CEPH_OSD_OP_SPARSE_READ:
+  case STONE_OSD_OP_SPARSE_READ:
     return do_read_op([&osd_op] (auto& backend, const auto& os) {
       return backend.sparse_read(os, osd_op);
     });
-  case CEPH_OSD_OP_CHECKSUM:
+  case STONE_OSD_OP_CHECKSUM:
     return do_read_op([&osd_op] (auto& backend, const auto& os) {
       return backend.checksum(os, osd_op);
     });
-  case CEPH_OSD_OP_CMPEXT:
+  case STONE_OSD_OP_CMPEXT:
     return do_read_op([&osd_op] (auto& backend, const auto& os) {
       return backend.cmp_ext(os, osd_op);
     });
-  case CEPH_OSD_OP_GETXATTR:
+  case STONE_OSD_OP_GETXATTR:
     return do_read_op([&osd_op] (auto& backend, const auto& os) {
       return backend.getxattr(os, osd_op);
     });
-  case CEPH_OSD_OP_GETXATTRS:
+  case STONE_OSD_OP_GETXATTRS:
     return do_read_op([&osd_op] (auto& backend, const auto& os) {
       return backend.get_xattrs(os, osd_op);
     });
-  case CEPH_OSD_OP_RMXATTR:
+  case STONE_OSD_OP_RMXATTR:
     return do_write_op([&osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.rm_xattr(os, osd_op, txn);
     }, true);
-  case CEPH_OSD_OP_CREATE:
+  case STONE_OSD_OP_CREATE:
     return do_write_op([&osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.create(os, osd_op, txn);
     }, true);
-  case CEPH_OSD_OP_WRITE:
+  case STONE_OSD_OP_WRITE:
     return do_write_op([this, &osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.write(os, osd_op, txn, *osd_op_params);
     }, true);
-  case CEPH_OSD_OP_WRITESAME:
+  case STONE_OSD_OP_WRITESAME:
     return do_write_op([this, &osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.write_same(os, osd_op, txn, *osd_op_params);
     }, true);
-  case CEPH_OSD_OP_WRITEFULL:
+  case STONE_OSD_OP_WRITEFULL:
     return do_write_op([this, &osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.writefull(os, osd_op, txn, *osd_op_params);
     }, true);
-  case CEPH_OSD_OP_APPEND:
+  case STONE_OSD_OP_APPEND:
     return do_write_op([this, &osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.append(os, osd_op, txn, *osd_op_params);
     }, true);
-  case CEPH_OSD_OP_TRUNCATE:
+  case STONE_OSD_OP_TRUNCATE:
     return do_write_op([this, &osd_op] (auto& backend, auto& os, auto& txn) {
       // FIXME: rework needed. Move this out to do_write_op(), introduce
       // do_write_op_no_user_modify()...
       return backend.truncate(os, osd_op, txn, *osd_op_params);
     }, true);
-  case CEPH_OSD_OP_ZERO:
+  case STONE_OSD_OP_ZERO:
     return do_write_op([this, &osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.zero(os, osd_op, txn, *osd_op_params);
     }, true);
-  case CEPH_OSD_OP_SETALLOCHINT:
+  case STONE_OSD_OP_SETALLOCHINT:
     return osd_op_errorator::now();
-  case CEPH_OSD_OP_SETXATTR:
+  case STONE_OSD_OP_SETXATTR:
     return do_write_op([&osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.setxattr(os, osd_op, txn);
     }, true);
-  case CEPH_OSD_OP_DELETE:
+  case STONE_OSD_OP_DELETE:
     return do_write_op([] (auto& backend, auto& os, auto& txn) {
       return backend.remove(os, txn);
     }, true);
-  case CEPH_OSD_OP_CALL:
+  case STONE_OSD_OP_CALL:
     return this->do_op_call(osd_op);
-  case CEPH_OSD_OP_STAT:
+  case STONE_OSD_OP_STAT:
     // note: stat does not require RD
     return do_const_op([&osd_op] (/* const */auto& backend, const auto& os) {
       return backend.stat(os, osd_op);
     });
-  case CEPH_OSD_OP_TMAPUP:
-    // TODO: there was an effort to kill TMAP in ceph-osd. According to
+  case STONE_OSD_OP_TMAPUP:
+    // TODO: there was an effort to kill TMAP in stone-osd. According to
     // @dzafman this isn't possible yet. Maybe it could be accomplished
     // before crimson's readiness and we'd luckily don't need to carry.
     return dont_do_legacy_op();
 
   // OMAP
-  case CEPH_OSD_OP_OMAPGETKEYS:
+  case STONE_OSD_OP_OMAPGETKEYS:
     return do_read_op([&osd_op] (auto& backend, const auto& os) {
       return backend.omap_get_keys(os, osd_op);
     });
-  case CEPH_OSD_OP_OMAPGETVALS:
+  case STONE_OSD_OP_OMAPGETVALS:
     return do_read_op([&osd_op] (auto& backend, const auto& os) {
       return backend.omap_get_vals(os, osd_op);
     });
-  case CEPH_OSD_OP_OMAPGETHEADER:
+  case STONE_OSD_OP_OMAPGETHEADER:
     return do_read_op([&osd_op] (auto& backend, const auto& os) {
       return backend.omap_get_header(os, osd_op);
     });
-  case CEPH_OSD_OP_OMAPGETVALSBYKEYS:
+  case STONE_OSD_OP_OMAPGETVALSBYKEYS:
     return do_read_op([&osd_op] (auto& backend, const auto& os) {
       return backend.omap_get_vals_by_keys(os, osd_op);
     });
-  case CEPH_OSD_OP_OMAPSETVALS:
+  case STONE_OSD_OP_OMAPSETVALS:
 #if 0
     if (!pg.get_pool().info.supports_omap()) {
       return crimson::ct_error::operation_not_supported::make();
@@ -541,7 +541,7 @@ OpsExecuter::execute_op(OSDOp& osd_op)
     return do_write_op([this, &osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.omap_set_vals(os, osd_op, txn, *osd_op_params);
     }, true);
-  case CEPH_OSD_OP_OMAPSETHEADER:
+  case STONE_OSD_OP_OMAPSETHEADER:
 #if 0
     if (!pg.get_pool().info.supports_omap()) {
       return crimson::ct_error::operation_not_supported::make();
@@ -550,7 +550,7 @@ OpsExecuter::execute_op(OSDOp& osd_op)
     return do_write_op([&osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.omap_set_header(os, osd_op, txn);
     }, true);
-  case CEPH_OSD_OP_OMAPRMKEYRANGE:
+  case STONE_OSD_OP_OMAPRMKEYRANGE:
 #if 0
     if (!pg.get_pool().info.supports_omap()) {
       return crimson::ct_error::operation_not_supported::make();
@@ -559,29 +559,29 @@ OpsExecuter::execute_op(OSDOp& osd_op)
     return do_write_op([&osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.omap_remove_range(os, osd_op, txn);
     }, true);
-  case CEPH_OSD_OP_OMAPCLEAR:
+  case STONE_OSD_OP_OMAPCLEAR:
     return do_write_op([this, &osd_op] (auto& backend, auto& os, auto& txn) {
       return backend.omap_clear(os, osd_op, txn, *osd_op_params);
     }, true);
 
   // watch/notify
-  case CEPH_OSD_OP_WATCH:
+  case STONE_OSD_OP_WATCH:
     return do_write_op([this, &osd_op] (auto& backend, auto& os, auto& txn) {
       return do_op_watch(osd_op, os, txn);
     }, false);
-  case CEPH_OSD_OP_NOTIFY:
+  case STONE_OSD_OP_NOTIFY:
     return do_read_op([this, &osd_op] (auto&, const auto& os) {
       return do_op_notify(osd_op, os);
     });
-  case CEPH_OSD_OP_NOTIFY_ACK:
+  case STONE_OSD_OP_NOTIFY_ACK:
     return do_read_op([this, &osd_op] (auto&, const auto& os) {
       return do_op_notify_ack(osd_op, os);
     });
 
   default:
-    logger().warn("unknown op {}", ceph_osd_op_name(op.op));
+    logger().warn("unknown op {}", stone_osd_op_name(op.op));
     throw std::runtime_error(
-      fmt::format("op '{}' not supported", ceph_osd_op_name(op.op)));
+      fmt::format("op '{}' not supported", stone_osd_op_name(op.op)));
   }
 }
 
@@ -612,7 +612,7 @@ static inline std::unique_ptr<const PGLSFilter> get_pgls_filter(
         throw crimson::osd::invalid_argument{};
       }
     } else {
-      ceph_assert(cls);
+      stone_assert(cls);
     }
 
     ClassHandler::ClassFilter * const class_filter = cls->get_filter(filter_name);
@@ -631,7 +631,7 @@ static inline std::unique_ptr<const PGLSFilter> get_pgls_filter(
     }
   }
 
-  ceph_assert(filter);
+  stone_assert(filter);
   int r = filter->init(iter);
   if (r < 0) {
     logger().warn("error initializing filter {}: {}", type, cpp_strerror(r));
@@ -651,10 +651,10 @@ static seastar::future<hobject_t> pgls_filter(
     logger().debug("pgls_filter: filter is interested in xattr={} for obj={}",
                    xattr, sobj);
     return backend.getxattr(sobj, xattr).safe_then(
-      [&filter, sobj] (ceph::bufferptr bp) {
+      [&filter, sobj] (stone::bufferptr bp) {
         logger().debug("pgls_filter: got xvalue for obj={}", sobj);
 
-        ceph::bufferlist val;
+        stone::bufferlist val;
         val.push_back(std::move(bp));
         const bool filtered = filter.filter(sobj, val);
         return seastar::make_ready_future<hobject_t>(filtered ? sobj : hobject_t{});
@@ -664,18 +664,18 @@ static seastar::future<hobject_t> pgls_filter(
         if (filter.reject_empty_xattr()) {
           return seastar::make_ready_future<hobject_t>(hobject_t{});
         }
-        ceph::bufferlist val;
+        stone::bufferlist val;
         const bool filtered = filter.filter(sobj, val);
         return seastar::make_ready_future<hobject_t>(filtered ? sobj : hobject_t{});
       }));
   } else {
-    ceph::bufferlist empty_lvalue_bl;
+    stone::bufferlist empty_lvalue_bl;
     const bool filtered = filter.filter(sobj, empty_lvalue_bl);
     return seastar::make_ready_future<hobject_t>(filtered ? sobj : hobject_t{});
   }
 }
 
-static seastar::future<ceph::bufferlist> do_pgnls_common(
+static seastar::future<stone::bufferlist> do_pgnls_common(
   const hobject_t& pg_start,
   const hobject_t& pg_end,
   const PGBackend& backend,
@@ -749,11 +749,11 @@ static seastar::future<ceph::bufferlist> do_pgnls_common(
       boost::push_back(response.entries, items | boost::adaptors::filtered(is_matched)
                                                | boost::adaptors::transformed(to_entry));
       response.handle = next.is_max() ? pg_end : next;
-      ceph::bufferlist out;
+      stone::bufferlist out;
       encode(response, out);
       logger().debug("{}: response.entries.size()=",
                      __func__, response.entries.size());
-      return seastar::make_ready_future<ceph::bufferlist>(std::move(out));
+      return seastar::make_ready_future<stone::bufferlist>(std::move(out));
   });
 }
 
@@ -764,7 +764,7 @@ static seastar::future<> do_pgnls(
 {
   hobject_t lower_bound;
   try {
-    ceph::decode(lower_bound, osd_op.indata);
+    stone::decode(lower_bound, osd_op.indata);
   } catch (const buffer::error&) {
     throw std::invalid_argument("unable to decode PGNLS handle");
   }
@@ -792,9 +792,9 @@ static seastar::future<> do_pgnls_filtered(
   std::string cname, mname, type;
   auto bp = osd_op.indata.cbegin();
   try {
-    ceph::decode(cname, bp);
-    ceph::decode(mname, bp);
-    ceph::decode(type, bp);
+    stone::decode(cname, bp);
+    stone::decode(mname, bp);
+    stone::decode(type, bp);
   } catch (const buffer::error&) {
     throw crimson::osd::invalid_argument{};
   }
@@ -829,7 +829,7 @@ static seastar::future<> do_pgnls_filtered(
   });
 }
 
-static seastar::future<ceph::bufferlist> do_pgls_common(
+static seastar::future<stone::bufferlist> do_pgls_common(
   const hobject_t& pg_start,
   const hobject_t& pg_end,
   const PGBackend& backend,
@@ -876,11 +876,11 @@ static seastar::future<ceph::bufferlist> do_pgls_common(
       pg_ls_response_t response;
       response.handle = next.is_max() ? pg_end : next;
       response.entries = std::move(entries);
-      ceph::bufferlist out;
+      stone::bufferlist out;
       encode(response, out);
       logger().debug("{}: response.entries.size()=",
                      __func__, response.entries.size());
-      return seastar::make_ready_future<ceph::bufferlist>(std::move(out));
+      return seastar::make_ready_future<stone::bufferlist>(std::move(out));
   });
 }
 
@@ -920,9 +920,9 @@ static seastar::future<> do_pgls_filtered(
   std::string cname, mname, type;
   auto bp = osd_op.indata.cbegin();
   try {
-    ceph::decode(cname, bp);
-    ceph::decode(mname, bp);
-    ceph::decode(type, bp);
+    stone::decode(cname, bp);
+    stone::decode(mname, bp);
+    stone::decode(type, bp);
   } catch (const buffer::error&) {
     throw crimson::osd::invalid_argument{};
   }
@@ -960,20 +960,20 @@ static seastar::future<> do_pgls_filtered(
 seastar::future<>
 PgOpsExecuter::execute_op(OSDOp& osd_op)
 {
-  logger().warn("handling op {}", ceph_osd_op_name(osd_op.op.op));
-  switch (const ceph_osd_op& op = osd_op.op; op.op) {
-  case CEPH_OSD_OP_PGLS:
+  logger().warn("handling op {}", stone_osd_op_name(osd_op.op.op));
+  switch (const stone_osd_op& op = osd_op.op; op.op) {
+  case STONE_OSD_OP_PGLS:
     return do_pgls(pg, nspace, osd_op);
-  case CEPH_OSD_OP_PGLS_FILTER:
+  case STONE_OSD_OP_PGLS_FILTER:
     return do_pgls_filtered(pg, nspace, osd_op);
-  case CEPH_OSD_OP_PGNLS:
+  case STONE_OSD_OP_PGNLS:
     return do_pgnls(pg, nspace, osd_op);
-  case CEPH_OSD_OP_PGNLS_FILTER:
+  case STONE_OSD_OP_PGNLS_FILTER:
     return do_pgnls_filtered(pg, nspace, osd_op);
   default:
-    logger().warn("unknown op {}", ceph_osd_op_name(op.op));
+    logger().warn("unknown op {}", stone_osd_op_name(op.op));
     throw std::runtime_error(
-      fmt::format("op '{}' not supported", ceph_osd_op_name(op.op)));
+      fmt::format("op '{}' not supported", stone_osd_op_name(op.op)));
   }
 }
 

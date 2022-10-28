@@ -7,8 +7,8 @@
 #include "librbd/Utils.h"
 #include "Policy.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_map::Policy: " << this \
                            << " " << __func__ << ": "
@@ -39,7 +39,7 @@ using librbd::util::unique_lock_name;
 
 Policy::Policy(librados::IoCtx &ioctx)
   : m_ioctx(ioctx),
-    m_map_lock(ceph::make_shared_mutex(
+    m_map_lock(stone::make_shared_mutex(
      unique_lock_name("rbd::mirror::image_map::Policy::m_map_lock", this))) {
 
   // map should at least have once instance
@@ -53,19 +53,19 @@ void Policy::init(
 
   std::unique_lock map_lock{m_map_lock};
   for (auto& it : image_mapping) {
-    ceph_assert(!it.second.instance_id.empty());
+    stone_assert(!it.second.instance_id.empty());
     auto map_result = m_map[it.second.instance_id].emplace(it.first);
-    ceph_assert(map_result.second);
+    stone_assert(map_result.second);
 
     auto image_state_result = m_image_states.emplace(
       it.first, ImageState{it.second.instance_id, it.second.mapped_time});
-    ceph_assert(image_state_result.second);
+    stone_assert(image_state_result.second);
 
     // ensure we (re)send image acquire actions to the instance
     auto& image_state = image_state_result.first->second;
     auto start_action = set_state(&image_state,
                                   StateTransition::STATE_INITIALIZING, false);
-    ceph_assert(start_action);
+    stone_assert(start_action);
   }
 }
 
@@ -117,7 +117,7 @@ void Policy::add_instances(const InstanceIds &instance_ids,
 
   std::unique_lock map_lock{m_map_lock};
   for (auto& instance : instance_ids) {
-    ceph_assert(!instance.empty());
+    stone_assert(!instance.empty());
     m_map.emplace(instance, std::set<std::string>{});
   }
 
@@ -146,7 +146,7 @@ void Policy::add_instances(const InstanceIds &instance_ids,
           << "]" << dendl;
   for (auto& global_image_id : shuffle_global_image_ids) {
     auto it = m_image_states.find(global_image_id);
-    ceph_assert(it != m_image_states.end());
+    stone_assert(it != m_image_states.end());
 
     auto& image_state = it->second;
     if (set_state(&image_state, StateTransition::STATE_SHUFFLING, false)) {
@@ -161,10 +161,10 @@ void Policy::remove_instances(const InstanceIds &instance_ids,
   remove_instances(m_map_lock, instance_ids, global_image_ids);
 }
 
-void Policy::remove_instances(const ceph::shared_mutex& lock,
+void Policy::remove_instances(const stone::shared_mutex& lock,
                               const InstanceIds &instance_ids,
                               GlobalImageIds* global_image_ids) {
-  ceph_assert(ceph_mutex_is_wlocked(m_map_lock));
+  stone_assert(stone_mutex_is_wlocked(m_map_lock));
   dout(5) << "instance_ids=" << instance_ids << dendl;
 
   for (auto& instance_id : instance_ids) {
@@ -184,7 +184,7 @@ void Policy::remove_instances(const ceph::shared_mutex& lock,
             << "global_image_ids=[" << instance_global_image_ids << "]"<< dendl;
     for (auto& global_image_id : instance_global_image_ids) {
       auto it = m_image_states.find(global_image_id);
-      ceph_assert(it != m_image_states.end());
+      stone_assert(it != m_image_states.end());
 
       auto& image_state = it->second;
       if (is_state_scheduled(image_state,
@@ -204,11 +204,11 @@ ActionType Policy::start_action(const std::string &global_image_id) {
   std::unique_lock map_lock{m_map_lock};
 
   auto it = m_image_states.find(global_image_id);
-  ceph_assert(it != m_image_states.end());
+  stone_assert(it != m_image_states.end());
 
   auto& image_state = it->second;
   auto& transition = image_state.transition;
-  ceph_assert(transition.action_type != ACTION_TYPE_NONE);
+  stone_assert(transition.action_type != ACTION_TYPE_NONE);
 
   dout(5) << "global_image_id=" << global_image_id << ", "
           << "state=" << image_state.state << ", "
@@ -225,7 +225,7 @@ bool Policy::finish_action(const std::string &global_image_id, int r) {
   std::unique_lock map_lock{m_map_lock};
 
   auto it = m_image_states.find(global_image_id);
-  ceph_assert(it != m_image_states.end());
+  stone_assert(it != m_image_states.end());
 
   auto& image_state = it->second;
   auto& transition = image_state.transition;
@@ -247,7 +247,7 @@ bool Policy::finish_action(const std::string &global_image_id, int r) {
   StateTransition::transit(image_state.state, &image_state.transition);
   if (transition.finish_state) {
     // in-progress state machine complete
-    ceph_assert(StateTransition::is_idle(*transition.finish_state));
+    stone_assert(StateTransition::is_idle(*transition.finish_state));
     image_state.state = *transition.finish_state;
     image_state.transition = {};
   }
@@ -255,7 +255,7 @@ bool Policy::finish_action(const std::string &global_image_id, int r) {
   if (StateTransition::is_idle(image_state.state) && image_state.next_state) {
     // advance to pending state machine
     bool start_action = set_state(&image_state, *image_state.next_state, false);
-    ceph_assert(start_action);
+    stone_assert(start_action);
   }
 
   // image state may get purged in execute_policy_action()
@@ -282,8 +282,8 @@ void Policy::execute_policy_action(
     break;
   case StateTransition::POLICY_ACTION_REMOVE:
     if (image_state->state == StateTransition::STATE_UNASSOCIATED) {
-      ceph_assert(image_state->instance_id == UNMAPPED_INSTANCE_ID);
-      ceph_assert(!image_state->next_state);
+      stone_assert(image_state->instance_id == UNMAPPED_INSTANCE_ID);
+      stone_assert(!image_state->next_state);
       m_image_states.erase(global_image_id);
     }
     break;
@@ -291,7 +291,7 @@ void Policy::execute_policy_action(
 }
 
 void Policy::map(const std::string& global_image_id, ImageState* image_state) {
-  ceph_assert(ceph_mutex_is_wlocked(m_map_lock));
+  stone_assert(stone_mutex_is_wlocked(m_map_lock));
 
   std::string instance_id = image_state->instance_id;
   if (instance_id != UNMAPPED_INSTANCE_ID && !is_dead_instance(instance_id)) {
@@ -302,20 +302,20 @@ void Policy::map(const std::string& global_image_id, ImageState* image_state) {
   }
 
   instance_id = do_map(m_map, global_image_id);
-  ceph_assert(!instance_id.empty());
+  stone_assert(!instance_id.empty());
   dout(5) << "global_image_id=" << global_image_id << ", "
           << "instance_id=" << instance_id << dendl;
 
   image_state->instance_id = instance_id;
-  image_state->mapped_time = ceph_clock_now();
+  image_state->mapped_time = stone_clock_now();
 
   auto ins = m_map[instance_id].emplace(global_image_id);
-  ceph_assert(ins.second);
+  stone_assert(ins.second);
 }
 
 void Policy::unmap(const std::string &global_image_id,
                    ImageState* image_state) {
-  ceph_assert(ceph_mutex_is_wlocked(m_map_lock));
+  stone_assert(stone_mutex_is_wlocked(m_map_lock));
 
   std::string instance_id = image_state->instance_id;
   if (instance_id == UNMAPPED_INSTANCE_ID) {
@@ -325,7 +325,7 @@ void Policy::unmap(const std::string &global_image_id,
   dout(5) << "global_image_id=" << global_image_id << ", "
           << "instance_id=" << instance_id << dendl;
 
-  ceph_assert(!instance_id.empty());
+  stone_assert(!instance_id.empty());
   m_map[instance_id].erase(global_image_id);
   image_state->instance_id = UNMAPPED_INSTANCE_ID;
   image_state->mapped_time = {};
@@ -338,10 +338,10 @@ void Policy::unmap(const std::string &global_image_id,
 }
 
 bool Policy::is_image_shuffling(const std::string &global_image_id) {
-  ceph_assert(ceph_mutex_is_locked(m_map_lock));
+  stone_assert(stone_mutex_is_locked(m_map_lock));
 
   auto it = m_image_states.find(global_image_id);
-  ceph_assert(it != m_image_states.end());
+  stone_assert(it != m_image_states.end());
   auto& image_state = it->second;
 
   // avoid attempting to re-shuffle a pending shuffle
@@ -353,20 +353,20 @@ bool Policy::is_image_shuffling(const std::string &global_image_id) {
 }
 
 bool Policy::can_shuffle_image(const std::string &global_image_id) {
-  ceph_assert(ceph_mutex_is_locked(m_map_lock));
+  stone_assert(stone_mutex_is_locked(m_map_lock));
 
-  CephContext *cct = reinterpret_cast<CephContext *>(m_ioctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(m_ioctx.cct());
   int migration_throttle = cct->_conf.get_val<uint64_t>(
     "rbd_mirror_image_policy_migration_throttle");
 
   auto it = m_image_states.find(global_image_id);
-  ceph_assert(it != m_image_states.end());
+  stone_assert(it != m_image_states.end());
   auto& image_state = it->second;
 
   utime_t last_shuffled_time = image_state.mapped_time;
 
   // idle images that haven't been recently remapped can shuffle
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   auto result = (StateTransition::is_idle(image_state.state) &&
                  ((migration_throttle <= 0) ||
                   (now - last_shuffled_time >= migration_throttle)));
@@ -387,8 +387,8 @@ bool Policy::set_state(ImageState* image_state, StateTransition::State state,
     image_state->next_state = boost::none;
 
     StateTransition::transit(image_state->state, &image_state->transition);
-    ceph_assert(image_state->transition.action_type != ACTION_TYPE_NONE);
-    ceph_assert(!image_state->transition.finish_state);
+    stone_assert(image_state->transition.action_type != ACTION_TYPE_NONE);
+    stone_assert(!image_state->transition.finish_state);
     return true;
   }
 

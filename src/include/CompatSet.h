@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2009 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_COMPATSET_H
-#define CEPH_COMPATSET_H
+#ifndef STONE_COMPATSET_H
+#define STONE_COMPATSET_H
 
 #include <iostream>
 #include <map>
@@ -39,9 +39,9 @@ struct CompatSet {
 
   public:
     friend struct CompatSet;
-    friend class CephCompatSet_AllSet_Test;
-    friend class CephCompatSet_other_Test;
-    friend class CephCompatSet_merge_Test;
+    friend class StoneeCompatSet_AllSet_Test;
+    friend class StoneeCompatSet_other_Test;
+    friend class StoneeCompatSet_merge_Test;
     friend std::ostream& operator<<(std::ostream& out, const CompatSet::FeatureSet& fs);
     friend std::ostream& operator<<(std::ostream& out, const CompatSet& compat);
     FeatureSet() : mask(1), names() {}

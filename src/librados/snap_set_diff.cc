@@ -4,17 +4,17 @@
 #include <vector>
 
 #include "snap_set_diff.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "include/rados/librados.hpp"
 #include "include/interval_set.h"
 #include "common/debug.h"
 
-#define dout_subsys ceph_subsys_rados
+#define dout_subsys stone_subsys_rados
 
 /**
  * calculate intervals/extents that vary between two snapshots
  */
-void calc_snap_set_diff(CephContext *cct, const librados::snap_set_t& snap_set,
+void calc_snap_set_diff(StoneContext *cct, const librados::snap_set_t& snap_set,
 			librados::snap_t start, librados::snap_t end,
 			interval_set<uint64_t> *diff, uint64_t *end_size,
                         bool *end_exists, librados::snap_t *clone_end_snap_id,

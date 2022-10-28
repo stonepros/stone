@@ -1,0 +1,7 @@
+tasks:
+  - stone-fuse:
+      client.0:
+        stonefs_name: foo
+  - stone-fuse:
+      client.1:
+        stonefs_name: bar

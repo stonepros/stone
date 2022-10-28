@@ -12,7 +12,7 @@
 #include "librbd/migration/NativeFormat.h"
 #include "librbd/migration/SourceSpecBuilder.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::migration::OpenSourceImageRequest: " \
                            << this << " " << __func__ << ": "
@@ -24,7 +24,7 @@ template <typename I>
 OpenSourceImageRequest<I>::OpenSourceImageRequest(
     librados::IoCtx& io_ctx, I* dst_image_ctx, uint64_t src_snap_id,
     const MigrationInfo &migration_info, I** src_image_ctx, Context* on_finish)
-  : m_cct(reinterpret_cast<CephContext*>(io_ctx.cct())), m_io_ctx(io_ctx),
+  : m_cct(reinterpret_cast<StoneContext*>(io_ctx.cct())), m_io_ctx(io_ctx),
     m_dst_image_ctx(dst_image_ctx), m_src_snap_id(src_snap_id),
     m_migration_info(migration_info), m_src_image_ctx(src_image_ctx),
     m_on_finish(on_finish) {
@@ -41,7 +41,7 @@ void OpenSourceImageRequest<I>::open_source() {
   ldout(m_cct, 10) << dendl;
 
   // note that all source image ctx properties are placeholders
-  *m_src_image_ctx = I::create("", "", CEPH_NOSNAP, m_io_ctx, true);
+  *m_src_image_ctx = I::create("", "", STONE_NOSNAP, m_io_ctx, true);
   auto src_image_ctx = *m_src_image_ctx;
   src_image_ctx->child = m_dst_image_ctx;
 
@@ -116,7 +116,7 @@ void OpenSourceImageRequest<I>::get_image_size() {
   auto ctx = util::create_context_callback<
     OpenSourceImageRequest<I>,
     &OpenSourceImageRequest<I>::handle_get_image_size>(this);
-  m_format->get_image_size(CEPH_NOSNAP, &m_image_size, ctx);
+  m_format->get_image_size(STONE_NOSNAP, &m_image_size, ctx);
 }
 
 template <typename I>
@@ -192,7 +192,7 @@ void OpenSourceImageRequest<I>::handle_get_snapshots(int r) {
                    << "snaps=" << snapc.snaps << "}" << dendl;
 
   // ensure data_ctx and data_io_context are pointing to correct snapshot
-  if (m_src_snap_id != CEPH_NOSNAP) {
+  if (m_src_snap_id != STONE_NOSNAP) {
     int r = src_image_ctx->snap_set(m_src_snap_id);
     if (r < 0) {
       src_image_ctx->image_lock.unlock();

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -23,7 +23,7 @@
 #include <iostream>
 #include <gtest/gtest.h>
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/common_init.h"
 #include "include/stringify.h"
 #include "include/Context.h"
@@ -36,7 +36,7 @@ class CrushWrapperTest : public ::testing::Test
 public:
   void SetUp() final
   {
-    CephInitParameters params(CEPH_ENTITY_TYPE_CLIENT);
+    StoneInitParameters params(STONE_ENTITY_TYPE_CLIENT);
     cct = common_preinit(params, CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
     cct->_conf.set_val("debug_crush", "0");
@@ -47,7 +47,7 @@ public:
     cct = nullptr;
   }
 protected:
-  CephContext *cct = nullptr;
+  StoneContext *cct = nullptr;
 };
 
 TEST_F(CrushWrapperTest, get_immediate_parent) {
@@ -1031,7 +1031,7 @@ TEST_F(CrushWrapperTest, choose_args_compat) {
   item = 2;
   c.insert_item(cct, item, weight, "osd.2", loc);
 
-  ceph_assert(c.add_simple_rule("rule1", "r11", "host", "",
+  stone_assert(c.add_simple_rule("rule1", "r11", "host", "",
 			   "firstn", pg_pool_t::TYPE_ERASURE) >= 0);
 
   int id = c.get_item_id("b1");
@@ -1041,7 +1041,7 @@ TEST_F(CrushWrapperTest, choose_args_compat) {
   weight_set.size = 1;
   weight_set.weights = &weights;
   int maxbuckets = c.get_max_buckets();
-  ceph_assert(maxbuckets > 0);
+  stone_assert(maxbuckets > 0);
   crush_choose_arg choose_args[maxbuckets];
   memset(choose_args, '\0', sizeof(crush_choose_arg) * maxbuckets);
   choose_args[-1-id].ids_size = 0;
@@ -1051,14 +1051,14 @@ TEST_F(CrushWrapperTest, choose_args_compat) {
   arg_map.size = c.get_max_buckets();
   arg_map.args = choose_args;
 
-  uint64_t features = CEPH_FEATURE_CRUSH_TUNABLES5|CEPH_FEATURE_INCARNATION_2;
+  uint64_t features = STONE_FEATURE_CRUSH_TUNABLES5|STONE_FEATURE_INCARNATION_2;
   int64_t caid = CrushWrapper::DEFAULT_CHOOSE_ARGS;
 
   // if the client is capable, encode choose_args
   {
     c.choose_args[caid] = arg_map;
     bufferlist bl;
-    c.encode(bl, features|CEPH_FEATURE_CRUSH_CHOOSE_ARGS);
+    c.encode(bl, features|STONE_FEATURE_CRUSH_CHOOSE_ARGS);
     auto i = bl.cbegin();
     CrushWrapper c_new;
     c_new.decode(i);
@@ -1103,7 +1103,7 @@ TEST_F(CrushWrapperTest, remove_root) {
   loc["root"] = "default";
   c.insert_item(cct, item, weight, "osd.2", loc);
 
-  ceph_assert(c.add_simple_rule("rule1", "r11", "host", "",
+  stone_assert(c.add_simple_rule("rule1", "r11", "host", "",
 			   "firstn", pg_pool_t::TYPE_ERASURE) >= 0);
   ASSERT_TRUE(c.name_exists("default"));
   ASSERT_TRUE(c.name_exists("r11"));

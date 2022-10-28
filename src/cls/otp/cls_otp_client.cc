@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -57,7 +57,7 @@ namespace rados {
         rados_op->exec("otp", "otp_remove", in);
       }
 
-      int OTP::check(CephContext *cct, librados::IoCtx& ioctx, const string& oid,
+      int OTP::check(StoneContext *cct, librados::IoCtx& ioctx, const string& oid,
                      const string& id, const string& val, otp_check_t *result) {
         cls_otp_check_otp_op op;
         op.id = id;
@@ -87,7 +87,7 @@ namespace rados {
         cls_otp_get_result_reply ret;
         try {
           decode(ret, iter);
-        } catch (ceph::buffer::error& err) {
+        } catch (stone::buffer::error& err) {
 	  return -EBADMSG;
         }
 
@@ -125,7 +125,7 @@ namespace rados {
         auto iter = out.cbegin();
         try {
           decode(ret, iter);
-        } catch (ceph::buffer::error& err) {
+        } catch (stone::buffer::error& err) {
 	  return -EBADMSG;
         }
 
@@ -158,7 +158,7 @@ namespace rados {
       }
 
       int OTP::get_current_time(librados::IoCtx& ioctx, const string& oid,
-                                ceph::real_time *result) {
+                                stone::real_time *result) {
         cls_otp_get_current_time_op op;
         bufferlist in;
         bufferlist out;
@@ -178,7 +178,7 @@ namespace rados {
         auto iter = out.cbegin();
         try {
           decode(ret, iter);
-        } catch (ceph::buffer::error& err) {
+        } catch (stone::buffer::error& err) {
 	  return -EBADMSG;
         }
 

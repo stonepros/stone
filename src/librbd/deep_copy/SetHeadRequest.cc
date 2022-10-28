@@ -10,7 +10,7 @@
 #include "librbd/image/AttachParentRequest.h"
 #include "librbd/image/DetachParentRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::deep_copy::SetHeadRequest: " \
                            << this << " " << __func__ << ": "
@@ -29,7 +29,7 @@ SetHeadRequest<I>::SetHeadRequest(I *image_ctx, uint64_t size,
   : m_image_ctx(image_ctx), m_size(size), m_parent_spec(spec),
     m_parent_overlap(parent_overlap), m_on_finish(on_finish),
     m_cct(image_ctx->cct) {
-  ceph_assert(m_parent_overlap <= m_size);
+  stone_assert(m_parent_overlap <= m_size);
 }
 
 template <typename I>
@@ -71,7 +71,7 @@ void SetHeadRequest<I>::send_set_size() {
     });
   librados::AioCompletion *comp = create_rados_callback(ctx);
   r = m_image_ctx->md_ctx.aio_operate(m_image_ctx->header_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 

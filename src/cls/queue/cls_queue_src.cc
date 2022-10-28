@@ -9,9 +9,9 @@
 #include "cls/queue/cls_queue_const.h"
 #include "cls/queue/cls_queue_src.h"
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
 
 int queue_write_head(cls_method_context_t hctx, cls_queue_head& head)
 {
@@ -32,7 +32,7 @@ int queue_write_head(cls_method_context_t hctx, cls_queue_head& head)
     return -EINVAL;
   }
 
-  int ret = cls_cxx_write2(hctx, 0, bl.length(), &bl, CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+  int ret = cls_cxx_write2(hctx, 0, bl.length(), &bl, STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
   if (ret < 0) {
     CLS_LOG(5, "ERROR: queue_write_head: failed to write head");
     return ret;
@@ -61,7 +61,7 @@ int queue_read_head(cls_method_context_t hctx, cls_queue_head& head)
   uint16_t queue_head_start;
   try {
     decode(queue_head_start, it);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     CLS_LOG(0, "ERROR: queue_read_head: failed to decode queue start: %s", err.what());
     return -EINVAL;
   }
@@ -73,7 +73,7 @@ int queue_read_head(cls_method_context_t hctx, cls_queue_head& head)
   uint64_t encoded_len;
   try {
     decode(encoded_len, it);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     CLS_LOG(0, "ERROR: queue_read_head: failed to decode encoded head size: %s", err.what());
     return -EINVAL;
   }
@@ -82,7 +82,7 @@ int queue_read_head(cls_method_context_t hctx, cls_queue_head& head)
     start_offset = chunk_size;
     chunk_size = (encoded_len - (chunk_size - QUEUE_ENTRY_OVERHEAD));
     bufferlist bl_remaining_head;
-    const auto ret = cls_cxx_read2(hctx, start_offset, chunk_size, &bl_remaining_head, CEPH_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
+    const auto ret = cls_cxx_read2(hctx, start_offset, chunk_size, &bl_remaining_head, STONE_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
     if (ret < 0) {
       CLS_LOG(5, "ERROR: queue_read_head: failed to read remaining part of head");
       return ret;
@@ -92,7 +92,7 @@ int queue_read_head(cls_method_context_t hctx, cls_queue_head& head)
 
   try {
     decode(head, it);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     CLS_LOG(0, "ERROR: queue_read_head: failed to decode head: %s", err.what());
     return -EINVAL;
   }
@@ -197,7 +197,7 @@ int queue_enqueue(cls_method_context_t hctx, cls_queue_enqueue_op& op, cls_queue
       if ((head.tail.offset + bl.length()) <= head.queue_size) {
         CLS_LOG(5, "INFO: queue_enqueue: Writing data size and data: offset: %s, size: %u", head.tail.to_str().c_str(), bl.length());
         //write data size and data at tail offset
-        auto ret = cls_cxx_write2(hctx, head.tail.offset, bl.length(), &bl, CEPH_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
+        auto ret = cls_cxx_write2(hctx, head.tail.offset, bl.length(), &bl, STONE_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
         if (ret < 0) {
           return ret;
         }
@@ -211,7 +211,7 @@ int queue_enqueue(cls_method_context_t hctx, cls_queue_enqueue_op& op, cls_queue
           bl.splice(0, size_before_wrap, &bl_data_before_wrap);
           //write spliced (data size and data) at tail offset
           CLS_LOG(5, "INFO: queue_enqueue: Writing spliced data at offset: %s and data size: %u", head.tail.to_str().c_str(), bl_data_before_wrap.length());
-          auto ret = cls_cxx_write2(hctx, head.tail.offset, bl_data_before_wrap.length(), &bl_data_before_wrap, CEPH_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
+          auto ret = cls_cxx_write2(hctx, head.tail.offset, bl_data_before_wrap.length(), &bl_data_before_wrap, STONE_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
           if (ret < 0) {
             return ret;
           }
@@ -219,7 +219,7 @@ int queue_enqueue(cls_method_context_t hctx, cls_queue_enqueue_op& op, cls_queue
           head.tail.gen += 1;
           //write remaining data at tail offset after wrapping around
           CLS_LOG(5, "INFO: queue_enqueue: Writing remaining data at offset: %s and data size: %u", head.tail.to_str().c_str(), bl.length());
-          ret = cls_cxx_write2(hctx, head.tail.offset, bl.length(), &bl, CEPH_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
+          ret = cls_cxx_write2(hctx, head.tail.offset, bl.length(), &bl, STONE_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
           if (ret < 0) {
             return ret;
           }
@@ -234,7 +234,7 @@ int queue_enqueue(cls_method_context_t hctx, cls_queue_enqueue_op& op, cls_queue
       if ((head.tail.offset + bl.length()) <= head.front.offset) {
         CLS_LOG(5, "INFO: queue_enqueue: Writing data size and data: offset: %s, size: %u", head.tail.to_str().c_str(), bl.length());
         //write data size and data at tail offset
-        auto ret = cls_cxx_write2(hctx, head.tail.offset, bl.length(), &bl, CEPH_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
+        auto ret = cls_cxx_write2(hctx, head.tail.offset, bl.length(), &bl, STONE_OSD_OP_FLAG_FADVISE_SEQUENTIAL);
         if (ret < 0) {
           return ret;
         }
@@ -342,7 +342,7 @@ int queue_list_entries(cls_method_context_t hctx, const cls_queue_list_op& op, c
     do {
       CLS_LOG(10, "INFO: queue_list_entries(): index: %u, size_to_process: %lu", index, size_to_process);
       cls_queue_entry entry;
-      ceph_assert(it.get_off() == index);
+      stone_assert(it.get_off() == index);
       //Use the last marker saved in previous iteration as the marker for this entry
       if (offset_populated) {
         entry.marker = last_marker;
@@ -359,7 +359,7 @@ int queue_list_entries(cls_method_context_t hctx, const cls_queue_list_op& op, c
           // Decode magic number at start
           try {
             decode(entry_start, it);
-          } catch (const ceph::buffer::error& err) {
+          } catch (const stone::buffer::error& err) {
             CLS_LOG(10, "ERROR: queue_list_entries: failed to decode entry start: %s", err.what());
             return -EINVAL;
           }
@@ -372,7 +372,7 @@ int queue_list_entries(cls_method_context_t hctx, const cls_queue_list_op& op, c
           // Decode data size
           try {
             decode(data_size, it);
-          } catch (const ceph::buffer::error& err) {
+          } catch (const stone::buffer::error& err) {
             CLS_LOG(10, "ERROR: queue_list_entries: failed to decode data size: %s", err.what());
             return -EINVAL;
           }

@@ -20,8 +20,8 @@ extern "C" {
 #include "kmip_memset.h"
 };
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 static enum kmip_version protocol_version = KMIP_1_0;
 
@@ -79,7 +79,7 @@ kmip_free_handle_stuff(RGWKmipHandle *kmip)
 
 class RGWKmipHandleBuilder {
 private:
-  CephContext *cct;
+  StoneContext *cct;
   const char *clientcert = 0;
   const char *clientkey = 0;
   const char *capath = 0;
@@ -88,7 +88,7 @@ private:
   const char *username = 0;
   const char *password = 0;
 public:
-  RGWKmipHandleBuilder(CephContext *cct) : cct(cct) {};
+  RGWKmipHandleBuilder(StoneContext *cct) : cct(cct) {};
   RGWKmipHandleBuilder& set_clientcert(const std::string &v) {
     const char *s = v.c_str();
     if (*s) {
@@ -137,14 +137,14 @@ public:
 
 static int
 kmip_write_an_error_helper(const char *s, size_t l, void *u) {
-  CephContext *cct = (CephContext *)u;
+  StoneContext *cct = (StoneContext *)u;
   std::string_view es(s, l);
   lderr(cct) << es << dendl;
   return l;
 }
 
 void
-ERR_print_errors_ceph(CephContext *cct)
+ERR_print_errors_stone(StoneContext *cct)
 {
   ERR_print_errors_cb(kmip_write_an_error_helper, cct);
 }
@@ -164,7 +164,7 @@ RGWKmipHandleBuilder::build() const
   else if (SSL_CTX_use_certificate_file(r->ctx, clientcert, SSL_FILETYPE_PEM) != 1) {
     lderr(cct) << "ERROR: can't load client cert from "
       << clientcert << dendl;
-    ERR_print_errors_ceph(cct);
+    ERR_print_errors_stone(cct);
     goto Done;
   }
 
@@ -174,7 +174,7 @@ RGWKmipHandleBuilder::build() const
       SSL_FILETYPE_PEM) != 1) {
     lderr(cct) << "ERROR: can't load client key from "
       << clientkey << dendl;
-    ERR_print_errors_ceph(cct);
+    ERR_print_errors_stone(cct);
     goto Done;
   }
 
@@ -183,7 +183,7 @@ RGWKmipHandleBuilder::build() const
   else if (SSL_CTX_load_verify_locations(r->ctx, capath, NULL) != 1) {
     lderr(cct) << "ERROR: can't load cacert from "
       << capath << dendl;
-    ERR_print_errors_ceph(cct);
+    ERR_print_errors_stone(cct);
     goto Done;
   }
   r->bio = BIO_new_ssl_connect(r->ctx);
@@ -199,7 +199,7 @@ RGWKmipHandleBuilder::build() const
   if (BIO_do_connect(r->bio) != 1) {
     lderr(cct) << "BIO_do_connect failed to " << host
       << ":" << portstring << dendl;
-    ERR_print_errors_ceph(cct);
+    ERR_print_errors_stone(cct);
     goto Done;
   }
 
@@ -256,13 +256,13 @@ Done:
 }
 
 struct RGWKmipHandles : public Thread {
-  CephContext *cct;
-  ceph::mutex cleaner_lock = ceph::make_mutex("RGWKmipHandles::cleaner_lock");
+  StoneContext *cct;
+  stone::mutex cleaner_lock = stone::make_mutex("RGWKmipHandles::cleaner_lock");
   std::vector<RGWKmipHandle*> saved_kmip;
   int cleaner_shutdown;
   bool cleaner_active = false;
-  ceph::condition_variable cleaner_cond;
-  RGWKmipHandles(CephContext *cct) :
+  stone::condition_variable cleaner_cond;
+  RGWKmipHandles(StoneContext *cct) :
     cct(cct), cleaner_shutdown{0} {
   }
   RGWKmipHandle* get_kmip_handle();

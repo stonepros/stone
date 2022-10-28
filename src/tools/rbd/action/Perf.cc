@@ -5,8 +5,8 @@
 #include "tools/rbd/Shell.h"
 #include "tools/rbd/Utils.h"
 #include "include/stringify.h"
-#include "common/ceph_context.h"
-#include "common/ceph_json.h"
+#include "common/stone_context.h"
+#include "common/stone_json.h"
 #include "common/errno.h"
 #include "common/Formatter.h"
 #include "common/TextTable.h"
@@ -126,7 +126,7 @@ int query_iostats(librados::Rados& rados, const std::string& pool_spec,
   if (r == -EOPNOTSUPP) {
     err_os << "rbd: 'rbd_support' mgr module is not enabled."
            << std::endl << std::endl
-           << "Use 'ceph mgr module enable rbd_support' to enable."
+           << "Use 'stone mgr module enable rbd_support' to enable."
            << std::endl;
     return r;
   } else if (r < 0) {
@@ -235,7 +235,7 @@ void format_stat(StatDescriptor stat_descriptor, double stat,
     }
     break;
   default:
-    ceph_assert(false);
+    stone_assert(false);
     break;
   }
 }
@@ -290,7 +290,7 @@ void format(const ImageStats& image_stats, Formatter* f, bool global_search) {
         title = "RD_LAT ";
         break;
       default:
-        ceph_assert(false);
+        stone_assert(false);
         break;
       }
       tbl.define_column(title, TextTable::RIGHT, TextTable::RIGHT);
@@ -439,7 +439,7 @@ private:
         title = "READ LAT";
         break;
       default:
-        ceph_assert(false);
+        stone_assert(false);
         break;
       }
       m_columns[pair.first] = (title);
@@ -580,7 +580,7 @@ void get_arguments_iostat(po::options_description *positional,
 }
 
 int execute_iostat(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   std::string pool;
   std::string pool_namespace;
   size_t arg_index = 0;
@@ -663,7 +663,7 @@ void get_arguments_iotop(po::options_description *positional,
 }
 
 int execute_iotop(const po::variables_map &vm,
-                  const std::vector<std::string> &ceph_global_init_args) {
+                  const std::vector<std::string> &stone_global_init_args) {
   std::string pool;
   std::string pool_namespace;
   size_t arg_index = 0;

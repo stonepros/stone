@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -21,8 +21,8 @@
 
 #include <boost/optional.hpp>
 
-#ifndef CEPH_COMMON_CONVENIENCE_H
-#define CEPH_COMMON_CONVENIENCE_H
+#ifndef STONE_COMMON_CONVENIENCE_H
+#define STONE_COMMON_CONVENIENCE_H
 
 namespace ceph {
 // boost::optional is wonderful! Unfortunately it lacks a function for
@@ -132,4 +132,4 @@ inline void for_each(std::tuple<Ts...>& t, F& f) {
   _convenience::for_each_helper(t, f, std::index_sequence_for<Ts...>{});
 }
 }
-#endif // CEPH_COMMON_CONVENIENCE_H
+#endif // STONE_COMMON_CONVENIENCE_H

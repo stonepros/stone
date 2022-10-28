@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -17,7 +17,7 @@
 #include "common/errno.h"
 #include "EventKqueue.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 
 #undef dout_prefix
 #define dout_prefix *_dout << "KqueueDriver."
@@ -73,7 +73,7 @@ int KqueueDriver::test_thread_change(const char* funcname) {
   } else if ((kqfd != -1) && (test_kqfd() < 0)) {
     // should this ever happen?
     // It would be strange to change kqfd with thread change.
-    // Might nee to change this into an ceph_assert() in the future.
+    // Might nee to change this into an stone_assert() in the future.
     ldout(cct,0) << funcname << " Warning: Recreating old kqfd. "
                  << "This should not happen!!!"  << dendl;
     kqfd = -1;
@@ -203,7 +203,7 @@ int KqueueDriver::resize_events(int newsize)
     if (!sav_events) {
       lderr(cct) << __func__ << " unable to realloc memory: "
                              << cpp_strerror(errno) << dendl;
-      ceph_assert(sav_events);
+      stone_assert(sav_events);
       return -ENOMEM;
     }
     memset(&sav_events[size], 0, sizeof(struct SaveEvent)*(newsize-sav_max));

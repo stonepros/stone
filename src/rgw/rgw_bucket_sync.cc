@@ -8,7 +8,7 @@
 #include "services/svc_zone.h"
 #include "services/svc_bucket_sync.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 ostream& operator<<(ostream& os, const rgw_sync_bucket_entity& e) {
@@ -55,7 +55,7 @@ static bool is_wildcard_bucket(const rgw_bucket& bucket)
   return bucket.name.empty();
 }
 
-void rgw_sync_group_pipe_map::dump(ceph::Formatter *f) const
+void rgw_sync_group_pipe_map::dump(stone::Formatter *f) const
 {
   encode_json("zone", zone.id, f);
   encode_json("buckets", rgw_sync_bucket_entities::bucket_key(bucket), f);
@@ -141,7 +141,7 @@ pair<zb_pipe_map_t::const_iterator, zb_pipe_map_t::const_iterator> rgw_sync_grou
 
 
 template <typename CB>
-void rgw_sync_group_pipe_map::init(CephContext *cct,
+void rgw_sync_group_pipe_map::init(StoneContext *cct,
                                    const rgw_zone_id& _zone,
                                    std::optional<rgw_bucket> _bucket,
                                    const rgw_sync_policy_group& group,
@@ -474,7 +474,7 @@ void RGWBucketSyncFlowManager::pipe_set::insert(const rgw_sync_bucket_pipe& pipe
   handlers.insert(h);
 }
 
-void RGWBucketSyncFlowManager::pipe_set::dump(ceph::Formatter *f) const
+void RGWBucketSyncFlowManager::pipe_set::dump(stone::Formatter *f) const
 {
   encode_json("pipes", pipe_map, f);
 }
@@ -602,7 +602,7 @@ void RGWBucketSyncFlowManager::reflect(std::optional<rgw_bucket> effective_bucke
 }
 
 
-RGWBucketSyncFlowManager::RGWBucketSyncFlowManager(CephContext *_cct,
+RGWBucketSyncFlowManager::RGWBucketSyncFlowManager(StoneContext *_cct,
                                                    const rgw_zone_id& _zone_id,
                                                    std::optional<rgw_bucket> _bucket,
                                                    const RGWBucketSyncFlowManager *_parent) : cct(_cct),

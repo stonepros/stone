@@ -3,7 +3,7 @@
 # not "lib64" (even on 64-bit platforms).
 set(ocf_dir ${CMAKE_INSTALL_PREFIX}/lib/ocf)
 
-# The ceph provider directory
+# The stone provider directory
 set(ra_dir ${ocf_dir}/resource.d/${PROJECT_NAME})
 
 configure_file(rbd.in rbd @ONLY)

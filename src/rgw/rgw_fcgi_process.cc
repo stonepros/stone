@@ -13,7 +13,7 @@
 #include "rgw_client_io.h"
 #include "rgw_client_io_filters.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 void RGWFCGXProcess::run()
 {

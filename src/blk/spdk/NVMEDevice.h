@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
   *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_BLK_NVMEDEVICE
-#define CEPH_BLK_NVMEDEVICE
+#ifndef STONE_BLK_NVMEDEVICE
+#define STONE_BLK_NVMEDEVICE
 
 #include <queue>
 #include <map>
@@ -51,7 +51,7 @@ class NVMEDevice : public BlockDevice {
   std::atomic_int queue_number = {0};
   SharedDriverData *get_driver() { return driver; }
 
-  NVMEDevice(CephContext* cct, aio_callback_t cb, void *cbpriv);
+  NVMEDevice(StoneeContext* cct, aio_callback_t cb, void *cbpriv);
 
   bool supported_bdev_label() override { return false; }
 

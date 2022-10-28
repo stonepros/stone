@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_LOGCLIENT_H
-#define CEPH_LOGCLIENT_H
+#ifndef STONE_LOGCLIENT_H
+#define STONE_LOGCLIENT_H
 
 #include <atomic>
 #include "common/LogEntry.h"
@@ -39,7 +39,7 @@ namespace logging {
 }
 }
 
-int parse_log_client_options(CephContext *cct,
+int parse_log_client_options(StoneeContext *cct,
 			     std::map<std::string,std::string> &log_to_monitors,
 			     std::map<std::string,std::string> &log_to_syslog,
 			     std::map<std::string,std::string> &log_channels,
@@ -63,8 +63,8 @@ class LogChannel : public OstreamTemp::OstreamTempSink
 {
 public:
 
-  LogChannel(CephContext *cct, LogClient *lc, const std::string &channel);
-  LogChannel(CephContext *cct, LogClient *lc,
+  LogChannel(StoneeContext *cct, LogClient *lc, const std::string &channel);
+  LogChannel(StoneeContext *cct, LogClient *lc,
              const std::string &channel,
              const std::string &facility,
              const std::string &prio);
@@ -171,7 +171,7 @@ public:
   void do_log(clog_type prio, const std::string& s);
 
 private:
-  CephContext *cct;
+  StoneeContext *cct;
   LogClient *parent;
   ceph::mutex channel_lock = ceph::make_mutex("LogChannel::channel_lock");
   std::string log_channel;
@@ -193,7 +193,7 @@ public:
     FLAG_MON = 0x1,
   };
 
-  LogClient(CephContext *cct, Messenger *m, MonMap *mm,
+  LogClient(StoneeContext *cct, Messenger *m, MonMap *mm,
 	    enum logclient_flag_t flags);
   virtual ~LogClient() {
     channels.clear();
@@ -238,7 +238,7 @@ private:
   ceph::ref_t<Message> _get_mon_log_message();
   void _send_to_mon();
 
-  CephContext *cct;
+  StoneeContext *cct;
   Messenger *messenger;
   MonMap *monmap;
   bool is_mon;

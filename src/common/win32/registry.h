@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2019 SUSE LINUX GmbH
  *
@@ -16,10 +16,10 @@
 
 class RegistryKey {
 public:
-  RegistryKey(CephContext *cct_, HKEY hRootKey, LPCTSTR strKey, bool create_value);
+  RegistryKey(StoneeContext *cct_, HKEY hRootKey, LPCTSTR strKey, bool create_value);
   ~RegistryKey();
 
-  static remove(CephContext *cct_, HKEY hRootKey, LPCTSTR strKey);
+  static remove(StoneeContext *cct_, HKEY hRootKey, LPCTSTR strKey);
 
   int flush();
 
@@ -34,5 +34,5 @@ public:
   bool missingKey = false;
 
 private:
-  CephContext *cct;
+  StoneeContext *cct;
 };

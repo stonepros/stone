@@ -13,7 +13,7 @@
 #include <regex>
 #include <algorithm>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 void set_event_id(std::string& id, const std::string& hash, const utime_t& ts) {
   char buf[64];
@@ -336,7 +336,7 @@ void encode_json(const char *name, const rgw::notify::EventTypeList& l, Formatte
 {
   f->open_array_section(name);
   for (auto iter = l.cbegin(); iter != l.cend(); ++iter) {
-    f->dump_string("obj", rgw::notify::to_ceph_string(*iter));
+    f->dump_string("obj", rgw::notify::to_stone_string(*iter));
   }
   f->close_section();
 }

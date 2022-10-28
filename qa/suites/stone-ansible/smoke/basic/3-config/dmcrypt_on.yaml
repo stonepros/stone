@@ -1,0 +1,7 @@
+meta:
+- desc: "use dmcrypt option"
+
+overrides:
+   stone_ansible:
+     vars:
+        dmcrypt: True

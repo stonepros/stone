@@ -39,7 +39,7 @@ target_link_libraries(rbd_test_mock PUBLIC
   GMock::GMock)
 
 # unittest_librbd
-# doesn't use add_ceph_test because it is called by run-rbd-unit-tests.sh
+# doesn't use add_stone_test because it is called by run-rbd-unit-tests.sh
 set(unittest_librbd_srcs
   test_main.cc
   test_mock_fixture.cc
@@ -172,9 +172,9 @@ target_link_libraries(unittest_librbd
   rbd_types
   rados_test_stub
   librados
-  ceph_immutable_object_cache_lib
+  stone_immutable_object_cache_lib
   osdc
-  ceph-common
+  stone-common
   global
   OpenSSL::SSL
   ${UNITTEST_LIBS})
@@ -184,10 +184,10 @@ if(WITH_RBD_RWL OR WITH_RBD_SSD_CACHE)
     librbd_plugin_pwl_cache)
 endif()
 
-add_executable(ceph_test_librbd
+add_executable(stone_test_librbd
   test_main.cc
   $<TARGET_OBJECTS:common_texttable_obj>)
-target_link_libraries(ceph_test_librbd
+target_link_libraries(stone_test_librbd
   rbd_test
   rbd_api
   rbd_internal
@@ -199,13 +199,13 @@ target_link_libraries(ceph_test_librbd
   librados
   ${UNITTEST_LIBS}
   radostest)
-target_compile_definitions(ceph_test_librbd PRIVATE "TEST_LIBRBD_INTERNALS")
+target_compile_definitions(stone_test_librbd PRIVATE "TEST_LIBRBD_INTERNALS")
 
-add_executable(ceph_test_librbd_fsx
+add_executable(stone_test_librbd_fsx
   fsx.cc
   $<TARGET_OBJECTS:common_texttable_obj>
   )
-target_link_libraries(ceph_test_librbd_fsx
+target_link_libraries(stone_test_librbd_fsx
   librbd
   librados
   journal
@@ -216,13 +216,13 @@ target_link_libraries(ceph_test_librbd_fsx
   ${EXTRALIBS}
   )
 if(WITH_KRBD)
-  target_link_libraries(ceph_test_librbd_fsx
+  target_link_libraries(stone_test_librbd_fsx
     krbd)
 endif()
 install(TARGETS
-  ceph_test_librbd_fsx
+  stone_test_librbd_fsx
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(TARGETS
-  ceph_test_librbd
+  stone_test_librbd
   DESTINATION ${CMAKE_INSTALL_BINDIR})

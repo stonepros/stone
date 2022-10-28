@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -16,7 +16,7 @@
  * Test Ioctx::operate
  */
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
 #include "common/config.h"
 #include "global/global_init.h"
@@ -43,22 +43,22 @@ int main(int argc, const char **argv)
   int ret = 0;
   vector<const char*> args;
   argv_to_vec(argc, argv, args);
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   string val;
-  string oid("ceph_test_object");
+  string oid("stone_test_object");
   string pool_name("test_pool");
   for (std::vector<const char*>::iterator i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_double_dash(args, i)) {
+    if (stone_argparse_double_dash(args, i)) {
       break;
     }
-    else if (ceph_argparse_witharg(args, i, &val, "--oid", "-o", (char*)NULL)) {
+    else if (stone_argparse_witharg(args, i, &val, "--oid", "-o", (char*)NULL)) {
       oid = val;
     }
-    else if (ceph_argparse_witharg(args, i, &val, "--pool", "-p", (char*)NULL)) {
+    else if (stone_argparse_witharg(args, i, &val, "--pool", "-p", (char*)NULL)) {
       pool_name = val;
     }
     else {
@@ -70,7 +70,7 @@ int main(int argc, const char **argv)
   }
 
   Rados rados;
-  if (rados.init_with_context(g_ceph_context) < 0) {
+  if (rados.init_with_context(g_stone_context) < 0) {
      cerr << "couldn't initialize rados!" << std::endl;
      return 1;
   }

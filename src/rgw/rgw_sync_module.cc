@@ -15,7 +15,7 @@
 
 #include <boost/asio/yield.hpp>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 RGWMetadataHandler *RGWSyncModuleInstance::alloc_bucket_meta_handler()
 {

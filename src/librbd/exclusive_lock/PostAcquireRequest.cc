@@ -18,7 +18,7 @@
 #include "librbd/journal/Policy.h"
 #include "librbd/PluginRegistry.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::exclusive_lock::PostAcquireRequest: " \
                            << this << " " << __func__ << ": "
@@ -66,7 +66,7 @@ void PostAcquireRequest<I>::send_refresh() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PostAcquireRequest<I>;
@@ -82,7 +82,7 @@ void PostAcquireRequest<I>::send_refresh() {
 
 template <typename I>
 void PostAcquireRequest<I>::handle_refresh(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r == -ERESTART) {
@@ -119,7 +119,7 @@ void PostAcquireRequest<I>::send_open_journal() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PostAcquireRequest<I>;
@@ -135,7 +135,7 @@ void PostAcquireRequest<I>::send_open_journal() {
 
 template <typename I>
 void PostAcquireRequest<I>::handle_open_journal(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   save_result(r);
@@ -150,7 +150,7 @@ void PostAcquireRequest<I>::handle_open_journal(int r) {
 
 template <typename I>
 void PostAcquireRequest<I>::send_allocate_journal_tag() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   std::shared_lock image_locker{m_image_ctx.image_lock};
@@ -162,7 +162,7 @@ void PostAcquireRequest<I>::send_allocate_journal_tag() {
 
 template <typename I>
 void PostAcquireRequest<I>::handle_allocate_journal_tag(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   save_result(r);
@@ -178,7 +178,7 @@ void PostAcquireRequest<I>::handle_allocate_journal_tag(int r) {
 
 template <typename I>
 void PostAcquireRequest<I>::send_process_plugin_acquire_lock() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PostAcquireRequest<I>;
@@ -189,7 +189,7 @@ void PostAcquireRequest<I>::send_process_plugin_acquire_lock() {
 
 template <typename I>
 void PostAcquireRequest<I>::handle_process_plugin_acquire_lock(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   save_result(r);
@@ -205,7 +205,7 @@ void PostAcquireRequest<I>::handle_process_plugin_acquire_lock(int r) {
 
 template <typename I>
 void PostAcquireRequest<I>::send_process_plugin_release_lock() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PostAcquireRequest<I>;
@@ -216,7 +216,7 @@ void PostAcquireRequest<I>::send_process_plugin_release_lock() {
 
 template <typename I>
 void PostAcquireRequest<I>::handle_process_plugin_release_lock(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   save_result(r);
@@ -234,7 +234,7 @@ void PostAcquireRequest<I>::send_close_journal() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PostAcquireRequest<I>;
@@ -245,7 +245,7 @@ void PostAcquireRequest<I>::send_close_journal() {
 
 template <typename I>
 void PostAcquireRequest<I>::handle_close_journal(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   save_result(r);
@@ -263,20 +263,20 @@ void PostAcquireRequest<I>::send_open_object_map() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PostAcquireRequest<I>;
   Context *ctx = create_context_callback<klass, &klass::handle_open_object_map>(
     this);
 
-  m_object_map = m_image_ctx.create_object_map(CEPH_NOSNAP);
+  m_object_map = m_image_ctx.create_object_map(STONE_NOSNAP);
   m_object_map->open(ctx);
 }
 
 template <typename I>
 void PostAcquireRequest<I>::handle_open_object_map(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -303,7 +303,7 @@ void PostAcquireRequest<I>::send_close_object_map() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PostAcquireRequest<I>;
@@ -314,7 +314,7 @@ void PostAcquireRequest<I>::send_close_object_map() {
 
 template <typename I>
 void PostAcquireRequest<I>::handle_close_object_map(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -329,10 +329,10 @@ template <typename I>
 void PostAcquireRequest<I>::apply() {
   {
     std::unique_lock image_locker{m_image_ctx.image_lock};
-    ceph_assert(m_image_ctx.object_map == nullptr);
+    stone_assert(m_image_ctx.object_map == nullptr);
     m_image_ctx.object_map = m_object_map;
 
-    ceph_assert(m_image_ctx.journal == nullptr);
+    stone_assert(m_image_ctx.journal == nullptr);
     m_image_ctx.journal = m_journal;
   }
 
@@ -353,7 +353,7 @@ void PostAcquireRequest<I>::revert() {
     m_journal->put();
   }
 
-  ceph_assert(m_error_result < 0);
+  stone_assert(m_error_result < 0);
 }
 
 template <typename I>

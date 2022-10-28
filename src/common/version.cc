@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -17,43 +17,43 @@
 #include <stdlib.h>
 #include <sstream>
 
-#include "ceph_ver.h"
-#include "common/ceph_strings.h"
+#include "stone_ver.h"
+#include "common/stone_strings.h"
 
 #define _STR(x) #x
 #define STRINGIFY(x) _STR(x)
 
-const char *ceph_version_to_str()
+const char *stone_version_to_str()
 {
-  char* debug_version_for_testing = getenv("ceph_debug_version_for_testing");
+  char* debug_version_for_testing = getenv("stone_debug_version_for_testing");
   if (debug_version_for_testing) {
     return debug_version_for_testing;
   } else {
-    return CEPH_GIT_NICE_VER;
+    return STONE_GIT_NICE_VER;
   }
 }
 
-const char *ceph_release_to_str(void)
+const char *stone_release_to_str(void)
 {
-  return ceph_release_name(CEPH_RELEASE);
+  return stone_release_name(STONE_RELEASE);
 }
 
 const char *git_version_to_str(void)
 {
-  return STRINGIFY(CEPH_GIT_VER);
+  return STRINGIFY(STONE_GIT_VER);
 }
 
 std::string const pretty_version_to_str(void)
 {
   std::ostringstream oss;
-  oss << "ceph version " << CEPH_GIT_NICE_VER
-      << " (" << STRINGIFY(CEPH_GIT_VER) << ") "
-      << ceph_release_name(CEPH_RELEASE)
-      << " (" << CEPH_RELEASE_TYPE << ")";
+  oss << "stone version " << STONE_GIT_NICE_VER
+      << " (" << STRINGIFY(STONE_GIT_VER) << ") "
+      << stone_release_name(STONE_RELEASE)
+      << " (" << STONE_RELEASE_TYPE << ")";
   return oss.str();
 }
 
-const char *ceph_release_type(void)
+const char *stone_release_type(void)
 {
-  return CEPH_RELEASE_TYPE;
+  return STONE_RELEASE_TYPE;
 }

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -14,7 +14,7 @@
 #include "rgw/rgw_rados.h"
 #include "rgw/rgw_http_client.h"
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include <curl/curl.h>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/write.hpp>
@@ -43,7 +43,7 @@ TEST(HTTPManager, ReadTruncated)
   }};
   const auto url = std::string{"http://127.0.0.1:"} + std::to_string(acceptor.local_endpoint().port());
 
-  RGWHTTPClient client{g_ceph_context, "GET", url};
+  RGWHTTPClient client{g_stone_context, "GET", url};
   EXPECT_EQ(-EAGAIN, RGWHTTP::process(&client, null_yield));
 
   server.join();
@@ -51,7 +51,7 @@ TEST(HTTPManager, ReadTruncated)
 
 TEST(HTTPManager, SignalThread)
 {
-  auto cct = g_ceph_context;
+  auto cct = g_stone_context;
   RGWHTTPManager http(cct);
 
   ASSERT_EQ(0, http.start());
@@ -79,10 +79,10 @@ int main(int argc, char** argv)
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   rgw_http_client_init(cct->get());
   rgw_setup_saved_curl_handles();

@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 {
   if (argc != 2) {
     cout << "Syntax: "
-         << "ceph_test_log_rss_usage <process name>"
+         << "stone_test_log_rss_usage <process name>"
          << endl;
     exit(EINVAL);
   }

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 
-#ifndef CEPH_RGW_ACL_SWIFT_H
-#define CEPH_RGW_ACL_SWIFT_H
+#ifndef STONE_RGW_ACL_SWIFT_H
+#define STONE_RGW_ACL_SWIFT_H
 
 #include <map>
 #include <vector>

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/errno.h"
 #include "include/rados/librados.hpp"
 #include "include/stringify.h"
@@ -154,9 +154,9 @@ int MirrorDaemonServiceInfo::get_mirror_service_dump() {
         mirror_service.client_id = client_id.get_str();
       }
 
-      auto& ceph_version = metadata["ceph_version_short"];
-      if (!ceph_version.is_null()) {
-        mirror_service.ceph_version = ceph_version.get_str();
+      auto& stone_version = metadata["stone_version_short"];
+      if (!stone_version.is_null()) {
+        mirror_service.stone_version = stone_version.get_str();
       }
 
       auto& hostname = metadata["hostname"];

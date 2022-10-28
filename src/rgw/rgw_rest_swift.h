@@ -288,9 +288,9 @@ class RGWFormPost::SignatureHelper
 {
 private:
   static constexpr uint32_t output_size =
-    CEPH_CRYPTO_HMACSHA1_DIGESTSIZE * 2 + 1;
+    STONE_CRYPTO_HMACSHA1_DIGESTSIZE * 2 + 1;
 
-  unsigned char dest[CEPH_CRYPTO_HMACSHA1_DIGESTSIZE]; // 20
+  unsigned char dest[STONE_CRYPTO_HMACSHA1_DIGESTSIZE]; // 20
   char dest_str[output_size];
 
 public:

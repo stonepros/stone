@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MDS_EOPEN_H
-#define CEPH_MDS_EOPEN_H
+#ifndef STONE_MDS_EOPEN_H
+#define STONE_MDS_EOPEN_H
 
 #include "../LogEvent.h"
 #include "EMetaBlob.h"
@@ -38,7 +38,7 @@ public:
     if (!in->is_base()) {
       metablob.add_dir_context(in->get_projected_parent_dn()->get_dir());
       metablob.add_primary_dentry(in->get_projected_parent_dn(), 0, false);
-      if (in->last == CEPH_NOSNAP)
+      if (in->last == STONE_NOSNAP)
 	inos.push_back(in->ino());
       else
 	snap_inos.push_back(in->vino());

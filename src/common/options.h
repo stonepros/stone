@@ -168,7 +168,7 @@ struct Option {
   // Items like mon, osd, rgw, rbd, ceph-fuse.  This is advisory metadata
   // for presentation layers (like web dashboards, or generated docs), so that
   // they know which options to display where.
-  // Additionally: "common" for settings that exist in any Ceph code.  Do
+  // Additionally: "common" for settings that exist in any Stonee code.  Do
   // not use common for settings that are just shared some places: for those
   // places, list them.
   std::vector<const char*> services;

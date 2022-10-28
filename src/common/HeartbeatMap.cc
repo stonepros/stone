@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 Sage Weil <sage@newdream.net>
  *
@@ -16,12 +16,12 @@
 #include <signal.h>
 
 #include "HeartbeatMap.h"
-#include "ceph_context.h"
+#include "stone_context.h"
 #include "common/errno.h"
 #include "common/valgrind.h"
 #include "debug.h"
 
-#define dout_subsys ceph_subsys_heartbeatmap
+#define dout_subsys stone_subsys_heartbeatmap
 #undef dout_prefix
 #define dout_prefix *_dout << "heartbeat_map "
 
@@ -29,9 +29,9 @@ using std::chrono::duration_cast;
 using std::chrono::seconds;
 using std::string;
 
-namespace ceph {
+namespace stone {
 
-HeartbeatMap::HeartbeatMap(CephContext *cct)
+HeartbeatMap::HeartbeatMap(StoneContext *cct)
   : m_cct(cct),
     m_unhealthy_workers(0),
     m_total_workers(0)
@@ -40,7 +40,7 @@ HeartbeatMap::HeartbeatMap(CephContext *cct)
 
 HeartbeatMap::~HeartbeatMap()
 {
-  ceph_assert(m_workers.empty());
+  stone_assert(m_workers.empty());
 }
 
 heartbeat_handle_d *HeartbeatMap::add_worker(const string& name, pthread_t thread_id)
@@ -67,7 +67,7 @@ void HeartbeatMap::remove_worker(const heartbeat_handle_d *h)
 }
 
 bool HeartbeatMap::_check(const heartbeat_handle_d *h, const char *who,
-			  ceph::coarse_mono_time now)
+			  stone::coarse_mono_time now)
 {
   bool healthy = true;
   if (auto was = h->timeout.load(std::memory_order_relaxed);
@@ -82,14 +82,14 @@ bool HeartbeatMap::_check(const heartbeat_handle_d *h, const char *who,
 		    << " had suicide timed out after " << h->suicide_grace << dendl;
     pthread_kill(h->thread_id, SIGABRT);
     sleep(1);
-    ceph_abort_msg("hit suicide timeout");
+    stone_abort_msg("hit suicide timeout");
   }
   return healthy;
 }
 
 void HeartbeatMap::reset_timeout(heartbeat_handle_d *h,
-				 ceph::timespan grace,
-				 ceph::timespan suicide_grace)
+				 stone::timespan grace,
+				 stone::timespan suicide_grace)
 {
   ldout(m_cct, 20) << "reset_timeout '" << h->name << "' grace " << grace
 		   << " suicide " << suicide_grace << dendl;
@@ -99,7 +99,7 @@ void HeartbeatMap::reset_timeout(heartbeat_handle_d *h,
   h->timeout.store(now + grace, std::memory_order_relaxed);
   h->grace = grace;
 
-  if (suicide_grace > ceph::timespan::zero()) {
+  if (suicide_grace > stone::timespan::zero()) {
     h->suicide_timeout.store(now + suicide_grace, std::memory_order_relaxed);
   } else {
     h->suicide_timeout.store(clock::zero(), std::memory_order_relaxed);
@@ -121,7 +121,7 @@ bool HeartbeatMap::is_healthy()
   int unhealthy = 0;
   int total = 0;
   m_rwlock.lock_shared();
-  auto now = ceph::coarse_mono_clock::now();
+  auto now = stone::coarse_mono_clock::now();
   if (m_cct->_conf->heartbeat_inject_failure) {
     ldout(m_cct, 0) << "is_healthy injecting failure for next " << m_cct->_conf->heartbeat_inject_failure << " seconds" << dendl;
     m_inject_unhealthy_until = now + std::chrono::seconds(m_cct->_conf->heartbeat_inject_failure);

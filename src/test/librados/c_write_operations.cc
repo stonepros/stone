@@ -146,7 +146,7 @@ TEST(LibRadosCWriteOps, Write) {
   //create write op with iohint
   op = rados_create_write_op();
   ASSERT_TRUE(op);
-  rados_write_op_write_full(op, "ceph", 4);
+  rados_write_op_write_full(op, "stone", 4);
   rados_write_op_set_flags(op, LIBRADOS_OP_FLAG_FADVISE_NOCACHE);
   ASSERT_EQ(0, rados_write_op_operate(op, ioctx, "test", NULL, 0));
   ASSERT_EQ(4, rados_read(ioctx, "test", hi, 4, 0));

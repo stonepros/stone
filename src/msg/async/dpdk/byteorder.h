@@ -20,8 +20,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_MSG_BYTEORDER_H_
-#define CEPH_MSG_BYTEORDER_H_
+#ifndef STONE_MSG_BYTEORDER_H_
+#define STONE_MSG_BYTEORDER_H_
 
 #include <arpa/inet.h>  // for ntohs() and friends
 #include <iosfwd>
@@ -55,4 +55,4 @@ inline int32_t hton(int32_t x) { return htonl(x); }
 inline int64_t ntoh(int64_t x) { return ntohq(x); }
 inline int64_t hton(int64_t x) { return htonq(x); }
 
-#endif /* CEPH_MSG_BYTEORDER_H_ */
+#endif /* STONE_MSG_BYTEORDER_H_ */

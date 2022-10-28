@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc.
  *
@@ -14,7 +14,7 @@
 #include "librados/librados_asio.h"
 #include <gtest/gtest.h>
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
 #include "common/errno.h"
 #include "global/global_init.h"
@@ -25,12 +25,12 @@
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/use_future.hpp>
 
-#define dout_subsys ceph_subsys_rados
-#define dout_context g_ceph_context
+#define dout_subsys stone_subsys_rados
+#define dout_context g_stone_context
 
 // test fixture for global setup/teardown
 class AsioRados : public ::testing::Test {
-  static constexpr auto poolname = "ceph_test_rados_api_asio";
+  static constexpr auto poolname = "stone_test_rados_api_asio";
 
  protected:
   static librados::Rados rados;
@@ -42,7 +42,7 @@ class AsioRados : public ::testing::Test {
 
  public:
   static void SetUpTestCase() {
-    ASSERT_EQ(0, rados.init_with_context(g_ceph_context));
+    ASSERT_EQ(0, rados.init_with_context(g_stone_context));
     ASSERT_EQ(0, rados.connect());
     // open/create test pool
     int r = rados.ioctx_create(poolname, io);
@@ -360,7 +360,7 @@ int main(int argc, char **argv)
   argv_to_vec(argc, (const char **)argv, args);
   env_to_vec(args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY, 0);
   common_init_finish(cct.get());
 

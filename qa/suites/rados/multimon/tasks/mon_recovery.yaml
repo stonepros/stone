@@ -1,6 +1,6 @@
 tasks:
 - install:
-- ceph:
+- stone:
     log-ignorelist:
       - overall HEALTH_
       - \(MON_DOWN\)

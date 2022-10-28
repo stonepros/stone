@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "include/compat.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "common/snap_types.h"
 #include "common/Clock.h"
@@ -31,8 +31,8 @@ using cls::rbd::MIRROR_PEER_DIRECTION_RX;
 using cls::rbd::MIRROR_PEER_DIRECTION_TX;
 using cls::rbd::MIRROR_PEER_DIRECTION_RX_TX;
 using ::librbd::ParentImageInfo;
-using ceph::encode;
-using ceph::decode;
+using stone::encode;
+using stone::decode;
 
 static int snapshot_add(librados::IoCtx *ioctx, const std::string &oid,
                         uint64_t snap_id, const std::string &snap_name) {
@@ -596,16 +596,16 @@ TEST_F(TestClsRbd, get_size)
   string oid = get_temp_image_name();
   uint64_t size;
   uint8_t order;
-  ASSERT_EQ(-ENOENT, get_size(&ioctx, oid, CEPH_NOSNAP, &size, &order));
+  ASSERT_EQ(-ENOENT, get_size(&ioctx, oid, STONE_NOSNAP, &size, &order));
 
   ASSERT_EQ(0, create_image(&ioctx, oid, 0, 22, 0, oid, -1));
-  ASSERT_EQ(0, get_size(&ioctx, oid, CEPH_NOSNAP, &size, &order));
+  ASSERT_EQ(0, get_size(&ioctx, oid, STONE_NOSNAP, &size, &order));
   ASSERT_EQ(0u, size);
   ASSERT_EQ(22, order);
   ASSERT_EQ(0, ioctx.remove(oid));
 
   ASSERT_EQ(0, create_image(&ioctx, oid, 2 << 22, 0, 0, oid, -1));
-  ASSERT_EQ(0, get_size(&ioctx, oid, CEPH_NOSNAP, &size, &order));
+  ASSERT_EQ(0, get_size(&ioctx, oid, STONE_NOSNAP, &size, &order));
   ASSERT_EQ(2u << 22, size);
   ASSERT_EQ(0, order);
 
@@ -625,17 +625,17 @@ TEST_F(TestClsRbd, set_size)
   uint64_t size;
   uint8_t order;
   ASSERT_EQ(0, create_image(&ioctx, oid, 0, 22, 0, oid, -1));
-  ASSERT_EQ(0, get_size(&ioctx, oid, CEPH_NOSNAP, &size, &order));
+  ASSERT_EQ(0, get_size(&ioctx, oid, STONE_NOSNAP, &size, &order));
   ASSERT_EQ(0u, size);
   ASSERT_EQ(22, order);
 
   ASSERT_EQ(0, set_size(&ioctx, oid, 0));
-  ASSERT_EQ(0, get_size(&ioctx, oid, CEPH_NOSNAP, &size, &order));
+  ASSERT_EQ(0, get_size(&ioctx, oid, STONE_NOSNAP, &size, &order));
   ASSERT_EQ(0u, size);
   ASSERT_EQ(22, order);
 
   ASSERT_EQ(0, set_size(&ioctx, oid, 3 << 22));
-  ASSERT_EQ(0, get_size(&ioctx, oid, CEPH_NOSNAP, &size, &order));
+  ASSERT_EQ(0, get_size(&ioctx, oid, STONE_NOSNAP, &size, &order));
   ASSERT_EQ(3u << 22, size);
   ASSERT_EQ(22, order);
 
@@ -651,20 +651,20 @@ TEST_F(TestClsRbd, protection_status)
   string oid2 = get_temp_image_name();
   uint8_t status = RBD_PROTECTION_STATUS_UNPROTECTED;
   ASSERT_EQ(-ENOENT, get_protection_status(&ioctx, oid,
-					   CEPH_NOSNAP, &status));
+					   STONE_NOSNAP, &status));
   ASSERT_EQ(-ENOENT, set_protection_status(&ioctx, oid,
-					   CEPH_NOSNAP, status));
+					   STONE_NOSNAP, status));
 
   ASSERT_EQ(0, create_image(&ioctx, oid, 0, 22, RBD_FEATURE_LAYERING, oid, -1));
   ASSERT_EQ(0, create_image(&ioctx, oid2, 0, 22, 0, oid, -1));
   ASSERT_EQ(-EINVAL, get_protection_status(&ioctx, oid2,
-					   CEPH_NOSNAP, &status));
+					   STONE_NOSNAP, &status));
   ASSERT_EQ(-ENOEXEC, set_protection_status(&ioctx, oid2,
-					   CEPH_NOSNAP, status));
+					   STONE_NOSNAP, status));
   ASSERT_EQ(-EINVAL, get_protection_status(&ioctx, oid,
-					   CEPH_NOSNAP, &status));
+					   STONE_NOSNAP, &status));
   ASSERT_EQ(-EINVAL, set_protection_status(&ioctx, oid,
-					   CEPH_NOSNAP, status));
+					   STONE_NOSNAP, status));
   ASSERT_EQ(-ENOENT, get_protection_status(&ioctx, oid,
 					   2, &status));
   ASSERT_EQ(-ENOENT, set_protection_status(&ioctx, oid,
@@ -753,16 +753,16 @@ TEST_F(TestClsRbd, parents_v1)
   cls::rbd::ParentImageSpec pspec;
   uint64_t size;
 
-  ASSERT_EQ(-ENOENT, get_parent(&ioctx, "doesnotexist", CEPH_NOSNAP, &pspec, &size));
+  ASSERT_EQ(-ENOENT, get_parent(&ioctx, "doesnotexist", STONE_NOSNAP, &pspec, &size));
 
   // old image should fail
   std::string oid = get_temp_image_name();
   ASSERT_EQ(0, create_image(&ioctx, oid, 33<<20, 22, 0, "old_blk.", -1));
-  // get nonexistent parent: succeed, return (-1, "", CEPH_NOSNAP), overlap 0
-  ASSERT_EQ(0, get_parent(&ioctx, oid, CEPH_NOSNAP, &pspec, &size));
+  // get nonexistent parent: succeed, return (-1, "", STONE_NOSNAP), overlap 0
+  ASSERT_EQ(0, get_parent(&ioctx, oid, STONE_NOSNAP, &pspec, &size));
   ASSERT_EQ(pspec.pool_id, -1);
   ASSERT_STREQ("", pspec.image_id.c_str());
-  ASSERT_EQ(pspec.snap_id, CEPH_NOSNAP);
+  ASSERT_EQ(pspec.snap_id, STONE_NOSNAP);
   ASSERT_EQ(size, 0ULL);
   pspec = {-1, "", "parent", 3};
   ASSERT_EQ(-ENOEXEC, set_parent(&ioctx, oid, {-1, "", "parent", 3}, 10<<20));
@@ -773,14 +773,14 @@ TEST_F(TestClsRbd, parents_v1)
   ASSERT_EQ(0, create_image(&ioctx, oid, 33<<20, 22, RBD_FEATURE_LAYERING,
                             "foo.", -1));
 
-  ASSERT_EQ(0, get_parent(&ioctx, oid, CEPH_NOSNAP, &pspec, &size));
+  ASSERT_EQ(0, get_parent(&ioctx, oid, STONE_NOSNAP, &pspec, &size));
   ASSERT_EQ(-1, pspec.pool_id);
   ASSERT_EQ(0, get_parent(&ioctx, oid, 123, &pspec, &size));
   ASSERT_EQ(-1, pspec.pool_id);
 
   ASSERT_EQ(-EINVAL, set_parent(&ioctx, oid, {-1, "", "parent", 3}, 10<<20));
   ASSERT_EQ(-EINVAL, set_parent(&ioctx, oid, {1, "", "", 3}, 10<<20));
-  ASSERT_EQ(-EINVAL, set_parent(&ioctx, oid, {1, "", "parent", CEPH_NOSNAP}, 10<<20));
+  ASSERT_EQ(-EINVAL, set_parent(&ioctx, oid, {1, "", "parent", STONE_NOSNAP}, 10<<20));
   ASSERT_EQ(-EINVAL, set_parent(&ioctx, oid, {1, "", "parent", 3}, 0));
 
   pspec = {1, "", "parent", 3};
@@ -788,14 +788,14 @@ TEST_F(TestClsRbd, parents_v1)
   ASSERT_EQ(-EEXIST, set_parent(&ioctx, oid, pspec, 10<<20));
   ASSERT_EQ(-EEXIST, set_parent(&ioctx, oid, {2, "", "parent", 34}, 10<<20));
 
-  ASSERT_EQ(0, get_parent(&ioctx, oid, CEPH_NOSNAP, &pspec, &size));
+  ASSERT_EQ(0, get_parent(&ioctx, oid, STONE_NOSNAP, &pspec, &size));
   ASSERT_EQ(pspec.pool_id, 1);
   ASSERT_EQ(pspec.image_id, "parent");
   ASSERT_EQ(pspec.snap_id, snapid_t(3));
 
   ASSERT_EQ(0, remove_parent(&ioctx, oid));
   ASSERT_EQ(-ENOENT, remove_parent(&ioctx, oid));
-  ASSERT_EQ(0, get_parent(&ioctx, oid, CEPH_NOSNAP, &pspec, &size));
+  ASSERT_EQ(0, get_parent(&ioctx, oid, STONE_NOSNAP, &pspec, &size));
   ASSERT_EQ(-1, pspec.pool_id);
 
   // snapshots
@@ -838,7 +838,7 @@ TEST_F(TestClsRbd, parents_v1)
 
   // make sure set_parent takes min of our size and parent's size
   ASSERT_EQ(0, set_parent(&ioctx, oid, {1, "", "parent", 3}, 1<<20));
-  ASSERT_EQ(0, get_parent(&ioctx, oid, CEPH_NOSNAP, &pspec, &size));
+  ASSERT_EQ(0, get_parent(&ioctx, oid, STONE_NOSNAP, &pspec, &size));
   ASSERT_EQ(pspec.pool_id, 1);
   ASSERT_EQ(pspec.image_id, "parent");
   ASSERT_EQ(pspec.snap_id, snapid_t(3));
@@ -846,7 +846,7 @@ TEST_F(TestClsRbd, parents_v1)
   ASSERT_EQ(0, remove_parent(&ioctx, oid));
 
   ASSERT_EQ(0, set_parent(&ioctx, oid, {1, "", "parent", 3}, 100<<20));
-  ASSERT_EQ(0, get_parent(&ioctx, oid, CEPH_NOSNAP, &pspec, &size));
+  ASSERT_EQ(0, get_parent(&ioctx, oid, STONE_NOSNAP, &pspec, &size));
   ASSERT_EQ(pspec.pool_id, 1);
   ASSERT_EQ(pspec.image_id, "parent");
   ASSERT_EQ(pspec.snap_id, snapid_t(3));
@@ -858,7 +858,7 @@ TEST_F(TestClsRbd, parents_v1)
 
   ASSERT_EQ(0, snapshot_add(&ioctx, oid, 14, "snap4"));
   ASSERT_EQ(0, set_size(&ioctx, oid, 3 << 20));
-  ASSERT_EQ(0, get_parent(&ioctx, oid, CEPH_NOSNAP, &pspec, &size));
+  ASSERT_EQ(0, get_parent(&ioctx, oid, STONE_NOSNAP, &pspec, &size));
   ASSERT_EQ(pspec.pool_id, 1);
   ASSERT_EQ(pspec.image_id, "parent");
   ASSERT_EQ(pspec.snap_id, snapid_t(3));
@@ -871,7 +871,7 @@ TEST_F(TestClsRbd, parents_v1)
 
   ASSERT_EQ(0, snapshot_add(&ioctx, oid, 15, "snap5"));
   ASSERT_EQ(0, set_size(&ioctx, oid, 30 << 20));
-  ASSERT_EQ(0, get_parent(&ioctx, oid, CEPH_NOSNAP, &pspec, &size));
+  ASSERT_EQ(0, get_parent(&ioctx, oid, STONE_NOSNAP, &pspec, &size));
   ASSERT_EQ(pspec.pool_id, 1);
   ASSERT_EQ(pspec.image_id, "parent");
   ASSERT_EQ(pspec.snap_id, snapid_t(3));
@@ -888,7 +888,7 @@ TEST_F(TestClsRbd, parents_v1)
   ASSERT_EQ(size, 3ull<<20);
 
   ASSERT_EQ(0, set_size(&ioctx, oid, 2 << 20));
-  ASSERT_EQ(0, get_parent(&ioctx, oid, CEPH_NOSNAP, &pspec, &size));
+  ASSERT_EQ(0, get_parent(&ioctx, oid, STONE_NOSNAP, &pspec, &size));
   ASSERT_EQ(pspec.pool_id, 1);
   ASSERT_EQ(pspec.image_id, "parent");
   ASSERT_EQ(pspec.snap_id, snapid_t(3));
@@ -914,7 +914,7 @@ TEST_F(TestClsRbd, parents_v1)
   ASSERT_EQ(-1, pspec.pool_id);
   ASSERT_EQ(0, get_parent(&ioctx, oid, 2, &pspec, &size));
   ASSERT_EQ(-1, pspec.pool_id);
-  ASSERT_EQ(0, get_parent(&ioctx, oid, CEPH_NOSNAP, &pspec, &size));
+  ASSERT_EQ(0, get_parent(&ioctx, oid, STONE_NOSNAP, &pspec, &size));
   ASSERT_EQ(-1, pspec.pool_id);
 
   ioctx.close();
@@ -930,7 +930,7 @@ TEST_F(TestClsRbd, parents_v2)
   std::optional<uint64_t> parent_overlap;
 
   ASSERT_EQ(-ENOENT, parent_get(&ioctx, oid, &parent_image_spec));
-  ASSERT_EQ(-ENOENT, parent_overlap_get(&ioctx, oid, CEPH_NOSNAP,
+  ASSERT_EQ(-ENOENT, parent_overlap_get(&ioctx, oid, STONE_NOSNAP,
                                         &parent_overlap));
   ASSERT_EQ(-ENOENT, parent_attach(&ioctx, oid, parent_image_spec, 0ULL,
                                    false));
@@ -941,7 +941,7 @@ TEST_F(TestClsRbd, parents_v2)
   ASSERT_EQ(0, create_image(&ioctx, oid, 33<<20, 22, 0, "old_blk.", -1));
   ASSERT_EQ(0, parent_get(&ioctx, oid, &parent_image_spec));
   ASSERT_FALSE(parent_image_spec.exists());
-  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, CEPH_NOSNAP, &parent_overlap));
+  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, STONE_NOSNAP, &parent_overlap));
   ASSERT_EQ(std::nullopt, parent_overlap);
   ASSERT_EQ(-ENOEXEC, parent_attach(&ioctx, oid, parent_image_spec, 0ULL, false));
   ASSERT_EQ(-ENOEXEC, parent_detach(&ioctx, oid));
@@ -953,7 +953,7 @@ TEST_F(TestClsRbd, parents_v2)
 
   ASSERT_EQ(0, parent_get(&ioctx, oid, &parent_image_spec));
   ASSERT_FALSE(parent_image_spec.exists());
-  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, CEPH_NOSNAP, &parent_overlap));
+  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, STONE_NOSNAP, &parent_overlap));
   ASSERT_EQ(std::nullopt, parent_overlap);
   ASSERT_EQ(-EINVAL, parent_attach(&ioctx, oid, parent_image_spec, 0ULL, false));
   ASSERT_EQ(-ENOENT, parent_detach(&ioctx, oid));
@@ -972,7 +972,7 @@ TEST_F(TestClsRbd, parents_v2)
   std::optional<uint64_t> on_disk_parent_overlap;
   ASSERT_EQ(0, parent_get(&ioctx, oid, &on_disk_parent_image_spec));
   ASSERT_EQ(parent_image_spec, on_disk_parent_image_spec);
-  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, CEPH_NOSNAP,
+  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, STONE_NOSNAP,
                                   &on_disk_parent_overlap));
   ASSERT_EQ(parent_overlap, on_disk_parent_overlap);
 
@@ -983,7 +983,7 @@ TEST_F(TestClsRbd, parents_v2)
 
   parent_overlap = (32 << 20);
   ASSERT_EQ(0, set_size(&ioctx, oid, *parent_overlap));
-  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, CEPH_NOSNAP,
+  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, STONE_NOSNAP,
                                   &on_disk_parent_overlap));
   ASSERT_EQ(parent_overlap, on_disk_parent_overlap);
 
@@ -995,7 +995,7 @@ TEST_F(TestClsRbd, parents_v2)
 
   ASSERT_EQ(0, parent_get(&ioctx, oid, &on_disk_parent_image_spec));
   ASSERT_EQ(parent_image_spec, on_disk_parent_image_spec);
-  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, CEPH_NOSNAP,
+  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, STONE_NOSNAP,
                                   &on_disk_parent_overlap));
   ASSERT_EQ(std::nullopt, on_disk_parent_overlap);
 
@@ -1015,7 +1015,7 @@ TEST_F(TestClsRbd, parents_v2)
 
   ASSERT_EQ(0, parent_get(&ioctx, oid, &on_disk_parent_image_spec));
   ASSERT_EQ(parent_image_spec, on_disk_parent_image_spec);
-  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, CEPH_NOSNAP,
+  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, STONE_NOSNAP,
                                   &on_disk_parent_overlap));
   ASSERT_EQ(parent_overlap, on_disk_parent_overlap);
 
@@ -1026,7 +1026,7 @@ TEST_F(TestClsRbd, parents_v2)
 
   parent_overlap = (30 << 20);
   ASSERT_EQ(0, set_size(&ioctx, oid, *parent_overlap));
-  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, CEPH_NOSNAP,
+  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, STONE_NOSNAP,
                                   &on_disk_parent_overlap));
   ASSERT_EQ(parent_overlap, on_disk_parent_overlap);
 
@@ -1039,14 +1039,14 @@ TEST_F(TestClsRbd, parents_v2)
 
   cls::rbd::ParentImageSpec on_disk_parent_spec;
   uint64_t legacy_parent_overlap;
-  ASSERT_EQ(-EXDEV, get_parent(&ioctx, oid, CEPH_NOSNAP, &on_disk_parent_spec,
+  ASSERT_EQ(-EXDEV, get_parent(&ioctx, oid, STONE_NOSNAP, &on_disk_parent_spec,
                                &legacy_parent_overlap));
   ASSERT_EQ(-EXDEV, get_parent(&ioctx, oid, 10, &on_disk_parent_spec,
                                &legacy_parent_overlap));
 
   ASSERT_EQ(0, parent_get(&ioctx, oid, &on_disk_parent_image_spec));
   ASSERT_EQ(parent_image_spec, on_disk_parent_image_spec);
-  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, CEPH_NOSNAP,
+  ASSERT_EQ(0, parent_overlap_get(&ioctx, oid, STONE_NOSNAP,
                                   &on_disk_parent_overlap));
   ASSERT_EQ(std::nullopt, on_disk_parent_overlap);
 
@@ -1154,7 +1154,7 @@ TEST_F(TestClsRbd, snapshots)
   uint64_t size;
   uint8_t order;
   ASSERT_EQ(0, set_size(&ioctx, oid, 0));
-  ASSERT_EQ(0, get_size(&ioctx, oid, CEPH_NOSNAP, &size, &order));
+  ASSERT_EQ(0, get_size(&ioctx, oid, STONE_NOSNAP, &size, &order));
   ASSERT_EQ(0u, size);
   ASSERT_EQ(22u, order);
 
@@ -1471,13 +1471,13 @@ TEST_F(TestClsRbd, flags)
   ASSERT_EQ(0, create_image(&ioctx, oid, 0, 22, 0, oid, -1));
 
   uint64_t flags;
-  ASSERT_EQ(0, get_flags(&ioctx, oid, CEPH_NOSNAP, &flags));
+  ASSERT_EQ(0, get_flags(&ioctx, oid, STONE_NOSNAP, &flags));
   ASSERT_EQ(0U, flags);
 
   librados::ObjectWriteOperation op1;
-  set_flags(&op1, CEPH_NOSNAP, 3, 2);
+  set_flags(&op1, STONE_NOSNAP, 3, 2);
   ASSERT_EQ(0, ioctx.operate(oid, &op1));
-  ASSERT_EQ(0, get_flags(&ioctx, oid, CEPH_NOSNAP, &flags));
+  ASSERT_EQ(0, get_flags(&ioctx, oid, STONE_NOSNAP, &flags));
   ASSERT_EQ(2U, flags);
 
   uint64_t snap_id = 10;
@@ -2153,7 +2153,7 @@ TEST_F(TestClsRbd, mirror_image_map)
   std::map<std::string, cls::rbd::MirrorImageMap> image_mapping;
   ASSERT_EQ(-ENOENT, mirror_image_map_list(&ioctx, "", 0, &image_mapping));
 
-  utime_t expected_time = ceph_clock_now();
+  utime_t expected_time = stone_clock_now();
 
   bufferlist expected_data;
   expected_data.append("test");
@@ -2186,7 +2186,7 @@ TEST_F(TestClsRbd, mirror_image_map)
     stringify(18), expected_time, expected_data};
   ASSERT_EQ(expected_mirror_image_map, image_map.second);
 
-  expected_time = ceph_clock_now();
+  expected_time = stone_clock_now();
   expected_mirror_image_map.mapped_time = expected_time;
 
   expected_data.append("update");
@@ -2246,7 +2246,7 @@ TEST_F(TestClsRbd, mirror_snapshot) {
 
   cls::rbd::MirrorSnapshotNamespace primary = {
     cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {"peer1", "peer2"}, "",
-    CEPH_NOSNAP};
+    STONE_NOSNAP};
   cls::rbd::MirrorSnapshotNamespace non_primary = {
     cls::rbd::MIRROR_SNAPSHOT_STATE_NON_PRIMARY, {"peer1"}, "uuid", 123};
   librados::ObjectWriteOperation op;
@@ -2828,14 +2828,14 @@ TEST_F(TestClsRbd, trash_methods)
   std::map<string, cls::rbd::TrashImageSpec> entries;
   ASSERT_EQ(-ENOENT, trash_list(&ioctx, "", 1024, &entries));
 
-  utime_t now1 = ceph_clock_now();
+  utime_t now1 = stone_clock_now();
   utime_t now1_delay = now1;
   now1_delay += 380;
   cls::rbd::TrashImageSpec trash_spec(cls::rbd::TRASH_IMAGE_SOURCE_USER, "name",
                                       now1, now1_delay);
   ASSERT_EQ(0, trash_add(&ioctx, id, trash_spec));
 
-  utime_t now2 = ceph_clock_now();
+  utime_t now2 = stone_clock_now();
   utime_t now2_delay = now2;
   now2_delay += 480;
   cls::rbd::TrashImageSpec trash_spec2(cls::rbd::TRASH_IMAGE_SOURCE_MIRRORING,
@@ -3141,7 +3141,7 @@ TEST_F(TestClsRbd, migration)
 
   uint64_t features;
   uint64_t incompatible_features;
-  ASSERT_EQ(0, get_features(&ioctx, oid, CEPH_NOSNAP, &features,
+  ASSERT_EQ(0, get_features(&ioctx, oid, STONE_NOSNAP, &features,
                             &incompatible_features));
   ASSERT_EQ(0U, features);
 
@@ -3149,7 +3149,7 @@ TEST_F(TestClsRbd, migration)
   ASSERT_EQ(0, migration_get(&ioctx, oid, &read_migration_spec));
   ASSERT_EQ(migration_spec, read_migration_spec);
 
-  ASSERT_EQ(0, get_features(&ioctx, oid, CEPH_NOSNAP, &features,
+  ASSERT_EQ(0, get_features(&ioctx, oid, STONE_NOSNAP, &features,
                             &incompatible_features));
   ASSERT_EQ(RBD_FEATURE_MIGRATING, features);
 
@@ -3164,7 +3164,7 @@ TEST_F(TestClsRbd, migration)
 
   ASSERT_EQ(0, migration_remove(&ioctx, oid));
 
-  ASSERT_EQ(0, get_features(&ioctx, oid, CEPH_NOSNAP, &features,
+  ASSERT_EQ(0, get_features(&ioctx, oid, STONE_NOSNAP, &features,
                             &incompatible_features));
   ASSERT_EQ(0U, features);
 
@@ -3176,14 +3176,14 @@ TEST_F(TestClsRbd, migration)
 
   ASSERT_EQ(0, migration_set(&ioctx, oid, migration_spec));
 
-  ASSERT_EQ(0, get_features(&ioctx, oid, CEPH_NOSNAP, &features,
+  ASSERT_EQ(0, get_features(&ioctx, oid, STONE_NOSNAP, &features,
                             &incompatible_features));
   ASSERT_EQ(RBD_FEATURE_MIGRATING, features);
 
   ASSERT_EQ(0, migration_remove(&ioctx, oid));
 
   ASSERT_EQ(-EINVAL, migration_get(&ioctx, oid, &read_migration_spec));
-  ASSERT_EQ(0, get_features(&ioctx, oid, CEPH_NOSNAP, &features,
+  ASSERT_EQ(0, get_features(&ioctx, oid, STONE_NOSNAP, &features,
                             &incompatible_features));
   ASSERT_EQ(0U, features);
 
@@ -3272,7 +3272,7 @@ TEST_F(TestClsRbd, assert_snapc_seq)
                              cls::rbd::ASSERT_SNAPC_SEQ_LE_SNAPSET_SEQ));
 
   std::vector<uint64_t> snaps;
-  snaps.push_back(CEPH_NOSNAP);
+  snaps.push_back(STONE_NOSNAP);
   ASSERT_EQ(0, ioctx.selfmanaged_snap_create(&snaps.back()));
   snapc_seq = snaps[0];
 

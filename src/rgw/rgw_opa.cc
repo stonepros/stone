@@ -4,8 +4,8 @@
 #include "rgw_opa.h"
 #include "rgw_http_client.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 int rgw_opa_authorize(RGWOp *& op,
                       req_state * const s)

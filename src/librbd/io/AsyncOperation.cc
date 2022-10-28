@@ -2,12 +2,12 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "librbd/io/AsyncOperation.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/dout.h"
 #include "librbd/AsioEngine.h"
 #include "librbd/ImageCtx.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::AsyncOperation: "
 
@@ -39,7 +39,7 @@ struct C_CompleteFlushes : public Context {
 } // anonymous namespace
 
 void AsyncOperation::start_op(ImageCtx &image_ctx) {
-  ceph_assert(m_image_ctx == NULL);
+  stone_assert(m_image_ctx == NULL);
   m_image_ctx = &image_ctx;
 
   ldout(m_image_ctx->cct, 20) << this << " " << __func__ << dendl;
@@ -54,7 +54,7 @@ void AsyncOperation::finish_op() {
     std::lock_guard l{m_image_ctx->async_ops_lock};
     xlist<AsyncOperation *>::iterator iter(&m_xlist_item);
     ++iter;
-    ceph_assert(m_xlist_item.remove_myself());
+    stone_assert(m_xlist_item.remove_myself());
 
     // linked list stored newest -> oldest ops
     if (!iter.end() && !m_flush_contexts.empty()) {

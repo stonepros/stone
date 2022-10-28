@@ -14,7 +14,7 @@ using std::pair;
 using std::string;
 using std::vector;
 
-using ceph::real_time;
+using stone::real_time;
 
 using namespace librados;
 
@@ -91,7 +91,7 @@ private:
   T *data;
   int *ret_code;
 public:
-  ClsBucketIndexOpCtx(T* _data, int *_ret_code) : data(_data), ret_code(_ret_code) { ceph_assert(data); }
+  ClsBucketIndexOpCtx(T* _data, int *_ret_code) : data(_data), ret_code(_ret_code) { stone_assert(data); }
   ~ClsBucketIndexOpCtx() override {}
   void handle_completion(int r, bufferlist& outbl) override {
     // if successful, or we're asked for a retry, copy result into
@@ -100,7 +100,7 @@ public:
       try {
         auto iter = outbl.cbegin();
         decode((*data), iter);
-      } catch (ceph::buffer::error& err) {
+      } catch (stone::buffer::error& err) {
         r = -EIO;
       }
     }
@@ -114,7 +114,7 @@ void BucketIndexAioManager::do_completion(const int request_id) {
   std::lock_guard l{lock};
 
   auto iter = pendings.find(request_id);
-  ceph_assert(iter != pendings.end());
+  stone_assert(iter != pendings.end());
   completions[request_id] = iter->second;
   pendings.erase(iter);
 
@@ -432,7 +432,7 @@ int cls_rgw_bi_get(librados::IoCtx& io_ctx, const string oid,
   auto iter = out.cbegin();
   try {
     decode(op_ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 
@@ -484,7 +484,7 @@ int cls_rgw_bi_list(librados::IoCtx& io_ctx, const std::string& oid,
   auto iter = out.cbegin();
   try {
     decode(op_ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 
@@ -497,7 +497,7 @@ int cls_rgw_bi_list(librados::IoCtx& io_ctx, const std::string& oid,
 int cls_rgw_bucket_link_olh(librados::IoCtx& io_ctx, const string& oid,
                             const cls_rgw_obj_key& key, bufferlist& olh_tag,
                             bool delete_marker, const string& op_tag, rgw_bucket_dir_entry_meta *meta,
-                            uint64_t olh_epoch, ceph::real_time unmod_since, bool high_precision_time, bool log_op, rgw_zone_set& zones_trace)
+                            uint64_t olh_epoch, stone::real_time unmod_since, bool high_precision_time, bool log_op, rgw_zone_set& zones_trace)
 {
   librados::ObjectWriteOperation op;
   cls_rgw_bucket_link_olh(op, key, olh_tag, delete_marker, op_tag, meta,
@@ -511,7 +511,7 @@ int cls_rgw_bucket_link_olh(librados::IoCtx& io_ctx, const string& oid,
 void cls_rgw_bucket_link_olh(librados::ObjectWriteOperation& op, const cls_rgw_obj_key& key,
                             bufferlist& olh_tag, bool delete_marker,
                             const string& op_tag, rgw_bucket_dir_entry_meta *meta,
-                            uint64_t olh_epoch, ceph::real_time unmod_since, bool high_precision_time, bool log_op, rgw_zone_set& zones_trace)
+                            uint64_t olh_epoch, stone::real_time unmod_since, bool high_precision_time, bool log_op, rgw_zone_set& zones_trace)
 {
   bufferlist in, out;
   rgw_cls_link_olh_op call;
@@ -760,7 +760,7 @@ public:
     try {
       auto iter = outbl.cbegin();
       decode(ret, iter);
-    } catch (ceph::buffer::error& err) {
+    } catch (stone::buffer::error& err) {
       r = -EIO;
     }
 
@@ -816,7 +816,7 @@ int cls_rgw_usage_log_read(IoCtx& io_ctx, const string& oid, const string& user,
       *is_truncated = result.truncated;
 
     usage = result.usage;
-  } catch (ceph::buffer::error& e) {
+  } catch (stone::buffer::error& e) {
     return -EINVAL;
   }
 
@@ -915,7 +915,7 @@ int cls_rgw_gc_list(IoCtx& io_ctx, string& oid, string& marker, uint32_t max, bo
   try {
     auto iter = out.cbegin();
     decode(ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 
@@ -947,7 +947,7 @@ int cls_rgw_lc_get_head(IoCtx& io_ctx, const string& oid, cls_rgw_lc_obj_head& h
   try {
     auto iter = out.cbegin();
     decode(ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
   head = ret.head;
@@ -980,7 +980,7 @@ int cls_rgw_lc_get_next_entry(IoCtx& io_ctx, const string& oid, string& marker,
   try {
     auto iter = out.cbegin();
     decode(ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
   entry = ret.entry;
@@ -1026,7 +1026,7 @@ int cls_rgw_lc_get_entry(IoCtx& io_ctx, const string& oid,
   try {
     auto iter = out.cbegin();
     decode(ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 
@@ -1057,7 +1057,7 @@ int cls_rgw_lc_list(IoCtx& io_ctx, const string& oid,
   try {
     auto iter = out.cbegin();
     decode(ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 
@@ -1093,7 +1093,7 @@ int cls_rgw_reshard_list(librados::IoCtx& io_ctx, const string& oid, string& mar
   auto iter = out.cbegin();
   try {
     decode(op_ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 
@@ -1117,7 +1117,7 @@ int cls_rgw_reshard_get(librados::IoCtx& io_ctx, const string& oid, cls_rgw_resh
   auto iter = out.cbegin();
   try {
     decode(op_ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 
@@ -1169,7 +1169,7 @@ int cls_rgw_get_bucket_resharding(librados::IoCtx& io_ctx, const string& oid,
   auto iter = out.cbegin();
   try {
     decode(op_ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 

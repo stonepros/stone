@@ -35,7 +35,7 @@
 #include "rgw_otp.h"
 #include "rgw_user.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 RGWServices_Def::RGWServices_Def() = default;
 RGWServices_Def::~RGWServices_Def()
@@ -43,7 +43,7 @@ RGWServices_Def::~RGWServices_Def()
   shutdown();
 }
 
-int RGWServices_Def::init(CephContext *cct,
+int RGWServices_Def::init(StoneContext *cct,
 			  bool have_cache,
                           bool raw,
 			  bool run_sync,
@@ -275,7 +275,7 @@ void RGWServices_Def::shutdown()
 }
 
 
-int RGWServices::do_init(CephContext *_cct, bool have_cache, bool raw, bool run_sync, optional_yield y, const DoutPrefixProvider *dpp)
+int RGWServices::do_init(StoneContext *_cct, bool have_cache, bool raw, bool run_sync, optional_yield y, const DoutPrefixProvider *dpp)
 {
   cct = _cct;
 

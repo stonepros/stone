@@ -1,0 +1,29 @@
+[Unit]
+Description=Stone immutable object cache daemon
+After=network-online.target local-fs.target
+Wants=network-online.target local-fs.target
+PartOf=stone-immutable-object-cache.target
+
+[Service]
+Environment=CLUSTER=stone
+EnvironmentFile=-@SYSTEMD_ENV_FILE@
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStart=/usr/bin/stone-immutable-object-cache -f --cluster ${CLUSTER} --id %i --setuser stone --setgroup stone
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+PrivateDevices=yes
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectSystem=full
+Restart=on-failure
+RestrictSUIDSGID=true
+StartLimitBurst=3
+
+[Install]
+WantedBy=stone-immutable-object-cache.target

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_SHELL_H
-#define CEPH_RBD_SHELL_H
+#ifndef STONE_RBD_SHELL_H
+#define STONE_RBD_SHELL_H
 
 #include "include/int_types.h"
 #include <set>
@@ -73,4 +73,4 @@ private:
 
 } // namespace rbd
 
-#endif // CEPH_RBD_SHELL_H
+#endif // STONE_RBD_SHELL_H

@@ -21,7 +21,7 @@
 FROM centos:%%os_version%%
 
 COPY install-deps.sh /root/
-COPY ceph.spec.in /root/
+COPY stone.spec.in /root/
 RUN dnf install -y redhat-lsb-core
 RUN dnf install -y yum-utils && dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8 && dnf update -y && dnf config-manager --enable cr
 # build dependencies

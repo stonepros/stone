@@ -7,13 +7,13 @@
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "rgw_common.h"
 #include "rgw_es_query.h"
 
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 bool pop_front(list<string>& l, string *s)
 {
@@ -205,7 +205,7 @@ public:
 };
 
 class ESQueryNodeLeafVal_Date : public ESQueryNodeLeafVal {
-  ceph::real_time val;
+  stone::real_time val;
 public:
   ESQueryNodeLeafVal_Date() {}
   bool init(const string& str_val, string *perr) override {
@@ -400,7 +400,7 @@ string ESQueryNode_Op_Nested<int64_t>::type_str() const {
 }
 
 template<>
-string ESQueryNode_Op_Nested<ceph::real_time>::type_str() const {
+string ESQueryNode_Op_Nested<stone::real_time>::type_str() const {
   return "date";
 }
 
@@ -436,7 +436,7 @@ bool ESQueryNode_Op::handle_nested(ESQueryNode **pnode, string *perr)
       new_node = new ESQueryNode_Op_Nested<int64_t>(compiler, field_name, this);
       break;
     case ESEntityTypeMap::ES_ENTITY_DATE:
-      new_node = new ESQueryNode_Op_Nested<ceph::real_time>(compiler, field_name, this);
+      new_node = new ESQueryNode_Op_Nested<stone::real_time>(compiler, field_name, this);
       break;
     default:
       new_node = new ESQueryNode_Op_Nested<string>(compiler, field_name, this);

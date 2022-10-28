@@ -7,9 +7,9 @@
 #include "cls/rgw/cls_rgw_client.h"
 
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
-RGWSI_BILog_RADOS::RGWSI_BILog_RADOS(CephContext *cct) : RGWServiceInstance(cct)
+RGWSI_BILog_RADOS::RGWSI_BILog_RADOS(StoneContext *cct) : RGWServiceInstance(cct)
 {
 }
 
@@ -187,7 +187,7 @@ int RGWSI_BILog_RADOS::get_log_status(const DoutPrefixProvider *dpp,
   if (r < 0)
     return r;
 
-  ceph_assert(headers.size() == bucket_instance_ids.size());
+  stone_assert(headers.size() == bucket_instance_ids.size());
 
   auto iter = headers.begin();
   map<int, string>::iterator viter = bucket_instance_ids.begin();

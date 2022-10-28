@@ -17,7 +17,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/construct.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::ObjectMapIterateRequest: "
 
@@ -40,7 +40,7 @@ public:
     m_invalidate(invalidate)
   {
     m_io_ctx.dup(image_ctx->data_ctx);
-    m_io_ctx.snap_set_read(CEPH_SNAPDIR);
+    m_io_ctx.snap_set_read(STONE_SNAPDIR);
   }
 
   void complete(int r) override {
@@ -73,7 +73,7 @@ private:
 
   bool should_complete(int r) {
     I &image_ctx = this->m_image_ctx;
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     if (r == 0) {
       r = m_snap_list_ret;
     }
@@ -91,7 +91,7 @@ private:
 
   void send_list_snaps() {
     I &image_ctx = this->m_image_ctx;
-    ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+    stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
     ldout(image_ctx.cct, 5) << m_oid
 			    << " C_VerifyObjectCallback::send_list_snaps"
                             << dendl;
@@ -101,7 +101,7 @@ private:
 
     librados::AioCompletion *comp = util::create_rados_callback(this);
     int r = m_io_ctx.aio_operate(m_oid, comp, &op, NULL);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -137,27 +137,27 @@ private:
 
   uint64_t next_valid_snap_id(uint64_t snap_id) {
     I &image_ctx = this->m_image_ctx;
-    ceph_assert(ceph_mutex_is_locked(image_ctx.image_lock));
+    stone_assert(stone_mutex_is_locked(image_ctx.image_lock));
 
     std::map<librados::snap_t, SnapInfo>::iterator it =
       image_ctx.snap_info.lower_bound(snap_id);
     if (it == image_ctx.snap_info.end()) {
-      return CEPH_NOSNAP;
+      return STONE_NOSNAP;
     }
     return it->first;
   }
 
   bool object_map_action(uint8_t new_state) {
     I &image_ctx = this->m_image_ctx;
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     std::shared_lock owner_locker{image_ctx.owner_lock};
 
     // should have been canceled prior to releasing lock
-    ceph_assert(image_ctx.exclusive_lock == nullptr ||
+    stone_assert(image_ctx.exclusive_lock == nullptr ||
                 image_ctx.exclusive_lock->is_lock_owner());
 
     std::shared_lock image_locker{image_ctx.image_lock};
-    ceph_assert(image_ctx.object_map != nullptr);
+    stone_assert(image_ctx.object_map != nullptr);
 
     uint8_t state = (*image_ctx.object_map)[m_object_no];
     ldout(cct, 10) << "C_VerifyObjectCallback::object_map_action"
@@ -168,7 +168,7 @@ private:
     if (state != new_state) {
       int r = 0;
 
-      ceph_assert(m_handle_mismatch);
+      stone_assert(m_handle_mismatch);
       r = m_handle_mismatch(image_ctx, m_object_no, state, new_state);
       if (r) {
 	lderr(cct) << "object map error: object "
@@ -202,7 +202,7 @@ void ObjectMapIterateRequest<I>::send() {
 
 template <typename I>
 bool ObjectMapIterateRequest<I>::should_complete(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " should_complete: " << " r=" << r << dendl;
 
   if (r == -ENODEV) {
@@ -233,7 +233,7 @@ bool ObjectMapIterateRequest<I>::should_complete(int r) {
     break;
 
   default:
-    ceph_abort();
+    stone_abort();
     break;
   }
 
@@ -246,8 +246,8 @@ bool ObjectMapIterateRequest<I>::should_complete(int r) {
 
 template <typename I>
 void ObjectMapIterateRequest<I>::send_verify_objects() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  CephContext *cct = m_image_ctx.cct;
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  StoneContext *cct = m_image_ctx.cct;
 
   uint64_t snap_id;
   uint64_t num_objects;
@@ -274,8 +274,8 @@ void ObjectMapIterateRequest<I>::send_verify_objects() {
 
 template <typename I>
 uint64_t ObjectMapIterateRequest<I>::get_image_size() const {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.image_lock));
-  if (m_image_ctx.snap_id == CEPH_NOSNAP) {
+  stone_assert(stone_mutex_is_locked(m_image_ctx.image_lock));
+  if (m_image_ctx.snap_id == STONE_NOSNAP) {
     if (!m_image_ctx.resize_reqs.empty()) {
       return m_image_ctx.resize_reqs.front()->get_image_size();
     } else {
@@ -287,7 +287,7 @@ uint64_t ObjectMapIterateRequest<I>::get_image_size() const {
 
 template <typename I>
 void ObjectMapIterateRequest<I>::send_invalidate_object_map() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   ldout(cct, 5) << this << " send_invalidate_object_map" << dendl;
   m_state = STATE_INVALIDATE_OBJECT_MAP;
@@ -297,7 +297,7 @@ void ObjectMapIterateRequest<I>::send_invalidate_object_map() {
 					     true,
 					     this->create_callback_context());
 
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
   std::unique_lock image_locker{m_image_ctx.image_lock};
   req->send();
 }

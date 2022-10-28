@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Sage Weil <sage@newdream.net>
  *
@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_NEORADOS_RADOSIMPL_H
-#define CEPH_NEORADOS_RADOSIMPL_H
+#ifndef STONE_NEORADOS_RADOSIMPL_H
+#define STONE_NEORADOS_RADOSIMPL_H
 
 #include <functional>
 #include <memory>
@@ -46,7 +46,7 @@ class RADOS : public Dispatcher
   friend NeoClient;
 
   boost::asio::io_context& ioctx;
-  boost::intrusive_ptr<CephContext> cct;
+  boost::intrusive_ptr<StoneContext> cct;
 
   ceph::mutex lock = ceph::make_mutex("RADOS_unleashed::_::RADOSImpl");
   int instance_id = -1;
@@ -60,7 +60,7 @@ class RADOS : public Dispatcher
 
 public:
 
-  RADOS(boost::asio::io_context& ioctx, boost::intrusive_ptr<CephContext> cct);
+  RADOS(boost::asio::io_context& ioctx, boost::intrusive_ptr<StoneContext> cct);
   ~RADOS();
   bool ms_dispatch(Message *m) override;
   void ms_handle_connect(Connection *con) override;
@@ -75,7 +75,7 @@ public:
 class Client {
 public:
   Client(boost::asio::io_context& ioctx,
-         boost::intrusive_ptr<CephContext> cct,
+         boost::intrusive_ptr<StoneContext> cct,
          MonClient& monclient, Objecter* objecter)
     : ioctx(ioctx), cct(cct), monclient(monclient), objecter(objecter) {
   }
@@ -86,7 +86,7 @@ public:
 
   boost::asio::io_context& ioctx;
 
-  boost::intrusive_ptr<CephContext> cct;
+  boost::intrusive_ptr<StoneContext> cct;
   MonClient& monclient;
   Objecter* objecter;
 

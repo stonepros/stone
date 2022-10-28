@@ -2,8 +2,8 @@
 // vim: ts=8 sw=2 smarttab
 
 
-#ifndef CEPH_OSDMAPMAPPING_H
-#define CEPH_OSDMAPMAPPING_H
+#ifndef STONE_OSDMAPMAPPING_H
+#define STONE_OSDMAPMAPPING_H
 
 #include <vector>
 #include <map>
@@ -94,7 +94,7 @@ public:
   };
 
 protected:
-  CephContext *cct;
+  StoneeContext *cct;
 
   struct Item {
     Job *job;
@@ -155,7 +155,7 @@ protected:
   } wq;
 
 public:
-  ParallelPGMapper(CephContext *cct, ThreadPool *tp)
+  ParallelPGMapper(StoneeContext *cct, ThreadPool *tp)
     : cct(cct),
       wq(this, tp) {}
 

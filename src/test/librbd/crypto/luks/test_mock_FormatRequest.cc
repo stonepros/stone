@@ -37,8 +37,8 @@ struct TestMockCryptoLuksFormatRequest : public TestMockFixture {
   C_SaferCond finished_cond;
   Context *on_finish = &finished_cond;
   io::AioCompletion* aio_comp;
-  ceph::bufferlist header_bl;
-  ceph::ref_t<CryptoInterface> crypto;
+  stone::bufferlist header_bl;
+  stone::ref_t<CryptoInterface> crypto;
 
   void SetUp() override {
     TestMockFixture::SetUp();
@@ -64,7 +64,7 @@ struct TestMockCryptoLuksFormatRequest : public TestMockFixture {
   }
 
   void expect_get_image_size(uint64_t image_size) {
-    EXPECT_CALL(*mock_image_ctx, get_image_size(CEPH_NOSNAP)).WillOnce(Return(
+    EXPECT_CALL(*mock_image_ctx, get_image_size(STONE_NOSNAP)).WillOnce(Return(
             image_size));
   }
 

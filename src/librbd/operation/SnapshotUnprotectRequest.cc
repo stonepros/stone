@@ -17,7 +17,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/construct.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::SnapshotUnprotectRequest: "
 
@@ -64,9 +64,9 @@ public:
 
   int send() override {
     I &image_ctx = this->m_image_ctx;
-    ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+    stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 10) << this << " scanning pool '" << m_pool.second << "'"
                    << dendl;
 
@@ -102,7 +102,7 @@ public:
       util::create_rados_callback(this);
     r = m_pool_ioctx.aio_operate(RBD_CHILDREN, rados_completion, &op,
                                  &m_children_bl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     rados_completion->release();
     return 0;
   }
@@ -110,7 +110,7 @@ public:
 protected:
   void finish(int r) override {
     I &image_ctx = this->m_image_ctx;
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
 
     if (r == 0) {
       auto it = m_children_bl.cbegin();
@@ -153,7 +153,7 @@ SnapshotUnprotectRequest<I>::SnapshotUnprotectRequest(I &image_ctx,
 						      const std::string &snap_name)
   : Request<I>(image_ctx, on_finish), m_snap_namespace(snap_namespace),
     m_snap_name(snap_name), m_state(STATE_UNPROTECT_SNAP_START),
-    m_ret_val(0), m_snap_id(CEPH_NOSNAP) {
+    m_ret_val(0), m_snap_id(STONE_NOSNAP) {
 }
 
 template <typename I>
@@ -164,7 +164,7 @@ void SnapshotUnprotectRequest<I>::send_op() {
 template <typename I>
 bool SnapshotUnprotectRequest<I>::should_complete(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": state=" << m_state << ", "
                 << "r=" << r << dendl;
   if (r < 0) {
@@ -196,7 +196,7 @@ bool SnapshotUnprotectRequest<I>::should_complete(int r) {
     finished = true;
     break;
   default:
-    ceph_abort();
+    stone_abort();
     break;
   }
   return finished;
@@ -206,7 +206,7 @@ template <typename I>
 bool SnapshotUnprotectRequest<I>::should_complete_error() {
   I &image_ctx = this->m_image_ctx;
   std::shared_lock owner_locker{image_ctx.owner_lock};
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   lderr(cct) << this << " " << __func__ << ": "
              << "ret_val=" << m_ret_val << dendl;
 
@@ -222,9 +222,9 @@ bool SnapshotUnprotectRequest<I>::should_complete_error() {
 template <typename I>
 void SnapshotUnprotectRequest<I>::send_unprotect_snap_start() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   int r = verify_and_send_unprotect_snap_start();
@@ -237,9 +237,9 @@ void SnapshotUnprotectRequest<I>::send_unprotect_snap_start() {
 template <typename I>
 void SnapshotUnprotectRequest<I>::send_scan_pool_children() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
   m_state = STATE_SCAN_POOL_CHILDREN;
 
@@ -270,9 +270,9 @@ void SnapshotUnprotectRequest<I>::send_scan_pool_children() {
 template <typename I>
 void SnapshotUnprotectRequest<I>::send_unprotect_snap_finish() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   m_state = STATE_UNPROTECT_SNAP_FINISH;
@@ -283,16 +283,16 @@ void SnapshotUnprotectRequest<I>::send_unprotect_snap_finish() {
 
   librados::AioCompletion *comp = this->create_callback_completion();
   int r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void SnapshotUnprotectRequest<I>::send_unprotect_snap_rollback() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   m_state = STATE_UNPROTECT_SNAP_ROLLBACK;
@@ -303,7 +303,7 @@ void SnapshotUnprotectRequest<I>::send_unprotect_snap_rollback() {
 
   librados::AioCompletion *comp = this->create_callback_completion();
   int r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -312,14 +312,14 @@ int SnapshotUnprotectRequest<I>::verify_and_send_unprotect_snap_start() {
   I &image_ctx = this->m_image_ctx;
   std::shared_lock image_locker{image_ctx.image_lock};
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   if ((image_ctx.features & RBD_FEATURE_LAYERING) == 0) {
     lderr(cct) << "image must support layering" << dendl;
     return -ENOSYS;
   }
 
   m_snap_id = image_ctx.get_snap_id(m_snap_namespace, m_snap_name);
-  if (m_snap_id == CEPH_NOSNAP) {
+  if (m_snap_id == STONE_NOSNAP) {
     return -ENOENT;
   }
 
@@ -340,7 +340,7 @@ int SnapshotUnprotectRequest<I>::verify_and_send_unprotect_snap_start() {
 
   librados::AioCompletion *comp = this->create_callback_completion();
   r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 
   // TODO legacy code threw a notification post UNPROTECTING update -- required?

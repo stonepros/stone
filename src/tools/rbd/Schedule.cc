@@ -3,7 +3,7 @@
 
 #include "common/Formatter.h"
 #include "common/TextTable.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "tools/rbd/ArgumentTypes.h"
 #include "tools/rbd/Schedule.h"
 #include "tools/rbd/Utils.h"
@@ -229,7 +229,7 @@ int Schedule::parse(json_spirit::mValue &schedule_val) {
   return 0;
 }
 
-void Schedule::dump(ceph::Formatter *f) {
+void Schedule::dump(stone::Formatter *f) {
   f->open_array_section("items");
   for (auto &item : items) {
     f->open_object_section("item");
@@ -304,7 +304,7 @@ Schedule *ScheduleList::find(const std::string &name) {
   return &it->second;
 }
 
-void ScheduleList::dump(ceph::Formatter *f) {
+void ScheduleList::dump(stone::Formatter *f) {
   f->open_array_section("schedules");
   for (auto &[name, s] : schedules) {
     std::string pool_name;

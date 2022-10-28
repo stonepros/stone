@@ -25,7 +25,7 @@ public:
 };
 
 /**
- * ceph_deleg_caps_for_type - what caps are necessary for a delegation?
+ * stone_deleg_caps_for_type - what caps are necessary for a delegation?
  * @type: delegation request type
  *
  * Determine what caps are necessary in order to grant a delegation of a given
@@ -37,24 +37,24 @@ public:
  * For write delegations, we need whatever read delegations need plus the
  * caps to allow writing to the file (Fbwx).
  */
-int ceph_deleg_caps_for_type(unsigned type)
+int stone_deleg_caps_for_type(unsigned type)
 {
-	int caps = CEPH_CAP_PIN;
+	int caps = STONE_CAP_PIN;
 
 	switch (type) {
-	case CEPH_DELEGATION_WR:
-		caps |= CEPH_CAP_FILE_EXCL |
-			CEPH_CAP_FILE_WR | CEPH_CAP_FILE_BUFFER;
+	case STONE_DELEGATION_WR:
+		caps |= STONE_CAP_FILE_EXCL |
+			STONE_CAP_FILE_WR | STONE_CAP_FILE_BUFFER;
 		/* Fallthrough */
-	case CEPH_DELEGATION_RD:
-		caps |= CEPH_CAP_FILE_SHARED |
-			CEPH_CAP_FILE_RD | CEPH_CAP_FILE_CACHE |
-			CEPH_CAP_XATTR_SHARED |
-			CEPH_CAP_LINK_SHARED | CEPH_CAP_AUTH_SHARED;
+	case STONE_DELEGATION_RD:
+		caps |= STONE_CAP_FILE_SHARED |
+			STONE_CAP_FILE_RD | STONE_CAP_FILE_CACHE |
+			STONE_CAP_XATTR_SHARED |
+			STONE_CAP_LINK_SHARED | STONE_CAP_AUTH_SHARED;
 		break;
 	default:
 		// Should never happen
-		ceph_abort();
+		stone_abort();
 	}
 	return caps;
 }
@@ -63,29 +63,29 @@ int ceph_deleg_caps_for_type(unsigned type)
  * A delegation is a container for holding caps on behalf of a client that
  * wants to be able to rely on them until recalled.
  */
-Delegation::Delegation(Fh *_fh, unsigned _type, ceph_deleg_cb_t _cb, void *_priv)
+Delegation::Delegation(Fh *_fh, unsigned _type, stone_deleg_cb_t _cb, void *_priv)
 	: fh(_fh), priv(_priv), type(_type), recall_cb(_cb),
 	  recall_time(utime_t()), timeout_event(nullptr)
 {
   Inode *inode = _fh->inode.get();
-  inode->client->get_cap_ref(inode, ceph_deleg_caps_for_type(_type));
+  inode->client->get_cap_ref(inode, stone_deleg_caps_for_type(_type));
 };
 
 Delegation::~Delegation()
 {
   disarm_timeout();
   Inode *inode = fh->inode.get();
-  inode->client->put_cap_ref(inode, ceph_deleg_caps_for_type(type));
+  inode->client->put_cap_ref(inode, stone_deleg_caps_for_type(type));
 }
 
-void Delegation::reinit(unsigned _type, ceph_deleg_cb_t _recall_cb, void *_priv)
+void Delegation::reinit(unsigned _type, stone_deleg_cb_t _recall_cb, void *_priv)
 {
   /* update cap refs -- note that we do a get first to avoid any going to 0 */
   if (type != _type) {
     Inode *inode = fh->inode.get();
 
-    inode->client->get_cap_ref(inode, ceph_deleg_caps_for_type(_type));
-    inode->client->put_cap_ref(inode, ceph_deleg_caps_for_type(type));
+    inode->client->get_cap_ref(inode, stone_deleg_caps_for_type(_type));
+    inode->client->put_cap_ref(inode, stone_deleg_caps_for_type(type));
     type = _type;
   }
 
@@ -120,12 +120,12 @@ void Delegation::disarm_timeout()
 void Delegation::recall(bool skip_read)
 {
   /* If skip_read is true, don't break read delegations */
-  if (skip_read && type == CEPH_DELEGATION_RD)
+  if (skip_read && type == STONE_DELEGATION_RD)
     return;
 
   if (!is_recalled()) {
     recall_cb(fh, priv);
-    recall_time = ceph_clock_now();
+    recall_time = stone_clock_now();
     arm_timeout();
   }
 }

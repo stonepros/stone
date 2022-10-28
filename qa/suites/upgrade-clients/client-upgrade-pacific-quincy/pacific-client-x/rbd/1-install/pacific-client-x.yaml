@@ -1,11 +1,11 @@
 tasks:
 - install:
     branch: pacific
-    exclude_packages: ['ceph-mgr','libcephfs2','libcephfs-devel','libcephfs-dev','python34-cephfs','python34-rados']
+    exclude_packages: ['stone-mgr','libstonefs2','libstonefs-devel','libstonefs-dev','python34-stonefs','python34-rados']
 - print: "**** done install pacific"
 - install.upgrade:
-   exclude_packages: ['ceph-test', 'ceph-test-dbg','libcephfs1', 'python-ceph']
+   exclude_packages: ['stone-test', 'stone-test-dbg','libstonefs1', 'python-stone']
    client.1:
 - print: "**** done install.upgrade to -x on client.1"
-- ceph:
-- print: "**** done ceph task"
+- stone:
+- print: "**** done stone task"

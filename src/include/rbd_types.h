@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2010 Sage Weil <sage@newdream.net>
  *
@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef CEPH_RBD_TYPES_H
-#define CEPH_RBD_TYPES_H
+#ifndef STONE_RBD_TYPES_H
+#define STONE_RBD_TYPES_H
 
 #include "include/types.h"
 #include "rbd/features.h"

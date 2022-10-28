@@ -1,0 +1,6 @@
+tasks:
+- stoneadm:
+    roleless: true
+    image: docker.io/stone/stone:v16.2.5
+    stoneadm_branch: v16.2.5
+    stoneadm_git_url: https://github.com/stone/stone

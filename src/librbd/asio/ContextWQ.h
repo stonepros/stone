@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_ASIO_CONTEXT_WQ_H
-#define CEPH_LIBRBD_ASIO_CONTEXT_WQ_H
+#ifndef STONE_LIBRBD_ASIO_CONTEXT_WQ_H
+#define STONE_LIBRBD_ASIO_CONTEXT_WQ_H
 
 #include "include/common_fwd.h"
 #include "include/Context.h"
@@ -17,7 +17,7 @@ namespace asio {
 
 class ContextWQ {
 public:
-  explicit ContextWQ(CephContext* cct, boost::asio::io_context& io_context);
+  explicit ContextWQ(StoneContext* cct, boost::asio::io_context& io_context);
   ~ContextWQ();
 
   void drain();
@@ -36,7 +36,7 @@ public:
   }
 
 private:
-  CephContext* m_cct;
+  StoneContext* m_cct;
   boost::asio::io_context& m_io_context;
   std::unique_ptr<boost::asio::io_context::strand> m_strand;
 
@@ -49,4 +49,4 @@ private:
 } // namespace asio
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_ASIO_CONTEXT_WQ_H
+#endif // STONE_LIBRBD_ASIO_CONTEXT_WQ_H

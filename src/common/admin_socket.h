@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_COMMON_ADMIN_SOCKET_H
-#define CEPH_COMMON_ADMIN_SOCKET_H
+#ifndef STONE_COMMON_ADMIN_SOCKET_H
+#define STONE_COMMON_ADMIN_SOCKET_H
 
 #if defined(WITH_SEASTAR) && !defined(WITH_ALIEN)
 #include "crimson/admin/admin_socket.h"
@@ -33,7 +33,7 @@
 class MCommand;
 class MMonCommand;
 
-inline constexpr auto CEPH_ADMIN_SOCK_VERSION = std::string_view("2");
+inline constexpr auto STONE_ADMIN_SOCK_VERSION = std::string_view("2");
 
 class AdminSocketHook {
 public:
@@ -105,7 +105,7 @@ public:
 class AdminSocket
 {
 public:
-  AdminSocket(CephContext *cct);
+  AdminSocket(StoneeContext *cct);
   ~AdminSocket();
 
   AdminSocket(const AdminSocket&) = delete;
@@ -176,7 +176,7 @@ private:
   void do_accept();
   void do_tell_queue();
 
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   std::string m_path;
   int m_sock_fd = -1;
   int m_wakeup_rd_fd = -1;

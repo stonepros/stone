@@ -9,7 +9,7 @@
 
 #include "rgw_basic_types.h"
 #include "rgw_xml.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 using std::string;
 using std::stringstream;

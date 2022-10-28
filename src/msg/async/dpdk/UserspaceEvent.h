@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -13,8 +13,8 @@
  *
  */
 
-#ifndef CEPH_USERSPACEEVENT_H
-#define CEPH_USERSPACEEVENT_H
+#ifndef STONE_USERSPACEEVENT_H
+#define STONE_USERSPACEEVENT_H
 
 #include <cstddef>
 #include <errno.h>
@@ -27,7 +27,7 @@
 #include "include/int_types.h"
 #include "common/Tub.h"
 
-class CephContext;
+class StoneeContext;
 
 class UserspaceEventManager {
   struct UserspaceFDImpl {
@@ -38,7 +38,7 @@ class UserspaceEventManager {
     int8_t activating_mask = 0;
     uint32_t magic = 4921;
   };
-  CephContext *cct;
+  StoneeContext *cct;
   int max_fd = 0;
   uint32_t max_wait_idx = 0;
   std::vector<Tub<UserspaceFDImpl> > fds;
@@ -46,7 +46,7 @@ class UserspaceEventManager {
   std::list<uint32_t> unused_fds;
 
  public:
-  explicit UserspaceEventManager(CephContext *c): cct(c) {
+  explicit UserspaceEventManager(StoneeContext *c): cct(c) {
     waiting_fds.resize(1024);
   }
 
@@ -103,4 +103,4 @@ class UserspaceEventManager {
   }
 };
 
-#endif //CEPH_USERSPACEEVENT_H
+#endif //STONE_USERSPACEEVENT_H

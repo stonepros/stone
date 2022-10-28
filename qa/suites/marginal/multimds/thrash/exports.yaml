@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     conf:
       mds:
         mds thrash exports: 1

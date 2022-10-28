@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (c) 2020 Huawei Technologies Co., Ltd.
  *
@@ -30,8 +30,8 @@ using std::string;
 using std::vector;
 
 // -----------------------------------------------------------------------------
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_common
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_common
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 
@@ -86,7 +86,7 @@ void log_error(const string &err)
 {
   derr << "Intended OpenSSL engine acceleration failed.\n"
        << "set by openssl_engine_opts = "
-       << g_ceph_context->_conf->openssl_engine_opts
+       << g_stone_context->_conf->openssl_engine_opts
        << "\ndetail error information:\n" << err << dendl;
 }
 
@@ -123,7 +123,7 @@ void load_module(const string &engine_conf)
 
 void init_engine()
 {
-  string opts = g_ceph_context->_conf->openssl_engine_opts;
+  string opts = g_stone_context->_conf->openssl_engine_opts;
   if (opts.empty()) {
     return;
   }
@@ -131,7 +131,7 @@ void init_engine()
   load_module(engine_conf);
 }
 
-void ceph::crypto::init_openssl_engine_once()
+void stone::crypto::init_openssl_engine_once()
 {
   static std::once_flag flag;
   std::call_once(flag, init_engine);

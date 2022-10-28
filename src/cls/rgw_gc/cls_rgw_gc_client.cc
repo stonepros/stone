@@ -12,8 +12,8 @@
 using std::list;
 using std::string;
 
-using ceph::decode;
-using ceph::encode;
+using stone::decode;
+using stone::encode;
 
 using namespace librados;
 
@@ -38,7 +38,7 @@ int cls_rgw_gc_queue_get_capacity(IoCtx& io_ctx, const string& oid, uint64_t& si
   auto iter = out.cbegin();
   try {
     decode(op_ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 
@@ -75,7 +75,7 @@ int cls_rgw_gc_queue_list_entries(IoCtx& io_ctx, const string& oid, const string
   auto iter = out.cbegin();
   try {
     decode(ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 

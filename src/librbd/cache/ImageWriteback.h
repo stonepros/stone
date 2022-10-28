@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CACHE_IMAGE_WRITEBACK
-#define CEPH_LIBRBD_CACHE_IMAGE_WRITEBACK
+#ifndef STONE_LIBRBD_CACHE_IMAGE_WRITEBACK
+#define STONE_LIBRBD_CACHE_IMAGE_WRITEBACK
 
 #include "include/buffer_fwd.h"
 #include "include/int_types.h"
@@ -74,4 +74,4 @@ private:
 
 extern template class librbd::cache::ImageWriteback<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_CACHE_IMAGE_WRITEBACK
+#endif // STONE_LIBRBD_CACHE_IMAGE_WRITEBACK

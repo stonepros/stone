@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CLS_OTP_CLIENT_H
-#define CEPH_CLS_OTP_CLIENT_H
+#ifndef STONE_CLS_OTP_CLIENT_H
+#define STONE_CLS_OTP_CLIENT_H
 
 #include "include/rados/librados_fwd.hpp"
 #include "cls/otp/cls_otp_types.h"
@@ -28,7 +28,7 @@ namespace rados {
         static int get(librados::ObjectReadOperation *op,
                        librados::IoCtx& ioctx, const std::string& oid,
                        const std::list<std::string> *ids, bool get_all, std::list<otp_info_t> *result);
-        static int check(CephContext *cct, librados::IoCtx& ioctx, const std::string& oid,
+        static int check(StoneContext *cct, librados::IoCtx& ioctx, const std::string& oid,
                          const std::string& id, const std::string& val, otp_check_t *result);
         static int get_current_time(librados::IoCtx& ioctx, const std::string& oid,
                                     ceph::real_time *result);

@@ -9,7 +9,7 @@
 #include "librbd/plugin/Api.h"
 #include <boost/tokenizer.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::PluginRegistry: " \
                            << this << " " << __func__ << ": "

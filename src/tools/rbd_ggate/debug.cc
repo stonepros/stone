@@ -2,8 +2,8 @@
 #include "common/errno.h"
 #include "debug.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::ggate: "
 
@@ -11,13 +11,13 @@ extern "C" void debugv(int level, const char *fmt, va_list ap) {
     char *msg;
     int saved_errno = errno;
 
-    if (g_ceph_context == nullptr) {
+    if (g_stone_context == nullptr) {
         return;
     }
 
     vasprintf(&msg, fmt, ap);
 
-    dout(ceph::dout::need_dynamic(level)) << msg << dendl;
+    dout(stone::dout::need_dynamic(level)) << msg << dendl;
 
     free(msg);
     errno = saved_errno;

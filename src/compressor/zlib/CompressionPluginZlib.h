@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 Mirantis, Inc.
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_COMPRESSION_PLUGIN_ZLIB_H
-#define CEPH_COMPRESSION_PLUGIN_ZLIB_H
+#ifndef STONE_COMPRESSION_PLUGIN_ZLIB_H
+#define STONE_COMPRESSION_PLUGIN_ZLIB_H
 
 // -----------------------------------------------------------------------------
 #include "arch/probe.h"
@@ -29,7 +29,7 @@ class CompressionPluginZlib : public ceph::CompressionPlugin {
 public:
   bool has_isal = false;
 
-  explicit CompressionPluginZlib(CephContext *cct) : CompressionPlugin(cct)
+  explicit CompressionPluginZlib(StoneeContext *cct) : CompressionPlugin(cct)
   {}
 
   int factory(CompressorRef *cs,

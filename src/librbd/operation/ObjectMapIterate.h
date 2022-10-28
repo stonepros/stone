@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_LIBRBD_OPERATION_OBJECT_MAP_ITERATE_H
-#define CEPH_LIBRBD_OPERATION_OBJECT_MAP_ITERATE_H
+#ifndef STONE_LIBRBD_OPERATION_OBJECT_MAP_ITERATE_H
+#define STONE_LIBRBD_OPERATION_OBJECT_MAP_ITERATE_H
 
 #include <iostream>
 #include <atomic>

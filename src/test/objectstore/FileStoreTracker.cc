@@ -97,11 +97,11 @@ void FileStoreTracker::write(const pair<coll_t, string> &obj,
   for (uint64_t i = offset;
        i < offset + len;
        ++i, ++iter) {
-    ceph_assert(iter.valid());
+    stone_assert(iter.valid());
     to_write.append(*iter);
   }
   out->t->write(coll_t(obj.first),
-		ghobject_t(hobject_t(sobject_t(obj.second, CEPH_NOSNAP))),
+		ghobject_t(hobject_t(sobject_t(obj.second, STONE_NOSNAP))),
 		offset,
 		len,
 		to_write);
@@ -117,7 +117,7 @@ void FileStoreTracker::remove(const pair<coll_t, string> &obj,
   if (!old_contents.exists())
     return;
   out->t->remove(coll_t(obj.first),
-		 ghobject_t(hobject_t(sobject_t(obj.second, CEPH_NOSNAP))));
+		 ghobject_t(hobject_t(sobject_t(obj.second, STONE_NOSNAP))));
   ObjectContents contents;
   out->in_flight->push_back(make_pair(obj, set_content(obj, contents)));
 }
@@ -127,7 +127,7 @@ void FileStoreTracker::clone_range(const pair<coll_t, string> &from,
 				   OutTransaction *out) {
   std::lock_guard l{lock};
   std::cerr << "CloningRange " << from << " to " << to << std::endl;
-  ceph_assert(from.first == to.first);
+  stone_assert(from.first == to.first);
   ObjectContents from_contents = get_current_content(from);
   ObjectContents to_contents = get_current_content(to);
   if (!from_contents.exists()) {
@@ -145,8 +145,8 @@ void FileStoreTracker::clone_range(const pair<coll_t, string> &from,
   interval_to_clone.insert(offset, len);
   to_contents.clone_range(from_contents, interval_to_clone);
   out->t->clone_range(coll_t(from.first),
-		      ghobject_t(hobject_t(sobject_t(from.second, CEPH_NOSNAP))),
-		      ghobject_t(hobject_t(sobject_t(to.second, CEPH_NOSNAP))),
+		      ghobject_t(hobject_t(sobject_t(from.second, STONE_NOSNAP))),
+		      ghobject_t(hobject_t(sobject_t(to.second, STONE_NOSNAP))),
 		      offset,
 		      len,
 		      offset);
@@ -158,7 +158,7 @@ void FileStoreTracker::clone(const pair<coll_t, string> &from,
 			     OutTransaction *out) {
   std::lock_guard l{lock};
   std::cerr << "Cloning " << from << " to " << to << std::endl;
-  ceph_assert(from.first == to.first);
+  stone_assert(from.first == to.first);
   if (from.second == to.second) {
     return;
   }
@@ -170,10 +170,10 @@ void FileStoreTracker::clone(const pair<coll_t, string> &from,
 
   if (to_contents.exists())
     out->t->remove(coll_t(to.first),
-		   ghobject_t(hobject_t(sobject_t(to.second, CEPH_NOSNAP))));
+		   ghobject_t(hobject_t(sobject_t(to.second, STONE_NOSNAP))));
   out->t->clone(coll_t(from.first),
-		ghobject_t(hobject_t(sobject_t(from.second, CEPH_NOSNAP))),
-		ghobject_t(hobject_t(sobject_t(to.second, CEPH_NOSNAP))));
+		ghobject_t(hobject_t(sobject_t(from.second, STONE_NOSNAP))),
+		ghobject_t(hobject_t(sobject_t(to.second, STONE_NOSNAP))));
   out->in_flight->push_back(make_pair(to, set_content(to, from_contents)));
 }
 
@@ -279,7 +279,7 @@ void FileStoreTracker::verify(const coll_t &coll, const string &obj,
   bufferlist contents;
   auto ch = store->open_collection(coll_t(coll));
   int r = store->read(ch,
-		      ghobject_t(hobject_t(sobject_t(obj, CEPH_NOSNAP))),
+		      ghobject_t(hobject_t(sobject_t(obj, STONE_NOSNAP))),
 		      0,
 		      2*SIZE,
 		      contents);
@@ -327,7 +327,7 @@ void FileStoreTracker::verify(const coll_t &coll, const string &obj,
     }
   }
   std::cerr << "Verifying " << make_pair(coll, obj) << " failed " << std::endl;
-  ceph_abort();
+  stone_abort();
 }
 
 ObjectContents FileStoreTracker::get_current_content(
@@ -341,7 +341,7 @@ ObjectContents FileStoreTracker::get_current_content(
     auto bp = bl.cbegin();
     pair<uint64_t, bufferlist> val;
     decode(val, bp);
-    ceph_assert(seq_to_key(val.first) == iter->key());
+    stone_assert(seq_to_key(val.first) == iter->key());
     bp = val.second.begin();
     return ObjectContents(bp);
   }
@@ -361,7 +361,7 @@ ObjectContents FileStoreTracker::get_content(
   auto bp = got.begin()->second.cbegin();
   decode(val, bp);
   bp = val.second.begin();
-  ceph_assert(val.first == version);
+  stone_assert(val.first == version);
   return ObjectContents(bp);
 }
 
@@ -403,7 +403,7 @@ void FileStoreTracker::committed(const pair<coll_t, string> &obj,
 				 uint64_t seq) {
   std::lock_guard l{lock};
   ObjStatus status = get_obj_status(obj, db);
-  ceph_assert(status.last_committed < seq);
+  stone_assert(status.last_committed < seq);
   status.last_committed = seq;
   KeyValueDB::Transaction t = db->get_transaction();
   clear_obsolete(obj, status, db, t);
@@ -416,7 +416,7 @@ void FileStoreTracker::applied(const pair<coll_t, string> &obj,
   std::lock_guard l{lock};
   std::cerr << "Applied " << obj << " version " << seq << std::endl;
   ObjStatus status = get_obj_status(obj, db);
-  ceph_assert(status.last_applied < seq);
+  stone_assert(status.last_applied < seq);
   status.set_last_applied(seq, restart_seq);
   KeyValueDB::Transaction t = db->get_transaction();
   clear_obsolete(obj, status, db, t);

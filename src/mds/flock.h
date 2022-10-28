@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_MDS_FLOCK_H
-#define CEPH_MDS_FLOCK_H
+#ifndef STONE_MDS_FLOCK_H
+#define STONE_MDS_FLOCK_H
 
 #include <errno.h>
 
@@ -70,7 +70,7 @@ inline bool operator!=(const ceph_filelock& l, const ceph_filelock& r) {
 
 class ceph_lock_state_t {
 public:
-  explicit ceph_lock_state_t(CephContext *cct_, int type_) : cct(cct_), type(type_) {}
+  explicit ceph_lock_state_t(StoneContext *cct_, int type_) : cct(cct_), type(type_) {}
   ~ceph_lock_state_t();
   /**
    * Check if a lock is on the waiting_locks list.
@@ -88,7 +88,7 @@ public:
   /*
    * Try to set a new lock. If it's blocked and wait_on_fail is true,
    * add the lock to waiting_locks.
-   * The lock needs to be of type CEPH_LOCK_EXCL or CEPH_LOCK_SHARED.
+   * The lock needs to be of type STONE_LOCK_EXCL or STONE_LOCK_SHARED.
    * This may merge previous locks, or convert the type of already-owned
    * locks.
    *
@@ -104,7 +104,7 @@ public:
    * See if a lock is blocked by existing locks. If the lock is blocked,
    * it will be set to the value of the first blocking lock. Otherwise,
    * it will be returned unchanged, except for setting the type field
-   * to CEPH_LOCK_UNLOCK.
+   * to STONE_LOCK_UNLOCK.
    *
    * @param testing_lock The lock to check for conflicts on.
    */
@@ -263,7 +263,7 @@ private:
   ceph_filelock *contains_exclusive_lock(std::list<std::multimap<uint64_t,
                                          ceph_filelock>::iterator>& locks);
 
-  CephContext *cct;
+  StoneContext *cct;
   int type;
 };
 WRITE_CLASS_ENCODER(ceph_lock_state_t)

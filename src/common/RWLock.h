@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -14,8 +14,8 @@
 
 
 
-#ifndef CEPH_RWLock_Posix__H
-#define CEPH_RWLock_Posix__H
+#ifndef STONE_RWLock_Posix__H
+#define STONE_RWLock_Posix__H
 
 #include <pthread.h>
 #include <string>
@@ -271,4 +271,4 @@ public:
   };
 };
 
-#endif // !CEPH_RWLock_Posix__H
+#endif // !STONE_RWLock_Posix__H

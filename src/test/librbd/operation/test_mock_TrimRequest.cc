@@ -136,7 +136,7 @@ public:
                                 bool updated, int ret_val) {
     if (mock_image_ctx.object_map != nullptr) {
       EXPECT_CALL(*mock_image_ctx.object_map,
-                  aio_update(CEPH_NOSNAP, start_object, end_object, state,
+                  aio_update(STONE_NOSNAP, start_object, end_object, state,
                              boost::optional<uint8_t>(current_state), _, false, _))
         .WillOnce(WithArg<7>(Invoke([&mock_image_ctx, updated, ret_val](Context *ctx) {
                                if (updated) {
@@ -149,7 +149,7 @@ public:
 
   void expect_get_parent_overlap(MockTestImageCtx &mock_image_ctx,
                                  uint64_t overlap) {
-    EXPECT_CALL(mock_image_ctx, get_parent_overlap(CEPH_NOSNAP, _))
+    EXPECT_CALL(mock_image_ctx, get_parent_overlap(STONE_NOSNAP, _))
       .WillOnce(WithArg<1>(Invoke([overlap](uint64_t *o) {
                              *o = overlap;
                              return 0;

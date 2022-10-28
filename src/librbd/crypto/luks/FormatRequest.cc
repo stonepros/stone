@@ -14,7 +14,7 @@
 #include "librbd/io/AioCompletion.h"
 #include "librbd/io/ImageDispatchSpec.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::crypto::luks::FormatRequest: " << this \
                            << " " << __func__ << ": "
@@ -28,7 +28,7 @@ using librbd::util::create_context_callback;
 template <typename I>
 FormatRequest<I>::FormatRequest(
         I* image_ctx, encryption_format_t format, encryption_algorithm_t alg,
-        std::string&& passphrase, ceph::ref_t<CryptoInterface>* result_crypto,
+        std::string&& passphrase, stone::ref_t<CryptoInterface>* result_crypto,
         Context* on_finish,
         bool insecure_fast_mode) : m_image_ctx(image_ctx), m_format(format),
                                    m_alg(alg),
@@ -103,7 +103,7 @@ void FormatRequest<I>::send() {
   }
 
   m_image_ctx->image_lock.lock_shared();
-  uint64_t image_size = m_image_ctx->get_image_size(CEPH_NOSNAP);
+  uint64_t image_size = m_image_ctx->get_image_size(STONE_NOSNAP);
   m_image_ctx->image_lock.unlock_shared();
 
   if (m_header.get_data_offset() >= image_size) {
@@ -123,14 +123,14 @@ void FormatRequest<I>::send() {
   r = util::build_crypto(m_image_ctx->cct, key, key_size,
                          m_header.get_sector_size(),
                          m_header.get_data_offset(), m_result_crypto);
-  ceph_memzero_s(key, key_size, key_size);
+  stone_memzero_s(key, key_size, key_size);
   if (r != 0) {
     finish(r);
     return;
   }
 
   // read header from libcryptsetup interface
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   r = m_header.read(&bl);
   if (r < 0) {
     finish(r);
@@ -165,7 +165,7 @@ void FormatRequest<I>::handle_write_header(int r) {
 
 template <typename I>
 void FormatRequest<I>::finish(int r) {
-  ceph_memzero_s(
+  stone_memzero_s(
           &m_passphrase[0], m_passphrase.capacity(), m_passphrase.size());
   m_on_finish->complete(r);
   delete this;

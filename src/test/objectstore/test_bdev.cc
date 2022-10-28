@@ -7,8 +7,8 @@
 #include <gtest/gtest.h>
 #include "global/global_init.h"
 #include "global/global_context.h"
-#include "common/ceph_context.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_context.h"
+#include "common/stone_argparse.h"
 #include "include/stringify.h"
 #include "common/errno.h"
 
@@ -27,12 +27,12 @@ private:
   static string get_temp_bdev(uint64_t size)
   {
     static int n = 0;
-    string fn = "ceph_test_bluefs.tmp.block." + stringify(getpid())
+    string fn = "stone_test_bluefs.tmp.block." + stringify(getpid())
       + "." + stringify(++n);
     int fd = ::open(fn.c_str(), O_CREAT|O_RDWR|O_TRUNC, 0644);
-    ceph_assert(fd >= 0);
+    stone_assert(fd >= 0);
     int r = ::ftruncate(fd, size);
-    ceph_assert(r >= 0);
+    stone_assert(r >= 0);
     ::close(fd);
     return fn;
   }
@@ -51,7 +51,7 @@ TEST(KernelDevice, Ticket45337) {
   const bool buffered = true;
 
   std::unique_ptr<BlockDevice> b(
-    BlockDevice::create(g_ceph_context, bdev.path, NULL, NULL,
+    BlockDevice::create(g_stone_context, bdev.path, NULL, NULL,
       [](void* handle, void* aio) {}, NULL));
   bufferlist bl;
   // writing a bit less than 4GB
@@ -71,7 +71,7 @@ TEST(KernelDevice, Ticket45337) {
       return;
     }
   }
-  std::unique_ptr<IOContext> ioc(new IOContext(g_ceph_context, NULL));
+  std::unique_ptr<IOContext> ioc(new IOContext(g_stone_context, NULL));
 
   auto r = b->aio_write(0, bl, ioc.get(), buffered);
   ASSERT_EQ(r, 0);
@@ -97,14 +97,14 @@ int main(int argc, char **argv) {
     { "debug_bdev", "1/20" }
   };
 
-  auto cct = global_init(&defaults, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(&defaults, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.set_val(
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.set_val(
     "enable_experimental_unrecoverable_data_corrupting_features",
     "*");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.apply_changes(nullptr);
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

@@ -11,7 +11,7 @@
 #include "rgw/rgw_zone.h"
 #include "rgw/rgw_tools.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 class RGWSI_SysObj_Cache_CB : public RGWSI_Notify::CB
 {
@@ -294,7 +294,7 @@ int RGWSI_SysObj_Cache::write(const DoutPrefixProvider *dpp,
   info.status = 0;
   info.data = data;
   info.flags = CACHE_FLAG_XATTRS | CACHE_FLAG_DATA | CACHE_FLAG_META;
-  ceph::real_time result_mtime;
+  stone::real_time result_mtime;
   int ret = RGWSI_SysObj_Core::write(dpp, obj, &result_mtime, attrs,
                                      exclusive, data,
                                      objv_tracker, set_mtime, y);
@@ -496,11 +496,11 @@ void RGWSI_SysObj_Cache::unregister_chained_cache(RGWChainedCache *cc)
 
 static void cache_list_dump_helper(Formatter* f,
                                    const std::string& name,
-                                   const ceph::real_time mtime,
+                                   const stone::real_time mtime,
                                    const std::uint64_t size)
 {
   f->dump_string("name", name);
-  f->dump_string("mtime", ceph::to_iso_8601(mtime));
+  f->dump_string("mtime", stone::to_iso_8601(mtime));
   f->dump_unsigned("size", size);
 }
 
@@ -508,11 +508,11 @@ class RGWSI_SysObj_Cache_ASocketHook : public AdminSocketHook {
   RGWSI_SysObj_Cache *svc;
 
   static constexpr std::string_view admin_commands[][2] = {
-    { "cache list name=filter,type=CephString,req=false",
+    { "cache list name=filter,type=StoneString,req=false",
       "cache list [filter_str]: list object cache, possibly matching substrings" },
-    { "cache inspect name=target,type=CephString,req=true",
+    { "cache inspect name=target,type=StoneString,req=true",
       "cache inspect target: print cache element" },
-    { "cache erase name=target,type=CephString,req=true",
+    { "cache erase name=target,type=StoneString,req=true",
       "cache erase target: erase element from cache" },
     { "cache zap",
       "cache zap: erase all elements from cache" }

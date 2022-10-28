@@ -1,5 +1,5 @@
-#ifndef CEPH_HASH_H
-#define CEPH_HASH_H
+#ifndef STONE_HASH_H
+#define STONE_HASH_H
 
 #include "acconfig.h"
 

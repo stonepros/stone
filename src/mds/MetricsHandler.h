@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MDS_METRICS_HANDLER_H
-#define CEPH_MDS_METRICS_HANDLER_H
+#ifndef STONE_MDS_METRICS_HANDLER_H
+#define STONE_MDS_METRICS_HANDLER_H
 
 #include <thread>
 #include <utility>
@@ -23,7 +23,7 @@ class Session;
 
 class MetricsHandler : public Dispatcher {
 public:
-  MetricsHandler(CephContext *cct, MDSRank *mds);
+  MetricsHandler(StoneContext *cct, MDSRank *mds);
 
   bool ms_can_fast_dispatch_any() const override {
     return true;
@@ -111,4 +111,4 @@ private:
   void update_rank0();
 };
 
-#endif // CEPH_MDS_METRICS_HANDLER_H
+#endif // STONE_MDS_METRICS_HANDLER_H

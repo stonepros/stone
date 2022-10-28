@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2021 Red Hat, Inc.
  *
@@ -29,13 +29,13 @@
 #include <limits.h>
 #include <string.h>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/rados/librados.hpp"
 
 #include "cls/lock/cls_lock_client.h"
 
-#include "common/ceph_argparse.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_argparse.h"
+#include "common/stone_mutex.h"
 #include "common/common_init.h"
 #include "common/config.h"
 #include "common/debug.h"
@@ -44,12 +44,12 @@
 
 #include "SimpleRADOSStriper.h"
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
-#define dout_subsys ceph_subsys_cephsqlite
+#define dout_subsys stone_subsys_stonesqlite
 #undef dout_prefix
 #define dout_prefix *_dout << "client." << ioctx.get_instance_id() << ": SimpleRADOSStriper: " << __func__ << ": " << oid << ": "
-#define d(lvl) ldout((CephContext*)ioctx.cct(), (lvl))
+#define d(lvl) ldout((StoneContext*)ioctx.cct(), (lvl))
 
 enum {
   P_FIRST = 0xe0000,
@@ -64,7 +64,7 @@ enum {
   P_LAST,
 };
 
-int SimpleRADOSStriper::config_logger(CephContext* cct, std::string_view name, std::shared_ptr<PerfCounters>* l)
+int SimpleRADOSStriper::config_logger(StoneContext* cct, std::string_view name, std::shared_ptr<PerfCounters>* l)
 {
   PerfCountersBuilder plb(cct, name.data(), P_FIRST, P_LAST);
   plb.add_u64_counter(P_UPDATE_METADATA, "update_metadata", "Number of metadata updates");
@@ -265,19 +265,19 @@ int SimpleRADOSStriper::open()
     auto sstr = bl_size.to_str();
     std::string err;
     size = strict_strtoll(sstr.c_str(), 10, &err);
-    ceph_assert(err.empty());
+    stone_assert(err.empty());
   }
   {
     auto sstr = bl_alloc.to_str();
     std::string err;
     allocated = strict_strtoll(sstr.c_str(), 10, &err);
-    ceph_assert(err.empty());
+    stone_assert(err.empty());
   }
   {
     auto sstr = bl_version.to_str();
     std::string err;
     version = strict_strtoll(sstr.c_str(), 10, &err);
-    ceph_assert(err.empty());
+    stone_assert(err.empty());
   }
   d(15) << " size: " << size << " allocated: " << allocated << " version: " << version << dendl;
   return 0;
@@ -288,7 +288,7 @@ int SimpleRADOSStriper::shrink_alloc(uint64_t a)
   d(5) << dendl;
   std::vector<aiocompletionptr> removes;
 
-  ceph_assert(a <= allocated);
+  stone_assert(a <= allocated);
   uint64_t prune = std::max<uint64_t>(a, (1u << object_size)); /* never delete first extent here */
   uint64_t len = allocated - prune;
   const uint64_t bytes_removed = len;
@@ -509,7 +509,7 @@ ssize_t SimpleRADOSStriper::read(void* data, size_t len, uint64_t off)
     bl.begin().copy(bl.length(), ((char*)data)+r);
     r += bl.length();
   }
-  ceph_assert(r <= len);
+  stone_assert(r <= len);
 
   return r;
 }
@@ -556,7 +556,7 @@ void SimpleRADOSStriper::lock_keeper_main(void)
 
     if (since >= lock_keeper_interval && locked) {
       d(10) << "renewing lock" << dendl;
-      auto tv = ceph::to_timeval(lock_keeper_timeout);
+      auto tv = stone::to_timeval(lock_keeper_timeout);
       int rc = ioctx.lock_exclusive(ext.soid, biglock, cookie.to_string(), lockdesc, &tv, LIBRADOS_LOCK_FLAG_MUST_RENEW);
       if (rc) {
         /* If lock renewal fails, we cannot continue the application. Return
@@ -582,7 +582,7 @@ int SimpleRADOSStriper::recover_lock()
   const auto ext = get_first_extent();
 
   {
-    auto tv = ceph::to_timeval(lock_keeper_timeout);
+    auto tv = stone::to_timeval(lock_keeper_timeout);
     if (int rc = ioctx.lock_exclusive(ext.soid, biglock, cookie.to_string(), lockdesc, &tv, 0); rc < 0) {
       return rc;
     }
@@ -667,7 +667,7 @@ int SimpleRADOSStriper::lock(uint64_t timeoutms)
 
   std::scoped_lock lock(lock_keeper_mutex);
 
-  ceph_assert(!is_locked());
+  stone_assert(!is_locked());
 
   /* We're going to be very lazy here in implementation: only exclusive locks
    * are allowed. That even ensures a single reader.
@@ -683,7 +683,7 @@ int SimpleRADOSStriper::lock(uint64_t timeoutms)
      */
 
     auto op = librados::ObjectWriteOperation();
-    auto tv = ceph::to_timeval(lock_keeper_timeout);
+    auto tv = stone::to_timeval(lock_keeper_timeout);
     utime_t duration;
     duration.set_from_timeval(&tv);
     rados::cls::lock::lock(&op, biglock, ClsLockType::EXCLUSIVE, cookie.to_string(), "", lockdesc, duration, 0);
@@ -745,7 +745,7 @@ int SimpleRADOSStriper::unlock()
 
   std::scoped_lock lock(lock_keeper_mutex);
 
-  ceph_assert(is_locked());
+  stone_assert(is_locked());
 
   /* wait for flush of metadata */
   if (int rc = flush(); rc < 0) {

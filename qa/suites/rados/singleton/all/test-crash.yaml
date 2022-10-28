@@ -3,9 +3,9 @@ roles:
 
 tasks:
   - install:
-  - ceph:
+  - stone:
       pre-mgr-commands:
-        - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+        - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
       log-ignorelist:
         - Reduced data availability
         - OSD_.*DOWN
@@ -14,7 +14,7 @@ tasks:
       clients:
          client.0:
            - rados/test_crash.sh
-  - ceph.restart: [osd.*]
+  - stone.restart: [osd.*]
   - exec:
       mon.a:
         - find $TESTDIR/archive/coredump -type f -exec rm -f {} \;

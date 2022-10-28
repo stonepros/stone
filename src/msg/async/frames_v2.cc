@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat
  *
@@ -18,11 +18,11 @@
 
 #include <fmt/format.h>
 
-namespace ceph::msgr::v2 {
+namespace stone::msgr::v2 {
 
 // Unpads bufferlist to unpadded_len.
 static void unpad_zero(bufferlist& bl, uint32_t unpadded_len) {
-  ceph_assert(bl.length() >= unpadded_len);
+  stone_assert(bl.length() >= unpadded_len);
   if (bl.length() > unpadded_len) {
     bl.splice(unpadded_len, bl.length() - unpadded_len);
   }
@@ -32,7 +32,7 @@ static void unpad_zero(bufferlist& bl, uint32_t unpadded_len) {
 // A frame always has at least one (possibly empty) segment.
 static size_t calc_num_segments(const bufferlist segment_bls[],
                                 size_t segment_count) {
-  ceph_assert(segment_count > 0 && segment_count <= MAX_NUM_SEGMENTS);
+  stone_assert(segment_count > 0 && segment_count <= MAX_NUM_SEGMENTS);
   for (size_t i = segment_count; i-- > 0; ) {
     if (segment_bls[i].length() > 0) {
       return i + 1;
@@ -72,13 +72,13 @@ void FrameAssembler::fill_preamble(Tag tag,
     preamble.segments[i].alignment = m_descs[i].align;
   }
   preamble.num_segments = m_descs.size();
-  preamble.crc = ceph_crc32c(
+  preamble.crc = stone_crc32c(
       0, reinterpret_cast<const unsigned char*>(&preamble),
       sizeof(preamble) - sizeof(preamble.crc));
 }
 
 uint64_t FrameAssembler::get_frame_logical_len() const {
-  ceph_assert(!m_descs.empty());
+  stone_assert(!m_descs.empty());
   uint64_t logical_len = 0;
   for (size_t i = 0; i < m_descs.size(); i++) {
     logical_len += m_descs[i].logical_len;
@@ -87,7 +87,7 @@ uint64_t FrameAssembler::get_frame_logical_len() const {
 }
 
 uint64_t FrameAssembler::get_frame_onwire_len() const {
-  ceph_assert(!m_descs.empty());
+  stone_assert(!m_descs.empty());
   uint64_t onwire_len = get_preamble_onwire_len();
   for (size_t i = 0; i < m_descs.size(); i++) {
     onwire_len += get_segment_onwire_len(i);
@@ -105,7 +105,7 @@ bufferlist FrameAssembler::asm_crc_rev0(const preamble_block_t& preamble,
   bufferlist frame_bl(sizeof(preamble) + sizeof(epilogue));
   frame_bl.append(reinterpret_cast<const char*>(&preamble), sizeof(preamble));
   for (size_t i = 0; i < m_descs.size(); i++) {
-    ceph_assert(segment_bls[i].length() == m_descs[i].logical_len);
+    stone_assert(segment_bls[i].length() == m_descs[i].logical_len);
     epilogue.crc_values[i] = segment_bls[i].crc32c(-1);
     if (segment_bls[i].length() > 0) {
       frame_bl.claim_append(segment_bls[i]);
@@ -157,7 +157,7 @@ bufferlist FrameAssembler::asm_crc_rev1(const preamble_block_t& preamble,
   bufferlist frame_bl(sizeof(preamble) + FRAME_CRC_SIZE + sizeof(epilogue));
   frame_bl.append(reinterpret_cast<const char*>(&preamble), sizeof(preamble));
 
-  ceph_assert(segment_bls[0].length() == m_descs[0].logical_len);
+  stone_assert(segment_bls[0].length() == m_descs[0].logical_len);
   if (segment_bls[0].length() > 0) {
     uint32_t crc = segment_bls[0].crc32c(-1);
     frame_bl.claim_append(segment_bls[0]);
@@ -168,7 +168,7 @@ bufferlist FrameAssembler::asm_crc_rev1(const preamble_block_t& preamble,
   }
 
   for (size_t i = 1; i < m_descs.size(); i++) {
-    ceph_assert(segment_bls[i].length() == m_descs[i].logical_len);
+    stone_assert(segment_bls[i].length() == m_descs[i].logical_len);
     epilogue.crc_values[i - 1] = segment_bls[i].crc32c(-1);
     if (segment_bls[i].length() > 0) {
       frame_bl.claim_append(segment_bls[i]);
@@ -251,7 +251,7 @@ bufferlist FrameAssembler::assemble_frame(Tag tag, bufferlist segment_bls[],
 
   if (m_crypto->rx) {
     for (size_t i = 0; i < m_descs.size(); i++) {
-      ceph_assert(segment_bls[i].length() == m_descs[i].logical_len);
+      stone_assert(segment_bls[i].length() == m_descs[i].logical_len);
       // We're padding segments to biggest cipher's block size. Although
       // AES-GCM can live without that as it's a stream cipher, we don't
       // want to be fixed to stream ciphers only.
@@ -277,23 +277,23 @@ Tag FrameAssembler::disassemble_preamble(bufferlist& preamble_bl) {
   if (m_crypto->rx) {
     m_crypto->rx->reset_rx_handler();
     if (m_is_rev1) {
-      ceph_assert(preamble_bl.length() == FRAME_PREAMBLE_WITH_INLINE_SIZE +
+      stone_assert(preamble_bl.length() == FRAME_PREAMBLE_WITH_INLINE_SIZE +
                                           get_auth_tag_len());
       m_crypto->rx->authenticated_decrypt_update_final(preamble_bl);
     } else {
-      ceph_assert(preamble_bl.length() == sizeof(preamble_block_t));
+      stone_assert(preamble_bl.length() == sizeof(preamble_block_t));
       m_crypto->rx->authenticated_decrypt_update(preamble_bl);
     }
   } else {
-    ceph_assert(preamble_bl.length() == sizeof(preamble_block_t));
+    stone_assert(preamble_bl.length() == sizeof(preamble_block_t));
   }
 
-  // I expect ceph_le32 will make the endian conversion for me. Passing
+  // I expect stone_le32 will make the endian conversion for me. Passing
   // everything through ::Decode is unnecessary.
   auto preamble = reinterpret_cast<const preamble_block_t*>(
       preamble_bl.c_str());
   // check preamble crc before any further processing
-  uint32_t crc = ceph_crc32c(
+  uint32_t crc = stone_crc32c(
       0, reinterpret_cast<const unsigned char*>(preamble),
       sizeof(*preamble) - sizeof(preamble->crc));
   if (crc != preamble->crc) {
@@ -322,12 +322,12 @@ Tag FrameAssembler::disassemble_preamble(bufferlist& preamble_bl) {
 
 bool FrameAssembler::disasm_all_crc_rev0(bufferlist segment_bls[],
                                          bufferlist& epilogue_bl) const {
-  ceph_assert(epilogue_bl.length() == sizeof(epilogue_crc_rev0_block_t));
+  stone_assert(epilogue_bl.length() == sizeof(epilogue_crc_rev0_block_t));
   auto epilogue = reinterpret_cast<const epilogue_crc_rev0_block_t*>(
       epilogue_bl.c_str());
 
   for (size_t i = 0; i < m_descs.size(); i++) {
-    ceph_assert(segment_bls[i].length() == m_descs[i].logical_len);
+    stone_assert(segment_bls[i].length() == m_descs[i].logical_len);
     check_segment_crc(segment_bls[i], epilogue->crc_values[i]);
   }
   return !(epilogue->late_flags & FRAME_LATE_FLAG_ABORTED);
@@ -336,14 +336,14 @@ bool FrameAssembler::disasm_all_crc_rev0(bufferlist segment_bls[],
 bool FrameAssembler::disasm_all_secure_rev0(bufferlist segment_bls[],
                                             bufferlist& epilogue_bl) const {
   for (size_t i = 0; i < m_descs.size(); i++) {
-    ceph_assert(segment_bls[i].length() == get_segment_padded_len(i));
+    stone_assert(segment_bls[i].length() == get_segment_padded_len(i));
     if (segment_bls[i].length() > 0) {
       m_crypto->rx->authenticated_decrypt_update(segment_bls[i]);
       unpad_zero(segment_bls[i], m_descs[i].logical_len);
     }
   }
 
-  ceph_assert(epilogue_bl.length() == sizeof(epilogue_secure_rev0_block_t) +
+  stone_assert(epilogue_bl.length() == sizeof(epilogue_secure_rev0_block_t) +
                                       get_auth_tag_len());
   m_crypto->rx->authenticated_decrypt_update_final(epilogue_bl);
   auto epilogue = reinterpret_cast<const epilogue_secure_rev0_block_t*>(
@@ -353,9 +353,9 @@ bool FrameAssembler::disasm_all_secure_rev0(bufferlist segment_bls[],
 
 void FrameAssembler::disasm_first_crc_rev1(bufferlist& preamble_bl,
                                            bufferlist& segment_bl) const {
-  ceph_assert(preamble_bl.length() == sizeof(preamble_block_t));
+  stone_assert(preamble_bl.length() == sizeof(preamble_block_t));
   if (m_descs[0].logical_len > 0) {
-    ceph_assert(segment_bl.length() == m_descs[0].logical_len +
+    stone_assert(segment_bl.length() == m_descs[0].logical_len +
                                        FRAME_CRC_SIZE);
     bufferlist::const_iterator it(&segment_bl, m_descs[0].logical_len);
     uint32_t expected_crc;
@@ -363,18 +363,18 @@ void FrameAssembler::disasm_first_crc_rev1(bufferlist& preamble_bl,
     segment_bl.splice(m_descs[0].logical_len, FRAME_CRC_SIZE);
     check_segment_crc(segment_bl, expected_crc);
   } else {
-    ceph_assert(segment_bl.length() == 0);
+    stone_assert(segment_bl.length() == 0);
   }
 }
 
 bool FrameAssembler::disasm_remaining_crc_rev1(bufferlist segment_bls[],
                                                bufferlist& epilogue_bl) const {
-  ceph_assert(epilogue_bl.length() == sizeof(epilogue_crc_rev1_block_t));
+  stone_assert(epilogue_bl.length() == sizeof(epilogue_crc_rev1_block_t));
   auto epilogue = reinterpret_cast<const epilogue_crc_rev1_block_t*>(
       epilogue_bl.c_str());
 
   for (size_t i = 1; i < m_descs.size(); i++) {
-    ceph_assert(segment_bls[i].length() == m_descs[i].logical_len);
+    stone_assert(segment_bls[i].length() == m_descs[i].logical_len);
     check_segment_crc(segment_bls[i], epilogue->crc_values[i - 1]);
   }
   return check_epilogue_late_status(epilogue->late_status);
@@ -382,10 +382,10 @@ bool FrameAssembler::disasm_remaining_crc_rev1(bufferlist segment_bls[],
 
 void FrameAssembler::disasm_first_secure_rev1(bufferlist& preamble_bl,
                                               bufferlist& segment_bl) const {
-  ceph_assert(preamble_bl.length() == FRAME_PREAMBLE_WITH_INLINE_SIZE);
+  stone_assert(preamble_bl.length() == FRAME_PREAMBLE_WITH_INLINE_SIZE);
   uint32_t padded_len = get_segment_padded_len(0);
   if (padded_len > FRAME_PREAMBLE_INLINE_SIZE) {
-    ceph_assert(segment_bl.length() == padded_len + get_auth_tag_len() -
+    stone_assert(segment_bl.length() == padded_len + get_auth_tag_len() -
                                        FRAME_PREAMBLE_INLINE_SIZE);
     m_crypto->rx->reset_rx_handler();
     m_crypto->rx->authenticated_decrypt_update_final(segment_bl);
@@ -396,26 +396,26 @@ void FrameAssembler::disasm_first_secure_rev1(bufferlist& preamble_bl,
                        &segment_bl);
     segment_bl.claim_append(std::move(tmp));
   } else {
-    ceph_assert(segment_bl.length() == 0);
+    stone_assert(segment_bl.length() == 0);
     preamble_bl.splice(sizeof(preamble_block_t), FRAME_PREAMBLE_INLINE_SIZE,
                        &segment_bl);
   }
   unpad_zero(segment_bl, m_descs[0].logical_len);
-  ceph_assert(segment_bl.length() == m_descs[0].logical_len);
+  stone_assert(segment_bl.length() == m_descs[0].logical_len);
 }
 
 bool FrameAssembler::disasm_remaining_secure_rev1(
     bufferlist segment_bls[], bufferlist& epilogue_bl) const {
   m_crypto->rx->reset_rx_handler();
   for (size_t i = 1; i < m_descs.size(); i++) {
-    ceph_assert(segment_bls[i].length() == get_segment_padded_len(i));
+    stone_assert(segment_bls[i].length() == get_segment_padded_len(i));
     if (segment_bls[i].length() > 0) {
       m_crypto->rx->authenticated_decrypt_update(segment_bls[i]);
       unpad_zero(segment_bls[i], m_descs[i].logical_len);
     }
   }
 
-  ceph_assert(epilogue_bl.length() == sizeof(epilogue_secure_rev1_block_t) +
+  stone_assert(epilogue_bl.length() == sizeof(epilogue_secure_rev1_block_t) +
                                       get_auth_tag_len());
   m_crypto->rx->authenticated_decrypt_update_final(epilogue_bl);
   auto epilogue = reinterpret_cast<const epilogue_secure_rev1_block_t*>(
@@ -425,7 +425,7 @@ bool FrameAssembler::disasm_remaining_secure_rev1(
 
 void FrameAssembler::disassemble_first_segment(bufferlist& preamble_bl,
                                                bufferlist& segment_bl) const {
-  ceph_assert(!m_descs.empty());
+  stone_assert(!m_descs.empty());
   if (m_is_rev1) {
     if (m_crypto->rx) {
       disasm_first_secure_rev1(preamble_bl, segment_bl);
@@ -439,11 +439,11 @@ void FrameAssembler::disassemble_first_segment(bufferlist& preamble_bl,
 
 bool FrameAssembler::disassemble_remaining_segments(
     bufferlist segment_bls[], bufferlist& epilogue_bl) const {
-  ceph_assert(!m_descs.empty());
+  stone_assert(!m_descs.empty());
   if (m_is_rev1) {
     if (m_descs.size() == 1) {
       // no epilogue if only one segment
-      ceph_assert(epilogue_bl.length() == 0);
+      stone_assert(epilogue_bl.length() == 0);
       return true;
     }
     if (m_crypto->rx) {
@@ -473,4 +473,4 @@ std::ostream& operator<<(std::ostream& os, const FrameAssembler& frame_asm) {
   return os;
 }
 
-}  // namespace ceph::msgr::v2
+}  // namespace stone::msgr::v2

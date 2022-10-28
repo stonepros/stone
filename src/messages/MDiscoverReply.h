@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MDISCOVERREPLY_H
-#define CEPH_MDISCOVERREPLY_H
+#ifndef STONE_MDISCOVERREPLY_H
+#define STONE_MDISCOVERREPLY_H
 
 #include "include/filepath.h"
 #include "messages/MMDSOp.h"
@@ -132,7 +132,7 @@ protected:
     base_dir_frag(df.frag),
     wanted_base_dir(false),
     path_locked(false),
-    wanted_snapid(CEPH_NOSNAP),
+    wanted_snapid(STONE_NOSNAP),
     flag_error_dn(false),
     flag_error_dir(false),
     unsolicited(false),

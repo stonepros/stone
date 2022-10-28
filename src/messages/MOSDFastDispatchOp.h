@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MOSDFASTDISPATCHOP_H
-#define CEPH_MOSDFASTDISPATCHOP_H
+#ifndef STONE_MOSDFASTDISPATCHOP_H
+#define STONE_MOSDFASTDISPATCHOP_H
 
 #include "msg/Message.h"
 #include "osd/osd_types.h"

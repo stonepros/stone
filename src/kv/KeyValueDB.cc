@@ -11,7 +11,7 @@
 using std::map;
 using std::string;
 
-KeyValueDB *KeyValueDB::create(CephContext *cct, const string& type,
+KeyValueDB *KeyValueDB::create(StoneContext *cct, const string& type,
 			       const string& dir,
 			       map<string,string> options,
 			       void *p)

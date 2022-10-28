@@ -14,11 +14,11 @@
 #include "common/debug.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_bluestore
+#define dout_subsys stone_subsys_bluestore
 #undef dout_prefix
 #define dout_prefix *_dout << "ZonedAllocator " << this << " "
 
-ZonedAllocator::ZonedAllocator(CephContext* cct,
+ZonedAllocator::ZonedAllocator(StoneContext* cct,
 			       int64_t size,
 			       int64_t block_size,
 			       const std::string& name)
@@ -38,7 +38,7 @@ ZonedAllocator::ZonedAllocator(CephContext* cct,
 		 << " number of zones " << num_zones
 		 << " first sequential zone " << starting_zone_num
 		 << dendl;
-  ceph_assert(size % zone_size == 0);
+  stone_assert(size % zone_size == 0);
 }
 
 ZonedAllocator::~ZonedAllocator() {}
@@ -51,7 +51,7 @@ int64_t ZonedAllocator::allocate(
   PExtentVector *extents) {
   std::lock_guard l(lock);
 
-  ceph_assert(want_size % 4096 == 0);
+  stone_assert(want_size % 4096 == 0);
 
   ldout(cct, 10) << __func__ << " trying to allocate "
 		 << std::hex << want_size << dendl;
@@ -128,21 +128,21 @@ void ZonedAllocator::init_rm_free(uint64_t offset, uint64_t length) {
 		 << offset << "~" << length << dendl;
 
   num_free -= length;
-  ceph_assert(num_free >= 0);
+  stone_assert(num_free >= 0);
 
   uint64_t zone_num = offset / zone_size;
   uint64_t write_pointer = offset % zone_size;
   uint64_t remaining_space = get_remaining_space(zone_num);
 
-  ceph_assert(get_write_pointer(zone_num) == write_pointer);
-  ceph_assert(remaining_space <= length);
+  stone_assert(get_write_pointer(zone_num) == write_pointer);
+  stone_assert(remaining_space <= length);
   advance_write_pointer(zone_num, remaining_space);
 
   ldout(cct, 40) << __func__ << " set zone 0x" << std::hex
 		 << zone_num << " write pointer to 0x" << zone_size << dendl;
 
   length -= remaining_space;
-  ceph_assert(length % zone_size == 0);
+  stone_assert(length % zone_size == 0);
 
   for ( ; length; length -= zone_size) {
     advance_write_pointer(++zone_num, zone_size);

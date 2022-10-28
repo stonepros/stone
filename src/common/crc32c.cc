@@ -14,31 +14,31 @@
 /*
  * choose best implementation based on the CPU architecture.
  */
-ceph_crc32c_func_t ceph_choose_crc32(void)
+stone_crc32c_func_t stone_choose_crc32(void)
 {
   // make sure we've probed cpu features; this might depend on the
   // link order of this file relative to arch/probe.cc.
-  ceph_arch_probe();
+  stone_arch_probe();
 
   // if the CPU supports it, *and* the fast version is compiled in,
   // use that.
 #if defined(__i386__) || defined(__x86_64__)
-  if (ceph_arch_intel_sse42 && ceph_crc32c_intel_fast_exists()) {
-    return ceph_crc32c_intel_fast;
+  if (stone_arch_intel_sse42 && stone_crc32c_intel_fast_exists()) {
+    return stone_crc32c_intel_fast;
   }
 #elif defined(__arm__) || defined(__aarch64__)
 # if defined(HAVE_ARMV8_CRC)
-  if (ceph_arch_aarch64_crc32){
-    return ceph_crc32c_aarch64;
+  if (stone_arch_aarch64_crc32){
+    return stone_crc32c_aarch64;
   }
 # endif
 #elif defined(__powerpc__) || defined(__ppc__)
-  if (ceph_arch_ppc_crc32) {
-    return ceph_crc32c_ppc;
+  if (stone_arch_ppc_crc32) {
+    return stone_crc32c_ppc;
   }
 #endif
   // default
-  return ceph_crc32c_sctp;
+  return stone_crc32c_sctp;
 }
 
 /*
@@ -50,7 +50,7 @@ ceph_crc32c_func_t ceph_choose_crc32(void)
  *
  * We initialize it during program init using the magic of C++.
  */
-ceph_crc32c_func_t ceph_crc32c_func = ceph_choose_crc32();
+stone_crc32c_func_t stone_crc32c_func = stone_choose_crc32();
 
 
 /*
@@ -65,7 +65,7 @@ void create_turbo_table(uint32_t table[32][32])
 {
   //crc_turbo_struct table;
   for (int bit = 0 ; bit < 32 ; bit++) {
-    table[0][bit] = ceph_crc32c_sctp(1UL << bit, nullptr, 1);
+    table[0][bit] = stone_crc32c_sctp(1UL << bit, nullptr, 1);
   }
   for (int range = 1; range <32 ; range++) {
     for (int bit = 0 ; bit < 32 ; bit++) {
@@ -213,7 +213,7 @@ static uint32_t crc_turbo_table[32][32] =
      0x00010000, 0x00020000, 0x00040000, 0x00080000, 0x00100000, 0x00200000, 0x00400000, 0x00800000}
 };
 
-uint32_t ceph_crc32c_zeros(uint32_t crc, unsigned len)
+uint32_t stone_crc32c_zeros(uint32_t crc, unsigned len)
 {
   int range = 0;
   unsigned remainder = len & 15;
@@ -235,6 +235,6 @@ uint32_t ceph_crc32c_zeros(uint32_t crc, unsigned len)
     range++;
   }
   if (remainder > 0)
-    crc = ceph_crc32c(crc, nullptr, remainder);
+    crc = stone_crc32c(crc, nullptr, remainder);
   return crc;
 }

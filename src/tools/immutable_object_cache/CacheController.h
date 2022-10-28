@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CACHE_CACHE_CONTROLLER_H
-#define CEPH_CACHE_CACHE_CONTROLLER_H
+#ifndef STONE_CACHE_CACHE_CONTROLLER_H
+#define STONE_CACHE_CACHE_CONTROLLER_H
 
 #include "common/ceph_context.h"
 #include "common/WorkQueue.h"
@@ -37,4 +37,4 @@ class CacheController {
 }  // namespace immutable_obj_cache
 }  // namespace ceph
 
-#endif  // CEPH_CACHE_CACHE_CONTROLLER_H
+#endif  // STONE_CACHE_CACHE_CONTROLLER_H

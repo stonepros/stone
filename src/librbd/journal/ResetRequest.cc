@@ -8,13 +8,13 @@
 #include "common/WorkQueue.h"
 #include "journal/Journaler.h"
 #include "journal/Settings.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "librbd/Journal.h"
 #include "librbd/Utils.h"
 #include "librbd/journal/CreateRequest.h"
 #include "librbd/journal/RemoveRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::journal::ResetRequest: " << this << " " \
                            << __func__ << ": "

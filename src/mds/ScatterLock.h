@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_SCATTERLOCK_H
-#define CEPH_SCATTERLOCK_H
+#ifndef STONE_SCATTERLOCK_H
+#define STONE_SCATTERLOCK_H
 
 #include "SimpleLock.h"
 
@@ -55,7 +55,7 @@ public:
 
   void set_xlock_snap_sync(MDSContext *c)
   {
-    ceph_assert(get_type() == CEPH_LOCK_IFILE);
+    ceph_assert(get_type() == STONE_LOCK_IFILE);
     ceph_assert(state == LOCK_XLOCK || state == LOCK_XLOCKDONE);
     state = LOCK_XLOCKSNAP;
     add_waiter(WAIT_STABLE, c);

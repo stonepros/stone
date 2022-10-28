@@ -21,7 +21,7 @@ struct MockTestImageCtx : public MockImageCtx {
                                   const std::string &image_id,
                                   const char *snap, librados::IoCtx& p,
                                   bool read_only) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->construct(image_name, image_id);
     return s_instance;
   }
@@ -116,7 +116,7 @@ TEST_F(TestMockTrashMoveRequest, Success) {
   expect_op_work_queue(mock_image_ctx);
 
   InSequence seq;
-  utime_t delete_time{ceph_clock_now()};
+  utime_t delete_time{stone_clock_now()};
   expect_trash_add(mock_image_ctx, "image id",
                    cls::rbd::TRASH_IMAGE_SOURCE_USER, "image name", delete_time,
                    0);
@@ -148,7 +148,7 @@ TEST_F(TestMockTrashMoveRequest, TrashAddError) {
   expect_op_work_queue(mock_image_ctx);
 
   InSequence seq;
-  utime_t delete_time{ceph_clock_now()};
+  utime_t delete_time{stone_clock_now()};
   expect_trash_add(mock_image_ctx, "image id",
                    cls::rbd::TRASH_IMAGE_SOURCE_USER, "image name", delete_time,
                    -EPERM);
@@ -178,7 +178,7 @@ TEST_F(TestMockTrashMoveRequest, RemoveIdError) {
   expect_op_work_queue(mock_image_ctx);
 
   InSequence seq;
-  utime_t delete_time{ceph_clock_now()};
+  utime_t delete_time{stone_clock_now()};
   expect_trash_add(mock_image_ctx, "image id",
                    cls::rbd::TRASH_IMAGE_SOURCE_USER, "image name", delete_time,
                    0);
@@ -209,7 +209,7 @@ TEST_F(TestMockTrashMoveRequest, DirectoryRemoveError) {
   expect_op_work_queue(mock_image_ctx);
 
   InSequence seq;
-  utime_t delete_time{ceph_clock_now()};
+  utime_t delete_time{stone_clock_now()};
   expect_trash_add(mock_image_ctx, "image id",
                    cls::rbd::TRASH_IMAGE_SOURCE_USER, "image name", delete_time,
                    0);

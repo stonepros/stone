@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     conf:
       global:
         ms inject socket failures: 500
@@ -9,5 +9,5 @@ overrides:
 tasks:
 - exec:
     client.0:
-    - "dmesg | grep -q 'libceph: osd.* socket closed'"
-    - "dmesg | grep -q 'libceph: osd.* socket error on write'"
+    - "dmesg | grep -q 'libstone: osd.* socket closed'"
+    - "dmesg | grep -q 'libstone: osd.* socket error on write'"

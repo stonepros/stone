@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 FUJITSU LIMITED
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -33,13 +33,13 @@ extern int calc_determinant(int *matrix, int dim);
 extern int* reed_sol_vandermonde_coding_matrix(int k, int m, int w);
 }
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_osd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 
 using namespace std;
-using namespace ceph;
+using namespace stone;
 
 
 static ostream& _prefix(std::ostream* _dout)
@@ -64,7 +64,7 @@ unsigned int ErasureCodeShec::get_chunk_size(unsigned int object_size) const
   unsigned tail = object_size % alignment;
   unsigned padded_length = object_size + ( tail ?  ( alignment - tail ) : 0 );
 
-  ceph_assert(padded_length % k == 0);
+  stone_assert(padded_length % k == 0);
   return padded_length / k;
 }
 
@@ -414,7 +414,7 @@ void ErasureCodeShecReedSolomonVandermonde::prepare()
   dout(10) << " [ technique ] = " <<
     ((technique == MULTIPLE) ? "multiple" : "single") << dendl;
 
-  ceph_assert((technique == SINGLE) || (technique == MULTIPLE));
+  stone_assert((technique == SINGLE) || (technique == MULTIPLE));
 
 }
 

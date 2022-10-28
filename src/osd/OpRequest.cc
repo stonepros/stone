@@ -10,7 +10,7 @@
 #include "messages/MOSDOp.h"
 #include "messages/MOSDRepOp.h"
 #include "messages/MOSDRepOpReply.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "osd/osd_types.h"
 
 #ifdef WITH_LTTNG
@@ -28,7 +28,7 @@ using std::set;
 using std::string;
 using std::stringstream;
 
-using ceph::Formatter;
+using stone::Formatter;
 
 OpRequest::OpRequest(Message* req, OpTracker* tracker)
     : TrackedOp(tracker, req->get_throttle_stamp()),
@@ -40,7 +40,7 @@ OpRequest::OpRequest(Message* req, OpTracker* tracker)
     // don't warn as quickly for low priority ops
     warn_interval_multiplier = tracker->cct->_conf->osd_recovery_op_warn_multiple;
   }
-  if (req->get_type() == CEPH_MSG_OSD_OP) {
+  if (req->get_type() == STONE_MSG_OSD_OP) {
     reqid = static_cast<MOSDOp*>(req)->get_reqid();
   } else if (req->get_type() == MSG_OSD_REPOP) {
     reqid = static_cast<MOSDRepOp*>(req)->reqid;

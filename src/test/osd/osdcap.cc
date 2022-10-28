@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 Inktank
  *
@@ -65,8 +65,8 @@ const char *parse_good[] = {
   "allow pool foo namespace=nfoo rwx ; allow pool bar namespace=nbar r",
   "allow pool foo namespace nfoo rwx ;allow pool bar namespace nbar r",
   "allow pool foo namespace=nfoo rwx; allow pool bar namespace nbar object_prefix rbd r",
-  "allow rwx namespace=nfoo tag cephfs data=cephfs_a",
-  "allow rwx namespace foo tag cephfs data =cephfs_a",
+  "allow rwx namespace=nfoo tag stonefs data=stonefs_a",
+  "allow rwx namespace foo tag stonefs data =stonefs_a",
   "allow pool foo namespace=nfoo* rwx",
   "allow pool foo namespace=\"\" rwx; allow pool bar namespace='' object_prefix rbd r",
   "allow pool foo namespace \"\" rwx; allow pool bar namespace '' object_prefix rbd r",
@@ -81,7 +81,7 @@ const char *parse_good[] = {
   "allow rwx network ::1/128",
   "allow rwx network [ff::1]/128",
   "profile foo network 127.0.0.1/8",
-  "allow rwx namespace foo tag cephfs data =cephfs_a network 127.0.0.1/8",
+  "allow rwx namespace foo tag stonefs data =stonefs_a network 127.0.0.1/8",
   "allow pool foo rwx network 1.2.3.4/24",
   0
 };

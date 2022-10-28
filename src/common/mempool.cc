@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Allen Samuels <allen.samuels@sandisk.com>
  *
@@ -39,7 +39,7 @@ const char *mempool::get_pool_name(mempool::pool_index_t ix) {
   return names[ix];
 }
 
-void mempool::dump(ceph::Formatter *f)
+void mempool::dump(stone::Formatter *f)
 {
   stats_t total;
   f->open_object_section("mempool"); // we need (dummy?) topmost section for 
@@ -108,7 +108,7 @@ void mempool::pool_t::get_stats(
   if (debug_mode) {
     std::lock_guard shard_lock(lock);
     for (auto &p : type_map) {
-      std::string n = ceph_demangle(p.second.type_name);
+      std::string n = stone_demangle(p.second.type_name);
       stats_t &s = (*by_type)[n];
       s.bytes = p.second.items * p.second.item_size;
       s.items = p.second.items;
@@ -116,7 +116,7 @@ void mempool::pool_t::get_stats(
   }
 }
 
-void mempool::pool_t::dump(ceph::Formatter *f, stats_t *ptotal) const
+void mempool::pool_t::dump(stone::Formatter *f, stats_t *ptotal) const
 {
   stats_t total;
   std::map<std::string, stats_t> by_type;

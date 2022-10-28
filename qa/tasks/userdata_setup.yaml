@@ -19,7 +19,7 @@
   apt-get update
 
   # DST Root CA X3 certificate expired on Sep 30, 2021.  It was used by
-  # Let's Encrypt, which is what git.ceph.com relies on for HTTPS.  Get the
+  # Let's Encrypt, which is what git.stone.com relies on for HTTPS.  Get the
   # new Let's Encrypt root certificate in place and deactivate the old one
   # (lines that begin with "!" are deselected).
   apt-get install --only-upgrade ca-certificates libssl1.0.0

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 SUSE LINUX GmbH
  *
@@ -30,7 +30,7 @@
 // TODO: consider converting WinSock2 (WSA*) error codes, which are quite
 // similar to the errno.h ones.
 
-__u32 ceph_to_hostos_errno_unsigned(__u32 r)
+__u32 stone_to_hostos_errno_unsigned(__u32 r)
 {
   // using an array like like freebsd_errno.cc might be more readable but
   // we have some large values defined by Boost.
@@ -174,7 +174,7 @@ __u32 ceph_to_hostos_errno_unsigned(__u32 r)
   }
 }
 
-__u32 hostos_to_ceph_errno_unsigned(__u32 r) {
+__u32 hostos_to_stone_errno_unsigned(__u32 r) {
   // Windows errno -> Linux errno
   switch(r) {
     case EPERM: return 1;
@@ -328,7 +328,7 @@ __s32 wsae_to_errno_unsigned(__s32 r)
     case WSAEINVAL: return EINVAL;
     case WSAEMFILE: return EMFILE;
     // Linux defines WSAEWOULDBLOCK as EAGAIN, but not Windows headers.
-    // Since all ceph code uses EAGAIN instead of EWOULDBLOCK, we'll do
+    // Since all stone code uses EAGAIN instead of EWOULDBLOCK, we'll do
     // the same here.
     case WSAEWOULDBLOCK: return EAGAIN;
     // Some functions (e.g. connect) can return WSAEWOULDBLOCK instead of
@@ -395,17 +395,17 @@ __s32 wsae_to_errno_unsigned(__s32 r)
 }
 
 // converts from linux errno values to host values
-__s32 ceph_to_hostos_errno(__s32 r)
+__s32 stone_to_hostos_errno(__s32 r)
 {
   int sign = (r < 0 ? -1 : 1);
-  return ceph_to_hostos_errno_unsigned(abs(r)) * sign;
+  return stone_to_hostos_errno_unsigned(abs(r)) * sign;
 }
 
-// converts Host OS errno values to linux/Ceph values
-__s32 hostos_to_ceph_errno(__s32 r)
+// converts Host OS errno values to linux/Stone values
+__s32 hostos_to_stone_errno(__s32 r)
 {
   int sign = (r < 0 ? -1 : 1);
-  return hostos_to_ceph_errno_unsigned(abs(r)) * sign;
+  return hostos_to_stone_errno_unsigned(abs(r)) * sign;
 }
 
 __s32 wsae_to_errno(__s32 r)
@@ -598,55 +598,55 @@ std::string win32_lasterror_str()
   return win32_strerror(err);
 }
 
-static const ceph::unordered_map<int,NTSTATUS> cephfs_errno_to_ntstatus = {
-  {CEPHFS_EBLOCKLISTED,    STATUS_SYSTEM_SHUTDOWN},
-  {CEPHFS_EPERM,           STATUS_ACCESS_DENIED},
-  {CEPHFS_ESTALE,          STATUS_INVALID_HANDLE},
-  {CEPHFS_ENOSPC,          STATUS_DISK_FULL},
-  {CEPHFS_ETIMEDOUT,       STATUS_TIMEOUT},
-  {CEPHFS_EIO,             STATUS_DATA_ERROR},
-  {CEPHFS_ENOTCONN,        STATUS_CONNECTION_DISCONNECTED},
-  {CEPHFS_EEXIST,          STATUS_OBJECT_NAME_COLLISION},
-  {CEPHFS_EINTR,           STATUS_RETRY},
-  {CEPHFS_EINVAL,          STATUS_INVALID_PARAMETER},
-  {CEPHFS_EBADF,           STATUS_INVALID_HANDLE},
-  {CEPHFS_EROFS,           STATUS_MEDIA_WRITE_PROTECTED},
-  {CEPHFS_EAGAIN,          STATUS_RETRY},
-  {CEPHFS_EACCES,          STATUS_ACCESS_DENIED},
-  {CEPHFS_ELOOP,           STATUS_TOO_MANY_LINKS},
-  {CEPHFS_EISDIR,          STATUS_FILE_IS_A_DIRECTORY},
-  {CEPHFS_ENOENT,          STATUS_OBJECT_NAME_NOT_FOUND},
-  {CEPHFS_ENOTDIR,         STATUS_NOT_A_DIRECTORY},
-  {CEPHFS_ENAMETOOLONG,    STATUS_NAME_TOO_LONG},
-  {CEPHFS_EBUSY,           STATUS_DEVICE_BUSY},
-  {CEPHFS_EDQUOT,          STATUS_QUOTA_EXCEEDED},
-  {CEPHFS_EFBIG,           STATUS_FILE_TOO_LARGE},
-  {CEPHFS_ERANGE,          STATUS_INVALID_PARAMETER},
-  {CEPHFS_ENXIO,           STATUS_NOT_FOUND},
-  {CEPHFS_ECANCELED,       STATUS_REQUEST_CANCELED},
-  {CEPHFS_ENODATA,         STATUS_NOT_FOUND},
-  {CEPHFS_EOPNOTSUPP,      STATUS_NOT_SUPPORTED},
-  {CEPHFS_EXDEV,           STATUS_NOT_SAME_DEVICE},
-  {CEPHFS_ENOMEM,          STATUS_NO_MEMORY},
-  {CEPHFS_ENOTRECOVERABLE, STATUS_INTERNAL_ERROR},
-  {CEPHFS_ENOSYS,          STATUS_NOT_IMPLEMENTED},
-  {CEPHFS_ENOTEMPTY,       STATUS_DIRECTORY_NOT_EMPTY},
-  {CEPHFS_EDEADLK,         STATUS_POSSIBLE_DEADLOCK},
-  {CEPHFS_EDOM,            STATUS_INVALID_PARAMETER},
-  {CEPHFS_EMLINK,          STATUS_TOO_MANY_LINKS},
-  {CEPHFS_ETIME,           STATUS_TIMEOUT},
-  {CEPHFS_EOLDSNAPC,       STATUS_DATA_ERROR}
+static const stone::unordered_map<int,NTSTATUS> stonefs_errno_to_ntstatus = {
+  {STONEFS_EBLOCKLISTED,    STATUS_SYSTEM_SHUTDOWN},
+  {STONEFS_EPERM,           STATUS_ACCESS_DENIED},
+  {STONEFS_ESTALE,          STATUS_INVALID_HANDLE},
+  {STONEFS_ENOSPC,          STATUS_DISK_FULL},
+  {STONEFS_ETIMEDOUT,       STATUS_TIMEOUT},
+  {STONEFS_EIO,             STATUS_DATA_ERROR},
+  {STONEFS_ENOTCONN,        STATUS_CONNECTION_DISCONNECTED},
+  {STONEFS_EEXIST,          STATUS_OBJECT_NAME_COLLISION},
+  {STONEFS_EINTR,           STATUS_RETRY},
+  {STONEFS_EINVAL,          STATUS_INVALID_PARAMETER},
+  {STONEFS_EBADF,           STATUS_INVALID_HANDLE},
+  {STONEFS_EROFS,           STATUS_MEDIA_WRITE_PROTECTED},
+  {STONEFS_EAGAIN,          STATUS_RETRY},
+  {STONEFS_EACCES,          STATUS_ACCESS_DENIED},
+  {STONEFS_ELOOP,           STATUS_TOO_MANY_LINKS},
+  {STONEFS_EISDIR,          STATUS_FILE_IS_A_DIRECTORY},
+  {STONEFS_ENOENT,          STATUS_OBJECT_NAME_NOT_FOUND},
+  {STONEFS_ENOTDIR,         STATUS_NOT_A_DIRECTORY},
+  {STONEFS_ENAMETOOLONG,    STATUS_NAME_TOO_LONG},
+  {STONEFS_EBUSY,           STATUS_DEVICE_BUSY},
+  {STONEFS_EDQUOT,          STATUS_QUOTA_EXCEEDED},
+  {STONEFS_EFBIG,           STATUS_FILE_TOO_LARGE},
+  {STONEFS_ERANGE,          STATUS_INVALID_PARAMETER},
+  {STONEFS_ENXIO,           STATUS_NOT_FOUND},
+  {STONEFS_ECANCELED,       STATUS_REQUEST_CANCELED},
+  {STONEFS_ENODATA,         STATUS_NOT_FOUND},
+  {STONEFS_EOPNOTSUPP,      STATUS_NOT_SUPPORTED},
+  {STONEFS_EXDEV,           STATUS_NOT_SAME_DEVICE},
+  {STONEFS_ENOMEM,          STATUS_NO_MEMORY},
+  {STONEFS_ENOTRECOVERABLE, STATUS_INTERNAL_ERROR},
+  {STONEFS_ENOSYS,          STATUS_NOT_IMPLEMENTED},
+  {STONEFS_ENOTEMPTY,       STATUS_DIRECTORY_NOT_EMPTY},
+  {STONEFS_EDEADLK,         STATUS_POSSIBLE_DEADLOCK},
+  {STONEFS_EDOM,            STATUS_INVALID_PARAMETER},
+  {STONEFS_EMLINK,          STATUS_TOO_MANY_LINKS},
+  {STONEFS_ETIME,           STATUS_TIMEOUT},
+  {STONEFS_EOLDSNAPC,       STATUS_DATA_ERROR}
 };
 
-__u32 cephfs_errno_to_ntsatus(int cephfs_errno)
+__u32 stonefs_errno_to_ntsatus(int stonefs_errno)
 {
-  cephfs_errno = abs(cephfs_errno);
+  stonefs_errno = abs(stonefs_errno);
 
-  if (cephfs_errno == 0)
+  if (stonefs_errno == 0)
     return 0;
 
-  auto it = cephfs_errno_to_ntstatus.find(cephfs_errno);
-  if (it != cephfs_errno_to_ntstatus.end())
+  auto it = stonefs_errno_to_ntstatus.find(stonefs_errno);
+  if (it != stonefs_errno_to_ntstatus.end())
     return it->second;
   return STATUS_INTERNAL_ERROR;
 }

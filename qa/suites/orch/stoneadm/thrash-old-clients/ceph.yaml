@@ -1,0 +1,7 @@
+# Don't verify os + flavor + sha1
+verify_stone_hash: false
+tasks:
+- stoneadm:
+    conf:
+      mon:
+        auth allow insecure global id reclaim: true

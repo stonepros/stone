@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,7 +20,7 @@
 #include "kv/KeyValueDB.h"
 #include "kv/RocksDBStore.h"
 #include "include/Context.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "common/Cond.h"
 #include "common/errno.h"
@@ -50,7 +50,7 @@ public:
 
   void init() {
     cout << "Creating " << string(GetParam()) << "\n";
-    db.reset(KeyValueDB::create(g_ceph_context, string(GetParam()),
+    db.reset(KeyValueDB::create(g_stone_context, string(GetParam()),
 				"kv_test_temp_dir"));
   }
   void fini() {
@@ -164,7 +164,7 @@ TEST_P(KVTest, PutReopen) {
 TEST_P(KVTest, BenchCommit) {
   int n = 1024;
   ASSERT_EQ(0, db->create_and_open(cout));
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   {
     cout << "priming" << std::endl;
     // prime
@@ -188,7 +188,7 @@ TEST_P(KVTest, BenchCommit) {
     t->set("prefix", "key" + stringify(i), data);
     db->submit_transaction_sync(t);
   }
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   utime_t dur = end - start;
   cout << n << " commits in " << dur << ", avg latency " << (dur / (double)n)
        << std::endl;
@@ -698,7 +698,7 @@ public:
 	   << cpp_strerror(r) << std::endl;
       return;
     }
-    db.reset(KeyValueDB::create(g_ceph_context, "rocksdb",
+    db.reset(KeyValueDB::create(g_stone_context, "rocksdb",
 				"kv_test_temp_dir"));
     ASSERT_EQ(0, db->init(g_conf()->bluestore_rocksdb_options));
     if (verbose)
@@ -1020,10 +1020,10 @@ public:
       return;
     }
 
-    KeyValueDB* db_kv = KeyValueDB::create(g_ceph_context, "rocksdb",
+    KeyValueDB* db_kv = KeyValueDB::create(g_stone_context, "rocksdb",
 					 "kv_test_temp_dir");
     RocksDBStore* db_rocks = dynamic_cast<RocksDBStore*>(db_kv);
-    ceph_assert(db_rocks);
+    stone_assert(db_rocks);
     db.reset(db_rocks);
     ASSERT_EQ(0, db->init(g_conf()->bluestore_rocksdb_options));
   }
@@ -1290,14 +1290,14 @@ int main(int argc, char **argv) {
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.set_val(
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.set_val(
     "enable_experimental_unrecoverable_data_corrupting_features",
     "rocksdb, memdb");
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.apply_changes(nullptr);
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

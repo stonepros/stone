@@ -1,5 +1,5 @@
-#ifndef CEPH_LRU_MAP_H
-#define CEPH_LRU_MAP_H
+#ifndef STONE_LRU_MAP_H
+#define STONE_LRU_MAP_H
 
 #include "common/ceph_mutex.h"
 

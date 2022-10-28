@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OSD_BLUESTORE_COMMON_H
-#define CEPH_OSD_BLUESTORE_COMMON_H
+#ifndef STONE_OSD_BLUESTORE_COMMON_H
+#define STONE_OSD_BLUESTORE_COMMON_H
 
 #include "include/intarith.h"
 #include "include/ceph_assert.h"

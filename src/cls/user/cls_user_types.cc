@@ -3,15 +3,15 @@
 
 #include "cls/user/cls_user_types.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "include/utime.h"
 
 using std::list;
 using std::string;
 
-using ceph::Formatter;
-using ceph::bufferlist;
-using ceph::real_clock;
+using stone::Formatter;
+using stone::bufferlist;
+using stone::real_clock;
 
 void cls_user_gen_test_bucket(cls_user_bucket *bucket, int i)
 {

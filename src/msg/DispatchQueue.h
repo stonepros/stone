@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_DISPATCHQUEUE_H
-#define CEPH_DISPATCHQUEUE_H
+#ifndef STONE_DISPATCHQUEUE_H
+#define STONE_DISPATCHQUEUE_H
 
 #include <atomic>
 #include <map>
@@ -62,7 +62,7 @@ class DispatchQueue {
     }
   };
 
-  CephContext *cct;
+  StoneeContext *cct;
   Messenger *msgr;
   mutable ceph::mutex lock;
   ceph::condition_variable cond;
@@ -152,7 +152,7 @@ class DispatchQueue {
       return;
     mqueue.enqueue_strict(
       0,
-      CEPH_MSG_PRIO_HIGHEST,
+      STONE_MSG_PRIO_HIGHEST,
       QueueItem(D_CONNECT, con));
     cond.notify_all();
   }
@@ -162,7 +162,7 @@ class DispatchQueue {
       return;
     mqueue.enqueue_strict(
       0,
-      CEPH_MSG_PRIO_HIGHEST,
+      STONE_MSG_PRIO_HIGHEST,
       QueueItem(D_ACCEPT, con));
     cond.notify_all();
   }
@@ -172,7 +172,7 @@ class DispatchQueue {
       return;
     mqueue.enqueue_strict(
       0,
-      CEPH_MSG_PRIO_HIGHEST,
+      STONE_MSG_PRIO_HIGHEST,
       QueueItem(D_BAD_REMOTE_RESET, con));
     cond.notify_all();
   }
@@ -182,7 +182,7 @@ class DispatchQueue {
       return;
     mqueue.enqueue_strict(
       0,
-      CEPH_MSG_PRIO_HIGHEST,
+      STONE_MSG_PRIO_HIGHEST,
       QueueItem(D_BAD_RESET, con));
     cond.notify_all();
   }
@@ -192,7 +192,7 @@ class DispatchQueue {
       return;
     mqueue.enqueue_strict(
       0,
-      CEPH_MSG_PRIO_HIGHEST,
+      STONE_MSG_PRIO_HIGHEST,
       QueueItem(D_CONN_REFUSED, con));
     cond.notify_all();
   }
@@ -218,7 +218,7 @@ class DispatchQueue {
   void shutdown();
   bool is_started() const {return dispatch_thread.is_started();}
 
-  DispatchQueue(CephContext *cct, Messenger *msgr, std::string &name)
+  DispatchQueue(StoneeContext *cct, Messenger *msgr, std::string &name)
     : cct(cct), msgr(msgr),
       lock(ceph::make_mutex("Messenger::DispatchQueue::lock" + name)),
       mqueue(cct->_conf->ms_pq_max_tokens_per_priority,

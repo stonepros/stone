@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MCLIENTCAPRELEASE_H
-#define CEPH_MCLIENTCAPRELEASE_H
+#ifndef STONE_MCLIENTCAPRELEASE_H
+#define STONE_MCLIENTCAPRELEASE_H
 
 #include "msg/Message.h"
 
@@ -57,7 +57,7 @@ private:
   static constexpr int COMPAT_VERSION = 1;
 
   MClientCapRelease() : 
-    SafeMessage{CEPH_MSG_CLIENT_CAPRELEASE, HEAD_VERSION, COMPAT_VERSION}
+    SafeMessage{STONE_MSG_CLIENT_CAPRELEASE, HEAD_VERSION, COMPAT_VERSION}
   {
     memset(&head, 0, sizeof(head));
   }

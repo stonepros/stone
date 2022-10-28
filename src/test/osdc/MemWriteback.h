@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_TEST_OSDC_MEMWRITEBACK_H
-#define CEPH_TEST_OSDC_MEMWRITEBACK_H
+#ifndef STONE_TEST_OSDC_MEMWRITEBACK_H
+#define STONE_TEST_OSDC_MEMWRITEBACK_H
 
 #include "include/Context.h"
 #include "include/types.h"
@@ -14,7 +14,7 @@ class Finisher;
 
 class MemWriteback : public WritebackHandler {
 public:
-  MemWriteback(CephContext *cct, ceph::mutex *lock, uint64_t delay_ns);
+  MemWriteback(StoneeContext *cct, ceph::mutex *lock, uint64_t delay_ns);
   ~MemWriteback() override;
 
   void read(const object_t& oid, uint64_t object_no,
@@ -42,7 +42,7 @@ public:
 		       bufferlist *data_bl);
 private:
   std::map<object_t, bufferlist> object_data;
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   ceph::mutex *m_lock;
   uint64_t m_delay_ns;
   std::atomic<unsigned> m_tid = { 0 };

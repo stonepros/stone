@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef __CEPH_OS_HOBJECT_H
-#define __CEPH_OS_HOBJECT_H
+#ifndef __STONE_OS_HOBJECT_H
+#define __STONE_OS_HOBJECT_H
 
 #include "include/types.h"
 #include "include/cmp.h"
@@ -167,25 +167,25 @@ public:
   /// @return head version of this hobject_t
   hobject_t get_head() const {
     hobject_t ret(*this);
-    ret.snap = CEPH_NOSNAP;
+    ret.snap = STONE_NOSNAP;
     return ret;
   }
 
   /// @return snapdir version of this hobject_t
   hobject_t get_snapdir() const {
     hobject_t ret(*this);
-    ret.snap = CEPH_SNAPDIR;
+    ret.snap = STONE_SNAPDIR;
     return ret;
   }
 
   /// @return true if object is snapdir
   bool is_snapdir() const {
-    return snap == CEPH_SNAPDIR;
+    return snap == STONE_SNAPDIR;
   }
 
   /// @return true if object is head
   bool is_head() const {
-    return snap == CEPH_NOSNAP;
+    return snap == STONE_NOSNAP;
   }
 
   /// @return true if object is neither head nor snapdir nor max
@@ -274,7 +274,7 @@ public:
   }
 
   hobject_t make_temp_hobject(const std::string& name) const {
-    return hobject_t(object_t(name), "", CEPH_NOSNAP,
+    return hobject_t(object_t(name), "", STONE_NOSNAP,
 		     hash,
 		     get_temp_pool(pool),
 		     "");
@@ -406,7 +406,7 @@ public:
       max(false) {}
 
   static ghobject_t make_pgmeta(int64_t pool, uint32_t hash, shard_id_t shard) {
-    hobject_t h(object_t(), std::string(), CEPH_NOSNAP, hash, pool, std::string());
+    hobject_t h(object_t(), std::string(), STONE_NOSNAP, hash, pool, std::string());
     return ghobject_t(h, NO_GEN, shard);
   }
   bool is_pgmeta() const {

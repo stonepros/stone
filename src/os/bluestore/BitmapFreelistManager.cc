@@ -9,16 +9,16 @@
 #include "common/debug.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_bluestore
+#define dout_subsys stone_subsys_bluestore
 #undef dout_prefix
 #define dout_prefix *_dout << "freelist "
 
 using std::string;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::decode;
+using stone::encode;
 
 void make_offset_key(uint64_t offset, std::string *key)
 {
@@ -35,7 +35,7 @@ struct XorMergeOperator : public KeyValueDB::MergeOperator {
     const char *ldata, size_t llen,
     const char *rdata, size_t rlen,
     std::string *new_value) override {
-    ceph_assert(llen == rlen);
+    stone_assert(llen == rlen);
     *new_value = std::string(ldata, llen);
     for (size_t i = 0; i < rlen; ++i) {
       (*new_value)[i] ^= rdata[i];
@@ -54,7 +54,7 @@ void BitmapFreelistManager::setup_merge_operator(KeyValueDB *db, string prefix)
   db->set_merge_operator(prefix, merge_op);
 }
 
-BitmapFreelistManager::BitmapFreelistManager(CephContext* cct,
+BitmapFreelistManager::BitmapFreelistManager(StoneContext* cct,
 					     string meta_prefix,
 					     string bitmap_prefix)
   : FreelistManager(cct),
@@ -68,7 +68,7 @@ int BitmapFreelistManager::create(uint64_t new_size, uint64_t granularity,
 				  KeyValueDB::Transaction txn)
 {
   bytes_per_block = granularity;
-  ceph_assert(isp2(bytes_per_block));
+  stone_assert(isp2(bytes_per_block));
   size = p2align(new_size, bytes_per_block);
   blocks_per_key = cct->_conf->bluestore_freelist_blocks_per_key;
 
@@ -114,7 +114,7 @@ int BitmapFreelistManager::create(uint64_t new_size, uint64_t granularity,
 int BitmapFreelistManager::_expand(uint64_t old_size, KeyValueDB* db)
 {
   assert(old_size < size);
-  ceph_assert(isp2(bytes_per_block));
+  stone_assert(isp2(bytes_per_block));
 
   KeyValueDB::Transaction txn;
   txn = db->get_transaction();
@@ -303,12 +303,12 @@ void BitmapFreelistManager::_sync(KeyValueDB* kvdb, bool read_only)
   dout(10) << __func__ << " checks if size sync is needed" << dendl;
   uint64_t size_db = 0;
   int r = read_size_meta_from_db(kvdb, &size_db);
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
   if (!read_only && size_db < size) {
     dout(1) << __func__ << " committing new size 0x" << std::hex << size
       << std::dec << dendl;
     r = _expand(size_db, kvdb);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   } else if (size_db > size) {
     // this might hapen when OSD passed the following sequence:
     // upgrade -> downgrade -> expand -> upgrade
@@ -375,13 +375,13 @@ bool BitmapFreelistManager::enumerate_next(KeyValueDB *kvdb, uint64_t *offset, u
     enumerate_p->lower_bound(string());
     // we assert that the first block is always allocated; it's true,
     // and it simplifies our lives a bit.
-    ceph_assert(enumerate_p->valid());
+    stone_assert(enumerate_p->valid());
     string k = enumerate_p->key();
     const char *p = k.c_str();
     _key_decode_u64(p, &enumerate_offset);
     enumerate_bl = enumerate_p->value();
-    ceph_assert(enumerate_offset == 0);
-    ceph_assert(get_next_set_bit(enumerate_bl, 0) == 0);
+    stone_assert(enumerate_offset == 0);
+    stone_assert(get_next_set_bit(enumerate_bl, 0) == 0);
   }
 
   if (enumerate_offset >= size) {
@@ -503,8 +503,8 @@ void BitmapFreelistManager::_xor(
   KeyValueDB::Transaction txn)
 {
   // must be block aligned
-  ceph_assert((offset & block_mask) == offset);
-  ceph_assert((length & block_mask) == length);
+  stone_assert((offset & block_mask) == offset);
+  stone_assert((length & block_mask) == length);
 
   uint64_t first_key = offset & key_mask;
   uint64_t last_key = (offset + length - 1) & key_mask;
@@ -558,7 +558,7 @@ void BitmapFreelistManager::_xor(
       txn->merge(bitmap_prefix, k, all_set_bl);
       first_key += bytes_per_key;
     }
-    ceph_assert(first_key == last_key);
+    stone_assert(first_key == last_key);
     {
       bufferptr p(blocks_per_key >> 3);
       p.zero();

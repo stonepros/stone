@@ -41,7 +41,7 @@ public:
   {}
   seastar::future<tell_result_t> call(const cmdmap_t&,
 				      std::string_view format,
-				      ceph::bufferlist&& input) const final
+				      stone::bufferlist&& input) const final
   {
     unique_ptr<Formatter> f{Formatter::create(format, "json-pretty", "json-pretty")};
     f->open_object_section("status");
@@ -68,7 +68,7 @@ public:
   {}
   seastar::future<tell_result_t> call(const cmdmap_t&,
 				      std::string_view format,
-				      ceph::bufferlist&& input) const final
+				      stone::bufferlist&& input) const final
   {
     return osd.send_beacon().then([] {
       return seastar::make_ready_future<tell_result_t>();
@@ -93,7 +93,7 @@ public:
   {}
   seastar::future<tell_result_t> call(const cmdmap_t&,
 				      std::string_view format,
-				      ceph::bufferlist&& input) const final
+				      stone::bufferlist&& input) const final
   {
     uint64_t seq = osd.send_pg_stats();
     unique_ptr<Formatter> f{Formatter::create(format, "json-pretty", "json-pretty")};
@@ -117,7 +117,7 @@ public:
   {}
   seastar::future<tell_result_t> call(const cmdmap_t&,
                                       std::string_view format,
-                                      ceph::bufferlist&& input) const final
+                                      stone::bufferlist&& input) const final
   {
     std::unique_ptr<Formatter> f{Formatter::create(format,
                                                    "json-pretty",
@@ -133,7 +133,7 @@ private:
 template std::unique_ptr<AdminSocketHook> make_asok_hook<DumpPGStateHistory>(const crimson::osd::OSD& osd);
 
 /**
- * A CephContext admin hook: calling assert (if allowed by
+ * A StoneContext admin hook: calling assert (if allowed by
  * 'debug_asok_assert_abort')
  */
 class AssertAlwaysHook : public AdminSocketHook {
@@ -145,10 +145,10 @@ public:
   {}
   seastar::future<tell_result_t> call(const cmdmap_t&,
 				      std::string_view format,
-				      ceph::bufferlist&& input) const final
+				      stone::bufferlist&& input) const final
   {
     if (local_conf().get_val<bool>("debug_asok_assert_abort")) {
-      ceph_assert_always(0);
+      stone_assert_always(0);
       return seastar::make_ready_future<tell_result_t>();
     } else {
       return seastar::make_ready_future<tell_result_t>(
@@ -170,7 +170,7 @@ public:
  {}
  seastar::future<tell_result_t> call(const cmdmap_t& cmdmap,
              std::string_view format,
-             ceph::bufferlist&& input) const final
+             stone::bufferlist&& input) const final
  {
    std::unique_ptr<Formatter> f{Formatter::create(format, "json-pretty", "json-pretty")};
    f->open_object_section("perf_dump_seastar");

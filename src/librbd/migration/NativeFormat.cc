@@ -14,7 +14,7 @@
 #include "boost/lexical_cast.hpp"
 #include <sstream>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::migration::NativeFormat: " << this \
                            << " " << __func__ << ": "
@@ -150,14 +150,14 @@ void NativeFormat<I>::open(Context* on_finish) {
   }
 
   if (snap_id_val.type() != json_spirit::null_type &&
-      m_snap_id == CEPH_NOSNAP) {
+      m_snap_id == STONE_NOSNAP) {
     lderr(cct) << "invalid snap id" << dendl;
     on_finish->complete(-EINVAL);
     return;
   }
 
   // snapshot is required for import to keep source read-only
-  if (m_import_only && m_snap_name.empty() && m_snap_id == CEPH_NOSNAP) {
+  if (m_import_only && m_snap_name.empty() && m_snap_id == STONE_NOSNAP) {
     lderr(cct) << "snapshot required for import" << dendl;
     on_finish->complete(-EINVAL);
     return;
@@ -209,7 +209,7 @@ void NativeFormat<I>::handle_open(int r, Context* on_finish) {
     return;
   }
 
-  if (m_snap_id == CEPH_NOSNAP && m_snap_name.empty()) {
+  if (m_snap_id == STONE_NOSNAP && m_snap_name.empty()) {
     on_finish->complete(0);
     return;
   }
@@ -220,7 +220,7 @@ void NativeFormat<I>::handle_open(int r, Context* on_finish) {
                                          m_snap_name);
   }
 
-  if (m_snap_id == CEPH_NOSNAP) {
+  if (m_snap_id == STONE_NOSNAP) {
     lderr(cct) << "failed to locate snapshot " << m_snap_name << dendl;
     on_finish = new LambdaContext([on_finish](int) {
       on_finish->complete(-ENOENT); });

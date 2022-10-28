@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef CEPH_TEST_PERFHELPER_H
-#define CEPH_TEST_PERFHELPER_H
+#ifndef STONE_TEST_PERFHELPER_H
+#define STONE_TEST_PERFHELPER_H
 
 namespace PerfHelper {
 
@@ -27,4 +27,4 @@ void throw_int();
 
 } // PerfHelper
 
-#endif  // CEPH_TEST_PERFHELPER_H
+#endif  // STONE_TEST_PERFHELPER_H

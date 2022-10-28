@@ -1,10 +1,10 @@
 overrides:
-  ceph:
+  stone:
     conf:
       mgr:
         debug client: 10
 
 tasks:
-  - cephfs_test_runner:
+  - stonefs_test_runner:
       modules:
-        - tasks.cephfs.test_mirroring.TestMirroring
+        - tasks.stonefs.test_mirroring.TestMirroring

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
   *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -19,9 +19,9 @@
 #include "EventDPDK.h"
 
 #include "common/dout.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 
 #undef dout_prefix
 #define dout_prefix *_dout << "DPDKDriver."

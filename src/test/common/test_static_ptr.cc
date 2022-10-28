@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc.
  *
@@ -15,8 +15,8 @@
 #include "common/static_ptr.h"
 #include <gtest/gtest.h>
 
-using ceph::static_ptr;
-using ceph::make_static;
+using stone::static_ptr;
+using stone::make_static;
 
 class base {
 public:
@@ -137,7 +137,7 @@ TEST(StaticPtr, StaticCast) {
   static_ptr<base, sizeof(grandchild)> p1(std::in_place_type_t<grandchild>{}, 3);
   static_ptr<sibling2, sizeof(grandchild)> p2;
 
-  p2 = ceph::static_pointer_cast<sibling2, sizeof(grandchild)>(std::move(p1));
+  p2 = stone::static_pointer_cast<sibling2, sizeof(grandchild)>(std::move(p1));
   EXPECT_EQ(p2->func(), 9);
   EXPECT_EQ(p2->call(10), 30);
 }
@@ -146,13 +146,13 @@ TEST(StaticPtr, DynamicCast) {
   static constexpr auto sz = sizeof(great_grandchild);
   {
     static_ptr<base, sz> p1(std::in_place_type_t<grandchild>{}, 3);
-    auto p2 = ceph::dynamic_pointer_cast<great_grandchild, sz>(std::move(p1));
+    auto p2 = stone::dynamic_pointer_cast<great_grandchild, sz>(std::move(p1));
     EXPECT_FALSE(p2);
   }
 
   {
     static_ptr<base, sz> p1(std::in_place_type_t<grandchild>{}, 3);
-    auto p2 = ceph::dynamic_pointer_cast<grandchild, sz>(std::move(p1));
+    auto p2 = stone::dynamic_pointer_cast<grandchild, sz>(std::move(p1));
     EXPECT_TRUE(p2);
     EXPECT_EQ(p2->func(), 9);
     EXPECT_EQ(p2->call(10), 30);
@@ -174,7 +174,7 @@ TEST(StaticPtr, ConstCast) {
   {
     auto p1 = make_static<const constable>();
     EXPECT_EQ(p1->foo(), 5);
-    auto p2 = ceph::const_pointer_cast<constable, sz>(std::move(p1));
+    auto p2 = stone::const_pointer_cast<constable, sz>(std::move(p1));
     static_assert(!std::is_const<decltype(p2)::element_type>{},
                   "Things are more const than they ought to be.");
     EXPECT_TRUE(p2);
@@ -186,10 +186,10 @@ TEST(StaticPtr, ReinterpretCast) {
   static constexpr auto sz = sizeof(grandchild);
   {
     auto p1 = make_static<grandchild>(3);
-    auto p2 = ceph::reinterpret_pointer_cast<constable, sz>(std::move(p1));
+    auto p2 = stone::reinterpret_pointer_cast<constable, sz>(std::move(p1));
     static_assert(std::is_same<decltype(p2)::element_type, constable>{},
                   "Reinterpret is screwy.");
-    auto p3 = ceph::reinterpret_pointer_cast<grandchild, sz>(std::move(p2));
+    auto p3 = stone::reinterpret_pointer_cast<grandchild, sz>(std::move(p2));
     static_assert(std::is_same<decltype(p3)::element_type, grandchild>{},
                   "Reinterpret is screwy.");
     EXPECT_EQ(p3->func(), 9);

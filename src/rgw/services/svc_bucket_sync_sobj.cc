@@ -7,13 +7,13 @@
 #include "rgw/rgw_zone.h"
 #include "rgw/rgw_sync_policy.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 static string bucket_sync_sources_oid_prefix = "bucket.sync-source-hints";
 static string bucket_sync_targets_oid_prefix = "bucket.sync-target-hints";
 
 class RGWSI_Bucket_Sync_SObj_HintIndexManager {
-  CephContext *cct;
+  StoneContext *cct;
 
   struct {
     RGWSI_Zone *zone;
@@ -42,7 +42,7 @@ public:
                    optional_yield y);
 };
 
-RGWSI_Bucket_Sync_SObj::RGWSI_Bucket_Sync_SObj(CephContext *cct) : RGWSI_Bucket_Sync(cct) {
+RGWSI_Bucket_Sync_SObj::RGWSI_Bucket_Sync_SObj(StoneContext *cct) : RGWSI_Bucket_Sync(cct) {
 }
 RGWSI_Bucket_Sync_SObj::~RGWSI_Bucket_Sync_SObj() {
 }
@@ -296,7 +296,7 @@ class RGWSI_BS_SObj_HintIndexObj
 {
   friend class RGWSI_Bucket_Sync_SObj;
 
-  CephContext *cct;
+  StoneContext *cct;
   struct {
     RGWSI_SysObj *sysobj;
   } svc;

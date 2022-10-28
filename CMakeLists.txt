@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 # remove cmake/modules/FindPython* once 3.12 is required
 
-project(ceph
+project(stone
   VERSION 16.2.10
   LANGUAGES CXX C ASM)
 
@@ -105,15 +105,15 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include(GNUInstallDirs)
-include(CephChecks)
+include(StoneChecks)
 
-set(CEPH_MAN_DIR "share/man" CACHE STRING "Install location for man pages (relative to prefix).")
+set(STONE_MAN_DIR "share/man" CACHE STRING "Install location for man pages (relative to prefix).")
 
 option(ENABLE_SHARED "build shared libraries" ON)
 if(ENABLE_SHARED)
-  set(CEPH_SHARED SHARED)
+  set(STONE_SHARED SHARED)
 else(ENABLE_SHARED)
-  set(CEPH_SHARED STATIC)
+  set(STONE_SHARED STATIC)
 endif(ENABLE_SHARED)
 set(CMAKE_POSITION_INDEPENDENT_CODE ${ENABLE_SHARED})
 
@@ -280,10 +280,10 @@ if(WITH_QATZIP)
 endif(WITH_QATZIP)
 
 # needs mds and? XXX
-option(WITH_LIBCEPHFS "libcephfs client library" ON)
+option(WITH_LIBSTONEFS "libstonefs client library" ON)
 
-option(WITH_LIBCEPHSQLITE "libcephsqlite client library" ON)
-if(WITH_LIBCEPHSQLITE)
+option(WITH_LIBSTONESQLITE "libstonesqlite client library" ON)
+if(WITH_LIBSTONESQLITE)
   find_package(SQLite3 REQUIRED)
 endif()
 
@@ -296,7 +296,7 @@ if(WITH_KRBD AND NOT WITH_RBD)
   message(FATAL_ERROR "Cannot have WITH_KRBD without WITH_RBD.")
 endif()
 if(LINUX)
-  if(WITH_LIBCEPHFS OR WITH_KRBD)
+  if(WITH_LIBSTONEFS OR WITH_KRBD)
     # keyutils is only used when talking to the Linux Kernel key store 
     find_package(keyutils REQUIRED)
     set(HAVE_KEYUTILS ${KEYUTILS_FOUND})
@@ -326,7 +326,7 @@ if(WITH_LZ4)
   set(HAVE_LZ4 ${LZ4_FOUND})
 endif(WITH_LZ4)
 
-option(WITH_CEPH_DEBUG_MUTEX "Use debug ceph::mutex with lockdep" OFF)
+option(WITH_STONE_DEBUG_MUTEX "Use debug stone::mutex with lockdep" OFF)
 
 #if allocator is set on command line make sure it matches below strings
 set(ALLOCATOR "" CACHE STRING
@@ -468,8 +468,8 @@ if(WITH_RADOSGW)
   message(STATUS "crypto soname: ${LIBCRYPTO_SONAME}")
 endif (WITH_RADOSGW)
 
-#option for CephFS
-option(WITH_CEPHFS "CephFS is enabled" ON)
+#option for StoneFS
+option(WITH_STONEFS "StoneFS is enabled" ON)
 
 if(NOT WIN32)
 # Please specify 3.[0-7] if you want to build with a certain version of python3.
@@ -477,13 +477,13 @@ set(WITH_PYTHON3 "3" CACHE STRING "build with specified python3 version")
 find_package(Python3 ${WITH_PYTHON3} EXACT REQUIRED
   COMPONENTS Interpreter Development)
 
-option(WITH_MGR "ceph-mgr is enabled" ON)
+option(WITH_MGR "stone-mgr is enabled" ON)
 if(WITH_MGR)
   set(MGR_PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
   set(MGR_PYTHON_LIBRARIES ${Python3_LIBRARIES})
   set(MGR_PYTHON_VERSION_MAJOR ${Python3_VERSION_MAJOR})
   set(MGR_PYTHON_VERSION_MINOR ${Python3_VERSION_MINOR})
-  # https://tracker.ceph.com/issues/45147
+  # https://tracker.stone.com/issues/45147
   if(Python3_VERSION VERSION_GREATER_EQUAL 3.8)
     set(MGR_DISABLED_MODULES "diskprediction_local")
     message(STATUS "mgr module disabled for ${Python3_VERSION}: ${MGR_DISABLED_MODULES}")
@@ -537,9 +537,9 @@ option(DEBUG_GATHER "C_Gather debugging is enabled" ON)
 option(ENABLE_COVERAGE "Coverage is enabled" OFF)
 option(PG_DEBUG_REFS "PG Ref debugging is enabled" OFF)
 
-option(WITH_TESTS "enable the build of ceph-test package scripts/binaries" ON)
+option(WITH_TESTS "enable the build of stone-test package scripts/binaries" ON)
 set(UNIT_TESTS_BUILT ${WITH_TESTS})
-set(CEPH_TEST_TIMEOUT 3600 CACHE STRING 
+set(STONE_TEST_TIMEOUT 3600 CACHE STRING 
   "Maximum time before a CTest gets killed" )
 
 # fio
@@ -648,7 +648,7 @@ if(WITH_SYSTEM_NPM)
   endif()
 endif()
 set(DASHBOARD_FRONTEND_LANGS "" CACHE STRING
-  "List of comma separated ceph-dashboard frontend languages to build. \
+  "List of comma separated stone-dashboard frontend languages to build. \
   Use value `ALL` to build all languages")
 
 # TODO: make this an option and set it to the same value as WITH_MGR_DASHBOARD_FRONTEND
@@ -696,7 +696,7 @@ if(LINUX)
 endif()
 
 option(WITH_GRAFANA "install grafana dashboards" OFF)
-add_subdirectory(monitoring/ceph-mixin)
+add_subdirectory(monitoring/stone-mixin)
 
 CMAKE_DEPENDENT_OPTION(WITH_BOOST_VALGRIND "Boost support for valgrind" OFF
   "NOT WITH_SYSTEM_BOOST" OFF)

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OBJECTER_H
-#define CEPH_OBJECTER_H
+#ifndef STONE_OBJECTER_H
+#define STONE_OBJECTER_H
 
 #include <condition_variable>
 #include <list>
@@ -307,21 +307,21 @@ struct ObjectOperation {
   void pg_ls(uint64_t count, ceph::buffer::list& filter,
 	     collection_list_handle_t cookie, epoch_t start_epoch) {
     if (filter.length() == 0)
-      add_pgls(CEPH_OSD_OP_PGLS, count, cookie, start_epoch);
+      add_pgls(STONE_OSD_OP_PGLS, count, cookie, start_epoch);
     else
-      add_pgls_filter(CEPH_OSD_OP_PGLS_FILTER, count, filter, cookie,
+      add_pgls_filter(STONE_OSD_OP_PGLS_FILTER, count, filter, cookie,
 		      start_epoch);
-    flags |= CEPH_OSD_FLAG_PGOP;
+    flags |= STONE_OSD_FLAG_PGOP;
   }
 
   void pg_nls(uint64_t count, const ceph::buffer::list& filter,
 	      collection_list_handle_t cookie, epoch_t start_epoch) {
     if (filter.length() == 0)
-      add_pgls(CEPH_OSD_OP_PGNLS, count, cookie, start_epoch);
+      add_pgls(STONE_OSD_OP_PGNLS, count, cookie, start_epoch);
     else
-      add_pgls_filter(CEPH_OSD_OP_PGNLS_FILTER, count, filter, cookie,
+      add_pgls_filter(STONE_OSD_OP_PGNLS_FILTER, count, filter, cookie,
 		      start_epoch);
-    flags |= CEPH_OSD_FLAG_PGOP;
+    flags |= STONE_OSD_FLAG_PGOP;
   }
 
   void scrub_ls(const librados::object_id_t& start_after,
@@ -336,8 +336,8 @@ struct ObjectOperation {
 		int *rval);
 
   void create(bool excl) {
-    OSDOp& o = add_op(CEPH_OSD_OP_CREATE);
-    o.op.flags = (excl ? CEPH_OSD_OP_FLAG_EXCL : 0);
+    OSDOp& o = add_op(STONE_OSD_OP_CREATE);
+    o.op.flags = (excl ? STONE_OSD_OP_FLAG_EXCL : 0);
   }
 
   struct CB_ObjectOperation_stat {
@@ -378,46 +378,46 @@ struct ObjectOperation {
     }
   };
   void stat(uint64_t *psize, ceph::real_time *pmtime, int *prval) {
-    add_op(CEPH_OSD_OP_STAT);
+    add_op(STONE_OSD_OP_STAT);
     set_handler(CB_ObjectOperation_stat(psize, pmtime, nullptr, nullptr, prval,
 					nullptr));
     out_rval.back() = prval;
   }
   void stat(uint64_t *psize, ceph::real_time *pmtime,
 	    boost::system::error_code* ec) {
-    add_op(CEPH_OSD_OP_STAT);
+    add_op(STONE_OSD_OP_STAT);
     set_handler(CB_ObjectOperation_stat(psize, pmtime, nullptr, nullptr,
 					nullptr, ec));
     out_ec.back() = ec;
   }
   void stat(uint64_t *psize, time_t *ptime, int *prval) {
-    add_op(CEPH_OSD_OP_STAT);
+    add_op(STONE_OSD_OP_STAT);
     set_handler(CB_ObjectOperation_stat(psize, nullptr, ptime, nullptr, prval,
 					nullptr));
     out_rval.back() = prval;
   }
   void stat(uint64_t *psize, struct timespec *pts, int *prval) {
-    add_op(CEPH_OSD_OP_STAT);
+    add_op(STONE_OSD_OP_STAT);
     set_handler(CB_ObjectOperation_stat(psize, nullptr, nullptr, pts, prval, nullptr));
     out_rval.back() = prval;
   }
   void stat(uint64_t *psize, ceph::real_time *pmtime, nullptr_t) {
-    add_op(CEPH_OSD_OP_STAT);
+    add_op(STONE_OSD_OP_STAT);
     set_handler(CB_ObjectOperation_stat(psize, pmtime, nullptr, nullptr, nullptr,
 					nullptr));
   }
   void stat(uint64_t *psize, time_t *ptime, nullptr_t) {
-    add_op(CEPH_OSD_OP_STAT);
+    add_op(STONE_OSD_OP_STAT);
     set_handler(CB_ObjectOperation_stat(psize, nullptr, ptime, nullptr, nullptr,
 					nullptr));
   }
   void stat(uint64_t *psize, struct timespec *pts, nullptr_t) {
-    add_op(CEPH_OSD_OP_STAT);
+    add_op(STONE_OSD_OP_STAT);
     set_handler(CB_ObjectOperation_stat(psize, nullptr, nullptr, pts, nullptr,
 					nullptr));
   }
   void stat(uint64_t *psize, nullptr_t, nullptr_t) {
-    add_op(CEPH_OSD_OP_STAT);
+    add_op(STONE_OSD_OP_STAT);
     set_handler(CB_ObjectOperation_stat(psize, nullptr, nullptr, nullptr,
 					nullptr, nullptr));
   }
@@ -443,14 +443,14 @@ struct ObjectOperation {
   };
 
   void cmpext(uint64_t off, ceph::buffer::list& cmp_bl, int *prval) {
-    add_data(CEPH_OSD_OP_CMPEXT, off, cmp_bl.length(), cmp_bl);
+    add_data(STONE_OSD_OP_CMPEXT, off, cmp_bl.length(), cmp_bl);
     set_handler(CB_ObjectOperation_cmpext(prval));
     out_rval.back() = prval;
   }
 
   void cmpext(uint64_t off, ceph::buffer::list&& cmp_bl, boost::system::error_code* ec,
 	      std::size_t* s) {
-    add_data(CEPH_OSD_OP_CMPEXT, off, cmp_bl.length(), cmp_bl);
+    add_data(STONE_OSD_OP_CMPEXT, off, cmp_bl.length(), cmp_bl);
     set_handler(CB_ObjectOperation_cmpext(ec, s));
     out_ec.back() = ec;
   }
@@ -459,7 +459,7 @@ struct ObjectOperation {
   void cmpext(uint64_t off, uint64_t cmp_len, const char *cmp_buf, int *prval) {
     ceph::buffer::list cmp_bl;
     cmp_bl.append(cmp_buf, cmp_len);
-    add_data(CEPH_OSD_OP_CMPEXT, off, cmp_len, cmp_bl);
+    add_data(STONE_OSD_OP_CMPEXT, off, cmp_len, cmp_bl);
     set_handler(CB_ObjectOperation_cmpext(prval));
     out_rval.back() = prval;
   }
@@ -467,7 +467,7 @@ struct ObjectOperation {
   void read(uint64_t off, uint64_t len, ceph::buffer::list *pbl, int *prval,
 	    Context* ctx) {
     ceph::buffer::list bl;
-    add_data(CEPH_OSD_OP_READ, off, len, bl);
+    add_data(STONE_OSD_OP_READ, off, len, bl);
     unsigned p = ops.size() - 1;
     out_bl[p] = pbl;
     out_rval[p] = prval;
@@ -477,7 +477,7 @@ struct ObjectOperation {
   void read(uint64_t off, uint64_t len, boost::system::error_code* ec,
 	    ceph::buffer::list* pbl) {
     ceph::buffer::list bl;
-    add_data(CEPH_OSD_OP_READ, off, len, bl);
+    add_data(STONE_OSD_OP_READ, off, len, bl);
     out_ec.back() = ec;
     out_bl.back() = pbl;
   }
@@ -520,7 +520,7 @@ struct ObjectOperation {
   void sparse_read(uint64_t off, uint64_t len, std::map<uint64_t, uint64_t>* m,
 		   ceph::buffer::list* data_bl, int* prval) {
     ceph::buffer::list bl;
-    add_data(CEPH_OSD_OP_SPARSE_READ, off, len, bl);
+    add_data(STONE_OSD_OP_SPARSE_READ, off, len, bl);
     set_handler(CB_ObjectOperation_sparse_read(data_bl, m, prval, nullptr));
     out_rval.back() = prval;
   }
@@ -529,14 +529,14 @@ struct ObjectOperation {
 		   std::vector<std::pair<uint64_t, uint64_t>>* m,
 		   ceph::buffer::list* data_bl) {
     ceph::buffer::list bl;
-    add_data(CEPH_OSD_OP_SPARSE_READ, off, len, bl);
+    add_data(STONE_OSD_OP_SPARSE_READ, off, len, bl);
     set_handler(CB_ObjectOperation_sparse_read(data_bl, m, nullptr, ec));
     out_ec.back() = ec;
   }
   void write(uint64_t off, ceph::buffer::list& bl,
 	     uint64_t truncate_size,
 	     uint32_t truncate_seq) {
-    add_data(CEPH_OSD_OP_WRITE, off, bl.length(), bl);
+    add_data(STONE_OSD_OP_WRITE, off, bl.length(), bl);
     OSDOp& o = *ops.rbegin();
     o.op.extent.truncate_size = truncate_size;
     o.op.extent.truncate_seq = truncate_seq;
@@ -545,39 +545,39 @@ struct ObjectOperation {
     write(off, bl, 0, 0);
   }
   void write_full(ceph::buffer::list& bl) {
-    add_data(CEPH_OSD_OP_WRITEFULL, 0, bl.length(), bl);
+    add_data(STONE_OSD_OP_WRITEFULL, 0, bl.length(), bl);
   }
   void writesame(uint64_t off, uint64_t write_len, ceph::buffer::list& bl) {
-    add_writesame(CEPH_OSD_OP_WRITESAME, off, write_len, bl);
+    add_writesame(STONE_OSD_OP_WRITESAME, off, write_len, bl);
   }
   void append(ceph::buffer::list& bl) {
-    add_data(CEPH_OSD_OP_APPEND, 0, bl.length(), bl);
+    add_data(STONE_OSD_OP_APPEND, 0, bl.length(), bl);
   }
   void zero(uint64_t off, uint64_t len) {
     ceph::buffer::list bl;
-    add_data(CEPH_OSD_OP_ZERO, off, len, bl);
+    add_data(STONE_OSD_OP_ZERO, off, len, bl);
   }
   void truncate(uint64_t off) {
     ceph::buffer::list bl;
-    add_data(CEPH_OSD_OP_TRUNCATE, off, 0, bl);
+    add_data(STONE_OSD_OP_TRUNCATE, off, 0, bl);
   }
   void remove() {
     ceph::buffer::list bl;
-    add_data(CEPH_OSD_OP_DELETE, 0, 0, bl);
+    add_data(STONE_OSD_OP_DELETE, 0, 0, bl);
   }
   void mapext(uint64_t off, uint64_t len) {
     ceph::buffer::list bl;
-    add_data(CEPH_OSD_OP_MAPEXT, off, len, bl);
+    add_data(STONE_OSD_OP_MAPEXT, off, len, bl);
   }
   void sparse_read(uint64_t off, uint64_t len) {
     ceph::buffer::list bl;
-    add_data(CEPH_OSD_OP_SPARSE_READ, off, len, bl);
+    add_data(STONE_OSD_OP_SPARSE_READ, off, len, bl);
   }
 
   void checksum(uint8_t type, const ceph::buffer::list &init_value_bl,
 		uint64_t off, uint64_t len, size_t chunk_size,
 		ceph::buffer::list *pbl, int *prval, Context *ctx) {
-    OSDOp& osd_op = add_op(CEPH_OSD_OP_CHECKSUM);
+    OSDOp& osd_op = add_op(STONE_OSD_OP_CHECKSUM);
     osd_op.op.checksum.offset = off;
     osd_op.op.checksum.length = len;
     osd_op.op.checksum.type = type;
@@ -593,7 +593,7 @@ struct ObjectOperation {
   // object attrs
   void getxattr(const char *name, ceph::buffer::list *pbl, int *prval) {
     ceph::buffer::list bl;
-    add_xattr(CEPH_OSD_OP_GETXATTR, name, bl);
+    add_xattr(STONE_OSD_OP_GETXATTR, name, bl);
     unsigned p = ops.size() - 1;
     out_bl[p] = pbl;
     out_rval[p] = prval;
@@ -601,7 +601,7 @@ struct ObjectOperation {
   void getxattr(std::string_view name, boost::system::error_code* ec,
 		buffer::list *pbl) {
     ceph::buffer::list bl;
-    add_xattr(CEPH_OSD_OP_GETXATTR, name, bl);
+    add_xattr(STONE_OSD_OP_GETXATTR, name, bl);
     out_bl.back() = pbl;
     out_ec.back() = ec;
   }
@@ -828,7 +828,7 @@ struct ObjectOperation {
     }
   };
   void getxattrs(std::map<std::string,ceph::buffer::list> *pattrs, int *prval) {
-    add_op(CEPH_OSD_OP_GETXATTRS);
+    add_op(STONE_OSD_OP_GETXATTRS);
     if (pattrs || prval) {
       set_handler(CB_ObjectOperation_decodevals(0, pattrs, nullptr, prval,
 						nullptr));
@@ -837,53 +837,53 @@ struct ObjectOperation {
   }
   void getxattrs(boost::system::error_code* ec,
 		 boost::container::flat_map<std::string, ceph::buffer::list> *pattrs) {
-    add_op(CEPH_OSD_OP_GETXATTRS);
+    add_op(STONE_OSD_OP_GETXATTRS);
     set_handler(CB_ObjectOperation_decodevals(0, pattrs, nullptr, nullptr, ec));
     out_ec.back() = ec;
   }
   void setxattr(const char *name, const ceph::buffer::list& bl) {
-    add_xattr(CEPH_OSD_OP_SETXATTR, name, bl);
+    add_xattr(STONE_OSD_OP_SETXATTR, name, bl);
   }
   void setxattr(std::string_view name, const ceph::buffer::list& bl) {
-    add_xattr(CEPH_OSD_OP_SETXATTR, name, bl);
+    add_xattr(STONE_OSD_OP_SETXATTR, name, bl);
   }
   void setxattr(const char *name, const std::string& s) {
     ceph::buffer::list bl;
     bl.append(s);
-    add_xattr(CEPH_OSD_OP_SETXATTR, name, bl);
+    add_xattr(STONE_OSD_OP_SETXATTR, name, bl);
   }
   void cmpxattr(const char *name, uint8_t cmp_op, uint8_t cmp_mode,
 		const ceph::buffer::list& bl) {
-    add_xattr_cmp(CEPH_OSD_OP_CMPXATTR, name, cmp_op, cmp_mode, bl);
+    add_xattr_cmp(STONE_OSD_OP_CMPXATTR, name, cmp_op, cmp_mode, bl);
   }
   void cmpxattr(std::string_view name, uint8_t cmp_op, uint8_t cmp_mode,
 		const ceph::buffer::list& bl) {
-    add_xattr_cmp(CEPH_OSD_OP_CMPXATTR, name, cmp_op, cmp_mode, bl);
+    add_xattr_cmp(STONE_OSD_OP_CMPXATTR, name, cmp_op, cmp_mode, bl);
   }
   void rmxattr(const char *name) {
     ceph::buffer::list bl;
-    add_xattr(CEPH_OSD_OP_RMXATTR, name, bl);
+    add_xattr(STONE_OSD_OP_RMXATTR, name, bl);
   }
   void rmxattr(std::string_view name) {
     ceph::buffer::list bl;
-    add_xattr(CEPH_OSD_OP_RMXATTR, name, bl);
+    add_xattr(STONE_OSD_OP_RMXATTR, name, bl);
   }
   void setxattrs(map<string, ceph::buffer::list>& attrs) {
     using ceph::encode;
     ceph::buffer::list bl;
     encode(attrs, bl);
-    add_xattr(CEPH_OSD_OP_RESETXATTRS, 0, bl.length());
+    add_xattr(STONE_OSD_OP_RESETXATTRS, 0, bl.length());
   }
   void resetxattrs(const char *prefix, std::map<std::string, ceph::buffer::list>& attrs) {
     using ceph::encode;
     ceph::buffer::list bl;
     encode(attrs, bl);
-    add_xattr(CEPH_OSD_OP_RESETXATTRS, prefix, bl);
+    add_xattr(STONE_OSD_OP_RESETXATTRS, prefix, bl);
   }
 
   // trivialmap
   void tmap_update(ceph::buffer::list& bl) {
-    add_data(CEPH_OSD_OP_TMAPUP, 0, 0, bl);
+    add_data(STONE_OSD_OP_TMAPUP, 0, 0, bl);
   }
 
   // objectmap
@@ -893,7 +893,7 @@ struct ObjectOperation {
 		     bool *ptruncated,
 		     int *prval) {
     using ceph::encode;
-    OSDOp &op = add_op(CEPH_OSD_OP_OMAPGETKEYS);
+    OSDOp &op = add_op(STONE_OSD_OP_OMAPGETKEYS);
     ceph::buffer::list bl;
     encode(start_after, bl);
     encode(max_to_get, bl);
@@ -911,7 +911,7 @@ struct ObjectOperation {
 		     boost::system::error_code* ec,
 		     boost::container::flat_set<std::string> *out_set,
 		     bool *ptruncated) {
-    OSDOp& op = add_op(CEPH_OSD_OP_OMAPGETKEYS);
+    OSDOp& op = add_op(STONE_OSD_OP_OMAPGETKEYS);
     ceph::buffer::list bl;
     encode(start_after ? *start_after : std::string_view{}, bl);
     encode(max_to_get, bl);
@@ -931,7 +931,7 @@ struct ObjectOperation {
 		     bool *ptruncated,
 		     int *prval) {
     using ceph::encode;
-    OSDOp &op = add_op(CEPH_OSD_OP_OMAPGETVALS);
+    OSDOp &op = add_op(STONE_OSD_OP_OMAPGETVALS);
     ceph::buffer::list bl;
     encode(start_after, bl);
     encode(max_to_get, bl);
@@ -952,7 +952,7 @@ struct ObjectOperation {
 		     boost::system::error_code* ec,
 		     boost::container::flat_map<std::string, ceph::buffer::list> *out_set,
 		     bool *ptruncated) {
-    OSDOp &op = add_op(CEPH_OSD_OP_OMAPGETVALS);
+    OSDOp &op = add_op(STONE_OSD_OP_OMAPGETVALS);
     ceph::buffer::list bl;
     encode(start_after ? *start_after : std::string_view{}, bl);
     encode(max_to_get, bl);
@@ -968,7 +968,7 @@ struct ObjectOperation {
   void omap_get_vals_by_keys(const std::set<std::string> &to_get,
 			     std::map<std::string, ceph::buffer::list> *out_set,
 			     int *prval) {
-    OSDOp &op = add_op(CEPH_OSD_OP_OMAPGETVALSBYKEYS);
+    OSDOp &op = add_op(STONE_OSD_OP_OMAPGETVALSBYKEYS);
     ceph::buffer::list bl;
     encode(to_get, bl);
     op.op.extent.offset = 0;
@@ -985,7 +985,7 @@ struct ObjectOperation {
     const boost::container::flat_set<std::string>& to_get,
     boost::system::error_code* ec,
     boost::container::flat_map<std::string, ceph::buffer::list> *out_set) {
-    OSDOp &op = add_op(CEPH_OSD_OP_OMAPGETVALSBYKEYS);
+    OSDOp &op = add_op(STONE_OSD_OP_OMAPGETVALSBYKEYS);
     ceph::buffer::list bl;
     encode(to_get, bl);
     op.op.extent.offset = 0;
@@ -999,7 +999,7 @@ struct ObjectOperation {
   void omap_cmp(const std::map<std::string, pair<ceph::buffer::list,int> > &assertions,
 		int *prval) {
     using ceph::encode;
-    OSDOp &op = add_op(CEPH_OSD_OP_OMAP_CMP);
+    OSDOp &op = add_op(STONE_OSD_OP_OMAP_CMP);
     ceph::buffer::list bl;
     encode(assertions, bl);
     op.op.extent.offset = 0;
@@ -1014,7 +1014,7 @@ struct ObjectOperation {
   void omap_cmp(const boost::container::flat_map<
 		  std::string, pair<ceph::buffer::list, int>>& assertions,
 		boost::system::error_code *ec) {
-    OSDOp &op = add_op(CEPH_OSD_OP_OMAP_CMP);
+    OSDOp &op = add_op(STONE_OSD_OP_OMAP_CMP);
     ceph::buffer::list bl;
     encode(assertions, bl);
     op.op.extent.offset = 0;
@@ -1137,7 +1137,7 @@ struct ObjectOperation {
 		uint64_t *truncate_size,
 		int *prval) {
     using ceph::encode;
-    OSDOp& osd_op = add_op(CEPH_OSD_OP_COPY_GET);
+    OSDOp& osd_op = add_op(STONE_OSD_OP_COPY_GET);
     osd_op.op.copy_get.max = max;
     encode(*cursor, osd_op.indata);
     encode(max, osd_op.indata);
@@ -1156,7 +1156,7 @@ struct ObjectOperation {
   }
 
   void undirty() {
-    add_op(CEPH_OSD_OP_UNDIRTY);
+    add_op(STONE_OSD_OP_UNDIRTY);
   }
 
   struct C_ObjectOperation_isdirty : public Context {
@@ -1183,7 +1183,7 @@ struct ObjectOperation {
   };
 
   void is_dirty(bool *pisdirty, int *prval) {
-    add_op(CEPH_OSD_OP_ISDIRTY);
+    add_op(STONE_OSD_OP_ISDIRTY);
     unsigned p = ops.size() - 1;
     out_rval[p] = prval;
     C_ObjectOperation_isdirty *h =
@@ -1243,7 +1243,7 @@ struct ObjectOperation {
    * @param prval [out] return value
    */
   void hit_set_ls(std::list< std::pair<time_t, time_t> > *pls, int *prval) {
-    add_op(CEPH_OSD_OP_PG_HITSET_LS);
+    add_op(STONE_OSD_OP_PG_HITSET_LS);
     unsigned p = ops.size() - 1;
     out_rval[p] = prval;
     C_ObjectOperation_hit_set_ls *h =
@@ -1253,7 +1253,7 @@ struct ObjectOperation {
   }
   void hit_set_ls(std::list<std::pair<ceph::real_time, ceph::real_time> > *pls,
 		  int *prval) {
-    add_op(CEPH_OSD_OP_PG_HITSET_LS);
+    add_op(STONE_OSD_OP_PG_HITSET_LS);
     unsigned p = ops.size() - 1;
     out_rval[p] = prval;
     C_ObjectOperation_hit_set_ls *h =
@@ -1273,7 +1273,7 @@ struct ObjectOperation {
    * @param prval [out] return value
    */
   void hit_set_get(ceph::real_time stamp, ceph::buffer::list *pbl, int *prval) {
-    OSDOp& op = add_op(CEPH_OSD_OP_PG_HITSET_GET);
+    OSDOp& op = add_op(STONE_OSD_OP_PG_HITSET_GET);
     op.op.hit_set_get.stamp = ceph::real_clock::to_ceph_timespec(stamp);
     unsigned p = ops.size() - 1;
     out_rval[p] = prval;
@@ -1281,14 +1281,14 @@ struct ObjectOperation {
   }
 
   void omap_get_header(ceph::buffer::list *bl, int *prval) {
-    add_op(CEPH_OSD_OP_OMAPGETHEADER);
+    add_op(STONE_OSD_OP_OMAPGETHEADER);
     unsigned p = ops.size() - 1;
     out_bl[p] = bl;
     out_rval[p] = prval;
   }
 
   void omap_get_header(boost::system::error_code* ec, ceph::buffer::list *bl) {
-    add_op(CEPH_OSD_OP_OMAPGETHEADER);
+    add_op(STONE_OSD_OP_OMAPGETHEADER);
     out_bl.back() = bl;
     out_ec.back() = ec;
   }
@@ -1296,33 +1296,33 @@ struct ObjectOperation {
   void omap_set(const map<string, ceph::buffer::list> &map) {
     ceph::buffer::list bl;
     encode(map, bl);
-    add_data(CEPH_OSD_OP_OMAPSETVALS, 0, bl.length(), bl);
+    add_data(STONE_OSD_OP_OMAPSETVALS, 0, bl.length(), bl);
   }
 
   void omap_set(const boost::container::flat_map<string, ceph::buffer::list>& map) {
     ceph::buffer::list bl;
     encode(map, bl);
-    add_data(CEPH_OSD_OP_OMAPSETVALS, 0, bl.length(), bl);
+    add_data(STONE_OSD_OP_OMAPSETVALS, 0, bl.length(), bl);
   }
 
   void omap_set_header(ceph::buffer::list &bl) {
-    add_data(CEPH_OSD_OP_OMAPSETHEADER, 0, bl.length(), bl);
+    add_data(STONE_OSD_OP_OMAPSETHEADER, 0, bl.length(), bl);
   }
 
   void omap_clear() {
-    add_op(CEPH_OSD_OP_OMAPCLEAR);
+    add_op(STONE_OSD_OP_OMAPCLEAR);
   }
 
   void omap_rm_keys(const std::set<std::string> &to_remove) {
     using ceph::encode;
     ceph::buffer::list bl;
     encode(to_remove, bl);
-    add_data(CEPH_OSD_OP_OMAPRMKEYS, 0, bl.length(), bl);
+    add_data(STONE_OSD_OP_OMAPRMKEYS, 0, bl.length(), bl);
   }
   void omap_rm_keys(const boost::container::flat_set<std::string>& to_remove) {
     ceph::buffer::list bl;
     encode(to_remove, bl);
-    add_data(CEPH_OSD_OP_OMAPRMKEYS, 0, bl.length(), bl);
+    add_data(STONE_OSD_OP_OMAPRMKEYS, 0, bl.length(), bl);
   }
 
   void omap_rm_range(std::string_view key_begin, std::string_view key_end) {
@@ -1330,46 +1330,46 @@ struct ObjectOperation {
     using ceph::encode;
     encode(key_begin, bl);
     encode(key_end, bl);
-    add_data(CEPH_OSD_OP_OMAPRMKEYRANGE, 0, bl.length(), bl);
+    add_data(STONE_OSD_OP_OMAPRMKEYRANGE, 0, bl.length(), bl);
   }
 
   // object classes
   void call(const char *cname, const char *method, ceph::buffer::list &indata) {
-    add_call(CEPH_OSD_OP_CALL, cname, method, indata, NULL, NULL, NULL);
+    add_call(STONE_OSD_OP_CALL, cname, method, indata, NULL, NULL, NULL);
   }
 
   void call(const char *cname, const char *method, ceph::buffer::list &indata,
 	    ceph::buffer::list *outdata, Context *ctx, int *prval) {
-    add_call(CEPH_OSD_OP_CALL, cname, method, indata, outdata, ctx, prval);
+    add_call(STONE_OSD_OP_CALL, cname, method, indata, outdata, ctx, prval);
   }
 
   void call(std::string_view cname, std::string_view method,
 	    const ceph::buffer::list& indata, boost::system::error_code* ec) {
-    add_call(CEPH_OSD_OP_CALL, cname, method, indata, NULL, NULL, NULL);
+    add_call(STONE_OSD_OP_CALL, cname, method, indata, NULL, NULL, NULL);
     out_ec.back() = ec;
   }
 
   void call(std::string_view cname, std::string_view method, const ceph::buffer::list& indata,
 	    boost::system::error_code* ec, ceph::buffer::list *outdata) {
-    add_call(CEPH_OSD_OP_CALL, cname, method, indata, outdata, nullptr, nullptr);
+    add_call(STONE_OSD_OP_CALL, cname, method, indata, outdata, nullptr, nullptr);
     out_ec.back() = ec;
   }
   void call(std::string_view cname, std::string_view method,
 	    const ceph::buffer::list& indata,
 	    fu2::unique_function<void (boost::system::error_code,
 				       const ceph::buffer::list&) &&> f) {
-    add_call(CEPH_OSD_OP_CALL, cname, method, indata, std::move(f));
+    add_call(STONE_OSD_OP_CALL, cname, method, indata, std::move(f));
   }
   void call(std::string_view cname, std::string_view method,
 	    const ceph::buffer::list& indata,
 	    fu2::unique_function<void (boost::system::error_code, int,
 				       const ceph::buffer::list&) &&> f) {
-    add_call(CEPH_OSD_OP_CALL, cname, method, indata, std::move(f));
+    add_call(STONE_OSD_OP_CALL, cname, method, indata, std::move(f));
   }
 
   // watch/notify
   void watch(uint64_t cookie, __u8 op, uint32_t timeout = 0) {
-    OSDOp& osd_op = add_op(CEPH_OSD_OP_WATCH);
+    OSDOp& osd_op = add_op(STONE_OSD_OP_WATCH);
     osd_op.op.watch.cookie = cookie;
     osd_op.op.watch.op = op;
     osd_op.op.watch.timeout = timeout;
@@ -1378,7 +1378,7 @@ struct ObjectOperation {
   void notify(uint64_t cookie, uint32_t prot_ver, uint32_t timeout,
               ceph::buffer::list &bl, ceph::buffer::list *inbl) {
     using ceph::encode;
-    OSDOp& osd_op = add_op(CEPH_OSD_OP_NOTIFY);
+    OSDOp& osd_op = add_op(STONE_OSD_OP_NOTIFY);
     osd_op.op.notify.cookie = cookie;
     encode(prot_ver, *inbl);
     encode(timeout, *inbl);
@@ -1389,7 +1389,7 @@ struct ObjectOperation {
   void notify_ack(uint64_t notify_id, uint64_t cookie,
 		  ceph::buffer::list& reply_bl) {
     using ceph::encode;
-    OSDOp& osd_op = add_op(CEPH_OSD_OP_NOTIFY_ACK);
+    OSDOp& osd_op = add_op(STONE_OSD_OP_NOTIFY_ACK);
     ceph::buffer::list bl;
     encode(notify_id, bl);
     encode(cookie, bl);
@@ -1399,7 +1399,7 @@ struct ObjectOperation {
 
   void list_watchers(std::list<obj_watch_t> *out,
 		     int *prval) {
-    add_op(CEPH_OSD_OP_LIST_WATCHERS);
+    add_op(STONE_OSD_OP_LIST_WATCHERS);
     if (prval || out) {
       set_handler(CB_ObjectOperation_decodewatchers(out, prval, nullptr));
       out_rval.back() = prval;
@@ -1407,14 +1407,14 @@ struct ObjectOperation {
   }
   void list_watchers(vector<neorados::ObjWatcher>* out,
 		     boost::system::error_code* ec) {
-    add_op(CEPH_OSD_OP_LIST_WATCHERS);
+    add_op(STONE_OSD_OP_LIST_WATCHERS);
     set_handler(CB_ObjectOperation_decodewatchersneo(out, nullptr, ec));
     out_ec.back() = ec;
   }
 
   void list_snaps(librados::snap_set_t *out, int *prval,
 		  boost::system::error_code* ec = nullptr) {
-    add_op(CEPH_OSD_OP_LIST_SNAPS);
+    add_op(STONE_OSD_OP_LIST_SNAPS);
     if (prval || out || ec) {
       set_handler(CB_ObjectOperation_decodesnaps(out, nullptr, prval, ec));
       out_rval.back() = prval;
@@ -1424,7 +1424,7 @@ struct ObjectOperation {
 
   void list_snaps(neorados::SnapSet *out, int *prval,
 		  boost::system::error_code* ec = nullptr) {
-    add_op(CEPH_OSD_OP_LIST_SNAPS);
+    add_op(STONE_OSD_OP_LIST_SNAPS);
     if (prval || out || ec) {
       set_handler(CB_ObjectOperation_decodesnaps(nullptr, out, prval, ec));
       out_rval.back() = prval;
@@ -1433,20 +1433,20 @@ struct ObjectOperation {
   }
 
   void assert_version(uint64_t ver) {
-    OSDOp& osd_op = add_op(CEPH_OSD_OP_ASSERT_VER);
+    OSDOp& osd_op = add_op(STONE_OSD_OP_ASSERT_VER);
     osd_op.op.assert_ver.ver = ver;
   }
 
   void cmpxattr(const char *name, const ceph::buffer::list& val,
 		int op, int mode) {
-    add_xattr(CEPH_OSD_OP_CMPXATTR, name, val);
+    add_xattr(STONE_OSD_OP_CMPXATTR, name, val);
     OSDOp& o = *ops.rbegin();
     o.op.xattr.cmp_op = op;
     o.op.xattr.cmp_mode = mode;
   }
 
   void rollback(uint64_t snapid) {
-    OSDOp& osd_op = add_op(CEPH_OSD_OP_ROLLBACK);
+    OSDOp& osd_op = add_op(STONE_OSD_OP_ROLLBACK);
     osd_op.op.snap.snapid = snapid;
   }
 
@@ -1454,7 +1454,7 @@ struct ObjectOperation {
 		 version_t src_version, unsigned flags,
 		 unsigned src_fadvise_flags) {
     using ceph::encode;
-    OSDOp& osd_op = add_op(CEPH_OSD_OP_COPY_FROM);
+    OSDOp& osd_op = add_op(STONE_OSD_OP_COPY_FROM);
     osd_op.op.copy_from.snapid = snapid;
     osd_op.op.copy_from.src_version = src_version;
     osd_op.op.copy_from.flags = flags;
@@ -1467,7 +1467,7 @@ struct ObjectOperation {
 		 uint32_t truncate_seq, uint64_t truncate_size,
 		 unsigned src_fadvise_flags) {
     using ceph::encode;
-    OSDOp& osd_op = add_op(CEPH_OSD_OP_COPY_FROM2);
+    OSDOp& osd_op = add_op(STONE_OSD_OP_COPY_FROM2);
     osd_op.op.copy_from.snapid = snapid;
     osd_op.op.copy_from.src_version = src_version;
     osd_op.op.copy_from.flags = flags;
@@ -1489,7 +1489,7 @@ struct ObjectOperation {
    * use with IGNORE_CACHE to avoid triggering promote.
    */
   void cache_flush() {
-    add_op(CEPH_OSD_OP_CACHE_FLUSH);
+    add_op(STONE_OSD_OP_CACHE_FLUSH);
   }
 
   /**
@@ -1504,7 +1504,7 @@ struct ObjectOperation {
    * use with IGNORE_CACHE to avoid triggering promote.
    */
   void cache_try_flush() {
-    add_op(CEPH_OSD_OP_CACHE_TRY_FLUSH);
+    add_op(STONE_OSD_OP_CACHE_TRY_FLUSH);
   }
 
   /**
@@ -1516,7 +1516,7 @@ struct ObjectOperation {
    * use with IGNORE_CACHE to avoid triggering promote.
    */
   void cache_evict() {
-    add_op(CEPH_OSD_OP_CACHE_EVICT);
+    add_op(STONE_OSD_OP_CACHE_EVICT);
   }
 
   /*
@@ -1525,7 +1525,7 @@ struct ObjectOperation {
   void set_redirect(object_t tgt, snapid_t snapid, object_locator_t tgt_oloc, 
 		    version_t tgt_version, int flag) {
     using ceph::encode;
-    OSDOp& osd_op = add_op(CEPH_OSD_OP_SET_REDIRECT);
+    OSDOp& osd_op = add_op(STONE_OSD_OP_SET_REDIRECT);
     osd_op.op.copy_from.snapid = snapid;
     osd_op.op.copy_from.src_version = tgt_version;
     encode(tgt, osd_op.indata);
@@ -1536,7 +1536,7 @@ struct ObjectOperation {
   void set_chunk(uint64_t src_offset, uint64_t src_length, object_locator_t tgt_oloc,
 		 object_t tgt_oid, uint64_t tgt_offset, int flag) {
     using ceph::encode;
-    OSDOp& osd_op = add_op(CEPH_OSD_OP_SET_CHUNK);
+    OSDOp& osd_op = add_op(STONE_OSD_OP_SET_CHUNK);
     encode(src_offset, osd_op.indata);
     encode(src_length, osd_op.indata);
     encode(tgt_oloc, osd_op.indata);
@@ -1546,31 +1546,31 @@ struct ObjectOperation {
   }
 
   void tier_promote() {
-    add_op(CEPH_OSD_OP_TIER_PROMOTE);
+    add_op(STONE_OSD_OP_TIER_PROMOTE);
   }
 
   void unset_manifest() {
-    add_op(CEPH_OSD_OP_UNSET_MANIFEST);
+    add_op(STONE_OSD_OP_UNSET_MANIFEST);
   }
 
   void tier_flush() {
-    add_op(CEPH_OSD_OP_TIER_FLUSH);
+    add_op(STONE_OSD_OP_TIER_FLUSH);
   }
 
   void tier_evict() {
-    add_op(CEPH_OSD_OP_TIER_EVICT);
+    add_op(STONE_OSD_OP_TIER_EVICT);
   }
 
   void set_alloc_hint(uint64_t expected_object_size,
                       uint64_t expected_write_size,
 		      uint32_t flags) {
-    add_alloc_hint(CEPH_OSD_OP_SETALLOCHINT, expected_object_size,
+    add_alloc_hint(STONE_OSD_OP_SETALLOCHINT, expected_object_size,
 		   expected_write_size, flags);
 
-    // CEPH_OSD_OP_SETALLOCHINT op is advisory and therefore deemed
+    // STONE_OSD_OP_SETALLOCHINT op is advisory and therefore deemed
     // not worth a feature bit.  Set FAILOK per-op flag to make
     // sure older osds don't trip over an unsupported opcode.
-    set_last_op_flags(CEPH_OSD_OP_FLAG_FAILOK);
+    set_last_op_flags(STONE_OSD_OP_FLAG_FAILOK);
   }
 
   template<typename V>
@@ -1593,11 +1593,11 @@ struct ObjectOperation {
    * Pin/unpin an object in cache tier
    */
   void cache_pin() {
-    add_op(CEPH_OSD_OP_CACHE_PIN);
+    add_op(STONE_OSD_OP_CACHE_PIN);
   }
 
   void cache_unpin() {
-    add_op(CEPH_OSD_OP_CACHE_UNPIN);
+    add_op(STONE_OSD_OP_CACHE_UNPIN);
   }
 };
 
@@ -1810,7 +1810,7 @@ public:
     hobject_t get_hobj() {
       return hobject_t(target_oid,
 		       target_oloc.key,
-		       CEPH_NOSNAP,
+		       STONE_NOSNAP,
 		       target_oloc.hash >= 0 ? target_oloc.hash : pgid.ps(),
 		       target_oloc.pool,
 		       target_oloc.nspace);
@@ -1824,8 +1824,8 @@ public:
 
     bool respects_full() const {
       return
-	(flags & (CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_RWORDERED)) &&
-	!(flags & (CEPH_OSD_FLAG_FULL_TRY | CEPH_OSD_FLAG_FULL_FORCE));
+	(flags & (STONE_OSD_FLAG_WRITE | STONE_OSD_FLAG_RWORDERED)) &&
+	!(flags & (STONE_OSD_FLAG_FULL_TRY | STONE_OSD_FLAG_FULL_FORCE));
     }
 
     void dump(ceph::Formatter *f) const;
@@ -1887,11 +1887,11 @@ public:
     op_target_t target;
 
     ConnectionRef con = nullptr;  // for rx buffer only
-    uint64_t features = CEPH_FEATURES_SUPPORTED_DEFAULT; // explicitly specified op features
+    uint64_t features = STONE_FEATURES_SUPPORTED_DEFAULT; // explicitly specified op features
 
     osdc_opvec ops;
 
-    snapid_t snapid = CEPH_NOSNAP;
+    snapid_t snapid = STONE_NOSNAP;
     SnapContext snapc;
     ceph::real_time mtime;
 
@@ -2256,7 +2256,7 @@ public:
     Objecter *objecter;
     uint64_t linger_id{0};
     op_target_t target{object_t(), object_locator_t(), 0};
-    snapid_t snap{CEPH_NOSNAP};
+    snapid_t snap{STONE_NOSNAP};
     SnapContext snapc;
     ceph::real_time mtime;
 
@@ -2387,7 +2387,7 @@ public:
     int num_locks;
     std::unique_ptr<std::mutex[]> completion_locks;
 
-    OSDSession(CephContext *cct, int o) :
+    OSDSession(StoneeContext *cct, int o) :
       osd(o), incarnation(0), con(NULL),
       num_locks(cct->_conf->objecter_completion_locks_per_session),
       completion_locks(new std::mutex[num_locks]) {}
@@ -2570,7 +2570,7 @@ private:
 			   static_cast<int64_t>(
 			     cct->_conf->objecter_inflight_ops)};
  public:
-  Objecter(CephContext *cct, Messenger *m, MonClient *mc,
+  Objecter(StoneeContext *cct, Messenger *m, MonClient *mc,
 	   boost::asio::io_context& service);
   ~Objecter() override;
 
@@ -2633,8 +2633,8 @@ private:
   }
   bool ms_can_fast_dispatch(const Message *m) const override {
     switch (m->get_type()) {
-    case CEPH_MSG_OSD_OPREPLY:
-    case CEPH_MSG_WATCH_NOTIFY:
+    case STONE_MSG_OSD_OPREPLY:
+    case STONE_MSG_WATCH_NOTIFY:
       return true;
     default:
       return false;
@@ -2905,7 +2905,7 @@ public:
     osd_reqid_t reqid = osd_reqid_t(),
     ZTracer::Trace *parent_trace = nullptr) {
     Op *o = new Op(oid, oloc, std::move(op.ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit, objver,
+		   STONE_OSD_FLAG_WRITE, oncommit, objver,
 		   nullptr, parent_trace);
     o->priority = op.priority;
     o->mtime = mtime;
@@ -2938,7 +2938,7 @@ public:
 	      version_t *objver = NULL, osd_reqid_t reqid = osd_reqid_t(),
 	      ZTracer::Trace *parent_trace = nullptr) {
     Op *o = new Op(oid, oloc, std::move(op.ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, std::move(oncommit), objver,
+		   STONE_OSD_FLAG_WRITE, std::move(oncommit), objver,
 		   nullptr, parent_trace);
     o->priority = op.priority;
     o->mtime = mtime;
@@ -2961,7 +2961,7 @@ public:
     uint64_t features = 0,
     ZTracer::Trace *parent_trace = nullptr) {
     Op *o = new Op(oid, oloc, std::move(op.ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_READ, onack, objver,
+		   STONE_OSD_FLAG_READ, onack, objver,
 		   data_offset, parent_trace);
     o->priority = op.priority;
     o->snapid = snapid;
@@ -2997,7 +2997,7 @@ public:
 	    version_t *objver = nullptr, int *data_offset = nullptr,
 	    uint64_t features = 0, ZTracer::Trace *parent_trace = nullptr) {
     Op *o = new Op(oid, oloc, std::move(op.ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_READ, std::move(onack), objver,
+		   STONE_OSD_FLAG_READ, std::move(onack), objver,
 		   data_offset, parent_trace);
     o->priority = op.priority;
     o->snapid = snapid;
@@ -3024,13 +3024,13 @@ public:
     int *ctx_budget) {
     Op *o = new Op(object_t(), oloc,
 		   std::move(op.ops),
-		   flags | global_op_flags | CEPH_OSD_FLAG_READ |
-		   CEPH_OSD_FLAG_IGNORE_OVERLAY,
+		   flags | global_op_flags | STONE_OSD_FLAG_READ |
+		   STONE_OSD_FLAG_IGNORE_OVERLAY,
 		   onack, NULL);
     o->target.precalc_pgid = true;
     o->target.base_pgid = pg_t(hash, oloc.pool);
     o->priority = op.priority;
-    o->snapid = CEPH_NOSNAP;
+    o->snapid = STONE_NOSNAP;
     o->outbl = pbl;
     o->out_bl.swap(op.out_bl);
     o->out_handler.swap(op.out_handler);
@@ -3063,13 +3063,13 @@ public:
     ceph_tid_t tid;
     Op *o = new Op(object_t(), oloc,
 		   std::move(op.ops),
-		   flags | global_op_flags | CEPH_OSD_FLAG_READ |
-		   CEPH_OSD_FLAG_IGNORE_OVERLAY,
+		   flags | global_op_flags | STONE_OSD_FLAG_READ |
+		   STONE_OSD_FLAG_IGNORE_OVERLAY,
 		   std::move(onack), nullptr);
     o->target.precalc_pgid = true;
     o->target.base_pgid = pg_t(hash, oloc.pool);
     o->priority = op.priority;
-    o->snapid = CEPH_NOSNAP;
+    o->snapid = STONE_NOSNAP;
     o->outbl = pbl;
     o->out_bl.swap(op.out_bl);
     o->out_handler.swap(op.out_handler);
@@ -3162,10 +3162,10 @@ public:
     ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_STAT;
+    ops[i].op.op = STONE_OSD_OP_STAT;
     C_Stat *fin = new C_Stat(psize, pmtime, onfinish);
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_READ, fin, objver);
+		   STONE_OSD_FLAG_READ, fin, objver);
     o->snapid = snap;
     o->outbl = &fin->bl;
     return o;
@@ -3190,14 +3190,14 @@ public:
     ZTracer::Trace *parent_trace = nullptr) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_READ;
+    ops[i].op.op = STONE_OSD_OP_READ;
     ops[i].op.extent.offset = off;
     ops[i].op.extent.length = len;
     ops[i].op.extent.truncate_size = 0;
     ops[i].op.extent.truncate_seq = 0;
     ops[i].op.flags = op_flags;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_READ, onfinish, objver,
+		   STONE_OSD_FLAG_READ, onfinish, objver,
 		   nullptr, parent_trace);
     o->snapid = snap;
     o->outbl = pbl;
@@ -3222,7 +3222,7 @@ public:
     ObjectOperation *extra_ops = NULL, int op_flags = 0) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_CMPEXT;
+    ops[i].op.op = STONE_OSD_OP_CMPEXT;
     ops[i].op.extent.offset = off;
     ops[i].op.extent.length = cmp_bl.length();
     ops[i].op.extent.truncate_size = 0;
@@ -3230,7 +3230,7 @@ public:
     ops[i].indata = cmp_bl;
     ops[i].op.flags = op_flags;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_READ, onfinish, objver);
+		   STONE_OSD_FLAG_READ, onfinish, objver);
     o->snapid = snap;
     return o;
   }
@@ -3255,14 +3255,14 @@ public:
 			ObjectOperation *extra_ops = NULL, int op_flags = 0) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_READ;
+    ops[i].op.op = STONE_OSD_OP_READ;
     ops[i].op.extent.offset = off;
     ops[i].op.extent.length = len;
     ops[i].op.extent.truncate_size = trunc_size;
     ops[i].op.extent.truncate_seq = trunc_seq;
     ops[i].op.flags = op_flags;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_READ, onfinish, objver);
+		   STONE_OSD_FLAG_READ, onfinish, objver);
     o->snapid = snap;
     o->outbl = pbl;
     ceph_tid_t tid;
@@ -3275,13 +3275,13 @@ public:
 		    ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_MAPEXT;
+    ops[i].op.op = STONE_OSD_OP_MAPEXT;
     ops[i].op.extent.offset = off;
     ops[i].op.extent.length = len;
     ops[i].op.extent.truncate_size = 0;
     ops[i].op.extent.truncate_seq = 0;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_READ, onfinish, objver);
+		   STONE_OSD_FLAG_READ, onfinish, objver);
     o->snapid = snap;
     o->outbl = pbl;
     ceph_tid_t tid;
@@ -3294,13 +3294,13 @@ public:
 	     version_t *objver = NULL, ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_GETXATTR;
+    ops[i].op.op = STONE_OSD_OP_GETXATTR;
     ops[i].op.xattr.name_len = (name ? strlen(name) : 0);
     ops[i].op.xattr.value_len = 0;
     if (name)
       ops[i].indata.append(name, ops[i].op.xattr.name_len);
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_READ, onfinish, objver);
+		   STONE_OSD_FLAG_READ, onfinish, objver);
     o->snapid = snap;
     o->outbl = pbl;
     ceph_tid_t tid;
@@ -3314,10 +3314,10 @@ public:
 		       ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_GETXATTRS;
+    ops[i].op.op = STONE_OSD_OP_GETXATTRS;
     C_GetAttrs *fin = new C_GetAttrs(attrset, onfinish);
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_READ, fin, objver);
+		   STONE_OSD_FLAG_READ, fin, objver);
     o->snapid = snap;
     o->outbl = &fin->bl;
     ceph_tid_t tid;
@@ -3330,7 +3330,7 @@ public:
 		       Context *onfinish, version_t *objver = NULL,
 		       ObjectOperation *extra_ops = NULL) {
     return read(oid, oloc, 0, 0, snap, pbl, flags | global_op_flags |
-		CEPH_OSD_FLAG_READ, onfinish, objver, extra_ops);
+		STONE_OSD_FLAG_READ, onfinish, objver, extra_ops);
   }
 
 
@@ -3342,7 +3342,7 @@ public:
 		     Context *oncommit,
 		     version_t *objver = NULL) {
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit, objver);
+		   STONE_OSD_FLAG_WRITE, oncommit, objver);
     o->mtime = mtime;
     o->snapc = snapc;
     ceph_tid_t tid;
@@ -3358,7 +3358,7 @@ public:
     ZTracer::Trace *parent_trace = nullptr) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_WRITE;
+    ops[i].op.op = STONE_OSD_OP_WRITE;
     ops[i].op.extent.offset = off;
     ops[i].op.extent.length = len;
     ops[i].op.extent.truncate_size = 0;
@@ -3366,7 +3366,7 @@ public:
     ops[i].indata = bl;
     ops[i].op.flags = op_flags;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, std::move(oncommit), objver,
+		   STONE_OSD_FLAG_WRITE, std::move(oncommit), objver,
                    nullptr, parent_trace);
     o->mtime = mtime;
     o->snapc = snapc;
@@ -3393,14 +3393,14 @@ public:
     ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_APPEND;
+    ops[i].op.op = STONE_OSD_OP_APPEND;
     ops[i].op.extent.offset = 0;
     ops[i].op.extent.length = len;
     ops[i].op.extent.truncate_size = 0;
     ops[i].op.extent.truncate_seq = 0;
     ops[i].indata = bl;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit, objver);
+		   STONE_OSD_FLAG_WRITE, oncommit, objver);
     o->mtime = mtime;
     o->snapc = snapc;
     return o;
@@ -3427,7 +3427,7 @@ public:
 			 ObjectOperation *extra_ops = NULL, int op_flags = 0) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_WRITE;
+    ops[i].op.op = STONE_OSD_OP_WRITE;
     ops[i].op.extent.offset = off;
     ops[i].op.extent.length = len;
     ops[i].op.extent.truncate_size = trunc_size;
@@ -3435,7 +3435,7 @@ public:
     ops[i].indata = bl;
     ops[i].op.flags = op_flags;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit, objver);
+		   STONE_OSD_FLAG_WRITE, oncommit, objver);
     o->mtime = mtime;
     o->snapc = snapc;
     ceph_tid_t tid;
@@ -3450,13 +3450,13 @@ public:
     ObjectOperation *extra_ops = NULL, int op_flags = 0) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_WRITEFULL;
+    ops[i].op.op = STONE_OSD_OP_WRITEFULL;
     ops[i].op.extent.offset = 0;
     ops[i].op.extent.length = bl.length();
     ops[i].indata = bl;
     ops[i].op.flags = op_flags;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit, objver);
+		   STONE_OSD_FLAG_WRITE, oncommit, objver);
     o->mtime = mtime;
     o->snapc = snapc;
     return o;
@@ -3483,14 +3483,14 @@ public:
 
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_WRITESAME;
+    ops[i].op.op = STONE_OSD_OP_WRITESAME;
     ops[i].op.writesame.offset = off;
     ops[i].op.writesame.length = write_len;
     ops[i].op.writesame.data_length = bl.length();
     ops[i].indata = bl;
     ops[i].op.flags = op_flags;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit, objver);
+		   STONE_OSD_FLAG_WRITE, oncommit, objver);
     o->mtime = mtime;
     o->snapc = snapc;
     return o;
@@ -3518,12 +3518,12 @@ public:
 		   ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_TRUNCATE;
+    ops[i].op.op = STONE_OSD_OP_TRUNCATE;
     ops[i].op.extent.offset = trunc_size;
     ops[i].op.extent.truncate_size = trunc_size;
     ops[i].op.extent.truncate_seq = trunc_seq;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit, objver);
+		   STONE_OSD_FLAG_WRITE, oncommit, objver);
     o->mtime = mtime;
     o->snapc = snapc;
     ceph_tid_t tid;
@@ -3536,11 +3536,11 @@ public:
 	     version_t *objver = NULL, ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_ZERO;
+    ops[i].op.op = STONE_OSD_OP_ZERO;
     ops[i].op.extent.offset = off;
     ops[i].op.extent.length = len;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit, objver);
+		   STONE_OSD_FLAG_WRITE, oncommit, objver);
     o->mtime = mtime;
     o->snapc = snapc;
     ceph_tid_t tid;
@@ -3554,9 +3554,9 @@ public:
 			     ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_ROLLBACK;
+    ops[i].op.op = STONE_OSD_OP_ROLLBACK;
     ops[i].op.snap.snapid = snapid;
-    Op *o = new Op(oid, oloc, std::move(ops), CEPH_OSD_FLAG_WRITE, oncommit, objver);
+    Op *o = new Op(oid, oloc, std::move(ops), STONE_OSD_FLAG_WRITE, oncommit, objver);
     o->mtime = mtime;
     o->snapc = snapc;
     ceph_tid_t tid;
@@ -3570,10 +3570,10 @@ public:
 		    ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_CREATE;
+    ops[i].op.op = STONE_OSD_OP_CREATE;
     ops[i].op.flags = create_flags;
     Op *o = new Op(oid, oloc, std::move(ops), global_flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit, objver);
+		   STONE_OSD_FLAG_WRITE, oncommit, objver);
     o->mtime = mtime;
     o->snapc = snapc;
     ceph_tid_t tid;
@@ -3587,9 +3587,9 @@ public:
     version_t *objver = NULL, ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_DELETE;
+    ops[i].op.op = STONE_OSD_OP_DELETE;
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit, objver);
+		   STONE_OSD_FLAG_WRITE, oncommit, objver);
     o->mtime = mtime;
     o->snapc = snapc;
     return o;
@@ -3613,14 +3613,14 @@ public:
 	      version_t *objver = NULL, ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_SETXATTR;
+    ops[i].op.op = STONE_OSD_OP_SETXATTR;
     ops[i].op.xattr.name_len = (name ? strlen(name) : 0);
     ops[i].op.xattr.value_len = bl.length();
     if (name)
       ops[i].indata.append(name, ops[i].op.xattr.name_len);
     ops[i].indata.append(bl);
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit,
+		   STONE_OSD_FLAG_WRITE, oncommit,
 		   objver);
     o->mtime = mtime;
     o->snapc = snapc;
@@ -3635,13 +3635,13 @@ public:
 	      version_t *objver = NULL, ObjectOperation *extra_ops = NULL) {
     osdc_opvec ops;
     int i = init_ops(ops, 1, extra_ops);
-    ops[i].op.op = CEPH_OSD_OP_RMXATTR;
+    ops[i].op.op = STONE_OSD_OP_RMXATTR;
     ops[i].op.xattr.name_len = (name ? strlen(name) : 0);
     ops[i].op.xattr.value_len = 0;
     if (name)
       ops[i].indata.append(name, ops[i].op.xattr.name_len);
     Op *o = new Op(oid, oloc, std::move(ops), flags | global_op_flags |
-		   CEPH_OSD_FLAG_WRITE, oncommit, objver);
+		   STONE_OSD_FLAG_WRITE, oncommit, objver);
     o->mtime = mtime;
     o->snapc = snapc;
     ceph_tid_t tid;

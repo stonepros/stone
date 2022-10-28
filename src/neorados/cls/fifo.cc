@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson
@@ -37,7 +37,7 @@
 
 namespace neorados::cls::fifo {
 namespace bs = boost::system;
-namespace cb = ceph::buffer;
+namespace cb = stone::buffer;
 namespace fifo = rados::cls::fifo;
 
 void create_meta(WriteOp& op, std::string_view id,
@@ -240,12 +240,12 @@ std::optional<marker> FIFO::to_marker(std::string_view s) {
   auto num = s.substr(0, pos);
   auto ofs = s.substr(pos + 1);
 
-  auto n = ceph::parse<decltype(m.num)>(num);
+  auto n = stone::parse<decltype(m.num)>(num);
   if (!n) {
     return std::nullopt;
   }
   m.num = *n;
-  auto o = ceph::parse<decltype(m.ofs)>(ofs);
+  auto o = stone::parse<decltype(m.ofs)>(ofs);
   if (!o) {
     return std::nullopt;
   }
@@ -282,7 +282,7 @@ std::string FIFO::generate_tag() const
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-class error_category : public ceph::converting_category {
+class error_category : public stone::converting_category {
 public:
   error_category(){}
   const char* name() const noexcept override;
@@ -292,7 +292,7 @@ public:
     override;
   bool equivalent(int ev, const bs::error_condition& c) const
     noexcept override;
-  using ceph::converting_category::equivalent;
+  using stone::converting_category::equivalent;
   int from_code(int ev) const noexcept override;
 };
 #pragma GCC diagnostic pop

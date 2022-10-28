@@ -3,7 +3,7 @@
 
 #include <boost/optional.hpp>
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/RWLock.h"
 #include "common/RefCountedObj.h"
 #include "common/WorkQueue.h"
@@ -32,7 +32,7 @@
 
 #include <boost/asio/yield.hpp>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #undef dout_prefix
 #define dout_prefix (*_dout << "meta sync: ")
@@ -365,7 +365,7 @@ std::ostream&  RGWMetaSyncStatusManager::gen_prefix(std::ostream& out) const
   return out << "meta sync: ";
 }
 
-void RGWMetaSyncEnv::init(const DoutPrefixProvider *_dpp, CephContext *_cct, rgw::sal::RGWRadosStore *_store, RGWRESTConn *_conn,
+void RGWMetaSyncEnv::init(const DoutPrefixProvider *_dpp, StoneContext *_cct, rgw::sal::RGWRadosStore *_store, RGWRESTConn *_conn,
                           RGWAsyncRadosProcessor *_async_rados, RGWHTTPManager *_http_manager,
                           RGWSyncErrorLogger *_error_logger, RGWSyncTraceManager *_sync_tracer) {
   dpp = _dpp;
@@ -1426,8 +1426,8 @@ class RGWMetaSyncShardCR : public RGWCoroutine {
   string raw_key;
   rgw_mdlog_entry mdlog_entry;
 
-  ceph::mutex inc_lock = ceph::make_mutex("RGWMetaSyncShardCR::inc_lock");
-  ceph::condition_variable inc_cond;
+  stone::mutex inc_lock = stone::make_mutex("RGWMetaSyncShardCR::inc_lock");
+  stone::condition_variable inc_cond;
 
   boost::asio::coroutine incremental_cr;
   boost::asio::coroutine full_cr;
@@ -1525,7 +1525,7 @@ public:
       }
 
       map<string, string>::iterator prev_iter = pos_to_prev.find(pos);
-      ceph_assert(prev_iter != pos_to_prev.end());
+      stone_assert(prev_iter != pos_to_prev.end());
 
       if (pos_to_prev.size() == 1) {
         if (can_adjust_marker) {
@@ -1533,7 +1533,7 @@ public:
         }
         pos_to_prev.erase(prev_iter);
       } else {
-        ceph_assert(pos_to_prev.size() > 1);
+        stone_assert(pos_to_prev.size() > 1);
         pos_to_prev.erase(prev_iter);
         prev_iter = pos_to_prev.begin();
         if (can_adjust_marker) {
@@ -1690,7 +1690,7 @@ public:
       tn->log(10, "full sync complete");
 
       // apply the sync marker update
-      ceph_assert(temp_marker);
+      stone_assert(temp_marker);
       sync_marker = std::move(*temp_marker);
       temp_marker = boost::none;
       // must not yield after this point!
@@ -1813,7 +1813,7 @@ public:
               raw_key = log_iter->section + ":" + log_iter->name;
               yield {
                 RGWCoroutinesStack *stack = spawn(new RGWMetaSyncSingleEntryCR(sync_env, raw_key, log_iter->id, mdlog_entry.log_data.status, marker_tracker, tn), false);
-                ceph_assert(stack);
+                stone_assert(stack);
                 // stack_to_pos holds a reference to the stack
                 stack_to_pos[stack] = log_iter->id;
                 pos_to_prev[log_iter->id] = marker;
@@ -2011,7 +2011,7 @@ public:
           return set_cr_error(ret);
         }
         // advance to the next period
-        ceph_assert(next);
+        stone_assert(next);
         cursor = next;
 
         // write the updated sync info

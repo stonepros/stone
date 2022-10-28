@@ -15,7 +15,7 @@
 #include "osd/osd_types.h"
 #include "osdc/Striper.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::util: " << __func__ << ": "
 
@@ -42,8 +42,8 @@ void apply_op_flags(uint32_t op_flags, uint32_t flags, neorados::Op* op) {
 }
 
 bool assemble_write_same_extent(
-    const LightweightObjectExtent &object_extent, const ceph::bufferlist& data,
-    ceph::bufferlist *ws_data, bool force_write) {
+    const LightweightObjectExtent &object_extent, const stone::bufferlist& data,
+    stone::bufferlist *ws_data, bool force_write) {
   size_t data_len = data.length();
 
   if (!force_write) {
@@ -116,7 +116,7 @@ void read_parent(I *image_ctx, uint64_t object_no, ReadExtents* extents,
 
   ldout(cct, 20) << dendl;
 
-  ceph::bufferlist* parent_read_bl;
+  stone::bufferlist* parent_read_bl;
   if (extents->size() > 1) {
     auto parent_comp = new ReadResult::C_ObjectReadMergedExtents(
             cct, extents, on_finish);
@@ -153,7 +153,7 @@ int clip_request(I *image_ctx, Extents *image_extents) {
   return 0;
 }
 
-void unsparsify(CephContext* cct, ceph::bufferlist* bl,
+void unsparsify(StoneContext* cct, stone::bufferlist* bl,
                 const Extents& extent_map, uint64_t bl_off,
                 uint64_t out_bl_len) {
   Striper::StripedReadResult destriper;

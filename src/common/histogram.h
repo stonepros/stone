@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -10,8 +10,8 @@
  * Copyright 2013 Inktank
  */
 
-#ifndef CEPH_HISTOGRAM_H
-#define CEPH_HISTOGRAM_H
+#ifndef STONE_HISTOGRAM_H
+#define STONE_HISTOGRAM_H
 
 #include <list>
 
@@ -125,4 +125,4 @@ public:
 };
 WRITE_CLASS_ENCODER(pow2_hist_t)
 
-#endif /* CEPH_HISTOGRAM_H */
+#endif /* STONE_HISTOGRAM_H */

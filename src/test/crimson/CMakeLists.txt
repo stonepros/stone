@@ -4,33 +4,33 @@ add_executable(unittest-crimson-backfill
   ${PROJECT_SOURCE_DIR}/src/auth/Crypto.cc
   ${PROJECT_SOURCE_DIR}/src/crimson/osd/backfill_state.cc
   ${PROJECT_SOURCE_DIR}/src/osd/recovery_types.cc)
-add_ceph_unittest(unittest-crimson-backfill
+add_stone_unittest(unittest-crimson-backfill
   --memory 256M --smp 1)
 target_link_libraries(unittest-crimson-backfill crimson GTest::Main)
 
 add_executable(unittest-seastar-buffer
   test_buffer.cc)
-add_ceph_unittest(unittest-seastar-buffer
+add_stone_unittest(unittest-seastar-buffer
   --memory 256M --smp 1)
 target_link_libraries(unittest-seastar-buffer crimson)
 
 add_executable(unittest-seastar-denc
   test_denc.cc)
-add_ceph_unittest(unittest-seastar-denc --memory 256M --smp 1)
+add_stone_unittest(unittest-seastar-denc --memory 256M --smp 1)
 target_link_libraries(unittest-seastar-denc crimson GTest::Main)
 
 add_executable(unittest-seastar-socket test_socket.cc)
-add_ceph_unittest(unittest-seastar-socket
+add_stone_unittest(unittest-seastar-socket
   --memory 256M --smp 2)
 target_link_libraries(unittest-seastar-socket crimson)
 
 add_executable(unittest-seastar-messenger test_messenger.cc)
-add_ceph_unittest(unittest-seastar-messenger
+add_stone_unittest(unittest-seastar-messenger
   --memory 256M --smp 1)
 target_link_libraries(unittest-seastar-messenger crimson)
 
 add_executable(test-seastar-messenger-peer test_messenger_peer.cc)
-target_link_libraries(test-seastar-messenger-peer ceph-common global ${ALLOC_LIBS})
+target_link_libraries(test-seastar-messenger-peer stone-common global ${ALLOC_LIBS})
 
 add_executable(test-seastar-echo
   test_alien_echo.cc)
@@ -38,11 +38,11 @@ target_link_libraries(test-seastar-echo crimson)
 
 add_executable(test-async-echo
   test_async_echo.cc)
-target_link_libraries(test-async-echo ceph-common global)
+target_link_libraries(test-async-echo stone-common global)
 
 add_executable(unittest-seastar-alienstore-thread-pool
   test_alienstore_thread_pool.cc)
-add_ceph_unittest(unittest-seastar-alienstore-thread-pool
+add_stone_unittest(unittest-seastar-alienstore-thread-pool
   --memory 256M --smp 1)
 target_link_libraries(unittest-seastar-alienstore-thread-pool
   crimson-alienstore
@@ -50,7 +50,7 @@ target_link_libraries(unittest-seastar-alienstore-thread-pool
 
 add_executable(unittest-seastar-config
   test_config.cc)
-add_ceph_unittest(unittest-seastar-config
+add_stone_unittest(unittest-seastar-config
   --memory 256M --smp 4)
 target_link_libraries(unittest-seastar-config crimson)
 
@@ -60,19 +60,19 @@ target_link_libraries(unittest-seastar-monc crimson)
 
 add_executable(unittest-seastar-perfcounters
   test_perfcounters.cc)
-add_ceph_unittest(unittest-seastar-perfcounters
+add_stone_unittest(unittest-seastar-perfcounters
   --memory 256M --smp 1)
 target_link_libraries(unittest-seastar-perfcounters crimson)
 
 add_executable(unittest-seastar-lru
   test_lru.cc)
-add_ceph_unittest(unittest-seastar-lru
+add_stone_unittest(unittest-seastar-lru
   --memory 256M --smp 1)
 target_link_libraries(unittest-seastar-lru crimson GTest::Main)
 
 add_executable(unittest-fixed-kv-node-layout
   test_fixed_kv_node_layout.cc)
-add_ceph_unittest(unittest-fixed-kv-node-layout)
+add_stone_unittest(unittest-fixed-kv-node-layout)
 
 add_subdirectory(seastore)
 
@@ -86,5 +86,5 @@ add_executable(unittest-seastar-errorator
 target_link_libraries(
   unittest-seastar-errorator
   crimson::gtest)
-add_ceph_unittest(unittest-seastar-errorator
+add_stone_unittest(unittest-seastar-errorator
   --memory 256M --smp 1)

@@ -7,12 +7,12 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "rgw_common.h"
 #include "rgw_user.h"
 #include "rgw_acl_swift.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 #define SWIFT_PERM_READ  RGW_PERM_READ_OBJS
@@ -112,7 +112,7 @@ static boost::optional<ACLGrant> referrer_to_grant(std::string url_spec,
 }
 
 static ACLGrant user_to_grant(const DoutPrefixProvider *dpp, 
-                              CephContext* const cct,
+                              StoneContext* const cct,
                               RGWUserCtl* const user_ctl,
                               const std::string& uid,
                               const uint32_t perm)

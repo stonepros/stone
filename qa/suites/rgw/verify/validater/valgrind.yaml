@@ -1,8 +1,8 @@
 overrides:
   install:
-    ceph:
+    stone:
       #debuginfo: true
-  ceph:
+  stone:
     conf:
       global:
         osd heartbeat grace: 40
@@ -14,5 +14,5 @@ overrides:
 #      mon: [--tool=memcheck, --leak-check=full, --show-reachable=yes]
 #      osd: [--tool=memcheck]
 #      mds: [--tool=memcheck]
-## https://tracker.ceph.com/issues/38621
+## https://tracker.stone.com/issues/38621
 ##      mgr: [--tool=memcheck]

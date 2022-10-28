@@ -7,20 +7,20 @@
 #include "include/types.h"
 #include "auth/Crypto.h"
 #include "common/Clock.h"
-#include "common/ceph_crypto.h"
-#include "common/ceph_context.h"
+#include "common/stone_crypto.h"
+#include "common/stone_context.h"
 #include "global/global_context.h"
 
 
 class CryptoEnvironment: public ::testing::Environment {
 public:
   void SetUp() override {
-    ceph::crypto::init();
+    stone::crypto::init();
   }
 };
 
 TEST(AES, ValidateSecret) {
-  CryptoHandler *h = g_ceph_context->get_crypto_handler(CEPH_CRYPTO_AES);
+  CryptoHandler *h = g_stone_context->get_crypto_handler(STONE_CRYPTO_AES);
   int l;
 
   for (l=0; l<16; l++) {
@@ -39,7 +39,7 @@ TEST(AES, ValidateSecret) {
 }
 
 TEST(AES, Encrypt) {
-  CryptoHandler *h = g_ceph_context->get_crypto_handler(CEPH_CRYPTO_AES);
+  CryptoHandler *h = g_stone_context->get_crypto_handler(STONE_CRYPTO_AES);
   char secret_s[] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
     0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -79,7 +79,7 @@ TEST(AES, Encrypt) {
 }
 
 TEST(AES, EncryptNoBl) {
-  CryptoHandler *h = g_ceph_context->get_crypto_handler(CEPH_CRYPTO_AES);
+  CryptoHandler *h = g_stone_context->get_crypto_handler(STONE_CRYPTO_AES);
   char secret_s[] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
     0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -123,7 +123,7 @@ TEST(AES, EncryptNoBl) {
 }
 
 TEST(AES, Decrypt) {
-  CryptoHandler *h = g_ceph_context->get_crypto_handler(CEPH_CRYPTO_AES);
+  CryptoHandler *h = g_stone_context->get_crypto_handler(STONE_CRYPTO_AES);
   char secret_s[] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
     0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -163,7 +163,7 @@ TEST(AES, Decrypt) {
 }
 
 TEST(AES, DecryptNoBl) {
-  CryptoHandler *h = g_ceph_context->get_crypto_handler(CEPH_CRYPTO_AES);
+  CryptoHandler *h = g_stone_context->get_crypto_handler(STONE_CRYPTO_AES);
   const char secret_s[] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
     0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -199,8 +199,8 @@ TEST(AES, DecryptNoBl) {
 }
 
 template <std::size_t TextSizeV>
-static void aes_loop_cephx() {
-  CryptoHandler *h = g_ceph_context->get_crypto_handler(CEPH_CRYPTO_AES);
+static void aes_loop_stonex() {
+  CryptoHandler *h = g_stone_context->get_crypto_handler(STONE_CRYPTO_AES);
 
   CryptoRandom random;
 
@@ -232,14 +232,14 @@ static void aes_loop_cephx() {
   }
 }
 
-// These magics reflects Cephx's signature size. Please consult
-// CephxSessionHandler::_calc_signature() for more details.
-TEST(AES, LoopCephx) {
-  aes_loop_cephx<29>();
+// These magics reflects Stonex's signature size. Please consult
+// StonexSessionHandler::_calc_signature() for more details.
+TEST(AES, LoopStonex) {
+  aes_loop_stonex<29>();
 }
 
-TEST(AES, LoopCephxV2) {
-  aes_loop_cephx<32>();
+TEST(AES, LoopStonexV2) {
+  aes_loop_stonex<32>();
 }
 
 static void aes_loop(const std::size_t text_size) {
@@ -257,7 +257,7 @@ static void aes_loop(const std::size_t text_size) {
   for (int i=0; i<10000; i++) {
     bufferlist cipher;
     {
-      CryptoHandler *h = g_ceph_context->get_crypto_handler(CEPH_CRYPTO_AES);
+      CryptoHandler *h = g_stone_context->get_crypto_handler(STONE_CRYPTO_AES);
 
       std::string error;
       CryptoKeyHandler *kh = h->get_key_handler(secret, error);
@@ -270,7 +270,7 @@ static void aes_loop(const std::size_t text_size) {
     plaintext.clear();
 
     {
-      CryptoHandler *h = g_ceph_context->get_crypto_handler(CEPH_CRYPTO_AES);
+      CryptoHandler *h = g_stone_context->get_crypto_handler(STONE_CRYPTO_AES);
       std::string error;
       CryptoKeyHandler *ckh = h->get_key_handler(secret, error);
       int r = ckh->decrypt(cipher, plaintext, &error);
@@ -290,8 +290,8 @@ TEST(AES, Loop) {
   aes_loop(256);
 }
 
-// These magics reflects Cephx's signature size. Please consult
-// CephxSessionHandler::_calc_signature() for more details.
+// These magics reflects Stonex's signature size. Please consult
+// StonexSessionHandler::_calc_signature() for more details.
 TEST(AES, Loop_29) {
   aes_loop(29);
 }
@@ -304,24 +304,24 @@ void aes_loopkey(const std::size_t text_size) {
   CryptoRandom random;
   bufferptr k(16);
   random.get_bytes(k.c_str(), k.length());
-  CryptoKey key(CEPH_CRYPTO_AES, ceph_clock_now(), k);
+  CryptoKey key(STONE_CRYPTO_AES, stone_clock_now(), k);
 
   bufferlist data;
   bufferptr r(text_size);
   random.get_bytes(r.c_str(), r.length());
   data.append(r);
 
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   int n = 100000;
 
   for (int i=0; i<n; ++i) {
     bufferlist encoded;
     string error;
-    int r = key.encrypt(g_ceph_context, data, encoded, &error);
+    int r = key.encrypt(g_stone_context, data, encoded, &error);
     ASSERT_EQ(r, 0);
   }
 
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   utime_t dur = end - start;
   cout << n << " encoded in " << dur << std::endl;
 }
@@ -330,8 +330,8 @@ TEST(AES, LoopKey) {
   aes_loopkey(128);
 }
 
-// These magics reflects Cephx's signature size. Please consult
-// CephxSessionHandler::_calc_signature() for more details.
+// These magics reflects Stonex's signature size. Please consult
+// StonexSessionHandler::_calc_signature() for more details.
 TEST(AES, LoopKey_29) {
   aes_loopkey(29);
 }

@@ -31,7 +31,7 @@ foreach(component ${Sanitizers_FIND_COMPONENTS})
 endforeach()
 
 if(Sanitizers_address_COMPILE_OPTIONS OR Sanitizers_leak_COMPILE_OPTIONS)
-  # ASAN_LIBRARY will be read by ceph.in to preload the asan library
+  # ASAN_LIBRARY will be read by stone.in to preload the asan library
   find_library(ASAN_LIBRARY
     NAMES
       libasan.so.5

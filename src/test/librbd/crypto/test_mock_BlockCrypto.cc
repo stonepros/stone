@@ -25,7 +25,7 @@ MATCHER_P(CompareArrayToString, s, "") {
 
 struct TestMockCryptoBlockCrypto : public TestFixture {
     MockDataCryptor* cryptor;
-    ceph::ref_t<BlockCrypto<MockCryptoContext>> bc;
+    stone::ref_t<BlockCrypto<MockCryptoContext>> bc;
     int cryptor_block_size = 16;
     int cryptor_iv_size = 16;
     int block_size = 4096;
@@ -38,7 +38,7 @@ struct TestMockCryptoBlockCrypto : public TestFixture {
       cryptor = new MockDataCryptor();
       cryptor->block_size = cryptor_block_size;
       bc = new BlockCrypto<MockCryptoContext>(
-              reinterpret_cast<CephContext*>(m_ioctx.cct()), cryptor,
+              reinterpret_cast<StoneContext*>(m_ioctx.cct()), cryptor,
               block_size, data_offset);
       expectation_set = new ExpectationSet();
     }
@@ -89,14 +89,14 @@ struct TestMockCryptoBlockCrypto : public TestFixture {
 TEST_F(TestMockCryptoBlockCrypto, Encrypt) {
   uint32_t image_offset = 0x1230 * 512;
 
-  ceph::bufferlist data1;
+  stone::bufferlist data1;
   data1.append(std::string(2048, '1'));
-  ceph::bufferlist data2;
+  stone::bufferlist data2;
   data2.append(std::string(4096, '2'));
-  ceph::bufferlist data3;
+  stone::bufferlist data3;
   data3.append(std::string(2048, '3'));
 
-  ceph::bufferlist data;
+  stone::bufferlist data;
   data.claim_append(data1);
   data.claim_append(data2);
   data.claim_append(data3);
@@ -114,19 +114,19 @@ TEST_F(TestMockCryptoBlockCrypto, Encrypt) {
 }
 
 TEST_F(TestMockCryptoBlockCrypto, UnalignedImageOffset) {
-  ceph::bufferlist data;
+  stone::bufferlist data;
   data.append(std::string(4096, '1'));
   ASSERT_EQ(-EINVAL, bc->encrypt(&data, 2));
 }
 
 TEST_F(TestMockCryptoBlockCrypto, UnalignedDataLength) {
-  ceph::bufferlist data;
+  stone::bufferlist data;
   data.append(std::string(512, '1'));
   ASSERT_EQ(-EINVAL, bc->encrypt(&data, 0));
 }
 
 TEST_F(TestMockCryptoBlockCrypto, GetContextError) {
-  ceph::bufferlist data;
+  stone::bufferlist data;
   data.append(std::string(4096, '1'));
   EXPECT_CALL(*cryptor, get_context(CipherMode::CIPHER_MODE_ENC)).WillOnce(
           Return(nullptr));
@@ -134,7 +134,7 @@ TEST_F(TestMockCryptoBlockCrypto, GetContextError) {
 }
 
 TEST_F(TestMockCryptoBlockCrypto, InitContextError) {
-  ceph::bufferlist data;
+  stone::bufferlist data;
   data.append(std::string(4096, '1'));
   expect_get_context(CipherMode::CIPHER_MODE_ENC);
   EXPECT_CALL(*cryptor, init_context(_, _, _)).WillOnce(Return(-123));
@@ -143,7 +143,7 @@ TEST_F(TestMockCryptoBlockCrypto, InitContextError) {
 }
 
 TEST_F(TestMockCryptoBlockCrypto, UpdateContextError) {
-  ceph::bufferlist data;
+  stone::bufferlist data;
   data.append(std::string(4096, '1'));
   expect_get_context(CipherMode::CIPHER_MODE_ENC);
   EXPECT_CALL(*cryptor, init_context(_, _, _));

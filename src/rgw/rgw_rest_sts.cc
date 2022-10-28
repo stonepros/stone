@@ -15,10 +15,10 @@
 
 
 
-#include "ceph_ver.h"
+#include "stone_ver.h"
 #include "common/Formatter.h"
 #include "common/utf8.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "rgw_rest.h"
 #include "rgw_auth.h"
@@ -38,8 +38,8 @@
 #include "rgw_rest_oidc_provider.h"
 
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 namespace rgw::auth::sts {
 

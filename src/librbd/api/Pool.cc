@@ -17,7 +17,7 @@
 #include "librbd/api/Trash.h"
 #include "librbd/image/ValidatePoolRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 namespace librbd {
 namespace api {
@@ -37,7 +37,7 @@ public:
                    std::atomic<uint64_t>* bytes,
                    std::atomic<uint64_t>* max_bytes,
                    std::atomic<uint64_t>* snaps)
-    : m_cct(reinterpret_cast<CephContext*>(io_ctx.cct())),
+    : m_cct(reinterpret_cast<StoneContext*>(io_ctx.cct())),
       m_io_ctx(io_ctx), m_throttle(throttle), m_image_id(image_id),
       m_scan_snaps(scan_snaps), m_bytes(bytes), m_max_bytes(max_bytes),
       m_snaps(snaps) {
@@ -57,7 +57,7 @@ protected:
   }
 
 private:
-  CephContext* m_cct;
+  StoneContext* m_cct;
   librados::IoCtx& m_io_ctx;
   SimpleThrottle& m_throttle;
   const std::string& m_image_id;
@@ -74,7 +74,7 @@ private:
     ldout(m_cct, 15) << dendl;
 
     librados::ObjectReadOperation op;
-    cls_client::get_size_start(&op, CEPH_NOSNAP);
+    cls_client::get_size_start(&op, STONE_NOSNAP);
     if (m_scan_snaps) {
       cls_client::get_snapcontext_start(&op);
     }
@@ -84,7 +84,7 @@ private:
       ImageStatRequest<I>, &ImageStatRequest<I>::handle_get_head>(this);
     int r = m_io_ctx.aio_operate(util::header_name(m_image_id), aio_comp, &op,
                                  &m_out_bl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     aio_comp->release();
   }
 
@@ -141,7 +141,7 @@ private:
       ImageStatRequest<I>, &ImageStatRequest<I>::handle_get_snaps>(this);
     int r = m_io_ctx.aio_operate(util::header_name(m_image_id), aio_comp, &op,
                                  &m_out_bl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     aio_comp->release();
   }
 
@@ -238,7 +238,7 @@ int get_pool_stats(librados::IoCtx& io_ctx, const ConfigProxy& config,
 
 template <typename I>
 int Pool<I>::init(librados::IoCtx& io_ctx, bool force) {
-  auto cct = reinterpret_cast<CephContext*>(io_ctx.cct());
+  auto cct = reinterpret_cast<StoneContext*>(io_ctx.cct());
   ldout(cct, 10) << dendl;
 
   int r = io_ctx.application_enable(pg_pool_t::APPLICATION_NAME_RBD, force);
@@ -282,7 +282,7 @@ int Pool<I>::add_stat_option(StatOptions* stat_options,
 
 template <typename I>
 int Pool<I>::get_stats(librados::IoCtx& io_ctx, StatOptions* stat_options) {
-  auto cct = reinterpret_cast<CephContext*>(io_ctx.cct());
+  auto cct = reinterpret_cast<StoneContext*>(io_ctx.cct());
   ldout(cct, 10) << dendl;
 
   ConfigProxy config{cct->_conf};

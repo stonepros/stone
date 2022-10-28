@@ -240,7 +240,7 @@ if(LINUX AND HAVE_LIBCRYPTSETUP)
 endif()
 
 add_custom_target(librbd_plugins)
-set(librbd_plugins_dir ${CEPH_INSTALL_PKGLIBDIR}/librbd)
+set(librbd_plugins_dir ${STONE_INSTALL_PKGLIBDIR}/librbd)
 
 set(rbd_plugin_parent_cache_srcs
   cache/ParentCacheObjectDispatch.cc
@@ -248,11 +248,11 @@ set(rbd_plugin_parent_cache_srcs
 add_library(librbd_plugin_parent_cache SHARED
   ${rbd_plugin_parent_cache_srcs})
 target_link_libraries(librbd_plugin_parent_cache PRIVATE
-  ceph_immutable_object_cache_lib ceph-common librbd
+  stone_immutable_object_cache_lib stone-common librbd
   libneorados
   librados)
 set_target_properties(librbd_plugin_parent_cache PROPERTIES
-  OUTPUT_NAME ceph_librbd_parent_cache
+  OUTPUT_NAME stone_librbd_parent_cache
   VERSION 1.0.0
   SOVERSION 1)
 install(TARGETS librbd_plugin_parent_cache DESTINATION ${librbd_plugins_dir})
@@ -297,7 +297,7 @@ if(WITH_RBD_RWL OR WITH_RBD_SSD_CACHE)
     ${rbd_plugin_pwl_srcs})
   target_link_libraries(librbd_plugin_pwl_cache PRIVATE
     blk
-    ceph-common
+    stone-common
     cls_rbd_client
     libneorados
     librados
@@ -310,14 +310,14 @@ if(WITH_RBD_RWL OR WITH_RBD_SSD_CACHE)
   endif()
 
   set_target_properties(librbd_plugin_pwl_cache PROPERTIES
-    OUTPUT_NAME ceph_librbd_pwl_cache
+    OUTPUT_NAME stone_librbd_pwl_cache
     VERSION 1.0.0
     SOVERSION 1)
   install(TARGETS librbd_plugin_pwl_cache DESTINATION ${librbd_plugins_dir})
   add_dependencies(librbd_plugins librbd_plugin_pwl_cache)
 endif()
 
-add_library(librbd ${CEPH_SHARED}
+add_library(librbd ${STONE_SHARED}
   librbd.cc)
 if(WITH_LTTNG)
   add_dependencies(librbd librbd-tp)
@@ -332,7 +332,7 @@ target_link_libraries(librbd PRIVATE
   cls_journal_client
   libneorados
   librados
-  ceph-common
+  stone-common
   pthread
   ${CMAKE_DL_LIBS}
   ${EXTRALIBS} ${GSSAPI_LIBRARIES})

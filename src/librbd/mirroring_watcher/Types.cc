@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "common/Formatter.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/stringify.h"
 #include "librbd/mirroring_watcher/Types.h"
 #include "librbd/watcher/Utils.h"
@@ -24,18 +24,18 @@ public:
   }
 
 private:
-  ceph::Formatter *m_formatter;
+  stone::Formatter *m_formatter;
 };
 
 } // anonymous namespace
 
 void ModeUpdatedPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(static_cast<uint32_t>(mirror_mode), bl);
 }
 
 void ModeUpdatedPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   uint32_t mirror_mode_decode;
   decode(mirror_mode_decode, iter);
   mirror_mode = static_cast<cls::rbd::MirrorMode>(mirror_mode_decode);
@@ -46,14 +46,14 @@ void ModeUpdatedPayload::dump(Formatter *f) const {
 }
 
 void ImageUpdatedPayload::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(static_cast<uint32_t>(mirror_image_state), bl);
   encode(image_id, bl);
   encode(global_image_id, bl);
 }
 
 void ImageUpdatedPayload::decode(__u8 version, bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   uint32_t mirror_image_state_decode;
   decode(mirror_image_state_decode, iter);
   mirror_image_state = static_cast<cls::rbd::MirrorImageState>(
@@ -69,7 +69,7 @@ void ImageUpdatedPayload::dump(Formatter *f) const {
 }
 
 void UnknownPayload::encode(bufferlist &bl) const {
-  ceph_abort();
+  stone_abort();
 }
 
 void UnknownPayload::decode(__u8 version, bufferlist::const_iterator &iter) {

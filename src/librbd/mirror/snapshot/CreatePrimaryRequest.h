@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_MIRROR_SNAPSHOT_CREATE_PRIMARY_REQUEST_H
-#define CEPH_LIBRBD_MIRROR_SNAPSHOT_CREATE_PRIMARY_REQUEST_H
+#ifndef STONE_LIBRBD_MIRROR_SNAPSHOT_CREATE_PRIMARY_REQUEST_H
+#define STONE_LIBRBD_MIRROR_SNAPSHOT_CREATE_PRIMARY_REQUEST_H
 
 #include "include/buffer.h"
 #include "include/rados/librados.hpp"
@@ -103,4 +103,4 @@ private:
 
 extern template class librbd::mirror::snapshot::CreatePrimaryRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_MIRROR_SNAPSHOT_CREATE_PRIMARY_REQUEST_H
+#endif // STONE_LIBRBD_MIRROR_SNAPSHOT_CREATE_PRIMARY_REQUEST_H

@@ -9,8 +9,8 @@
 #include "rgw_rest_s3.h"
 #include "rgw_sal_rados.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 struct es_index_obj_response {
   string bucket;
@@ -21,7 +21,7 @@ struct es_index_obj_response {
 
   struct {
     uint64_t size{0};
-    ceph::real_time mtime;
+    stone::real_time mtime;
     string etag;
     string content_type;
     string storage_class;

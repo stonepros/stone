@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (c) 2019 SUSE LINUX GmbH
  *
@@ -17,7 +17,7 @@
 void install_sighandler(int signum, signal_handler_t handler, int flags) {}
 void sighup_handler(int signum) {}
 
-// Install the standard Ceph signal handlers
+// Install the standard Stone signal handlers
 void install_standard_sighandlers(void){}
 
 /// initialize async signal handler framework

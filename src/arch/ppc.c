@@ -10,7 +10,7 @@
 #include "arch/probe.h"
 
 /* flags we export */
-int ceph_arch_ppc_crc32 = 0;
+int stone_arch_ppc_crc32 = 0;
 
 #include <stdio.h>
 
@@ -27,12 +27,12 @@ int ceph_arch_ppc_crc32 = 0;
 #define AT_HWCAP2	26
 #endif
 
-int ceph_arch_ppc_probe(void)
+int stone_arch_ppc_probe(void)
 {
-  ceph_arch_ppc_crc32 = 0;
+  stone_arch_ppc_crc32 = 0;
 
 #ifdef HAVE_PPC64LE
-  if (getauxval(AT_HWCAP2) & PPC_FEATURE2_VEC_CRYPTO) ceph_arch_ppc_crc32 = 1;
+  if (getauxval(AT_HWCAP2) & PPC_FEATURE2_VEC_CRYPTO) stone_arch_ppc_crc32 = 1;
 #endif /* HAVE_PPC64LE */
 
   return 0;

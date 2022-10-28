@@ -3,17 +3,17 @@
 
 // Amount of buffer data to dump when using ceph_ctf_sequence or ceph_ctf_sequencep.
 // If 0, then *_data field is omitted entirely.
-#if !defined(CEPH_TRACE_BUF_TRUNC_LEN)
-#define CEPH_TRACE_BUF_TRUNC_LEN 0u
+#if !defined(STONE_TRACE_BUF_TRUNC_LEN)
+#define STONE_TRACE_BUF_TRUNC_LEN 0u
 #endif
 
-// TODO: This is GCC-specific.  Replace CEPH_MAX and CEPH_MIN with standard macros, if possible.
-#define CEPH_MAX(a,b) \
+// TODO: This is GCC-specific.  Replace STONE_MAX and STONE_MIN with standard macros, if possible.
+#define STONE_MAX(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
      _a > _b ? _a : _b; })
 
-#define CEPH_MIN(a,b) \
+#define STONE_MIN(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
@@ -37,10 +37,10 @@
 
 // val should have type type*
 // lenval should have type lentype
-#if CEPH_TRACE_BUF_TRUNC_LEN > 0
+#if STONE_TRACE_BUF_TRUNC_LEN > 0
 #define ceph_ctf_sequence(type, field, val, lentype, lenval) \
     ctf_integer_hex(void*, field, val) \
-    ctf_sequence(type, field##_data, (val) == NULL ? "" : (val), lentype, (val) == NULL ? 0 : CEPH_MIN((lenval), CEPH_TRACE_BUF_TRUNC_LEN)) \
+    ctf_sequence(type, field##_data, (val) == NULL ? "" : (val), lentype, (val) == NULL ? 0 : STONE_MIN((lenval), STONE_TRACE_BUF_TRUNC_LEN)) \
     ctf_integer(uint8_t, field##_isnull, (val) == NULL) \
     ctf_integer(lentype, field##_len, lenval)
 #else
@@ -52,14 +52,14 @@
 
 // val should have type type**
 // lenval should have type lentype*
-#if CEPH_TRACE_BUF_TRUNC_LEN > 0
+#if STONE_TRACE_BUF_TRUNC_LEN > 0
 #define ceph_ctf_sequencep(type, field, val, lentype, lenval) \
     ctf_integer_hex(void*, field, val) \
     ctf_sequence(type, \
                  field##_data, \
                  ((val) == NULL || *(val) == NULL) ? "" : *(val), \
                  lentype, \
-                 ((val) == NULL || *(val) == NULL || (lenval) == NULL) ? 0 : CEPH_MIN(*(lenval), CEPH_TRACE_BUF_TRUNC_LEN)) \
+                 ((val) == NULL || *(val) == NULL || (lenval) == NULL) ? 0 : STONE_MIN(*(lenval), STONE_TRACE_BUF_TRUNC_LEN)) \
     ctf_integer(uint8_t, field##_isnull, (val) == NULL) \
     ctf_integer(uint8_t, field##_data_isnull, ((val) == NULL || *(val) == NULL)) \
     ctf_integer(lentype, field##_len, (lenval) == NULL ? 0 : *(lenval)) \

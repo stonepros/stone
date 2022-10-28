@@ -66,7 +66,7 @@ target_link_libraries(rbd
   journal
   libneorados
   librados
-  ceph-common global
+  stone-common global
   ${BLKID_LIBRARIES} ${CMAKE_DL_LIBS})
 if(CURSES_FOUND)
   target_compile_definitions(rbd PRIVATE HAVE_CURSES)

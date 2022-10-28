@@ -10,9 +10,9 @@
 using std::set;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
 
 void cls_cas_chunk_create_or_get_ref(
   librados::ObjectWriteOperation& op,

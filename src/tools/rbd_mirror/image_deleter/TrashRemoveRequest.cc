@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "tools/rbd_mirror/image_deleter/TrashRemoveRequest.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/debug.h"
 #include "common/errno.h"
 #include "common/WorkQueue.h"
@@ -14,8 +14,8 @@
 #include "librbd/trash/RemoveRequest.h"
 #include "tools/rbd_mirror/image_deleter/SnapshotPurgeRequest.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_deleter::TrashRemoveRequest: " \
                            << this << " " << __func__ << ": "
@@ -46,7 +46,7 @@ void TrashRemoveRequest<I>::get_trash_image_spec() {
     &TrashRemoveRequest<I>::handle_get_trash_image_spec>(this);
   m_out_bl.clear();
   int r = m_io_ctx.aio_operate(RBD_TRASH, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -101,7 +101,7 @@ void TrashRemoveRequest<I>::set_trash_state() {
     TrashRemoveRequest<I>,
     &TrashRemoveRequest<I>::handle_set_trash_state>(this);
   int r = m_io_ctx.aio_operate(RBD_TRASH, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -137,7 +137,7 @@ void TrashRemoveRequest<I>::get_snap_context() {
     &TrashRemoveRequest<I>::handle_get_snap_context>(this);
   m_out_bl.clear();
   int r = m_io_ctx.aio_operate(header_oid, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

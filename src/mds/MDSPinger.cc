@@ -6,8 +6,8 @@
 #include "mds/MDSRank.h"
 #include "mds/MDSPinger.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds.pinger " << __func__
 

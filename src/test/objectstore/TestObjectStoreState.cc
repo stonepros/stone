@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stone - scalable distributed file system
 *
 * Copyright (C) 2012 New Dream Network
 *
@@ -17,18 +17,18 @@
 #include <stdlib.h>
 #include <signal.h>
 #include "os/ObjectStore.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "common/debug.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include "TestObjectStoreState.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_filestore
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_filestore
 #undef dout_prefix
-#define dout_prefix *_dout << "ceph_test_objectstore_state "
+#define dout_prefix *_dout << "stone_test_objectstore_state "
 
 void TestObjectStoreState::init(int colls, int objs)
 {
@@ -64,7 +64,7 @@ void TestObjectStoreState::init(int colls, int objs)
     for (int i = 0; i < objs; i++) {
       hobject_t *obj = entry->touch_obj(i + baseid);
       t->touch(entry->m_cid, ghobject_t(*obj));
-      ceph_assert(i + baseid == m_num_objects);
+      stone_assert(i + baseid == m_num_objects);
       m_num_objects++;
     }
     baseid += objs;
@@ -125,7 +125,7 @@ TestObjectStoreState::get_coll_at(int pos, bool erase)
   if (m_collections.empty())
     return NULL;
 
-  ceph_assert((size_t) pos < m_collections_ids.size());
+  stone_assert((size_t) pos < m_collections_ids.size());
 
   coll_t cid = m_collections_ids[pos];
   coll_entry_t *entry = m_collections[cid];
@@ -180,7 +180,7 @@ hobject_t *TestObjectStoreState::coll_entry_t::touch_obj(int id)
   memset(buf, 0, 100);
   snprintf(buf, 100, "obj%d", id);
 
-  hobject_t *obj = new hobject_t(sobject_t(object_t(buf), CEPH_NOSNAP));
+  hobject_t *obj = new hobject_t(sobject_t(object_t(buf), STONE_NOSNAP));
   obj->set_hash(m_pgid.ps());
   obj->pool = m_pgid.pool();
   m_objects.insert(make_pair(id, obj));
@@ -283,7 +283,7 @@ TestObjectStoreState::coll_entry_t::replace_obj(int id, hobject_t *obj) {
 
 int TestObjectStoreState::coll_entry_t::get_random_obj_id(rngen_t& gen)
 {
-  ceph_assert(!m_objects.empty());
+  stone_assert(!m_objects.empty());
 
   boost::uniform_int<> orig_obj_rng(0, m_objects.size()-1);
   int pos = orig_obj_rng(gen);
@@ -293,5 +293,5 @@ int TestObjectStoreState::coll_entry_t::get_random_obj_id(rngen_t& gen)
       return it->first;
     }
   }
-  ceph_abort_msg("INTERNAL ERROR");
+  stone_abort_msg("INTERNAL ERROR");
 }

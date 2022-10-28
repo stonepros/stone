@@ -17,7 +17,7 @@
 #include "services/svc_sys_obj.h"
 #include "services/svc_tier_rados.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 
@@ -79,7 +79,7 @@ bool is_v2_upload_id(const string& upload_id)
 }
 
 int list_multipart_parts(const DoutPrefixProvider *dpp, rgw::sal::RGWRadosStore *store, RGWBucketInfo& bucket_info,
-			 CephContext *cct,
+			 StoneContext *cct,
 			 const string& upload_id,
 			 const string& meta_oid, int num_parts,
 			 int marker, map<uint32_t, RGWUploadPartInfo>& parts,
@@ -202,7 +202,7 @@ int list_multipart_parts(const DoutPrefixProvider *dpp,
 }
 
 int abort_multipart_upload(const DoutPrefixProvider *dpp,
-                           rgw::sal::RGWRadosStore *store, CephContext *cct,
+                           rgw::sal::RGWRadosStore *store, StoneContext *cct,
 			   RGWObjectCtx *obj_ctx, RGWBucketInfo& bucket_info,
 			   RGWMPObj& mp_obj)
 {
@@ -318,7 +318,7 @@ int list_bucket_multiparts(const DoutPrefixProvider* dpp,
 
 int abort_bucket_multiparts(const DoutPrefixProvider* dpp,
 			    rgw::sal::RGWRadosStore* store,
-			    CephContext* cct,
+			    StoneContext* cct,
 			    RGWBucketInfo& bucket_info)
 {
   constexpr int max = 1000;

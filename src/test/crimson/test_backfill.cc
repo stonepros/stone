@@ -47,8 +47,8 @@ struct FakeStore {
 
   void drop(const hobject_t& obj, const eversion_t version) {
     auto it = objs.find(obj);
-    ceph_assert(it != std::end(objs));
-    ceph_assert(it->second == version);
+    stone_assert(it != std::end(objs));
+    stone_assert(it->second == version);
     objs.erase(it);
   }
 
@@ -144,7 +144,7 @@ public:
   // }
 
   void next_round(std::size_t how_many=1) {
-    ceph_assert(events_to_dispatch.size() >= how_many);
+    stone_assert(events_to_dispatch.size() >= how_many);
     while (how_many-- > 0) {
       backfill_state.process_event(std::move(events_to_dispatch.front()));
       events_to_dispatch.pop_front();
@@ -329,7 +329,7 @@ struct BackfillFixtureBuilder {
     const auto new_osd_num = std::size(backfill_targets);
     const auto [ _, inserted ] = backfill_targets.emplace(
       new_osd_num, FakeReplica{ FakeStore{std::move(objs)} });
-    ceph_assert(inserted);
+    stone_assert(inserted);
     return std::move(*this);
   }
 

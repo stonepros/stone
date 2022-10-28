@@ -72,7 +72,7 @@ struct ImageListSnapsRequest<librbd::MockTestImageCtx> {
       librbd::MockImageCtx& image_ctx, AioCompletion* aio_comp,
       Extents&& image_extents, SnapIds&& snap_ids, int list_snaps_flags,
       SnapshotDelta* snapshot_delta, const ZTracer::Trace& parent_trace) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->aio_comp = aio_comp;
     s_instance->image_extents = image_extents;
     s_instance->snapshot_delta = snapshot_delta;
@@ -81,7 +81,7 @@ struct ImageListSnapsRequest<librbd::MockTestImageCtx> {
 
   MOCK_METHOD0(execute_send, void());
   void send() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->execute_send();
   }
 };
@@ -279,7 +279,7 @@ struct TestMockIoObjectRequest : public TestMockFixture {
                                 bool updated, int ret_val) {
     if (mock_image_ctx.object_map != nullptr) {
       EXPECT_CALL(*mock_image_ctx.object_map,
-                  aio_update(CEPH_NOSNAP, start_object, end_object, state,
+                  aio_update(STONE_NOSNAP, start_object, end_object, state,
                              current_state, _, false, _))
         .WillOnce(WithArg<7>(Invoke([&mock_image_ctx, updated, ret_val](Context *ctx) {
                                if (updated) {
@@ -388,7 +388,7 @@ struct TestMockIoObjectRequest : public TestMockFixture {
   void expect_list_snaps(MockTestImageCtx &mock_image_ctx,
                         const librados::snap_set_t& snap_set, int r) {
     auto io_context = *mock_image_ctx.get_data_io_context();
-    io_context.read_snap(CEPH_SNAPDIR);
+    io_context.read_snap(STONE_SNAPDIR);
     auto& mock_io_ctx = librados::get_mock_io_ctx(mock_image_ctx.rados_api,
                                                   io_context);
     EXPECT_CALL(mock_io_ctx, list_snaps(_, _))
@@ -431,7 +431,7 @@ TEST_F(TestMockIoObjectRequest, Read) {
 
   InSequence seq;
   expect_object_may_exist(mock_image_ctx, 0, true);
-  expect_get_read_flags(mock_image_ctx, CEPH_NOSNAP, 0);
+  expect_get_read_flags(mock_image_ctx, STONE_NOSNAP, 0);
   expect_read(mock_image_ctx, ictx->get_object_name(0), 0, 4096,
               std::string(4096, '1'), 0);
   expect_read(mock_image_ctx, ictx->get_object_name(0), 8192, 4096,
@@ -472,7 +472,7 @@ TEST_F(TestMockIoObjectRequest, SparseReadThreshold) {
 
   InSequence seq;
   expect_object_may_exist(mock_image_ctx, 0, true);
-  expect_get_read_flags(mock_image_ctx, CEPH_NOSNAP, 0);
+  expect_get_read_flags(mock_image_ctx, STONE_NOSNAP, 0);
   expect_sparse_read(mock_image_ctx, ictx->get_object_name(0), 0,
                      ictx->sparse_read_threshold_bytes,
                      std::string(ictx->sparse_read_threshold_bytes, '1'), 0);
@@ -501,7 +501,7 @@ TEST_F(TestMockIoObjectRequest, ReadError) {
 
   InSequence seq;
   expect_object_may_exist(mock_image_ctx, 0, true);
-  expect_get_read_flags(mock_image_ctx, CEPH_NOSNAP, 0);
+  expect_get_read_flags(mock_image_ctx, STONE_NOSNAP, 0);
   expect_read(mock_image_ctx, ictx->get_object_name(0), 0, 4096, "", -EPERM);
 
   C_SaferCond ctx;
@@ -544,12 +544,12 @@ TEST_F(TestMockIoObjectRequest, ParentRead) {
 
   InSequence seq;
   expect_object_may_exist(mock_image_ctx, 0, true);
-  expect_get_read_flags(mock_image_ctx, CEPH_NOSNAP, 0);
+  expect_get_read_flags(mock_image_ctx, STONE_NOSNAP, 0);
   expect_read(mock_image_ctx, ictx->get_object_name(0), 0, 4096, "", -ENOENT);
 
   MockUtils mock_utils;
   ReadExtents extents = {{0, 4096}};
-  expect_read_parent(mock_utils, 0, &extents, CEPH_NOSNAP, 0);
+  expect_read_parent(mock_utils, 0, &extents, STONE_NOSNAP, 0);
 
   C_SaferCond ctx;
   auto req = MockObjectReadRequest::create(
@@ -590,12 +590,12 @@ TEST_F(TestMockIoObjectRequest, ParentReadError) {
 
   InSequence seq;
   expect_object_may_exist(mock_image_ctx, 0, true);
-  expect_get_read_flags(mock_image_ctx, CEPH_NOSNAP, 0);
+  expect_get_read_flags(mock_image_ctx, STONE_NOSNAP, 0);
   expect_read(mock_image_ctx, ictx->get_object_name(0), 0, 4096, "", -ENOENT);
 
   MockUtils mock_utils;
   ReadExtents extents = {{0, 4096}};
-  expect_read_parent(mock_utils, 0, &extents, CEPH_NOSNAP, -EPERM);
+  expect_read_parent(mock_utils, 0, &extents, STONE_NOSNAP, -EPERM);
 
   C_SaferCond ctx;
   auto req = MockObjectReadRequest::create(
@@ -636,7 +636,7 @@ TEST_F(TestMockIoObjectRequest, SkipParentRead) {
 
   InSequence seq;
   expect_object_may_exist(mock_image_ctx, 0, true);
-  expect_get_read_flags(mock_image_ctx, CEPH_NOSNAP, 0);
+  expect_get_read_flags(mock_image_ctx, STONE_NOSNAP, 0);
   expect_read(mock_image_ctx, ictx->get_object_name(0), 0, 4096, "", -ENOENT);
 
   ReadExtents extents = {{0, 4096}};
@@ -678,15 +678,15 @@ TEST_F(TestMockIoObjectRequest, CopyOnRead) {
 
   InSequence seq;
   expect_object_may_exist(mock_image_ctx, 0, true);
-  expect_get_read_flags(mock_image_ctx, CEPH_NOSNAP, 0);
+  expect_get_read_flags(mock_image_ctx, STONE_NOSNAP, 0);
   expect_read(mock_image_ctx, ictx->get_object_name(0), 0, 4096, "", -ENOENT);
 
   MockUtils mock_utils;
   ReadExtents extents = {{0, 4096}};
-  expect_read_parent(mock_utils, 0, &extents, CEPH_NOSNAP, 0);
+  expect_read_parent(mock_utils, 0, &extents, STONE_NOSNAP, 0);
 
   MockCopyupRequest mock_copyup_request;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 4096, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 4096, 0);
   expect_prune_parent_extents(mock_image_ctx, {{0, 4096}}, 4096, 4096);
   expect_copyup(mock_copyup_request, 0);
 
@@ -721,7 +721,7 @@ TEST_F(TestMockIoObjectRequest, Write) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
   expect_write(mock_image_ctx, 0, 4096, 0);
@@ -758,7 +758,7 @@ TEST_F(TestMockIoObjectRequest, WriteWithCreateExclusiveFlag) {
     bl.append(std::string(4096, '1'));
 
     InSequence seq;
-    expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+    expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
     expect_object_may_exist(mock_image_ctx, 0, true);
     expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false,
                              0);
@@ -779,7 +779,7 @@ TEST_F(TestMockIoObjectRequest, WriteWithCreateExclusiveFlag) {
     bl.append(std::string(4096, '1'));
 
     InSequence seq;
-    expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+    expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
     expect_object_may_exist(mock_image_ctx, 0, true);
     expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false,
                              0);
@@ -818,7 +818,7 @@ TEST_F(TestMockIoObjectRequest, WriteWithAssertVersion) {
     bl.append(std::string(4096, '1'));
 
     InSequence seq;
-    expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+    expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
     expect_object_may_exist(mock_image_ctx, 0, true);
     expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false,
                              0);
@@ -839,7 +839,7 @@ TEST_F(TestMockIoObjectRequest, WriteWithAssertVersion) {
     bl.append(std::string(4096, '1'));
 
     InSequence seq;
-    expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+    expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
     expect_object_may_exist(mock_image_ctx, 0, true);
     expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false,
                              0);
@@ -860,7 +860,7 @@ TEST_F(TestMockIoObjectRequest, WriteWithAssertVersion) {
     bl.append(std::string(4096, '1'));
 
     InSequence seq;
-    expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+    expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
     expect_object_may_exist(mock_image_ctx, 0, true);
     expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false,
                              0);
@@ -880,7 +880,7 @@ TEST_F(TestMockIoObjectRequest, WriteWithAssertVersion) {
     bl.append(std::string(4096, '1'));
 
     InSequence seq;
-    expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+    expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
     expect_object_may_exist(mock_image_ctx, 0, true);
     expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false,
                              0);
@@ -917,7 +917,7 @@ TEST_F(TestMockIoObjectRequest, WriteFull) {
   bl.append(std::string(ictx->get_object_size(), '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
   expect_write_full(mock_image_ctx, 0);
@@ -951,7 +951,7 @@ TEST_F(TestMockIoObjectRequest, WriteObjectMap) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, true, 0);
   expect_write(mock_image_ctx, 0, 4096, 0);
@@ -975,7 +975,7 @@ TEST_F(TestMockIoObjectRequest, WriteError) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_write(mock_image_ctx, 0, 4096, -EPERM);
 
   C_SaferCond ctx;
@@ -1022,7 +1022,7 @@ TEST_F(TestMockIoObjectRequest, Copyup) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 4096, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 4096, 0);
   expect_prune_parent_extents(mock_image_ctx, {{0, 4096}}, 4096, 4096);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
@@ -1076,7 +1076,7 @@ TEST_F(TestMockIoObjectRequest, CopyupRestart) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 4096, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 4096, 0);
   expect_prune_parent_extents(mock_image_ctx, {{0, 4096}}, 4096, 4096);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
@@ -1128,7 +1128,7 @@ TEST_F(TestMockIoObjectRequest, CopyupOptimization) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 4096, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 4096, 0);
   expect_prune_parent_extents(mock_image_ctx, {{0, 4096}}, 4096, 4096);
   expect_object_may_exist(mock_image_ctx, 0, false);
 
@@ -1169,7 +1169,7 @@ TEST_F(TestMockIoObjectRequest, CopyupError) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 4096, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 4096, 0);
   expect_prune_parent_extents(mock_image_ctx, {{0, 4096}}, 4096, 4096);
   expect_assert_exists(mock_image_ctx, -ENOENT);
 
@@ -1204,7 +1204,7 @@ TEST_F(TestMockIoObjectRequest, DiscardRemove) {
   }
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_PENDING, {}, false, 0);
   expect_remove(mock_image_ctx, 0);
@@ -1254,7 +1254,7 @@ TEST_F(TestMockIoObjectRequest, DiscardRemoveTruncate) {
   }
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 4096, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 4096, 0);
   expect_prune_parent_extents(mock_image_ctx, {{0, 4096}}, 4096, 4096);
   expect_object_may_exist(mock_image_ctx, 0, false);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
@@ -1308,7 +1308,7 @@ TEST_F(TestMockIoObjectRequest, DiscardTruncateAssertExists) {
   }
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 4096, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 4096, 0);
   expect_prune_parent_extents(mock_image_ctx, {{0, 4096}}, 4096, 4096);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
@@ -1346,7 +1346,7 @@ TEST_F(TestMockIoObjectRequest, DiscardTruncate) {
   }
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
   expect_truncate(mock_image_ctx, 1, 0);
@@ -1381,7 +1381,7 @@ TEST_F(TestMockIoObjectRequest, DiscardZero) {
   }
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
   expect_zero(mock_image_ctx, 1, 1, 0);
@@ -1411,7 +1411,7 @@ TEST_F(TestMockIoObjectRequest, DiscardDisableObjectMapUpdate) {
   mock_image_ctx.object_map = &mock_object_map;
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_remove(mock_image_ctx, 0);
 
@@ -1443,7 +1443,7 @@ TEST_F(TestMockIoObjectRequest, DiscardNoOp) {
   mock_image_ctx.object_map = &mock_object_map;
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, false);
 
   C_SaferCond ctx;
@@ -1479,7 +1479,7 @@ TEST_F(TestMockIoObjectRequest, WriteSame) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
   expect_writesame(mock_image_ctx, 0, 4096, 0);
@@ -1517,7 +1517,7 @@ TEST_F(TestMockIoObjectRequest, CompareAndWrite) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
   expect_cmpext(mock_image_ctx, 0, 0);
@@ -1557,7 +1557,7 @@ TEST_F(TestMockIoObjectRequest, CompareAndWriteFull) {
   bl.append(std::string(ictx->get_object_size(), '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
   expect_cmpext(mock_image_ctx, 0, 0);
@@ -1611,7 +1611,7 @@ TEST_F(TestMockIoObjectRequest, CompareAndWriteCopyup) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 4096, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 4096, 0);
   expect_prune_parent_extents(mock_image_ctx, {{0, 4096}}, 4096, 4096);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
@@ -1659,7 +1659,7 @@ TEST_F(TestMockIoObjectRequest, CompareAndWriteMismatch) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, false, 0);
   expect_cmpext(mock_image_ctx, 0, -MAX_ERRNO - 1);
@@ -1695,7 +1695,7 @@ TEST_F(TestMockIoObjectRequest, ObjectMapError) {
   bl.append(std::string(4096, '1'));
 
   InSequence seq;
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 0, 0);
   expect_object_may_exist(mock_image_ctx, 0, true);
   expect_object_map_update(mock_image_ctx, 0, 1, OBJECT_EXISTS, {}, true,
                            -EBLOCKLISTED);
@@ -1742,7 +1742,7 @@ TEST_F(TestMockIoObjectRequest, ListSnaps) {
   clone_info.size = 3072000;
   snap_set.clones.push_back(clone_info);
 
-  clone_info.cloneid = CEPH_NOSNAP;
+  clone_info.cloneid = STONE_NOSNAP;
   clone_info.snaps = {};
   clone_info.overlap = {};
   clone_info.size = 4194304;
@@ -1755,7 +1755,7 @@ TEST_F(TestMockIoObjectRequest, ListSnaps) {
   auto req = MockObjectListSnapsRequest::create(
     &mock_image_ctx, 0,
     {{440320, 1024}, {2122728, 1024}, {2220032, 2048}, {3072000, 4096}},
-    {3, 4, 5, 6, 7, CEPH_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
+    {3, 4, 5, 6, 7, STONE_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
   req->send();
   ASSERT_EQ(0, ctx.wait());
 
@@ -1766,11 +1766,11 @@ TEST_F(TestMockIoObjectRequest, ListSnaps) {
     2122728, 1024, {SPARSE_EXTENT_STATE_DATA, 1024});
   expected_snapshot_delta[{5,6}].insert(
     2220032, 2048, {SPARSE_EXTENT_STATE_DATA, 2048});
-  expected_snapshot_delta[{7,CEPH_NOSNAP}].insert(
+  expected_snapshot_delta[{7,STONE_NOSNAP}].insert(
     2122728, 1024, {SPARSE_EXTENT_STATE_DATA, 1024});
-  expected_snapshot_delta[{7,CEPH_NOSNAP}].insert(
+  expected_snapshot_delta[{7,STONE_NOSNAP}].insert(
     2221056, 1024, {SPARSE_EXTENT_STATE_DATA, 1024});
-  expected_snapshot_delta[{7,CEPH_NOSNAP}].insert(
+  expected_snapshot_delta[{7,STONE_NOSNAP}].insert(
     3072000, 4096, {SPARSE_EXTENT_STATE_DATA, 4096});
   expected_snapshot_delta[{5,5}].insert(
     3072000, 4096, {SPARSE_EXTENT_STATE_ZEROED, 4096});
@@ -1790,7 +1790,7 @@ TEST_F(TestMockIoObjectRequest, ListSnapsENOENT) {
   auto req = MockObjectListSnapsRequest::create(
     &mock_image_ctx, 0,
     {{440320, 1024}},
-    {0, CEPH_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
+    {0, STONE_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
   req->send();
   ASSERT_EQ(0, ctx.wait());
 
@@ -1850,7 +1850,7 @@ TEST_F(TestMockIoObjectRequest, ListSnapsEmpty) {
   auto req = MockObjectListSnapsRequest::create(
     &mock_image_ctx, 0,
     {{440320, 1024}},
-    {0, CEPH_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
+    {0, STONE_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
   req->send();
   ASSERT_EQ(0, ctx.wait());
 
@@ -1873,7 +1873,7 @@ TEST_F(TestMockIoObjectRequest, ListSnapsError) {
   auto req = MockObjectListSnapsRequest::create(
     &mock_image_ctx, 0,
     {{440320, 1024}, {2122728, 1024}, {2220032, 2048}, {3072000, 4096}},
-    {3, CEPH_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
+    {3, STONE_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
   req->send();
   ASSERT_EQ(-EPERM, ctx.wait());
 }
@@ -1889,7 +1889,7 @@ TEST_F(TestMockIoObjectRequest, ListSnapsParent) {
 
   expect_list_snaps(mock_image_ctx, {}, -ENOENT);
 
-  expect_get_parent_overlap(mock_image_ctx, CEPH_NOSNAP, 4096, 0);
+  expect_get_parent_overlap(mock_image_ctx, STONE_NOSNAP, 4096, 0);
   expect_prune_parent_extents(mock_image_ctx, {{0, 4096}}, 4096, 4096);
 
   MockImageListSnapsRequest mock_image_list_snaps_request;
@@ -1904,7 +1904,7 @@ TEST_F(TestMockIoObjectRequest, ListSnapsParent) {
   auto req = MockObjectListSnapsRequest::create(
     &mock_image_ctx, 0,
     {{440320, 1024}, {2122728, 1024}, {2220032, 2048}, {3072000, 4096}},
-    {0, CEPH_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
+    {0, STONE_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
   req->send();
   ASSERT_EQ(0, ctx.wait());
 
@@ -1933,7 +1933,7 @@ TEST_F(TestMockIoObjectRequest, ListSnapsWholeObject) {
   clone_info.size = 4194304;
   snap_set.clones.push_back(clone_info);
 
-  clone_info.cloneid = CEPH_NOSNAP;
+  clone_info.cloneid = STONE_NOSNAP;
   clone_info.snaps = {};
   clone_info.overlap = {};
   clone_info.size = 4194304;
@@ -1945,12 +1945,12 @@ TEST_F(TestMockIoObjectRequest, ListSnapsWholeObject) {
   C_SaferCond ctx;
   auto req = MockObjectListSnapsRequest::create(
     &mock_image_ctx, 0, {{0, mock_image_ctx.layout.object_size - 1}},
-    {0, CEPH_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
+    {0, STONE_NOSNAP}, 0, {}, &snapshot_delta, &ctx);
   req->send();
   ASSERT_EQ(0, ctx.wait());
 
   SnapshotDelta expected_snapshot_delta;
-  expected_snapshot_delta[{CEPH_NOSNAP,CEPH_NOSNAP}].insert(
+  expected_snapshot_delta[{STONE_NOSNAP,STONE_NOSNAP}].insert(
     0, mock_image_ctx.layout.object_size - 1,
     {SPARSE_EXTENT_STATE_DATA, mock_image_ctx.layout.object_size - 1});
   ASSERT_EQ(expected_snapshot_delta, snapshot_delta);

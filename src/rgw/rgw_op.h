@@ -10,8 +10,8 @@
  * to provide additional virtual methods such as send_response or get_params.
  */
 
-#ifndef CEPH_RGW_OP_H
-#define CEPH_RGW_OP_H
+#ifndef STONE_RGW_OP_H
+#define STONE_RGW_OP_H
 
 #include <limits.h>
 
@@ -2123,11 +2123,11 @@ inline int encode_dlo_manifest_attr(const char * const dlo_manifest,
 
 inline void complete_etag(MD5& hash, string *etag)
 {
-  char etag_buf[CEPH_CRYPTO_MD5_DIGESTSIZE];
-  char etag_buf_str[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 16];
+  char etag_buf[STONE_CRYPTO_MD5_DIGESTSIZE];
+  char etag_buf_str[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 16];
 
   hash.Final((unsigned char *)etag_buf);
-  buf_to_hex((const unsigned char *)etag_buf, CEPH_CRYPTO_MD5_DIGESTSIZE,
+  buf_to_hex((const unsigned char *)etag_buf, STONE_CRYPTO_MD5_DIGESTSIZE,
 	    etag_buf_str);
 
   *etag = etag_buf_str;
@@ -2516,4 +2516,4 @@ inline int parse_value_and_bound(
   return 0;
 }
 
-#endif /* CEPH_RGW_OP_H */
+#endif /* STONE_RGW_OP_H */

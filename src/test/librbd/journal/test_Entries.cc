@@ -26,8 +26,8 @@ public:
   typedef std::list<::journal::Journaler *> Journalers;
 
   struct ReplayHandler : public ::journal::ReplayHandler {
-    ceph::mutex lock = ceph::make_mutex("ReplayHandler::lock");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("ReplayHandler::lock");
+    stone::condition_variable cond;
     bool entries_available;
     bool complete;
 
@@ -161,7 +161,7 @@ TEST_F(TestJournalEntries, AioWrite) {
 TEST_F(TestJournalEntries, AioDiscard) {
   REQUIRE_FEATURE(RBD_FEATURE_JOURNALING);
 
-  CephContext* cct = reinterpret_cast<CephContext*>(_rados.cct());
+  StoneContext* cct = reinterpret_cast<StoneContext*>(_rados.cct());
   REQUIRE(!cct->_conf.get_val<bool>("rbd_skip_partial_discard"));
 
   librbd::ImageCtx *ictx;

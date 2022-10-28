@@ -1,6 +1,6 @@
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -20,14 +20,14 @@
 
 #include "Crypto.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/Clock.h"
 #include "common/armor.h"
-#include "common/ceph_context.h"
-#include "common/ceph_crypto.h"
+#include "common/stone_context.h"
+#include "common/stone_crypto.h"
 #include "common/hex.h"
 #include "common/safe_io.h"
-#include "include/ceph_fs.h"
+#include "include/stone_fs.h"
 #include "include/compat.h"
 #include "common/Formatter.h"
 #include "common/debug.h"
@@ -42,9 +42,9 @@
 using std::ostringstream;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::Formatter;
 
 static bool getentropy_works()
 {
@@ -145,11 +145,11 @@ std::size_t CryptoKeyHandler::encrypt(
   const CryptoKeyHandler::in_slice_t& in,
   const CryptoKeyHandler::out_slice_t& out) const
 {
-  ceph::bufferptr inptr(reinterpret_cast<const char*>(in.buf), in.length);
-  ceph::bufferlist plaintext;
+  stone::bufferptr inptr(reinterpret_cast<const char*>(in.buf), in.length);
+  stone::bufferlist plaintext;
   plaintext.append(std::move(inptr));
 
-  ceph::bufferlist ciphertext;
+  stone::bufferlist ciphertext;
   std::string error;
   const int ret = encrypt(plaintext, ciphertext, &error);
   if (ret != 0 || !error.empty()) {
@@ -169,11 +169,11 @@ std::size_t CryptoKeyHandler::decrypt(
   const CryptoKeyHandler::in_slice_t& in,
   const CryptoKeyHandler::out_slice_t& out) const
 {
-  ceph::bufferptr inptr(reinterpret_cast<const char*>(in.buf), in.length);
-  ceph::bufferlist ciphertext;
+  stone::bufferptr inptr(reinterpret_cast<const char*>(in.buf), in.length);
+  stone::bufferlist ciphertext;
   ciphertext.append(std::move(inptr));
 
-  ceph::bufferlist plaintext;
+  stone::bufferlist plaintext;
   std::string error;
   const int ret = decrypt(ciphertext, plaintext, &error);
   if (ret != 0 || !error.empty()) {
@@ -190,7 +190,7 @@ std::size_t CryptoKeyHandler::decrypt(
 }
 
 sha256_digest_t CryptoKeyHandler::hmac_sha256(
-  const ceph::bufferlist& in) const
+  const stone::bufferlist& in) const
 {
   TOPNSPC::crypto::HMACSHA256 hmac((const unsigned char*)secret.c_str(), secret.length());
 
@@ -231,7 +231,7 @@ public:
   CryptoNone() { }
   ~CryptoNone() override {}
   int get_type() const override {
-    return CEPH_CRYPTO_NONE;
+    return STONE_CRYPTO_NONE;
   }
   int create(CryptoRandom *random, bufferptr& secret) override {
     return 0;
@@ -253,7 +253,7 @@ public:
   CryptoAES() { }
   ~CryptoAES() override {}
   int get_type() const override {
-    return CEPH_CRYPTO_AES;
+    return STONE_CRYPTO_AES;
   }
   int create(CryptoRandom *random, bufferptr& secret) override;
   int validate_secret(const bufferptr& secret) override;
@@ -295,8 +295,8 @@ public:
     return 0;
   }
 
-  int encrypt(const ceph::bufferlist& in,
-	      ceph::bufferlist& out,
+  int encrypt(const stone::bufferlist& in,
+	      stone::bufferlist& out,
               std::string* /* unused */) const override {
     // we need to take into account the PKCS#7 padding. There *always* will
     // be at least one byte of padding. This stays even to input aligned to
@@ -304,31 +304,31 @@ public:
     // To exemplify:
     //   16 + p2align(10, 16) -> 16
     //   16 + p2align(16, 16) -> 32 including 16 bytes for padding.
-    ceph::bufferptr out_tmp{static_cast<unsigned>(
+    stone::bufferptr out_tmp{static_cast<unsigned>(
       AES_BLOCK_LEN + p2align<std::size_t>(in.length(), AES_BLOCK_LEN))};
 
     // let's pad the data
     std::uint8_t pad_len = out_tmp.length() - in.length();
-    ceph::bufferptr pad_buf{pad_len};
+    stone::bufferptr pad_buf{pad_len};
     // FIPS zeroization audit 20191115: this memset is not intended to
     // wipe out a secret after use.
     memset(pad_buf.c_str(), pad_len, pad_len);
 
     // form contiguous buffer for block cipher. The ctor copies shallowly.
-    ceph::bufferlist incopy(in);
+    stone::bufferlist incopy(in);
     incopy.append(std::move(pad_buf));
     const auto in_buf = reinterpret_cast<unsigned char*>(incopy.c_str());
 
     // reinitialize IV each time. It might be unnecessary depending on
     // actual implementation but at the interface layer we are obliged
     // to deliver IV as non-const.
-    static_assert(strlen_ct(CEPH_AES_IV) == AES_BLOCK_LEN);
+    static_assert(strlen_ct(STONE_AES_IV) == AES_BLOCK_LEN);
     unsigned char iv[AES_BLOCK_LEN];
-    memcpy(iv, CEPH_AES_IV, AES_BLOCK_LEN);
+    memcpy(iv, STONE_AES_IV, AES_BLOCK_LEN);
 
     // we aren't using EVP because of performance concerns. Profiling
     // shows the cost is quite high. Endianness might be an issue.
-    // However, as they would affect Cephx, any fallout should pop up
+    // However, as they would affect Stonex, any fallout should pop up
     // rather early, hopefully.
     AES_cbc_encrypt(in_buf, reinterpret_cast<unsigned char*>(out_tmp.c_str()),
 		    out_tmp.length(), &enc_key, iv, AES_ENCRYPT);
@@ -337,8 +337,8 @@ public:
     return 0;
   }
 
-  int decrypt(const ceph::bufferlist& in,
-	      ceph::bufferlist& out,
+  int decrypt(const stone::bufferlist& in,
+	      stone::bufferlist& out,
 	      std::string* /* unused */) const override {
     // PKCS#7 padding enlarges even empty plain-text to take 16 bytes.
     if (in.length() < AES_BLOCK_LEN || in.length() % AES_BLOCK_LEN) {
@@ -346,15 +346,15 @@ public:
     }
 
     // needed because of .c_str() on const. It's a shallow copy.
-    ceph::bufferlist incopy(in);
+    stone::bufferlist incopy(in);
     const auto in_buf = reinterpret_cast<unsigned char*>(incopy.c_str());
 
     // make a local, modifiable copy of IV.
-    static_assert(strlen_ct(CEPH_AES_IV) == AES_BLOCK_LEN);
+    static_assert(strlen_ct(STONE_AES_IV) == AES_BLOCK_LEN);
     unsigned char iv[AES_BLOCK_LEN];
-    memcpy(iv, CEPH_AES_IV, AES_BLOCK_LEN);
+    memcpy(iv, STONE_AES_IV, AES_BLOCK_LEN);
 
-    ceph::bufferptr out_tmp{in.length()};
+    stone::bufferptr out_tmp{in.length()};
     AES_cbc_encrypt(in_buf, reinterpret_cast<unsigned char*>(out_tmp.c_str()),
 		    in.length(), &dec_key, iv, AES_DECRYPT);
 
@@ -393,9 +393,9 @@ public:
 
     // need a local copy because AES_cbc_encrypt takes `iv` as non-const.
     // Useful because it allows us to encrypt in two steps: main + tail.
-    static_assert(strlen_ct(CEPH_AES_IV) == AES_BLOCK_LEN);
+    static_assert(strlen_ct(STONE_AES_IV) == AES_BLOCK_LEN);
     std::array<unsigned char, AES_BLOCK_LEN> iv;
-    memcpy(iv.data(), CEPH_AES_IV, AES_BLOCK_LEN);
+    memcpy(iv.data(), STONE_AES_IV, AES_BLOCK_LEN);
 
     const std::size_t main_encrypt_size = \
       std::min(in.length - tail_len, out.max_length);
@@ -423,9 +423,9 @@ public:
       throw std::runtime_error("output buffer too small");
     }
 
-    static_assert(strlen_ct(CEPH_AES_IV) == AES_BLOCK_LEN);
+    static_assert(strlen_ct(STONE_AES_IV) == AES_BLOCK_LEN);
     std::array<unsigned char, AES_BLOCK_LEN> iv;
-    memcpy(iv.data(), CEPH_AES_IV, AES_BLOCK_LEN);
+    memcpy(iv.data(), STONE_AES_IV, AES_BLOCK_LEN);
 
     AES_cbc_encrypt(in.buf, out.buf, in.length, &dec_key, iv.data(),
 		    AES_DECRYPT);
@@ -483,7 +483,7 @@ CryptoKeyHandler *CryptoAES::get_key_handler(const bufferptr& secret,
 
 void CryptoKey::encode(bufferlist& bl) const
 {
-  using ceph::encode;
+  using stone::encode;
   encode(type, bl);
   encode(created, bl);
   __u16 len = secret.length();
@@ -493,7 +493,7 @@ void CryptoKey::encode(bufferlist& bl) const
 
 void CryptoKey::decode(bufferlist::const_iterator& bl)
 {
-  using ceph::decode;
+  using stone::decode;
   decode(type, bl);
   decode(created, bl);
   __u16 len;
@@ -501,7 +501,7 @@ void CryptoKey::decode(bufferlist::const_iterator& bl)
   bufferptr tmp;
   bl.copy_deep(len, tmp);
   if (_set_secret(type, tmp) < 0)
-    throw ceph::buffer::malformed_input("malformed secret");
+    throw stone::buffer::malformed_input("malformed secret");
 }
 
 int CryptoKey::set_secret(int type, const bufferptr& s, utime_t c)
@@ -542,7 +542,7 @@ int CryptoKey::_set_secret(int t, const bufferptr& s)
   return 0;
 }
 
-int CryptoKey::create(CephContext *cct, int t)
+int CryptoKey::create(StoneContext *cct, int t)
 {
   CryptoHandler *ch = CryptoHandler::create(t);
   if (!ch) {
@@ -559,7 +559,7 @@ int CryptoKey::create(CephContext *cct, int t)
   r = _set_secret(t, s);
   if (r < 0)
     return r;
-  created = ceph_clock_now();
+  created = stone_clock_now();
   return r;
 }
 
@@ -595,9 +595,9 @@ void CryptoKey::encode_plaintext(bufferlist &bl)
 CryptoHandler *CryptoHandler::create(int type)
 {
   switch (type) {
-  case CEPH_CRYPTO_NONE:
+  case STONE_CRYPTO_NONE:
     return new CryptoNone;
-  case CEPH_CRYPTO_AES:
+  case STONE_CRYPTO_AES:
     return new CryptoAES;
   default:
     return NULL;

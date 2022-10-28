@@ -7,28 +7,28 @@ target_link_libraries(rados_striper_test
   radostest-cxx
   GTest::GTest)
 
-add_executable(ceph_test_rados_striper_api_striping
+add_executable(stone_test_rados_striper_api_striping
   striping.cc
   )
-target_link_libraries(ceph_test_rados_striper_api_striping
+target_link_libraries(stone_test_rados_striper_api_striping
   ${UNITTEST_LIBS} rados_striper_test
   radosstriper
   librados)
-install(TARGETS ceph_test_rados_striper_api_striping
+install(TARGETS stone_test_rados_striper_api_striping
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-add_executable(ceph_test_rados_striper_api_io
+add_executable(stone_test_rados_striper_api_io
   io.cc)
-target_link_libraries(ceph_test_rados_striper_api_io
+target_link_libraries(stone_test_rados_striper_api_io
   ${UNITTEST_LIBS} rados_striper_test
   radosstriper
   librados)
-install(TARGETS ceph_test_rados_striper_api_io
+install(TARGETS stone_test_rados_striper_api_io
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-add_executable(ceph_test_rados_striper_api_aio
+add_executable(stone_test_rados_striper_api_aio
   aio.cc)
-target_link_libraries(ceph_test_rados_striper_api_aio librados radosstriper
+target_link_libraries(stone_test_rados_striper_api_aio librados radosstriper
   ${UNITTEST_LIBS} rados_striper_test)
-install(TARGETS ceph_test_rados_striper_api_aio
+install(TARGETS stone_test_rados_striper_api_aio
   DESTINATION ${CMAKE_INSTALL_BINDIR})

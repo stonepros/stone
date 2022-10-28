@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_TEST_LIBRBD_CACHE_MOCK_IMAGE_CACHE_H
-#define CEPH_TEST_LIBRBD_CACHE_MOCK_IMAGE_CACHE_H
+#ifndef STONE_TEST_LIBRBD_CACHE_MOCK_IMAGE_CACHE_H
+#define STONE_TEST_LIBRBD_CACHE_MOCK_IMAGE_CACHE_H
 
 #include "gmock/gmock.h"
 #include "librbd/io/Types.h"
@@ -55,4 +55,4 @@ struct MockImageCache {
 } // namespace cache
 } // namespace librbd
 
-#endif // CEPH_TEST_LIBRBD_CACHE_MOCK_IMAGE_CACHE_H
+#endif // STONE_TEST_LIBRBD_CACHE_MOCK_IMAGE_CACHE_H

@@ -8,7 +8,7 @@
 
 #include <atomic>
 
-#define dout_subsys ceph_subsys_journaler
+#define dout_subsys stone_subsys_journaler
 #undef dout_prefix
 #define dout_prefix *_dout << "JournalRecorder: " << this << " " << __func__ \
                            << ": "
@@ -20,12 +20,12 @@ namespace journal {
 namespace {
 
 struct C_Flush : public Context {
-  ceph::ref_t<JournalMetadata> journal_metadata;
+  stone::ref_t<JournalMetadata> journal_metadata;
   Context *on_finish;
   std::atomic<int64_t> pending_flushes{0};
   int ret_val = 0;
 
-  C_Flush(ceph::ref_t<JournalMetadata> _journal_metadata, Context *_on_finish,
+  C_Flush(stone::ref_t<JournalMetadata> _journal_metadata, Context *_on_finish,
           size_t _pending_flushes)
     : journal_metadata(std::move(_journal_metadata)),
       on_finish(_on_finish),
@@ -50,7 +50,7 @@ struct C_Flush : public Context {
 
 JournalRecorder::JournalRecorder(librados::IoCtx &ioctx,
                                  std::string_view object_oid_prefix,
-                                 ceph::ref_t<JournalMetadata> journal_metadata,
+                                 stone::ref_t<JournalMetadata> journal_metadata,
                                  uint64_t max_in_flight_appends)
   : m_object_oid_prefix(object_oid_prefix),
     m_journal_metadata(std::move(journal_metadata)),
@@ -58,15 +58,15 @@ JournalRecorder::JournalRecorder(librados::IoCtx &ioctx,
     m_listener(this),
     m_object_handler(this),
     m_current_set(m_journal_metadata->get_active_set()),
-    m_object_locks{ceph::make_lock_container<ceph::mutex>(
+    m_object_locks{stone::make_lock_container<stone::mutex>(
       m_journal_metadata->get_splay_width(), [](const size_t splay_offset) {
-      return ceph::make_mutex("ObjectRecorder::m_lock::" +
+      return stone::make_mutex("ObjectRecorder::m_lock::" +
 			      std::to_string(splay_offset));
     })}
 {
   std::lock_guard locker{m_lock};
   m_ioctx.dup(ioctx);
-  m_cct = reinterpret_cast<CephContext*>(m_ioctx.cct());
+  m_cct = reinterpret_cast<StoneContext*>(m_ioctx.cct());
 
   uint8_t splay_width = m_journal_metadata->get_splay_width();
   for (uint8_t splay_offset = 0; splay_offset < splay_width; ++splay_offset) {
@@ -83,8 +83,8 @@ JournalRecorder::~JournalRecorder() {
   m_journal_metadata->remove_listener(&m_listener);
 
   std::lock_guard locker{m_lock};
-  ceph_assert(m_in_flight_advance_sets == 0);
-  ceph_assert(m_in_flight_object_closes == 0);
+  stone_assert(m_in_flight_advance_sets == 0);
+  stone_assert(m_in_flight_object_closes == 0);
 }
 
 void JournalRecorder::shut_down(Context *on_safe) {
@@ -94,7 +94,7 @@ void JournalRecorder::shut_down(Context *on_safe) {
       {
 	std::lock_guard locker{m_lock};
         if (m_in_flight_advance_sets != 0) {
-          ceph_assert(m_on_object_set_advanced == nullptr);
+          stone_assert(m_on_object_set_advanced == nullptr);
           m_on_object_set_advanced = new LambdaContext(
             [on_safe, r](int) {
               on_safe->complete(r);
@@ -144,7 +144,7 @@ Future JournalRecorder::append(uint64_t tag_tid,
   auto object_ptr = get_object(splay_offset);
   uint64_t commit_tid = m_journal_metadata->allocate_commit_tid(
     object_ptr->get_object_number(), tag_tid, entry_tid);
-  auto future = ceph::make_ref<FutureImpl>(tag_tid, entry_tid, commit_tid);
+  auto future = stone::make_ref<FutureImpl>(tag_tid, entry_tid, commit_tid);
   future->init(m_prev_future);
   m_prev_future = future;
 
@@ -154,7 +154,7 @@ Future JournalRecorder::append(uint64_t tag_tid,
   bufferlist entry_bl;
   encode(Entry(future->get_tag_tid(), future->get_entry_tid(), payload_bl),
 	 entry_bl);
-  ceph_assert(entry_bl.length() <= m_journal_metadata->get_object_size());
+  stone_assert(entry_bl.length() <= m_journal_metadata->get_object_size());
 
   bool object_full = object_ptr->append({{future, entry_bl}});
   m_object_locks[splay_offset].unlock();
@@ -186,16 +186,16 @@ void JournalRecorder::flush(Context *on_safe) {
   ctx->complete(0);
 }
 
-ceph::ref_t<ObjectRecorder> JournalRecorder::get_object(uint8_t splay_offset) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+stone::ref_t<ObjectRecorder> JournalRecorder::get_object(uint8_t splay_offset) {
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   const auto& object_recoder = m_object_ptrs.at(splay_offset);
-  ceph_assert(object_recoder);
+  stone_assert(object_recoder);
   return object_recoder;
 }
 
 void JournalRecorder::close_and_advance_object_set(uint64_t object_set) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   // entry overflow from open object
   if (m_current_set != object_set) {
@@ -205,11 +205,11 @@ void JournalRecorder::close_and_advance_object_set(uint64_t object_set) {
 
   // we shouldn't overflow upon append if already closed and we
   // shouldn't receive an overflowed callback if already closed
-  ceph_assert(m_in_flight_advance_sets == 0);
-  ceph_assert(m_in_flight_object_closes == 0);
+  stone_assert(m_in_flight_advance_sets == 0);
+  stone_assert(m_in_flight_object_closes == 0);
 
   uint64_t active_set = m_journal_metadata->get_active_set();
-  ceph_assert(m_current_set == active_set);
+  stone_assert(m_current_set == active_set);
   ++m_current_set;
   ++m_in_flight_advance_sets;
 
@@ -220,9 +220,9 @@ void JournalRecorder::close_and_advance_object_set(uint64_t object_set) {
 }
 
 void JournalRecorder::advance_object_set() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
-  ceph_assert(m_in_flight_object_closes == 0);
+  stone_assert(m_in_flight_object_closes == 0);
   ldout(m_cct, 10) << "advance to object set " << m_current_set << dendl;
   m_journal_metadata->set_active_set(m_current_set, new C_AdvanceObjectSet(
     this));
@@ -234,7 +234,7 @@ void JournalRecorder::handle_advance_object_set(int r) {
     std::lock_guard locker{m_lock};
     ldout(m_cct, 20) << __func__ << ": r=" << r << dendl;
 
-    ceph_assert(m_in_flight_advance_sets > 0);
+    stone_assert(m_in_flight_advance_sets > 0);
     --m_in_flight_advance_sets;
 
     if (r < 0 && r != -ESTALE) {
@@ -253,7 +253,7 @@ void JournalRecorder::handle_advance_object_set(int r) {
 }
 
 void JournalRecorder::open_object_set() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   ldout(m_cct, 10) << "opening object set " << m_current_set << dendl;
 
@@ -265,7 +265,7 @@ void JournalRecorder::open_object_set() {
     const auto& object_recorder = p.second;
     uint64_t object_number = object_recorder->get_object_number();
     if (object_number / splay_width != m_current_set) {
-      ceph_assert(object_recorder->is_closed());
+      stone_assert(object_recorder->is_closed());
 
       // ready to close object and open object in active set
       if (create_next_object_recorder(object_recorder)) {
@@ -284,7 +284,7 @@ void JournalRecorder::open_object_set() {
 
 bool JournalRecorder::close_object_set(uint64_t active_set) {
   ldout(m_cct, 10) << "active_set=" << active_set << dendl;
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   // object recorders will invoke overflow handler as they complete
   // closing the object to ensure correct order of future appends
@@ -309,10 +309,10 @@ bool JournalRecorder::close_object_set(uint64_t active_set) {
   return (m_in_flight_object_closes == 0);
 }
 
-ceph::ref_t<ObjectRecorder> JournalRecorder::create_object_recorder(
-    uint64_t object_number, ceph::mutex* lock) {
+stone::ref_t<ObjectRecorder> JournalRecorder::create_object_recorder(
+    uint64_t object_number, stone::mutex* lock) {
   ldout(m_cct, 10) << "object_number=" << object_number << dendl;
-  auto object_recorder = ceph::make_ref<ObjectRecorder>(
+  auto object_recorder = stone::make_ref<ObjectRecorder>(
     m_ioctx, utils::get_object_name(m_object_oid_prefix, object_number),
     object_number, lock, m_journal_metadata->get_work_queue(),
     &m_object_handler, m_journal_metadata->get_order(),
@@ -323,15 +323,15 @@ ceph::ref_t<ObjectRecorder> JournalRecorder::create_object_recorder(
 }
 
 bool JournalRecorder::create_next_object_recorder(
-    ceph::ref_t<ObjectRecorder> object_recorder) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone::ref_t<ObjectRecorder> object_recorder) {
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   uint64_t object_number = object_recorder->get_object_number();
   uint8_t splay_width = m_journal_metadata->get_splay_width();
   uint8_t splay_offset = object_number % splay_width;
   ldout(m_cct, 10) << "object_number=" << object_number << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_object_locks[splay_offset]));
+  stone_assert(stone_mutex_is_locked(m_object_locks[splay_offset]));
 
   auto new_object_recorder = create_object_recorder(
      (m_current_set * splay_width) + splay_offset, &m_object_locks[splay_offset]);
@@ -387,9 +387,9 @@ void JournalRecorder::handle_closed(ObjectRecorder *object_recorder) {
   uint8_t splay_width = m_journal_metadata->get_splay_width();
   uint8_t splay_offset = object_number % splay_width;
   auto& active_object_recorder = m_object_ptrs.at(splay_offset);
-  ceph_assert(active_object_recorder->get_object_number() == object_number);
+  stone_assert(active_object_recorder->get_object_number() == object_number);
 
-  ceph_assert(m_in_flight_object_closes > 0);
+  stone_assert(m_in_flight_object_closes > 0);
   --m_in_flight_object_closes;
 
   // object closed after advance active set committed
@@ -415,7 +415,7 @@ void JournalRecorder::handle_overflow(ObjectRecorder *object_recorder) {
   uint8_t splay_width = m_journal_metadata->get_splay_width();
   uint8_t splay_offset = object_number % splay_width;
   auto& active_object_recorder = m_object_ptrs.at(splay_offset);
-  ceph_assert(active_object_recorder->get_object_number() == object_number);
+  stone_assert(active_object_recorder->get_object_number() == object_number);
 
   ldout(m_cct, 10) << "object " << active_object_recorder->get_oid()
                    << " overflowed" << dendl;

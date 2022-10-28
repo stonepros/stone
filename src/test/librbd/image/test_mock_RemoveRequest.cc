@@ -32,7 +32,7 @@ struct MockTestImageCtx : public MockImageCtx {
                                   const std::string &image_id,
                                   const char *snap, librados::IoCtx& p,
                                   bool read_only) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -47,7 +47,7 @@ MockTestImageCtx* MockTestImageCtx::s_instance = nullptr;
 
 template<>
 struct Journal<MockTestImageCtx> {
-  static void get_work_queue(CephContext*, MockContextWQ**) {
+  static void get_work_queue(StoneContext*, MockContextWQ**) {
   }
 };
 
@@ -64,7 +64,7 @@ public:
   static DetachChildRequest *s_instance;
   static DetachChildRequest *create(MockTestImageCtx &image_ctx,
                                     Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -86,7 +86,7 @@ public:
   static PreRemoveRequest *s_instance;
   static PreRemoveRequest *create(MockTestImageCtx* image_ctx, bool force,
                                   Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -122,7 +122,7 @@ public:
   static TrimRequest *create(MockTestImageCtx &image_ctx, Context *on_finish,
                              uint64_t original_size, uint64_t new_size,
                              ProgressContext &prog_ctx) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -152,7 +152,7 @@ public:
   static RemoveRequest *create(IoCtx &ioctx, const std::string &imageid,
                                       const std::string &client_id,
                                       ContextWQ *op_work_queue, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -180,7 +180,7 @@ public:
 
   static DisableRequest *create(MockTestImageCtx *image_ctx, bool force,
                                 bool remove, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }

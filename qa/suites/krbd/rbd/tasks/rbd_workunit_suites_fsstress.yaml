@@ -1,6 +1,6 @@
 tasks:
 - install:
-- ceph:
+- stone:
 - rbd:
     all:
 - workunit:

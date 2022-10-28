@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -18,7 +18,7 @@
 
 #include "common/perf_counters_collection.h"
 #include "common/admin_socket_client.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "common/errno.h"
 #include "common/safe_io.h"
@@ -26,7 +26,7 @@
 #include "common/code_environment.h"
 #include "global/global_context.h"
 #include "global/global_init.h"
-#include "include/msgr.h" // for CEPH_ENTITY_TYPE_CLIENT
+#include "include/msgr.h" // for STONE_ENTITY_TYPE_CLIENT
 #include "gtest/gtest.h"
 
 #include <errno.h>
@@ -51,11 +51,11 @@ int main(int argc, char **argv) {
     { "admin_socket", get_rand_socket_path() }
   };
   std::vector<const char*> args;
-  auto cct = global_init(&defaults, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(&defaults, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE|
 			 CINIT_FLAG_NO_CCT_PERF_COUNTERS);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
@@ -87,7 +87,7 @@ std::string sd(const char *c)
   return ret;
 }
 
-static PerfCounters* setup_test_perfcounters1(CephContext *cct)
+static PerfCounters* setup_test_perfcounters1(StoneContext *cct)
 {
   PerfCountersBuilder bld(cct, "test_perfcounter_1",
 	  TEST_PERFCOUNTERS1_ELEMENT_FIRST, TEST_PERFCOUNTERS1_ELEMENT_LAST);
@@ -98,8 +98,8 @@ static PerfCounters* setup_test_perfcounters1(CephContext *cct)
 }
 
 TEST(PerfCounters, SinglePerfCounters) {
-  PerfCountersCollection *coll = g_ceph_context->get_perfcounters_collection();
-  PerfCounters* fake_pf = setup_test_perfcounters1(g_ceph_context);
+  PerfCountersCollection *coll = g_stone_context->get_perfcounters_collection();
+  PerfCounters* fake_pf = setup_test_perfcounters1(g_stone_context);
   coll->add(fake_pf);
   AdminSocketClient client(get_rand_socket_path());
   std::string msg;
@@ -133,7 +133,7 @@ enum {
   TEST_PERFCOUNTERS2_ELEMENT_LAST,
 };
 
-static PerfCounters* setup_test_perfcounter2(CephContext *cct)
+static PerfCounters* setup_test_perfcounter2(StoneContext *cct)
 {
   PerfCountersBuilder bld(cct, "test_perfcounter_2",
 	  TEST_PERFCOUNTERS2_ELEMENT_FIRST, TEST_PERFCOUNTERS2_ELEMENT_LAST);
@@ -143,10 +143,10 @@ static PerfCounters* setup_test_perfcounter2(CephContext *cct)
 }
 
 TEST(PerfCounters, MultiplePerfCounters) {
-  PerfCountersCollection *coll = g_ceph_context->get_perfcounters_collection();
+  PerfCountersCollection *coll = g_stone_context->get_perfcounters_collection();
   coll->clear();
-  PerfCounters* fake_pf1 = setup_test_perfcounters1(g_ceph_context);
-  PerfCounters* fake_pf2 = setup_test_perfcounter2(g_ceph_context);
+  PerfCounters* fake_pf1 = setup_test_perfcounters1(g_stone_context);
+  PerfCounters* fake_pf2 = setup_test_perfcounter2(g_stone_context);
   coll->add(fake_pf1);
   coll->add(fake_pf2);
   AdminSocketClient client(get_rand_socket_path());
@@ -193,9 +193,9 @@ TEST(PerfCounters, MultiplePerfCounters) {
 TEST(PerfCounters, ResetPerfCounters) {
   AdminSocketClient client(get_rand_socket_path());
   std::string msg;
-  PerfCountersCollection *coll = g_ceph_context->get_perfcounters_collection();
+  PerfCountersCollection *coll = g_stone_context->get_perfcounters_collection();
   coll->clear();
-  PerfCounters* fake_pf1 = setup_test_perfcounters1(g_ceph_context);
+  PerfCounters* fake_pf1 = setup_test_perfcounters1(g_stone_context);
   coll->add(fake_pf1);
 
   ASSERT_EQ("", client.do_request("{ \"prefix\": \"perf reset\", \"var\": \"all\", \"format\": \"json\" }", &msg));
@@ -215,7 +215,7 @@ enum {
   TEST_PERFCOUNTERS3_ELEMENT_LAST,
 };
 
-static std::shared_ptr<PerfCounters> setup_test_perfcounter3(CephContext* cct) {
+static std::shared_ptr<PerfCounters> setup_test_perfcounter3(StoneContext* cct) {
   PerfCountersBuilder bld(cct, "test_percounter_3",
       TEST_PERFCOUNTERS3_ELEMENT_FIRST, TEST_PERFCOUNTERS3_ELEMENT_LAST);
   bld.add_time_avg(TEST_PERFCOUNTERS3_ELEMENT_READ, "read_avg");
@@ -246,7 +246,7 @@ static void counters_readavg_test(std::shared_ptr<PerfCounters> fake_pf) {
 }
 
 TEST(PerfCounters, read_avg) {
-  std::shared_ptr<PerfCounters> fake_pf = setup_test_perfcounter3(g_ceph_context);
+  std::shared_ptr<PerfCounters> fake_pf = setup_test_perfcounter3(g_stone_context);
 
   std::thread t1(counters_inc_test, fake_pf);
   std::thread t2(counters_readavg_test, fake_pf);

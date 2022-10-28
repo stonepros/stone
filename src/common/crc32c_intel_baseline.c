@@ -107,7 +107,7 @@ unsigned long crc32_table_iscsi_base[256] = {
 
 
 // iSCSI CRC baseline function
-uint32_t ceph_crc32c_intel_baseline(uint32_t crc_init2, unsigned char const *buffer, unsigned len)
+uint32_t stone_crc32c_intel_baseline(uint32_t crc_init2, unsigned char const *buffer, unsigned len)
 {
 	unsigned int crc_init = crc_init2;
 	unsigned int crc;

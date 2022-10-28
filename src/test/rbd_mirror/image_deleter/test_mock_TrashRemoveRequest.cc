@@ -30,7 +30,7 @@ struct TrashWatcher<MockTestImageCtx> {
   static TrashWatcher* s_instance;
   static void notify_image_removed(librados::IoCtx&,
                                    const std::string& image_id, Context *ctx) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->notify_image_removed(image_id, ctx);
   }
 
@@ -56,7 +56,7 @@ struct RemoveRequest<librbd::MockTestImageCtx> {
                                bool force,
                                librbd::ProgressContext &progress_ctx,
                                Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     EXPECT_TRUE(force);
     s_instance->construct(image_id);
     s_instance->on_finish = on_finish;
@@ -88,7 +88,7 @@ struct SnapshotPurgeRequest<librbd::MockTestImageCtx> {
   static SnapshotPurgeRequest *create(librados::IoCtx &io_ctx,
                                       const std::string &image_id,
                                       Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->construct(image_id);
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -131,7 +131,7 @@ public:
   typedef librbd::trash::RemoveRequest<librbd::MockTestImageCtx> MockLibrbdTrashRemoveRequest;
 
   void expect_trash_get(const cls::rbd::TrashImageSpec& trash_spec, int r) {
-    using ceph::encode;
+    using stone::encode;
     EXPECT_CALL(get_mock_io_ctx(m_local_io_ctx),
                 exec(StrEq(RBD_TRASH), _, StrEq("rbd"),
                      StrEq("trash_get"), _, _, _, _))

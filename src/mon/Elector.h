@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MON_ELECTOR_H
-#define CEPH_MON_ELECTOR_H
+#ifndef STONE_MON_ELECTOR_H
+#define STONE_MON_ELECTOR_H
 
 #include <map>
 

@@ -3,10 +3,10 @@
 
 #include "include/fs_types.h"
 #include "common/Formatter.h"
-#include "include/ceph_features.h"
-#include "common/ceph_json.h"
+#include "include/stone_features.h"
+#include "common/stone_json.h"
 
-void dump(const ceph_file_layout& l, ceph::Formatter *f)
+void dump(const stone_file_layout& l, stone::Formatter *f)
 {
   f->dump_unsigned("stripe_unit", l.fl_stripe_unit);
   f->dump_unsigned("stripe_count", l.fl_stripe_count);
@@ -19,7 +19,7 @@ void dump(const ceph_file_layout& l, ceph::Formatter *f)
     f->dump_unsigned("pg_pool", l.fl_pg_pool);
 }
 
-void dump(const ceph_dir_layout& l, ceph::Formatter *f)
+void dump(const stone_dir_layout& l, stone::Formatter *f)
 {
   f->dump_unsigned("dir_hash", l.dl_dir_hash);
   f->dump_unsigned("unused1", l.dl_unused1);
@@ -33,9 +33,9 @@ void dump(const ceph_dir_layout& l, ceph::Formatter *f)
 bool file_layout_t::is_valid() const
 {
   /* stripe unit, object size must be non-zero, 64k increment */
-  if (!stripe_unit || (stripe_unit & (CEPH_MIN_STRIPE_UNIT-1)))
+  if (!stripe_unit || (stripe_unit & (STONE_MIN_STRIPE_UNIT-1)))
     return false;
-  if (!object_size || (object_size & (CEPH_MIN_STRIPE_UNIT-1)))
+  if (!object_size || (object_size & (STONE_MIN_STRIPE_UNIT-1)))
     return false;
   /* object size must be a multiple of stripe unit */
   if (object_size < stripe_unit || object_size % stripe_unit)
@@ -46,7 +46,7 @@ bool file_layout_t::is_valid() const
   return true;
 }
 
-void file_layout_t::from_legacy(const ceph_file_layout& fl)
+void file_layout_t::from_legacy(const stone_file_layout& fl)
 {
   stripe_unit = fl.fl_stripe_unit;
   stripe_count = fl.fl_stripe_count;
@@ -59,7 +59,7 @@ void file_layout_t::from_legacy(const ceph_file_layout& fl)
   pool_ns.clear();
 }
 
-void file_layout_t::to_legacy(ceph_file_layout *fl) const
+void file_layout_t::to_legacy(stone_file_layout *fl) const
 {
   fl->fl_stripe_unit = stripe_unit;
   fl->fl_stripe_count = stripe_count;
@@ -74,12 +74,12 @@ void file_layout_t::to_legacy(ceph_file_layout *fl) const
     fl->fl_pg_pool = 0;
 }
 
-void file_layout_t::encode(ceph::buffer::list& bl, uint64_t features) const
+void file_layout_t::encode(stone::buffer::list& bl, uint64_t features) const
 {
-  using ceph::encode;
-  if ((features & CEPH_FEATURE_FS_FILE_LAYOUT_V2) == 0) {
-    ceph_file_layout fl;
-    ceph_assert((stripe_unit & 0xff) == 0);  // first byte must be 0
+  using stone::encode;
+  if ((features & STONE_FEATURE_FS_FILE_LAYOUT_V2) == 0) {
+    stone_file_layout fl;
+    stone_assert((stripe_unit & 0xff) == 0);  // first byte must be 0
     to_legacy(&fl);
     encode(fl, bl);
     return;
@@ -94,11 +94,11 @@ void file_layout_t::encode(ceph::buffer::list& bl, uint64_t features) const
   ENCODE_FINISH(bl);
 }
 
-void file_layout_t::decode(ceph::buffer::list::const_iterator& p)
+void file_layout_t::decode(stone::buffer::list::const_iterator& p)
 {
-  using ceph::decode;
+  using stone::decode;
   if (*p == 0) {
-    ceph_file_layout fl;
+    stone_file_layout fl;
     decode(fl, p);
     from_legacy(fl);
     return;
@@ -112,7 +112,7 @@ void file_layout_t::decode(ceph::buffer::list::const_iterator& p)
   DECODE_FINISH(p);
 }
 
-void file_layout_t::dump(ceph::Formatter *f) const
+void file_layout_t::dump(stone::Formatter *f) const
 {
   f->dump_unsigned("stripe_unit", stripe_unit);
   f->dump_unsigned("stripe_count", stripe_count);
@@ -143,7 +143,7 @@ void file_layout_t::generate_test_instances(std::list<file_layout_t*>& o)
 
 std::ostream& operator<<(std::ostream& out, const file_layout_t &layout)
 {
-  ceph::JSONFormatter f;
+  stone::JSONFormatter f;
   layout.dump(&f);
   f.flush(out);
   return out;

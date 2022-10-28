@@ -262,7 +262,7 @@ void get_arguments_diff(po::options_description *positional,
 }
 
 int execute_diff(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -351,7 +351,7 @@ public:
       return;
     }
 
-    ceph_assert(m_bufferlist.length() == static_cast<size_t>(r));
+    stone_assert(m_bufferlist.length() == static_cast<size_t>(r));
     if (m_fd != STDOUT_FILENO) {
       if (m_bufferlist.is_zero()) {
         return;
@@ -601,7 +601,7 @@ void get_arguments(po::options_description *positional,
 }
 
 int execute(const po::variables_map &vm,
-            const std::vector<std::string> &ceph_global_init_args) {
+            const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;

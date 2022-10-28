@@ -243,8 +243,8 @@ TEST_F(TestGroup, add_snapshot)
     size_t unquiesce_count = 0;
     int r = 0;
 
-    ceph::mutex lock = ceph::make_mutex("lock");
-    ceph::condition_variable cv;
+    stone::mutex lock = stone::make_mutex("lock");
+    stone::condition_variable cv;
 
     Watcher(rbd_image_t &image) : image(image) {
     }

@@ -27,8 +27,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef CEPH_LIBRBD_MIGRATION_QCOW2_H
-#define CEPH_LIBRBD_MIGRATION_QCOW2_H
+#ifndef STONE_LIBRBD_MIGRATION_QCOW2_H
+#define STONE_LIBRBD_MIGRATION_QCOW2_H
 
 #include "include/ceph_assert.h"
 #include "include/int_types.h"
@@ -463,4 +463,4 @@ static inline uint64_t refcount_diff(uint64_t r1, uint64_t r2)
     return r1 > r2 ? r1 - r2 : r2 - r1;
 }
 
-#endif // CEPH_LIBRBD_MIGRATION_QCOW2_H
+#endif // STONE_LIBRBD_MIGRATION_QCOW2_H

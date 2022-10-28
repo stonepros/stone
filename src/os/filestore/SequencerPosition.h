@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef __CEPH_OS_SEQUENCERPOSITION_H
-#define __CEPH_OS_SEQUENCERPOSITION_H
+#ifndef __STONE_OS_SEQUENCERPOSITION_H
+#define __STONE_OS_SEQUENCERPOSITION_H
 
 #include "include/types.h"
 #include "include/cmp.h"

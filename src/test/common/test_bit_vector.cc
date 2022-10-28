@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
  *
@@ -13,7 +13,7 @@
 #include "common/bit_vector.hpp"
 #include <boost/assign/list_of.hpp>
 
-using namespace ceph;
+using namespace stone;
 
 template <uint8_t _bit_count>
 class TestParams {

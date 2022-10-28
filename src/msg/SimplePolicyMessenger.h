@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Portions Copyright (C) 2013 CohortFS, LLC
@@ -30,7 +30,7 @@ private:
 
 public:
 
-  SimplePolicyMessenger(CephContext *cct, entity_name_t name)
+  SimplePolicyMessenger(StoneeContext *cct, entity_name_t name)
     : Messenger(cct, name)
     {
     }

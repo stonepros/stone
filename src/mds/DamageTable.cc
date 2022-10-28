@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -18,8 +18,8 @@
 
 #include "DamageTable.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << rank << ".damage " << __func__ << " "
 
@@ -165,7 +165,7 @@ bool DamageTable::notify_dirfrag(inodeno_t ino, frag_t frag,
   // Special cases: damage to these dirfrags is considered fatal to
   // the MDS rank that owns them.
   if ((MDS_INO_IS_STRAY(ino) && MDS_INO_STRAY_OWNER(ino) == rank)
-      || (ino == CEPH_INO_ROOT)) {
+      || (ino == STONE_INO_ROOT)) {
     derr << "Damage to fragment " << frag << " of ino " << ino
          << " is fatal because it is a system directory for this rank" << dendl;
     return true;
@@ -255,7 +255,7 @@ void DamageTable::erase(damage_entry_id_t damage_id)
   }
 
   DamageEntryRef entry = by_id_entry->second;
-  ceph_assert(entry->id == damage_id);  // Sanity
+  stone_assert(entry->id == damage_id);  // Sanity
 
   const auto type = entry->get_type();
   if (type == DAMAGE_ENTRY_DIRFRAG) {
@@ -269,7 +269,7 @@ void DamageTable::erase(damage_entry_id_t damage_id)
     remotes.erase(backtrace_entry->ino);
   } else {
     derr << "Invalid type " << type << dendl;
-    ceph_abort();
+    stone_abort();
   }
 
   by_id.erase(by_id_entry);

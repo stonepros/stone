@@ -116,7 +116,7 @@ class ShardedCache : public rocksdb::Cache, public PriorityCache::PriCache {
 
  private:
   static inline uint32_t HashSlice(const rocksdb::Slice& s) {
-     return ceph_str_hash(CEPH_STR_HASH_RJENKINS, s.data(), s.size());
+     return ceph_str_hash(STONE_STR_HASH_RJENKINS, s.data(), s.size());
 //    return Hash(s.data(), s.size(), 0);
   }
 

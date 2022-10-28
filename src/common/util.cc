@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 Inktank Storage, Inc.
  *
@@ -46,11 +46,11 @@ using std::list;
 using std::map;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
 #ifndef _WIN32
-int get_fs_stats(ceph_data_stats_t &stats, const char *path)
+int get_fs_stats(stone_data_stats_t &stats, const char *path)
 {
   if (!path)
     return -EINVAL;
@@ -68,7 +68,7 @@ int get_fs_stats(ceph_data_stats_t &stats, const char *path)
   return 0;
 }
 #else
-int get_fs_stats(ceph_data_stats_t &stats, const char *path)
+int get_fs_stats(stone_data_stats_t &stats, const char *path)
 {
   ULARGE_INTEGER avail_bytes, total_bytes, total_free_bytes;
 
@@ -111,7 +111,7 @@ static bool value_set(char *buf, const char *prefix,
   return true;
 }
 
-static void file_values_parse(const map<string, string>& kvm, FILE *fp, map<string, string> *m, CephContext *cct) {
+static void file_values_parse(const map<string, string>& kvm, FILE *fp, map<string, string> *m, StoneContext *cct) {
   char buf[512];
   while (fgets(buf, sizeof(buf) - 1, fp) != NULL) {
     for (auto& kv : kvm) {
@@ -121,7 +121,7 @@ static void file_values_parse(const map<string, string>& kvm, FILE *fp, map<stri
   }
 }
 
-static bool os_release_parse(map<string, string> *m, CephContext *cct)
+static bool os_release_parse(map<string, string> *m, StoneContext *cct)
 {
 #if defined(__linux__)
   static const map<string, string> kvm = {
@@ -153,7 +153,7 @@ static bool os_release_parse(map<string, string> *m, CephContext *cct)
   return true;
 }
 
-static void distro_detect(map<string, string> *m, CephContext *cct)
+static void distro_detect(map<string, string> *m, StoneContext *cct)
 {
   if (!os_release_parse(m, cct)) {
     lderr(cct) << "distro_detect - /etc/os-release is required" << dendl;
@@ -225,12 +225,12 @@ int get_windows_version(POSVERSIONINFOEXW ver) {
 }
 #endif
 
-void collect_sys_info(map<string, string> *m, CephContext *cct)
+void collect_sys_info(map<string, string> *m, StoneContext *cct)
 {
   // version
-  (*m)["ceph_version"] = pretty_version_to_str();
-  (*m)["ceph_version_short"] = ceph_version_to_str();
-  (*m)["ceph_release"] = ceph_release_to_str();
+  (*m)["stone_version"] = pretty_version_to_str();
+  (*m)["stone_version_short"] = stone_version_to_str();
+  (*m)["stone_release"] = stone_release_to_str();
 
   #ifndef _WIN32
   // kernel info
@@ -380,7 +380,7 @@ void collect_sys_info(map<string, string> *m, CephContext *cct)
 
 void dump_services(Formatter* f, const map<string, list<int> >& services, const char* type)
 {
-  ceph_assert(f);
+  stone_assert(f);
 
   f->open_object_section(type);
   for (auto host = services.begin();
@@ -398,7 +398,7 @@ void dump_services(Formatter* f, const map<string, list<int> >& services, const 
 
 void dump_services(Formatter* f, const map<string, list<string> >& services, const char* type)
 {
-  ceph_assert(f);
+  stone_assert(f);
 
   f->open_object_section(type);
   for (const auto& host : services) {

@@ -24,7 +24,7 @@ public:
   static DetachChildRequest *s_instance;
   static DetachChildRequest *create(MockImageCtx &image_ctx,
                                     Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -54,7 +54,7 @@ public:
   static RemoveImageStateRequest *create(MockImageCtx *image_ctx,
                                          uint64_t snap_id,
                                          Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -135,7 +135,7 @@ public:
       return;
     }
 
-    using ceph::encode;
+    using stone::encode;
     EXPECT_CALL(get_mock_io_ctx(mock_image_ctx.md_ctx),
                 exec(mock_image_ctx.header_oid, _, StrEq("rbd"),
                      StrEq("snapshot_get"), _, _, _, _))
@@ -151,7 +151,7 @@ public:
       return;
     }
 
-    using ceph::encode;
+    using stone::encode;
     EXPECT_CALL(get_mock_io_ctx(mock_image_ctx.md_ctx),
                 exec(mock_image_ctx.header_oid, _, StrEq("rbd"),
                      StrEq("children_list"), _, _, _, _))

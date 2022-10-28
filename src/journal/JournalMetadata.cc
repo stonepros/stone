@@ -9,7 +9,7 @@
 #include <functional>
 #include <set>
 
-#define dout_subsys ceph_subsys_journaler
+#define dout_subsys stone_subsys_journaler
 #undef dout_prefix
 #define dout_prefix *_dout << "JournalMetadata: " << this << " "
 
@@ -20,7 +20,7 @@ using namespace cls::journal;
 namespace {
 
 struct C_GetClient : public Context {
-  CephContext *cct;
+  StoneContext *cct;
   librados::IoCtx &ioctx;
   const std::string &oid;
   AsyncOpTracker &async_op_tracker;
@@ -30,7 +30,7 @@ struct C_GetClient : public Context {
 
   bufferlist out_bl;
 
-  C_GetClient(CephContext *cct, librados::IoCtx &ioctx, const std::string &oid,
+  C_GetClient(StoneContext *cct, librados::IoCtx &ioctx, const std::string &oid,
               AsyncOpTracker &async_op_tracker, const std::string &client_id,
               cls::journal::Client *client, Context *on_finish)
     : cct(cct), ioctx(ioctx), oid(oid), async_op_tracker(async_op_tracker),
@@ -56,7 +56,7 @@ struct C_GetClient : public Context {
         C_GetClient, &C_GetClient::handle_get_client>);
 
     int r = ioctx.aio_operate(oid, comp, &op, &out_bl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -76,7 +76,7 @@ struct C_GetClient : public Context {
 };
 
 struct C_AllocateTag : public Context {
-  CephContext *cct;
+  StoneContext *cct;
   librados::IoCtx &ioctx;
   const std::string &oid;
   AsyncOpTracker &async_op_tracker;
@@ -86,7 +86,7 @@ struct C_AllocateTag : public Context {
 
   bufferlist out_bl;
 
-  C_AllocateTag(CephContext *cct, librados::IoCtx &ioctx,
+  C_AllocateTag(StoneContext *cct, librados::IoCtx &ioctx,
                 const std::string &oid, AsyncOpTracker &async_op_tracker,
                 uint64_t tag_class, const bufferlist &data, Tag *tag,
                 Context *on_finish)
@@ -115,7 +115,7 @@ struct C_AllocateTag : public Context {
 
     out_bl.clear();
     int r = ioctx.aio_operate(oid, comp, &op, &out_bl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -144,7 +144,7 @@ struct C_AllocateTag : public Context {
         C_AllocateTag, &C_AllocateTag::handle_tag_create>);
 
     int r = ioctx.aio_operate(oid, comp, &op);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -174,7 +174,7 @@ struct C_AllocateTag : public Context {
 
     out_bl.clear();
     int r = ioctx.aio_operate(oid, comp, &op, &out_bl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -199,7 +199,7 @@ struct C_AllocateTag : public Context {
 };
 
 struct C_GetTag : public Context {
-  CephContext *cct;
+  StoneContext *cct;
   librados::IoCtx &ioctx;
   const std::string &oid;
   AsyncOpTracker &async_op_tracker;
@@ -209,7 +209,7 @@ struct C_GetTag : public Context {
 
   bufferlist out_bl;
 
-  C_GetTag(CephContext *cct, librados::IoCtx &ioctx, const std::string &oid,
+  C_GetTag(StoneContext *cct, librados::IoCtx &ioctx, const std::string &oid,
            AsyncOpTracker &async_op_tracker, uint64_t tag_tid,
            JournalMetadata::Tag *tag, Context *on_finish)
     : cct(cct), ioctx(ioctx), oid(oid), async_op_tracker(async_op_tracker),
@@ -233,7 +233,7 @@ struct C_GetTag : public Context {
         C_GetTag, &C_GetTag::handle_get_tag>);
 
     int r = ioctx.aio_operate(oid, comp, &op, &out_bl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -251,7 +251,7 @@ struct C_GetTag : public Context {
 };
 
 struct C_GetTags : public Context {
-  CephContext *cct;
+  StoneContext *cct;
   librados::IoCtx &ioctx;
   const std::string &oid;
   const std::string &client_id;
@@ -264,7 +264,7 @@ struct C_GetTags : public Context {
   const uint64_t MAX_RETURN = 64;
   bufferlist out_bl;
 
-  C_GetTags(CephContext *cct, librados::IoCtx &ioctx, const std::string &oid,
+  C_GetTags(StoneContext *cct, librados::IoCtx &ioctx, const std::string &oid,
             const std::string &client_id, AsyncOpTracker &async_op_tracker,
             uint64_t start_after_tag_tid,
             const boost::optional<uint64_t> &tag_class,
@@ -294,7 +294,7 @@ struct C_GetTags : public Context {
 
     out_bl.clear();
     int r = ioctx.aio_operate(oid, comp, &op, &out_bl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -339,7 +339,7 @@ struct C_FlushCommitPosition : public Context {
 };
 
 struct C_AssertActiveTag : public Context {
-  CephContext *cct;
+  StoneContext *cct;
   librados::IoCtx &ioctx;
   const std::string &oid;
   AsyncOpTracker &async_op_tracker;
@@ -349,7 +349,7 @@ struct C_AssertActiveTag : public Context {
 
   bufferlist out_bl;
 
-  C_AssertActiveTag(CephContext *cct, librados::IoCtx &ioctx,
+  C_AssertActiveTag(StoneContext *cct, librados::IoCtx &ioctx,
                     const std::string &oid, AsyncOpTracker &async_op_tracker,
                     const std::string &client_id, uint64_t tag_tid,
                     Context *on_finish)
@@ -372,7 +372,7 @@ struct C_AssertActiveTag : public Context {
         C_AssertActiveTag, &C_AssertActiveTag::handle_send>);
 
     int r = ioctx.aio_operate(oid, comp, &op, &out_bl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -401,7 +401,7 @@ struct C_AssertActiveTag : public Context {
 } // anonymous namespace
 
 JournalMetadata::JournalMetadata(ContextWQ *work_queue, SafeTimer *timer,
-                                 ceph::mutex *timer_lock, librados::IoCtx &ioctx,
+                                 stone::mutex *timer_lock, librados::IoCtx &ioctx,
                                  const std::string &oid,
                                  const std::string &client_id,
                                  const Settings &settings)
@@ -411,18 +411,18 @@ JournalMetadata::JournalMetadata(ContextWQ *work_queue, SafeTimer *timer,
       m_watch_ctx(this)
 {
   m_ioctx.dup(ioctx);
-  m_cct = reinterpret_cast<CephContext*>(m_ioctx.cct());
+  m_cct = reinterpret_cast<StoneContext*>(m_ioctx.cct());
 }
 
 JournalMetadata::~JournalMetadata() {
   std::lock_guard locker{m_lock};
-  ceph_assert(!m_initialized);
+  stone_assert(!m_initialized);
 }
 
 void JournalMetadata::init(Context *on_finish) {
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(!m_initialized);
+    stone_assert(!m_initialized);
     m_initialized = true;
   }
 
@@ -446,7 +446,7 @@ void JournalMetadata::init(Context *on_finish) {
   librados::AioCompletion *comp = librados::Rados::aio_create_completion(
     on_finish, utils::rados_ctx_callback);
   int r = m_ioctx.aio_watch(m_oid, comp, &m_watch_handle, &m_watch_ctx);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -474,7 +474,7 @@ void JournalMetadata::shut_down(Context *on_finish) {
       librados::AioCompletion *comp = librados::Rados::aio_create_completion(
         on_finish, utils::rados_ctx_callback);
       r = rados.aio_watch_flush(comp);
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       comp->release();
     });
   on_finish = new LambdaContext([this, on_finish](int r) {
@@ -484,7 +484,7 @@ void JournalMetadata::shut_down(Context *on_finish) {
     librados::AioCompletion *comp = librados::Rados::aio_create_completion(
       on_finish, utils::rados_ctx_callback);
     int r = m_ioctx.aio_unwatch(watch_handle, comp);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   } else {
     on_finish->complete(0);
@@ -519,7 +519,7 @@ void JournalMetadata::register_client(const bufferlist &data,
     librados::Rados::aio_create_completion(ctx, 
                                            utils::rados_ctx_callback);
   int r = m_ioctx.aio_operate(m_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -534,12 +534,12 @@ void JournalMetadata::update_client(const bufferlist &data,
   librados::AioCompletion *comp =
     librados::Rados::aio_create_completion(ctx, utils::rados_ctx_callback);
   int r = m_ioctx.aio_operate(m_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 void JournalMetadata::unregister_client(Context *on_finish) {
-  ceph_assert(!m_client_id.empty());
+  stone_assert(!m_client_id.empty());
 
   ldout(m_cct, 10) << __func__ << ": " << m_client_id << dendl;
   librados::ObjectWriteOperation op;
@@ -550,7 +550,7 @@ void JournalMetadata::unregister_client(Context *on_finish) {
   librados::AioCompletion *comp =
     librados::Rados::aio_create_completion(ctx, utils::rados_ctx_callback);
   int r = m_ioctx.aio_operate(m_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -618,7 +618,7 @@ void JournalMetadata::set_minimum_set(uint64_t object_set) {
   librados::AioCompletion *comp =
     librados::Rados::aio_create_completion(ctx, utils::rados_ctx_callback);
   int r = m_ioctx.aio_operate(m_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 
   m_minimum_set = object_set;
@@ -647,7 +647,7 @@ void JournalMetadata::set_active_set(uint64_t object_set, Context *on_finish) {
   librados::AioCompletion *comp =
     librados::Rados::aio_create_completion(ctx, utils::rados_ctx_callback);
   int r = m_ioctx.aio_operate(m_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 
   m_active_set = object_set;
@@ -711,7 +711,7 @@ bool JournalMetadata::get_last_allocated_entry_tid(uint64_t tag_tid,
     return false;
   }
 
-  ceph_assert(it->second > 0);
+  stone_assert(it->second > 0);
   *entry_tid = it->second - 1;
   return true;
 }
@@ -778,7 +778,7 @@ void JournalMetadata::handle_refresh_complete(C_Refresh *refresh, int r) {
   }
 
   Contexts refresh_ctxs;
-  ceph_assert(m_refreshes_in_progress > 0);
+  stone_assert(m_refreshes_in_progress > 0);
   --m_refreshes_in_progress;
   if (m_refreshes_in_progress == 0) {
     std::swap(refresh_ctxs, m_refresh_ctxs);
@@ -793,10 +793,10 @@ void JournalMetadata::handle_refresh_complete(C_Refresh *refresh, int r) {
 void JournalMetadata::cancel_commit_task() {
   ldout(m_cct, 20) << __func__ << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(*m_timer_lock));
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(m_commit_position_ctx != nullptr);
-  ceph_assert(m_commit_position_task_ctx != nullptr);
+  stone_assert(stone_mutex_is_locked(*m_timer_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(m_commit_position_ctx != nullptr);
+  stone_assert(m_commit_position_task_ctx != nullptr);
   m_timer->cancel_event(m_commit_position_task_ctx);
   m_commit_position_task_ctx = NULL;
 }
@@ -804,9 +804,9 @@ void JournalMetadata::cancel_commit_task() {
 void JournalMetadata::schedule_commit_task() {
   ldout(m_cct, 20) << __func__ << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(*m_timer_lock));
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(m_commit_position_ctx != nullptr);
+  stone_assert(stone_mutex_is_locked(*m_timer_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(m_commit_position_ctx != nullptr);
   if (m_commit_position_task_ctx == nullptr) {
     m_commit_position_task_ctx =
       m_timer->add_event_after(m_settings.commit_interval,
@@ -815,8 +815,8 @@ void JournalMetadata::schedule_commit_task() {
 }
 
 void JournalMetadata::handle_commit_position_task() {
-  ceph_assert(ceph_mutex_is_locked(*m_timer_lock));
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(*m_timer_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   ldout(m_cct, 20) << __func__ << ": "
                    << "client_id=" << m_client_id << ", "
                    << "commit_position=" << m_commit_position << dendl;
@@ -831,7 +831,7 @@ void JournalMetadata::handle_commit_position_task() {
   Context* ctx = new LambdaContext([this, commit_position_ctx](int r) {
       Contexts flush_commit_position_ctxs;
       m_lock.lock();
-      ceph_assert(m_flush_commits_in_progress > 0);
+      stone_assert(m_flush_commits_in_progress > 0);
       --m_flush_commits_in_progress;
       if (m_flush_commits_in_progress == 0) {
         std::swap(flush_commit_position_ctxs, m_flush_commit_position_ctxs);
@@ -863,17 +863,17 @@ void JournalMetadata::handle_commit_position_task() {
 
   auto comp = librados::Rados::aio_create_completion(ctx,                                                     utils::rados_ctx_callback);
   int r = m_ioctx.aio_operate(m_oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 void JournalMetadata::schedule_watch_reset() {
-  ceph_assert(ceph_mutex_is_locked(*m_timer_lock));
+  stone_assert(stone_mutex_is_locked(*m_timer_lock));
   m_timer->add_event_after(1, new C_WatchReset(this));
 }
 
 void JournalMetadata::handle_watch_reset() {
-  ceph_assert(ceph_mutex_is_locked(*m_timer_lock));
+  stone_assert(stone_mutex_is_locked(*m_timer_lock));
   if (!m_initialized) {
     return;
   }
@@ -955,8 +955,8 @@ void JournalMetadata::overflow_commit_tid(uint64_t commit_tid,
   std::lock_guard locker{m_lock};
 
   auto it = m_pending_commit_tids.find(commit_tid);
-  ceph_assert(it != m_pending_commit_tids.end());
-  ceph_assert(it->second.object_num < object_num);
+  stone_assert(it != m_pending_commit_tids.end());
+  stone_assert(it->second.object_num < object_num);
 
   ldout(m_cct, 20) << __func__ << ": "
                    << "commit_tid=" << commit_tid << ", "
@@ -971,7 +971,7 @@ void JournalMetadata::get_commit_entry(uint64_t commit_tid,
   std::lock_guard locker{m_lock};
 
   auto it = m_pending_commit_tids.find(commit_tid);
-  ceph_assert(it != m_pending_commit_tids.end());
+  stone_assert(it != m_pending_commit_tids.end());
 
   *object_num = it->second.object_num;
   *tag_tid = it->second.tag_tid;
@@ -986,7 +986,7 @@ void JournalMetadata::committed(uint64_t commit_tid,
   Context *stale_ctx = nullptr;
   {
     std::scoped_lock locker{*m_timer_lock, m_lock};
-    ceph_assert(commit_tid > m_commit_position_tid);
+    stone_assert(commit_tid > m_commit_position_tid);
 
     if (!m_commit_position.object_positions.empty()) {
       // in-flight commit position update
@@ -997,7 +997,7 @@ void JournalMetadata::committed(uint64_t commit_tid,
     }
 
     CommitTids::iterator it = m_pending_commit_tids.find(commit_tid);
-    ceph_assert(it != m_pending_commit_tids.end());
+    stone_assert(it != m_pending_commit_tids.end());
 
     CommitEntry &commit_entry = it->second;
     commit_entry.committed = true;
@@ -1067,7 +1067,7 @@ void JournalMetadata::async_notify_update(Context *on_safe) {
 
   bufferlist bl;
   int r = m_ioctx.aio_notify(m_oid, comp, bl, 5000, NULL);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   comp->release();
 }
@@ -1120,7 +1120,7 @@ void JournalMetadata::schedule_laggy_clients_disconnect(Context *on_finish) {
             auto comp = librados::Rados::aio_create_completion(
               ctx, utils::rados_ctx_callback);
             int r = m_ioctx.aio_operate(m_oid, comp, &op);
-            ceph_assert(r == 0);
+            stone_assert(r == 0);
             comp->release();
           });
       }

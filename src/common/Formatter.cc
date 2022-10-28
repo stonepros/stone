@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -24,7 +24,7 @@
 #include <limits>
 
 // -----------------------
-namespace ceph {
+namespace stone {
 
 std::string
 fixed_u_to_string(uint64_t num, int scale)
@@ -265,7 +265,7 @@ void JSONFormatter::close_section()
   if (handle_close_section()) {
     return;
   }
-  ceph_assert(!m_stack.empty());
+  stone_assert(!m_stack.empty());
   finish_pending_string();
 
   struct json_formatter_stack_entry_d& entry = m_stack.back();
@@ -443,7 +443,7 @@ void XMLFormatter::open_array_section_in_ns(std::string_view name, const char *n
 
 void XMLFormatter::close_section()
 {
-  ceph_assert(!m_sections.empty());
+  stone_assert(!m_sections.empty());
   finish_pending_string();
 
   std::string section = m_sections.back();

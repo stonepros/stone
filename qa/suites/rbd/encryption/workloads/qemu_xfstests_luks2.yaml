@@ -1,6 +1,6 @@
 overrides:
   install:
-    ceph:
+    stone:
       extra_packages: [rbd-nbd]
 tasks:
 - qemu:

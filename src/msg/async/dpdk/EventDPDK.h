@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -13,20 +13,20 @@
  *
  */
 
-#ifndef CEPH_EVENTDPDK_H
-#define CEPH_EVENTDPDK_H
+#ifndef STONE_EVENTDPDK_H
+#define STONE_EVENTDPDK_H
 
 #include "msg/async/Event.h"
 #include "msg/async/Stack.h"
 #include "UserspaceEvent.h"
 
 class DPDKDriver : public EventDriver {
-  CephContext *cct;
+  StoneeContext *cct;
 
  public:
   UserspaceEventManager manager;
 
-  explicit DPDKDriver(CephContext *c): cct(c), manager(c) {}
+  explicit DPDKDriver(StoneeContext *c): cct(c), manager(c) {}
   virtual ~DPDKDriver() { }
 
   int init(EventCenter *c, int nevent) override;
@@ -37,4 +37,4 @@ class DPDKDriver : public EventDriver {
   bool need_wakeup() override { return false; }
 };
 
-#endif //CEPH_EVENTDPDK_H
+#endif //STONE_EVENTDPDK_H

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IMAGE_ATTACH_CHILD_REQUEST_H
-#define CEPH_LIBRBD_IMAGE_ATTACH_CHILD_REQUEST_H
+#ifndef STONE_LIBRBD_IMAGE_ATTACH_CHILD_REQUEST_H
+#define STONE_LIBRBD_IMAGE_ATTACH_CHILD_REQUEST_H
 
 #include "include/common_fwd.h"
 #include "include/int_types.h"
@@ -74,7 +74,7 @@ private:
   uint32_t m_clone_format;
   Context* m_on_finish;
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
 
   void v1_add_child();
   void handle_v1_add_child(int r);
@@ -102,4 +102,4 @@ private:
 
 extern template class librbd::image::AttachChildRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_IMAGE_ATTACH_CHILD_REQUEST_H
+#endif // STONE_LIBRBD_IMAGE_ATTACH_CHILD_REQUEST_H

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MOSDBACKOFF_H
-#define CEPH_MOSDBACKOFF_H
+#ifndef STONE_MOSDBACKOFF_H
+#define STONE_MOSDBACKOFF_H
 
 #include "MOSDFastDispatchOp.h"
 #include "osd/osd_types.h"
@@ -26,7 +26,7 @@ public:
 
   spg_t pgid;
   epoch_t map_epoch = 0;
-  uint8_t op = 0;           ///< CEPH_OSD_BACKOFF_OP_*
+  uint8_t op = 0;           ///< STONE_OSD_BACKOFF_OP_*
   uint64_t id = 0;          ///< unique id within this session
   hobject_t begin, end;     ///< [) range to block, unless ==, block single obj
 
@@ -38,10 +38,10 @@ public:
   }
 
   MOSDBackoff()
-    : MOSDFastDispatchOp{CEPH_MSG_OSD_BACKOFF, HEAD_VERSION, COMPAT_VERSION} {}
+    : MOSDFastDispatchOp{STONE_MSG_OSD_BACKOFF, HEAD_VERSION, COMPAT_VERSION} {}
   MOSDBackoff(spg_t pgid_, epoch_t ep, uint8_t op_, uint64_t id_,
 	      hobject_t begin_, hobject_t end_)
-    : MOSDFastDispatchOp{CEPH_MSG_OSD_BACKOFF, HEAD_VERSION, COMPAT_VERSION},
+    : MOSDFastDispatchOp{STONE_MSG_OSD_BACKOFF, HEAD_VERSION, COMPAT_VERSION},
       pgid(pgid_),
       map_epoch(ep),
       op(op_),

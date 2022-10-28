@@ -6,7 +6,7 @@ openstack:
     size: 10 # GB
 tasks:
 - install:
-- ceph:
+- stone:
     fs: xfs
     conf:
       global:

@@ -1,7 +1,7 @@
 #include "zoned_types.h"
 
-using ceph::decode;
-using ceph::encode;
+using stone::decode;
+using stone::encode;
 
 std::ostream& operator<<(std::ostream& out,
                          const zone_state_t& zone_state) {
@@ -11,12 +11,12 @@ std::ostream& operator<<(std::ostream& out,
 	     << " " << std::dec;
 }
 
-void zone_state_t::encode(ceph::buffer::list &bl) const {
+void zone_state_t::encode(stone::buffer::list &bl) const {
   uint64_t v = static_cast<uint64_t>(num_dead_bytes) << 32 | write_pointer;
   ::encode(v, bl);
 }
 
-void zone_state_t::decode(ceph::buffer::list::const_iterator &p) {
+void zone_state_t::decode(stone::buffer::list::const_iterator &p) {
   uint64_t v;
   ::decode(v, p);
   num_dead_bytes = v >> 32;

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -31,7 +31,7 @@
 #include "gtest/gtest.h"
 #include "common/Thread.h"
 #include "common/Throttle.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 
 class ThrottleTest : public ::testing::Test {
 protected:
@@ -56,21 +56,21 @@ protected:
 
 TEST_F(ThrottleTest, Throttle) {
   int64_t throttle_max = 10;
-  Throttle throttle(g_ceph_context, "throttle", throttle_max);
+  Throttle throttle(g_stone_context, "throttle", throttle_max);
   ASSERT_EQ(throttle.get_max(), throttle_max);
   ASSERT_EQ(throttle.get_current(), 0);
 }
 
 TEST_F(ThrottleTest, take) {
   int64_t throttle_max = 10;
-  Throttle throttle(g_ceph_context, "throttle", throttle_max);
+  Throttle throttle(g_stone_context, "throttle", throttle_max);
   ASSERT_EQ(throttle.take(throttle_max), throttle_max);
   ASSERT_EQ(throttle.take(throttle_max), throttle_max * 2);
 }
 
 TEST_F(ThrottleTest, get) {
   int64_t throttle_max = 10;
-  Throttle throttle(g_ceph_context, "throttle");
+  Throttle throttle(g_stone_context, "throttle");
 
   // test increasing max from 0 to throttle_max
   {
@@ -139,7 +139,7 @@ TEST_F(ThrottleTest, get) {
 
 TEST_F(ThrottleTest, get_or_fail) {
   {
-    Throttle throttle(g_ceph_context, "throttle");
+    Throttle throttle(g_stone_context, "throttle");
 
     ASSERT_TRUE(throttle.get_or_fail(5));
     ASSERT_TRUE(throttle.get_or_fail(5));
@@ -147,7 +147,7 @@ TEST_F(ThrottleTest, get_or_fail) {
 
   {
     int64_t throttle_max = 10;
-    Throttle throttle(g_ceph_context, "throttle", throttle_max);
+    Throttle throttle(g_stone_context, "throttle", throttle_max);
 
     ASSERT_TRUE(throttle.get_or_fail(throttle_max));
     ASSERT_EQ(throttle.put(throttle_max), 0);
@@ -165,7 +165,7 @@ TEST_F(ThrottleTest, get_or_fail) {
 
 TEST_F(ThrottleTest, wait) {
   int64_t throttle_max = 10;
-  Throttle throttle(g_ceph_context, "throttle");
+  Throttle throttle(g_stone_context, "throttle");
 
   // test increasing max from 0 to throttle_max
   {
@@ -234,7 +234,7 @@ std::pair<double, std::chrono::duration<double> > test_backoff(
   uint64_t total_observed_total = 0;
   uint64_t total_observations = 0;
 
-  BackoffThrottle throttle(g_ceph_context, "backoff_throttle_test", 5);
+  BackoffThrottle throttle(g_stone_context, "backoff_throttle_test", 5);
   bool valid = throttle.set_params(
     low_threshhold,
     high_threshhold,
@@ -243,7 +243,7 @@ std::pair<double, std::chrono::duration<double> > test_backoff(
     max_multiple,
     max,
     0);
-  ceph_assert(valid);
+  stone_assert(valid);
 
   auto getter = [&]() {
     std::random_device rd;
@@ -279,7 +279,7 @@ std::pair<double, std::chrono::duration<double> > test_backoff(
       total_observed_total += total;
       total_observations++;
       in_queue.pop_front();
-      ceph_assert(total <= max);
+      stone_assert(total <= max);
 
       g.unlock();
       std::this_thread::sleep_for(

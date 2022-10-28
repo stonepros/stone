@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc
  *
@@ -43,7 +43,7 @@ static int compare_values_u64(Op op, uint64_t lhs, const bufferlist& value)
     try {
       // decode existing value as rhs
       auto p = value.cbegin();
-      using ceph::decode;
+      using stone::decode;
       decode(rhs, p);
     } catch (const buffer::error&) {
       // failures to decode existing values are reported as EIO
@@ -64,7 +64,7 @@ static int compare_value(Mode mode, Op op, const bufferlist& input,
       // decode input value as lhs
       uint64_t lhs;
       auto p = input.cbegin();
-      using ceph::decode;
+      using stone::decode;
       decode(lhs, p);
       return compare_values_u64(op, lhs, value);
     } catch (const buffer::error&) {

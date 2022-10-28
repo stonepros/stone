@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_FORMATTER_H
-#define CEPH_FORMATTER_H
+#ifndef STONE_FORMATTER_H
+#define STONE_FORMATTER_H
 
 #include "include/int_types.h"
 #include "include/buffer_fwd.h"

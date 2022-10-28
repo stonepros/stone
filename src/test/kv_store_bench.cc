@@ -10,7 +10,7 @@
 #include "key_value_store/kv_flat_btree_async.h"
 #include "include/rados/librados.hpp"
 #include "test/omap_bench.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 
 
 #include <string>
@@ -304,9 +304,9 @@ int KvStoreBench::test_random_insertions() {
 
 void KvStoreBench::aio_callback_timed(int * err, void *arg) {
   timed_args *args = reinterpret_cast<timed_args *>(arg);
-  ceph::mutex * ops_in_flight_lock = &args->kvsb->ops_in_flight_lock;
-  ceph::mutex * data_lock = &args->kvsb->data_lock;
-  ceph::condition_variable * op_avail = &args->kvsb->op_avail;
+  stone::mutex * ops_in_flight_lock = &args->kvsb->ops_in_flight_lock;
+  stone::mutex * data_lock = &args->kvsb->data_lock;
+  stone::condition_variable * op_avail = &args->kvsb->op_avail;
   int *ops_in_flight = &args->kvsb->ops_in_flight;
   if (*err < 0 && *err != -61) {
     cerr << "Error during " << args->op << " operation: " << *err << std::endl;
@@ -326,7 +326,7 @@ void KvStoreBench::aio_callback_timed(int * err, void *arg) {
   //throughput
   args->kvsb->data.throughput_jf.open_object_section("throughput");
   args->kvsb->data.throughput_jf.dump_unsigned(string(1, args->op).c_str(),
-      ceph_clock_now());
+      stone_clock_now());
   args->kvsb->data.throughput_jf.close_section();
 
   data_lock->unlock();
@@ -357,10 +357,10 @@ int KvStoreBench::test_teuthology_aio(next_gen_t distr,
 
   std::unique_lock l{ops_in_flight_lock};
   for (int i = 0; i < ops; i++) {
-    ceph_assert(ops_in_flight <= max_ops_in_flight);
+    stone_assert(ops_in_flight <= max_ops_in_flight);
     if (ops_in_flight == max_ops_in_flight) {
       op_avail.wait(l);
-      ceph_assert(ops_in_flight < max_ops_in_flight);
+      stone_assert(ops_in_flight < max_ops_in_flight);
     }
     cout << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" << i + 1 << " / "
 	<< ops << std::endl;

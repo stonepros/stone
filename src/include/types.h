@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_TYPES_H
-#define CEPH_TYPES_H
+#ifndef STONE_TYPES_H
+#define STONE_TYPES_H
 
 // this is needed for ceph_fs to compile in userland
 #include "int_types.h"
@@ -479,7 +479,7 @@ inline std::ostream& operator<<(std::ostream& out, const byte_u_t& b)
 inline std::ostream& operator<<(std::ostream& out, const ceph_mon_subscribe_item& i)
 {
   return out << i.start
-	     << ((i.flags & CEPH_SUBSCRIBE_ONETIME) ? "" : "+");
+	     << ((i.flags & STONE_SUBSCRIBE_ONETIME) ? "" : "+");
 }
 
 struct weightf_t {

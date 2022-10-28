@@ -3,16 +3,16 @@
 
 #include "CacheController.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_immutable_obj_cache
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_immutable_obj_cache
 #undef dout_prefix
-#define dout_prefix *_dout << "ceph::cache::CacheController: " << this << " " \
+#define dout_prefix *_dout << "stone::cache::CacheController: " << this << " " \
                            << __func__ << ": "
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
-CacheController::CacheController(CephContext *cct,
+CacheController::CacheController(StoneContext *cct,
                                  const std::vector<const char*> &args):
   m_args(args), m_cct(cct) {
   ldout(m_cct, 20) << dendl;
@@ -131,9 +131,9 @@ void CacheController::handle_request(CacheSession* session,
     }
     default:
       ldout(m_cct, 5) << "can't recongize request" << dendl;
-      ceph_assert(0);
+      stone_assert(0);
   }
 }
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone

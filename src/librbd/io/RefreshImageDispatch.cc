@@ -7,7 +7,7 @@
 #include "librbd/ImageState.h"
 #include <map>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::RefreshImageDispatch: " << this \
                            << " " << __func__ << ": "

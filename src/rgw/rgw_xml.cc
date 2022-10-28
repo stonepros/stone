@@ -222,7 +222,7 @@ bool RGWXMLParser::init()
 
 bool RGWXMLParser::parse(const char *_buf, int len, int done)
 {
-  ceph_assert(init_called);
+  stone_assert(init_called);
   int pos = buf_len;
   char *tmp_buf;
   tmp_buf = (char *)realloc(buf, buf_len + len);

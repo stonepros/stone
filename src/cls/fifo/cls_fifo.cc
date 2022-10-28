@@ -34,23 +34,23 @@ static constexpr auto CLS_FIFO_MAX_PART_HEADER_SIZE = 512;
 static std::uint32_t part_entry_overhead;
 
 struct entry_header_pre {
-  ceph_le64 magic;
-  ceph_le64 pre_size;
-  ceph_le64 header_size;
-  ceph_le64 data_size;
-  ceph_le64 index;
-  ceph_le32 reserved;
+  stone_le64 magic;
+  stone_le64 pre_size;
+  stone_le64 header_size;
+  stone_le64 data_size;
+  stone_le64 index;
+  stone_le32 reserved;
 } __attribute__ ((packed));
 
 struct entry_header {
-  ceph::real_time mtime;
+  stone::real_time mtime;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(mtime, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(mtime, bl);
     DECODE_FINISH(bl);
@@ -89,7 +89,7 @@ int write_header(cls_method_context_t hctx,
   if (inc_ver) {
     ++header.version.ver;
   }
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   encode(header, bl);
   return cls_cxx_write_full(hctx, &bl);
 }
@@ -97,9 +97,9 @@ int write_header(cls_method_context_t hctx,
 int read_part_header(cls_method_context_t hctx,
 		     part_header* part_header)
 {
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   int r = cls_cxx_read2(hctx, 0, CLS_FIFO_MAX_PART_HEADER_SIZE, &bl,
-			CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+			STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
   if (r < 0) {
     CLS_ERR("ERROR: %s: cls_cxx_read2() on obj returned %d", __PRETTY_FUNCTION__, r);
     return r;
@@ -108,12 +108,12 @@ int read_part_header(cls_method_context_t hctx,
   auto iter = bl.cbegin();
   try {
     decode(*part_header, iter);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     CLS_ERR("ERROR: %s: failed decoding part header", __PRETTY_FUNCTION__);
     return -EIO;
   }
 
-  using ceph::operator <<;
+  using stone::operator <<;
   std::ostringstream ss;
   ss << part_header->max_time;
   CLS_LOG(5, "%s:%d read part_header:\n"
@@ -141,7 +141,7 @@ int read_part_header(cls_method_context_t hctx,
 int write_part_header(cls_method_context_t hctx,
 		      part_header& part_header)
 {
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   encode(part_header, bl);
 
   if (bl.length() > CLS_FIFO_MAX_PART_HEADER_SIZE) {
@@ -150,7 +150,7 @@ int write_part_header(cls_method_context_t hctx,
   }
 
   int r = cls_cxx_write2(hctx, 0, bl.length(),
-			 &bl, CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+			 &bl, STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
   if (r < 0) {
     CLS_ERR("%s: failed to write part header: r=%d",
             __PRETTY_FUNCTION__, r);
@@ -172,8 +172,8 @@ int read_header(cls_method_context_t hctx,
     return r;
   }
 
-  ceph::buffer::list bl;
-  r = cls_cxx_read2(hctx, 0, size, &bl, CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+  stone::buffer::list bl;
+  r = cls_cxx_read2(hctx, 0, size, &bl, STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
   if (r < 0) {
     CLS_ERR("ERROR: %s: cls_cxx_read2() on obj returned %d", __PRETTY_FUNCTION__, r);
     return r;
@@ -191,7 +191,7 @@ int read_header(cls_method_context_t hctx,
   try {
     auto iter = bl.cbegin();
     decode(*info, iter);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     CLS_ERR("ERROR: %s: failed decoding header", __PRETTY_FUNCTION__);
     return -EIO;
   }
@@ -208,7 +208,7 @@ int read_header(cls_method_context_t hctx,
 }
 
 int create_meta(cls_method_context_t hctx,
-		ceph::buffer::list* in, ceph::buffer::list* out)
+		stone::buffer::list* in, stone::buffer::list* out)
 {
   CLS_LOG(5, "%s", __PRETTY_FUNCTION__);
 
@@ -216,7 +216,7 @@ int create_meta(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     CLS_ERR("ERROR: %s: failed to decode request: %s", __PRETTY_FUNCTION__,
 	    err.what());
     return -EINVAL;
@@ -251,8 +251,8 @@ int create_meta(cls_method_context_t hctx,
   if (r == 0) {
     CLS_LOG(5, "%s: FIFO already exists, reading from disk and comparing.",
 	    __PRETTY_FUNCTION__);
-    ceph::buffer::list bl;
-    r = cls_cxx_read2(hctx, 0, size, &bl, CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+    stone::buffer::list bl;
+    r = cls_cxx_read2(hctx, 0, size, &bl, STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
     if (r < 0) {
       CLS_ERR("ERROR: %s: cls_cxx_read2() on obj returned %d",
 	      __PRETTY_FUNCTION__, r);
@@ -263,7 +263,7 @@ int create_meta(cls_method_context_t hctx,
     try {
       auto iter = bl.cbegin();
       decode(header, iter);
-    } catch (const ceph::buffer::error& err) {
+    } catch (const stone::buffer::error& err) {
       CLS_ERR("ERROR: %s: failed decoding header: %s",
 	      __PRETTY_FUNCTION__, err.what());
       return -EIO;
@@ -309,8 +309,8 @@ int create_meta(cls_method_context_t hctx,
   return 0;
 }
 
-int update_meta(cls_method_context_t hctx, ceph::buffer::list* in,
-		ceph::buffer::list* out)
+int update_meta(cls_method_context_t hctx, stone::buffer::list* in,
+		stone::buffer::list* out)
 {
   CLS_LOG(5, "%s", __PRETTY_FUNCTION__);
 
@@ -318,7 +318,7 @@ int update_meta(cls_method_context_t hctx, ceph::buffer::list* in,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     CLS_ERR("ERROR: %s: failed to decode request", __PRETTY_FUNCTION__);
     return -EINVAL;
   }
@@ -362,8 +362,8 @@ int update_meta(cls_method_context_t hctx, ceph::buffer::list* in,
   return 0;
 }
 
-int get_meta(cls_method_context_t hctx, ceph::buffer::list* in,
-	     ceph::buffer::list* out)
+int get_meta(cls_method_context_t hctx, stone::buffer::list* in,
+	     stone::buffer::list* out)
 {
   CLS_LOG(5, "%s", __PRETTY_FUNCTION__);
 
@@ -371,7 +371,7 @@ int get_meta(cls_method_context_t hctx, ceph::buffer::list* in,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("ERROR: %s: failed to decode request", __PRETTY_FUNCTION__);
     return -EINVAL;
   }
@@ -390,8 +390,8 @@ int get_meta(cls_method_context_t hctx, ceph::buffer::list* in,
   return 0;
 }
 
-int init_part(cls_method_context_t hctx, ceph::buffer::list* in,
-	      ceph::buffer::list *out)
+int init_part(cls_method_context_t hctx, stone::buffer::list* in,
+	      stone::buffer::list *out)
 {
   CLS_LOG(5, "%s", __PRETTY_FUNCTION__);
 
@@ -399,7 +399,7 @@ int init_part(cls_method_context_t hctx, ceph::buffer::list* in,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("ERROR: %s: failed to decode request", __PRETTY_FUNCTION__);
     return -EINVAL;
   }
@@ -442,7 +442,7 @@ int init_part(cls_method_context_t hctx, ceph::buffer::list* in,
   part_header.min_ofs = CLS_FIFO_MAX_PART_HEADER_SIZE;
   part_header.last_ofs = 0;
   part_header.next_ofs = part_header.min_ofs;
-  part_header.max_time = ceph::real_clock::now();
+  part_header.max_time = stone::real_clock::now();
 
   cls_gen_random_bytes(reinterpret_cast<char *>(&part_header.magic),
 		       sizeof(part_header.magic));
@@ -461,8 +461,8 @@ bool full_part(const part_header& part_header)
   return (part_header.next_ofs > part_header.params.full_size_threshold);
 }
 
-int push_part(cls_method_context_t hctx, ceph::buffer::list* in,
-	      ceph::buffer::list* out)
+int push_part(cls_method_context_t hctx, stone::buffer::list* in,
+	      stone::buffer::list* out)
 {
   CLS_LOG(5, "%s", __PRETTY_FUNCTION__);
 
@@ -470,7 +470,7 @@ int push_part(cls_method_context_t hctx, ceph::buffer::list* in,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error& err) {
+  } catch (const stone::buffer::error& err) {
     CLS_ERR("ERROR: %s: failed to decode request", __PRETTY_FUNCTION__);
     return -EINVAL;
   }
@@ -503,9 +503,9 @@ int push_part(cls_method_context_t hctx, ceph::buffer::list* in,
     return -ERANGE;
   }
 
-  auto now = ceph::real_clock::now();
+  auto now = stone::real_clock::now();
   struct entry_header entry_header = { now };
-  ceph::buffer::list entry_header_bl;
+  stone::buffer::list entry_header_bl;
   encode(entry_header, entry_header_bl);
 
   auto max_index = part_header.max_index;
@@ -530,7 +530,7 @@ int push_part(cls_method_context_t hctx, ceph::buffer::list* in,
 
 
   int entries_pushed = 0;
-  ceph::buffer::list all_data;
+  stone::buffer::list all_data;
   for (auto& data : op.data_bufs) {
     if (full_part(part_header))
       break;
@@ -557,7 +557,7 @@ int push_part(cls_method_context_t hctx, ceph::buffer::list* in,
   auto write_len = all_data.length();
 
   r = cls_cxx_write2(hctx, write_ofs, write_len,
-		     &all_data, CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+		     &all_data, STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
 
   if (r < 0) {
     CLS_ERR("%s: failed to write entries (ofs=%" PRIu64
@@ -589,10 +589,10 @@ class EntryReader {
   const fifo::part_header& part_header;
 
   std::uint64_t ofs;
-  ceph::buffer::list data;
+  stone::buffer::list data;
 
   int fetch(std::uint64_t num_bytes);
-  int read(std::uint64_t num_bytes, ceph::buffer::list* pbl);
+  int read(std::uint64_t num_bytes, stone::buffer::list* pbl);
   int peek(std::uint64_t num_bytes, char *dest);
   int seek(std::uint64_t num_bytes);
 
@@ -614,9 +614,9 @@ public:
   }
 
   int peek_pre_header(entry_header_pre* pre_header);
-  int get_next_entry(ceph::buffer::list* pbl,
+  int get_next_entry(stone::buffer::list* pbl,
                      std::uint64_t* pofs,
-                     ceph::real_time* pmtime);
+                     stone::real_time* pmtime);
 };
 
 
@@ -624,10 +624,10 @@ int EntryReader::fetch(std::uint64_t num_bytes)
 {
   CLS_LOG(5, "%s: fetch %d bytes, ofs=%d data.length()=%d", __PRETTY_FUNCTION__, (int)num_bytes, (int)ofs, (int)data.length());
   if (data.length() < num_bytes) {
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     CLS_LOG(5, "%s: reading % " PRId64 " bytes at ofs=%" PRId64, __PRETTY_FUNCTION__,
 	    prefetch_len, ofs + data.length());
-    int r = cls_cxx_read2(hctx, ofs + data.length(), prefetch_len, &bl, CEPH_OSD_OP_FLAG_FADVISE_WILLNEED);
+    int r = cls_cxx_read2(hctx, ofs + data.length(), prefetch_len, &bl, STONE_OSD_OP_FLAG_FADVISE_WILLNEED);
     if (r < 0) {
       CLS_ERR("ERROR: %s: cls_cxx_read2() on obj returned %d", __PRETTY_FUNCTION__, r);
       return r;
@@ -644,7 +644,7 @@ int EntryReader::fetch(std::uint64_t num_bytes)
   return 0;
 }
 
-int EntryReader::read(std::uint64_t num_bytes, ceph::buffer::list* pbl)
+int EntryReader::read(std::uint64_t num_bytes, stone::buffer::list* pbl)
 {
   int r = fetch(num_bytes);
   if (r < 0) {
@@ -671,7 +671,7 @@ int EntryReader::peek(std::uint64_t num_bytes, char* dest)
 
 int EntryReader::seek(std::uint64_t num_bytes)
 {
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
 
   CLS_LOG(5, "%s:%d: num_bytes=%" PRIu64, __PRETTY_FUNCTION__, __LINE__, num_bytes);
   return read(num_bytes, &bl);
@@ -700,9 +700,9 @@ int EntryReader::peek_pre_header(entry_header_pre* pre_header)
 }
 
 
-int EntryReader::get_next_entry(ceph::buffer::list* pbl,
+int EntryReader::get_next_entry(stone::buffer::list* pbl,
                                 std::uint64_t* pofs,
-                                ceph::real_time* pmtime)
+                                stone::real_time* pmtime)
 {
   entry_header_pre pre_header;
   int r = peek_pre_header(&pre_header);
@@ -723,7 +723,7 @@ int EntryReader::get_next_entry(ceph::buffer::list* pbl,
     return r;
   }
 
-  ceph::buffer::list header;
+  stone::buffer::list header;
   CLS_LOG(5, "%s:%d: pre_header.header_size=%d", __PRETTY_FUNCTION__, __LINE__, (int)pre_header.header_size);
   r = read(pre_header.header_size, &header);
   if (r < 0) {
@@ -735,7 +735,7 @@ int EntryReader::get_next_entry(ceph::buffer::list* pbl,
   auto iter = header.cbegin();
   try {
     decode(entry_header, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_ERR("%s: failed decoding entry header", __PRETTY_FUNCTION__);
     return -EIO;
   }
@@ -762,7 +762,7 @@ int EntryReader::get_next_entry(ceph::buffer::list* pbl,
 }
 
 int trim_part(cls_method_context_t hctx,
-	      ceph::buffer::list *in, ceph::buffer::list *out)
+	      stone::buffer::list *in, stone::buffer::list *out)
 {
   CLS_LOG(5, "%s", __PRETTY_FUNCTION__);
 
@@ -770,7 +770,7 @@ int trim_part(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("ERROR: %s: failed to decode request", __PRETTY_FUNCTION__);
     return -EINVAL;
   }
@@ -845,8 +845,8 @@ int trim_part(cls_method_context_t hctx,
   return 0;
 }
 
-int list_part(cls_method_context_t hctx, ceph::buffer::list* in,
-	      ceph::buffer::list* out)
+int list_part(cls_method_context_t hctx, stone::buffer::list* in,
+	      stone::buffer::list* out)
 {
   CLS_LOG(5, "%s", __PRETTY_FUNCTION__);
 
@@ -890,8 +890,8 @@ int list_part(cls_method_context_t hctx, ceph::buffer::list* in,
   auto max_entries = std::min(op.max_entries, op::MAX_LIST_ENTRIES);
 
   for (int i = 0; i < max_entries && !reader.end(); ++i) {
-    ceph::buffer::list data;
-    ceph::real_time mtime;
+    stone::buffer::list data;
+    stone::real_time mtime;
     std::uint64_t ofs;
 
     r = reader.get_next_entry(&data, &ofs, &mtime);
@@ -912,8 +912,8 @@ int list_part(cls_method_context_t hctx, ceph::buffer::list* in,
   return 0;
 }
 
-int get_part_info(cls_method_context_t hctx, ceph::buffer::list *in,
-		  ceph::buffer::list *out)
+int get_part_info(cls_method_context_t hctx, stone::buffer::list *in,
+		  stone::buffer::list *out)
 {
   CLS_LOG(5, "%s", __PRETTY_FUNCTION__);
 
@@ -921,7 +921,7 @@ int get_part_info(cls_method_context_t hctx, ceph::buffer::list *in,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("ERROR: %s: failed to decode request", __PRETTY_FUNCTION__);
     return -EINVAL;
   }
@@ -991,7 +991,7 @@ CLS_INIT(fifo)
 
   /* calculate entry overhead */
   struct entry_header entry_header;
-  ceph::buffer::list entry_header_bl;
+  stone::buffer::list entry_header_bl;
   encode(entry_header, entry_header_bl);
 
   part_entry_overhead = sizeof(entry_header_pre) + entry_header_bl.length();

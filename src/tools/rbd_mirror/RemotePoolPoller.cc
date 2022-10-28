@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "RemotePoolPoller.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/debug.h"
 #include "common/errno.h"
 #include "common/Timer.h"
@@ -13,8 +13,8 @@
 #include "tools/rbd_mirror/Threads.h"
 #include "tools/rbd_mirror/Types.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::RemotePoolPoller: " << this << " " \
                            << __func__ << ": "
@@ -28,15 +28,15 @@ using librbd::util::create_rados_callback;
 
 template <typename I>
 RemotePoolPoller<I>::~RemotePoolPoller() {
-  ceph_assert(m_timer_task == nullptr);
+  stone_assert(m_timer_task == nullptr);
 }
 
 template <typename I>
 void RemotePoolPoller<I>::init(Context* on_finish) {
   dout(10) << dendl;
 
-  ceph_assert(m_state == STATE_INITIALIZING);
-  ceph_assert(m_on_finish == nullptr);
+  stone_assert(m_state == STATE_INITIALIZING);
+  stone_assert(m_on_finish == nullptr);
   m_on_finish = on_finish;
 
   get_mirror_uuid();
@@ -47,12 +47,12 @@ void RemotePoolPoller<I>::shut_down(Context* on_finish) {
   dout(10) << dendl;
 
   std::unique_lock locker(m_threads->timer_lock);
-  ceph_assert(m_state == STATE_POLLING);
+  stone_assert(m_state == STATE_POLLING);
   m_state = STATE_SHUTTING_DOWN;
 
   if (m_timer_task == nullptr) {
     // currently executing a poll
-    ceph_assert(m_on_finish == nullptr);
+    stone_assert(m_on_finish == nullptr);
     m_on_finish = on_finish;
     return;
   }
@@ -73,7 +73,7 @@ void RemotePoolPoller<I>::get_mirror_uuid() {
     RemotePoolPoller<I>, &RemotePoolPoller<I>::handle_get_mirror_uuid>(this);
   m_out_bl.clear();
   int r = m_remote_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -129,7 +129,7 @@ void RemotePoolPoller<I>::mirror_peer_ping() {
   auto aio_comp = create_rados_callback<
     RemotePoolPoller<I>, &RemotePoolPoller<I>::handle_mirror_peer_ping>(this);
   int r = m_remote_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -163,7 +163,7 @@ void RemotePoolPoller<I>::mirror_peer_list() {
     RemotePoolPoller<I>, &RemotePoolPoller<I>::handle_mirror_peer_list>(this);
   m_out_bl.clear();
   int r = m_remote_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -231,7 +231,7 @@ void RemotePoolPoller<I>::schedule_task(int r) {
   if (m_state == STATE_POLLING) {
     dout(10) << dendl;
 
-    ceph_assert(m_timer_task == nullptr);
+    stone_assert(m_timer_task == nullptr);
     m_timer_task = new LambdaContext([this](int) {
       handle_task();
     });
@@ -252,7 +252,7 @@ template <typename I>
 void RemotePoolPoller<I>::handle_task() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked_by_me(m_threads->timer_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_threads->timer_lock));
   m_timer_task = nullptr;
 
   auto ctx = new LambdaContext([this](int) {

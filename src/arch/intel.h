@@ -1,5 +1,5 @@
-#ifndef CEPH_ARCH_INTEL_H
-#define CEPH_ARCH_INTEL_H
+#ifndef STONE_ARCH_INTEL_H
+#define STONE_ARCH_INTEL_H
 
 #ifdef __cplusplus
 extern "C" {

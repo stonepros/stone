@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 Dreamhost
  *
@@ -400,8 +400,8 @@ TEST(StrictSICast, Error) {
 }
 
 
-using ceph::parse;
-using ceph::consume;
+using stone::parse;
+using stone::consume;
 using namespace std::literals;
 
 template<typename T>

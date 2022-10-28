@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -62,15 +62,15 @@ int set_kernel_secret(const char *secret, const char *key_name)
     return -EINVAL;
   }
 
-  ret = ceph_unarmor(payload, payload+sizeof(payload), secret, secret+secret_len);
+  ret = stone_unarmor(payload, payload+sizeof(payload), secret, secret+secret_len);
   if (ret < 0) {
     char error_buf[80];
     fprintf(stderr, "secret is not valid base64: %s.\n",
-	    ceph_strerror_r(-ret, error_buf, sizeof(error_buf)));
+	    stone_strerror_r(-ret, error_buf, sizeof(error_buf)));
     return ret;
   }
 
-  serial = add_key("ceph", key_name, payload, ret, KEY_SPEC_PROCESS_KEYRING);
+  serial = add_key("stone", key_name, payload, ret, KEY_SPEC_PROCESS_KEYRING);
   if (serial == -1) {
     ret = -errno;
   }
@@ -81,6 +81,6 @@ int set_kernel_secret(const char *secret, const char *key_name)
 int is_kernel_secret(const char *key_name)
 {
   key_serial_t serial;
-  serial = request_key("ceph", key_name, NULL, KEY_SPEC_USER_KEYRING);
+  serial = request_key("stone", key_name, NULL, KEY_SPEC_USER_KEYRING);
   return serial != -1;
 }

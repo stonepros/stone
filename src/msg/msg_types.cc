@@ -10,20 +10,20 @@
 
 #include "common/Formatter.h"
 
-void entity_name_t::dump(ceph::Formatter *f) const
+void entity_name_t::dump(stone::Formatter *f) const
 {
   f->dump_string("type", type_str());
   f->dump_unsigned("num", num());
 }
 
-void entity_addr_t::dump(ceph::Formatter *f) const
+void entity_addr_t::dump(stone::Formatter *f) const
 {
   f->dump_string("type", get_type_name(type));
   f->dump_stream("addr") << get_sockaddr();
   f->dump_unsigned("nonce", nonce);
 }
 
-void entity_inst_t::dump(ceph::Formatter *f) const
+void entity_inst_t::dump(stone::Formatter *f) const
 {
   f->dump_object("name", name);
   f->dump_object("addr", addr);
@@ -284,10 +284,10 @@ bool entity_addrvec_t::parse(const char *s, const char **end)
   return !v.empty();
 }
 
-void entity_addrvec_t::encode(ceph::buffer::list& bl, uint64_t features) const
+void entity_addrvec_t::encode(stone::buffer::list& bl, uint64_t features) const
 {
-  using ceph::encode;
-  if ((features & CEPH_FEATURE_MSG_ADDR2) == 0) {
+  using stone::encode;
+  if ((features & STONE_FEATURE_MSG_ADDR2) == 0) {
     // encode a single legacy entity_addr_t for unfeatured peers
     encode(legacy_addr(), bl, 0);
     return;
@@ -296,9 +296,9 @@ void entity_addrvec_t::encode(ceph::buffer::list& bl, uint64_t features) const
   encode(v, bl, features);
 }
 
-void entity_addrvec_t::decode(ceph::buffer::list::const_iterator& bl)
+void entity_addrvec_t::decode(stone::buffer::list::const_iterator& bl)
 {
-  using ceph::decode;
+  using stone::decode;
   __u8 marker;
   decode(marker, bl);
   if (marker == 0) {
@@ -323,13 +323,13 @@ void entity_addrvec_t::decode(ceph::buffer::list::const_iterator& bl)
 #endif
       uint16_t ss_family;
       if (elen < sizeof(ss_family)) {
-        throw ceph::buffer::malformed_input("elen smaller than family len");
+        throw stone::buffer::malformed_input("elen smaller than family len");
       }
       decode(ss_family, bl);
       sa->sa_family = ss_family;
       elen -= sizeof(ss_family);
       if (elen > addr.get_sockaddr_len() - sizeof(sa->sa_family)) {
-        throw ceph::buffer::malformed_input("elen exceeds sockaddr len");
+        throw stone::buffer::malformed_input("elen exceeds sockaddr len");
       }
       bl.copy(elen, sa->sa_data);
     }
@@ -339,11 +339,11 @@ void entity_addrvec_t::decode(ceph::buffer::list::const_iterator& bl)
     return;
   }
   if (marker > 2)
-    throw ceph::buffer::malformed_input("entity_addrvec_marker > 2");
+    throw stone::buffer::malformed_input("entity_addrvec_marker > 2");
   decode(v, bl);
 }
 
-void entity_addrvec_t::dump(ceph::Formatter *f) const
+void entity_addrvec_t::dump(stone::Formatter *f) const
 {
   f->open_array_section("addrvec");
   for (auto p = v.begin(); p != v.end(); ++p) {

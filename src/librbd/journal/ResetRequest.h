@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_JOURNAL_RESET_REQUEST_H
-#define CEPH_LIBRBD_JOURNAL_RESET_REQUEST_H
+#ifndef STONE_LIBRBD_JOURNAL_RESET_REQUEST_H
+#define STONE_LIBRBD_JOURNAL_RESET_REQUEST_H
 
 #include "include/int_types.h"
 #include "include/buffer.h"
@@ -41,7 +41,7 @@ public:
     : m_io_ctx(io_ctx), m_image_id(image_id), m_client_id(client_id),
       m_mirror_uuid(mirror_uuid), m_op_work_queue(op_work_queue),
       m_on_finish(on_finish),
-      m_cct(reinterpret_cast<CephContext *>(m_io_ctx.cct())) {
+      m_cct(reinterpret_cast<StoneContext *>(m_io_ctx.cct())) {
   }
 
   void send();
@@ -78,7 +78,7 @@ private:
   ContextWQ *m_op_work_queue;
   Context *m_on_finish;
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   Journaler *m_journaler = nullptr;
   int m_ret_val = 0;
 
@@ -107,4 +107,4 @@ private:
 
 extern template class librbd::journal::ResetRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_JOURNAL_REMOVE_REQUEST_H
+#endif // STONE_LIBRBD_JOURNAL_REMOVE_REQUEST_H

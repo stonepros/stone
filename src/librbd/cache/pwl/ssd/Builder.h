@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CACHE_PWL_SSD_BUILDER_H
-#define CEPH_LIBRBD_CACHE_PWL_SSD_BUILDER_H
+#ifndef STONE_LIBRBD_CACHE_PWL_SSD_BUILDER_H
+#define STONE_LIBRBD_CACHE_PWL_SSD_BUILDER_H
 
 #include <iostream>
 #include "LogEntry.h"
@@ -72,14 +72,14 @@ public:
   }
   std::shared_ptr<pwl::WriteLogOperation> create_write_log_operation(
       WriteLogOperationSet &set, uint64_t image_offset_bytes,
-      uint64_t write_bytes, CephContext *cct,
+      uint64_t write_bytes, StoneContext *cct,
       std::shared_ptr<pwl::WriteLogEntry> write_log_entry) {
     return std::make_shared<WriteLogOperation>(
         set, image_offset_bytes, write_bytes, cct, write_log_entry);
   }
   std::shared_ptr<pwl::WriteLogOperation> create_write_log_operation(
       WriteLogOperationSet &set, uint64_t image_offset_bytes,
-      uint64_t write_bytes, uint32_t data_len, CephContext *cct,
+      uint64_t write_bytes, uint32_t data_len, StoneContext *cct,
       std::shared_ptr<pwl::WriteLogEntry> writesame_log_entry) {
     return std::make_shared<WriteLogOperation>(
         set, image_offset_bytes, write_bytes, data_len, cct,
@@ -88,12 +88,12 @@ public:
   std::shared_ptr<pwl::DiscardLogOperation> create_discard_log_operation(
       std::shared_ptr<SyncPoint> sync_point, uint64_t image_offset_bytes,
       uint64_t write_bytes, uint32_t discard_granularity_bytes,
-      utime_t dispatch_time, PerfCounters *perfcounter, CephContext *cct) {
+      utime_t dispatch_time, PerfCounters *perfcounter, StoneContext *cct) {
     return std::make_shared<DiscardLogOperation>(
         sync_point, image_offset_bytes, write_bytes, discard_granularity_bytes,
         dispatch_time, perfcounter, cct);
   }
-  C_ReadRequest *create_read_request(CephContext *cct, utime_t arrived,
+  C_ReadRequest *create_read_request(StoneContext *cct, utime_t arrived,
       PerfCounters *perfcounter, ceph::bufferlist *bl, Context *on_finish) {
     return new C_ReadRequest(cct, arrived, perfcounter, bl, on_finish);
   }
@@ -105,4 +105,4 @@ public:
 } // namespace cache
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_CACHE_PWL_SSD_BUILDER_H
+#endif // STONE_LIBRBD_CACHE_PWL_SSD_BUILDER_H

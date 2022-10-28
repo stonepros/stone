@@ -19,7 +19,7 @@ EncryptionFormat<I>::EncryptionFormat(
 
 template <typename I>
 EncryptionFormat<I>::~EncryptionFormat() {
-  ceph_memzero_s(
+  stone_memzero_s(
           &m_passphrase[0], m_passphrase.capacity(), m_passphrase.size());
 }
 

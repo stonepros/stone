@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#include "ceph_ver.h"
+#include "stone_ver.h"
 #include "common/dout.h"
 #include "common/errno.h"
 #include "common/PluginRegistry.h"
@@ -16,11 +16,11 @@
 
 extern "C" {
 
-const char *__ceph_plugin_version() {
-  return CEPH_GIT_NICE_VER;
+const char *__stone_plugin_version() {
+  return STONE_GIT_NICE_VER;
 }
 
-int __ceph_plugin_init(CephContext *cct, const std::string& type,
+int __stone_plugin_init(StoneContext *cct, const std::string& type,
                        const std::string& name) {
   auto plugin_registry = cct->get_plugin_registry();
   return plugin_registry->add(
@@ -29,7 +29,7 @@ int __ceph_plugin_init(CephContext *cct, const std::string& type,
 
 } // extern "C"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::plugin::WriteLogImageCache: " \
                            << this << " " << __func__ << ": "

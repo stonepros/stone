@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -14,8 +14,8 @@
 
 
 
-#ifndef CEPH_MESSENGER_H
-#define CEPH_MESSENGER_H
+#ifndef STONE_MESSENGER_H
+#define STONE_MESSENGER_H
 
 #include <map>
 #include <deque>
@@ -118,10 +118,10 @@ public:
 #endif
 
   /**
-   *  The CephContext this Messenger uses. Many other components initialize themselves
+   *  The StoneeContext this Messenger uses. Many other components initialize themselves
    *  from this value.
    */
-  CephContext *cct;
+  StoneeContext *cct;
   int crcflags;
 
   using Policy = ceph::net::Policy<Throttle>;
@@ -142,7 +142,7 @@ public:
    * Messenger users should construct full implementations directly,
    * or use the create() function.
    */
-  Messenger(CephContext *cct_, entity_name_t w);
+  Messenger(StoneeContext *cct_, entity_name_t w);
   virtual ~Messenger() {}
 
   /**
@@ -157,7 +157,7 @@ public:
    * @param lname logical name of the messenger in this process (e.g., "client")
    * @param nonce nonce value to uniquely identify this instance on the current host
    */
-  static Messenger *create(CephContext *cct,
+  static Messenger *create(StoneeContext *cct,
                            const std::string &type,
                            entity_name_t name,
 			   std::string lname,
@@ -178,7 +178,7 @@ public:
    * @param cct context
    * @param lname logical name of the messenger in this process (e.g., "client")
    */
-  static Messenger *create_client_messenger(CephContext *cct, std::string lname);
+  static Messenger *create_client_messenger(StoneeContext *cct, std::string lname);
 
   /**
    * @defgroup Accessors
@@ -519,11 +519,11 @@ public:
     const entity_addrvec_t& addr) = 0;
   int send_to_mon(
     Message *m, const entity_addrvec_t& addrs) {
-    return send_to(m, CEPH_ENTITY_TYPE_MON, addrs);
+    return send_to(m, STONE_ENTITY_TYPE_MON, addrs);
   }
   int send_to_mds(
     Message *m, const entity_addrvec_t& addrs) {
-    return send_to(m, CEPH_ENTITY_TYPE_MDS, addrs);
+    return send_to(m, STONE_ENTITY_TYPE_MDS, addrs);
   }
 
   /**
@@ -546,19 +546,19 @@ public:
     bool anon=false, bool not_local_dest=false) = 0;
   ConnectionRef connect_to_mon(const entity_addrvec_t& dest,
       bool anon=false, bool not_local_dest=false) {
-	return connect_to(CEPH_ENTITY_TYPE_MON, dest, anon, not_local_dest);
+	return connect_to(STONE_ENTITY_TYPE_MON, dest, anon, not_local_dest);
   }
   ConnectionRef connect_to_mds(const entity_addrvec_t& dest,
       bool anon=false, bool not_local_dest=false) {
-	return connect_to(CEPH_ENTITY_TYPE_MDS, dest, anon, not_local_dest);
+	return connect_to(STONE_ENTITY_TYPE_MDS, dest, anon, not_local_dest);
   }
   ConnectionRef connect_to_osd(const entity_addrvec_t& dest,
       bool anon=false, bool not_local_dest=false) {
-	return connect_to(CEPH_ENTITY_TYPE_OSD, dest, anon, not_local_dest);
+	return connect_to(STONE_ENTITY_TYPE_OSD, dest, anon, not_local_dest);
   }
   ConnectionRef connect_to_mgr(const entity_addrvec_t& dest,
       bool anon=false, bool not_local_dest=false) {
-	return connect_to(CEPH_ENTITY_TYPE_MGR, dest, anon, not_local_dest);
+	return connect_to(STONE_ENTITY_TYPE_MGR, dest, anon, not_local_dest);
   }
 
   /**
@@ -611,7 +611,7 @@ protected:
    * @} // Subclass Interfacing
    */
 public:
-#ifdef CEPH_USE_SIGPIPE_BLOCKER
+#ifdef STONE_USE_SIGPIPE_BLOCKER
   /**
    * We need to disable SIGPIPE on all platforms, and if they
    * don't give us a better mechanism (read: are on Solaris) that

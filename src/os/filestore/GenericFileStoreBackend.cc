@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -44,11 +44,11 @@
 #include "common/SloppyCRCMap.h"
 #include "os/filestore/chain_xattr.h"
 
-#define SLOPPY_CRC_XATTR "user.cephos.scrc"
+#define SLOPPY_CRC_XATTR "user.stoneos.scrc"
 
 
 #define dout_context cct()
-#define dout_subsys ceph_subsys_filestore
+#define dout_subsys stone_subsys_filestore
 #undef dout_prefix
 #define dout_prefix *_dout << "genericfilestorebackend(" << get_basedir_path() << ") "
 
@@ -60,8 +60,8 @@ using std::ostream;
 using std::ostringstream;
 using std::string;
 
-using ceph::bufferptr;
-using ceph::bufferlist;
+using stone::bufferptr;
+using stone::bufferlist;
 
 GenericFileStoreBackend::GenericFileStoreBackend(FileStore *fs):
   FileStoreBackend(fs),
@@ -203,7 +203,7 @@ int GenericFileStoreBackend::detect_features()
   }
 
   //splice detection
-#ifdef CEPH_HAVE_SPLICE
+#ifdef STONE_HAVE_SPLICE
   if (!m_filestore_splice) {
     dout(0) << __func__ << ": splice() is disabled via 'filestore splice' config option" << dendl;
     use_splice = false;
@@ -260,7 +260,7 @@ int GenericFileStoreBackend::detect_features()
       dout(0) << "detect_features: no syncfs(2), but 'filestore fsync flushes journal data = true', so fsync will suffice." << dendl;
     } else {
       dout(0) << "detect_features: no syncfs(2), must use sync(2)." << dendl;
-      dout(0) << "detect_features: WARNING: multiple ceph-osd daemons on the same host will be slow" << dendl;
+      dout(0) << "detect_features: WARNING: multiple stone-osd daemons on the same host will be slow" << dendl;
     }
   }
 
@@ -319,10 +319,10 @@ int GenericFileStoreBackend::do_fiemap(int fd, off_t start, size_t len, struct f
    * the result is (logical=4096, len=4096). It leak the [3990, 4096).
    * Commit:"xfs: fix rounding error of fiemap length parameter
    * (eedf32bfcace7d8e20cc66757d74fc68f3439ff7)" fix this bug.
-   * Here, we make offset aligned with CEPH_PAGE_SIZE to avoid this bug.
+   * Here, we make offset aligned with STONE_PAGE_SIZE to avoid this bug.
    */
-  fiemap->fm_start = start - start % CEPH_PAGE_SIZE;
-  fiemap->fm_length = len + start % CEPH_PAGE_SIZE;
+  fiemap->fm_start = start - start % STONE_PAGE_SIZE;
+  fiemap->fm_length = len + start % STONE_PAGE_SIZE;
   fiemap->fm_flags = FIEMAP_FLAG_SYNC; /* flush extents to disk if needed */
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
@@ -378,12 +378,12 @@ int GenericFileStoreBackend::_crc_load_or_init(int fd, SloppyCRCMap *cm)
     return 0;
   }
   if (l >= 0) {
-    bp = ceph::buffer::create(l);
+    bp = stone::buffer::create(l);
     memcpy(bp.c_str(), buf, l);
   } else if (l == -ERANGE) {
     l = chain_fgetxattr(fd, SLOPPY_CRC_XATTR, 0, 0);
     if (l > 0) {
-      bp = ceph::buffer::create(l);
+      bp = stone::buffer::create(l);
       l = chain_fgetxattr(fd, SLOPPY_CRC_XATTR, bp.c_str(), l);
     }
   }
@@ -393,7 +393,7 @@ int GenericFileStoreBackend::_crc_load_or_init(int fd, SloppyCRCMap *cm)
   try {
     decode(*cm, p);
   }
-  catch (ceph::buffer::error &e) {
+  catch (stone::buffer::error &e) {
     r = -EIO;
   }
   if (r < 0)

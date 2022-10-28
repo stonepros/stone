@@ -8,7 +8,7 @@
 #include "librbd/ImageCtx.h"
 #include "librbd/object_map/InvalidateRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::Request: "
 
@@ -16,7 +16,7 @@ namespace librbd {
 namespace object_map {
 
 bool Request::should_complete(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << this << " should_complete: r=" << r << dendl;
 
   switch (m_state)
@@ -45,7 +45,7 @@ bool Request::should_complete(int r) {
 
   default:
     lderr(cct) << "invalid state: " << m_state << dendl;
-    ceph_abort();
+    stone_abort();
     break;
   }
   return false;

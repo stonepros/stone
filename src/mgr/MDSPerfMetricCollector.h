@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MGR_MDS_PERF_COLLECTOR_H
-#define CEPH_MGR_MDS_PERF_COLLECTOR_H
+#ifndef STONE_MGR_MDS_PERF_COLLECTOR_H
+#define STONE_MGR_MDS_PERF_COLLECTOR_H
 
 #include "mgr/MetricCollector.h"
 #include "mgr/MDSPerfMetricTypes.h"
@@ -23,4 +23,4 @@ public:
   int get_counters(PerfCollector *collector) override;
 };
 
-#endif // CEPH_MGR_MDS_PERF_COLLECTOR_H
+#endif // STONE_MGR_MDS_PERF_COLLECTOR_H

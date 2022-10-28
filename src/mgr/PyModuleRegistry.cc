@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 John Spray <john.spray@redhat.com>
  *
@@ -36,8 +36,8 @@ namespace fs = std::experimental::filesystem;
 
 #include "ActivePyModules.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr[py] "
@@ -56,9 +56,9 @@ void PyModuleRegistry::init()
 #undef WCHAR
   // Add more modules
   if (g_conf().get_val<bool>("daemonize")) {
-    PyImport_AppendInittab("ceph_logger", PyModule::init_ceph_logger);
+    PyImport_AppendInittab("stone_logger", PyModule::init_stone_logger);
   }
-  PyImport_AppendInittab("ceph_module", PyModule::init_ceph_module);
+  PyImport_AppendInittab("stone_module", PyModule::init_stone_module);
   Py_InitializeEx(0);
 #if PY_VERSION_HEX < 0x03090000
   // Let CPython know that we will be calling it back from other
@@ -70,7 +70,7 @@ void PyModuleRegistry::init()
   // Drop the GIL and remember the main thread state (current
   // thread state becomes NULL)
   pMainThreadState = PyEval_SaveThread();
-  ceph_assert(pMainThreadState != nullptr);
+  stone_assert(pMainThreadState != nullptr);
 
   std::list<std::string> failed_modules;
 
@@ -98,10 +98,10 @@ void PyModuleRegistry::init()
     modules[module_name] = std::move(mod);
   }
   if (module_names.empty()) {
-    clog->error() << "No ceph-mgr modules found in " << module_path;
+    clog->error() << "No stone-mgr modules found in " << module_path;
   }
   if (!failed_modules.empty()) {
-    clog->error() << "Failed to load ceph-mgr modules: " << joinify(
+    clog->error() << "Failed to load stone-mgr modules: " << joinify(
         failed_modules.begin(), failed_modules.end(), std::string(", "));
   }
 }
@@ -142,12 +142,12 @@ bool PyModuleRegistry::handle_mgr_map(const MgrMap &mgr_map_)
 void PyModuleRegistry::standby_start(MonClient &mc, Finisher &f)
 {
   std::lock_guard l(lock);
-  ceph_assert(active_modules == nullptr);
-  ceph_assert(standby_modules == nullptr);
+  stone_assert(active_modules == nullptr);
+  stone_assert(standby_modules == nullptr);
 
   // Must have seen a MgrMap by this point, in order to know
   // which modules should be enabled
-  ceph_assert(mgr_map.epoch > 0);
+  stone_assert(mgr_map.epoch > 0);
 
   dout(4) << "Starting modules in standby mode" << dendl;
 
@@ -174,7 +174,7 @@ void PyModuleRegistry::standby_start(MonClient &mc, Finisher &f)
   }
 
   if (!failed_modules.empty()) {
-    clog->error() << "Failed to execute ceph-mgr module(s) in standby mode: "
+    clog->error() << "Failed to execute stone-mgr module(s) in standby mode: "
         << joinify(failed_modules.begin(), failed_modules.end(),
                    std::string(", "));
   }
@@ -192,11 +192,11 @@ void PyModuleRegistry::active_start(
 
   dout(4) << "Starting modules in active mode" << dendl;
 
-  ceph_assert(active_modules == nullptr);
+  stone_assert(active_modules == nullptr);
 
   // Must have seen a MgrMap by this point, in order to know
   // which modules should be enabled
-  ceph_assert(mgr_map.epoch > 0);
+  stone_assert(mgr_map.epoch > 0);
 
   if (standby_modules != nullptr) {
     standby_modules->shutdown();
@@ -273,7 +273,7 @@ void PyModuleRegistry::shutdown()
 std::set<std::string> PyModuleRegistry::probe_modules(const std::string &path) const
 {
   const auto opt = g_conf().get_val<std::string>("mgr_disabled_modules");
-  const auto disabled_modules = ceph::split(opt);
+  const auto disabled_modules = stone::split(opt);
 
   std::set<std::string> modules;
   for (const auto& entry: fs::directory_iterator(path)) {

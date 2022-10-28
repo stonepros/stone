@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank <info@inktank.com>
  *
@@ -13,14 +13,14 @@
 #include <memory>
 #include <set>
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/common_init.h"
 #include "include/stringify.h"
 
 #include "crush/CrushWrapper.h"
 #include "osd/osd_types.h"
 
-std::unique_ptr<CrushWrapper> build_indep_map(CephContext *cct, int num_rack,
+std::unique_ptr<CrushWrapper> build_indep_map(StoneContext *cct, int num_rack,
                               int num_host, int num_osd)
 {
   std::unique_ptr<CrushWrapper> c(new CrushWrapper);
@@ -54,15 +54,15 @@ std::unique_ptr<CrushWrapper> build_indep_map(CephContext *cct, int num_rack,
   int ret;
   int ruleno = 0;
   ret = c->add_rule(ruleno, 4, 123, 1, 20);
-  ceph_assert(ret == ruleno);
+  stone_assert(ret == ruleno);
   ret = c->set_rule_step(ruleno, 0, CRUSH_RULE_SET_CHOOSELEAF_TRIES, 10, 0);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
   ret = c->set_rule_step(ruleno, 1, CRUSH_RULE_TAKE, rootno, 0);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
   ret = c->set_rule_step(ruleno, 2, CRUSH_RULE_CHOOSELEAF_INDEP, CRUSH_CHOOSE_N, 1);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
   ret = c->set_rule_step(ruleno, 3, CRUSH_RULE_EMIT, 0, 0);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
   c->set_rule_name(ruleno, "data");
 
   c->finalize();
@@ -97,7 +97,7 @@ class CRUSHTest : public ::testing::Test
 public:
   void SetUp() final
   {
-    CephInitParameters params(CEPH_ENTITY_TYPE_CLIENT);
+    StoneInitParameters params(STONE_ENTITY_TYPE_CLIENT);
     cct = common_preinit(params, CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
   }
@@ -107,7 +107,7 @@ public:
     cct = nullptr;
   }
 protected:
-  CephContext *cct = nullptr;
+  StoneContext *cct = nullptr;
 };
 
 TEST_F(CRUSHTest, indep_toosmall) {

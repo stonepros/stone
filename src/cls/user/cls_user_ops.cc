@@ -3,11 +3,11 @@
 
 #include "cls/user/cls_user_ops.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 using std::list;
 
-using ceph::Formatter;
+using stone::Formatter;
 
 void cls_user_set_buckets_op::dump(Formatter *f) const
 {

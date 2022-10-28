@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -15,7 +15,7 @@
 #include "rgw/rgw_rados.h"
 #include "rgw/rgw_zone.h"
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include <boost/lexical_cast.hpp>
 #include <gtest/gtest.h>
 
@@ -76,7 +76,7 @@ bool operator==(const RGWPeriod& lhs, const RGWPeriod& rhs)
 
 TEST(PeriodHistory, InsertBefore)
 {
-  RGWPeriodHistory history(g_ceph_context, &puller, current_period);
+  RGWPeriodHistory history(g_stone_context, &puller, current_period);
 
   // inserting right before current_period 5 will attach to history
   auto c = history.insert(make_period("4", 4, "3"));
@@ -92,7 +92,7 @@ TEST(PeriodHistory, InsertBefore)
 
 TEST(PeriodHistory, InsertAfter)
 {
-  RGWPeriodHistory history(g_ceph_context, &puller, current_period);
+  RGWPeriodHistory history(g_stone_context, &puller, current_period);
 
   // inserting right after current_period 5 will attach to history
   auto c = history.insert(make_period("6", 6, "5"));
@@ -108,7 +108,7 @@ TEST(PeriodHistory, InsertAfter)
 
 TEST(PeriodHistory, InsertWayBefore)
 {
-  RGWPeriodHistory history(g_ceph_context, &puller, current_period);
+  RGWPeriodHistory history(g_stone_context, &puller, current_period);
 
   // inserting way before current_period 5 will not attach to history
   auto c = history.insert(make_period("1", 1, ""));
@@ -118,7 +118,7 @@ TEST(PeriodHistory, InsertWayBefore)
 
 TEST(PeriodHistory, InsertWayAfter)
 {
-  RGWPeriodHistory history(g_ceph_context, &puller, current_period);
+  RGWPeriodHistory history(g_stone_context, &puller, current_period);
 
   // inserting way after current_period 5 will not attach to history
   auto c = history.insert(make_period("9", 9, "8"));
@@ -129,8 +129,8 @@ TEST(PeriodHistory, InsertWayAfter)
 TEST(PeriodHistory, PullPredecessorsBeforeCurrent)
 {
   RecordingPuller puller{-EFAULT};
-  RGWPeriodHistory history(g_ceph_context, &puller, current_period);
-  const DoutPrefix dp(g_ceph_context, 1, "test rgw period history: ");
+  RGWPeriodHistory history(g_stone_context, &puller, current_period);
+  const DoutPrefix dp(g_stone_context, 1, "test rgw period history: ");
 
   // create a disjoint history at 1 and verify that periods are requested
   // backwards from current_period
@@ -166,8 +166,8 @@ TEST(PeriodHistory, PullPredecessorsBeforeCurrent)
 TEST(PeriodHistory, PullPredecessorsAfterCurrent)
 {
   RecordingPuller puller{-EFAULT};
-  RGWPeriodHistory history(g_ceph_context, &puller, current_period);
-  const DoutPrefix dp(g_ceph_context, 1, "test rgw period history: ");
+  RGWPeriodHistory history(g_stone_context, &puller, current_period);
+  const DoutPrefix dp(g_stone_context, 1, "test rgw period history: ");
 
   // create a disjoint history at 9 and verify that periods are requested
   // backwards down to current_period
@@ -193,7 +193,7 @@ TEST(PeriodHistory, PullPredecessorsAfterCurrent)
 
 TEST(PeriodHistory, MergeBeforeCurrent)
 {
-  RGWPeriodHistory history(g_ceph_context, &puller, current_period);
+  RGWPeriodHistory history(g_stone_context, &puller, current_period);
 
   auto c = history.get_current();
   ASSERT_FALSE(c.has_prev());
@@ -215,7 +215,7 @@ TEST(PeriodHistory, MergeBeforeCurrent)
 
 TEST(PeriodHistory, MergeAfterCurrent)
 {
-  RGWPeriodHistory history(g_ceph_context, &puller, current_period);
+  RGWPeriodHistory history(g_stone_context, &puller, current_period);
 
   auto c = history.get_current();
   ASSERT_FALSE(c.has_next());
@@ -237,7 +237,7 @@ TEST(PeriodHistory, MergeAfterCurrent)
 
 TEST(PeriodHistory, MergeWithoutCurrent)
 {
-  RGWPeriodHistory history(g_ceph_context, &puller, current_period);
+  RGWPeriodHistory history(g_stone_context, &puller, current_period);
 
   // create a disjoint history at 7
   auto c7 = history.insert(make_period("7", 7, "6"));
@@ -271,8 +271,8 @@ TEST(PeriodHistory, MergeWithoutCurrent)
 TEST(PeriodHistory, AttachBefore)
 {
   NumericPuller puller;
-  RGWPeriodHistory history(g_ceph_context, &puller, current_period);
-  const DoutPrefix dp(g_ceph_context, 1, "test rgw period history: ");
+  RGWPeriodHistory history(g_stone_context, &puller, current_period);
+  const DoutPrefix dp(g_stone_context, 1, "test rgw period history: ");
 
   auto c1 = history.attach(&dp, make_period("1", 1, ""), null_yield);
   ASSERT_TRUE(c1);
@@ -298,8 +298,8 @@ TEST(PeriodHistory, AttachBefore)
 TEST(PeriodHistory, AttachAfter)
 {
   NumericPuller puller;
-  RGWPeriodHistory history(g_ceph_context, &puller, current_period);
-  const DoutPrefix dp(g_ceph_context, 1, "test rgw period history: ");
+  RGWPeriodHistory history(g_stone_context, &puller, current_period);
+  const DoutPrefix dp(g_stone_context, 1, "test rgw period history: ");
 
   auto c9 = history.attach(&dp, make_period("9", 9, "8"), null_yield);
   ASSERT_TRUE(c9);
@@ -327,10 +327,10 @@ int main(int argc, char** argv)
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

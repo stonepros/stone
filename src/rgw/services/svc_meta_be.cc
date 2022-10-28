@@ -6,7 +6,7 @@
 
 #include "rgw/rgw_mdlog.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 RGWSI_MetaBackend::Context::~Context() {} // needed, even though destructor is pure virtual
@@ -74,7 +74,7 @@ int RGWSI_MetaBackend::prepare_mutate(RGWSI_MetaBackend::Context *ctx,
 
 int RGWSI_MetaBackend::do_mutate(RGWSI_MetaBackend::Context *ctx,
 				 const string& key,
-				 const ceph::real_time& mtime,
+				 const stone::real_time& mtime,
 				 RGWObjVersionTracker *objv_tracker,
 				 RGWMDLogStatus op_type,
                                  optional_yield y,

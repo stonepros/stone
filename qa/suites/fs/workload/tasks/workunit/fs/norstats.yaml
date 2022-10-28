@@ -11,7 +11,7 @@ tasks:
 overrides:
   kclient:
     rbytes: false
-  ceph:
+  stone:
     conf:
       client:
         client dirsize rbytes: false

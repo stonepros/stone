@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MOSDPGQUERY_H
-#define CEPH_MOSDPGQUERY_H
+#ifndef STONE_MOSDPGQUERY_H
+#define STONE_MOSDPGQUERY_H
 
 #include "common/hobject.h"
 #include "msg/Message.h"
@@ -38,7 +38,7 @@ private:
   MOSDPGQuery() : Message{MSG_OSD_PG_QUERY,
 			  HEAD_VERSION,
 			  COMPAT_VERSION} {
-    set_priority(CEPH_MSG_PRIO_HIGH);
+    set_priority(STONE_MSG_PRIO_HIGH);
   }
   MOSDPGQuery(epoch_t e, pg_list_t&& ls) :
     Message{MSG_OSD_PG_QUERY,
@@ -46,7 +46,7 @@ private:
 	    COMPAT_VERSION},
     epoch(e),
     pg_list(std::move(ls)) {
-    set_priority(CEPH_MSG_PRIO_HIGH);
+    set_priority(STONE_MSG_PRIO_HIGH);
   }
 private:
   ~MOSDPGQuery() final {}

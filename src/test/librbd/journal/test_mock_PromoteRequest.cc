@@ -33,10 +33,10 @@ struct OpenRequest<MockTestImageCtx> {
   static OpenRequest *s_instance;
   static OpenRequest *create(MockTestImageCtx *image_ctx,
                              ::journal::MockJournalerProxy *journaler,
-                             ceph::mutex *lock, ImageClientMeta *client_meta,
+                             stone::mutex *lock, ImageClientMeta *client_meta,
                              uint64_t *tag_tid, journal::TagData *tag_data,
                              Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     client_meta->tag_class = 456;
     tag_data->mirror_uuid = Journal<>::ORPHAN_MIRROR_UUID;
     *tag_tid = 567;
@@ -91,7 +91,7 @@ public:
     tag_data.predecessor = predecessor;
 
     bufferlist tag_data_bl;
-    using ceph::encode;
+    using stone::encode;
     encode(tag_data, tag_data_bl);
 
     EXPECT_CALL(mock_journaler, allocate_tag(456, ContentsEqual(tag_data_bl),

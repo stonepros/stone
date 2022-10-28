@@ -18,15 +18,15 @@ enum class echo_role {
 
 namespace native_pingpong {
 
-constexpr int CEPH_OSD_PROTOCOL = 10;
+constexpr int STONE_OSD_PROTOCOL = 10;
 
 struct Server {
-  Server(CephContext* cct, const entity_inst_t& entity)
+  Server(StoneContext* cct, const entity_inst_t& entity)
     : dummy_auth(cct), dispatcher(cct)
   {
     msgr.reset(Messenger::create(cct, "async", entity.name, "pong", entity.addr.get_nonce()));
     dummy_auth.auth_registry.refresh_config();
-    msgr->set_cluster_protocol(CEPH_OSD_PROTOCOL);
+    msgr->set_cluster_protocol(STONE_OSD_PROTOCOL);
     msgr->set_default_policy(Messenger::Policy::stateless_server(0));
     msgr->set_auth_client(&dummy_auth);
     msgr->set_auth_server(&dummy_auth);
@@ -38,14 +38,14 @@ struct Server {
     std::mutex mutex;
     std::condition_variable on_reply;
     bool replied = false;
-    ServerDispatcher(CephContext* cct)
+    ServerDispatcher(StoneContext* cct)
       : Dispatcher(cct)
     {}
     bool ms_can_fast_dispatch_any() const override {
       return true;
     }
     bool ms_can_fast_dispatch(const Message* m) const override {
-      return m->get_type() == CEPH_MSG_PING;
+      return m->get_type() == STONE_MSG_PING;
     }
     void ms_fast_dispatch(Message* m) override {
       m->get_connection()->send_message(new MPing);
@@ -57,7 +57,7 @@ struct Server {
       on_reply.notify_one();
     }
     bool ms_dispatch(Message*) override {
-      ceph_abort();
+      stone_abort();
     }
     bool ms_handle_reset(Connection*) override {
       return true;
@@ -80,12 +80,12 @@ struct Server {
 
 struct Client {
   unique_ptr<Messenger> msgr;
-  Client(CephContext *cct)
+  Client(StoneContext *cct)
     : dummy_auth(cct), dispatcher(cct)
   {
     msgr.reset(Messenger::create(cct, "async", entity_name_t::CLIENT(-1), "ping", getpid()));
     dummy_auth.auth_registry.refresh_config();
-    msgr->set_cluster_protocol(CEPH_OSD_PROTOCOL);
+    msgr->set_cluster_protocol(STONE_OSD_PROTOCOL);
     msgr->set_default_policy(Messenger::Policy::lossy_client(0));
     msgr->set_auth_client(&dummy_auth);
     msgr->set_auth_server(&dummy_auth);
@@ -97,14 +97,14 @@ struct Client {
     std::condition_variable on_reply;
     bool replied = false;
 
-    ClientDispatcher(CephContext* cct)
+    ClientDispatcher(StoneContext* cct)
       : Dispatcher(cct)
     {}
     bool ms_can_fast_dispatch_any() const override {
       return true;
     }
     bool ms_can_fast_dispatch(const Message* m) const override {
-      return m->get_type() == CEPH_MSG_PING;
+      return m->get_type() == STONE_MSG_PING;
     }
     void ms_fast_dispatch(Message* m) override {
       m->put();
@@ -115,7 +115,7 @@ struct Client {
       on_reply.notify_one();
     }
     bool ms_dispatch(Message*) override {
-      ceph_abort();
+      stone_abort();
     }
     bool ms_handle_reset(Connection *) override {
       return true;
@@ -142,10 +142,10 @@ struct Client {
 };
 } // namespace native_pingpong
 
-static void ceph_echo(CephContext* cct,
+static void stone_echo(StoneContext* cct,
                       entity_addr_t addr, echo_role role, unsigned count)
 {
-  std::cout << "ceph/";
+  std::cout << "stone/";
   entity_inst_t entity{entity_name_t::OSD(0), addr};
   if (role == echo_role::as_server) {
     std::cout << "server listening at " << addr << std::endl;
@@ -227,9 +227,9 @@ int main(int argc, char** argv)
   auto count = vm["count"].as<unsigned>();
   std::vector<const char*> args(argv, argv + argc);
   auto cct = global_init(nullptr, args,
-                         CEPH_ENTITY_TYPE_CLIENT,
+                         STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY,
                          CINIT_FLAG_NO_MON_CONFIG);
   common_init_finish(cct.get());
-  ceph_echo(cct.get(), addr, role, count);
+  stone_echo(cct.get(), addr, role, count);
 }

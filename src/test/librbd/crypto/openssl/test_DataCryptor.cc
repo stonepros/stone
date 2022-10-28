@@ -19,7 +19,7 @@ struct TestCryptoOpensslDataCryptor : public TestFixture {
 
     void SetUp() override {
       TestFixture::SetUp();
-      cryptor = new DataCryptor(reinterpret_cast<CephContext*>(m_ioctx.cct()));
+      cryptor = new DataCryptor(reinterpret_cast<StoneContext*>(m_ioctx.cct()));
       ASSERT_EQ(0,
                 cryptor->init(TEST_CIPHER_NAME, TEST_KEY, sizeof(TEST_KEY)));
     }

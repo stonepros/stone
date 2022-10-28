@@ -4,7 +4,7 @@
 #include "include/compat.h"
 #include "CrushLocation.h"
 #include "CrushWrapper.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "include/str_list.h"
 #include "common/debug.h"
@@ -70,13 +70,13 @@ int CrushLocation::update_from_hook()
     return ret;
   }
 
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   ret = bl.read_fd(hook.get_stdout(), 100 * 1024);
   if (ret < 0) {
     lderr(cct) << "error: failed read stdout from "
 	       << cct->_conf->crush_location_hook
 	       << ": " << cpp_strerror(-ret) << dendl;
-    ceph::buffer::list err;
+    stone::buffer::list err;
     err.read_fd(hook.get_stderr(), 100 * 1024);
     lderr(cct) << "stderr:\n";
     err.hexdump(*_dout);

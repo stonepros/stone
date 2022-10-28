@@ -147,15 +147,15 @@ static int parse_map_options(const std::string &options_string,
       put_map_option("share", this_char, map_options);
     } else if (!strcmp(this_char, "crc") || !strcmp(this_char, "nocrc")) {
       put_map_option("crc", this_char, map_options);
-    } else if (!strcmp(this_char, "cephx_require_signatures") ||
-               !strcmp(this_char, "nocephx_require_signatures")) {
-      put_map_option("cephx_require_signatures", this_char, map_options);
+    } else if (!strcmp(this_char, "stonex_require_signatures") ||
+               !strcmp(this_char, "nostonex_require_signatures")) {
+      put_map_option("stonex_require_signatures", this_char, map_options);
     } else if (!strcmp(this_char, "tcp_nodelay") ||
                !strcmp(this_char, "notcp_nodelay")) {
       put_map_option("tcp_nodelay", this_char, map_options);
-    } else if (!strcmp(this_char, "cephx_sign_messages") ||
-               !strcmp(this_char, "nocephx_sign_messages")) {
-      put_map_option("cephx_sign_messages", this_char, map_options);
+    } else if (!strcmp(this_char, "stonex_sign_messages") ||
+               !strcmp(this_char, "nostonex_sign_messages")) {
+      put_map_option("stonex_sign_messages", this_char, map_options);
     } else if (!strcmp(this_char, "mount_timeout")) {
       if (put_map_option_value("mount_timeout", value_char, map_option_int_cb,
                                map_options))
@@ -258,7 +258,7 @@ static int do_kernel_list(Formatter *f) {
   struct krbd_ctx *krbd;
   int r;
 
-  r = krbd_create_from_context(g_ceph_context, 0, &krbd);
+  r = krbd_create_from_context(g_stone_context, 0, &krbd);
   if (r < 0)
     return r;
 
@@ -390,7 +390,7 @@ static int do_kernel_map(const char *poolname, const char *nspace_name,
   for (auto it = map_options.begin(); it != map_options.end(); ) {
     // for compatibility with < 3.7 kernels, assume that rw is on by
     // default and omit it even if it was specified by the user
-    // (see ceph.git commit fb0f1986449b)
+    // (see stone.git commit fb0f1986449b)
     if (it->first == "rw" && it->second == "rw") {
       it = map_options.erase(it);
     } else if (it->first == "udev") {
@@ -406,7 +406,7 @@ static int do_kernel_map(const char *poolname, const char *nspace_name,
     }
   }
 
-  r = krbd_create_from_context(g_ceph_context, flags, &krbd);
+  r = krbd_create_from_context(g_stone_context, flags, &krbd);
   if (r < 0)
     return r;
 
@@ -463,7 +463,7 @@ static int do_kernel_unmap(const char *dev, const char *poolname,
     }
   }
 
-  r = krbd_create_from_context(g_ceph_context, flags, &krbd);
+  r = krbd_create_from_context(g_stone_context, flags, &krbd);
   if (r < 0)
     return r;
 
@@ -482,7 +482,7 @@ static int do_kernel_unmap(const char *dev, const char *poolname,
 }
 
 int execute_list(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   at::Format::Formatter formatter;
   int r = utils::get_formatter(vm, &formatter);
   if (r < 0) {
@@ -500,7 +500,7 @@ int execute_list(const po::variables_map &vm,
 }
 
 int execute_map(const po::variables_map &vm,
-                const std::vector<std::string> &ceph_global_init_args) {
+                const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string nspace_name;
@@ -595,7 +595,7 @@ int execute_map(const po::variables_map &vm,
 }
 
 int execute_unmap(const po::variables_map &vm,
-                  const std::vector<std::string> &ceph_global_init_args) {
+                  const std::vector<std::string> &stone_global_init_args) {
   std::string device_name = utils::get_positional_argument(vm, 0);
   if (!boost::starts_with(device_name, "/dev/")) {
     device_name.clear();
@@ -657,7 +657,7 @@ int execute_unmap(const po::variables_map &vm,
 }
 
 int execute_attach(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
 #if defined(WITH_KRBD)
   std::cerr << "rbd: krbd does not support attach" << std::endl;
 #else
@@ -667,7 +667,7 @@ int execute_attach(const po::variables_map &vm,
 }
 
 int execute_detach(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
 #if defined(WITH_KRBD)
   std::cerr << "rbd: krbd does not support detach" << std::endl;
 #else

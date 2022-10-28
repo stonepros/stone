@@ -7,7 +7,7 @@
 class DummyAuthClientServer : public AuthClient,
 			      public AuthServer {
 public:
-  DummyAuthClientServer(CephContext *cct) : AuthServer(cct) {}
+  DummyAuthClientServer(StoneContext *cct) : AuthServer(cct) {}
 
   // client
   int get_auth_request(
@@ -16,8 +16,8 @@ public:
     uint32_t *method,
     std::vector<uint32_t> *preferred_modes,
     bufferlist *out) override {
-    *method = CEPH_AUTH_NONE;
-    *preferred_modes = { CEPH_CON_MODE_CRC };
+    *method = STONE_AUTH_NONE;
+    *preferred_modes = { STONE_CON_MODE_CRC };
     return 0;
   }
 

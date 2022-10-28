@@ -6,10 +6,10 @@
 
 #include "rgw/rgw_metadata.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
-RGWSI_Meta::RGWSI_Meta(CephContext *cct) : RGWServiceInstance(cct) {
+RGWSI_Meta::RGWSI_Meta(StoneContext *cct) : RGWServiceInstance(cct) {
 }
 
 RGWSI_Meta::~RGWSI_Meta() {}

@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_HASHINDEX_H
-#define CEPH_HASHINDEX_H
+#ifndef STONE_HASHINDEX_H
+#define STONE_HASHINDEX_H
 
 #include "include/buffer_fwd.h"
 #include "include/encoding.h"
@@ -40,7 +40,7 @@ extern std::string reverse_hexdigit_bits_string(std::string l);
  * given by the hex characters in the hash beginning with the least
  * significant.
  *
- * ex: ghobject_t("object", CEPH_NO_SNAP, 0xA4CEE0D2)
+ * ex: ghobject_t("object", STONE_NO_SNAP, 0xA4CEE0D2)
  * would be located in (root)/2/D/0/
  *
  * Subdirectories are created when the number of objects in a

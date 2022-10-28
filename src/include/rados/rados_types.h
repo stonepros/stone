@@ -1,5 +1,5 @@
-#ifndef CEPH_RADOS_TYPES_H
-#define CEPH_RADOS_TYPES_H
+#ifndef STONE_RADOS_TYPES_H
+#define STONE_RADOS_TYPES_H
 
 #include <stdint.h>
 

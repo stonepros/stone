@@ -4,7 +4,7 @@
 #include "librbd/api/Mirror.h"
 #include "include/rados/librados.hpp"
 #include "include/stringify.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/dout.h"
 #include "common/errno.h"
 #include "cls/rbd/cls_rbd_client.h"
@@ -37,7 +37,7 @@
 
 #include <algorithm>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::api::Mirror: " << __func__ << ": "
 
@@ -115,11 +115,11 @@ int remove_peer_config_key(librados::IoCtx& io_ctx,
   return 0;
 }
 
-int create_bootstrap_user(CephContext* cct, librados::Rados& rados,
-                          std::string* peer_client_id, std::string* cephx_key) {
+int create_bootstrap_user(StoneContext* cct, librados::Rados& rados,
+                          std::string* peer_client_id, std::string* stonex_key) {
   ldout(cct, 20) << dendl;
 
-  // retrieve peer CephX user from config-key
+  // retrieve peer StoneX user from config-key
   int r = get_config_key(rados, RBD_MIRROR_PEER_CLIENT_ID_CONFIG_KEY,
                          peer_client_id);
   if (r == -EACCES) {
@@ -181,7 +181,7 @@ int create_bootstrap_user(CephContext* cct, librados::Rados& rados,
   if(json_spirit::read(out_bl.to_str(), json_root)) {
     try {
       auto& json_obj = json_root.get_array()[0].get_obj();
-      *cephx_key = json_obj["key"].get_str();
+      *stonex_key = json_obj["key"].get_str();
       json_valid = true;
     } catch (std::runtime_error&) {
     }
@@ -195,7 +195,7 @@ int create_bootstrap_user(CephContext* cct, librados::Rados& rados,
   return 0;
 }
 
-int create_bootstrap_peer(CephContext* cct, librados::IoCtx& io_ctx,
+int create_bootstrap_peer(StoneContext* cct, librados::IoCtx& io_ctx,
                           mirror_peer_direction_t direction,
                           const std::string& site_name, const std::string& fsid,
                           const std::string& client_id, const std::string& key,
@@ -253,7 +253,7 @@ int create_bootstrap_peer(CephContext* cct, librados::IoCtx& io_ctx,
 
 int list_mirror_images(librados::IoCtx& io_ctx,
                        std::set<std::string>& mirror_image_ids) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
 
   std::string last_read = "";
   int max_read = 1024;
@@ -385,7 +385,7 @@ struct C_ImageSnapshotCreate : public Context {
     }
 
     auto req = mirror::snapshot::CreatePrimaryRequest<I>::create(
-      ictx, mirror_image.global_image_id, CEPH_NOSNAP, snap_create_flags, 0U,
+      ictx, mirror_image.global_image_id, STONE_NOSNAP, snap_create_flags, 0U,
       snap_id, on_finish);
     req->send();
   }
@@ -396,7 +396,7 @@ struct C_ImageSnapshotCreate : public Context {
 template <typename I>
 int Mirror<I>::image_enable(I *ictx, mirror_image_mode_t mode,
                             bool relax_same_pool_parent_check) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "ictx=" << ictx << " mode=" << mode
                  << " relax_same_pool_parent_check="
                  << relax_same_pool_parent_check <<  dendl;
@@ -467,7 +467,7 @@ int Mirror<I>::image_enable(I *ictx, mirror_image_mode_t mode,
 
 template <typename I>
 int Mirror<I>::image_disable(I *ictx, bool force) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "ictx=" << ictx << dendl;
 
   int r = ictx->state->refresh_if_required();
@@ -526,7 +526,7 @@ int Mirror<I>::image_disable(I *ictx, bool force) {
       ictx->state->handle_update_notification();
 
       // attempt to restore the image state
-      CephContext *cct = ictx->cct;
+      StoneContext *cct = ictx->cct;
       mirror_image_internal.state = cls::rbd::MIRROR_IMAGE_STATE_ENABLED;
       int r = cls_client::mirror_image_set(&ictx->md_ctx, ictx->id,
                                            mirror_image_internal);
@@ -641,7 +641,7 @@ int Mirror<I>::image_disable(I *ictx, bool force) {
 
 template <typename I>
 int Mirror<I>::image_promote(I *ictx, bool force) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
 
   C_SaferCond ctx;
   Mirror<I>::image_promote(ictx, force, &ctx);
@@ -656,7 +656,7 @@ int Mirror<I>::image_promote(I *ictx, bool force) {
 
 template <typename I>
 void Mirror<I>::image_promote(I *ictx, bool force, Context *on_finish) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "ictx=" << ictx << ", "
                  << "force=" << force << dendl;
 
@@ -689,7 +689,7 @@ void Mirror<I>::image_promote(I *ictx, bool force, Context *on_finish) {
 
 template <typename I>
 int Mirror<I>::image_demote(I *ictx) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
 
   C_SaferCond ctx;
   Mirror<I>::image_demote(ictx, &ctx);
@@ -704,7 +704,7 @@ int Mirror<I>::image_demote(I *ictx) {
 
 template <typename I>
 void Mirror<I>::image_demote(I *ictx, Context *on_finish) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "ictx=" << ictx << dendl;
 
   auto on_cleanup = new LambdaContext([ictx, on_finish](int r) {
@@ -738,7 +738,7 @@ void Mirror<I>::image_demote(I *ictx, Context *on_finish) {
 
 template <typename I>
 int Mirror<I>::image_resync(I *ictx) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "ictx=" << ictx << dendl;
 
   int r = ictx->state->refresh_if_required();
@@ -811,7 +811,7 @@ int Mirror<I>::image_resync(I *ictx) {
 template <typename I>
 void Mirror<I>::image_get_info(I *ictx, mirror_image_info_t *mirror_image_info,
                                Context *on_finish) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "ictx=" << ictx << dendl;
 
   auto on_refresh = new LambdaContext(
@@ -855,7 +855,7 @@ void Mirror<I>::image_get_info(librados::IoCtx& io_ctx,
                                const std::string &image_id,
                                mirror_image_info_t *mirror_image_info,
                                Context *on_finish) {
-  auto cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  auto cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << "pool_id=" << io_ctx.get_id() << ", image_id=" << image_id
                  << dendl;
 
@@ -885,7 +885,7 @@ int Mirror<I>::image_get_info(librados::IoCtx& io_ctx,
 template <typename I>
 void Mirror<I>::image_get_mode(I *ictx, mirror_image_mode_t *mode,
                                Context *on_finish) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "ictx=" << ictx << dendl;
 
   auto ctx = new C_ImageGetInfo(nullptr, mode, on_finish);
@@ -911,7 +911,7 @@ template <typename I>
 void Mirror<I>::image_get_global_status(I *ictx,
                                         mirror_image_global_status_t *status,
                                         Context *on_finish) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "ictx=" << ictx << dendl;
 
   auto ctx = new C_ImageGetGlobalStatus(ictx->name, status, on_finish);
@@ -936,7 +936,7 @@ int Mirror<I>::image_get_global_status(I *ictx,
 
 template <typename I>
 int Mirror<I>::image_get_instance_id(I *ictx, std::string *instance_id) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "ictx=" << ictx << dendl;
 
   cls::rbd::MirrorImage mirror_image;
@@ -968,7 +968,7 @@ int Mirror<I>::image_get_instance_id(I *ictx, std::string *instance_id) {
 
 template <typename I>
 int Mirror<I>::site_name_get(librados::Rados& rados, std::string* name) {
-  CephContext *cct = reinterpret_cast<CephContext *>(rados.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(rados.cct());
   ldout(cct, 20) << dendl;
 
   int r = get_config_key(rados, RBD_MIRROR_SITE_NAME_CONFIG_KEY, name);
@@ -993,7 +993,7 @@ int Mirror<I>::site_name_get(librados::Rados& rados, std::string* name) {
 
 template <typename I>
 int Mirror<I>::site_name_set(librados::Rados& rados, const std::string& name) {
-  CephContext *cct = reinterpret_cast<CephContext *>(rados.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(rados.cct());
 
   std::string site_name{name};
   boost::algorithm::trim(site_name);
@@ -1014,7 +1014,7 @@ int Mirror<I>::site_name_set(librados::Rados& rados, const std::string& name) {
 template <typename I>
 int Mirror<I>::mode_get(librados::IoCtx& io_ctx,
                         rbd_mirror_mode_t *mirror_mode) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << dendl;
 
   cls::rbd::MirrorMode mirror_mode_internal;
@@ -1043,7 +1043,7 @@ int Mirror<I>::mode_get(librados::IoCtx& io_ctx,
 template <typename I>
 int Mirror<I>::mode_set(librados::IoCtx& io_ctx,
                         rbd_mirror_mode_t mirror_mode) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << dendl;
 
   cls::rbd::MirrorMode next_mirror_mode;
@@ -1238,7 +1238,7 @@ int Mirror<I>::mode_set(librados::IoCtx& io_ctx,
 
 template <typename I>
 int Mirror<I>::uuid_get(librados::IoCtx& io_ctx, std::string* mirror_uuid) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << dendl;
 
   C_SaferCond ctx;
@@ -1258,7 +1258,7 @@ int Mirror<I>::uuid_get(librados::IoCtx& io_ctx, std::string* mirror_uuid) {
 template <typename I>
 void Mirror<I>::uuid_get(librados::IoCtx& io_ctx, std::string* mirror_uuid,
                          Context* on_finish) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << dendl;
 
   auto req = mirror::GetUuidRequest<I>::create(io_ctx, mirror_uuid, on_finish);
@@ -1268,7 +1268,7 @@ void Mirror<I>::uuid_get(librados::IoCtx& io_ctx, std::string* mirror_uuid,
 template <typename I>
 int Mirror<I>::peer_bootstrap_create(librados::IoCtx& io_ctx,
                                      std::string* token) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << dendl;
 
   auto mirror_mode = cls::rbd::MIRROR_MODE_DISABLED;
@@ -1292,8 +1292,8 @@ int Mirror<I>::peer_bootstrap_create(librados::IoCtx& io_ctx,
   }
 
   std::string peer_client_id;
-  std::string cephx_key;
-  r = create_bootstrap_user(cct, rados, &peer_client_id, &cephx_key);
+  std::string stonex_key;
+  r = create_bootstrap_user(cct, rados, &peer_client_id, &stonex_key);
   if (r < 0) {
     return r;
   }
@@ -1307,7 +1307,7 @@ int Mirror<I>::peer_bootstrap_create(librados::IoCtx& io_ctx,
     R"({)" \
       R"("fsid":")" + fsid + R"(",)" + \
       R"("client_id":")" + peer_client_id + R"(",)" + \
-      R"("key":")" + cephx_key + R"(",)" + \
+      R"("key":")" + stonex_key + R"(",)" + \
       R"("mon_host":")" + \
         boost::replace_all_copy(mon_host, "\"", "\\\"") + R"(")" + \
     R"(})");
@@ -1324,7 +1324,7 @@ template <typename I>
 int Mirror<I>::peer_bootstrap_import(librados::IoCtx& io_ctx,
                                      rbd_mirror_peer_direction_t direction,
                                      const std::string& token) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << dendl;
 
   if (direction != RBD_MIRROR_PEER_DIRECTION_RX &&
@@ -1391,7 +1391,7 @@ int Mirror<I>::peer_bootstrap_import(librados::IoCtx& io_ctx,
   librados::Rados remote_rados;
   remote_rados.init(remote_client_id.c_str());
 
-  auto remote_cct = reinterpret_cast<CephContext*>(remote_rados.cct());
+  auto remote_cct = reinterpret_cast<StoneContext*>(remote_rados.cct());
   remote_cct->_conf.set_val("mon_host", remote_mon_host);
   remote_cct->_conf.set_val("key", remote_key);
 
@@ -1499,7 +1499,7 @@ int Mirror<I>::peer_site_add(librados::IoCtx& io_ctx, std::string *uuid,
                              mirror_peer_direction_t direction,
                              const std::string &site_name,
                              const std::string &client_name) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << "name=" << site_name << ", "
                  << "client=" << client_name << dendl;
 
@@ -1535,7 +1535,7 @@ int Mirror<I>::peer_site_add(librados::IoCtx& io_ctx, std::string *uuid,
 template <typename I>
 int Mirror<I>::peer_site_remove(librados::IoCtx& io_ctx,
                                 const std::string &uuid) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << "uuid=" << uuid << dendl;
 
   int r = remove_peer_config_key(io_ctx, uuid);
@@ -1650,7 +1650,7 @@ int Mirror<I>::peer_site_remove(librados::IoCtx& io_ctx,
 template <typename I>
 int Mirror<I>::peer_site_list(librados::IoCtx& io_ctx,
                               std::vector<mirror_peer_site_t> *peers) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << dendl;
 
   std::vector<cls::rbd::MirrorPeer> mirror_peers;
@@ -1680,7 +1680,7 @@ template <typename I>
 int Mirror<I>::peer_site_set_client(librados::IoCtx& io_ctx,
                                     const std::string &uuid,
                                     const std::string &client_name) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << "uuid=" << uuid << ", "
                  << "client=" << client_name << dendl;
 
@@ -1697,7 +1697,7 @@ template <typename I>
 int Mirror<I>::peer_site_set_name(librados::IoCtx& io_ctx,
                                   const std::string &uuid,
                                   const std::string &site_name) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << "uuid=" << uuid << ", "
                  << "name=" << site_name << dendl;
 
@@ -1722,7 +1722,7 @@ int Mirror<I>::peer_site_set_direction(librados::IoCtx& io_ctx,
   cls::rbd::MirrorPeerDirection mirror_peer_direction = static_cast<
     cls::rbd::MirrorPeerDirection>(direction);
 
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << "uuid=" << uuid << ", "
                  << "direction=" << mirror_peer_direction << dendl;
 
@@ -1740,7 +1740,7 @@ template <typename I>
 int Mirror<I>::peer_site_get_attributes(librados::IoCtx& io_ctx,
                                         const std::string &uuid,
                                         Attributes* attributes) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << "uuid=" << uuid << dendl;
 
   attributes->clear();
@@ -1781,7 +1781,7 @@ template <typename I>
 int Mirror<I>::peer_site_set_attributes(librados::IoCtx& io_ctx,
                                         const std::string &uuid,
                                         const Attributes& attributes) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << "uuid=" << uuid << ", "
                  << "attributes=" << attributes << dendl;
 
@@ -1826,7 +1826,7 @@ template <typename I>
 int Mirror<I>::image_global_status_list(
     librados::IoCtx& io_ctx, const std::string &start_id, size_t max,
     IdToMirrorImageGlobalStatus *images) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   int r;
 
   map<string, string> id_to_name;
@@ -1909,7 +1909,7 @@ int Mirror<I>::image_global_status_list(
 template <typename I>
 int Mirror<I>::image_status_summary(librados::IoCtx& io_ctx,
                                     MirrorImageStatusStates *states) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
 
   std::vector<cls::rbd::MirrorPeer> mirror_peers;
   int r = cls_client::mirror_peer_list(&io_ctx, &mirror_peers);
@@ -1936,7 +1936,7 @@ template <typename I>
 int Mirror<I>::image_instance_id_list(
     librados::IoCtx& io_ctx, const std::string &start_image_id, size_t max,
     std::map<std::string, std::string> *instance_ids) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   std::map<std::string, entity_inst_t> instances;
 
   int r = librbd::cls_client::mirror_image_instance_list(
@@ -1960,7 +1960,7 @@ int Mirror<I>::image_info_list(
     const std::string &start_id, size_t max,
     std::map<std::string, std::pair<mirror_image_mode_t,
                                     mirror_image_info_t>> *entries) {
-  CephContext *cct = reinterpret_cast<CephContext *>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(io_ctx.cct());
   ldout(cct, 20) << "pool=" << io_ctx.get_pool_name() << ", mode_filter="
                  << (mode_filter ? stringify(*mode_filter) : "null")
                  << ", start_id=" << start_id << ", max=" << max << dendl;
@@ -2029,7 +2029,7 @@ int Mirror<I>::image_snapshot_create(I *ictx, uint32_t flags,
 template <typename I>
 void Mirror<I>::image_snapshot_create(I *ictx, uint32_t flags,
                                       uint64_t *snap_id, Context *on_finish) {
-  CephContext *cct = ictx->cct;
+  StoneContext *cct = ictx->cct;
   ldout(cct, 20) << "ictx=" << ictx << dendl;
 
   uint64_t snap_create_flags = 0;

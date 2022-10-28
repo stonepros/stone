@@ -27,7 +27,7 @@
 #include "librbd/image/ListWatchersRequest.h"
 #include <experimental/map>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::api::Trash: " << __func__ << ": "
 
@@ -62,7 +62,7 @@ int disable_mirroring(I *ictx) {
 
 template <typename I>
 int enable_mirroring(IoCtx &io_ctx, const std::string &image_id) {
-  auto cct = reinterpret_cast<CephContext*>(io_ctx.cct());
+  auto cct = reinterpret_cast<StoneContext*>(io_ctx.cct());
 
   uint64_t features;
   uint64_t incompatible_features;
@@ -113,7 +113,7 @@ int list_trash_image_specs(
     librados::IoCtx &io_ctx,
     std::map<std::string, cls::rbd::TrashImageSpec>* trash_image_specs,
     bool exclude_user_remove_source) {
-  CephContext *cct((CephContext *)io_ctx.cct());
+  StoneContext *cct((StoneContext *)io_ctx.cct());
   ldout(cct, 20) << "list_trash_image_specs " << &io_ctx << dendl;
 
   bool more_entries;
@@ -157,8 +157,8 @@ template <typename I>
 int Trash<I>::move(librados::IoCtx &io_ctx, rbd_trash_image_source_t source,
                    const std::string &image_name, const std::string &image_id,
                    uint64_t delay) {
-  ceph_assert(!image_name.empty() && !image_id.empty());
-  CephContext *cct((CephContext *)io_ctx.cct());
+  stone_assert(!image_name.empty() && !image_id.empty());
+  StoneContext *cct((StoneContext *)io_ctx.cct());
   ldout(cct, 20) << &io_ctx << " name=" << image_name << ", id=" << image_id
                  << dendl;
 
@@ -232,7 +232,7 @@ int Trash<I>::move(librados::IoCtx &io_ctx, rbd_trash_image_source_t source,
     ictx->state->close();
   }
 
-  utime_t delete_time{ceph_clock_now()};
+  utime_t delete_time{stone_clock_now()};
   utime_t deferment_end_time{delete_time};
   deferment_end_time += delay;
   cls::rbd::TrashImageSpec trash_image_spec{
@@ -274,7 +274,7 @@ int Trash<I>::move(librados::IoCtx &io_ctx, rbd_trash_image_source_t source,
 template <typename I>
 int Trash<I>::move(librados::IoCtx &io_ctx, rbd_trash_image_source_t source,
                    const std::string &image_name, uint64_t delay) {
-  CephContext *cct((CephContext *)io_ctx.cct());
+  StoneContext *cct((StoneContext *)io_ctx.cct());
   ldout(cct, 20) << &io_ctx << " name=" << image_name << dendl;
 
   // try to get image id from the directory
@@ -326,7 +326,7 @@ int Trash<I>::move(librados::IoCtx &io_ctx, rbd_trash_image_source_t source,
 template <typename I>
 int Trash<I>::get(IoCtx &io_ctx, const std::string &id,
               trash_image_info_t *info) {
-  CephContext *cct((CephContext *)io_ctx.cct());
+  StoneContext *cct((StoneContext *)io_ctx.cct());
   ldout(cct, 20) << __func__ << " " << &io_ctx << dendl;
 
   cls::rbd::TrashImageSpec spec;
@@ -349,7 +349,7 @@ int Trash<I>::get(IoCtx &io_ctx, const std::string &id,
 template <typename I>
 int Trash<I>::list(IoCtx &io_ctx, vector<trash_image_info_t> &entries,
                    bool exclude_user_remove_source) {
-  CephContext *cct((CephContext *)io_ctx.cct());
+  StoneContext *cct((StoneContext *)io_ctx.cct());
   ldout(cct, 20) << __func__ << " " << &io_ctx << dendl;
 
   std::map<std::string, cls::rbd::TrashImageSpec> trash_image_specs;
@@ -374,7 +374,7 @@ int Trash<I>::list(IoCtx &io_ctx, vector<trash_image_info_t> &entries,
 template <typename I>
 int Trash<I>::purge(IoCtx& io_ctx, time_t expire_ts,
                     float threshold, ProgressContext& pctx) {
-  auto *cct((CephContext *) io_ctx.cct());
+  auto *cct((StoneContext *) io_ctx.cct());
   ldout(cct, 20) << &io_ctx << dendl;
 
   std::vector<librbd::trash_image_info_t> trash_entries;
@@ -409,7 +409,7 @@ int Trash<I>::purge(IoCtx& io_ctx, time_t expire_ts,
 
     json_spirit::mValue json;
     if (!json_spirit::read(outbl.to_str(), json)) {
-      lderr(cct) << "ceph df json output could not be parsed"
+      lderr(cct) << "stone df json output could not be parsed"
                  << dendl;
       return -EBADMSG;
     }
@@ -567,7 +567,7 @@ int Trash<I>::purge(IoCtx& io_ctx, time_t expire_ts,
   }
 
   if (!to_be_removed.empty()) {
-    ceph_assert(remove_err < 0);
+    stone_assert(remove_err < 0);
     ldout(cct, 10) << "couldn't remove " << to_be_removed.size()
                    << " expired images" << dendl;
     return remove_err;
@@ -579,7 +579,7 @@ int Trash<I>::purge(IoCtx& io_ctx, time_t expire_ts,
 template <typename I>
 int Trash<I>::remove(IoCtx &io_ctx, const std::string &image_id, bool force,
                      ProgressContext& prog_ctx) {
-  CephContext *cct((CephContext *)io_ctx.cct());
+  StoneContext *cct((StoneContext *)io_ctx.cct());
   ldout(cct, 20) << "trash_remove " << &io_ctx << " " << image_id
                  << " " << force << dendl;
 
@@ -591,7 +591,7 @@ int Trash<I>::remove(IoCtx &io_ctx, const std::string &image_id, bool force,
     return r;
   }
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   if (now < trash_spec.deferment_end_time && !force) {
     lderr(cct) << "error: deferment time has not expired." << dendl;
     return -EPERM;
@@ -634,7 +634,7 @@ int Trash<I>::restore(librados::IoCtx &io_ctx,
                       const TrashImageSources& trash_image_sources,
                       const std::string &image_id,
                       const std::string &image_new_name) {
-  CephContext *cct((CephContext *)io_ctx.cct());
+  StoneContext *cct((StoneContext *)io_ctx.cct());
   ldout(cct, 20) << "trash_restore " << &io_ctx << " " << image_id << " "
                  << image_new_name << dendl;
 

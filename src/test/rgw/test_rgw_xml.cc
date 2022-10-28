@@ -433,7 +433,7 @@ TEST(TestDecoder, Attributes)
       expected_output_with_attributes);
 }
 
-static const char* expected_xml_output = "<Items xmlns=\"https://www.ceph.com/doc/\">"
+static const char* expected_xml_output = "<Items xmlns=\"https://www.stone.com/doc/\">"
                              "<Item Order=\"0\"><NameAndStatus><Name>hello</Name><Status>True</Status></NameAndStatus><Value>0</Value></Item>"
                              "<Item Order=\"1\"><NameAndStatus><Name>hello</Name><Status>False</Status></NameAndStatus><Value>1</Value></Item>"
                              "<Item Order=\"2\"><NameAndStatus><Name>hello</Name><Status>True</Status></NameAndStatus><Value>2</Value></Item>"
@@ -444,7 +444,7 @@ TEST(TestEncoder, ListWithAttrsAndNS)
 {
   XMLFormatter f;
   const auto array_size = 5;
-  f.open_array_section_in_ns("Items", "https://www.ceph.com/doc/");
+  f.open_array_section_in_ns("Items", "https://www.stone.com/doc/");
   for (auto i = 0; i < array_size; ++i) {
     FormatterAttrs item_attrs("Order", std::to_string(i).c_str(), NULL);
     f.open_object_section_with_attrs("Item", item_attrs);

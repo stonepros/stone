@@ -8,7 +8,7 @@
 #include "librbd/Utils.h"
 #include "librbd/watcher/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::TrashWatcher: " << __func__ << ": "
 
@@ -35,7 +35,7 @@ template <typename I>
 void TrashWatcher<I>::notify_image_added(
     librados::IoCtx &io_ctx, const std::string& image_id,
     const cls::rbd::TrashImageSpec& trash_image_spec, Context *on_finish) {
-  CephContext *cct = reinterpret_cast<CephContext*>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext*>(io_ctx.cct());
   ldout(cct, 20) << dendl;
 
   bufferlist bl;
@@ -43,7 +43,7 @@ void TrashWatcher<I>::notify_image_added(
 
   librados::AioCompletion *comp = create_rados_callback(on_finish);
   int r = io_ctx.aio_notify(RBD_TRASH, comp, bl, NOTIFY_TIMEOUT_MS, nullptr);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -51,7 +51,7 @@ template <typename I>
 void TrashWatcher<I>::notify_image_removed(librados::IoCtx &io_ctx,
                                            const std::string& image_id,
                                            Context *on_finish) {
-  CephContext *cct = reinterpret_cast<CephContext*>(io_ctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext*>(io_ctx.cct());
   ldout(cct, 20) << dendl;
 
   bufferlist bl;
@@ -59,14 +59,14 @@ void TrashWatcher<I>::notify_image_removed(librados::IoCtx &io_ctx,
 
   librados::AioCompletion *comp = create_rados_callback(on_finish);
   int r = io_ctx.aio_notify(RBD_TRASH, comp, bl, NOTIFY_TIMEOUT_MS, nullptr);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void TrashWatcher<I>::handle_notify(uint64_t notify_id, uint64_t handle,
                                     uint64_t notifier_id, bufferlist &bl) {
-  CephContext *cct = this->m_cct;
+  StoneContext *cct = this->m_cct;
   ldout(cct, 15) << "notify_id=" << notify_id << ", "
                  << "handle=" << handle << dendl;
 
@@ -90,7 +90,7 @@ void TrashWatcher<I>::handle_notify(uint64_t notify_id, uint64_t handle,
 template <typename I>
 bool TrashWatcher<I>::handle_payload(const ImageAddedPayload &payload,
                                      Context *on_notify_ack) {
-  CephContext *cct = this->m_cct;
+  StoneContext *cct = this->m_cct;
   ldout(cct, 20) << dendl;
   handle_image_added(payload.image_id, payload.trash_image_spec);
   return true;
@@ -99,7 +99,7 @@ bool TrashWatcher<I>::handle_payload(const ImageAddedPayload &payload,
 template <typename I>
 bool TrashWatcher<I>::handle_payload(const ImageRemovedPayload &payload,
                                      Context *on_notify_ack) {
-  CephContext *cct = this->m_cct;
+  StoneContext *cct = this->m_cct;
   ldout(cct, 20) << dendl;
   handle_image_removed(payload.image_id);
   return true;

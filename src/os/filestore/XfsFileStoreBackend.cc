@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Inktank, Inc
  *
@@ -25,11 +25,11 @@
 
 #include "common/errno.h"
 #include "common/linux_version.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/compat.h"
 
 #define dout_context cct()
-#define dout_subsys ceph_subsys_filestore
+#define dout_subsys stone_subsys_filestore
 #undef dout_prefix
 #define dout_prefix *_dout << "xfsfilestorebackend(" << get_basedir_path() << ") "
 
@@ -144,6 +144,6 @@ int XfsFileStoreBackend::set_alloc_hint(int fd, uint64_t hint)
   if (!m_has_extsize)
     return -EOPNOTSUPP;
 
-  ceph_assert(hint < UINT_MAX);
+  stone_assert(hint < UINT_MAX);
   return set_extsize(fd, hint);
 }

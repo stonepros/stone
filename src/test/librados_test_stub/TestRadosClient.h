@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_TEST_RADOS_CLIENT_H
-#define CEPH_TEST_RADOS_CLIENT_H
+#ifndef STONE_TEST_RADOS_CLIENT_H
+#define STONE_TEST_RADOS_CLIENT_H
 
 #include <map>
 #include <memory>
@@ -61,12 +61,12 @@ public:
     std::string oid;
   };
 
-  TestRadosClient(CephContext *cct, TestWatchNotify *watch_notify);
+  TestRadosClient(StoneeContext *cct, TestWatchNotify *watch_notify);
 
   void get();
   void put();
 
-  virtual CephContext *cct();
+  virtual StoneeContext *cct();
 
   virtual uint32_t get_nonce() = 0;
   virtual uint64_t get_instance_id() = 0;
@@ -143,7 +143,7 @@ protected:
 private:
   struct IOContextPool;
 
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   std::atomic<uint64_t> m_refcount = { 0 };
 
   TestWatchNotify *m_watch_notify;
@@ -159,4 +159,4 @@ private:
 
 } // namespace librados
 
-#endif // CEPH_TEST_RADOS_CLIENT_H
+#endif // STONE_TEST_RADOS_CLIENT_H

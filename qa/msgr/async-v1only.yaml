@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     mon_bind_msgr2: false
     conf:
       global:

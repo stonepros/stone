@@ -13,7 +13,7 @@ namespace crimson::net {
 namespace {
 
 seastar::logger& logger() {
-  return crimson::get_logger(ceph_subsys_ms);
+  return crimson::get_logger(stone_subsys_ms);
 }
 
 // an input_stream consumer that reads buffer segments into a bufferlist up to
@@ -120,7 +120,7 @@ close_and_handle_errors(seastar::output_stream<char>& out)
     if (e.code() != std::errc::broken_pipe &&
         e.code() != std::errc::connection_reset) {
       logger().error("Socket::close(): unexpected error {}", e);
-      ceph_abort();
+      stone_abort();
     }
     // can happen when out is already shutdown, ignore
   });
@@ -128,7 +128,7 @@ close_and_handle_errors(seastar::output_stream<char>& out)
 
 seastar::future<> Socket::close() {
 #ifndef NDEBUG
-  ceph_assert(!closed);
+  stone_assert(!closed);
   closed = true;
 #endif
   return seastar::when_all_succeed(
@@ -138,7 +138,7 @@ seastar::future<> Socket::close() {
     return seastar::make_ready_future<>();
   }).handle_exception([] (auto eptr) {
     logger().error("Socket::close(): unexpected exception {}", eptr);
-    ceph_abort();
+    stone_abort();
   });
 }
 
@@ -159,7 +159,7 @@ seastar::future<> Socket::try_trap_pre(bp_action_t& trap) {
     trap = action;
     break;
    default:
-    ceph_abort("unexpected action from trap");
+    stone_abort("unexpected action from trap");
   }
   return seastar::make_ready_future<>();
 }
@@ -175,7 +175,7 @@ seastar::future<> Socket::try_trap_post(bp_action_t& trap) {
     shutdown();
     return blocker->block();
    default:
-    ceph_abort("unexpected action from trap");
+    stone_abort("unexpected action from trap");
   }
   return seastar::make_ready_future<>();
 }
@@ -183,16 +183,16 @@ seastar::future<> Socket::try_trap_post(bp_action_t& trap) {
 void Socket::set_trap(bp_type_t type, bp_action_t action, socket_blocker* blocker_) {
   blocker = blocker_;
   if (type == bp_type_t::READ) {
-    ceph_assert(next_trap_read == bp_action_t::CONTINUE);
+    stone_assert(next_trap_read == bp_action_t::CONTINUE);
     next_trap_read = action;
   } else { // type == bp_type_t::WRITE
     if (next_trap_write == bp_action_t::CONTINUE) {
       next_trap_write = action;
     } else if (next_trap_write == bp_action_t::FAULT) {
       // do_sweep_messages() may combine multiple write events into one socket write
-      ceph_assert(action == bp_action_t::FAULT || action == bp_action_t::CONTINUE);
+      stone_assert(action == bp_action_t::FAULT || action == bp_action_t::CONTINUE);
     } else {
-      ceph_abort();
+      stone_abort();
     }
   }
 }
@@ -218,7 +218,7 @@ FixedCPUServerSocket::listen(entity_addr_t addr)
     } else {
       logger().error("FixedCPUServerSocket::listen({}): "
                      "got unexpeted error {}", addr, e);
-      ceph_abort();
+      stone_abort();
     }
     return false;
   }).then([] (bool success) -> listen_ertr::future<> {

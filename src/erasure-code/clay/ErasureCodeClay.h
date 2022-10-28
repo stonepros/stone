@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2018 Indian Institute of Science <office.ece@iisc.ac.in>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_ERASURE_CODE_CLAY_H
-#define CEPH_ERASURE_CODE_CLAY_H
+#ifndef STONE_ERASURE_CODE_CLAY_H
+#define STONE_ERASURE_CODE_CLAY_H
 
 #include "include/err.h"
 #include "include/buffer_fwd.h"

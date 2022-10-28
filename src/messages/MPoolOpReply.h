@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MPOOLOPREPLY_H
-#define CEPH_MPOOLOPREPLY_H
+#ifndef STONE_MPOOLOPREPLY_H
+#define STONE_MPOOLOPREPLY_H
 
 #include "common/errno.h"
 
@@ -24,10 +24,10 @@ public:
   epoch_t epoch = 0;
   ceph::buffer::list response_data;
 
-  MPoolOpReply() : PaxosServiceMessage{CEPH_MSG_POOLOP_REPLY, 0}
+  MPoolOpReply() : PaxosServiceMessage{STONE_MSG_POOLOP_REPLY, 0}
   {}
   MPoolOpReply( uuid_d& f, ceph_tid_t t, int rc, int e, version_t v) :
-    PaxosServiceMessage{CEPH_MSG_POOLOP_REPLY, v},
+    PaxosServiceMessage{STONE_MSG_POOLOP_REPLY, v},
     fsid(f),
     replyCode(rc),
     epoch(e) {
@@ -35,7 +35,7 @@ public:
   }
   MPoolOpReply(uuid_d& f, ceph_tid_t t, int rc, int e, version_t v,
 	       ceph::buffer::list *blp) :
-    PaxosServiceMessage{CEPH_MSG_POOLOP_REPLY, v},
+    PaxosServiceMessage{STONE_MSG_POOLOP_REPLY, v},
     fsid(f),
     replyCode(rc),
     epoch(e) {

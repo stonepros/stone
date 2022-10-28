@@ -11,7 +11,7 @@
 #include "cls/lock/cls_lock_client.h"
 #include <string>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::UpdateRequest: " << this \
                            << " " << __func__ << ": "
@@ -33,9 +33,9 @@ void UpdateRequest<I>::send() {
 
 template <typename I>
 void UpdateRequest<I>::update_object_map() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.image_lock));
-  ceph_assert(ceph_mutex_is_locked(*m_object_map_lock));
-  CephContext *cct = m_image_ctx.cct;
+  stone_assert(stone_mutex_is_locked(m_image_ctx.image_lock));
+  stone_assert(stone_mutex_is_locked(*m_object_map_lock));
+  StoneContext *cct = m_image_ctx.cct;
 
   // break very large requests into manageable batches
   m_update_end_object_no = std::min(
@@ -51,7 +51,7 @@ void UpdateRequest<I>::update_object_map() {
 		 << dendl;
 
   librados::ObjectWriteOperation op;
-  if (m_snap_id == CEPH_NOSNAP) {
+  if (m_snap_id == STONE_NOSNAP) {
     rados::cls::lock::assert_locked(&op, RBD_LOCK_NAME, ClsLockType::EXCLUSIVE, "", "");
   }
   cls_client::object_map_update(&op, m_update_start_object_no,
@@ -64,7 +64,7 @@ void UpdateRequest<I>::update_object_map() {
   int r = m_image_ctx.md_ctx.aio_operate(
     oid, rados_completion, &op, 0, snaps,
     (m_trace.valid() ? m_trace.get_info() : nullptr));
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
@@ -97,8 +97,8 @@ void UpdateRequest<I>::handle_update_object_map(int r) {
 
 template <typename I>
 void UpdateRequest<I>::update_in_memory_object_map() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.image_lock));
-  ceph_assert(ceph_mutex_is_locked(*m_object_map_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.image_lock));
+  stone_assert(stone_mutex_is_locked(*m_object_map_lock));
 
   // rebuilding the object map might update on-disk only
   if (m_snap_id == m_image_ctx.snap_id) {

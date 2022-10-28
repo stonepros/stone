@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,8 +20,8 @@
 
 #include "RecoveryQueue.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << mds->get_nodeid() << " RecoveryQueue::" << __func__ << " "
 
@@ -29,7 +29,7 @@ class C_MDC_Recover : public MDSIOContextBase {
 public:
   C_MDC_Recover(RecoveryQueue *rq_, CInode *i) :
     MDSIOContextBase(false), rq(rq_), in(i) {
-    ceph_assert(rq != NULL);
+    stone_assert(rq != NULL);
   }
   void print(ostream& out) const override {
     out << "file_recover(" << in->ino() << ")";
@@ -117,7 +117,7 @@ void RecoveryQueue::_start(CInode *in)
     dout(10) << "skipping " << pi->size << " " << *in << dendl;
     if (p == file_recovering.end()) {
       in->state_clear(CInode::STATE_RECOVERING);
-      mds->locker->eval(in, CEPH_LOCK_IFILE);
+      mds->locker->eval(in, STONE_LOCK_IFILE);
       in->auth_unpin(this);
     }
   }
@@ -133,7 +133,7 @@ void RecoveryQueue::prioritize(CInode *in)
   if (!in->item_recover_queue_front.is_on_list()) {
     dout(20) << *in << dendl;
 
-    ceph_assert(in->item_recover_queue.is_on_list());
+    stone_assert(in->item_recover_queue.is_on_list());
     in->item_recover_queue.remove_myself();
     file_recover_queue_size--;
 
@@ -160,8 +160,8 @@ static bool _is_in_any_recover_queue(CInode *in)
 void RecoveryQueue::enqueue(CInode *in)
 {
   dout(15) << "RecoveryQueue::enqueue " << *in << dendl;
-  ceph_assert(logger);  // Caller should have done set_logger before using me
-  ceph_assert(in->is_auth());
+  stone_assert(logger);  // Caller should have done set_logger before using me
+  stone_assert(in->is_auth());
 
   in->state_clear(CInode::STATE_NEEDSRECOVER);
   if (!in->state_test(CInode::STATE_RECOVERING)) {
@@ -188,7 +188,7 @@ void RecoveryQueue::_recovered(CInode *in, int r, uint64_t size, utime_t mtime)
 
   if (r != 0) {
     dout(0) << "recovery error! " << r << dendl;
-    if (r == -CEPHFS_EBLOCKLISTED) {
+    if (r == -STONEFS_EBLOCKLISTED) {
       mds->respawn();
       return;
     } else {
@@ -204,7 +204,7 @@ void RecoveryQueue::_recovered(CInode *in, int r, uint64_t size, utime_t mtime)
   }
 
   auto p = file_recovering.find(in);
-  ceph_assert(p != file_recovering.end());
+  stone_assert(p != file_recovering.end());
   bool restart = p->second;
   file_recovering.erase(p);
 
@@ -227,7 +227,7 @@ void RecoveryQueue::_recovered(CInode *in, int r, uint64_t size, utime_t mtime)
   } else if (!_is_in_any_recover_queue(in)) {
     // journal
     mds->locker->check_inode_max_size(in, true, 0,  size, mtime);
-    mds->locker->eval(in, CEPH_LOCK_IFILE);
+    mds->locker->eval(in, STONE_LOCK_IFILE);
     in->auth_unpin(this);
   }
 

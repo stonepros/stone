@@ -13,7 +13,7 @@
 #include "librbd/io/ImageDispatcherInterface.h"
 #include "librbd/io/ObjectDispatcherInterface.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::crypto::util: " << __func__ << ": "
 
@@ -22,10 +22,10 @@ namespace crypto {
 namespace util {
 
 template <typename I>
-void set_crypto(I *image_ctx, ceph::ref_t<CryptoInterface> crypto) {
+void set_crypto(I *image_ctx, stone::ref_t<CryptoInterface> crypto) {
   {
     std::unique_lock image_locker{image_ctx->image_lock};
-    ceph_assert(image_ctx->crypto == nullptr);
+    stone_assert(image_ctx->crypto == nullptr);
     image_ctx->crypto = crypto.get();
   }
   auto object_dispatch = CryptoObjectDispatch<I>::create(image_ctx, crypto);
@@ -35,9 +35,9 @@ void set_crypto(I *image_ctx, ceph::ref_t<CryptoInterface> crypto) {
 }
 
 int build_crypto(
-        CephContext* cct, const unsigned char* key, uint32_t key_length,
+        StoneContext* cct, const unsigned char* key, uint32_t key_length,
         uint64_t block_size, uint64_t data_offset,
-        ceph::ref_t<CryptoInterface>* result_crypto) {
+        stone::ref_t<CryptoInterface>* result_crypto) {
   const char* cipher_suite;
   switch (key_length) {
     case 32:
@@ -70,4 +70,4 @@ int build_crypto(
 } // namespace librbd
 
 template void librbd::crypto::util::set_crypto(
-    librbd::ImageCtx *image_ctx, ceph::ref_t<CryptoInterface> crypto);
+    librbd::ImageCtx *image_ctx, stone::ref_t<CryptoInterface> crypto);

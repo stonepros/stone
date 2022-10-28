@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -53,7 +53,7 @@ int RadosDump::get_header(header *h)
 
 int RadosDump::get_footer(footer *f)
 {
-  ceph_assert(f != NULL);
+  stone_assert(f != NULL);
 
   bufferlist ebl;
   auto ebliter = ebl.cbegin();
@@ -161,6 +161,6 @@ void RadosDump::write_super()
   superbl.clear();
 
   sh.encode(superbl);
-  ceph_assert(super_header::FIXED_LENGTH == superbl.length());
+  stone_assert(super_header::FIXED_LENGTH == superbl.length());
   superbl.write_fd(file_fd);
 }

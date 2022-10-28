@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -28,7 +28,7 @@
 
 #define MGR_METADATA_PREFIX "mgr_metadata"
 
-#define dout_subsys ceph_subsys_mon
+#define dout_subsys stone_subsys_mon
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, mon, map)
 using namespace TOPNSPC::common;
@@ -47,16 +47,16 @@ using std::stringstream;
 using std::to_string;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::ErasureCodeInterfaceRef;
-using ceph::ErasureCodeProfile;
-using ceph::Formatter;
-using ceph::JSONFormatter;
-using ceph::make_message;
-using ceph::mono_clock;
-using ceph::mono_time;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::ErasureCodeInterfaceRef;
+using stone::ErasureCodeProfile;
+using stone::Formatter;
+using stone::JSONFormatter;
+using stone::make_message;
+using stone::mono_clock;
+using stone::mono_time;
 
 static ostream& _prefix(std::ostream *_dout, Monitor &mon,
 			const MgrMap& mgrmap) {
@@ -69,7 +69,7 @@ static ostream& _prefix(std::ostream *_dout, Monitor &mon,
 // by ensuring that they are always enabled.
 const static std::map<uint32_t, std::set<std::string>> always_on_modules = {
   {
-    CEPH_RELEASE_NAUTILUS, {
+    STONE_RELEASE_NAUTILUS, {
       "crash",
       "status",
       "progress",
@@ -81,7 +81,7 @@ const static std::map<uint32_t, std::set<std::string>> always_on_modules = {
     }
   },
   {
-    CEPH_RELEASE_OCTOPUS, {
+    STONE_RELEASE_OCTOPUS, {
       "crash",
       "status",
       "progress",
@@ -95,7 +95,7 @@ const static std::map<uint32_t, std::set<std::string>> always_on_modules = {
     }
   },
   {
-    CEPH_RELEASE_PACIFIC, {
+    STONE_RELEASE_PACIFIC, {
       "crash",
       "status",
       "progress",
@@ -180,7 +180,7 @@ void MgrMonitor::update_from_paxos(bool *need_bootstrap)
 
     bufferlist bl;
     int err = get_version(version, bl);
-    ceph_assert(err == 0);
+    stone_assert(err == 0);
 
     bool old_available = map.get_available();
     uint64_t old_gid = map.get_active_gid();
@@ -198,7 +198,7 @@ void MgrMonitor::update_from_paxos(bool *need_bootstrap)
     if (map.available) {
       first_seen_inactive = utime_t();
     } else {
-      first_seen_inactive = ceph_clock_now();
+      first_seen_inactive = stone_clock_now();
     }
 
     check_subs();
@@ -291,7 +291,7 @@ void MgrMonitor::create_pending()
 
 health_status_t MgrMonitor::should_warn_about_mgr_down()
 {
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   // we warn if we have osds AND we've exceeded the grace period
   // which means a new mon cluster and be HEALTH_OK indefinitely as long as
   // no OSDs are ever created.
@@ -316,7 +316,7 @@ void MgrMonitor::post_paxos_update()
       prev_health_checks.resize(mon.paxos_service.size());
       send = true;
     }
-    ceph_assert(prev_health_checks.size() == mon.paxos_service.size());
+    stone_assert(prev_health_checks.size() == mon.paxos_service.size());
     for (auto i = 0u; i < prev_health_checks.size(); i++) {
       const auto& curr = mon.paxos_service[i]->get_health_checks();
       if (!send && curr != prev_health_checks[i]) {
@@ -513,7 +513,7 @@ bool MgrMonitor::prepare_beacon(MonOpRequestRef op)
     }
   }
 
-  last_beacon[m->get_gid()] = ceph::coarse_mono_clock::now();
+  last_beacon[m->get_gid()] = stone::coarse_mono_clock::now();
 
   // Track whether we modified pending_map
   bool updated = false;
@@ -580,7 +580,7 @@ bool MgrMonitor::prepare_beacon(MonOpRequestRef op)
 	    << pending_map.active_name << ")" << dendl;
     pending_map.active_gid = m->get_gid();
     pending_map.active_name = m->get_name();
-    pending_map.active_change = ceph_clock_now();
+    pending_map.active_change = stone_clock_now();
     pending_map.active_mgr_features = m->get_mgr_features();
     pending_map.available_modules = m->get_available_modules();
     encode(m->get_metadata(), pending_metadata[m->get_name()]);
@@ -650,7 +650,7 @@ void MgrMonitor::check_sub(Subscription *sub)
       }
     }
   } else {
-    ceph_assert(sub->type == "mgrdigest");
+    stone_assert(sub->type == "mgrdigest");
     if (sub->next == 0) {
       // new registration; cancel previous timer
       cancel_timer();
@@ -738,7 +738,7 @@ void MgrMonitor::tick()
   if (!is_active() || !mon.is_leader())
     return;
 
-  const auto now = ceph::coarse_mono_clock::now();
+  const auto now = stone::coarse_mono_clock::now();
 
   const auto mgr_beacon_grace =
       g_conf().get_val<std::chrono::seconds>("mon_mgr_beacon_grace");
@@ -748,7 +748,7 @@ void MgrMonitor::tick()
   const auto mgr_tick_period =
       g_conf().get_val<std::chrono::seconds>("mgr_tick_period");
 
-  if (last_tick != ceph::coarse_mono_clock::time_point::min()
+  if (last_tick != stone::coarse_mono_clock::time_point::min()
       && (now - last_tick > (mgr_beacon_grace - mgr_tick_period))) {
     // This case handles either local slowness (calls being delayed
     // for whatever reason) or cluster election slowness (a long gap
@@ -830,7 +830,7 @@ void MgrMonitor::tick()
   }
 
   // obsolete modules?
-  if (mon.monmap->min_mon_release >= ceph_release_t::octopus &&
+  if (mon.monmap->min_mon_release >= stone_release_t::octopus &&
       pending_map.module_enabled("orchestrator_cli")) {
     dout(10) << " disabling obsolete/renamed 'orchestrator_cli'" << dendl;
     // we don't need to enable 'orchestrator' because it's now always-on
@@ -847,13 +847,13 @@ void MgrMonitor::on_restart()
 {
   // Clear out the leader-specific state.
   last_beacon.clear();
-  last_tick = ceph::coarse_mono_clock::now();
+  last_tick = stone::coarse_mono_clock::now();
 }
 
 
 bool MgrMonitor::promote_standby()
 {
-  ceph_assert(pending_map.active_gid == 0);
+  stone_assert(pending_map.active_gid == 0);
   if (pending_map.standbys.size()) {
     // Promote a replacement (arbitrary choice of standby)
     auto replacement_gid = pending_map.standbys.begin()->first;
@@ -865,7 +865,7 @@ bool MgrMonitor::promote_standby()
       pending_map.standbys.at(replacement_gid).mgr_features;
     pending_map.available = false;
     pending_map.active_addrs = entity_addrvec_t();
-    pending_map.active_change = ceph_clock_now();
+    pending_map.active_change = stone_clock_now();
 
     drop_standby(replacement_gid, false);
 
@@ -877,14 +877,14 @@ bool MgrMonitor::promote_standby()
 
 void MgrMonitor::drop_active()
 {
-  ceph_assert(mon.osdmon()->is_writeable());
+  stone_assert(mon.osdmon()->is_writeable());
 
   if (last_beacon.count(pending_map.active_gid) > 0) {
     last_beacon.erase(pending_map.active_gid);
   }
 
-  ceph_assert(pending_map.active_gid > 0);
-  auto until = ceph_clock_now();
+  stone_assert(pending_map.active_gid > 0);
+  auto until = stone_clock_now();
   until += g_conf().get_val<double>("mon_mgr_blocklist_interval");
   dout(5) << "blocklisting previous mgr." << pending_map.active_name << "."
           << pending_map.active_gid << " ("
@@ -901,7 +901,7 @@ void MgrMonitor::drop_active()
   pending_metadata.erase(pending_map.active_name);
   pending_map.active_name = "";
   pending_map.active_gid = 0;
-  pending_map.active_change = ceph_clock_now();
+  pending_map.active_change = stone_clock_now();
   pending_map.active_mgr_features = 0;
   pending_map.available = false;
   pending_map.active_addrs = entity_addrvec_t();
@@ -1058,7 +1058,7 @@ bool MgrMonitor::preprocess_command(MonOpRequestRef op)
     }
     f->flush(rdata);
   } else if (prefix == "mgr versions") {
-    count_metadata("ceph_version", f.get());
+    count_metadata("stone_version", f.get());
     f->flush(rdata);
     r = 0;
   } else if (prefix == "mgr count-metadata") {
@@ -1266,7 +1266,7 @@ int MgrMonitor::load_metadata(const string& name, std::map<string, string>& m,
     auto p = bl.cbegin();
     decode(m, p);
   }
-  catch (ceph::buffer::error& e) {
+  catch (stone::buffer::error& e) {
     if (err)
       *err << "mgr." << name << " metadata is corrupt";
     return -EIO;
@@ -1306,7 +1306,7 @@ void MgrMonitor::get_versions(std::map<string, list<string> > &versions)
   for (auto& name : ls) {
     std::map<string,string> meta;
     load_metadata(name, meta, nullptr);
-    auto p = meta.find("ceph_version_short");
+    auto p = meta.find("stone_version_short");
     if (p == meta.end()) continue;
     versions[p->second].push_back(string("mgr.") + name);
   }
@@ -1325,7 +1325,7 @@ int MgrMonitor::dump_metadata(const string& name, Formatter *f, ostream *err)
 
 void MgrMonitor::print_nodes(Formatter *f) const
 {
-  ceph_assert(f);
+  stone_assert(f);
 
   std::map<string, list<string> > mgrs; // hostname => mgr
   auto ls = map.get_all_names();

@@ -20,8 +20,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_ARRAY_MAP_HH_
-#define CEPH_ARRAY_MAP_HH_
+#ifndef STONE_ARRAY_MAP_HH_
+#define STONE_ARRAY_MAP_HH_
 
 #include <array>
 

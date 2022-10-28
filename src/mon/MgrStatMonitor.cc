@@ -12,9 +12,9 @@
 #include "messages/MStatfsReply.h"
 #include "messages/MServiceMap.h"
 
-#include "include/ceph_assert.h"	// re-clobber assert
+#include "include/stone_assert.h"	// re-clobber assert
 
-#define dout_subsys ceph_subsys_mon
+#define dout_subsys stone_subsys_mon
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, mon)
 
@@ -32,16 +32,16 @@ using std::stringstream;
 using std::to_string;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::ErasureCodeInterfaceRef;
-using ceph::ErasureCodeProfile;
-using ceph::Formatter;
-using ceph::JSONFormatter;
-using ceph::make_message;
-using ceph::mono_clock;
-using ceph::mono_time;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::ErasureCodeInterfaceRef;
+using stone::ErasureCodeProfile;
+using stone::Formatter;
+using stone::JSONFormatter;
+using stone::make_message;
+using stone::mono_clock;
+using stone::mono_time;
 
 static ostream& _prefix(std::ostream *_dout, Monitor &mon) {
   return *_dout << "mon." << mon.name << "@" << mon.rank
@@ -61,9 +61,9 @@ void MgrStatMonitor::create_initial()
   dout(10) << __func__ << dendl;
   version = 0;
   service_map.epoch = 1;
-  service_map.modified = ceph_clock_now();
+  service_map.modified = stone_clock_now();
   pending_service_map_bl.clear();
-  encode(service_map, pending_service_map_bl, CEPH_FEATURES_ALL);
+  encode(service_map, pending_service_map_bl, STONE_FEATURES_ALL);
 }
 
 void MgrStatMonitor::update_from_paxos(bool *need_bootstrap)
@@ -74,7 +74,7 @@ void MgrStatMonitor::update_from_paxos(bool *need_bootstrap)
   bufferlist bl;
   get_version(version, bl);
   if (version) {
-    ceph_assert(bl.length());
+    stone_assert(bl.length());
     try {
       auto p = bl.cbegin();
       decode(digest, p);
@@ -87,7 +87,7 @@ void MgrStatMonitor::update_from_paxos(bool *need_bootstrap)
 	       << " " << progress_events.size() << " progress events"
 	       << dendl;
     }
-    catch (ceph::buffer::error& e) {
+    catch (stone::buffer::error& e) {
       derr << "failed to decode mgrstat state; luminous dev version? "
 	   << e.what() << dendl;
     }
@@ -153,7 +153,7 @@ void MgrStatMonitor::encode_pending(MonitorDBStore::TransactionRef t)
   dout(10) << " " << version << dendl;
   bufferlist bl;
   encode(pending_digest, bl, mon.get_quorum_con_features());
-  ceph_assert(pending_service_map_bl.length());
+  stone_assert(pending_service_map_bl.length());
   bl.append(pending_service_map_bl);
   encode(pending_progress_events, bl);
   put_version(t, version, bl);
@@ -184,7 +184,7 @@ bool MgrStatMonitor::preprocess_query(MonOpRequestRef op)
 {
   auto m = op->get_req<PaxosServiceMessage>();
   switch (m->get_type()) {
-  case CEPH_MSG_STATFS:
+  case STONE_MSG_STATFS:
     return preprocess_statfs(op);
   case MSG_MON_MGR_REPORT:
     return preprocess_report(op);

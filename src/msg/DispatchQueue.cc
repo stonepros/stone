@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -15,13 +15,13 @@
 #include "msg/Message.h"
 #include "DispatchQueue.h"
 #include "Messenger.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #include "common/debug.h"
 
-using ceph::cref_t;
-using ceph::ref_t;
+using stone::cref_t;
+using stone::ref_t;
 
 /*******************
  * DispatchQueue
@@ -46,7 +46,7 @@ uint64_t DispatchQueue::pre_dispatch(const ref_t<Message>& m)
 	       << " ==== " << m->get_payload().length()
 	       << "+" << m->get_middle().length()
 	       << "+" << m->get_data().length()
-	       << " (" << ceph_con_mode_name(m->get_connection()->get_con_mode())
+	       << " (" << stone_con_mode_name(m->get_connection()->get_con_mode())
 	       << " " << m->get_footer().front_crc << " "
 	       << m->get_footer().middle_crc
 	       << " " << m->get_footer().data_crc << ")"
@@ -88,7 +88,7 @@ void DispatchQueue::enqueue(const ref_t<Message>& m, int priority, uint64_t id)
   }
   ldout(cct,20) << "queue " << m << " prio " << priority << dendl;
   add_arrival(m);
-  if (priority >= CEPH_MSG_PRIO_LOW) {
+  if (priority >= STONE_MSG_PRIO_LOW) {
     mqueue.enqueue_strict(id, priority, QueueItem(m));
   } else {
     mqueue.enqueue(id, priority, m->get_cost(), QueueItem(m));
@@ -98,7 +98,7 @@ void DispatchQueue::enqueue(const ref_t<Message>& m, int priority, uint64_t id)
 
 void DispatchQueue::local_delivery(const ref_t<Message>& m, int priority)
 {
-  auto local_delivery_stamp = ceph_clock_now();
+  auto local_delivery_stamp = stone_clock_now();
   m->set_recv_stamp(local_delivery_stamp);
   m->set_throttle_stamp(local_delivery_stamp);
   m->set_recv_complete_stamp(local_delivery_stamp);
@@ -190,7 +190,7 @@ void DispatchQueue::entry()
 	  msgr->ms_deliver_handle_refused(qitem.get_connection());
 	  break;
 	default:
-	  ceph_abort();
+	  stone_abort();
 	}
       } else {
 	const ref_t<Message>& m = qitem.get_message();
@@ -218,7 +218,7 @@ void DispatchQueue::discard_queue(uint64_t id) {
   std::list<QueueItem> removed;
   mqueue.remove_by_class(id, &removed);
   for (auto i = removed.begin(); i != removed.end(); ++i) {
-    ceph_assert(!(i->is_code())); // We don't discard id 0, ever!
+    stone_assert(!(i->is_code())); // We don't discard id 0, ever!
     const ref_t<Message>& m = i->get_message();
     remove_arrival(m);
     dispatch_throttle_release(m->get_dispatch_throttle_size());
@@ -227,8 +227,8 @@ void DispatchQueue::discard_queue(uint64_t id) {
 
 void DispatchQueue::start()
 {
-  ceph_assert(!stop);
-  ceph_assert(!dispatch_thread.is_started());
+  stone_assert(!stop);
+  stone_assert(!dispatch_thread.is_started());
   dispatch_thread.create("ms_dispatch");
   local_delivery_thread.create("ms_local");
 }

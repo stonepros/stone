@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MMONSUBSCRIBE_H
-#define CEPH_MMONSUBSCRIBE_H
+#ifndef STONE_MMONSUBSCRIBE_H
+#define STONE_MMONSUBSCRIBE_H
 
 #include "msg/Message.h"
 #include "include/ceph_features.h"
@@ -37,7 +37,7 @@ public:
   std::string hostname;
   std::map<std::string, ceph_mon_subscribe_item> what;
 
-  MMonSubscribe() : Message{CEPH_MSG_MON_SUBSCRIBE, HEAD_VERSION, COMPAT_VERSION} { }
+  MMonSubscribe() : Message{STONE_MSG_MON_SUBSCRIBE, HEAD_VERSION, COMPAT_VERSION} { }
 private:
   ~MMonSubscribe() final {}
 
@@ -66,7 +66,7 @@ public:
 	  what[q->first].start = 0;
 	what[q->first].flags = 0;
 	if (q->second.onetime)
-	  what[q->first].flags |= CEPH_SUBSCRIBE_ONETIME;
+	  what[q->first].flags |= STONE_SUBSCRIBE_ONETIME;
       }
       return;
     }
@@ -77,7 +77,7 @@ public:
   }
   void encode_payload(uint64_t features) override {
     using ceph::encode;
-    if ((features & CEPH_FEATURE_SUBSCRIBE2) == 0) {
+    if ((features & STONE_FEATURE_SUBSCRIBE2) == 0) {
       header.version = 0;
       std::map<std::string, ceph_mon_subscribe_item_old> oldwhat;
       for (auto q = what.begin(); q != what.end(); q++) {
@@ -86,7 +86,7 @@ public:
 	  oldwhat[q->first].have = q->second.start - 1;
 	else
 	  oldwhat[q->first].have = 0;
-	oldwhat[q->first].onetime = q->second.flags & CEPH_SUBSCRIBE_ONETIME;
+	oldwhat[q->first].onetime = q->second.flags & STONE_SUBSCRIBE_ONETIME;
       }
       encode(oldwhat, payload);
       return;

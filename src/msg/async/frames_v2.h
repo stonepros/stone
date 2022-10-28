@@ -20,7 +20,7 @@ namespace ceph::msgr::v2 {
 
 // We require these features from any peer, period, in order to encode
 // a entity_addrvec_t.
-const uint64_t msgr2_required = CEPH_FEATUREMASK_MSG_ADDR2;
+const uint64_t msgr2_required = STONE_FEATUREMASK_MSG_ADDR2;
 
 // We additionally assume the peer has the below features *purely for
 // the purpose of encoding the frames themselves*.  The only complex
@@ -33,7 +33,7 @@ const uint64_t msgr2_required = CEPH_FEATUREMASK_MSG_ADDR2;
 // bit would be a cleaner approach, but those are scarce these days.
 const uint64_t msgr2_frame_assumed =
 		   msgr2_required |
-		   CEPH_FEATUREMASK_SERVER_NAUTILUS;
+		   STONE_FEATUREMASK_SERVER_NAUTILUS;
 
 enum class Tag : __u8 {
   HELLO = 1,

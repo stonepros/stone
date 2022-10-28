@@ -1,5 +1,5 @@
-#ifndef CEPH_CRUSH_TYPES_H
-#define CEPH_CRUSH_TYPES_H
+#ifndef STONE_CRUSH_TYPES_H
+#define STONE_CRUSH_TYPES_H
 
 #ifdef KERNEL
 # define free(x) kfree(x)

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -24,10 +24,10 @@
 #include <stdint.h>
 #include <arpa/inet.h>
 #include "include/Context.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Cond.h"
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "msg/async/Event.h"
 
 #include <atomic>
@@ -68,14 +68,14 @@ class EventDriverTest : public ::testing::TestWithParam<const char*> {
     cerr << __func__ << " start set up " << GetParam() << std::endl;
 #ifdef HAVE_EPOLL
     if (strcmp(GetParam(), "epoll"))
-      driver = new EpollDriver(g_ceph_context);
+      driver = new EpollDriver(g_stone_context);
 #endif
 #ifdef HAVE_KQUEUE
     if (strcmp(GetParam(), "kqueue"))
-      driver = new KqueueDriver(g_ceph_context);
+      driver = new KqueueDriver(g_stone_context);
 #endif
     if (strcmp(GetParam(), "select"))
-      driver = new SelectDriver(g_ceph_context);
+      driver = new SelectDriver(g_stone_context);
     driver->init(NULL, 100);
   }
   void TearDown() override {
@@ -147,12 +147,12 @@ void* echoclient(void *arg)
   sa.sin_port = htons(port);
   char addr[] = "127.0.0.1";
   int r = inet_pton(AF_INET, addr, &sa.sin_addr);
-  ceph_assert(r == 1);
+  stone_assert(r == 1);
 
   int connect_sd = ::socket(AF_INET, SOCK_STREAM, 0);
   if (connect_sd >= 0) {
     r = connect(connect_sd, (struct sockaddr*)&sa, sizeof(sa));
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     int t = 0;
   
     do {
@@ -257,7 +257,7 @@ class FakeEvent : public EventCallback {
 
 TEST(EventCenterTest, FileEventExpansion) {
   vector<int> sds;
-  EventCenter center(g_ceph_context);
+  EventCenter center(g_stone_context);
   center.init(100, 0, "posix");
   center.set_owner();
   EventCallbackRef e(new FakeEvent());
@@ -273,12 +273,12 @@ TEST(EventCenterTest, FileEventExpansion) {
 
 
 class Worker : public Thread {
-  CephContext *cct;
+  StoneContext *cct;
   bool done;
 
  public:
   EventCenter center;
-  explicit Worker(CephContext *c, int idx): cct(c), done(false), center(c) {
+  explicit Worker(StoneContext *c, int idx): cct(c), done(false), center(c) {
     center.init(100, idx, "posix");
   }
   void stop() {
@@ -295,12 +295,12 @@ class Worker : public Thread {
 
 class CountEvent: public EventCallback {
   std::atomic<unsigned> *count;
-  ceph::mutex *lock;
-  ceph::condition_variable *cond;
+  stone::mutex *lock;
+  stone::condition_variable *cond;
 
  public:
   CountEvent(std::atomic<unsigned> *atomic,
-             ceph::mutex *l, ceph::condition_variable *c)
+             stone::mutex *l, stone::condition_variable *c)
     : count(atomic), lock(l), cond(c) {}
   void do_request(uint64_t id) override {
     std::scoped_lock l{*lock};
@@ -310,10 +310,10 @@ class CountEvent: public EventCallback {
 };
 
 TEST(EventCenterTest, DispatchTest) {
-  Worker worker1(g_ceph_context, 1), worker2(g_ceph_context, 2);
+  Worker worker1(g_stone_context, 1), worker2(g_stone_context, 2);
   std::atomic<unsigned> count = { 0 };
-  ceph::mutex lock = ceph::make_mutex("DispatchTest::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("DispatchTest::lock");
+  stone::condition_variable cond;
   worker1.create("worker_1");
   worker2.create("worker_2");
   for (int i = 0; i < 10000; ++i) {
@@ -346,8 +346,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 /*
  * Local Variables:
- * compile-command: "cd ../.. ; make ceph_test_async_driver && 
- *    ./ceph_test_async_driver
+ * compile-command: "cd ../.. ; make stone_test_async_driver && 
+ *    ./stone_test_async_driver
  *
  * End:
  */

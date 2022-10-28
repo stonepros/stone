@@ -7,14 +7,14 @@
 #include "common/debug.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 
 using std::map;
 using std::set;
 
 void Session::clear_backoffs()
 {
-  map<spg_t,map<hobject_t,set<ceph::ref_t<Backoff>>>> ls;
+  map<spg_t,map<hobject_t,set<stone::ref_t<Backoff>>>> ls;
   {
     std::lock_guard l(backoff_lock);
     ls.swap(backoffs);
@@ -25,14 +25,14 @@ void Session::clear_backoffs()
       for (auto& b : p.second) {
 	std::lock_guard l(b->lock);
 	if (b->pg) {
-	  ceph_assert(b->session == this);
-	  ceph_assert(b->is_new() || b->is_acked());
+	  stone_assert(b->session == this);
+	  stone_assert(b->is_new() || b->is_acked());
 	  b->pg->rm_backoff(b);
 	  b->pg.reset();
 	  b->session.reset();
 	} else if (b->session) {
-	  ceph_assert(b->session == this);
-	  ceph_assert(b->is_deleting());
+	  stone_assert(b->session == this);
+	  stone_assert(b->is_deleting());
 	  b->session.reset();
 	}
       }
@@ -41,7 +41,7 @@ void Session::clear_backoffs()
 }
 
 void Session::ack_backoff(
-  CephContext *cct,
+  StoneContext *cct,
   spg_t pgid,
   uint64_t id,
   const hobject_t& begin,
@@ -82,17 +82,17 @@ void Session::ack_backoff(
       backoffs.erase(p);
     }
   }
-  ceph_assert(!backoff_count == backoffs.empty());
+  stone_assert(!backoff_count == backoffs.empty());
 }
 
 bool Session::check_backoff(
-  CephContext *cct, spg_t pgid, const hobject_t& oid, const Message *m)
+  StoneContext *cct, spg_t pgid, const hobject_t& oid, const Message *m)
 {
   auto b = have_backoff(pgid, oid);
   if (b) {
     dout(10) << __func__ << " session " << this << " has backoff " << *b
 	     << " for " << *m << dendl;
-    ceph_assert(!b->is_acked() || !g_conf()->osd_debug_crash_on_ignored_backoff);
+    stone_assert(!b->is_acked() || !g_conf()->osd_debug_crash_on_ignored_backoff);
     return true;
   }
   // we may race with ms_handle_reset.  it clears session->con before removing

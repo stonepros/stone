@@ -8,8 +8,8 @@
 #include "cls/journal/cls_journal_types.h"
 #include "librbd/journal/Types.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::util::" \
                            << __func__ << ": "

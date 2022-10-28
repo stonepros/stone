@@ -12,7 +12,7 @@
 using std::map;
 using std::string;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 CLS_VER(1,0)
 CLS_NAME(timeindex)
@@ -66,7 +66,7 @@ static int cls_timeindex_add(cls_method_context_t hctx,
   cls_timeindex_add_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_timeindex_add_op(): failed to decode op");
     return -EINVAL;
   }
@@ -99,7 +99,7 @@ static int cls_timeindex_list(cls_method_context_t hctx,
   cls_timeindex_list_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_timeindex_list_op(): failed to decode op");
     return -EINVAL;
   }
@@ -180,7 +180,7 @@ static int cls_timeindex_trim(cls_method_context_t hctx,
   cls_timeindex_trim_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_timeindex_trim: failed to decode entry");
     return -EINVAL;
   }

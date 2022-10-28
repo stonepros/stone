@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat Inc.
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_SUBSYS_TYPES_H
-#define CEPH_SUBSYS_TYPES_H
+#ifndef STONE_SUBSYS_TYPES_H
+#define STONE_SUBSYS_TYPES_H
 
 #include <algorithm>
 #include <array>
@@ -82,5 +82,5 @@ constexpr static std::size_t ceph_subsys_max_name_length() {
   });
 }
 
-#endif // CEPH_SUBSYS_TYPES_H
+#endif // STONE_SUBSYS_TYPES_H
 

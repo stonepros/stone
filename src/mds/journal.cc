@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -53,8 +53,8 @@
 
 #include "Locker.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << mds->get_nodeid() << ".journal "
 
@@ -89,14 +89,14 @@ struct BatchCommitBacktrace : public Context {
 		       std::vector<CInodeCommitOperations>&& ops) :
     mds(m), fin(f), ops_vec(std::move(ops)) {}
   void finish(int r) override {
-    C_GatherBuilder gather(g_ceph_context);
+    C_GatherBuilder gather(g_stone_context);
 
     for (auto &op : ops_vec) {
       op.in->_commit_ops(r, gather, op.ops_vec, op.bt);
       op.ops_vec.clear();
       op.bt.clear();
     }
-    ceph_assert(gather.has_subs());
+    stone_assert(gather.has_subs());
     gather.set_finisher(new C_OnFinisher(
 			  new BatchStoredBacktrace(mds, fin, std::move(ops_vec)),
 			  mds->finisher));
@@ -110,27 +110,27 @@ void LogSegment::try_to_expire(MDSRank *mds, MDSGatherBuilder &gather_bld, int o
 
   dout(6) << "LogSegment(" << seq << "/" << offset << ").try_to_expire" << dendl;
 
-  ceph_assert(g_conf()->mds_kill_journal_expire_at != 1);
+  stone_assert(g_conf()->mds_kill_journal_expire_at != 1);
 
   // commit dirs
   for (elist<CDir*>::iterator p = new_dirfrags.begin(); !p.end(); ++p) {
     dout(20) << " new_dirfrag " << **p << dendl;
-    ceph_assert((*p)->is_auth());
+    stone_assert((*p)->is_auth());
     commit.insert(*p);
   }
   for (elist<CDir*>::iterator p = dirty_dirfrags.begin(); !p.end(); ++p) {
     dout(20) << " dirty_dirfrag " << **p << dendl;
-    ceph_assert((*p)->is_auth());
+    stone_assert((*p)->is_auth());
     commit.insert(*p);
   }
   for (elist<CDentry*>::iterator p = dirty_dentries.begin(); !p.end(); ++p) {
     dout(20) << " dirty_dentry " << **p << dendl;
-    ceph_assert((*p)->is_auth());
+    stone_assert((*p)->is_auth());
     commit.insert((*p)->get_dir());
   }
   for (elist<CInode*>::iterator p = dirty_inodes.begin(); !p.end(); ++p) {
     dout(20) << " dirty_inode " << **p << dendl;
-    ceph_assert((*p)->is_auth());
+    stone_assert((*p)->is_auth());
     if ((*p)->is_base()) {
       (*p)->store(gather_bld.new_sub());
     } else
@@ -142,7 +142,7 @@ void LogSegment::try_to_expire(MDSRank *mds, MDSGatherBuilder &gather_bld, int o
 	 p != commit.end();
 	 ++p) {
       CDir *dir = *p;
-      ceph_assert(dir->is_auth());
+      stone_assert(dir->is_auth());
       if (dir->can_auth_pin()) {
 	dout(15) << "try_to_expire committing " << *dir << dendl;
 	dir->commit(0, gather_bld.new_sub(), false, op_prio);
@@ -194,19 +194,19 @@ void LogSegment::try_to_expire(MDSRank *mds, MDSGatherBuilder &gather_bld, int o
     mds->locker->scatter_nudge(&in->nestlock, gather_bld.new_sub());
   }
 
-  ceph_assert(g_conf()->mds_kill_journal_expire_at != 2);
+  stone_assert(g_conf()->mds_kill_journal_expire_at != 2);
 
   // open files and snap inodes 
   if (!open_files.empty()) {
-    ceph_assert(!mds->mdlog->is_capped()); // hmm FIXME
+    stone_assert(!mds->mdlog->is_capped()); // hmm FIXME
     EOpen *le = 0;
     LogSegment *ls = mds->mdlog->get_current_segment();
-    ceph_assert(ls != this);
+    stone_assert(ls != this);
     elist<CInode*>::iterator p = open_files.begin(member_offset(CInode, item_open_file));
     while (!p.end()) {
       CInode *in = *p;
       ++p;
-      if (in->last != CEPH_NOSNAP && in->is_auth() && !in->client_snap_caps.empty()) {
+      if (in->last != STONE_NOSNAP && in->is_auth() && !in->client_snap_caps.empty()) {
 	// journal snap inodes that need flush. This simplify the mds failover hanlding
 	dout(20) << "try_to_expire requeueing snap needflush inode " << *in << dendl;
 	if (!le) {
@@ -227,7 +227,7 @@ void LogSegment::try_to_expire(MDSRank *mds, MDSGatherBuilder &gather_bld, int o
     }
   }
 
-  ceph_assert(g_conf()->mds_kill_journal_expire_at != 3);
+  stone_assert(g_conf()->mds_kill_journal_expire_at != 3);
 
   size_t count = 0;
   for (elist<CInode*>::iterator it = dirty_parent_inodes.begin(); !it.end(); ++it)
@@ -238,7 +238,7 @@ void LogSegment::try_to_expire(MDSRank *mds, MDSGatherBuilder &gather_bld, int o
   // backtraces to be stored/updated
   for (elist<CInode*>::iterator p = dirty_parent_inodes.begin(); !p.end(); ++p) {
     CInode *in = *p;
-    ceph_assert(in->is_auth());
+    stone_assert(in->is_auth());
     if (in->can_auth_pin()) {
       dout(15) << "try_to_expire waiting for storing backtrace on " << *in << dendl;
       ops_vec.resize(ops_vec.size() + 1);
@@ -251,7 +251,7 @@ void LogSegment::try_to_expire(MDSRank *mds, MDSGatherBuilder &gather_bld, int o
   if (!ops_vec.empty())
     mds->finisher->queue(new BatchCommitBacktrace(mds, gather_bld.new_sub(), std::move(ops_vec)));
 
-  ceph_assert(g_conf()->mds_kill_journal_expire_at != 4);
+  stone_assert(g_conf()->mds_kill_journal_expire_at != 4);
 
   // idalloc
   if (inotablev > mds->inotable->get_committed_version()) {
@@ -276,17 +276,17 @@ void LogSegment::try_to_expire(MDSRank *mds, MDSGatherBuilder &gather_bld, int o
   touched_sessions.clear();
 
   // pending commit atids
-  for (map<int, ceph::unordered_set<version_t> >::iterator p = pending_commit_tids.begin();
+  for (map<int, stone::unordered_set<version_t> >::iterator p = pending_commit_tids.begin();
        p != pending_commit_tids.end();
        ++p) {
     MDSTableClient *client = mds->get_table_client(p->first);
-    ceph_assert(client);
-    for (ceph::unordered_set<version_t>::iterator q = p->second.begin();
+    stone_assert(client);
+    for (stone::unordered_set<version_t>::iterator q = p->second.begin();
 	 q != p->second.end();
 	 ++q) {
       dout(10) << "try_to_expire " << get_mdstable_name(p->first) << " transaction " << *q 
 	       << " pending commit (not yet acked), waiting" << dendl;
-      ceph_assert(!client->has_committed(*q));
+      stone_assert(!client->has_committed(*q));
       client->wait_for_ack(*q, gather_bld.new_sub());
     }
   }
@@ -296,7 +296,7 @@ void LogSegment::try_to_expire(MDSRank *mds, MDSGatherBuilder &gather_bld, int o
        p != tablev.end();
        ++p) {
     MDSTableServer *server = mds->get_table_server(p->first);
-    ceph_assert(server);
+    stone_assert(server);
     if (p->second > server->get_committed_version()) {
       dout(10) << "try_to_expire waiting for " << get_mdstable_name(p->first) 
 	       << " to save, need " << p->second << dendl;
@@ -320,7 +320,7 @@ void LogSegment::try_to_expire(MDSRank *mds, MDSGatherBuilder &gather_bld, int o
     dout(6) << "LogSegment(" << seq << "/" << offset << ").try_to_expire waiting" << dendl;
     mds->mdlog->flush();
   } else {
-    ceph_assert(g_conf()->mds_kill_journal_expire_at != 5);
+    stone_assert(g_conf()->mds_kill_journal_expire_at != 5);
     dout(6) << "LogSegment(" << seq << "/" << offset << ").try_to_expire success" << dendl;
   }
 }
@@ -364,7 +364,7 @@ void EMetaBlob::add_dir_context(CDir *dir, int mode)
 		!dir->state_test(CDir::STATE_AUXSUBTREE) &&
 		!diri->state_test(CInode::STATE_AMBIGUOUSAUTH)) {
 	      dout(0) << "EMetaBlob::add_dir_context unexpected subtree " << *dir << dendl;
-	      ceph_abort();
+	      stone_abort();
 	    }
 	    dout(20) << "EMetaBlob::add_dir_context(" << dir << ") ambiguous or transient subtree " << dendl;
 	  } else {
@@ -416,7 +416,7 @@ void EMetaBlob::add_dir_context(CDir *dir, int mode)
 
   dout(20) << "EMetaBlob::add_dir_context final: " << parents << dendl;
   for (const auto& dentry : parents) {
-    ceph_assert(dentry->get_projected_linkage()->is_primary());
+    stone_assert(dentry->get_projected_linkage()->is_primary());
     add_dentry(dentry, false);
   }
 }
@@ -631,7 +631,7 @@ void EMetaBlob::fullbit::update_inode(MDSRank *mds, CInode *in)
       *css << "Invalid layout for inode " << in->ino() << " in journal";
       mds->clog->error() << css->strv();
       mds->damaged();
-      ceph_abort();  // Should be unreachable because damaged() calls respawn()
+      stone_abort();  // Should be unreachable because damaged() calls respawn()
     }
   }
 }
@@ -1160,15 +1160,15 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 {
   dout(10) << "EMetaBlob.replay " << lump_map.size() << " dirlumps by " << client_name << dendl;
 
-  ceph_assert(logseg);
+  stone_assert(logseg);
 
-  ceph_assert(g_conf()->mds_kill_journal_replay_at != 1);
+  stone_assert(g_conf()->mds_kill_journal_replay_at != 1);
 
   for (auto& p : roots) {
     CInode *in = mds->mdcache->get_inode(p.inode->ino);
     bool isnew = in ? false:true;
     if (!in)
-      in = new CInode(mds->mdcache, false, 2, CEPH_NOSNAP);
+      in = new CInode(mds->mdcache, false, 2, STONE_NOSNAP);
     p.update_inode(mds, in);
 
     if (isnew)
@@ -1194,7 +1194,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	nnull += lump.nnull;
       }
     }
-    ceph_assert(nnull <= 1);
+    stone_assert(nnull <= 1);
   }
 
   // keep track of any inodes we unlink and don't relink elsewhere
@@ -1214,7 +1214,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
       CInode *diri = mds->mdcache->get_inode((lp).ino);
       if (!diri) {
 	if (MDS_INO_IS_MDSDIR(lp.ino)) {
-	  ceph_assert(MDS_INO_MDSDIR(mds->get_nodeid()) != lp.ino);
+	  stone_assert(MDS_INO_MDSDIR(mds->get_nodeid()) != lp.ino);
 	  diri = mds->mdcache->create_system_inode(lp.ino, S_IFDIR|0755);
 	  diri->state_clear(CInode::STATE_AUTH);
 	  dout(10) << "EMetaBlob.replay created base " << *diri << dendl;
@@ -1222,7 +1222,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	  dout(0) << "EMetaBlob.replay missing dir ino  " << lp.ino << dendl;
           mds->clog->error() << "failure replaying journal (EMetaBlob)";
           mds->damaged();
-          ceph_abort();  // Should be unreachable because damaged() calls respawn()
+          stone_abort();  // Should be unreachable because damaged() calls respawn()
 	}
       }
 
@@ -1288,7 +1288,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	if (fb.is_dirty()) dn->_mark_dirty(logseg);
 	dout(10) << "EMetaBlob.replay for [" << fb.dnfirst << "," << fb.dnlast << "] had " << *dn << dendl;
 	dn->first = fb.dnfirst;
-	ceph_assert(dn->last == fb.dnlast);
+	stone_assert(dn->last == fb.dnlast);
       }
       if (lump.is_importing())
 	dn->state_set(CDentry::STATE_AUTH);
@@ -1340,7 +1340,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	} else {
 	  dout(10) << "EMetaBlob.replay for [" << fb.dnfirst << "," << fb.dnlast << "] had " << *in << dendl;
 	}
-	ceph_assert(in->first == fb.dnfirst ||
+	stone_assert(in->first == fb.dnfirst ||
 	       (in->is_multiversion() && in->first > fb.dnfirst));
       }
       if (fb.is_dirty())
@@ -1353,7 +1353,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	in->state_set(CInode::STATE_AUTH);
       else
 	in->state_clear(CInode::STATE_AUTH);
-      ceph_assert(g_conf()->mds_kill_journal_replay_at != 2);
+      stone_assert(g_conf()->mds_kill_journal_replay_at != 2);
 
       if (!(++count % 1000))
         mds->heartbeat_reset();
@@ -1385,7 +1385,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	if (rb.dirty) dn->_mark_dirty(logseg);
 	dout(10) << "EMetaBlob.replay for [" << rb.dnfirst << "," << rb.dnlast << "] had " << *dn << dendl;
 	dn->first = rb.dnfirst;
-	ceph_assert(dn->last == rb.dnlast);
+	stone_assert(dn->last == rb.dnlast);
       }
       if (lump.is_importing())
 	dn->state_set(CDentry::STATE_AUTH);
@@ -1419,7 +1419,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	dn->set_version(nb.dnv);
 	if (nb.dirty) dn->_mark_dirty(logseg);
 	dout(10) << "EMetaBlob.replay had " << *dn << dendl;
-	ceph_assert(dn->last == nb.dnlast);
+	stone_assert(dn->last == nb.dnlast);
       }
       olddir = dir;
       if (lump.is_importing())
@@ -1433,28 +1433,28 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
     }
   }
 
-  ceph_assert(g_conf()->mds_kill_journal_replay_at != 3);
+  stone_assert(g_conf()->mds_kill_journal_replay_at != 3);
 
   if (renamed_dirino) {
     if (renamed_diri) {
-      ceph_assert(unlinked.count(renamed_diri));
-      ceph_assert(linked.count(renamed_diri));
+      stone_assert(unlinked.count(renamed_diri));
+      stone_assert(linked.count(renamed_diri));
       olddir = unlinked[renamed_diri];
     } else {
       // we imported a diri we haven't seen before
       renamed_diri = mds->mdcache->get_inode(renamed_dirino);
-      ceph_assert(renamed_diri);  // it was in the metablob
+      stone_assert(renamed_diri);  // it was in the metablob
     }
 
     if (olddir) {
       if (olddir->authority() != CDIR_AUTH_UNDEF &&
 	  renamed_diri->authority() == CDIR_AUTH_UNDEF) {
-	ceph_assert(peerup); // auth to non-auth, must be peer prepare
+	stone_assert(peerup); // auth to non-auth, must be peer prepare
         frag_vec_t leaves;
 	renamed_diri->dirfragtree.get_leaves(leaves);
 	for (const auto& leaf : leaves) {
 	  CDir *dir = renamed_diri->get_dirfrag(leaf);
-	  ceph_assert(dir);
+	  stone_assert(dir);
 	  if (dir->get_dir_auth() == CDIR_AUTH_UNDEF)
 	    // preserve subtree bound until peer commit
 	    peerup->olddirs.insert(dir->inode);
@@ -1485,7 +1485,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	if (dir) {
 	  // we already had the inode before, and we already adjusted this subtree accordingly.
 	  dout(10) << " already had+adjusted rename import bound " << *dir << dendl;
-	  ceph_assert(olddir); 
+	  stone_assert(olddir); 
 	  continue;
 	}
 	dir = renamed_diri->get_or_open_dirfrag(mds->mdcache, p);
@@ -1503,7 +1503,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
     for (map<CInode*, CDir*>::iterator p = unlinked.begin(); p != unlinked.end(); ++p) {
       if (!linked.count(p->first))
 	continue;
-      ceph_assert(p->first->is_dir());
+      stone_assert(p->first->is_dir());
       mds->mdcache->adjust_subtree_after_rename(p->first, p->second, false);
 
       if (!(++count % 1000))
@@ -1544,7 +1544,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
   // opened ino?
   if (opened_ino) {
     CInode *in = mds->mdcache->get_inode(opened_ino);
-    ceph_assert(in);
+    stone_assert(in);
     dout(10) << "EMetaBlob.replay noting opened inode " << *in << dendl;
     logseg->open_files.push_back(&in->item_open_file);
   }
@@ -1572,7 +1572,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	mds->inotable->force_replay_version(inotablev);
       }
 
-      ceph_assert(inotablev == mds->inotable->get_version());
+      stone_assert(inotablev == mds->inotable->get_version());
     }
   }
   if (sessionmapv) {
@@ -1593,7 +1593,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	  if (!session->info.prealloc_inos.empty()) {
 	    inodeno_t ino = session->take_ino(used_preallocated_ino);
 	    session->info.prealloc_inos.erase(ino);
-	    ceph_assert(ino == used_preallocated_ino);
+	    stone_assert(ino == used_preallocated_ino);
 	  }
           mds->sessionmap.replay_dirty_session(session);
 	}
@@ -1611,11 +1611,11 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	if (!preallocated_inos.empty())
 	  mds->sessionmap.replay_advance_version();
       }
-      ceph_assert(sessionmapv == mds->sessionmap.get_version());
+      stone_assert(sessionmapv == mds->sessionmap.get_version());
     } else {
       mds->clog->error() << "EMetaBlob.replay sessionmap v " << sessionmapv
 			 << " - " << diff << " > table " << mds->sessionmap.get_version();
-      ceph_assert(g_conf()->mds_wipe_sessions);
+      stone_assert(g_conf()->mds_wipe_sessions);
       mds->sessionmap.wipe();
       mds->sessionmap.set_version(sessionmapv);
     }
@@ -1624,7 +1624,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
   // truncating inodes
   for (const auto& ino : truncate_start) {
     CInode *in = mds->mdcache->get_inode(ino);
-    ceph_assert(in);
+    stone_assert(in);
     mds->mdcache->add_recovered_truncate(in, logseg);
 
     if (!(++count % 1000))
@@ -1634,7 +1634,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
     LogSegment *ls = mds->mdlog->get_segment(p.second);
     if (ls) {
       CInode *in = mds->mdcache->get_inode(p.first);
-      ceph_assert(in);
+      stone_assert(in);
       mds->mdcache->remove_recovered_truncate(in, ls);
     }
 
@@ -1654,7 +1654,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
 	mds->mdcache->remove_inode(in);
 	if (parent) {
 	  dout(10) << "EMetaBlob.replay unlinked from dentry " << *parent << dendl;
-	  ceph_assert(parent->get_linkage()->is_null());
+	  stone_assert(parent->get_linkage()->is_null());
 	}
       } else {
 	dout(10) << "EMetaBlob.replay destroyed " << *p << ", not in cache" << dendl;
@@ -1672,7 +1672,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
       dout(10) << "EMetaBlob.replay request " << p.first << " trim_to " << p.second << dendl;
       inodeno_t created = allocated_ino ? allocated_ino : used_preallocated_ino;
       // if we allocated an inode, there should be exactly one client request id.
-      ceph_assert(created == inodeno_t() || client_reqs.size() == 1);
+      stone_assert(created == inodeno_t() || client_reqs.size() == 1);
 
       Session *session = mds->sessionmap.get_session(p.first.name);
       if (session) {
@@ -1705,7 +1705,7 @@ void EMetaBlob::replay(MDSRank *mds, LogSegment *logseg, MDPeerUpdate *peerup)
   // update segment
   update_segment(logseg);
 
-  ceph_assert(g_conf()->mds_kill_journal_replay_at != 4);
+  stone_assert(g_conf()->mds_kill_journal_replay_at != 4);
 }
 
 // -----------------------
@@ -1810,11 +1810,11 @@ void ESession::replay(MDSRank *mds)
     } else {
       mds->sessionmap.replay_advance_version();
     }
-    ceph_assert(mds->sessionmap.get_version() == cmapv);
+    stone_assert(mds->sessionmap.get_version() == cmapv);
   } else {
     mds->clog->error() << "ESession.replay sessionmap v " << cmapv
 		       << " - 1 > table " << mds->sessionmap.get_version();
-    ceph_assert(g_conf()->mds_wipe_sessions);
+    stone_assert(g_conf()->mds_wipe_sessions);
     mds->sessionmap.wipe();
     mds->sessionmap.set_version(cmapv);
   }
@@ -1826,9 +1826,9 @@ void ESession::replay(MDSRank *mds)
     } else {
       dout(10) << "ESession.replay inotable " << mds->inotable->get_version()
 	       << " < " << inotablev << " " << (open ? "add":"remove") << dendl;
-      ceph_assert(!open);  // for now
+      stone_assert(!open);  // for now
       mds->inotable->replay_release_ids(inos_to_free);
-      ceph_assert(mds->inotable->get_version() == inotablev);
+      stone_assert(mds->inotable->get_version() == inotablev);
     }
   }
 
@@ -1904,7 +1904,7 @@ void ESessions::encode(bufferlist &bl, uint64_t features) const
 
 void ESessions::decode_old(bufferlist::const_iterator &bl)
 {
-  using ceph::decode;
+  using stone::decode;
   decode(client_map, bl);
   decode(cmapv, bl);
   if (!bl.end())
@@ -2031,7 +2031,7 @@ void ETableServer::replay(MDSRank *mds)
   dout(10) << " ETableServer.replay " << get_mdstable_name(table)
 	   << " " << get_mdstableserver_opname(op)
 	   << " event " << version << " - 1 == table " << server->get_version() << dendl;
-  ceph_assert(version-1 == server->get_version());
+  stone_assert(version-1 == server->get_version());
 
   switch (op) {
   case TABLESERVER_OP_PREPARE: {
@@ -2056,10 +2056,10 @@ void ETableServer::replay(MDSRank *mds)
   default:
     mds->clog->error() << "invalid tableserver op in ETableServer";
     mds->damaged();
-    ceph_abort();  // Should be unreachable because damaged() calls respawn()
+    stone_abort();  // Should be unreachable because damaged() calls respawn()
   }
   
-  ceph_assert(version == server->get_version());
+  stone_assert(version == server->get_version());
   update_segment();
 }
 
@@ -2110,7 +2110,7 @@ void ETableClient::replay(MDSRank *mds)
   if (!client)
     return;
 
-  ceph_assert(op == TABLESERVER_OP_ACK);
+  stone_assert(op == TABLESERVER_OP_ACK);
   client->got_journaled_ack(tid);
 }
 
@@ -2133,17 +2133,17 @@ void ESnap::replay(MDSRank *mds)
   
   dout(10) << " ESnap.replay event " << version
 	   << " - 1 == table " << mds->snaptable->get_version() << dendl;
-  ceph_assert(version-1 == mds->snaptable->get_version());
+  stone_assert(version-1 == mds->snaptable->get_version());
 
   if (create) {
     version_t v;
     snapid_t s = mds->snaptable->create(snap.dirino, snap.name, snap.stamp, &v);
-    ceph_assert(s == snap.snapid);
+    stone_assert(s == snap.snapid);
   } else {
     mds->snaptable->remove(snap.snapid);
   }
 
-  ceph_assert(version == mds->snaptable->get_version());
+  stone_assert(version == mds->snaptable->get_version());
 }
 */
 
@@ -2234,7 +2234,7 @@ void EUpdate::replay(MDSRank *mds)
       map<client_t,entity_inst_t> cm;
       map<client_t,client_metadata_t> cmm;
       auto blp = client_map.cbegin();
-      using ceph::decode;
+      using stone::decode;
       decode(cm, blp);
       if (!blp.end())
 	decode(cmm, blp);
@@ -2304,7 +2304,7 @@ void EOpen::replay(MDSRank *mds)
     CInode *in = mds->mdcache->get_inode(ino);
     if (!in) {
       dout(0) << "EOpen.replay ino " << ino << " not in metablob" << dendl;
-      ceph_assert(in);
+      stone_assert(in);
     }
     segment->open_files.push_back(&in->item_open_file);
   }
@@ -2312,7 +2312,7 @@ void EOpen::replay(MDSRank *mds)
     CInode *in = mds->mdcache->get_inode(vino);
     if (!in) {
       dout(0) << "EOpen.replay ino " << vino << " not in metablob" << dendl;
-      ceph_assert(in);
+      stone_assert(in);
     }
     segment->open_files.push_back(&in->item_open_file);
   }
@@ -2632,7 +2632,7 @@ void EPeerUpdate::replay(MDSRank *mds)
   default:
     mds->clog->error() << "invalid op in EPeerUpdate";
     mds->damaged();
-    ceph_abort();  // Should be unreachable because damaged() calls respawn()
+    stone_abort();  // Should be unreachable because damaged() calls respawn()
   }
 }
 
@@ -2795,7 +2795,7 @@ void ESubtreeMap::replay(MDSRank *mds)
       dout(0) << "journal subtrees: " << subtrees << dendl;
       dout(0) << "journal ambig_subtrees: " << ambiguous_subtrees << dendl;
       mds->mdcache->show_subtrees();
-      ceph_assert(!g_conf()->mds_debug_subtrees || errors == 0);
+      stone_assert(!g_conf()->mds_debug_subtrees || errors == 0);
     }
     return;
   }
@@ -2811,7 +2811,7 @@ void ESubtreeMap::replay(MDSRank *mds)
        p != subtrees.end();
        ++p) {
     CDir *dir = mds->mdcache->get_dirfrag(p->first);
-    ceph_assert(dir);
+    stone_assert(dir);
     if (ambiguous_subtrees.count(p->first)) {
       // ambiguous!
       mds->mdcache->add_ambiguous_import(p->first, p->second);
@@ -2876,7 +2876,7 @@ void EFragment::replay(MDSRank *mds)
     break;
 
   default:
-    ceph_abort();
+    stone_abort();
   }
 
   metablob.replay(mds, segment);
@@ -2966,14 +2966,14 @@ void EExport::replay(MDSRank *mds)
   metablob.replay(mds, segment);
   
   CDir *dir = mds->mdcache->get_dirfrag(base);
-  ceph_assert(dir);
+  stone_assert(dir);
   
   set<CDir*> realbounds;
   for (set<dirfrag_t>::iterator p = bounds.begin();
        p != bounds.end();
        ++p) {
     CDir *bd = mds->mdcache->get_dirfrag(*p);
-    ceph_assert(bd);
+    stone_assert(bd);
     realbounds.insert(bd);
   }
 
@@ -3049,14 +3049,14 @@ void EImportStart::replay(MDSRank *mds)
 
   // set auth partially to us so we don't trim it
   CDir *dir = mds->mdcache->get_dirfrag(base);
-  ceph_assert(dir);
+  stone_assert(dir);
 
   set<CDir*> realbounds;
   for (vector<dirfrag_t>::iterator p = bounds.begin();
        p != bounds.end();
        ++p) {
     CDir *bd = mds->mdcache->get_dirfrag(*p);
-    ceph_assert(bd);
+    stone_assert(bd);
     if (!bd->is_subtree_root())
       bd->state_clear(CDir::STATE_AUTH);
     realbounds.insert(bd);
@@ -3075,7 +3075,7 @@ void EImportStart::replay(MDSRank *mds)
     map<client_t,entity_inst_t> cm;
     map<client_t,client_metadata_t> cmm;
     auto blp = client_map.cbegin();
-    using ceph::decode;
+    using stone::decode;
     decode(cm, blp);
     if (!blp.end())
       decode(cmm, blp);
@@ -3137,7 +3137,7 @@ void EImportFinish::replay(MDSRank *mds)
       mds->mdcache->finish_ambiguous_import(base);
     } else {
       CDir *dir = mds->mdcache->get_dirfrag(base);
-      ceph_assert(dir);
+      stone_assert(dir);
       vector<dirfrag_t> bounds;
       mds->mdcache->get_ambiguous_import_bounds(base, bounds);
       mds->mdcache->adjust_bounded_subtree_auth(dir, bounds, CDIR_AUTH_UNDEF);
@@ -3151,7 +3151,7 @@ void EImportFinish::replay(MDSRank *mds)
 	     << dendl;
     mds->clog->error() << "failure replaying journal (EImportFinish)";
     mds->damaged();
-    ceph_abort();  // Should be unreachable because damaged() calls respawn()
+    stone_abort();  // Should be unreachable because damaged() calls respawn()
   }
 }
 

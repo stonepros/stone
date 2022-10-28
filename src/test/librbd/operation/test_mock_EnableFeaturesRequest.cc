@@ -33,7 +33,7 @@ struct MockOperationImageCtx : public MockImageCtx {
 
 template<>
 struct Journal<MockOperationImageCtx> {
-  static void get_work_queue(CephContext*, MockContextWQ**) {
+  static void get_work_queue(StoneContext*, MockContextWQ**) {
   }
 };
 
@@ -47,7 +47,7 @@ public:
 
   static SetFlagsRequest *create(MockOperationImageCtx *image_ctx, uint64_t flags,
 				 uint64_t mask, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -78,7 +78,7 @@ public:
                                const std::string &client_id,
                                MockContextWQ *op_work_queue,
                                Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -111,7 +111,7 @@ public:
                                cls::rbd::MirrorImageMode mirror_image_mode,
                                const std::string& non_primary_global_image_id,
                                bool image_clean, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -136,7 +136,7 @@ public:
   Context *on_finish = nullptr;
 
   static CreateRequest *create(MockOperationImageCtx *image_ctx, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }

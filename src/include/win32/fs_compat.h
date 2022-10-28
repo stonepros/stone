@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2021 SUSE LINUX GmbH
  *
@@ -10,7 +10,7 @@
  *
  */
 
-// Those definitions allow handling information coming from Ceph and should
+// Those definitions allow handling information coming from Stone and should
 // not be passed to Windows functions.
 
 #define S_IFLNK   0120000

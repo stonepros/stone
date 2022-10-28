@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_AUTHMONITOR_H
-#define CEPH_AUTHMONITOR_H
+#ifndef STONE_AUTHMONITOR_H
+#define STONE_AUTHMONITOR_H
 
 #include <map>
 #include <set>
@@ -115,7 +115,7 @@ private:
     Incremental inc;
     inc.inc_type = AUTH_DATA;
     encode(auth_inc, inc.auth_data);
-    inc.auth_type = CEPH_AUTH_CEPHX;
+    inc.auth_type = STONE_AUTH_STONEX;
     pending_auth.push_back(inc);
   }
 

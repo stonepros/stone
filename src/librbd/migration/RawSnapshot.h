@@ -1,8 +1,8 @@
 // -*- mode:c++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_MIGRATION_RAW_SNAPSHOT_H
-#define CEPH_LIBRBD_MIGRATION_RAW_SNAPSHOT_H
+#ifndef STONE_LIBRBD_MIGRATION_RAW_SNAPSHOT_H
+#define STONE_LIBRBD_MIGRATION_RAW_SNAPSHOT_H
 
 #include "include/buffer_fwd.h"
 #include "include/int_types.h"
@@ -72,4 +72,4 @@ private:
 
 extern template class librbd::migration::RawSnapshot<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_MIGRATION_RAW_SNAPSHOT_H
+#endif // STONE_LIBRBD_MIGRATION_RAW_SNAPSHOT_H

@@ -4,7 +4,7 @@ tasks:
     extra_packages:
       - iscsi-initiator-utils
       - device-mapper-multipath
-- ceph:
+- stone:
 - install:
     packages:
       rpm:
@@ -14,8 +14,8 @@ tasks:
 - install:
     packages:
       rpm:
-      - ceph-iscsi
+      - stone-iscsi
     shaman:
       force_noarch: True
-    project: ceph-iscsi
+    project: stone-iscsi
     sha1: latest

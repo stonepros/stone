@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -18,7 +18,7 @@
 
 #include "include/compat.h"
 
-std::string ceph_get_hostname()
+std::string stone_get_hostname()
 {
   // are we in a container?  if so we would prefer the *real* hostname.
   const char *node_name = getenv("NODE_NAME");
@@ -31,9 +31,9 @@ std::string ceph_get_hostname()
   return std::string(buf);
 }
 
-std::string ceph_get_short_hostname()
+std::string stone_get_short_hostname()
 {
-  std::string hostname = ceph_get_hostname();
+  std::string hostname = stone_get_hostname();
   size_t pos = hostname.find('.');
   if (pos == std::string::npos)
   {

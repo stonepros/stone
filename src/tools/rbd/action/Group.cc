@@ -86,7 +86,7 @@ void add_group_spec_options(po::options_description *pos,
 }
 
 int execute_create(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
 
   std::string pool_name;
@@ -119,7 +119,7 @@ int execute_create(const po::variables_map &vm,
 }
 
 int execute_list(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   std::string namespace_name;
   size_t arg_index = 0;
@@ -166,7 +166,7 @@ int execute_list(const po::variables_map &vm,
 }
 
 int execute_remove(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
 
   std::string pool_name;
@@ -200,7 +200,7 @@ int execute_remove(const po::variables_map &vm,
 }
 
 int execute_rename(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
 
   std::string pool_name;
@@ -262,7 +262,7 @@ int execute_rename(const po::variables_map &vm,
 }
 
 int execute_add(const po::variables_map &vm,
-                const std::vector<std::string> &ceph_global_init_args) {
+                const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   // Parse group data.
   std::string group_pool_name;
@@ -320,7 +320,7 @@ int execute_add(const po::variables_map &vm,
 }
 
 int execute_remove_image(const po::variables_map &vm,
-                         const std::vector<std::string> &ceph_global_init_args) {
+                         const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
 
   std::string group_pool_name;
@@ -392,7 +392,7 @@ int execute_remove_image(const po::variables_map &vm,
 }
 
 int execute_list_images(const po::variables_map &vm,
-                        const std::vector<std::string> &ceph_global_init_args) {
+                        const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -624,7 +624,7 @@ int execute_group_snap_rename(const po::variables_map &vm,
 }
 
 int execute_group_snap_list(const po::variables_map &vm,
-                            const std::vector<std::string> &ceph_global_args) {
+                            const std::vector<std::string> &stone_global_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;

@@ -6,7 +6,7 @@
 
 #include "common/errno.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "include/types.h"
 #include "rgw_string.h"
@@ -18,7 +18,7 @@
 #include "rgw_sal_rados.h"
 #include "services/svc_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 using rgw::IAM::Policy;
 
@@ -133,7 +133,7 @@ void RGWPutUserPolicy::execute(optional_yield y)
     return;
   }
 
-  ceph::bufferlist in_data;
+  stone::bufferlist in_data;
   op_ret = store->forward_request_to_master(this, s->user.get(), nullptr, in_data, nullptr, s->info, y);
   if (op_ret < 0) {
     ldpp_dout(this, 0) << "ERROR: forward_request_to_master returned ret=" << op_ret << dendl;
@@ -337,7 +337,7 @@ void RGWDeleteUserPolicy::execute(optional_yield y)
     return;
   }
 
-  ceph::bufferlist in_data;
+  stone::bufferlist in_data;
   op_ret = store->forward_request_to_master(this, s->user.get(), nullptr, in_data, nullptr, s->info, y);
   if (op_ret < 0) {
     // a policy might've been uploaded to this site when there was no sync

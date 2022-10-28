@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "librbd/crypto/CryptoObjectDispatch.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/neorados/RADOS.hpp"
 #include "common/dout.h"
 #include "librbd/ImageCtx.h"
@@ -14,7 +14,7 @@
 #include "librbd/io/ReadResult.h"
 #include "librbd/io/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::crypto::CryptoObjectDispatch: " \
                            << this << " " << __func__ << ": "
@@ -28,7 +28,7 @@ using librbd::util::data_object_name;
 template <typename I>
 struct C_AlignedObjectReadRequest : public Context {
     I* image_ctx;
-    ceph::ref_t<CryptoInterface> crypto;
+    stone::ref_t<CryptoInterface> crypto;
     uint64_t object_no;
     io::ReadExtents* extents;
     IOContext io_context;
@@ -39,7 +39,7 @@ struct C_AlignedObjectReadRequest : public Context {
     bool disable_read_from_parent;
 
     C_AlignedObjectReadRequest(
-            I* image_ctx, ceph::ref_t<CryptoInterface> crypto,
+            I* image_ctx, stone::ref_t<CryptoInterface> crypto,
             uint64_t object_no, io::ReadExtents* extents, IOContext io_context,
             int op_flags, int read_flags, const ZTracer::Trace &parent_trace,
             uint64_t* version, int* object_dispatch_flags,
@@ -81,7 +81,7 @@ struct C_AlignedObjectReadRequest : public Context {
                   io::util::get_file_offset(
                           image_ctx, object_no, extent.offset));
           if (crypto_ret != 0) {
-            ceph_assert(crypto_ret < 0);
+            stone_assert(crypto_ret < 0);
             r = crypto_ret;
             break;
           }
@@ -92,7 +92,7 @@ struct C_AlignedObjectReadRequest : public Context {
       if (r == -ENOENT && !disable_read_from_parent) {
         io::util::read_parent<I>(
                 image_ctx, object_no, extents,
-                io_context->read_snap().value_or(CEPH_NOSNAP),
+                io_context->read_snap().value_or(STONE_NOSNAP),
                 parent_trace, this);
       } else {
         complete(r);
@@ -102,14 +102,14 @@ struct C_AlignedObjectReadRequest : public Context {
 
 template <typename I>
 struct C_UnalignedObjectReadRequest : public Context {
-    CephContext* cct;
+    StoneContext* cct;
     io::ReadExtents* extents;
     Context* on_finish;
     io::ReadExtents aligned_extents;
     io::ObjectDispatchSpec* req;
 
     C_UnalignedObjectReadRequest(
-            I* image_ctx, ceph::ref_t<CryptoInterface> crypto,
+            I* image_ctx, stone::ref_t<CryptoInterface> crypto,
             uint64_t object_no, io::ReadExtents* extents, IOContext io_context,
             int op_flags, int read_flags, const ZTracer::Trace &parent_trace,
             uint64_t* version, int* object_dispatch_flags,
@@ -143,7 +143,7 @@ struct C_UnalignedObjectReadRequest : public Context {
           aligned_extent.bl.splice(cut_offset, extent.length, &extent.bl);
         } else {
           for (auto [off, len]: aligned_extent.extent_map) {
-            ceph::bufferlist tmp;
+            stone::bufferlist tmp;
             aligned_extent.bl.splice(0, len, &tmp);
 
             uint64_t bytes_to_skip = 0;
@@ -187,11 +187,11 @@ struct C_UnalignedObjectReadRequest : public Context {
 template <typename I>
 struct C_UnalignedObjectWriteRequest : public Context {
     I* image_ctx;
-    ceph::ref_t<CryptoInterface> crypto;
+    stone::ref_t<CryptoInterface> crypto;
     uint64_t object_no;
     uint64_t object_off;
-    ceph::bufferlist data;
-    ceph::bufferlist cmp_data;
+    stone::bufferlist data;
+    stone::bufferlist cmp_data;
     uint64_t* mismatch_offset;
     IOContext io_context;
     int op_flags;
@@ -202,16 +202,16 @@ struct C_UnalignedObjectWriteRequest : public Context {
     uint64_t* journal_tid;
     Context* on_finish;
     bool may_copyup;
-    ceph::bufferlist aligned_data;
+    stone::bufferlist aligned_data;
     io::ReadExtents extents;
     uint64_t version;
     C_UnalignedObjectReadRequest<I>* read_req;
     bool object_exists;
 
     C_UnalignedObjectWriteRequest(
-            I* image_ctx, ceph::ref_t<CryptoInterface> crypto,
-            uint64_t object_no, uint64_t object_off, ceph::bufferlist&& data,
-            ceph::bufferlist&& cmp_data, uint64_t* mismatch_offset,
+            I* image_ctx, stone::ref_t<CryptoInterface> crypto,
+            uint64_t object_no, uint64_t object_off, stone::bufferlist&& data,
+            stone::bufferlist&& cmp_data, uint64_t* mismatch_offset,
             IOContext io_context, int op_flags, int write_flags,
             std::optional<uint64_t> assert_version,
             const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
@@ -428,7 +428,7 @@ struct C_UnalignedObjectWriteRequest : public Context {
 
 template <typename I>
 CryptoObjectDispatch<I>::CryptoObjectDispatch(
-    I* image_ctx, ceph::ref_t<CryptoInterface> crypto)
+    I* image_ctx, stone::ref_t<CryptoInterface> crypto)
   : m_image_ctx(image_ctx), m_crypto(crypto) {
 }
 
@@ -451,7 +451,7 @@ bool CryptoObjectDispatch<I>::read(
   auto cct = m_image_ctx->cct;
   ldout(cct, 20) << data_object_name(m_image_ctx, object_no) << " "
                  << *extents << dendl;
-  ceph_assert(m_crypto != nullptr);
+  stone_assert(m_crypto != nullptr);
 
   *dispatch_result = io::DISPATCH_RESULT_COMPLETE;
   if (m_crypto->is_aligned(*extents)) {
@@ -473,7 +473,7 @@ bool CryptoObjectDispatch<I>::read(
 
 template <typename I>
 bool CryptoObjectDispatch<I>::write(
-    uint64_t object_no, uint64_t object_off, ceph::bufferlist&& data,
+    uint64_t object_no, uint64_t object_off, stone::bufferlist&& data,
     IOContext io_context, int op_flags, int write_flags,
     std::optional<uint64_t> assert_version,
     const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
@@ -482,7 +482,7 @@ bool CryptoObjectDispatch<I>::write(
   auto cct = m_image_ctx->cct;
   ldout(cct, 20) << data_object_name(m_image_ctx, object_no) << " "
                  << object_off << "~" << data.length() << dendl;
-  ceph_assert(m_crypto != nullptr);
+  stone_assert(m_crypto != nullptr);
 
   if (m_crypto->is_aligned(object_off, data.length())) {
     auto r = m_crypto->encrypt(
@@ -507,7 +507,7 @@ bool CryptoObjectDispatch<I>::write(
 template <typename I>
 bool CryptoObjectDispatch<I>::write_same(
     uint64_t object_no, uint64_t object_off, uint64_t object_len,
-    io::LightweightBufferExtents&& buffer_extents, ceph::bufferlist&& data,
+    io::LightweightBufferExtents&& buffer_extents, stone::bufferlist&& data,
     IOContext io_context, int op_flags,
     const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
     uint64_t* journal_tid, io::DispatchResult* dispatch_result,
@@ -515,7 +515,7 @@ bool CryptoObjectDispatch<I>::write_same(
   auto cct = m_image_ctx->cct;
   ldout(cct, 20) << data_object_name(m_image_ctx, object_no) << " "
                  << object_off << "~" << object_len << dendl;
-  ceph_assert(m_crypto != nullptr);
+  stone_assert(m_crypto != nullptr);
 
   // convert to regular write
   io::LightweightObjectExtent extent(object_no, object_off, object_len, 0);
@@ -541,8 +541,8 @@ bool CryptoObjectDispatch<I>::write_same(
 
 template <typename I>
 bool CryptoObjectDispatch<I>::compare_and_write(
-    uint64_t object_no, uint64_t object_off, ceph::bufferlist&& cmp_data,
-    ceph::bufferlist&& write_data, IOContext io_context, int op_flags,
+    uint64_t object_no, uint64_t object_off, stone::bufferlist&& cmp_data,
+    stone::bufferlist&& write_data, IOContext io_context, int op_flags,
     const ZTracer::Trace &parent_trace, uint64_t* mismatch_offset,
     int* object_dispatch_flags, uint64_t* journal_tid,
     io::DispatchResult* dispatch_result, Context** on_finish,
@@ -551,7 +551,7 @@ bool CryptoObjectDispatch<I>::compare_and_write(
   ldout(cct, 20) << data_object_name(m_image_ctx, object_no) << " "
                  << object_off << "~" << write_data.length()
                  << dendl;
-  ceph_assert(m_crypto != nullptr);
+  stone_assert(m_crypto != nullptr);
 
   *dispatch_result = io::DISPATCH_RESULT_COMPLETE;
   auto req = new C_UnalignedObjectWriteRequest<I>(
@@ -574,7 +574,7 @@ bool CryptoObjectDispatch<I>::discard(
   auto cct = m_image_ctx->cct;
   ldout(cct, 20) << data_object_name(m_image_ctx, object_no) << " "
                  << object_off << "~" << object_len << dendl;
-  ceph_assert(m_crypto != nullptr);
+  stone_assert(m_crypto != nullptr);
 
   // convert to write-same
   auto ctx = new LambdaContext(
@@ -600,7 +600,7 @@ template <typename I>
 int CryptoObjectDispatch<I>::prepare_copyup(
         uint64_t object_no,
         io::SnapshotSparseBufferlist* snapshot_sparse_bufferlist) {
-  ceph::bufferlist current_bl;
+  stone::bufferlist current_bl;
   current_bl.append_zero(m_image_ctx->get_object_size());
 
   for (auto& [key, extent_map]: *snapshot_sparse_bufferlist) {
@@ -610,7 +610,7 @@ int CryptoObjectDispatch<I>::prepare_copyup(
       if (sbe.state == io::SPARSE_EXTENT_STATE_DATA) {
         current_bl.begin(extent.get_off()).copy_in(extent.get_len(), sbe.bl);
       } else if (sbe.state == io::SPARSE_EXTENT_STATE_ZEROED) {
-        ceph::bufferlist zeros;
+        stone::bufferlist zeros;
         zeros.append_zero(extent.get_len());
         current_bl.begin(extent.get_off()).copy_in(extent.get_len(), zeros);
       }
@@ -626,10 +626,10 @@ int CryptoObjectDispatch<I>::prepare_copyup(
       io::util::extent_to_file(
               m_image_ctx, object_no, aligned_off, aligned_len, image_extents);
 
-      ceph::bufferlist encrypted_bl;
+      stone::bufferlist encrypted_bl;
       uint64_t position = 0;
       for (auto [image_offset, image_length]: image_extents) {
-        ceph::bufferlist aligned_bl;
+        stone::bufferlist aligned_bl;
         aligned_bl.substr_of(current_bl, aligned_off + position, image_length);
         aligned_bl.rebuild(); // to deep copy aligned_bl from current_bl
         position += image_length;

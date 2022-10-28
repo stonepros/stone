@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,7 +13,7 @@
  */
 #include <string>
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/errno.h"
 
 #include "global/global_init.h"
@@ -76,8 +76,8 @@ struct feature_op_t {
   }
   bool parse_value(string &s, ostream *errout = NULL) {
 
-    feature = ceph::features::mon::get_feature_by_name(s);
-    if (feature != ceph::features::mon::FEATURE_NONE) {
+    feature = stone::features::mon::get_feature_by_name(s);
+    if (feature != stone::features::mon::FEATURE_NONE) {
       return true;
     }
 
@@ -115,10 +115,10 @@ void features_list(feature_op_t &f, MonMap &m)
     cout << std::endl;
     cout << "AVAILABLE FEATURES:" << std::endl;
     cout << "    supported:  ";
-    ceph::features::mon::get_supported().print_with_value(cout);
+    stone::features::mon::get_supported().print_with_value(cout);
     cout << std::endl;
     cout << "    persistent: ";
-    ceph::features::mon::get_persistent().print_with_value(cout);
+    stone::features::mon::get_persistent().print_with_value(cout);
     cout << std::endl;
   } else if (f.type == feature_op_t::type_t::PARSEABLE) {
 
@@ -132,10 +132,10 @@ void features_list(feature_op_t &f, MonMap &m)
     m.get_required_features().print_with_value(cout);
     cout << std::endl;
     cout << "available:supported:";
-    ceph::features::mon::get_supported().print_with_value(cout);
+    stone::features::mon::get_supported().print_with_value(cout);
     cout << std::endl;
     cout << "available:persistent:";
-    ceph::features::mon::get_persistent().print_with_value(cout);
+    stone::features::mon::get_persistent().print_with_value(cout);
     cout << std::endl;
   }
 }
@@ -179,7 +179,7 @@ int main(int argc, const char **argv)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
@@ -195,36 +195,36 @@ int main(int argc, const char **argv)
   bool show_features = false;
   bool generate = false;
   bool filter = false;
-  ceph_release_t min_mon_release{0};
+  stone_release_t min_mon_release{0};
   map<string,entity_addr_t> add;
   map<string,entity_addrvec_t> addv;
   list<string> rm;
   list<feature_op_t> features;
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
   std::string val;
   for (std::vector<const char*>::iterator i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_double_dash(args, i)) {
+    if (stone_argparse_double_dash(args, i)) {
       break;
-    } else if (ceph_argparse_flag(args, i, "-p", "--print", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "-p", "--print", (char*)NULL)) {
       print = true;
-    } else if (ceph_argparse_flag(args, i, "--create", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--create", (char*)NULL)) {
       create = true;
-    } else if (ceph_argparse_flag(args, i, "--enable-all-features", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--enable-all-features", (char*)NULL)) {
       enable_all_features = true;
-    } else if (ceph_argparse_flag(args, i, "--clobber", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--clobber", (char*)NULL)) {
       clobber = true;
-    } else if (ceph_argparse_flag(args, i, "--generate", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--generate", (char*)NULL)) {
       generate = true;
-    } else if (ceph_argparse_flag(args, i, "--set-initial-members", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--set-initial-members", (char*)NULL)) {
       filter = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--set-min-mon-release",
+    } else if (stone_argparse_witharg(args, i, &val, "--set-min-mon-release",
 				     (char*)NULL)) {
-      min_mon_release = ceph_release_from_name(val);
-    } else if (ceph_argparse_flag(args, i, "--add", (char*)NULL)) {
+      min_mon_release = stone_release_from_name(val);
+    } else if (stone_argparse_flag(args, i, "--add", (char*)NULL)) {
       string name = *i;
       i = args.erase(i);
       if (i == args.end())
@@ -238,7 +238,7 @@ int main(int argc, const char **argv)
       add[name] = addr;
       modified = true;
       i = args.erase(i);
-    } else if (ceph_argparse_flag(args, i, "--addv", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--addv", (char*)NULL)) {
       string name = *i;
       i = args.erase(i);
       if (i == args.end())
@@ -251,10 +251,10 @@ int main(int argc, const char **argv)
       addv[name] = addrs;
       modified = true;
       i = args.erase(i);
-    } else if (ceph_argparse_witharg(args, i, &val, "--rm", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--rm", (char*)NULL)) {
       rm.push_back(val);
       modified = true;
-    } else if (ceph_argparse_flag(args, i, "--feature-list", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--feature-list", (char*)NULL)) {
       string format = *i;
       if (format == "plain" || format == "parseable") {
         i = args.erase(i);
@@ -274,7 +274,7 @@ int main(int argc, const char **argv)
 
       features.push_back(f);
       show_features = true;
-    } else if (ceph_argparse_witharg(args, i, &val,
+    } else if (stone_argparse_witharg(args, i, &val,
                                      "--feature-set", (char*)NULL)) {
       // parse value
       feature_op_t f(feature_op_t::op_t::OP_SET);
@@ -283,7 +283,7 @@ int main(int argc, const char **argv)
       }
       features.push_back(f);
 
-    } else if (ceph_argparse_witharg(args, i, &val,
+    } else if (stone_argparse_witharg(args, i, &val,
                                      "--feature-unset", (char*)NULL)) {
       // parse value
       feature_op_t f(feature_op_t::op_t::OP_UNSET);
@@ -291,12 +291,12 @@ int main(int argc, const char **argv)
         helpful_exit();
       }
       features.push_back(f);
-    } else if (ceph_argparse_flag(args, i, "--optional", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--optional", (char*)NULL)) {
       if (features.empty()) {
         helpful_exit();
       }
       features.back().set_optional();
-    } else if (ceph_argparse_flag(args, i, "--persistent", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--persistent", (char*)NULL)) {
       if (features.empty()) {
         helpful_exit();
       }
@@ -340,7 +340,7 @@ int main(int argc, const char **argv)
 
   if (create) {
     monmap.epoch = 0;
-    monmap.created = ceph_clock_now();
+    monmap.created = stone_clock_now();
     monmap.last_changed = monmap.created;
     srand(getpid() + time(0));
     if (g_conf().get_val<uuid_d>("fsid").is_zero()) {
@@ -354,17 +354,17 @@ int main(int argc, const char **argv)
   }
   if (enable_all_features) {
     // populate persistent features, too
-    monmap.persistent_features = ceph::features::mon::get_persistent();
+    monmap.persistent_features = stone::features::mon::get_persistent();
     modified = true;
   }
 
   if (generate) {
-    int r = monmap.build_initial(g_ceph_context, true, cerr);
+    int r = monmap.build_initial(g_stone_context, true, cerr);
     if (r < 0)
       return r;
   }
 
-  if (min_mon_release != ceph_release_t::unknown) {
+  if (min_mon_release != stone_release_t::unknown) {
     monmap.min_mon_release = min_mon_release;
     cout << "setting min_mon_release = " << min_mon_release << std::endl;
     modified = true;
@@ -377,7 +377,7 @@ int main(int argc, const char **argv)
     if (!initial_members.empty()) {
       cout << "initial_members " << initial_members << ", filtering seed monmap" << std::endl;
       set<entity_addrvec_t> removed;
-      monmap.set_initial_members(g_ceph_context, initial_members,
+      monmap.set_initial_members(g_stone_context, initial_members,
 				 string(), entity_addrvec_t(),
 				 &removed);
       cout << "removed " << removed << std::endl;
@@ -400,24 +400,24 @@ int main(int argc, const char **argv)
     }
     if (addr.get_port() == 0) {
       if (monmap.persistent_features.contains_all(
-	    ceph::features::mon::FEATURE_NAUTILUS)) {
+	    stone::features::mon::FEATURE_NAUTILUS)) {
 	addr.set_type(entity_addr_t::TYPE_MSGR2);
-	addr.set_port(CEPH_MON_PORT_IANA);
+	addr.set_port(STONE_MON_PORT_IANA);
 	addrs.v.push_back(addr);
 	addr.set_type(entity_addr_t::TYPE_LEGACY);
-	addr.set_port(CEPH_MON_PORT_LEGACY);
+	addr.set_port(STONE_MON_PORT_LEGACY);
 	addrs.v.push_back(addr);
       } else {
 	addr.set_type(entity_addr_t::TYPE_LEGACY);
-	addr.set_port(CEPH_MON_PORT_LEGACY);
+	addr.set_port(STONE_MON_PORT_LEGACY);
 	addrs.v.push_back(addr);
       }
-    } else if (addr.get_port() == CEPH_MON_PORT_LEGACY) {
+    } else if (addr.get_port() == STONE_MON_PORT_LEGACY) {
       addr.set_type(entity_addr_t::TYPE_LEGACY);
       addrs.v.push_back(addr);
     } else {
       if (monmap.persistent_features.contains_all(
-	    ceph::features::mon::FEATURE_NAUTILUS)) {
+	    stone::features::mon::FEATURE_NAUTILUS)) {
 	addr.set_type(entity_addr_t::TYPE_MSGR2);
       }
       addrs.v.push_back(addr);

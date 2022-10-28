@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -13,7 +13,7 @@
 #include "TrackedOp.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_optracker
+#define dout_subsys stone_subsys_optracker
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 
@@ -25,7 +25,7 @@ using std::set;
 using std::string;
 using std::stringstream;
 
-using ceph::Formatter;
+using stone::Formatter;
 
 static ostream& _prefix(std::ostream* _dout)
 {
@@ -148,13 +148,13 @@ void OpHistory::dump_ops(utime_t now, Formatter *f, set<string> filters, bool by
 }
 
 struct ShardedTrackingData {
-  ceph::mutex ops_in_flight_lock_sharded;
+  stone::mutex ops_in_flight_lock_sharded;
   TrackedOp::tracked_op_list_t ops_in_flight_sharded;
   explicit ShardedTrackingData(string lock_name)
-    : ops_in_flight_lock_sharded(ceph::make_mutex(lock_name)) {}
+    : ops_in_flight_lock_sharded(stone::make_mutex(lock_name)) {}
 };
 
-OpTracker::OpTracker(CephContext *cct_, bool tracking, uint32_t num_shards):
+OpTracker::OpTracker(StoneContext *cct_, bool tracking, uint32_t num_shards):
   seq(0),
   num_optracker_shards(num_shards),
   complaint_time(0), log_threshold(0),
@@ -170,7 +170,7 @@ OpTracker::OpTracker(CephContext *cct_, bool tracking, uint32_t num_shards):
 
 OpTracker::~OpTracker() {
   while (!sharded_in_flight_list.empty()) {
-    ceph_assert((sharded_in_flight_list.back())->ops_in_flight_sharded.empty());
+    stone_assert((sharded_in_flight_list.back())->ops_in_flight_sharded.empty());
     delete sharded_in_flight_list.back();
     sharded_in_flight_list.pop_back();
   }
@@ -182,7 +182,7 @@ bool OpTracker::dump_historic_ops(Formatter *f, bool by_duration, set<string> fi
     return false;
 
   std::shared_lock l{lock};
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   history.dump_ops(now, f, filters, by_duration);
   return true;
 }
@@ -217,7 +217,7 @@ bool OpTracker::dump_historic_slow_ops(Formatter *f, set<string> filters)
     return false;
 
   std::shared_lock l{lock};
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   history.dump_slow_ops(now, f, filters);
   return true;
 }
@@ -231,10 +231,10 @@ bool OpTracker::dump_ops_in_flight(Formatter *f, bool print_only_blocked, set<st
   f->open_object_section("ops_in_flight"); // overall dump
   uint64_t total_ops_in_flight = 0;
   f->open_array_section("ops"); // list of TrackedOps
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   for (uint32_t i = 0; i < num_optracker_shards; i++) {
     ShardedTrackingData* sdata = sharded_in_flight_list[i];
-    ceph_assert(NULL != sdata); 
+    stone_assert(NULL != sdata); 
     std::lock_guard locker(sdata->ops_in_flight_lock_sharded);
     for (auto& op : sdata->ops_in_flight_sharded) {
       if (print_only_blocked && (now - op.get_initiated() <= complaint_time))
@@ -266,7 +266,7 @@ bool OpTracker::register_inflight_op(TrackedOp *i)
   uint64_t current_seq = ++seq;
   uint32_t shard_index = current_seq % num_optracker_shards;
   ShardedTrackingData* sdata = sharded_in_flight_list[shard_index];
-  ceph_assert(NULL != sdata);
+  stone_assert(NULL != sdata);
   {
     std::lock_guard locker(sdata->ops_in_flight_lock_sharded);
     sdata->ops_in_flight_sharded.push_back(*i);
@@ -278,11 +278,11 @@ bool OpTracker::register_inflight_op(TrackedOp *i)
 void OpTracker::unregister_inflight_op(TrackedOp* const i)
 {
   // caller checks;
-  ceph_assert(i->state);
+  stone_assert(i->state);
 
   uint32_t shard_index = i->seq % num_optracker_shards;
   ShardedTrackingData* sdata = sharded_in_flight_list[shard_index];
-  ceph_assert(NULL != sdata);
+  stone_assert(NULL != sdata);
   {
     std::lock_guard locker(sdata->ops_in_flight_lock_sharded);
     auto p = sdata->ops_in_flight_sharded.iterator_to(*i);
@@ -293,7 +293,7 @@ void OpTracker::unregister_inflight_op(TrackedOp* const i)
 void OpTracker::record_history_op(TrackedOpRef&& i)
 {
   std::shared_lock l{lock};
-  history.insert(ceph_clock_now(), std::move(i));
+  history.insert(stone_clock_now(), std::move(i));
 }
 
 bool OpTracker::visit_ops_in_flight(utime_t* oldest_secs,
@@ -302,7 +302,7 @@ bool OpTracker::visit_ops_in_flight(utime_t* oldest_secs,
   if (!tracking_enabled)
     return false;
 
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
   utime_t oldest_op = now;
   // single representation of all inflight operations reunified
   // from OpTracker's shards. TrackedOpRef extends the lifetime
@@ -316,7 +316,7 @@ bool OpTracker::visit_ops_in_flight(utime_t* oldest_secs,
 
   std::shared_lock l{lock};
   for (const auto sdata : sharded_in_flight_list) {
-    ceph_assert(sdata);
+    stone_assert(sdata);
     std::lock_guard locker(sdata->ops_in_flight_lock_sharded);
     if (!sdata->ops_in_flight_sharded.empty()) {
       utime_t oldest_op_tmp =
@@ -357,7 +357,7 @@ bool OpTracker::with_slow_ops_in_flight(utime_t* oldest_secs,
 					int* num_warned_ops,
 					std::function<void(TrackedOp&)>&& on_warn)
 {
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
   auto too_old = now;
   too_old -= complaint_time;
   int slow = 0;
@@ -400,7 +400,7 @@ bool OpTracker::check_ops_in_flight(std::string* summary,
 				    std::vector<string> &warnings,
 				    int *num_slow_ops)
 {
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
   auto too_old = now;
   too_old -= complaint_time;
   int warned = 0;
@@ -436,11 +436,11 @@ bool OpTracker::check_ops_in_flight(std::string* summary,
 void OpTracker::get_age_ms_histogram(pow2_hist_t *h)
 {
   h->clear();
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
 
   for (uint32_t iter = 0; iter < num_optracker_shards; iter++) {
     ShardedTrackingData* sdata = sharded_in_flight_list[iter];
-    ceph_assert(NULL != sdata);
+    stone_assert(NULL != sdata);
     std::lock_guard locker(sdata->ops_in_flight_lock_sharded);
 
     for (auto& i : sdata->ops_in_flight_sharded) {

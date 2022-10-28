@@ -16,7 +16,7 @@
 #include "librbd/api/Mirror.h"
 #include "common/Cond.h"
 #include "common/errno.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "tools/rbd_mirror/PoolWatcher.h"
 #include "tools/rbd_mirror/Threads.h"
 #include "tools/rbd_mirror/Types.h"
@@ -70,7 +70,7 @@ public:
 
   struct PoolWatcherListener : public rbd::mirror::pool_watcher::Listener {
     TestPoolWatcher *test;
-    ceph::condition_variable cond;
+    stone::condition_variable cond;
     ImageIds image_ids;
 
     explicit PoolWatcherListener(TestPoolWatcher *test) : test(test) {
@@ -127,7 +127,7 @@ public:
 
   void create_image(const string &pool_name, bool mirrored=true,
 		    string *image_name=nullptr) {
-    uint64_t features = librbd::util::get_rbd_default_features(g_ceph_context);
+    uint64_t features = librbd::util::get_rbd_default_features(g_stone_context);
     string name = "image" + stringify(++m_image_number);
     if (mirrored) {
       features |= RBD_FEATURE_EXCLUSIVE_LOCK | RBD_FEATURE_JOURNALING;
@@ -178,7 +178,7 @@ public:
       ictx->state->close();
     }
 
-    uint64_t features = librbd::util::get_rbd_default_features(g_ceph_context);
+    uint64_t features = librbd::util::get_rbd_default_features(g_stone_context);
     string name = "clone" + stringify(++m_image_number);
     if (mirrored) {
       features |= RBD_FEATURE_EXCLUSIVE_LOCK | RBD_FEATURE_JOURNALING;
@@ -215,7 +215,7 @@ public:
     ASSERT_EQ(m_mirrored_images, m_pool_watcher_listener.image_ids);
   }
 
-  ceph::mutex m_lock = ceph::make_mutex("TestPoolWatcherLock");
+  stone::mutex m_lock = stone::make_mutex("TestPoolWatcherLock");
   RadosRef m_cluster;
   PoolWatcherListener m_pool_watcher_listener;
   unique_ptr<PoolWatcher<> > m_pool_watcher;

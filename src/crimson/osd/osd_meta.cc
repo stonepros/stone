@@ -12,12 +12,12 @@
 
 using read_errorator = crimson::os::FuturizedStore::read_errorator;
 
-void OSDMeta::create(ceph::os::Transaction& t)
+void OSDMeta::create(stone::os::Transaction& t)
 {
   t.create_collection(coll->get_cid(), 0);
 }
 
-void OSDMeta::store_map(ceph::os::Transaction& t,
+void OSDMeta::store_map(stone::os::Transaction& t,
                         epoch_t e, const bufferlist& m)
 {
   t.write(coll->get_cid(), osdmap_oid(e), 0, m.length(), m);
@@ -27,14 +27,14 @@ seastar::future<bufferlist> OSDMeta::load_map(epoch_t e)
 {
   return store->read(coll,
                      osdmap_oid(e), 0, 0,
-                     CEPH_OSD_OP_FLAG_FADVISE_WILLNEED).handle_error(
+                     STONE_OSD_OP_FLAG_FADVISE_WILLNEED).handle_error(
     read_errorator::all_same_way([e] {
       throw std::runtime_error(fmt::format("read gave enoent on {}",
                                            osdmap_oid(e)));
     }));
 }
 
-void OSDMeta::store_superblock(ceph::os::Transaction& t,
+void OSDMeta::store_superblock(stone::os::Transaction& t,
                                const OSDSuperblock& superblock)
 {
   bufferlist bl;
@@ -90,7 +90,7 @@ ghobject_t OSDMeta::osdmap_oid(epoch_t epoch)
 ghobject_t OSDMeta::final_pool_info_oid(int64_t pool)
 {
   string name = fmt::format("final_pool_{}", pool);
-  return ghobject_t(hobject_t(sobject_t(object_t(name), CEPH_NOSNAP)));
+  return ghobject_t(hobject_t(sobject_t(object_t(name), STONE_NOSNAP)));
 }
 
 ghobject_t OSDMeta::superblock_oid()

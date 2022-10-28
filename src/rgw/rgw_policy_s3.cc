@@ -3,13 +3,13 @@
 
 #include <errno.h>
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "rgw_policy_s3.h"
 #include "rgw_common.h"
 #include "rgw_crypt_sanitize.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 class RGWPolicyCondition {
 protected:
@@ -186,7 +186,7 @@ int RGWPolicy::add_condition(const string& op, const string& first, const string
 
 int RGWPolicy::check(RGWPolicyEnv *env, string& err_msg)
 {
-  uint64_t now = ceph_clock_now().sec();
+  uint64_t now = stone_clock_now().sec();
   if (expires <= now) {
     dout(0) << "NOTICE: policy calculated as expired: " << expiration_str << dendl;
     err_msg = "Policy expired";

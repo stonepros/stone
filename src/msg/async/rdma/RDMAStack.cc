@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 XSKY <haomai@xsky.com>
  *
@@ -26,7 +26,7 @@
 #include "common/Tub.h"
 #include "RDMAStack.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #undef dout_prefix
 #define dout_prefix *_dout << "RDMAStack "
 
@@ -35,12 +35,12 @@ RDMADispatcher::~RDMADispatcher()
   ldout(cct, 20) << __func__ << " destructing rdma dispatcher" << dendl;
   polling_stop();
 
-  ceph_assert(qp_conns.empty());
-  ceph_assert(num_qp_conn == 0);
-  ceph_assert(dead_queue_pairs.empty());
+  stone_assert(qp_conns.empty());
+  stone_assert(num_qp_conn == 0);
+  stone_assert(dead_queue_pairs.empty());
 }
 
-RDMADispatcher::RDMADispatcher(CephContext* c, std::shared_ptr<Infiniband>& ib)
+RDMADispatcher::RDMADispatcher(StoneContext* c, std::shared_ptr<Infiniband>& ib)
   : cct(c), ib(ib)
 {
   PerfCountersBuilder plb(cct, "AsyncMessenger::RDMADispatcher", l_msgr_rdma_dispatcher_first, l_msgr_rdma_dispatcher_last);
@@ -84,16 +84,16 @@ void RDMADispatcher::polling_start()
   ib->get_memory_manager()->set_rx_stat_logger(perf_logger);
 
   tx_cc = ib->create_comp_channel(cct);
-  ceph_assert(tx_cc);
+  stone_assert(tx_cc);
   rx_cc = ib->create_comp_channel(cct);
-  ceph_assert(rx_cc);
+  stone_assert(rx_cc);
   tx_cq = ib->create_comp_queue(cct, tx_cc);
-  ceph_assert(tx_cq);
+  stone_assert(tx_cq);
   rx_cq = ib->create_comp_queue(cct, rx_cc);
-  ceph_assert(rx_cq);
+  stone_assert(rx_cq);
 
   t = std::thread(&RDMADispatcher::polling, this);
-  ceph_pthread_setname(t.native_handle(), "rdma-polling");
+  stone_pthread_setname(t.native_handle(), "rdma-polling");
 }
 
 void RDMADispatcher::polling_stop()
@@ -344,7 +344,7 @@ void RDMADispatcher::polling()
           if (r < 0) {
             r = -errno;
             lderr(cct) << __func__ << " poll failed " << r << dendl;
-            ceph_abort();
+            stone_abort();
           }
         }
         if (r > 0 && tx_cc->get_cq_event())
@@ -378,7 +378,7 @@ void RDMADispatcher::notify_pending_workers() {
 void RDMADispatcher::register_qp(QueuePair *qp, RDMAConnectedSocketImpl* csi)
 {
   std::lock_guard l{lock};
-  ceph_assert(!qp_conns.count(qp->get_local_qp_number()));
+  stone_assert(!qp_conns.count(qp->get_local_qp_number()));
   qp_conns[qp->get_local_qp_number()] = std::make_pair(qp, csi);
   ++num_qp_conn;
 }
@@ -551,7 +551,7 @@ void RDMADispatcher::handle_tx_event(ibv_wc *cqe, int n)
       ldout(cct, 1) << __func__ << " sending of the disconnect msg completed" << dendl;
     } else {
       ldout(cct, 1) << __func__ << " not tx buffer, chunk " << chunk << dendl;
-      ceph_abort();
+      stone_abort();
     }
   }
 
@@ -595,7 +595,7 @@ void RDMADispatcher::handle_rx_event(ibv_wc *cqe, int rx_number)
 
     switch (response->status) {
       case IBV_WC_SUCCESS:
-        ceph_assert(response->opcode == IBV_WC_RECV);
+        stone_assert(response->opcode == IBV_WC_RECV);
         if (!conn) {
           ldout(cct, 1) << __func__ << " csi with qpn " << response->qp_num << " may be dead. chunk 0x"
                         << std::hex << chunk << " will be back." << std::dec << dendl;
@@ -656,7 +656,7 @@ void RDMADispatcher::handle_rx_event(ibv_wc *cqe, int rx_number)
   polled.clear();
 }
 
-RDMAWorker::RDMAWorker(CephContext *c, unsigned worker_id)
+RDMAWorker::RDMAWorker(StoneContext *c, unsigned worker_id)
   : Worker(c, worker_id),
     tx_handler(new C_handle_cq_tx(this))
 {
@@ -686,7 +686,7 @@ RDMAWorker::~RDMAWorker()
 
 void RDMAWorker::initialize()
 {
-  ceph_assert(dispatcher);
+  stone_assert(dispatcher);
 }
 
 int RDMAWorker::listen(entity_addr_t &sa, unsigned addr_slot,
@@ -736,7 +736,7 @@ int RDMAWorker::connect(const entity_addr_t &addr, const SocketOptions &opts, Co
 
 int RDMAWorker::get_reged_mem(RDMAConnectedSocketImpl *o, std::vector<Chunk*> &c, size_t bytes)
 {
-  ceph_assert(center.in_thread());
+  stone_assert(center.in_thread());
   int r = ib->get_tx_buffers(c, bytes);
   size_t got = ib->get_memory_manager()->get_tx_buffer_size() * r;
   ldout(cct, 30) << __func__ << " need " << bytes << " bytes, reserve " << got << " registered  bytes, inflight " << dispatcher->inflight << dendl;
@@ -778,7 +778,7 @@ void RDMAWorker::handle_pending_message()
   dispatcher->notify_pending_workers();
 }
 
-RDMAStack::RDMAStack(CephContext *cct)
+RDMAStack::RDMAStack(StoneContext *cct)
   : NetworkStack(cct), ib(std::make_shared<Infiniband>(cct)),
     rdma_dispatcher(std::make_shared<RDMADispatcher>(cct, ib))
 {
@@ -808,6 +808,6 @@ void RDMAStack::spawn_worker(unsigned i, std::function<void ()> &&func)
 
 void RDMAStack::join_worker(unsigned i)
 {
-  ceph_assert(threads.size() > i && threads[i].joinable());
+  stone_assert(threads.size() > i && threads[i].joinable());
   threads[i].join();
 }

@@ -9,7 +9,7 @@
 
 namespace librados {
 
-TestMemRadosClient::TestMemRadosClient(CephContext *cct,
+TestMemRadosClient::TestMemRadosClient(StoneContext *cct,
                                        TestMemCluster *test_mem_cluster)
   : TestRadosClient(cct, test_mem_cluster->get_watch_notify()),
     m_mem_cluster(test_mem_cluster) {

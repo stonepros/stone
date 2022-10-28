@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MOSDMAP_H
-#define CEPH_MOSDMAP_H
+#ifndef STONE_MOSDMAP_H
+#define STONE_MOSDMAP_H
 
 #include "msg/Message.h"
 #include "osd/OSDMap.h"
@@ -58,9 +58,9 @@ public:
   }
 
 
-  MOSDMap() : Message{CEPH_MSG_OSD_MAP, HEAD_VERSION, COMPAT_VERSION} { }
+  MOSDMap() : Message{STONE_MSG_OSD_MAP, HEAD_VERSION, COMPAT_VERSION} { }
   MOSDMap(const uuid_d &f, const uint64_t features)
-    : Message{CEPH_MSG_OSD_MAP, HEAD_VERSION, COMPAT_VERSION},
+    : Message{STONE_MSG_OSD_MAP, HEAD_VERSION, COMPAT_VERSION},
       fsid(f), encode_features(features),
       oldest_map(0), newest_map(0) { }
 private:
@@ -93,11 +93,11 @@ public:
     encode(fsid, payload);
     if (OSDMap::get_significant_features(encode_features) !=
          OSDMap::get_significant_features(features)) {
-      if ((features & CEPH_FEATURE_PGID64) == 0 ||
-	  (features & CEPH_FEATURE_PGPOOL3) == 0) {
+      if ((features & STONE_FEATURE_PGID64) == 0 ||
+	  (features & STONE_FEATURE_PGPOOL3) == 0) {
 	header.version = 1;  // old old_client version
 	header.compat_version = 1;
-      } else if ((features & CEPH_FEATURE_OSDENC) == 0) {
+      } else if ((features & STONE_FEATURE_OSDENC) == 0) {
 	header.version = 2;  // old pg_pool_t
 	header.compat_version = 2;
       }
@@ -119,7 +119,7 @@ public:
 	  OSDMap m;
 	  m.decode(inc.fullmap);
 	  inc.fullmap.clear();
-	  m.encode(inc.fullmap, f | CEPH_FEATURE_RESERVED);
+	  m.encode(inc.fullmap, f | STONE_FEATURE_RESERVED);
 	}
 	if (inc.crush.length()) {
 	  // embedded crush std::map
@@ -129,7 +129,7 @@ public:
 	  inc.crush.clear();
 	  c.encode(inc.crush, f);
 	}
-	inc.encode(p->second, f | CEPH_FEATURE_RESERVED);
+	inc.encode(p->second, f | STONE_FEATURE_RESERVED);
       }
       for (auto p = maps.begin(); p != maps.end(); ++p) {
 	OSDMap m;
@@ -137,7 +137,7 @@ public:
 	// always encode with subset of osdmaps canonical features
 	uint64_t f = m.get_encoding_features() & features;
 	p->second.clear();
-	m.encode(p->second, f | CEPH_FEATURE_RESERVED);
+	m.encode(p->second, f | STONE_FEATURE_RESERVED);
       }
     }
     encode(incremental_maps, payload);

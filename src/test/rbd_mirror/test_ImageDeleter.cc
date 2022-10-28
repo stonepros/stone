@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -38,7 +38,7 @@
 #define GLOBAL_IMAGE_ID "global_image_id"
 #define GLOBAL_CLONE_IMAGE_ID "global_image_id_clone"
 
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_subsys stone_subsys_rbd_mirror
 
 using rbd::mirror::RadosRef;
 using rbd::mirror::TestFixture;
@@ -59,10 +59,10 @@ public:
     TestFixture::SetUp();
 
     m_image_deletion_throttler.reset(
-        new rbd::mirror::Throttler<>(g_ceph_context,
+        new rbd::mirror::Throttler<>(g_stone_context,
                                      "rbd_mirror_concurrent_image_deletions"));
 
-    m_service_daemon.reset(new rbd::mirror::ServiceDaemon<>(g_ceph_context,
+    m_service_daemon.reset(new rbd::mirror::ServiceDaemon<>(g_stone_context,
                                                             _rados, m_threads));
 
     librbd::api::Mirror<>::mode_set(m_local_io_ctx, RBD_MIRROR_MODE_IMAGE);

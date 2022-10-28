@@ -43,9 +43,9 @@
 #include "common/Cycles.h"
 #include "common/dout.h"
 #include "common/errno.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_dpdk
+#define dout_subsys stone_subsys_dpdk
 #undef dout_prefix
 #define dout_prefix *_dout << "dpdk "
 
@@ -115,7 +115,7 @@ static constexpr uint8_t vmxnet3_max_xmit_segment_frags = 16;
 
 static constexpr uint16_t inline_mbuf_size = inline_mbuf_data_size + mbuf_overhead;
 
-static size_t huge_page_size = 512 * CEPH_PAGE_SIZE;
+static size_t huge_page_size = 512 * STONE_PAGE_SIZE;
 
 uint32_t qp_mempool_obj_size()
 {
@@ -151,7 +151,7 @@ static constexpr uint8_t packet_read_size        = 32;
 
 int DPDKDevice::init_port_start()
 {
-  ceph_assert(_port_idx < rte_eth_dev_count_avail());
+  stone_assert(_port_idx < rte_eth_dev_count_avail());
 
   rte_eth_dev_info_get(_port_idx, &_dev_info);
 
@@ -257,7 +257,7 @@ int DPDKDevice::init_port_start()
   if (_num_queues > 1) {
     if (_dev_info.reta_size) {
       // RETA size should be a power of 2
-      ceph_assert((_dev_info.reta_size & (_dev_info.reta_size - 1)) == 0);
+      stone_assert((_dev_info.reta_size & (_dev_info.reta_size - 1)) == 0);
 
       // Set the RSS table to the correct size
       _redir_table.resize(_dev_info.reta_size);
@@ -292,7 +292,7 @@ int DPDKDevice::init_port_start()
   // all together. If this assumption breaks we need to rework the below logic
   // by splitting the csum offload feature bit into separate bits for IPv4,
   // TCP.
-  ceph_assert(((_dev_info.rx_offload_capa & DEV_RX_OFFLOAD_IPV4_CKSUM) &&
+  stone_assert(((_dev_info.rx_offload_capa & DEV_RX_OFFLOAD_IPV4_CKSUM) &&
           (_dev_info.rx_offload_capa & DEV_RX_OFFLOAD_TCP_CKSUM)) ||
          (!(_dev_info.rx_offload_capa & DEV_RX_OFFLOAD_IPV4_CKSUM) &&
           !(_dev_info.rx_offload_capa & DEV_RX_OFFLOAD_TCP_CKSUM)));
@@ -320,7 +320,7 @@ int DPDKDevice::init_port_start()
   // or not set all together. If this assumption breaks we need to rework the
   // below logic by splitting the csum offload feature bit into separate bits
   // for TCP.
-  ceph_assert((_dev_info.tx_offload_capa & DEV_TX_OFFLOAD_TCP_CKSUM) ||
+  stone_assert((_dev_info.tx_offload_capa & DEV_TX_OFFLOAD_TCP_CKSUM) ||
           !(_dev_info.tx_offload_capa & DEV_TX_OFFLOAD_TCP_CKSUM));
 
   if (_dev_info.tx_offload_capa & DEV_TX_OFFLOAD_TCP_CKSUM) {
@@ -364,7 +364,7 @@ void DPDKDevice::set_hw_flow_control()
   if (ret < 0) {
     lderr(cct) << __func__ << " port " << int(_port_idx)
                << ": failed to get hardware flow control settings: " << ret << dendl;
-    ceph_abort();
+    stone_abort();
   }
 
   if (_enable_fc) {
@@ -383,7 +383,7 @@ void DPDKDevice::set_hw_flow_control()
   if (ret < 0) {
     lderr(cct) << __func__ << " port " << int(_port_idx)
                << ": failed to set hardware flow control settings: " << ret << dendl;
-    ceph_abort();
+    stone_abort();
   }
 
   ldout(cct, 1) << __func__ << " port " << int(_port_idx) << ":  HW FC " << _enable_fc << dendl;
@@ -461,7 +461,7 @@ void DPDKDevice::set_rss_table()
 }
 
 void DPDKQueuePair::configure_proxies(const std::map<unsigned, float>& cpu_weights) {
-  ceph_assert(!cpu_weights.empty());
+  stone_assert(!cpu_weights.empty());
   if (cpu_weights.size() == 1 && cpu_weights.begin()->first == _qid) {
     // special case queue sending to self only, to avoid requiring a hash value
     return;
@@ -536,10 +536,10 @@ bool DPDKQueuePair::init_rx_mbuf_pool()
     std::string mz_name = "rx_buffer_data" + std::to_string(_qid);
     const struct rte_memzone *mz = rte_memzone_reserve_aligned(mz_name.c_str(),
           mbuf_data_size*bufs_count, _pktmbuf_pool_rx->socket_id, mz_flags, mbuf_data_size);
-    ceph_assert(mz);
+    stone_assert(mz);
     void* m = mz->addr;
     for (int i = 0; i < bufs_count; i++) {
-      ceph_assert(m);
+      stone_assert(m);
       _alloc_bufs.push_back(m);
       m += mbuf_data_size;
     }
@@ -597,14 +597,14 @@ class C_handle_dev_stats : public EventCallback {
   }
 };
 
-DPDKQueuePair::DPDKQueuePair(CephContext *c, EventCenter *cen, DPDKDevice* dev, uint8_t qid)
+DPDKQueuePair::DPDKQueuePair(StoneContext *c, EventCenter *cen, DPDKDevice* dev, uint8_t qid)
   : cct(c), _dev(dev), _dev_port_idx(dev->port_idx()), center(cen), _qid(qid),
     _tx_poller(this), _rx_gc_poller(this), _tx_buf_factory(c, dev, qid),
     _tx_gc_poller(this)
 {
   if (!init_rx_mbuf_pool()) {
     lderr(cct) << __func__ << " cannot initialize mbuf pools" << dendl;
-    ceph_abort();
+    stone_abort();
   }
 
   static_assert(offsetof(tx_buf, private_end) -
@@ -670,7 +670,7 @@ void DPDKQueuePair::handle_stats()
 
 bool DPDKQueuePair::poll_tx() {
   bool nonloopback = !cct->_conf->ms_dpdk_debug_allow_loopback;
-#ifdef CEPH_PERF_DEV
+#ifdef STONE_PERF_DEV
   uint64_t start = Cycles::rdtsc();
 #endif
   uint32_t total_work = 0;
@@ -706,7 +706,7 @@ bool DPDKQueuePair::poll_tx() {
     uint64_t c = send(_tx_packetq);
     perf_logger->inc(l_dpdk_qp_tx_packets, c);
     perf_logger->set(l_dpdk_qp_tx_last_bunch, c);
-#ifdef CEPH_PERF_DEV
+#ifdef STONE_PERF_DEV
     tx_count += total_work;
     tx_cycles += Cycles::rdtsc() - start;
 #endif
@@ -799,14 +799,14 @@ bool DPDKQueuePair::rx_gc(bool force)
                            (void **)_rx_free_bufs.data(),
                            _rx_free_bufs.size());
 
-      // TODO: ceph_assert() in a fast path! Remove me ASAP!
-      ceph_assert(_num_rx_free_segs >= _rx_free_bufs.size());
+      // TODO: stone_assert() in a fast path! Remove me ASAP!
+      stone_assert(_num_rx_free_segs >= _rx_free_bufs.size());
 
       _num_rx_free_segs -= _rx_free_bufs.size();
       _rx_free_bufs.clear();
 
-      // TODO: ceph_assert() in a fast path! Remove me ASAP!
-      ceph_assert((_rx_free_pkts.empty() && !_num_rx_free_segs) ||
+      // TODO: stone_assert() in a fast path! Remove me ASAP!
+      stone_assert((_rx_free_pkts.empty() && !_num_rx_free_segs) ||
              (!_rx_free_pkts.empty() && _num_rx_free_segs));
     }
   }
@@ -872,7 +872,7 @@ bool DPDKQueuePair::poll_rx_once()
   struct rte_mbuf *buf[packet_read_size];
 
   /* read a port */
-#ifdef CEPH_PERF_DEV
+#ifdef STONE_PERF_DEV
   uint64_t start = Cycles::rdtsc();
 #endif
   uint16_t count = rte_eth_rx_burst(_dev_port_idx, _qid,
@@ -881,12 +881,12 @@ bool DPDKQueuePair::poll_rx_once()
   /* Now process the NIC packets read */
   if (likely(count > 0)) {
     process_packets(buf, count);
-#ifdef CEPH_PERF_DEV
+#ifdef STONE_PERF_DEV
     rx_cycles = Cycles::rdtsc() - start;
     rx_count += count;
 #endif
   }
-#ifdef CEPH_PERF_DEV
+#ifdef STONE_PERF_DEV
   else {
     if (rx_count > 10000 && tx_count) {
       ldout(cct, 0) << __func__ << " rx count=" << rx_count << " avg rx=" << Cycles::to_nanoseconds(rx_cycles)/rx_count << "ns "
@@ -900,7 +900,7 @@ bool DPDKQueuePair::poll_rx_once()
   return count;
 }
 
-DPDKQueuePair::tx_buf_factory::tx_buf_factory(CephContext *c,
+DPDKQueuePair::tx_buf_factory::tx_buf_factory(StoneContext *c,
         DPDKDevice *dev, uint8_t qid): cct(c)
 {
   std::string name = std::string(pktmbuf_pool_name) + std::to_string(qid) + "_tx";
@@ -924,13 +924,13 @@ DPDKQueuePair::tx_buf_factory::tx_buf_factory(CephContext *c,
 
     if (!_pool) {
       lderr(cct) << __func__ << " Failed to create mempool for Tx" << dendl;
-      ceph_abort();
+      stone_abort();
     }
     if (rte_eth_tx_queue_setup(dev->port_idx(), qid, default_ring_size,
                                rte_eth_dev_socket_id(dev->port_idx()),
                                dev->def_tx_conf()) < 0) {
       lderr(cct) << __func__ << " cannot initialize tx queue" << dendl;
-      ceph_abort();
+      stone_abort();
     }
   }
 
@@ -1038,7 +1038,7 @@ void DPDKQueuePair::tx_buf::set_cluster_offload_info(const Packet& p, const DPDK
       head->l3_len = oi.ip_hdr_len;
 
       if (oi.tso_seg_size) {
-        ceph_assert(oi.needs_ip_csum);
+        stone_assert(oi.needs_ip_csum);
         head->ol_flags |= PKT_TX_TCP_SEG;
         head->l4_len = oi.tcp_hdr_len;
         head->tso_segsz = oi.tso_seg_size;
@@ -1048,7 +1048,7 @@ void DPDKQueuePair::tx_buf::set_cluster_offload_info(const Packet& p, const DPDK
 }
 
 DPDKQueuePair::tx_buf* DPDKQueuePair::tx_buf::from_packet_zc(
-        CephContext *cct, Packet&& p, DPDKQueuePair& qp)
+        StoneContext *cct, Packet&& p, DPDKQueuePair& qp)
 {
   // Too fragmented - linearize
   if (p.nr_frags() > max_frags) {
@@ -1160,7 +1160,7 @@ void DPDKQueuePair::tx_buf::copy_packet_to_cluster(const Packet& p, rte_mbuf* he
       cur_seg_offset = 0;
 
       // FIXME: assert in a fast-path - remove!!!
-      ceph_assert(cur_seg);
+      stone_assert(cur_seg);
     }
   }
 }
@@ -1245,7 +1245,7 @@ size_t DPDKQueuePair::tx_buf::copy_one_data_buf(
 /******************************** Interface functions *************************/
 
 std::unique_ptr<DPDKDevice> create_dpdk_net_device(
-    CephContext *cct,
+    StoneContext *cct,
     unsigned cores,
     uint8_t port_idx,
     bool use_lro,

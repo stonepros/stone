@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,14 +13,14 @@
  */
 
 #include <iostream>
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
 #include "os/filestore/FileStore.h"
 #include "global/global_init.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_filestore
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_filestore
 #undef dout_prefix
 #define dout_prefix *_dout
 
@@ -29,7 +29,7 @@ struct Foo : public Thread {
     dout(0) << "foo started" << dendl;
     sleep(1);
     dout(0) << "foo asserting 0" << dendl;
-    ceph_abort();
+    stone_abort();
   }
 } foo;
 
@@ -38,10 +38,10 @@ int main(int argc, const char **argv)
   vector<const char*> args;
   argv_to_vec(argc, argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   // args
   if (args.size() < 2) return -1;
@@ -67,7 +67,7 @@ int main(int argc, const char **argv)
   for (int i=0; i<mb; i++) {
     char f[30];
     snprintf(f, sizeof(f), "foo%d\n", i);
-    sobject_t soid(f, CEPH_NOSNAP);
+    sobject_t soid(f, STONE_NOSNAP);
     t.write(coll_t(), ghobject_t(hobject_t(soid)), 0, bl.length(), bl);
   }
   

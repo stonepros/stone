@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -19,7 +19,7 @@
 #include "include/scope_guard.h"
 #include "include/types.h"
 #include "include/rados/librados.hpp"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 #include "cls/fifo/cls_fifo_ops.h"
 #include "test/librados/test_cxx.h"
@@ -31,11 +31,11 @@
 #include "gtest/gtest.h"
 
 namespace R = librados;
-namespace cb = ceph::buffer;
+namespace cb = stone::buffer;
 namespace fifo = rados::cls::fifo;
 namespace RCf = rgw::cls::fifo;
 
-auto cct = new CephContext(CEPH_ENTITY_TYPE_CLIENT);
+auto cct = new StoneContext(STONE_ENTITY_TYPE_CLIENT);
 const DoutPrefix dp(cct, 1, "test legacy cls fifo: ");
 
 namespace {
@@ -788,7 +788,7 @@ TEST_F(AioLegacyFIFO, TestMultipleParts)
       ASSERT_EQ(0, p.next_ofs);
       ASSERT_EQ(0, p.min_index);
       ASSERT_EQ(0, p.max_index);
-      ASSERT_EQ(ceph::real_time{}, p.max_time);
+      ASSERT_EQ(stone::real_time{}, p.max_time);
     }, c);
     c->wait_for_complete();
     r = c->get_return_value();

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Sage Weil <sage@newdream.net>
  *
@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_LIBRADOS_RADOSCLIENT_H
-#define CEPH_LIBRADOS_RADOSCLIENT_H
+#ifndef STONE_LIBRADOS_RADOSCLIENT_H
+#define STONE_LIBRADOS_RADOSCLIENT_H
 
 #include <functional>
 #include <memory>
@@ -49,8 +49,8 @@ class librados::RadosClient : public Dispatcher,
 public:
   using Dispatcher::cct;
 private:
-  std::unique_ptr<CephContext,
-		  std::function<void(CephContext*)>> cct_deleter;
+  std::unique_ptr<StoneeContext,
+		  std::function<void(StoneeContext*)>> cct_deleter;
 
 public:
   const ConfigProxy& conf{cct->_conf};
@@ -98,7 +98,7 @@ private:
 public:
   boost::asio::io_context::strand finish_strand{poolctx.get_io_context()};
 
-  explicit RadosClient(CephContext *cct);
+  explicit RadosClient(StoneeContext *cct);
   ~RadosClient() override;
   int ping_monitor(std::string mon_id, std::string *result);
   int connect();

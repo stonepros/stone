@@ -11,24 +11,24 @@ namespace fs = std::filesystem;
 namespace fs = std::experimental::filesystem;
 #endif
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_immutable_obj_cache
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_immutable_obj_cache
 #undef dout_prefix
-#define dout_prefix *_dout << "ceph::cache::ObjectCacheStore: " << this << " " \
+#define dout_prefix *_dout << "stone::cache::ObjectCacheStore: " << this << " " \
                            << __func__ << ": "
 
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 namespace {
 
-class SafeTimerSingleton : public CommonSafeTimer<ceph::mutex> {
+class SafeTimerSingleton : public CommonSafeTimer<stone::mutex> {
 public:
-  ceph::mutex lock = ceph::make_mutex
-    ("ceph::immutable_object_cache::SafeTimerSingleton::lock");
+  stone::mutex lock = stone::make_mutex
+    ("stone::immutable_object_cache::SafeTimerSingleton::lock");
 
-  explicit SafeTimerSingleton(CephContext *cct)
+  explicit SafeTimerSingleton(StoneContext *cct)
       : CommonSafeTimer(cct, lock, true) {
     init();
   }
@@ -45,7 +45,7 @@ enum ThrottleTargetCode {
   ROC_QOS_BPS_THROTTLE = 2
 };
 
-ObjectCacheStore::ObjectCacheStore(CephContext *cct)
+ObjectCacheStore::ObjectCacheStore(StoneContext *cct)
       : m_cct(cct), m_rados(new librados::Rados()) {
 
   m_cache_root_dir =
@@ -99,11 +99,11 @@ ObjectCacheStore::ObjectCacheStore(CephContext *cct)
 ObjectCacheStore::~ObjectCacheStore() {
   delete m_policy;
   if (m_qos_enabled_flag & ROC_QOS_IOPS_THROTTLE) {
-    ceph_assert(m_throttles[ROC_QOS_IOPS_THROTTLE] != nullptr);
+    stone_assert(m_throttles[ROC_QOS_IOPS_THROTTLE] != nullptr);
     delete m_throttles[ROC_QOS_IOPS_THROTTLE];
   }
   if (m_qos_enabled_flag & ROC_QOS_BPS_THROTTLE) {
-    ceph_assert(m_throttles[ROC_QOS_BPS_THROTTLE] != nullptr);
+    stone_assert(m_throttles[ROC_QOS_BPS_THROTTLE] != nullptr);
     delete m_throttles[ROC_QOS_BPS_THROTTLE];
   }
 }
@@ -113,7 +113,7 @@ int ObjectCacheStore::init(bool reset) {
 
   int ret = m_rados->init_with_context(m_cct);
   if (ret < 0) {
-    lderr(m_cct) << "fail to init Ceph context" << dendl;
+    lderr(m_cct) << "fail to init Stone context" << dendl;
     return ret;
   }
 
@@ -232,9 +232,9 @@ int ObjectCacheStore::handle_promote_callback(int ret, bufferlist* read_buf,
   }
 
   // update metadata
-  ceph_assert(OBJ_CACHE_SKIP == m_policy->get_status(cache_file_name));
+  stone_assert(OBJ_CACHE_SKIP == m_policy->get_status(cache_file_name));
   m_policy->update_status(cache_file_name, state, read_buf->length());
-  ceph_assert(state == m_policy->get_status(cache_file_name));
+  stone_assert(state == m_policy->get_status(cache_file_name));
 
   delete read_buf;
 
@@ -281,7 +281,7 @@ int ObjectCacheStore::lookup_object(std::string pool_nspace, uint64_t pool_id,
       return ret;
     default:
       lderr(m_cct) << "unrecognized object cache status" << dendl;
-      ceph_assert(0);
+      stone_assert(0);
   }
 }
 
@@ -348,7 +348,7 @@ std::string ObjectCacheStore::get_cache_file_path(std::string cache_file_name,
   ldout(m_cct, 20) << cache_file_name <<dendl;
 
   uint32_t crc = 0;
-  crc = ceph_crc32c(0, (unsigned char *)cache_file_name.c_str(),
+  crc = stone_crc32c(0, (unsigned char *)cache_file_name.c_str(),
                     cache_file_name.length());
 
   std::string cache_file_dir = std::to_string(crc % 100) + "/";
@@ -443,10 +443,10 @@ void ObjectCacheStore::apply_qos_tick_and_limit(
     &m_cct->lookup_or_create_singleton_object<SafeTimerSingleton>(
       "tools::immutable_object_cache", false, m_cct);
   SafeTimer* timer = safe_timer_singleton;
-  ceph::mutex* timer_lock = &safe_timer_singleton->lock;
+  stone::mutex* timer_lock = &safe_timer_singleton->lock;
   m_qos_enabled_flag |= flag;
   auto throttle_flags_it = THROTTLE_FLAGS.find(flag);
-  ceph_assert(throttle_flags_it != THROTTLE_FLAGS.end());
+  stone_assert(throttle_flags_it != THROTTLE_FLAGS.end());
   throttle = new TokenBucketThrottle(m_cct, throttle_flags_it->second,
     0, 0, timer, timer_lock);
   throttle->set_schedule_tick_min(min_tick.count());
@@ -458,9 +458,9 @@ void ObjectCacheStore::apply_qos_tick_and_limit(
     throttle->set_limit(limit, 0, 1);
   }
 
-  ceph_assert(m_throttles.find(flag) == m_throttles.end());
+  stone_assert(m_throttles.find(flag) == m_throttles.end());
   m_throttles.insert({flag, throttle});
 }
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone

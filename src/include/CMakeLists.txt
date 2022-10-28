@@ -1,5 +1,5 @@
 install(FILES
-  libcephsqlite.h
+  libstonesqlite.h
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 install(FILES

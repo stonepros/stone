@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_JOURNAL_H
-#define CEPH_LIBRBD_JOURNAL_H
+#ifndef STONE_LIBRBD_JOURNAL_H
+#define STONE_LIBRBD_JOURNAL_H
 
 #include "include/int_types.h"
 #include "include/Context.h"
@@ -90,7 +90,7 @@ public:
   Journal(ImageCtxT &image_ctx);
   ~Journal();
 
-  static void get_work_queue(CephContext *cct, ContextWQ **work_queue);
+  static void get_work_queue(StoneContext *cct, ContextWQ **work_queue);
 
   static bool is_journal_supported(ImageCtxT &image_ctx);
   static int create(librados::IoCtx &io_ctx, const std::string &image_id,
@@ -372,4 +372,4 @@ private:
 
 extern template class librbd::Journal<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_JOURNAL_H
+#endif // STONE_LIBRBD_JOURNAL_H

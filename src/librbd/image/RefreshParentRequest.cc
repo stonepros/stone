@@ -12,7 +12,7 @@
 #include "librbd/io/ObjectDispatcherInterface.h"
 #include "librbd/migration/OpenSourceImageRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::RefreshParentRequest: "
 
@@ -28,7 +28,7 @@ RefreshParentRequest<I>::RefreshParentRequest(
     const MigrationInfo &migration_info, Context *on_finish)
   : m_child_image_ctx(child_image_ctx), m_parent_md(parent_md),
     m_migration_info(migration_info), m_on_finish(on_finish),
-    m_parent_image_ctx(nullptr), m_parent_snap_id(CEPH_NOSNAP),
+    m_parent_image_ctx(nullptr), m_parent_snap_id(STONE_NOSNAP),
     m_error_result(0) {
 }
 
@@ -36,7 +36,7 @@ template <typename I>
 bool RefreshParentRequest<I>::is_refresh_required(
     I &child_image_ctx, const ParentImageInfo &parent_md,
     const MigrationInfo &migration_info) {
-  ceph_assert(ceph_mutex_is_locked(child_image_ctx.image_lock));
+  stone_assert(stone_mutex_is_locked(child_image_ctx.image_lock));
   return (is_open_required(child_image_ctx, parent_md, migration_info) ||
           is_close_required(child_image_ctx, parent_md, migration_info));
 }
@@ -89,13 +89,13 @@ void RefreshParentRequest<I>::send() {
 
 template <typename I>
 void RefreshParentRequest<I>::apply() {
-  ceph_assert(ceph_mutex_is_wlocked(m_child_image_ctx.image_lock));
+  stone_assert(stone_mutex_is_wlocked(m_child_image_ctx.image_lock));
   std::swap(m_child_image_ctx.parent, m_parent_image_ctx);
 }
 
 template <typename I>
 void RefreshParentRequest<I>::finalize(Context *on_finish) {
-  CephContext *cct = m_child_image_ctx.cct;
+  StoneContext *cct = m_child_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_on_finish = on_finish;
@@ -108,9 +108,9 @@ void RefreshParentRequest<I>::finalize(Context *on_finish) {
 
 template <typename I>
 void RefreshParentRequest<I>::send_open_parent() {
-  ceph_assert(m_parent_md.spec.pool_id >= 0);
+  stone_assert(m_parent_md.spec.pool_id >= 0);
 
-  CephContext *cct = m_child_image_ctx.cct;
+  StoneContext *cct = m_child_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   if (!m_migration_info.empty()) {
@@ -154,7 +154,7 @@ void RefreshParentRequest<I>::send_open_parent() {
 
 template <typename I>
 Context *RefreshParentRequest<I>::handle_open_parent(int *result) {
-  CephContext *cct = m_child_image_ctx.cct;
+  StoneContext *cct = m_child_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << " r=" << *result << dendl;
 
   save_result(result);
@@ -171,9 +171,9 @@ Context *RefreshParentRequest<I>::handle_open_parent(int *result) {
 
 template <typename I>
 void RefreshParentRequest<I>::send_close_parent() {
-  ceph_assert(m_parent_image_ctx != nullptr);
+  stone_assert(m_parent_image_ctx != nullptr);
 
-  CephContext *cct = m_child_image_ctx.cct;
+  StoneContext *cct = m_child_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   auto ctx = create_async_context_callback(
@@ -185,7 +185,7 @@ void RefreshParentRequest<I>::send_close_parent() {
 
 template <typename I>
 Context *RefreshParentRequest<I>::handle_close_parent(int *result) {
-  CephContext *cct = m_child_image_ctx.cct;
+  StoneContext *cct = m_child_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << " r=" << *result << dendl;
 
   m_parent_image_ctx = nullptr;
@@ -201,7 +201,7 @@ Context *RefreshParentRequest<I>::handle_close_parent(int *result) {
 
 template <typename I>
 void RefreshParentRequest<I>::send_reset_existence_cache() {
-  CephContext *cct = m_child_image_ctx.cct;
+  StoneContext *cct = m_child_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   Context *ctx = create_async_context_callback(
@@ -213,7 +213,7 @@ void RefreshParentRequest<I>::send_reset_existence_cache() {
 
 template <typename I>
 Context *RefreshParentRequest<I>::handle_reset_existence_cache(int *result) {
-  CephContext *cct = m_child_image_ctx.cct;
+  StoneContext *cct = m_child_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << " r=" << *result << dendl;
 
   if (*result < 0) {
@@ -232,7 +232,7 @@ Context *RefreshParentRequest<I>::handle_reset_existence_cache(int *result) {
 
 template <typename I>
 void RefreshParentRequest<I>::send_complete(int r) {
-  CephContext *cct = m_child_image_ctx.cct;
+  StoneContext *cct = m_child_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_on_finish->complete(r);

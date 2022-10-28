@@ -6,7 +6,7 @@
 #include "common/Timer.h"
 #include <limits>
 
-#define dout_subsys ceph_subsys_journaler
+#define dout_subsys stone_subsys_journaler
 #undef dout_prefix
 #define dout_prefix *_dout << "ObjectPlayer: " << this << " "
 
@@ -20,7 +20,7 @@ bool advance_to_last_pad_byte(uint32_t off, bufferlist::const_iterator *iter,
   auto pad_bytes = MAX_PAD - off % MAX_PAD;
   auto next = *iter;
 
-  ceph_assert(!next.end());
+  stone_assert(!next.end());
   if (*next != '\0') {
     return false;
   }
@@ -45,24 +45,24 @@ bool advance_to_last_pad_byte(uint32_t off, bufferlist::const_iterator *iter,
 ObjectPlayer::ObjectPlayer(librados::IoCtx &ioctx,
                            const std::string& object_oid_prefix,
                            uint64_t object_num, SafeTimer &timer,
-                           ceph::mutex &timer_lock, uint8_t order,
+                           stone::mutex &timer_lock, uint8_t order,
                            uint64_t max_fetch_bytes)
   : m_object_num(object_num),
     m_oid(utils::get_object_name(object_oid_prefix, m_object_num)),
     m_timer(timer), m_timer_lock(timer_lock), m_order(order),
     m_max_fetch_bytes(max_fetch_bytes > 0 ? max_fetch_bytes : 2 << order),
-    m_lock(ceph::make_mutex(utils::unique_lock_name("ObjectPlayer::m_lock", this)))
+    m_lock(stone::make_mutex(utils::unique_lock_name("ObjectPlayer::m_lock", this)))
 {
   m_ioctx.dup(ioctx);
-  m_cct = reinterpret_cast<CephContext*>(m_ioctx.cct());
+  m_cct = reinterpret_cast<StoneContext*>(m_ioctx.cct());
 }
 
 ObjectPlayer::~ObjectPlayer() {
   {
     std::lock_guard timer_locker{m_timer_lock};
     std::lock_guard locker{m_lock};
-    ceph_assert(!m_fetch_in_progress);
-    ceph_assert(m_watch_ctx == nullptr);
+    stone_assert(!m_fetch_in_progress);
+    stone_assert(m_watch_ctx == nullptr);
   }
 }
 
@@ -70,18 +70,18 @@ void ObjectPlayer::fetch(Context *on_finish) {
   ldout(m_cct, 10) << __func__ << ": " << m_oid << dendl;
 
   std::lock_guard locker{m_lock};
-  ceph_assert(!m_fetch_in_progress);
+  stone_assert(!m_fetch_in_progress);
   m_fetch_in_progress = true;
 
   C_Fetch *context = new C_Fetch(this, on_finish);
   librados::ObjectReadOperation op;
   op.read(m_read_off, m_max_fetch_bytes, &context->read_bl, NULL);
-  op.set_op_flags2(CEPH_OSD_OP_FLAG_FADVISE_DONTNEED);
+  op.set_op_flags2(STONE_OSD_OP_FLAG_FADVISE_DONTNEED);
 
   auto rados_completion =
     librados::Rados::aio_create_completion(context, utils::rados_ctx_callback);
   int r = m_ioctx.aio_operate(m_oid, rados_completion, &op, 0, NULL);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
@@ -91,7 +91,7 @@ void ObjectPlayer::watch(Context *on_fetch, double interval) {
   std::lock_guard timer_locker{m_timer_lock};
   m_watch_interval = interval;
 
-  ceph_assert(m_watch_ctx == nullptr);
+  stone_assert(m_watch_ctx == nullptr);
   m_watch_ctx = on_fetch;
 
   schedule_watch();
@@ -102,7 +102,7 @@ void ObjectPlayer::unwatch() {
   Context *watch_ctx = nullptr;
   {
     std::lock_guard timer_locker{m_timer_lock};
-    ceph_assert(!m_unwatched);
+    stone_assert(!m_unwatched);
     m_unwatched = true;
 
     if (!cancel_watch()) {
@@ -119,13 +119,13 @@ void ObjectPlayer::unwatch() {
 
 void ObjectPlayer::front(Entry *entry) const {
   std::lock_guard locker{m_lock};
-  ceph_assert(!m_entries.empty());
+  stone_assert(!m_entries.empty());
   *entry = m_entries.front();
 }
 
 void ObjectPlayer::pop_front() {
   std::lock_guard locker{m_lock};
-  ceph_assert(!m_entries.empty());
+  stone_assert(!m_entries.empty());
 
   auto &entry = m_entries.front();
   m_entry_keys.erase({entry.get_tag_tid(), entry.get_entry_tid()});
@@ -147,7 +147,7 @@ int ObjectPlayer::handle_fetch_complete(int r, const bufferlist &bl,
   }
 
   std::lock_guard locker{m_lock};
-  ceph_assert(m_fetch_in_progress);
+  stone_assert(m_fetch_in_progress);
   m_read_off += bl.length();
   m_read_bl.append(bl);
   m_refetch_state = REFETCH_STATE_REQUIRED;
@@ -272,13 +272,13 @@ void ObjectPlayer::clear_invalid_range(uint32_t off, uint32_t len) {
 }
 
 void ObjectPlayer::schedule_watch() {
-  ceph_assert(ceph_mutex_is_locked(m_timer_lock));
+  stone_assert(stone_mutex_is_locked(m_timer_lock));
   if (m_watch_ctx == NULL) {
     return;
   }
 
   ldout(m_cct, 20) << __func__ << ": " << m_oid << " scheduling watch" << dendl;
-  ceph_assert(m_watch_task == nullptr);
+  stone_assert(m_watch_task == nullptr);
   m_watch_task = m_timer.add_event_after(
     m_watch_interval,
     new LambdaContext([this](int) {
@@ -287,11 +287,11 @@ void ObjectPlayer::schedule_watch() {
 }
 
 bool ObjectPlayer::cancel_watch() {
-  ceph_assert(ceph_mutex_is_locked(m_timer_lock));
+  stone_assert(stone_mutex_is_locked(m_timer_lock));
   ldout(m_cct, 20) << __func__ << ": " << m_oid << " cancelling watch" << dendl;
   if (m_watch_task != nullptr) {
     bool canceled = m_timer.cancel_event(m_watch_task);
-    ceph_assert(canceled);
+    stone_assert(canceled);
 
     m_watch_task = nullptr;
     return true;
@@ -300,11 +300,11 @@ bool ObjectPlayer::cancel_watch() {
 }
 
 void ObjectPlayer::handle_watch_task() {
-  ceph_assert(ceph_mutex_is_locked(m_timer_lock));
+  stone_assert(stone_mutex_is_locked(m_timer_lock));
 
   ldout(m_cct, 10) << __func__ << ": " << m_oid << " polling" << dendl;
-  ceph_assert(m_watch_ctx != nullptr);
-  ceph_assert(m_watch_task != nullptr);
+  stone_assert(m_watch_ctx != nullptr);
+  stone_assert(m_watch_task != nullptr);
 
   m_watch_task = nullptr;
   fetch(new C_WatchFetch(this));

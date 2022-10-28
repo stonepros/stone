@@ -8,15 +8,15 @@
  *
 */
 
-#include "ceph_dokan.h"
+#include "stone_dokan.h"
 #include "utils.h"
 #include "dbg.h"
 
 #include "common/debug.h"
 #include "common/dout.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd-wnbd: "
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -17,7 +17,7 @@
 #include "include/compat.h"
 #include "pthread.h"
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/BackTrace.h"
 #include "common/debug.h"
 #include "common/safe_io.h"
@@ -38,13 +38,13 @@
 extern char *sys_siglist[]; 
 #endif 
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 using std::ostringstream;
 using std::string;
 
-using ceph::BackTrace;
-using ceph::JSONFormatter;
+using stone::BackTrace;
+using stone::JSONFormatter;
 
 void install_sighandler(int signum, signal_handler_t handler, int flags)
 {
@@ -78,7 +78,7 @@ void install_sighandler(int signum, signal_handler_t handler, int flags)
 
 void sighup_handler(int signum)
 {
-  g_ceph_context->reopen_logs();
+  g_stone_context->reopen_logs();
 }
 
 static void reraise_fatal(int signum)
@@ -151,7 +151,7 @@ static void handle_fatal_signal(int signum)
   // presumably dump core-- will handle it.
   char buf[1024];
   char pthread_name[16] = {0}; //limited by 16B include terminating null byte.
-  int r = ceph_pthread_getname(pthread_self(), pthread_name, sizeof(pthread_name));
+  int r = stone_pthread_getname(pthread_self(), pthread_name, sizeof(pthread_name));
   (void)r;
 #if defined(__sun)
   char message[SIG2STR_MAX];
@@ -176,12 +176,12 @@ static void handle_fatal_signal(int signum)
   dout_emergency(oss.str());
 
   char base[PATH_MAX] = { 0 };
-  if (g_ceph_context &&
-      g_ceph_context->_conf->crash_dir.size()) {
+  if (g_stone_context &&
+      g_stone_context->_conf->crash_dir.size()) {
     // -- crash dump --
     // id
     ostringstream idss;
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     now.gmtime(idss);
     uuid_d uuid;
     uuid.generate_random();
@@ -190,7 +190,7 @@ static void handle_fatal_signal(int signum)
     std::replace(id.begin(), id.end(), ' ', '_');
 
     snprintf(base, sizeof(base), "%s/%s",
-	     g_ceph_context->_conf->crash_dir.c_str(),
+	     g_stone_context->_conf->crash_dir.c_str(),
 	     id.c_str());
     int r = ::mkdir(base, 0700);
     if (r >= 0) {
@@ -203,8 +203,8 @@ static void handle_fatal_signal(int signum)
 	jf.dump_string("crash_id", id);
 	now.gmtime(jf.dump_stream("timestamp"));
 	jf.dump_string("process_name", g_process_name);
-	jf.dump_string("entity_name", g_ceph_context->_conf->name.to_str());
-	jf.dump_string("ceph_version", ceph_version_to_str());
+	jf.dump_string("entity_name", g_stone_context->_conf->name.to_str());
+	jf.dump_string("stone_version", stone_version_to_str());
 
 	struct utsname u;
 	r = uname(&u);
@@ -302,9 +302,9 @@ static void handle_fatal_signal(int signum)
 
   // avoid recursion back into logging code if that is where
   // we got the SEGV.
-  if (g_ceph_context &&
-      g_ceph_context->_log &&
-      !g_ceph_context->_log->is_inside_log_lock()) {
+  if (g_stone_context &&
+      g_stone_context->_log &&
+      !g_stone_context->_log->is_inside_log_lock()) {
     // dump to log.  this uses the heap extensively, but we're better
     // off trying than not.
     derr << buf << std::endl;
@@ -313,14 +313,14 @@ static void handle_fatal_signal(int signum)
 	   << "is needed to interpret this.\n"
 	   << dendl;
 
-    g_ceph_context->_log->dump_recent();
+    g_stone_context->_log->dump_recent();
 
     if (base[0]) {
       char fn[PATH_MAX*2];
       snprintf(fn, sizeof(fn)-1, "%s/log", base);
-      g_ceph_context->_log->set_log_file(fn);
-      g_ceph_context->_log->reopen_log_file();
-      g_ceph_context->_log->dump_recent();
+      g_stone_context->_log->set_log_file(fn);
+      g_stone_context->_log->reopen_log_file();
+      g_stone_context->_log->dump_recent();
     }
   }
 
@@ -440,14 +440,14 @@ struct SignalHandler : public Thread {
   safe_handler *handlers[32] = {nullptr};
 
   /// to protect the handlers array
-  ceph::mutex lock = ceph::make_mutex("SignalHandler::lock");
+  stone::mutex lock = stone::make_mutex("SignalHandler::lock");
 
   SignalHandler() {
     // create signal pipe
     int r = pipe_cloexec(pipefd, 0);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     r = fcntl(pipefd[0], F_SETFL, O_NONBLOCK);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
 
     // create thread
     create("signal_handler");
@@ -459,7 +459,7 @@ struct SignalHandler : public Thread {
 
   void signal_thread() {
     int r = write(pipefd[1], "\0", 1);
-    ceph_assert(r == 1);
+    stone_assert(r == 1);
   }
 
   void shutdown() {
@@ -547,9 +547,9 @@ struct SignalHandler : public Thread {
     // defined.  We can do this without the lock because we will never
     // have the signal handler defined without the handlers entry also
     // being filled in.
-    ceph_assert(handlers[signum]);
+    stone_assert(handlers[signum]);
     int r = write(handlers[signum]->pipefd[1], " ", 1);
-    ceph_assert(r == 1);
+    stone_assert(r == 1);
   }
 
   void queue_signal_info(int signum, siginfo_t *siginfo, void * content) {
@@ -557,10 +557,10 @@ struct SignalHandler : public Thread {
     // defined.  We can do this without the lock because we will never
     // have the signal handler defined without the handlers entry also
     // being filled in.
-    ceph_assert(handlers[signum]);
+    stone_assert(handlers[signum]);
     memcpy(&handlers[signum]->info_t, siginfo, sizeof(siginfo_t));
     int r = write(handlers[signum]->pipefd[1], " ", 1);
-    ceph_assert(r == 1);
+    stone_assert(r == 1);
   }
 
   void register_handler(int signum, signal_handler_t handler, bool oneshot);
@@ -577,14 +577,14 @@ void SignalHandler::register_handler(int signum, signal_handler_t handler, bool 
 {
   int r;
 
-  ceph_assert(signum >= 0 && signum < 32);
+  stone_assert(signum >= 0 && signum < 32);
 
   safe_handler *h = new safe_handler;
 
   r = pipe_cloexec(h->pipefd, 0);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   r = fcntl(h->pipefd[0], F_SETFL, O_NONBLOCK);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   h->handler = handler;
   lock.lock();
@@ -603,15 +603,15 @@ void SignalHandler::register_handler(int signum, signal_handler_t handler, bool 
   sigfillset(&act.sa_mask);  // mask all signals in the handler
   act.sa_flags = SA_SIGINFO | (oneshot ? SA_RESETHAND : 0);
   int ret = sigaction(signum, &act, &oldact);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
 }
 
 void SignalHandler::unregister_handler(int signum, signal_handler_t handler)
 {
-  ceph_assert(signum >= 0 && signum < 32);
+  stone_assert(signum >= 0 && signum < 32);
   safe_handler *h = handlers[signum];
-  ceph_assert(h);
-  ceph_assert(h->handler == handler);
+  stone_assert(h);
+  stone_assert(h->handler == handler);
 
   // restore to default
   signal(signum, SIG_DFL);
@@ -632,38 +632,38 @@ void SignalHandler::unregister_handler(int signum, signal_handler_t handler)
 
 void init_async_signal_handler()
 {
-  ceph_assert(!g_signal_handler);
+  stone_assert(!g_signal_handler);
   g_signal_handler = new SignalHandler;
 }
 
 void shutdown_async_signal_handler()
 {
-  ceph_assert(g_signal_handler);
+  stone_assert(g_signal_handler);
   delete g_signal_handler;
   g_signal_handler = NULL;
 }
 
 void queue_async_signal(int signum)
 {
-  ceph_assert(g_signal_handler);
+  stone_assert(g_signal_handler);
   g_signal_handler->queue_signal(signum);
 }
 
 void register_async_signal_handler(int signum, signal_handler_t handler)
 {
-  ceph_assert(g_signal_handler);
+  stone_assert(g_signal_handler);
   g_signal_handler->register_handler(signum, handler, false);
 }
 
 void register_async_signal_handler_oneshot(int signum, signal_handler_t handler)
 {
-  ceph_assert(g_signal_handler);
+  stone_assert(g_signal_handler);
   g_signal_handler->register_handler(signum, handler, true);
 }
 
 void unregister_async_signal_handler(int signum, signal_handler_t handler)
 {
-  ceph_assert(g_signal_handler);
+  stone_assert(g_signal_handler);
   g_signal_handler->unregister_handler(signum, handler);
 }
 

@@ -5,7 +5,7 @@
 #include "common/Formatter.h"
 
 using namespace std;
-using ceph::bufferlist;
+using stone::bufferlist;
 
 void SloppyCRCMap::write(uint64_t offset, uint64_t len, const bufferlist& bl,
 			 std::ostream *out)
@@ -158,7 +158,7 @@ void SloppyCRCMap::decode(bufferlist::const_iterator& bl)
   DECODE_FINISH(bl);
 }
 
-void SloppyCRCMap::dump(ceph::Formatter *f) const
+void SloppyCRCMap::dump(stone::Formatter *f) const
 {
   f->dump_unsigned("block_size", block_size);
   f->open_array_section("crc_map");

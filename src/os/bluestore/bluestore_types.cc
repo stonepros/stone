@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -23,9 +23,9 @@ using std::make_pair;
 using std::ostream;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::Formatter;
 
 // bluestore_bdev_label_t
 
@@ -117,9 +117,9 @@ void bluestore_extent_ref_map_t::_check() const
   unsigned refs = 0;
   for (const auto &p : ref_map) {
     if (p.first < pos)
-      ceph_abort_msg("overlap");
+      stone_abort_msg("overlap");
     if (p.first == pos && p.second.refs == refs)
-      ceph_abort_msg("unmerged");
+      stone_abort_msg("unmerged");
     pos = p.first + p.second.length;
     refs = p.second.refs;
   }
@@ -170,14 +170,14 @@ void bluestore_extent_ref_map_t::get(uint64_t offset, uint32_t length)
     }
     if (p->first < offset) {
       // split off the portion before offset
-      ceph_assert(p->first + p->second.length > offset);
+      stone_assert(p->first + p->second.length > offset);
       uint64_t left = p->first + p->second.length - offset;
       p->second.length = offset - p->first;
       p = ref_map.insert(map<uint64_t,record_t>::value_type(
 			   offset, record_t(left, p->second.refs))).first;
       // continue below
     }
-    ceph_assert(p->first == offset);
+    stone_assert(p->first == offset);
     if (length < p->second.length) {
       ref_map.insert(make_pair(offset + length,
 			       record_t(p->second.length - length,
@@ -207,11 +207,11 @@ void bluestore_extent_ref_map_t::put(
   auto p = ref_map.lower_bound(offset);
   if (p == ref_map.end() || p->first > offset) {
     if (p == ref_map.begin()) {
-      ceph_abort_msg("put on missing extent (nothing before)");
+      stone_abort_msg("put on missing extent (nothing before)");
     }
     --p;
     if (p->first + p->second.length <= offset) {
-      ceph_abort_msg("put on missing extent (gap)");
+      stone_abort_msg("put on missing extent (gap)");
     }
   }
   if (p->first < offset) {
@@ -224,7 +224,7 @@ void bluestore_extent_ref_map_t::put(
 			 offset, record_t(left, p->second.refs))).first;
   }
   while (length > 0) {
-    ceph_assert(p->first == offset);
+    stone_assert(p->first == offset);
     if (length < p->second.length) {
       if (p->second.refs != 1) {
 	unshared = false;
@@ -397,7 +397,7 @@ bluestore_blob_use_tracker_t::operator=(const bluestore_blob_use_tracker_t& rhs)
 
 void bluestore_blob_use_tracker_t::allocate()
 {
-  ceph_assert(num_au != 0);
+  stone_assert(num_au != 0);
   bytes_per_au = new uint32_t[num_au];
   mempool::get_pool(
     mempool::pool_index_t(mempool::mempool_bluestore_cache_other)).
@@ -410,9 +410,9 @@ void bluestore_blob_use_tracker_t::allocate()
 
 void bluestore_blob_use_tracker_t::init(
   uint32_t full_length, uint32_t _au_size) {
-  ceph_assert(!au_size || is_empty()); 
-  ceph_assert(_au_size > 0);
-  ceph_assert(full_length > 0);
+  stone_assert(!au_size || is_empty()); 
+  stone_assert(_au_size > 0);
+  stone_assert(full_length > 0);
   clear();  
   uint32_t _num_au = round_up_to(full_length, _au_size) / _au_size;
   au_size = _au_size;
@@ -425,7 +425,7 @@ void bluestore_blob_use_tracker_t::init(
 void bluestore_blob_use_tracker_t::get(
   uint32_t offset, uint32_t length)
 {
-  ceph_assert(au_size);
+  stone_assert(au_size);
   if (!num_au) {
     total_bytes += length;
   } else {
@@ -444,13 +444,13 @@ bool bluestore_blob_use_tracker_t::put(
   uint32_t offset, uint32_t length,
   PExtentVector *release_units)
 {
-  ceph_assert(au_size);
+  stone_assert(au_size);
   if (release_units) {
     release_units->clear();
   }
   bool maybe_empty = true;
   if (!num_au) {
-    ceph_assert(total_bytes >= length);
+    stone_assert(total_bytes >= length);
     total_bytes -= length;
   } else {
     auto end = offset + length;
@@ -459,7 +459,7 @@ bool bluestore_blob_use_tracker_t::put(
       auto phase = offset % au_size;
       size_t pos = offset / au_size;
       auto diff = std::min(au_size - phase, end - offset);
-      ceph_assert(diff <= bytes_per_au[pos]);
+      stone_assert(diff <= bytes_per_au[pos]);
       bytes_per_au[pos] -= diff;
       offset += (phase ? au_size - phase : au_size);
       if (bytes_per_au[pos] == 0) {
@@ -492,7 +492,7 @@ bool bluestore_blob_use_tracker_t::can_split() const
 
 bool bluestore_blob_use_tracker_t::can_split_at(uint32_t blob_offset) const
 {
-  ceph_assert(au_size);
+  stone_assert(au_size);
   return (blob_offset % au_size) == 0 &&
          blob_offset < num_au * au_size;
 }
@@ -501,10 +501,10 @@ void bluestore_blob_use_tracker_t::split(
   uint32_t blob_offset,
   bluestore_blob_use_tracker_t* r)
 {
-  ceph_assert(au_size);
-  ceph_assert(can_split());
-  ceph_assert(can_split_at(blob_offset));
-  ceph_assert(r->is_empty());
+  stone_assert(au_size);
+  stone_assert(can_split());
+  stone_assert(can_split_at(blob_offset));
+  stone_assert(r->is_empty());
   
   uint32_t new_num_au = blob_offset / au_size;
   r->init( (num_au - new_num_au) * au_size, au_size);
@@ -691,7 +691,7 @@ void bluestore_blob_t::generate_test_instances(list<bluestore_blob_t*>& ls)
   ls.back()->allocated_test(bluestore_pextent_t(111, 222));
   ls.push_back(new bluestore_blob_t);
   ls.back()->init_csum(Checksummer::CSUM_XXHASH32, 16, 65536);
-  ls.back()->csum_data = ceph::buffer::claim_malloc(4, strdup("abcd"));
+  ls.back()->csum_data = stone::buffer::claim_malloc(4, strdup("abcd"));
   ls.back()->add_unused(0, 3);
   ls.back()->add_unused(8, 8);
   ls.back()->allocated_test(bluestore_pextent_t(0x40100000, 0x10000));
@@ -796,7 +796,7 @@ void bluestore_blob_t::allocated(uint32_t b_off, uint32_t length, const PExtentV
   if (extents.size() == 0) {
     // if blob is compressed then logical length to be already configured
     // otherwise - to be unset.
-    ceph_assert((is_compressed() && logical_length != 0) ||
+    stone_assert((is_compressed() && logical_length != 0) ||
       (!is_compressed() && logical_length == 0));
 
     extents.reserve(allocs.size() + (b_off ? 1 : 0));
@@ -814,14 +814,14 @@ void bluestore_blob_t::allocated(uint32_t b_off, uint32_t length, const PExtentV
       logical_length = new_len;
     }
   } else {
-    ceph_assert(!is_compressed()); // partial allocations are forbidden when 
+    stone_assert(!is_compressed()); // partial allocations are forbidden when 
                               // compressed
-    ceph_assert(b_off < logical_length);
+    stone_assert(b_off < logical_length);
     uint32_t cur_offs = 0;
     auto start_it = extents.begin();
     size_t pos = 0;
     while (true) {
-      ceph_assert(start_it != extents.end());
+      stone_assert(start_it != extents.end());
       if (cur_offs + start_it->length > b_off) {
 	break;
       }
@@ -834,15 +834,15 @@ void bluestore_blob_t::allocated(uint32_t b_off, uint32_t length, const PExtentV
     auto end_it = start_it;
 
     while (true) {
-      ceph_assert(end_it != extents.end());
-      ceph_assert(!end_it->is_valid());
+      stone_assert(end_it != extents.end());
+      stone_assert(!end_it->is_valid());
       if (cur_offs + end_it->length >= end_off) {
 	break;
       }
       cur_offs += end_it->length;
       ++end_it;
     }
-    ceph_assert(cur_offs + end_it->length >= end_off);
+    stone_assert(cur_offs + end_it->length >= end_off);
     uint32_t tail = cur_offs + end_it->length - end_off;
 
     start_it = extents.erase(start_it, end_it + 1);
@@ -921,7 +921,7 @@ bool bluestore_blob_t::release_extents(bool all,
       }
       pos += e.length;
     }
-    ceph_assert(is_compressed() || get_logical_length() == pos);
+    stone_assert(is_compressed() || get_logical_length() == pos);
     extents.resize(1);
     extents[0].offset = bluestore_pextent_t::INVALID_OFFSET;
     extents[0].length = pos;
@@ -939,7 +939,7 @@ bool bluestore_blob_t::release_extents(bool all,
     if (loffs_it == lend ||
         pext_loffs_start + pext_it->length <= loffs_it->offset) {
       int delta0 = pext_loffs - pext_loffs_start;
-      ceph_assert(delta0 >= 0);
+      stone_assert(delta0 >= 0);
       if ((uint32_t)delta0 < pext_it->length) {
 	vb.add(pext_it->offset + delta0, pext_it->length - delta0);
       }
@@ -950,10 +950,10 @@ bool bluestore_blob_t::release_extents(bool all,
     else {
       //assert(pext_loffs == pext_loffs_start);
       int delta0 = pext_loffs - pext_loffs_start;
-      ceph_assert(delta0 >= 0);
+      stone_assert(delta0 >= 0);
 
       int delta = loffs_it->offset - pext_loffs;
-      ceph_assert(delta >= 0);
+      stone_assert(delta >= 0);
       if (delta > 0) {
 	vb.add(pext_it->offset + delta0, delta);
 	pext_loffs += delta;
@@ -1035,7 +1035,7 @@ void bluestore_blob_t::split(uint32_t blob_offset, bluestore_blob_t& rb)
     rb.csum_type = csum_type;
     rb.csum_chunk_order = csum_chunk_order;
     size_t csum_order = get_csum_chunk_size();
-    ceph_assert(blob_offset % csum_order == 0);
+    stone_assert(blob_offset % csum_order == 0);
     size_t pos = (blob_offset / csum_order) * get_csum_value_size();
     // deep copy csum data
     bufferptr old;

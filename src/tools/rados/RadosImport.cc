@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -18,15 +18,15 @@
 #include "osd/PGLog.h"
 #include "RadosImport.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rados
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rados
 
 int RadosImport::import(std::string pool, bool no_overwrite)
 {
   librados::IoCtx ioctx;
   librados::Rados cluster;
 
-  char *id = getenv("CEPH_CLIENT_ID");
+  char *id = getenv("STONE_CLIENT_ID");
   if (id) cerr << "Client id is: " << id << std::endl;
   int ret = cluster.init(id);
   if (ret) {
@@ -180,8 +180,8 @@ int RadosImport::get_object_rados(librados::IoCtx &ioctx, bufferlist &bl, bool n
   omap_hdr_section oh;
   omap_section os;
 
-  ceph_assert(g_ceph_context);
-  if (ob.hoid.hobj.nspace == g_ceph_context->_conf->osd_hit_set_namespace) {
+  stone_assert(g_stone_context);
+  if (ob.hoid.hobj.nspace == g_stone_context->_conf->osd_hit_set_namespace) {
     cout << "Skipping internal object " << ob.hoid << std::endl;
     skip_object(bl);
     return 0;
@@ -263,7 +263,7 @@ int RadosImport::get_object_rados(librados::IoCtx &ioctx, bufferlist &bl, bool n
 	  << std::endl;
 	return ret;
       }
-      ceph_assert(alignment != 0);
+      stone_assert(alignment != 0);
     }
   }
 
@@ -298,7 +298,7 @@ int RadosImport::get_object_rados(librados::IoCtx &ioctx, bufferlist &bl, bool n
           cerr << "Discontiguous object data in export" << std::endl;
           return -EFAULT;
         }
-        ceph_assert(ds.databl.length() == ds.len);
+        stone_assert(ds.databl.length() == ds.len);
         databl.claim_append(ds.databl);
         in_offset += ds.len;
         if (databl.length() >= alignment) {
@@ -314,7 +314,7 @@ int RadosImport::get_object_rados(librados::IoCtx &ioctx, bufferlist &bl, bool n
           out_offset += rndlen;
           bufferlist n;
           if (databl.length() > rndlen) {
-            ceph_assert(databl.length() - rndlen < alignment);
+            stone_assert(databl.length() - rndlen < alignment);
 	    n.substr_of(databl, rndlen, databl.length() - rndlen);
           }
           databl = n;
@@ -379,7 +379,7 @@ int RadosImport::get_object_rados(librados::IoCtx &ioctx, bufferlist &bl, bool n
     case TYPE_OBJECT_END:
       done = true;
       if (need_align && databl.length() > 0) {
-        ceph_assert(databl.length() < alignment);
+        stone_assert(databl.length() < alignment);
         dout(10) << "END write offset=" << out_offset << " len=" << databl.length() << dendl;
         if (dry_run || skipping)
           break;

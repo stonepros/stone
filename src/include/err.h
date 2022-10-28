@@ -1,5 +1,5 @@
-#ifndef CEPH_ERR_H
-#define CEPH_ERR_H
+#ifndef STONE_ERR_H
+#define STONE_ERR_H
 
 /*
  * adapted from linux 2.6.24 include/linux/err.h

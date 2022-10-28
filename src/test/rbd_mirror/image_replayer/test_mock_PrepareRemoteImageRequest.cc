@@ -53,7 +53,7 @@ struct GetInfoRequest<librbd::MockTestImageCtx> {
                                 PromotionState *promotion_state,
                                 std::string* primary_mirror_uuid,
                                 Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->mirror_image = mirror_image;
     s_instance->promotion_state = promotion_state;
     s_instance->primary_mirror_uuid = primary_mirror_uuid;
@@ -62,7 +62,7 @@ struct GetInfoRequest<librbd::MockTestImageCtx> {
   }
 
   GetInfoRequest() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
   ~GetInfoRequest() {
@@ -82,7 +82,7 @@ namespace mirror {
 
 template <>
 struct Threads<librbd::MockTestImageCtx> {
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
   SafeTimer *timer;
   librbd::asio::ContextWQ *work_queue;
 
@@ -104,7 +104,7 @@ struct GetMirrorImageIdRequest<librbd::MockTestImageCtx> {
                                          const std::string& global_image_id,
                                          std::string* image_id,
                                          Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->image_id = image_id;
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -148,7 +148,7 @@ struct StateBuilder<librbd::MockTestImageCtx>
   librbd::journal::MirrorPeerClientMeta remote_client_meta;
 
   static StateBuilder* create(const std::string&) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -174,7 +174,7 @@ struct StateBuilder<librbd::MockTestImageCtx>
   std::string remote_mirror_peer_uuid;
 
   static StateBuilder* create(const std::string&) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 

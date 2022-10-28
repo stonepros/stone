@@ -20,8 +20,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_MSG_PACKET_UTIL_H_
-#define CEPH_MSG_PACKET_UTIL_H_
+#ifndef STONE_MSG_PACKET_UTIL_H_
+#define STONE_MSG_PACKET_UTIL_H_
 
 #include <map>
 #include <iostream>

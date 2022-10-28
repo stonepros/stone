@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -16,7 +16,7 @@
 #include "messages/MOSDRepScrub.h"
 
 #include "common/errno.h"
-#include "common/ceph_releases.h"
+#include "common/stone_releases.h"
 #include "common/config.h"
 #include "OSD.h"
 #include "OpRequest.h"
@@ -69,7 +69,7 @@
 #include <sstream>
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, this)
 
@@ -83,13 +83,13 @@ using std::stringstream;
 using std::unique_ptr;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::decode;
-using ceph::encode;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::decode;
+using stone::encode;
+using stone::Formatter;
 
-using namespace ceph::osd::scheduler;
+using namespace stone::osd::scheduler;
 
 template <class T>
 static ostream& _prefix(std::ostream *_dout, T *t)
@@ -115,7 +115,7 @@ void PG::put(const char* tag)
   {
     std::lock_guard l(_ref_id_lock);
     auto tag_counts_entry = _tag_counts.find(tag);
-    ceph_assert(tag_counts_entry != _tag_counts.end());
+    stone_assert(tag_counts_entry != _tag_counts.end());
     --tag_counts_entry->second;
     if (tag_counts_entry->second == 0) {
       _tag_counts.erase(tag_counts_entry);
@@ -145,7 +145,7 @@ uint64_t PG::get_with_id()
 				 << " got id " << id << " "
 				 << (ref - 1) << " -> " << ref
 				 << dendl;
-  ceph_assert(!_live_ids.count(id));
+  stone_assert(!_live_ids.count(id));
   _live_ids.insert(make_pair(id, ss.str()));
   return id;
 }
@@ -159,7 +159,7 @@ void PG::put_with_id(uint64_t id)
 				 << dendl;
   {
     std::lock_guard l(_ref_id_lock);
-    ceph_assert(_live_ids.count(id));
+    stone_assert(_live_ids.count(id));
     _live_ids.erase(id);
   }
   if (newref)
@@ -241,28 +241,28 @@ PG::~PG()
 
 void PG::lock(bool no_lockdep) const
 {
-#ifdef CEPH_DEBUG_MUTEX
+#ifdef STONE_DEBUG_MUTEX
   _lock.lock(no_lockdep);
 #else
   _lock.lock();
   locked_by = std::this_thread::get_id();
 #endif
   // if we have unrecorded dirty state with the lock dropped, there is a bug
-  ceph_assert(!recovery_state.debug_has_dirty_state());
+  stone_assert(!recovery_state.debug_has_dirty_state());
 
   dout(30) << "lock" << dendl;
 }
 
 bool PG::is_locked() const
 {
-  return ceph_mutex_is_locked(_lock);
+  return stone_mutex_is_locked(_lock);
 }
 
 void PG::unlock() const
 {
   //generic_dout(0) << this << " " << info.pgid << " unlock" << dendl;
-  ceph_assert(!recovery_state.debug_has_dirty_state());
-#ifndef CEPH_DEBUG_MUTEX
+  stone_assert(!recovery_state.debug_has_dirty_state());
+#ifndef STONE_DEBUG_MUTEX
   locked_by = {};
 #endif
   _lock.unlock();
@@ -271,7 +271,7 @@ void PG::unlock() const
 std::ostream& PG::gen_prefix(std::ostream& out) const
 {
   OSDMapRef mapref = recovery_state.get_osdmap();
-#ifdef CEPH_DEBUG_MUTEX
+#ifdef STONE_DEBUG_MUTEX
   if (_lock.is_locked_by_me()) {
 #else
   if (locked_by == std::this_thread::get_id()) {
@@ -303,7 +303,7 @@ void PG::log_state_exit(
   const char *state_name, utime_t enter_time,
   uint64_t events, utime_t event_dur) {
   osd->pg_recovery_stats.log_exit(
-    state_name, ceph_clock_now() - enter_time, events, event_dur);
+    state_name, stone_clock_now() - enter_time, events, event_dur);
 }
 
 /********* PG **********/
@@ -321,13 +321,13 @@ void PG::clear_object_snap_mapping(
   ObjectStore::Transaction *t, const hobject_t &soid)
 {
   OSDriver::OSTransaction _t(osdriver.get_transaction(t));
-  if (soid.snap < CEPH_MAXSNAP) {
+  if (soid.snap < STONE_MAXSNAP) {
     int r = snap_mapper.remove_oid(
       soid,
       &_t);
     if (!(r == 0 || r == -ENOENT)) {
       derr << __func__ << ": remove_oid returned " << cpp_strerror(r) << dendl;
-      ceph_abort();
+      stone_abort();
     }
   }
 }
@@ -336,13 +336,13 @@ void PG::update_object_snap_mapping(
   ObjectStore::Transaction *t, const hobject_t &soid, const set<snapid_t> &snaps)
 {
   OSDriver::OSTransaction _t(osdriver.get_transaction(t));
-  ceph_assert(soid.snap < CEPH_MAXSNAP);
+  stone_assert(soid.snap < STONE_MAXSNAP);
   int r = snap_mapper.remove_oid(
     soid,
     &_t);
   if (!(r == 0 || r == -ENOENT)) {
     derr << __func__ << ": remove_oid returned " << cpp_strerror(r) << dendl;
-    ceph_abort();
+    stone_abort();
   }
   snap_mapper.add_oid(
     soid,
@@ -374,7 +374,7 @@ void PG::clear_primary_state()
 bool PG::op_has_sufficient_caps(OpRequestRef& op)
 {
   // only check MOSDOp
-  if (op->get_req()->get_type() != CEPH_MSG_OSD_OP)
+  if (op->get_req()->get_type() != STONE_MSG_OSD_OP)
     return true;
 
   auto req = op->get_req<MOSDOp>();
@@ -417,7 +417,7 @@ void PG::queue_recovery()
 {
   if (!is_primary() || !is_peered()) {
     dout(10) << "queue_recovery -- not primary or not peered " << dendl;
-    ceph_assert(!recovery_queued);
+    stone_assert(!recovery_queued);
   } else if (recovery_queued) {
     dout(10) << "queue_recovery -- already queued" << dendl;
   } else {
@@ -430,7 +430,7 @@ void PG::queue_recovery()
 void PG::queue_scrub_after_repair()
 {
   dout(10) << __func__ << dendl;
-  ceph_assert(ceph_mutex_is_locked(_lock));
+  stone_assert(stone_mutex_is_locked(_lock));
 
   m_planned_scrub.must_deep_scrub = true;
   m_planned_scrub.check_repair = true;
@@ -463,7 +463,7 @@ unsigned PG::get_scrub_priority()
 Context *PG::finish_recovery()
 {
   dout(10) << "finish_recovery" << dendl;
-  ceph_assert(info.last_complete == info.last_update);
+  stone_assert(info.last_complete == info.last_update);
 
   clear_recovery_state();
 
@@ -510,7 +510,7 @@ void PG::start_recovery_op(const hobject_t& soid)
 	   << " (" << recovering_oids << ")"
 #endif
 	   << dendl;
-  ceph_assert(recovery_ops_active >= 0);
+  stone_assert(recovery_ops_active >= 0);
   recovery_ops_active++;
 #ifdef DEBUG_RECOVERY_OIDS
   recovering_oids.insert(soid);
@@ -525,10 +525,10 @@ void PG::finish_recovery_op(const hobject_t& soid, bool dequeue)
 	   << " (" << recovering_oids << ")"
 #endif
 	   << dendl;
-  ceph_assert(recovery_ops_active > 0);
+  stone_assert(recovery_ops_active > 0);
   recovery_ops_active--;
 #ifdef DEBUG_RECOVERY_OIDS
-  ceph_assert(recovering_oids.count(soid));
+  stone_assert(recovering_oids.count(soid));
   recovering_oids.erase(recovering_oids.find(soid));
 #endif
   osd->finish_recovery_op(this, soid, dequeue);
@@ -590,7 +590,7 @@ void PG::merge_from(map<spg_t,PGRef>& sources, PeeringCtx &rctx,
   snap_mapper.update_bits(split_bits);
 }
 
-void PG::add_backoff(const ceph::ref_t<Session>& s, const hobject_t& begin, const hobject_t& end)
+void PG::add_backoff(const stone::ref_t<Session>& s, const hobject_t& begin, const hobject_t& end)
 {
   auto con = s->con;
   if (!con)   // OSD::ms_handle_reset clears s->con without a lock
@@ -599,10 +599,10 @@ void PG::add_backoff(const ceph::ref_t<Session>& s, const hobject_t& begin, cons
   if (b) {
     derr << __func__ << " already have backoff for " << s << " begin " << begin
 	 << " " << *b << dendl;
-    ceph_abort();
+    stone_abort();
   }
   std::lock_guard l(backoff_lock);
-  b = ceph::make_ref<Backoff>(info.pgid, this, s, ++s->backoff_seq, begin, end);
+  b = stone::make_ref<Backoff>(info.pgid, this, s, ++s->backoff_seq, begin, end);
   backoffs[begin].insert(b);
   s->add_backoff(b);
   dout(10) << __func__ << " session " << s << " added " << *b << dendl;
@@ -610,7 +610,7 @@ void PG::add_backoff(const ceph::ref_t<Session>& s, const hobject_t& begin, cons
     new MOSDBackoff(
       info.pgid,
       get_osdmap_epoch(),
-      CEPH_OSD_BACKOFF_OP_BLOCK,
+      STONE_OSD_BACKOFF_OP_BLOCK,
       b->id,
       begin,
       end));
@@ -619,7 +619,7 @@ void PG::add_backoff(const ceph::ref_t<Session>& s, const hobject_t& begin, cons
 void PG::release_backoffs(const hobject_t& begin, const hobject_t& end)
 {
   dout(10) << __func__ << " [" << begin << "," << end << ")" << dendl;
-  vector<ceph::ref_t<Backoff>> bv;
+  vector<stone::ref_t<Backoff>> bv;
   {
     std::lock_guard l(backoff_lock);
     auto p = backoffs.lower_bound(begin);
@@ -655,14 +655,14 @@ void PG::release_backoffs(const hobject_t& begin, const hobject_t& end)
     std::lock_guard l(b->lock);
     dout(10) << __func__ << " " << *b << dendl;
     if (b->session) {
-      ceph_assert(b->pg == this);
+      stone_assert(b->pg == this);
       ConnectionRef con = b->session->con;
       if (con) {   // OSD::ms_handle_reset clears s->con without a lock
 	con->send_message(
 	  new MOSDBackoff(
 	    info.pgid,
 	    get_osdmap_epoch(),
-	    CEPH_OSD_BACKOFF_OP_UNBLOCK,
+	    STONE_OSD_BACKOFF_OP_UNBLOCK,
 	    b->id,
 	    b->begin,
 	    b->end));
@@ -681,7 +681,7 @@ void PG::release_backoffs(const hobject_t& begin, const hobject_t& end)
 void PG::clear_backoffs()
 {
   dout(10) << __func__ << " " << dendl;
-  map<hobject_t,set<ceph::ref_t<Backoff>>> ls;
+  map<hobject_t,set<stone::ref_t<Backoff>>> ls;
   {
     std::lock_guard l(backoff_lock);
     ls.swap(backoffs);
@@ -691,7 +691,7 @@ void PG::clear_backoffs()
       std::lock_guard l(b->lock);
       dout(10) << __func__ << " " << *b << dendl;
       if (b->session) {
-	ceph_assert(b->pg == this);
+	stone_assert(b->pg == this);
 	if (b->is_new()) {
 	  b->state = Backoff::STATE_DELETING;
 	} else {
@@ -705,12 +705,12 @@ void PG::clear_backoffs()
 }
 
 // called by Session::clear_backoffs()
-void PG::rm_backoff(const ceph::ref_t<Backoff>& b)
+void PG::rm_backoff(const stone::ref_t<Backoff>& b)
 {
   dout(10) << __func__ << " " << *b << dendl;
   std::lock_guard l(backoff_lock);
-  ceph_assert(ceph_mutex_is_locked_by_me(b->lock));
-  ceph_assert(b->pg == this);
+  stone_assert(stone_mutex_is_locked_by_me(b->lock));
+  stone_assert(b->pg == this);
   auto p = backoffs.find(b->begin);
   // may race with release_backoffs()
   if (p != backoffs.end()) {
@@ -888,13 +888,13 @@ void PG::upgrade(ObjectStore *store)
 {
   dout(0) << __func__ << " " << info_struct_v << " -> " << pg_latest_struct_v
 	  << dendl;
-  ceph_assert(info_struct_v <= 10);
+  stone_assert(info_struct_v <= 10);
   ObjectStore::Transaction t;
 
   // <do upgrade steps here>
 
   // finished upgrade!
-  ceph_assert(info_struct_v == 10);
+  stone_assert(info_struct_v == 10);
 
   // update infover_key
   if (info_struct_v < pg_latest_struct_v) {
@@ -911,9 +911,9 @@ void PG::upgrade(ObjectStore *store)
   if (r != 0) {
     derr << __func__ << ": queue_transaction returned "
 	 << cpp_strerror(r) << dendl;
-    ceph_abort();
+    stone_abort();
   }
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   C_SaferCond waiter;
   if (!ch->flush_commit(&waiter)) {
@@ -952,7 +952,7 @@ void PG::prepare_write(
       cct->_conf->osd_fast_info,
       osd->logger,
       this);
-    ceph_assert(ret == 0);
+    stone_assert(ret == 0);
   }
   pglog.write_log_and_missing(
     t, &km, coll, pgmeta_oid, pool.info.require_rollback());
@@ -977,7 +977,7 @@ bool PG::_has_removal_flag(ObjectStore *store,
   keys.insert("_remove");
   map<string,bufferlist> values;
   auto ch = store->open_collection(coll);
-  ceph_assert(ch);
+  stone_assert(ch);
   if (store->omap_get_values(ch, pgmeta_oid, keys, &values) == 0 &&
       values.size() == 1)
     return true;
@@ -995,7 +995,7 @@ int PG::peek_map_epoch(ObjectStore *store,
   epoch_t cur_epoch = 0;
 
   // validate collection name
-  ceph_assert(coll.is_pg());
+  stone_assert(coll.is_pg());
 
   // try for v8
   set<string> keys;
@@ -1003,16 +1003,16 @@ int PG::peek_map_epoch(ObjectStore *store,
   keys.insert(string(epoch_key));
   map<string,bufferlist> values;
   auto ch = store->open_collection(coll);
-  ceph_assert(ch);
+  stone_assert(ch);
   int r = store->omap_get_values(ch, pgmeta_oid, keys, &values);
   if (r == 0) {
-    ceph_assert(values.size() == 2);
+    stone_assert(values.size() == 2);
 
     // sanity check version
     auto bp = values[string(infover_key)].cbegin();
     __u8 struct_v = 0;
     decode(struct_v, bp);
-    ceph_assert(struct_v >= 8);
+    stone_assert(struct_v >= 8);
 
     // get epoch
     bp = values[string(epoch_key)].begin();
@@ -1066,15 +1066,15 @@ int PG::read_info(
   ghobject_t pgmeta_oid(pgid.make_pgmeta_oid());
   map<string,bufferlist> values;
   auto ch = store->open_collection(coll);
-  ceph_assert(ch);
+  stone_assert(ch);
   int r = store->omap_get_values(ch, pgmeta_oid, keys, &values);
-  ceph_assert(r == 0);
-  ceph_assert(values.size() == 3 ||
+  stone_assert(r == 0);
+  stone_assert(values.size() == 3 ||
 	 values.size() == 4);
 
   auto p = values[string(infover_key)].cbegin();
   decode(struct_v, p);
-  ceph_assert(struct_v >= 10);
+  stone_assert(struct_v >= 10);
 
   p = values[string(info_key)].begin();
   decode(info, p);
@@ -1103,12 +1103,12 @@ void PG::read_state(ObjectStore *store)
     info_from_disk,
     past_intervals_from_disk,
     info_struct_v);
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
 
   if (info_struct_v < pg_compat_struct_v) {
     derr << "PG needs upgrade, but on-disk data is too old; upgrade to"
 	 << " an older version first." << dendl;
-    ceph_abort_msg("PG too old to upgrade");
+    stone_abort_msg("PG too old to upgrade");
   }
 
   recovery_state.init_from_disk_state(
@@ -1151,7 +1151,7 @@ void PG::read_state(ObjectStore *store)
   // init pool options
   store->set_collection_opts(ch, pool.info.opts);
 
-  PeeringCtx rctx(ceph_release_t::unknown);
+  PeeringCtx rctx(stone_release_t::unknown);
   handle_initialize(rctx);
   // note: we don't activate here because we know the OSD will advance maps
   // during boot.
@@ -1165,7 +1165,7 @@ void PG::update_snap_map(
 {
   for (auto i = log_entries.cbegin(); i != log_entries.cend(); ++i) {
     OSDriver::OSTransaction _t(osdriver.get_transaction(&t));
-    if (i->soid.snap < CEPH_MAXSNAP) {
+    if (i->soid.snap < STONE_MAXSNAP) {
       if (i->is_delete()) {
 	int r = snap_mapper.remove_oid(
 	  i->soid,
@@ -1173,9 +1173,9 @@ void PG::update_snap_map(
 	if (r)
 	  derr << __func__ << " remove_oid " << i->soid << " failed with " << r << dendl;
         // On removal tolerate missing key corruption
-        ceph_assert(r == 0 || r == -ENOENT);
+        stone_assert(r == 0 || r == -ENOENT);
       } else if (i->is_update()) {
-	ceph_assert(i->snaps.length() > 0);
+	stone_assert(i->snaps.length() > 0);
 	vector<snapid_t> snaps;
 	bufferlist snapbl = i->snaps;
 	auto p = snapbl.cbegin();
@@ -1198,9 +1198,9 @@ void PG::update_snap_map(
 	    _snaps,
 	    0,
 	    &_t);
-	  ceph_assert(r == 0);
+	  stone_assert(r == 0);
 	} else {
-	  ceph_assert(i->is_clean());
+	  stone_assert(i->is_clean());
 	}
       }
     }
@@ -1335,7 +1335,7 @@ bool PG::sched_scrub()
   dout(15) << __func__ << " pg(" << info.pgid
 	  << (is_active() ? ") <active>" : ") <not-active>")
 	  << (is_clean() ? " <clean>" : " <not-clean>") << dendl;
-  ceph_assert(ceph_mutex_is_locked(_lock));
+  stone_assert(stone_mutex_is_locked(_lock));
 
   if (m_scrubber && m_scrubber->is_scrub_active()) {
     return false;
@@ -1413,8 +1413,8 @@ bool PG::is_time_for_deep(bool allow_deep_scrub,
     return true;
   }
 
-  if (ceph_clock_now() >= next_deepscrub_interval()) {
-    dout(20) << __func__ << ": now (" << ceph_clock_now() << ") >= time for deep ("
+  if (stone_clock_now() >= next_deepscrub_interval()) {
+    dout(20) << __func__ << ": now (" << stone_clock_now() << ") >= time for deep ("
 	     << next_deepscrub_interval() << ")" << dendl;
     return true;
   }
@@ -1448,7 +1448,7 @@ bool PG::verify_periodic_scrub_mode(bool allow_deep_scrub,
 			      requested_scrub_t& planned) const
 
 {
-  ceph_assert(!planned.must_deep_scrub && !planned.must_repair);
+  stone_assert(!planned.must_deep_scrub && !planned.must_repair);
 
   if (!allow_deep_scrub && has_deep_errors) {
       osd->clog->error()
@@ -1490,9 +1490,9 @@ std::optional<requested_scrub_t> PG::verify_scrub_mode() const
 {
   dout(10) << __func__ << " processing pg " << info.pgid << dendl;
 
-  bool allow_deep_scrub = !(get_osdmap()->test_flag(CEPH_OSDMAP_NODEEP_SCRUB) ||
+  bool allow_deep_scrub = !(get_osdmap()->test_flag(STONE_OSDMAP_NODEEP_SCRUB) ||
 			    pool.info.has_flag(pg_pool_t::FLAG_NODEEP_SCRUB));
-  bool allow_regular_scrub = !(get_osdmap()->test_flag(CEPH_OSDMAP_NOSCRUB) ||
+  bool allow_regular_scrub = !(get_osdmap()->test_flag(STONE_OSDMAP_NOSCRUB) ||
 			       pool.info.has_flag(pg_pool_t::FLAG_NOSCRUB));
   bool has_deep_errors = (info.stats.stats.sum.num_deep_scrub_errors > 0);
   bool try_to_auto_repair =
@@ -1662,8 +1662,8 @@ void PG::schedule_event_on_commit(
 
 void PG::on_activate(interval_set<snapid_t> snaps)
 {
-  ceph_assert(!m_scrubber->are_callbacks_pending());
-  ceph_assert(callbacks_for_degraded_object.empty());
+  stone_assert(!m_scrubber->are_callbacks_pending());
+  stone_assert(callbacks_for_degraded_object.empty());
   snap_trimq = snaps;
   release_pg_backoffs();
   projected_last_update = info.last_update;
@@ -1696,7 +1696,7 @@ void PG::on_active_advmap(const OSDMapRef &osdmap)
     }
     dout(10) << __func__ << " new removed_snaps " << i->second
 	     << ", snap_trimq now " << snap_trimq << dendl;
-    ceph_assert(!bad || !cct->_conf->osd_debug_verify_cached_snaps);
+    stone_assert(!bad || !cct->_conf->osd_debug_verify_cached_snaps);
   }
 
   const auto& new_purged_snaps = osdmap->get_new_purged_snaps();
@@ -1735,7 +1735,7 @@ void PG::on_active_advmap(const OSDMapRef &osdmap)
     }
     dout(10) << __func__ << " new purged_snaps " << j->second
 	     << ", now " << recovery_state.get_info().purged_snaps << dendl;
-    ceph_assert(!bad || !cct->_conf->osd_debug_verify_cached_snaps);
+    stone_assert(!bad || !cct->_conf->osd_debug_verify_cached_snaps);
   }
 }
 
@@ -1773,8 +1773,8 @@ void PG::on_active_actmap()
 
   if (recovery_state.is_peered() &&
       !recovery_state.is_clean() &&
-      !recovery_state.get_osdmap()->test_flag(CEPH_OSDMAP_NOBACKFILL) &&
-      (!recovery_state.get_osdmap()->test_flag(CEPH_OSDMAP_NOREBALANCE) ||
+      !recovery_state.get_osdmap()->test_flag(STONE_OSDMAP_NOBACKFILL) &&
+      (!recovery_state.get_osdmap()->test_flag(STONE_OSDMAP_NOREBALANCE) ||
        recovery_state.is_degraded())) {
     queue_recovery();
   }
@@ -1824,7 +1824,7 @@ void PG::send_pg_created(pg_t pgid)
   osd->send_pg_created(pgid);
 }
 
-ceph::signedspan PG::get_mnow()
+stone::signedspan PG::get_mnow()
 {
   return osd->get_mnow();
 }
@@ -1834,7 +1834,7 @@ HeartbeatStampsRef PG::get_hb_stamps(int peer)
   return osd->get_hb_stamps(peer);
 }
 
-void PG::schedule_renew_lease(epoch_t lpr, ceph::timespan delay)
+void PG::schedule_renew_lease(epoch_t lpr, stone::timespan delay)
 {
   auto spgid = info.pgid;
   auto o = osd;
@@ -1845,7 +1845,7 @@ void PG::schedule_renew_lease(epoch_t lpr, ceph::timespan delay)
     });
 }
 
-void PG::queue_check_readable(epoch_t lpr, ceph::timespan delay)
+void PG::queue_check_readable(epoch_t lpr, stone::timespan delay)
 {
   osd->queue_check_readable(info.pgid, lpr, delay);
 }
@@ -1868,14 +1868,14 @@ void PG::on_activate_committed()
       dout(10) << __func__ << " flushes in progress, moving "
 	       << waiting_for_peered.size() << " items to waiting_for_flush"
 	       << dendl;
-      ceph_assert(waiting_for_flush.empty());
+      stone_assert(waiting_for_flush.empty());
       waiting_for_flush.swap(waiting_for_peered);
     }
   }
 }
 
 // Compute pending backfill data
-static int64_t pending_backfill(CephContext *cct, int64_t bf_bytes, int64_t local_bytes)
+static int64_t pending_backfill(StoneContext *cct, int64_t bf_bytes, int64_t local_bytes)
 {
   lgeneric_dout(cct, 20) << __func__ << " Adjust local usage "
 			 << (local_bytes >> 10) << "KiB"
@@ -2019,7 +2019,7 @@ void PG::_repair_oinfo_oid(ScrubMap &smap)
       // Fix object info
       oi.soid = hoid;
       bl.clear();
-      encode(oi, bl, get_osdmap()->get_features(CEPH_ENTITY_TYPE_OSD, nullptr));
+      encode(oi, bl, get_osdmap()->get_features(STONE_ENTITY_TYPE_OSD, nullptr));
 
       bufferptr bp(bl.c_str(), bl.length());
       o.attrs[OI_ATTR] = bp;
@@ -2059,12 +2059,12 @@ void PG::repair_object(
   } catch (...) {
     dout(0) << __func__ << ": Need version of replica, bad object_info_t: "
 	    << soid << dendl;
-    ceph_abort();
+    stone_abort();
   }
 
   if (bad_peers.count(get_primary())) {
     // We should only be scrubbing if the PG is clean.
-    ceph_assert(waiting_for_unreadable_object.empty());
+    stone_assert(waiting_for_unreadable_object.empty());
     dout(10) << __func__ << ": primary = " << get_primary() << dendl;
   }
 
@@ -2243,8 +2243,8 @@ bool PG::can_discard_op(OpRequestRef& op)
     return true;
   }
 
-  if ((m->get_flags() & (CEPH_OSD_FLAG_BALANCE_READS |
-			 CEPH_OSD_FLAG_LOCALIZE_READS)) &&
+  if ((m->get_flags() & (STONE_OSD_FLAG_BALANCE_READS |
+			 STONE_OSD_FLAG_LOCALIZE_READS)) &&
       !is_primary() &&
       m->get_map_epoch() < info.history.same_interval_since) {
     // Note: the Objecter will resend on interval change without the primary
@@ -2256,9 +2256,9 @@ bool PG::can_discard_op(OpRequestRef& op)
   }
 
 
-  if (m->get_connection()->has_feature(CEPH_FEATURE_RESEND_ON_SPLIT)) {
+  if (m->get_connection()->has_feature(STONE_FEATURE_RESEND_ON_SPLIT)) {
     // >= luminous client
-    if (m->get_connection()->has_feature(CEPH_FEATURE_SERVER_NAUTILUS)) {
+    if (m->get_connection()->has_feature(STONE_FEATURE_SERVER_NAUTILUS)) {
       // >= nautilus client
       if (m->get_map_epoch() < pool.info.get_last_force_op_resend()) {
 	dout(7) << __func__ << " sent before last_force_op_resend "
@@ -2280,7 +2280,7 @@ bool PG::can_discard_op(OpRequestRef& op)
 	      << info.history.last_epoch_split << ", dropping" << dendl;
       return true;
     }
-  } else if (m->get_connection()->has_feature(CEPH_FEATURE_OSD_POOLRESEND)) {
+  } else if (m->get_connection()->has_feature(STONE_FEATURE_OSD_POOLRESEND)) {
     // < luminous client
     if (m->get_map_epoch() < pool.info.get_last_force_op_resend_preluminous()) {
       dout(7) << __func__ << " sent before last_force_op_resend_preluminous "
@@ -2297,7 +2297,7 @@ template<typename T, int MSGTYPE>
 bool PG::can_discard_replica_op(OpRequestRef& op)
 {
   auto m = op->get_req<T>();
-  ceph_assert(m->get_type() == MSGTYPE);
+  stone_assert(m->get_type() == MSGTYPE);
 
   int from = m->get_source().num();
 
@@ -2336,7 +2336,7 @@ bool PG::can_discard_replica_op(OpRequestRef& op)
 bool PG::can_discard_scan(OpRequestRef op)
 {
   auto m = op->get_req<MOSDPGScan>();
-  ceph_assert(m->get_type() == MSG_OSD_PG_SCAN);
+  stone_assert(m->get_type() == MSG_OSD_PG_SCAN);
 
   if (old_peering_msg(m->map_epoch, m->query_epoch)) {
     dout(10) << " got old scan, ignoring" << dendl;
@@ -2348,7 +2348,7 @@ bool PG::can_discard_scan(OpRequestRef op)
 bool PG::can_discard_backfill(OpRequestRef op)
 {
   auto m = op->get_req<MOSDPGBackfill>();
-  ceph_assert(m->get_type() == MSG_OSD_PG_BACKFILL);
+  stone_assert(m->get_type() == MSG_OSD_PG_BACKFILL);
 
   if (old_peering_msg(m->map_epoch, m->query_epoch)) {
     dout(10) << " got old backfill, ignoring" << dendl;
@@ -2362,9 +2362,9 @@ bool PG::can_discard_backfill(OpRequestRef op)
 bool PG::can_discard_request(OpRequestRef& op)
 {
   switch (op->get_req()->get_type()) {
-  case CEPH_MSG_OSD_OP:
+  case STONE_MSG_OSD_OP:
     return can_discard_op(op);
-  case CEPH_MSG_OSD_BACKOFF:
+  case STONE_MSG_OSD_BACKOFF:
     return false; // never discard
   case MSG_OSD_REPOP:
     return can_discard_replica_op<MOSDRepOp, MSG_OSD_REPOP>(op);
@@ -2417,7 +2417,7 @@ bool PG::can_discard_request(OpRequestRef& op)
 void PG::do_peering_event(PGPeeringEventRef evt, PeeringCtx &rctx)
 {
   dout(10) << __func__ << ": " << evt->get_desc() << dendl;
-  ceph_assert(have_same_or_newer_map(evt->get_epoch_sent()));
+  stone_assert(have_same_or_newer_map(evt->get_epoch_sent()));
   if (old_peering_evt(evt)) {
     dout(10) << "discard old " << evt->get_desc() << dendl;
   } else {
@@ -2543,7 +2543,7 @@ void PG::on_pool_change()
 }
 
 void PG::C_DeleteMore::complete(int r) {
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   pg->lock();
   if (!pg->pg_has_reset_since(epoch)) {
     pg->osd->queue_for_pg_delete(pg->get_pgid(), epoch);
@@ -2565,7 +2565,7 @@ std::pair<ghobject_t, bool> PG::do_delete_work(
       PGRef pgref(this);
       auto delete_requeue_callback = new LambdaContext([this, pgref, e](int r) {
         dout(20) << "do_delete_work() [cb] wake up at "
-                 << ceph_clock_now()
+                 << stone_clock_now()
 	         << ", re-queuing delete" << dendl;
         std::scoped_lock locker{*this};
         delete_needs_sleep = false;
@@ -2574,8 +2574,8 @@ std::pair<ghobject_t, bool> PG::do_delete_work(
         }
       });
 
-      auto delete_schedule_time = ceph::real_clock::now();
-      delete_schedule_time += ceph::make_timespan(osd_delete_sleep);
+      auto delete_schedule_time = stone::real_clock::now();
+      delete_schedule_time += stone::make_timespan(osd_delete_sleep);
       std::lock_guard l{osd->sleep_lock};
       osd->sleep_timer.add_event_at(delete_schedule_time,
 				    delete_requeue_callback);
@@ -2637,7 +2637,7 @@ std::pair<ghobject_t, bool> PG::do_delete_work(
     }
     int r = snap_mapper.remove_oid(oid.hobj, &_t);
     if (r != 0 && r != -ENOENT) {
-      ceph_abort();
+      stone_abort();
     }
     t.remove(coll, oid);
     ++num;

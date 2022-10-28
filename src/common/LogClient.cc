@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,14 +20,14 @@
 #include "mon/MonMap.h"
 #include "common/Graylog.h"
 
-#define dout_subsys ceph_subsys_monc
+#define dout_subsys stone_subsys_monc
 
 using std::map;
 using std::ostream;
 using std::ostringstream;
 using std::string;
 
-int parse_log_client_options(CephContext *cct,
+int parse_log_client_options(StoneContext *cct,
 			     map<string,string> &log_to_monitors,
 			     map<string,string> &log_to_syslog,
 			     map<string,string> &log_channels,
@@ -111,13 +111,13 @@ static ostream& _prefix(std::ostream *_dout, LogChannel *lc) {
   return *_dout << "log_channel(" << lc->get_log_channel() << ") ";
 }
 
-LogChannel::LogChannel(CephContext *cct, LogClient *lc, const string &channel)
+LogChannel::LogChannel(StoneContext *cct, LogClient *lc, const string &channel)
   : cct(cct), parent(lc),
     log_channel(channel), log_to_syslog(false), log_to_monitors(false)
 {
 }
 
-LogChannel::LogChannel(CephContext *cct, LogClient *lc,
+LogChannel::LogChannel(StoneContext *cct, LogClient *lc,
                        const string &channel, const string &facility,
                        const string &prio)
   : cct(cct), parent(lc),
@@ -126,7 +126,7 @@ LogChannel::LogChannel(CephContext *cct, LogClient *lc,
 {
 }
 
-LogClient::LogClient(CephContext *cct, Messenger *m, MonMap *mm,
+LogClient::LogClient(StoneContext *cct, Messenger *m, MonMap *mm,
 		     enum logclient_flag_t flags)
   : cct(cct), messenger(m), monmap(mm), is_mon(flags & FLAG_MON),
     last_log_sent(0), last_log(0)
@@ -178,7 +178,7 @@ void LogChannel::update_config(map<string,string> &log_to_monitors,
   set_log_prio(prio);
 
   if (to_graylog && !graylog) { /* should but isn't */
-    graylog = std::make_shared<ceph::logging::Graylog>("clog");
+    graylog = std::make_shared<stone::logging::Graylog>("clog");
   } else if (!to_graylog && graylog) { /* shouldn't but is */
     graylog.reset();
   }
@@ -222,7 +222,7 @@ void LogChannel::do_log(clog_type prio, const std::string& s)
     ldout(cct,0) << "log " << prio << " : " << s << dendl;
   }
   LogEntry e;
-  e.stamp = ceph_clock_now();
+  e.stamp = stone_clock_now();
   // seq and who should be set for syslog/graylog/log_to_mon
   e.addrs = parent->get_myaddrs();
   e.name = parent->get_myname();
@@ -251,7 +251,7 @@ void LogChannel::do_log(clog_type prio, const std::string& s)
   }
 }
 
-ceph::ref_t<Message> LogClient::get_mon_log_message(bool flush)
+stone::ref_t<Message> LogClient::get_mon_log_message(bool flush)
 {
   std::lock_guard l(log_lock);
   if (flush) {
@@ -269,9 +269,9 @@ bool LogClient::are_pending()
   return last_log > last_log_sent;
 }
 
-ceph::ref_t<Message> LogClient::_get_mon_log_message()
+stone::ref_t<Message> LogClient::_get_mon_log_message()
 {
-  ceph_assert(ceph_mutex_is_locked(log_lock));
+  stone_assert(stone_mutex_is_locked(log_lock));
   if (log_queue.empty())
     return {};
 
@@ -294,30 +294,30 @@ ceph::ref_t<Message> LogClient::_get_mon_log_message()
 		<< " num " << log_queue.size()
 		<< " unsent " << num_unsent
 		<< " sending " << num_send << dendl;
-  ceph_assert(num_unsent <= log_queue.size());
+  stone_assert(num_unsent <= log_queue.size());
   std::deque<LogEntry>::iterator p = log_queue.begin();
   std::deque<LogEntry> o;
   while (p->seq <= last_log_sent) {
     ++p;
-    ceph_assert(p != log_queue.end());
+    stone_assert(p != log_queue.end());
   }
   while (num_send--) {
-    ceph_assert(p != log_queue.end());
+    stone_assert(p != log_queue.end());
     o.push_back(*p);
     last_log_sent = p->seq;
     ldout(cct,10) << " will send " << *p << dendl;
     ++p;
   }
   
-  return ceph::make_message<MLog>(monmap->get_fsid(),
+  return stone::make_message<MLog>(monmap->get_fsid(),
 				  std::move(o));
 }
 
 void LogClient::_send_to_mon()
 {
-  ceph_assert(ceph_mutex_is_locked(log_lock));
-  ceph_assert(is_mon);
-  ceph_assert(messenger->get_myname().is_mon());
+  stone_assert(stone_mutex_is_locked(log_lock));
+  stone_assert(is_mon);
+  stone_assert(messenger->get_myname().is_mon());
   ldout(cct,10) << __func__ << " log to self" << dendl;
   auto log = _get_mon_log_message();
   messenger->get_loopback_connection()->send_message2(std::move(log));

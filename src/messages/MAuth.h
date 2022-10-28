@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MAUTH_H
-#define CEPH_MAUTH_H
+#ifndef STONE_MAUTH_H
+#define STONE_MAUTH_H
 
 #include <string_view>
 
@@ -31,7 +31,7 @@ public:
 
   /* if protocol == 0, then auth_payload is a set<__u32> listing protocols the client supports */
 
-  MAuth() : PaxosServiceMessage{CEPH_MSG_AUTH, 0}, protocol(0), monmap_epoch(0) { }
+  MAuth() : PaxosServiceMessage{STONE_MSG_AUTH, 0}, protocol(0), monmap_epoch(0) { }
 private:
   ~MAuth() final {}
 

@@ -36,7 +36,7 @@ public:
     void handle(const InstanceIds& instance_ids, Instance* instance) {
       std::unique_lock<std::mutex> locker(lock);
       for (auto& instance_id : instance_ids) {
-        ceph_assert(instance->count > 0);
+        stone_assert(instance->count > 0);
         --instance->count;
 
         instance->ids.insert(instance_id);

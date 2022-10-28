@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 CohortFS, LLC
  *
@@ -13,7 +13,7 @@
  */
 #include <string>
 #include "QueueStrategy.h"
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #include "common/debug.h"
 
 QueueStrategy::QueueStrategy(int _n_threads)
@@ -44,11 +44,11 @@ void QueueStrategy::ds_dispatch(Message *m) {
 void QueueStrategy::entry(QSThread *thrd)
 {
   for (;;) {
-    ceph::ref_t<Message> m;
+    stone::ref_t<Message> m;
     std::unique_lock l{lock};
     for (;;) {
       if (! mqueue.empty()) {
-	m = ceph::ref_t<Message>(&mqueue.front(), false);
+	m = stone::ref_t<Message>(&mqueue.front(), false);
 	mqueue.pop_front();
 	break;
       }
@@ -81,7 +81,7 @@ void QueueStrategy::shutdown()
 void QueueStrategy::wait()
 {
   std::unique_lock l{lock};
-  ceph_assert(stop);
+  stone_assert(stop);
   for (auto& thread : threads) {
     l.unlock();
 
@@ -94,7 +94,7 @@ void QueueStrategy::wait()
 
 void QueueStrategy::start()
 {
-  ceph_assert(!stop);
+  stone_assert(!stop);
   std::lock_guard l{lock};
   threads.reserve(n_threads);
   for (int ix = 0; ix < n_threads; ++ix) {

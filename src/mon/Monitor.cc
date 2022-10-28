@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -64,7 +64,7 @@
 #include "messages/MPing.h"
 
 #include "common/strtol.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/Timer.h"
 #include "common/Clock.h"
 #include "common/errno.h"
@@ -74,7 +74,7 @@
 #include "common/Formatter.h"
 #include "include/stringify.h"
 #include "include/color.h"
-#include "include/ceph_fs.h"
+#include "include/stone_fs.h"
 #include "include/str_list.h"
 
 #include "OSDMonitor.h"
@@ -89,13 +89,13 @@
 #include "mon/HealthMonitor.h"
 #include "common/config.h"
 #include "common/cmdparse.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/compat.h"
 #include "perfglue/heap_profiler.h"
 
 #include "auth/none/AuthNoneClientHandler.h"
 
-#define dout_subsys ceph_subsys_mon
+#define dout_subsys stone_subsys_mon
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, this)
 using namespace TOPNSPC::common;
@@ -117,17 +117,17 @@ using std::to_string;
 using std::vector;
 using std::unique_ptr;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::ErasureCodeInterfaceRef;
-using ceph::ErasureCodeProfile;
-using ceph::Formatter;
-using ceph::JSONFormatter;
-using ceph::make_message;
-using ceph::mono_clock;
-using ceph::mono_time;
-using ceph::timespan_str;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::ErasureCodeInterfaceRef;
+using stone::ErasureCodeProfile;
+using stone::Formatter;
+using stone::JSONFormatter;
+using stone::make_message;
+using stone::mono_clock;
+using stone::mono_time;
+using stone::timespan_str;
 
 
 static ostream& _prefix(std::ostream *_dout, const Monitor *mon) {
@@ -153,7 +153,7 @@ MonCommand mon_commands[] = {
 #undef COMMAND
 #undef COMMAND_WITH_FLAG
 
-Monitor::Monitor(CephContext* cct_, string nm, MonitorDBStore *s,
+Monitor::Monitor(StoneContext* cct_, string nm, MonitorDBStore *s,
 		 Messenger *m, Messenger *mgr_m, MonMap *map) :
   Dispatcher(cct_),
   AuthServer(cct_),
@@ -224,7 +224,7 @@ Monitor::Monitor(CephContext* cct_, string nm, MonitorDBStore *s,
     */
     const int32_t set_result(setenv("KRB5_CLIENT_KTNAME", 
                                     gss_ktfile_client.c_str(), 1));
-    ceph_assert(set_result == 0);
+    stone_assert(set_result == 0);
   }
 
   op_tracker.set_complaint_and_threshold(
@@ -251,9 +251,9 @@ Monitor::Monitor(CephContext* cct_, string nm, MonitorDBStore *s,
   paxos_service[PAXOS_KV].reset(new KVMonitor(*this, *paxos, "kv"));
 
   bool r = mon_caps.parse("allow *", NULL);
-  ceph_assert(r);
+  stone_assert(r);
 
-  exited_quorum = ceph_clock_now();
+  exited_quorum = stone_clock_now();
 
   // prepare local commands
   local_mon_commands.resize(std::size(mon_commands));
@@ -284,7 +284,7 @@ Monitor::~Monitor()
   op_tracker.on_shutdown();
 
   delete logger;
-  ceph_assert(session_map.sessions.empty());
+  stone_assert(session_map.sessions.empty());
 }
 
 
@@ -400,14 +400,14 @@ int Monitor::do_admin_command(
     }
   } else if (command == "connection scores dump") {
     if (!get_quorum_mon_features().contains_all(
-				   ceph::features::mon::FEATURE_PINGING)) {
+				   stone::features::mon::FEATURE_PINGING)) {
       err << "Not all monitors support changing election strategies; \
               please upgrade them first!";
     }
     elector.dump_connection_scores(f);
   } else if (command == "connection scores reset") {
     if (!get_quorum_mon_features().contains_all(
-				   ceph::features::mon::FEATURE_PINGING)) {
+				   stone::features::mon::FEATURE_PINGING)) {
       err << "Not all monitors support changing election strategies; \
               please upgrade them first!";
     }
@@ -445,7 +445,7 @@ int Monitor::do_admin_command(
     }
     json_spirit::write(json_map, out, json_spirit::pretty_print);
   } else if (command == "heap") {
-    if (!ceph_using_tcmalloc()) {
+    if (!stone_using_tcmalloc()) {
       err << "could not issue heap profiler command -- not using tcmalloc!";
       r = -EOPNOTSUPP;
       goto abort;
@@ -462,19 +462,19 @@ int Monitor::do_admin_command(
     if (cmd_getval(cmdmap, "value", val)) {
       cmd_vec.push_back(val);
     }
-    ceph_heap_profiler_handle_command(cmd_vec, out);
+    stone_heap_profiler_handle_command(cmd_vec, out);
   } else if (command == "compact") {
     dout(1) << "triggering manual compaction" << dendl;
-    auto start = ceph::coarse_mono_clock::now();
+    auto start = stone::coarse_mono_clock::now();
     store->compact_async();
-    auto end = ceph::coarse_mono_clock::now();
-    auto duration = ceph::to_seconds<double>(end - start);
+    auto end = stone::coarse_mono_clock::now();
+    auto duration = stone::to_seconds<double>(end - start);
     dout(1) << "finished manual compaction in "
 	    << duration << " seconds" << dendl;
     out << "compacted " << g_conf().get_val<std::string>("mon_keyvaluedb")
 	<< " in " << duration << " seconds";
  } else {
-    ceph_abort_msg("bad AdminSocket command binding");
+    stone_abort_msg("bad AdminSocket command binding");
   }
   (read_only ? audit_clog->debug() : audit_clog->info())
     << "from='admin socket' "
@@ -494,46 +494,46 @@ abort:
 
 void Monitor::handle_signal(int signum)
 {
-  ceph_assert(signum == SIGINT || signum == SIGTERM);
+  stone_assert(signum == SIGINT || signum == SIGTERM);
   derr << "*** Got Signal " << sig_str(signum) << " ***" << dendl;
   shutdown();
 }
 
 CompatSet Monitor::get_initial_supported_features()
 {
-  CompatSet::FeatureSet ceph_mon_feature_compat;
-  CompatSet::FeatureSet ceph_mon_feature_ro_compat;
-  CompatSet::FeatureSet ceph_mon_feature_incompat;
-  ceph_mon_feature_incompat.insert(CEPH_MON_FEATURE_INCOMPAT_BASE);
-  ceph_mon_feature_incompat.insert(CEPH_MON_FEATURE_INCOMPAT_SINGLE_PAXOS);
-  return CompatSet(ceph_mon_feature_compat, ceph_mon_feature_ro_compat,
-		   ceph_mon_feature_incompat);
+  CompatSet::FeatureSet stone_mon_feature_compat;
+  CompatSet::FeatureSet stone_mon_feature_ro_compat;
+  CompatSet::FeatureSet stone_mon_feature_incompat;
+  stone_mon_feature_incompat.insert(STONE_MON_FEATURE_INCOMPAT_BASE);
+  stone_mon_feature_incompat.insert(STONE_MON_FEATURE_INCOMPAT_SINGLE_PAXOS);
+  return CompatSet(stone_mon_feature_compat, stone_mon_feature_ro_compat,
+		   stone_mon_feature_incompat);
 }
 
 CompatSet Monitor::get_supported_features()
 {
   CompatSet compat = get_initial_supported_features();
-  compat.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_OSD_ERASURE_CODES);
-  compat.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_OSDMAP_ENC);
-  compat.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_ERASURE_CODE_PLUGINS_V2);
-  compat.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_ERASURE_CODE_PLUGINS_V3);
-  compat.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_KRAKEN);
-  compat.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_LUMINOUS);
-  compat.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_MIMIC);
-  compat.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_NAUTILUS);
-  compat.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_OCTOPUS);
-  compat.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_PACIFIC);
+  compat.incompat.insert(STONE_MON_FEATURE_INCOMPAT_OSD_ERASURE_CODES);
+  compat.incompat.insert(STONE_MON_FEATURE_INCOMPAT_OSDMAP_ENC);
+  compat.incompat.insert(STONE_MON_FEATURE_INCOMPAT_ERASURE_CODE_PLUGINS_V2);
+  compat.incompat.insert(STONE_MON_FEATURE_INCOMPAT_ERASURE_CODE_PLUGINS_V3);
+  compat.incompat.insert(STONE_MON_FEATURE_INCOMPAT_KRAKEN);
+  compat.incompat.insert(STONE_MON_FEATURE_INCOMPAT_LUMINOUS);
+  compat.incompat.insert(STONE_MON_FEATURE_INCOMPAT_MIMIC);
+  compat.incompat.insert(STONE_MON_FEATURE_INCOMPAT_NAUTILUS);
+  compat.incompat.insert(STONE_MON_FEATURE_INCOMPAT_OCTOPUS);
+  compat.incompat.insert(STONE_MON_FEATURE_INCOMPAT_PACIFIC);
   return compat;
 }
 
 CompatSet Monitor::get_legacy_features()
 {
-  CompatSet::FeatureSet ceph_mon_feature_compat;
-  CompatSet::FeatureSet ceph_mon_feature_ro_compat;
-  CompatSet::FeatureSet ceph_mon_feature_incompat;
-  ceph_mon_feature_incompat.insert(CEPH_MON_FEATURE_INCOMPAT_BASE);
-  return CompatSet(ceph_mon_feature_compat, ceph_mon_feature_ro_compat,
-		   ceph_mon_feature_incompat);
+  CompatSet::FeatureSet stone_mon_feature_compat;
+  CompatSet::FeatureSet stone_mon_feature_ro_compat;
+  CompatSet::FeatureSet stone_mon_feature_incompat;
+  stone_mon_feature_incompat.insert(STONE_MON_FEATURE_INCOMPAT_BASE);
+  return CompatSet(stone_mon_feature_compat, stone_mon_feature_ro_compat,
+		   stone_mon_feature_incompat);
 }
 
 int Monitor::check_features(MonitorDBStore *store)
@@ -679,7 +679,7 @@ void Monitor::update_log_clients()
   uuid_d fsid;
   string host;
 
-  if (parse_log_client_options(g_ceph_context, log_to_monitors, log_to_syslog,
+  if (parse_log_client_options(g_stone_context, log_to_monitors, log_to_syslog,
 			       log_channel, log_prio, log_to_graylog,
 			       log_to_graylog_host, log_to_graylog_port,
 			       fsid, host))
@@ -736,9 +736,9 @@ int Monitor::preinit()
     return r;
   }
 
-  ceph_assert(!logger);
+  stone_assert(!logger);
   {
-    PerfCountersBuilder pcb(g_ceph_context, "mon", l_mon_first, l_mon_last);
+    PerfCountersBuilder pcb(g_stone_context, "mon", l_mon_first, l_mon_last);
     pcb.add_u64(l_mon_num_sessions, "num_sessions", "Open sessions", "sess",
         PerfCountersBuilder::PRIO_USEFUL);
     pcb.add_u64_counter(l_mon_session_add, "session_add", "Created sessions",
@@ -759,9 +759,9 @@ int Monitor::preinit()
     cct->get_perfcounters_collection()->add(logger);
   }
 
-  ceph_assert(!cluster_logger);
+  stone_assert(!cluster_logger);
   {
-    PerfCountersBuilder pcb(g_ceph_context, "cluster", l_cluster_first, l_cluster_last);
+    PerfCountersBuilder pcb(g_stone_context, "cluster", l_cluster_first, l_cluster_last);
     pcb.add_u64(l_cluster_num_mon, "num_mon", "Monitors");
     pcb.add_u64(l_cluster_num_mon_quorum, "num_mon_quorum", "Monitors in quorum");
     pcb.add_u64(l_cluster_num_osd, "num_osd", "OSDs");
@@ -812,7 +812,7 @@ int Monitor::preinit()
       dout(1) << " initial_members " << initial_members << ", filtering seed monmap" << dendl;
 
       monmap->set_initial_members(
-	g_ceph_context, initial_members, name, messenger->get_myaddrs(),
+	g_stone_context, initial_members, name, messenger->get_myaddrs(),
 	&extra_probe_peers);
 
       dout(10) << " monmap is " << *monmap << dendl;
@@ -877,7 +877,7 @@ int Monitor::preinit()
     r = keyring.load(cct, keyring_loc);
     if (r < 0) {
       EntityName mon_name;
-      mon_name.set_type(CEPH_ENTITY_TYPE_MON);
+      mon_name.set_type(STONE_ENTITY_TYPE_MON);
       EntityAuth mon_key;
       if (key_server.get_auth(mon_name, mon_key)) {
 	dout(1) << "copying mon. key from old db to external keyring" << dendl;
@@ -911,7 +911,7 @@ int Monitor::preinit()
     }
     r = admin_socket->register_command(command.cmdstring, admin_hook,
 				       command.helpstring);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
   l.lock();
 
@@ -980,7 +980,7 @@ void Monitor::refresh_from_paxos(bool *need_bootstrap)
       auto p = bl.cbegin();
       decode(fingerprint, p);
     }
-    catch (ceph::buffer::error& e) {
+    catch (stone::buffer::error& e) {
       dout(10) << __func__ << " failed to decode cluster_fingerprint" << dendl;
     }
   } else {
@@ -1064,8 +1064,8 @@ void Monitor::shutdown()
     svc->shutdown();
   }
 
-  finish_contexts(g_ceph_context, waitfor_quorum, -ECANCELED);
-  finish_contexts(g_ceph_context, maybe_wait_for_quorum, -ECANCELED);
+  finish_contexts(g_stone_context, waitfor_quorum, -ECANCELED);
+  finish_contexts(g_stone_context, maybe_wait_for_quorum, -ECANCELED);
 
   timer.shutdown();
 
@@ -1110,9 +1110,9 @@ void Monitor::respawn()
   // --- WARNING TO FUTURE COPY/PASTERS ---
   // You must also add a call like
   //
-  //   ceph_pthread_setname(pthread_self(), "ceph-mon");
+  //   stone_pthread_setname(pthread_self(), "stone-mon");
   //
-  // to main() so that /proc/$pid/stat field 2 contains "(ceph-mon)"
+  // to main() so that /proc/$pid/stat field 2 contains "(stone-mon)"
   // instead of "(exe)", so that killall (and log rotation) will work.
 
   dout(0) << __func__ << dendl;
@@ -1141,7 +1141,7 @@ void Monitor::respawn()
     /* Print CWD for the user's interest */
     char buf[PATH_MAX];
     char *cwd = getcwd(buf, sizeof(buf));
-    ceph_assert(cwd);
+    stone_assert(cwd);
     dout(1) << " cwd " << cwd << dendl;
 
     /* Fall back to a best-effort: just running in our CWD */
@@ -1158,7 +1158,7 @@ void Monitor::respawn()
 
   // We have to assert out here, because suicide() returns, and callers
   // to respawn expect it never to return.
-  ceph_abort();
+  stone_abort();
 }
 
 void Monitor::bootstrap()
@@ -1257,14 +1257,14 @@ void Monitor::bootstrap()
     if ((int)i != rank)
       send_mon_message(
 	new MMonProbe(monmap->fsid, MMonProbe::OP_PROBE, name, has_ever_joined,
-		      ceph_release()),
+		      stone_release()),
 	i);
   }
   for (auto& av : extra_probe_peers) {
     if (av != messenger->get_myaddrs()) {
       messenger->send_to_mon(
 	new MMonProbe(monmap->fsid, MMonProbe::OP_PROBE, name, has_ever_joined,
-		      ceph_release()),
+		      stone_release()),
 	av);
     }
   }
@@ -1296,12 +1296,12 @@ bool Monitor::_add_bootstrap_peer_hint(std::string_view cmd,
     addrs.v.push_back(addr);
     if (addr.get_port() == 0) {
       addrs.v[0].set_type(entity_addr_t::TYPE_MSGR2);
-      addrs.v[0].set_port(CEPH_MON_PORT_IANA);
+      addrs.v[0].set_port(STONE_MON_PORT_IANA);
       addrs.v.push_back(addr);
       addrs.v[1].set_type(entity_addr_t::TYPE_LEGACY);
-      addrs.v[1].set_port(CEPH_MON_PORT_LEGACY);
+      addrs.v[1].set_port(STONE_MON_PORT_LEGACY);
     } else if (addr.get_type() == entity_addr_t::TYPE_ANY) {
-      if (addr.get_port() == CEPH_MON_PORT_LEGACY) {
+      if (addr.get_port() == STONE_MON_PORT_LEGACY) {
 	addrs.v[0].set_type(entity_addr_t::TYPE_LEGACY);
       } else {
 	addrs.v[0].set_type(entity_addr_t::TYPE_MSGR2);
@@ -1346,7 +1346,7 @@ void Monitor::_reset()
   leader_since = utime_t();
   quorum_since = {};
   if (!quorum.empty()) {
-    exited_quorum = ceph_clock_now();
+    exited_quorum = stone_clock_now();
   }
   quorum.clear();
   outside_quorum.clear();
@@ -1379,7 +1379,7 @@ set<string> Monitor::get_sync_targets_names()
 void Monitor::sync_timeout()
 {
   dout(10) << __func__ << dendl;
-  ceph_assert(state == STATE_SYNCHRONIZING);
+  stone_assert(state == STATE_SYNCHRONIZING);
   bootstrap();
 }
 
@@ -1397,7 +1397,7 @@ void Monitor::sync_obtain_latest_monmap(bufferlist &bl)
       derr << __func__
            << " something wrong happened while reading the store: "
            << cpp_strerror(err) << dendl;
-      ceph_abort_msg("error reading the store");
+      stone_abort_msg("error reading the store");
     }
   } else {
     latest_monmap.decode(monmon_bl);
@@ -1411,9 +1411,9 @@ void Monitor::sync_obtain_latest_monmap(bufferlist &bl)
       derr << __func__
            << " something wrong happened while reading the store: "
            << cpp_strerror(err) << dendl;
-      ceph_abort_msg("error reading the store");
+      stone_abort_msg("error reading the store");
     }
-    ceph_assert(backup_bl.length() > 0);
+    stone_assert(backup_bl.length() > 0);
 
     MonMap backup_monmap;
     backup_monmap.decode(backup_bl);
@@ -1429,7 +1429,7 @@ void Monitor::sync_obtain_latest_monmap(bufferlist &bl)
 
   dout(1) << __func__ << " obtained monmap e" << latest_monmap.epoch << dendl;
 
-  latest_monmap.encode(bl, CEPH_FEATURES_ALL);
+  latest_monmap.encode(bl, STONE_FEATURES_ALL);
 }
 
 void Monitor::sync_reset_requester()
@@ -1457,7 +1457,7 @@ void Monitor::sync_start(entity_addrvec_t &addrs, bool full)
 {
   dout(10) << __func__ << " " << addrs << (full ? " full" : " recent") << dendl;
 
-  ceph_assert(state == STATE_PROBING ||
+  stone_assert(state == STATE_PROBING ||
 	 state == STATE_SYNCHRONIZING);
   state = STATE_SYNCHRONIZING;
 
@@ -1479,7 +1479,7 @@ void Monitor::sync_start(entity_addrvec_t &addrs, bool full)
 
     store->apply_transaction(t);
 
-    ceph_assert(g_conf()->mon_sync_requester_kill_at != 1);
+    stone_assert(g_conf()->mon_sync_requester_kill_at != 1);
 
     // clear the underlying store
     set<string> targets = get_sync_targets_names();
@@ -1491,7 +1491,7 @@ void Monitor::sync_start(entity_addrvec_t &addrs, bool full)
     // deciding a partial or no sync is needed.
     paxos->init();
 
-    ceph_assert(g_conf()->mon_sync_requester_kill_at != 2);
+    stone_assert(g_conf()->mon_sync_requester_kill_at != 2);
   }
 
   // assume 'other' as the leader. We will update the leader once we receive
@@ -1511,7 +1511,7 @@ void Monitor::sync_stash_critical_state(MonitorDBStore::TransactionRef t)
   dout(10) << __func__ << dendl;
   bufferlist backup_monmap;
   sync_obtain_latest_monmap(backup_monmap);
-  ceph_assert(backup_monmap.length() > 0);
+  stone_assert(backup_monmap.length() > 0);
   t->put("mon_sync", "latest_monmap", backup_monmap);
 }
 
@@ -1531,7 +1531,7 @@ void Monitor::sync_finish(version_t last_committed)
 {
   dout(10) << __func__ << " lc " << last_committed << " from " << sync_provider << dendl;
 
-  ceph_assert(g_conf()->mon_sync_requester_kill_at != 7);
+  stone_assert(g_conf()->mon_sync_requester_kill_at != 7);
 
   if (sync_full) {
     // finalize the paxos commits
@@ -1549,7 +1549,7 @@ void Monitor::sync_finish(version_t last_committed)
     store->apply_transaction(tx);
   }
 
-  ceph_assert(g_conf()->mon_sync_requester_kill_at != 8);
+  stone_assert(g_conf()->mon_sync_requester_kill_at != 8);
 
   auto t(std::make_shared<MonitorDBStore::Transaction>());
   t->erase("mon_sync", "in_sync");
@@ -1557,11 +1557,11 @@ void Monitor::sync_finish(version_t last_committed)
   t->erase("mon_sync", "last_committed_floor");
   store->apply_transaction(t);
 
-  ceph_assert(g_conf()->mon_sync_requester_kill_at != 9);
+  stone_assert(g_conf()->mon_sync_requester_kill_at != 9);
 
   init_paxos();
 
-  ceph_assert(g_conf()->mon_sync_requester_kill_at != 10);
+  stone_assert(g_conf()->mon_sync_requester_kill_at != 10);
 
   bootstrap();
 }
@@ -1598,7 +1598,7 @@ void Monitor::handle_sync(MonOpRequestRef op)
 
   default:
     dout(0) << __func__ << " unknown op " << m->op << dendl;
-    ceph_abort_msg("unknown op");
+    stone_abort_msg("unknown op");
   }
 }
 
@@ -1619,7 +1619,7 @@ void Monitor::handle_sync_get_cookie(MonOpRequestRef op)
     return;
   }
 
-  ceph_assert(g_conf()->mon_sync_provider_kill_at != 1);
+  stone_assert(g_conf()->mon_sync_provider_kill_at != 1);
 
   // make sure they can understand us.
   if ((required_features ^ m->get_connection()->get_features()) &
@@ -1636,14 +1636,14 @@ void Monitor::handle_sync_get_cookie(MonOpRequestRef op)
   // process instance.  there is no need to be unique *across*
   // monitors, though.
   uint64_t cookie = ((unsigned long long)elector.get_epoch() << 24) + ++sync_provider_count;
-  ceph_assert(sync_providers.count(cookie) == 0);
+  stone_assert(sync_providers.count(cookie) == 0);
 
   dout(10) << __func__ << " cookie " << cookie << " for " << m->get_source_inst() << dendl;
 
   SyncProvider& sp = sync_providers[cookie];
   sp.cookie = cookie;
   sp.addrs = m->get_source_addrs();
-  sp.reset_timeout(g_ceph_context, g_conf()->mon_sync_timeout * 2);
+  sp.reset_timeout(g_stone_context, g_conf()->mon_sync_timeout * 2);
 
   set<string> sync_targets;
   if (m->op == MMonSync::OP_GET_COOKIE_FULL) {
@@ -1675,10 +1675,10 @@ void Monitor::handle_sync_get_chunk(MonOpRequestRef op)
     return;
   }
 
-  ceph_assert(g_conf()->mon_sync_provider_kill_at != 2);
+  stone_assert(g_conf()->mon_sync_provider_kill_at != 2);
 
   SyncProvider& sp = sync_providers[m->cookie];
-  sp.reset_timeout(g_ceph_context, g_conf()->mon_sync_timeout * 2);
+  sp.reset_timeout(g_stone_context, g_conf()->mon_sync_timeout * 2);
 
   if (sp.last_committed < paxos->get_first_committed() &&
       paxos->get_first_committed() > 1) {
@@ -1701,7 +1701,7 @@ void Monitor::handle_sync_get_chunk(MonOpRequestRef op)
     sp.last_committed++;
 
     int err = store->get(paxos->get_name(), sp.last_committed, bl);
-    ceph_assert(err == 0);
+    stone_assert(err == 0);
 
     tx->put(paxos->get_name(), sp.last_committed, bl);
     bytes_left -= bl.length();
@@ -1726,7 +1726,7 @@ void Monitor::handle_sync_get_chunk(MonOpRequestRef op)
 	     << " key " << sp.last_key << dendl;
     reply->op = MMonSync::OP_LAST_CHUNK;
 
-    ceph_assert(g_conf()->mon_sync_provider_kill_at != 3);
+    stone_assert(g_conf()->mon_sync_provider_kill_at != 3);
 
     // clean up our local state
     sync_providers.erase(sp.cookie);
@@ -1757,7 +1757,7 @@ void Monitor::handle_sync_cookie(MonOpRequestRef op)
   sync_reset_timeout();
   sync_get_next_chunk();
 
-  ceph_assert(g_conf()->mon_sync_requester_kill_at != 3);
+  stone_assert(g_conf()->mon_sync_requester_kill_at != 3);
 }
 
 void Monitor::sync_get_next_chunk()
@@ -1770,7 +1770,7 @@ void Monitor::sync_get_next_chunk()
   MMonSync *r = new MMonSync(MMonSync::OP_GET_CHUNK, sync_cookie);
   messenger->send_to_mon(r, sync_provider);
 
-  ceph_assert(g_conf()->mon_sync_requester_kill_at != 4);
+  stone_assert(g_conf()->mon_sync_requester_kill_at != 4);
 }
 
 void Monitor::handle_sync_chunk(MonOpRequestRef op)
@@ -1787,8 +1787,8 @@ void Monitor::handle_sync_chunk(MonOpRequestRef op)
     return;
   }
 
-  ceph_assert(state == STATE_SYNCHRONIZING);
-  ceph_assert(g_conf()->mon_sync_requester_kill_at != 5);
+  stone_assert(state == STATE_SYNCHRONIZING);
+  stone_assert(g_conf()->mon_sync_requester_kill_at != 5);
 
   auto tx(std::make_shared<MonitorDBStore::Transaction>());
   tx->append_from_encoded(m->chunk_bl);
@@ -1801,7 +1801,7 @@ void Monitor::handle_sync_chunk(MonOpRequestRef op)
 
   store->apply_transaction(tx);
 
-  ceph_assert(g_conf()->mon_sync_requester_kill_at != 6);
+  stone_assert(g_conf()->mon_sync_requester_kill_at != 6);
 
   if (!sync_full) {
     dout(10) << __func__ << " applying recent paxos transactions as we go" << dendl;
@@ -1838,7 +1838,7 @@ void Monitor::sync_trim_providers()
 {
   dout(20) << __func__ << dendl;
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   map<uint64_t,SyncProvider>::iterator p = sync_providers.begin();
   while (p != sync_providers.end()) {
     if (now > p->second.timeout) {
@@ -1883,8 +1883,8 @@ void Monitor::reset_probe_timeout()
 void Monitor::probe_timeout(int r)
 {
   dout(4) << "probe_timeout " << probe_timeout_event << dendl;
-  ceph_assert(is_probing() || is_synchronizing());
-  ceph_assert(probe_timeout_event);
+  stone_assert(is_probing() || is_synchronizing());
+  stone_assert(probe_timeout_event);
   probe_timeout_event = NULL;
   bootstrap();
 }
@@ -1910,10 +1910,10 @@ void Monitor::handle_probe(MonOpRequestRef op)
 
   case MMonProbe::OP_MISSING_FEATURES:
     derr << __func__ << " require release " << (int)m->mon_release << " > "
-	 << (int)ceph_release()
-	 << ", or missing features (have " << CEPH_FEATURES_ALL
+	 << (int)stone_release()
+	 << ", or missing features (have " << STONE_FEATURES_ALL
 	 << ", required " << m->required_features
-	 << ", missing " << (m->required_features & ~CEPH_FEATURES_ALL) << ")"
+	 << ", missing " << (m->required_features & ~STONE_FEATURES_ALL) << ")"
 	 << dendl;
     break;
   }
@@ -1926,7 +1926,7 @@ void Monitor::handle_probe_probe(MonOpRequestRef op)
   dout(10) << "handle_probe_probe " << m->get_source_inst() << *m
 	   << " features " << m->get_connection()->get_features() << dendl;
   uint64_t missing = required_features & ~m->get_connection()->get_features();
-  if ((m->mon_release != ceph_release_t::unknown &&
+  if ((m->mon_release != stone_release_t::unknown &&
        m->mon_release < monmap->min_mon_release) ||
       missing) {
     dout(1) << " peer " << m->get_source_addr()
@@ -1958,7 +1958,7 @@ void Monitor::handle_probe_probe(MonOpRequestRef op)
   
   MMonProbe *r;
   r = new MMonProbe(monmap->fsid, MMonProbe::OP_REPLY, name, has_ever_joined,
-		    ceph_release());
+		    stone_release());
   r->name = name;
   r->quorum = quorum;
   r->leader = leader;
@@ -2049,7 +2049,7 @@ void Monitor::handle_probe_reply(MonOpRequestRef op)
     return;
   }
 
-  ceph_assert(paxos != NULL);
+  stone_assert(paxos != NULL);
 
   if (is_synchronizing()) {
     dout(10) << " currently syncing" << dendl;
@@ -2088,14 +2088,14 @@ void Monitor::handle_probe_reply(MonOpRequestRef op)
 
   // did the existing cluster complete upgrade to luminous?
   if (osdmon()->osdmap.get_epoch()) {
-    if (osdmon()->osdmap.require_osd_release < ceph_release_t::luminous) {
+    if (osdmon()->osdmap.require_osd_release < stone_release_t::luminous) {
       derr << __func__ << " existing cluster has not completed upgrade to"
-	   << " luminous; 'ceph osd require_osd_release luminous' before"
+	   << " luminous; 'stone osd require_osd_release luminous' before"
 	   << " upgrading" << dendl;
       exit(0);
     }
-    if (!osdmon()->osdmap.test_flag(CEPH_OSDMAP_PURGED_SNAPDIRS) ||
-	!osdmon()->osdmap.test_flag(CEPH_OSDMAP_RECOVERY_DELETES)) {
+    if (!osdmon()->osdmap.test_flag(STONE_OSDMAP_PURGED_SNAPDIRS) ||
+	!osdmon()->osdmap.test_flag(STONE_OSDMAP_RECOVERY_DELETES)) {
       derr << __func__ << " existing cluster has not completed a full luminous"
 	   << " scrub to purge legacy snapdir objects; please scrub before"
 	   << " upgrading beyond luminous." << dendl;
@@ -2188,7 +2188,7 @@ void Monitor::win_standalone_election()
   elector.declare_standalone_victory();
 
   rank = monmap->get_rank(name);
-  ceph_assert(rank == 0);
+  stone_assert(rank == 0);
   set<int> q;
   q.insert(rank);
 
@@ -2196,15 +2196,15 @@ void Monitor::win_standalone_election()
   collect_metadata(&metadata[0]);
 
   win_election(elector.get_epoch(), q,
-               CEPH_FEATURES_ALL,
-               ceph::features::mon::get_supported(),
-	       ceph_release(),
+               STONE_FEATURES_ALL,
+               stone::features::mon::get_supported(),
+	       stone_release(),
 	       metadata);
 }
 
 const utime_t& Monitor::get_leader_since() const
 {
-  ceph_assert(state == STATE_LEADER);
+  stone_assert(state == STATE_LEADER);
   return leader_since;
 }
 
@@ -2215,7 +2215,7 @@ epoch_t Monitor::get_epoch()
 
 void Monitor::_finish_svc_election()
 {
-  ceph_assert(state == STATE_LEADER || state == STATE_PEON);
+  stone_assert(state == STATE_LEADER || state == STATE_PEON);
 
   for (auto& svc : paxos_service) {
     // we already called election_finished() on monmon(); avoid callig twice
@@ -2227,7 +2227,7 @@ void Monitor::_finish_svc_election()
 
 void Monitor::win_election(epoch_t epoch, const set<int>& active, uint64_t features,
                            const mon_feature_t& mon_features,
-			   ceph_release_t min_mon_release,
+			   stone_release_t min_mon_release,
 			   const map<int,Metadata>& metadata)
 {
   dout(10) << __func__ << " epoch " << epoch << " quorum " << active
@@ -2235,9 +2235,9 @@ void Monitor::win_election(epoch_t epoch, const set<int>& active, uint64_t featu
            << " mon_features " << mon_features
 	   << " min_mon_release " << min_mon_release
            << dendl;
-  ceph_assert(is_electing());
+  stone_assert(is_electing());
   state = STATE_LEADER;
-  leader_since = ceph_clock_now();
+  leader_since = stone_clock_now();
   quorum_since = mono_clock::now();
   leader = rank;
   quorum = active;
@@ -2299,7 +2299,7 @@ void Monitor::win_election(epoch_t epoch, const set<int>& active, uint64_t featu
         dout(20) << __func__ << " healthmon proposing, waiting" << dendl;
         healthmon()->wait_for_finished_proposal(nullptr, new C_MonContext{this,
               [this](int r){
-                ceph_assert(ceph_mutex_is_locked_by_me(lock));
+                stone_assert(stone_mutex_is_locked_by_me(lock));
                 do_health_to_clog_interval();
               }});
 
@@ -2315,7 +2315,7 @@ void Monitor::win_election(epoch_t epoch, const set<int>& active, uint64_t featu
 void Monitor::lose_election(epoch_t epoch, set<int> &q, int l,
                             uint64_t features,
                             const mon_feature_t& mon_features,
-			    ceph_release_t min_mon_release)
+			    stone_release_t min_mon_release)
 {
   state = STATE_PEON;
   leader_since = utime_t();
@@ -2360,7 +2360,7 @@ std::string collect_compression_algorithms()
 
 void Monitor::collect_metadata(Metadata *m)
 {
-  collect_sys_info(m, g_ceph_context);
+  collect_sys_info(m, g_stone_context);
   (*m)["addrs"] = stringify(messenger->get_myaddrs());
   (*m)["compression_algorithms"] = collect_compression_algorithms();
 
@@ -2381,8 +2381,8 @@ void Monitor::finish_election()
   apply_monmap_to_compatset_features();
   timecheck_finish();
   exited_quorum = utime_t();
-  finish_contexts(g_ceph_context, waitfor_quorum);
-  finish_contexts(g_ceph_context, maybe_wait_for_quorum);
+  finish_contexts(g_stone_context, waitfor_quorum);
+  finish_contexts(g_stone_context, maybe_wait_for_quorum);
   resend_routed_requests();
   update_logger();
   register_cluster_logger();
@@ -2428,12 +2428,12 @@ void Monitor::_apply_compatset_features(CompatSet &new_features)
 void Monitor::apply_quorum_to_compatset_features()
 {
   CompatSet new_features(features);
-  new_features.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_OSD_ERASURE_CODES);
-  if (quorum_con_features & CEPH_FEATURE_OSDMAP_ENC) {
-    new_features.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_OSDMAP_ENC);
+  new_features.incompat.insert(STONE_MON_FEATURE_INCOMPAT_OSD_ERASURE_CODES);
+  if (quorum_con_features & STONE_FEATURE_OSDMAP_ENC) {
+    new_features.incompat.insert(STONE_MON_FEATURE_INCOMPAT_OSDMAP_ENC);
   }
-  new_features.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_ERASURE_CODE_PLUGINS_V2);
-  new_features.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_ERASURE_CODE_PLUGINS_V3);
+  new_features.incompat.insert(STONE_MON_FEATURE_INCOMPAT_ERASURE_CODE_PLUGINS_V2);
+  new_features.incompat.insert(STONE_MON_FEATURE_INCOMPAT_ERASURE_CODE_PLUGINS_V3);
   dout(5) << __func__ << dendl;
   _apply_compatset_features(new_features);
 }
@@ -2453,47 +2453,47 @@ void Monitor::apply_monmap_to_compatset_features()
    *   for an optional feature - as long as you make sure to clean it up
    *   once you unset it.
    */
-  if (monmap_features.contains_all(ceph::features::mon::FEATURE_KRAKEN)) {
-    ceph_assert(ceph::features::mon::get_persistent().contains_all(
-           ceph::features::mon::FEATURE_KRAKEN));
+  if (monmap_features.contains_all(stone::features::mon::FEATURE_KRAKEN)) {
+    stone_assert(stone::features::mon::get_persistent().contains_all(
+           stone::features::mon::FEATURE_KRAKEN));
     // this feature should only ever be set if the quorum supports it.
-    ceph_assert(HAVE_FEATURE(quorum_con_features, SERVER_KRAKEN));
-    new_features.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_KRAKEN);
+    stone_assert(HAVE_FEATURE(quorum_con_features, SERVER_KRAKEN));
+    new_features.incompat.insert(STONE_MON_FEATURE_INCOMPAT_KRAKEN);
   }
-  if (monmap_features.contains_all(ceph::features::mon::FEATURE_LUMINOUS)) {
-    ceph_assert(ceph::features::mon::get_persistent().contains_all(
-           ceph::features::mon::FEATURE_LUMINOUS));
+  if (monmap_features.contains_all(stone::features::mon::FEATURE_LUMINOUS)) {
+    stone_assert(stone::features::mon::get_persistent().contains_all(
+           stone::features::mon::FEATURE_LUMINOUS));
     // this feature should only ever be set if the quorum supports it.
-    ceph_assert(HAVE_FEATURE(quorum_con_features, SERVER_LUMINOUS));
-    new_features.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_LUMINOUS);
+    stone_assert(HAVE_FEATURE(quorum_con_features, SERVER_LUMINOUS));
+    new_features.incompat.insert(STONE_MON_FEATURE_INCOMPAT_LUMINOUS);
   }
-  if (monmap_features.contains_all(ceph::features::mon::FEATURE_MIMIC)) {
-    ceph_assert(ceph::features::mon::get_persistent().contains_all(
-           ceph::features::mon::FEATURE_MIMIC));
+  if (monmap_features.contains_all(stone::features::mon::FEATURE_MIMIC)) {
+    stone_assert(stone::features::mon::get_persistent().contains_all(
+           stone::features::mon::FEATURE_MIMIC));
     // this feature should only ever be set if the quorum supports it.
-    ceph_assert(HAVE_FEATURE(quorum_con_features, SERVER_MIMIC));
-    new_features.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_MIMIC);
+    stone_assert(HAVE_FEATURE(quorum_con_features, SERVER_MIMIC));
+    new_features.incompat.insert(STONE_MON_FEATURE_INCOMPAT_MIMIC);
   }
-  if (monmap_features.contains_all(ceph::features::mon::FEATURE_NAUTILUS)) {
-    ceph_assert(ceph::features::mon::get_persistent().contains_all(
-           ceph::features::mon::FEATURE_NAUTILUS));
+  if (monmap_features.contains_all(stone::features::mon::FEATURE_NAUTILUS)) {
+    stone_assert(stone::features::mon::get_persistent().contains_all(
+           stone::features::mon::FEATURE_NAUTILUS));
     // this feature should only ever be set if the quorum supports it.
-    ceph_assert(HAVE_FEATURE(quorum_con_features, SERVER_NAUTILUS));
-    new_features.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_NAUTILUS);
+    stone_assert(HAVE_FEATURE(quorum_con_features, SERVER_NAUTILUS));
+    new_features.incompat.insert(STONE_MON_FEATURE_INCOMPAT_NAUTILUS);
   }
-  if (monmap_features.contains_all(ceph::features::mon::FEATURE_OCTOPUS)) {
-    ceph_assert(ceph::features::mon::get_persistent().contains_all(
-           ceph::features::mon::FEATURE_OCTOPUS));
+  if (monmap_features.contains_all(stone::features::mon::FEATURE_OCTOPUS)) {
+    stone_assert(stone::features::mon::get_persistent().contains_all(
+           stone::features::mon::FEATURE_OCTOPUS));
     // this feature should only ever be set if the quorum supports it.
-    ceph_assert(HAVE_FEATURE(quorum_con_features, SERVER_OCTOPUS));
-    new_features.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_OCTOPUS);
+    stone_assert(HAVE_FEATURE(quorum_con_features, SERVER_OCTOPUS));
+    new_features.incompat.insert(STONE_MON_FEATURE_INCOMPAT_OCTOPUS);
   }
-  if (monmap_features.contains_all(ceph::features::mon::FEATURE_PACIFIC)) {
-    ceph_assert(ceph::features::mon::get_persistent().contains_all(
-           ceph::features::mon::FEATURE_PACIFIC));
+  if (monmap_features.contains_all(stone::features::mon::FEATURE_PACIFIC)) {
+    stone_assert(stone::features::mon::get_persistent().contains_all(
+           stone::features::mon::FEATURE_PACIFIC));
     // this feature should only ever be set if the quorum supports it.
-    ceph_assert(HAVE_FEATURE(quorum_con_features, SERVER_PACIFIC));
-    new_features.incompat.insert(CEPH_MON_FEATURE_INCOMPAT_PACIFIC);
+    stone_assert(HAVE_FEATURE(quorum_con_features, SERVER_PACIFIC));
+    new_features.incompat.insert(STONE_MON_FEATURE_INCOMPAT_PACIFIC);
   }
 
   dout(5) << __func__ << dendl;
@@ -2505,46 +2505,46 @@ void Monitor::calc_quorum_requirements()
   required_features = 0;
 
   // compatset
-  if (features.incompat.contains(CEPH_MON_FEATURE_INCOMPAT_OSDMAP_ENC)) {
-    required_features |= CEPH_FEATURE_OSDMAP_ENC;
+  if (features.incompat.contains(STONE_MON_FEATURE_INCOMPAT_OSDMAP_ENC)) {
+    required_features |= STONE_FEATURE_OSDMAP_ENC;
   }
-  if (features.incompat.contains(CEPH_MON_FEATURE_INCOMPAT_KRAKEN)) {
-    required_features |= CEPH_FEATUREMASK_SERVER_KRAKEN;
+  if (features.incompat.contains(STONE_MON_FEATURE_INCOMPAT_KRAKEN)) {
+    required_features |= STONE_FEATUREMASK_SERVER_KRAKEN;
   }
-  if (features.incompat.contains(CEPH_MON_FEATURE_INCOMPAT_LUMINOUS)) {
-    required_features |= CEPH_FEATUREMASK_SERVER_LUMINOUS;
+  if (features.incompat.contains(STONE_MON_FEATURE_INCOMPAT_LUMINOUS)) {
+    required_features |= STONE_FEATUREMASK_SERVER_LUMINOUS;
   }
-  if (features.incompat.contains(CEPH_MON_FEATURE_INCOMPAT_MIMIC)) {
-    required_features |= CEPH_FEATUREMASK_SERVER_MIMIC;
+  if (features.incompat.contains(STONE_MON_FEATURE_INCOMPAT_MIMIC)) {
+    required_features |= STONE_FEATUREMASK_SERVER_MIMIC;
   }
-  if (features.incompat.contains(CEPH_MON_FEATURE_INCOMPAT_NAUTILUS)) {
-    required_features |= CEPH_FEATUREMASK_SERVER_NAUTILUS |
-      CEPH_FEATUREMASK_CEPHX_V2;
+  if (features.incompat.contains(STONE_MON_FEATURE_INCOMPAT_NAUTILUS)) {
+    required_features |= STONE_FEATUREMASK_SERVER_NAUTILUS |
+      STONE_FEATUREMASK_STONEX_V2;
   }
-  if (features.incompat.contains(CEPH_MON_FEATURE_INCOMPAT_OCTOPUS)) {
-    required_features |= CEPH_FEATUREMASK_SERVER_OCTOPUS;
+  if (features.incompat.contains(STONE_MON_FEATURE_INCOMPAT_OCTOPUS)) {
+    required_features |= STONE_FEATUREMASK_SERVER_OCTOPUS;
   }
-  if (features.incompat.contains(CEPH_MON_FEATURE_INCOMPAT_PACIFIC)) {
-    required_features |= CEPH_FEATUREMASK_SERVER_PACIFIC;
+  if (features.incompat.contains(STONE_MON_FEATURE_INCOMPAT_PACIFIC)) {
+    required_features |= STONE_FEATUREMASK_SERVER_PACIFIC;
   }
 
   // monmap
   if (monmap->get_required_features().contains_all(
-	ceph::features::mon::FEATURE_KRAKEN)) {
-    required_features |= CEPH_FEATUREMASK_SERVER_KRAKEN;
+	stone::features::mon::FEATURE_KRAKEN)) {
+    required_features |= STONE_FEATUREMASK_SERVER_KRAKEN;
   }
   if (monmap->get_required_features().contains_all(
-	ceph::features::mon::FEATURE_LUMINOUS)) {
-    required_features |= CEPH_FEATUREMASK_SERVER_LUMINOUS;
+	stone::features::mon::FEATURE_LUMINOUS)) {
+    required_features |= STONE_FEATUREMASK_SERVER_LUMINOUS;
   }
   if (monmap->get_required_features().contains_all(
-	ceph::features::mon::FEATURE_MIMIC)) {
-    required_features |= CEPH_FEATUREMASK_SERVER_MIMIC;
+	stone::features::mon::FEATURE_MIMIC)) {
+    required_features |= STONE_FEATUREMASK_SERVER_MIMIC;
   }
   if (monmap->get_required_features().contains_all(
-	ceph::features::mon::FEATURE_NAUTILUS)) {
-    required_features |= CEPH_FEATUREMASK_SERVER_NAUTILUS |
-      CEPH_FEATUREMASK_CEPHX_V2;
+	stone::features::mon::FEATURE_NAUTILUS)) {
+    required_features |= STONE_FEATUREMASK_SERVER_NAUTILUS |
+      STONE_FEATUREMASK_STONEX_V2;
   }
   dout(10) << __func__ << " required_features " << required_features << dendl;
 }
@@ -2724,9 +2724,9 @@ void Monitor::health_tick_stop()
   }
 }
 
-ceph::real_clock::time_point Monitor::health_interval_calc_next_update()
+stone::real_clock::time_point Monitor::health_interval_calc_next_update()
 {
-  auto now = ceph::real_clock::now();
+  auto now = stone::real_clock::now();
 
   auto secs = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch());
   int remainder = secs.count() % cct->_conf->mon_health_to_clog_interval;
@@ -2739,7 +2739,7 @@ ceph::real_clock::time_point Monitor::health_interval_calc_next_update()
     << " interval: " << cct->_conf->mon_health_to_clog_interval
     << dendl;
 
-  return ceph::real_clock::time_point{next};
+  return stone::real_clock::time_point{next};
 }
 
 void Monitor::health_interval_start()
@@ -2870,7 +2870,7 @@ void Monitor::log_health(
     return;
   }
 
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
 
   // FIXME: log atomically as part of @t instead of using clog.
   dout(10) << __func__ << " updated " << updated.checks.size()
@@ -3042,7 +3042,7 @@ void Monitor::get_cluster_status(stringstream &ss, Formatter *f,
       string spacing(maxlen - 3, ' ');
       const auto quorum_names = get_quorum_names();
       const auto mon_count = monmap->mon_info.size();
-      auto mnow = ceph::mono_clock::now();
+      auto mnow = stone::mono_clock::now();
       ss << "    mon: " << spacing << mon_count << " daemons, quorum "
 	 << quorum_names << " (age " << timespan_str(mnow - quorum_since) << ")";
       if (quorum_names.size() != mon_count) {
@@ -3079,8 +3079,8 @@ void Monitor::get_cluster_status(stringstream &ss, Formatter *f,
       ss << "\n";
       for (auto& p : service_map.services) {
         const std::string &service = p.first;
-        // filter out normal ceph entity types
-        if (ServiceMap::is_normal_ceph_entity(service)) {
+        // filter out normal stone entity types
+        if (ServiceMap::is_normal_stone_entity(service)) {
           continue;
         }
 	ss << "    " << p.first << ": " << string(maxlen - p.first.size(), ' ')
@@ -3108,7 +3108,7 @@ void Monitor::get_cluster_status(stringstream &ss, Formatter *f,
     if (!pem.empty()) {
       ss << "\n \n  progress:\n";
       for (auto& i : pem) {
-	if (i.second.add_to_ceph_s){
+	if (i.second.add_to_stone_s){
 	ss << "    " << i.second.message << "\n";
 	}
       }
@@ -3160,7 +3160,7 @@ bool Monitor::_allowed_command(MonSession *s, const string &module,
   bool cmd_x = this_cmd->requires_perm('x');
 
   bool capable = s->caps.is_capable(
-    g_ceph_context,
+    g_stone_context,
     s->entity_name,
     module, prefix, param_str_map,
     cmd_r, cmd_w, cmd_x,
@@ -3193,10 +3193,10 @@ void Monitor::format_command_descriptions(const std::vector<MonCommand> &command
 
 bool Monitor::is_keyring_required()
 {
-  return auth_cluster_required.is_supported_auth(CEPH_AUTH_CEPHX) || 
-         auth_service_required.is_supported_auth(CEPH_AUTH_CEPHX) || 
-         auth_cluster_required.is_supported_auth(CEPH_AUTH_GSS)   || 
-         auth_service_required.is_supported_auth(CEPH_AUTH_GSS);
+  return auth_cluster_required.is_supported_auth(STONE_AUTH_STONEX) || 
+         auth_service_required.is_supported_auth(STONE_AUTH_STONEX) || 
+         auth_cluster_required.is_supported_auth(STONE_AUTH_GSS)   || 
+         auth_service_required.is_supported_auth(STONE_AUTH_GSS);
 }
 
 struct C_MgrProxyCommand : public Context {
@@ -3216,7 +3216,7 @@ struct C_MgrProxyCommand : public Context {
 
 void Monitor::handle_tell_command(MonOpRequestRef op)
 {
-  ceph_assert(op->is_type_command());
+  stone_assert(op->is_type_command());
   MCommand *m = static_cast<MCommand*>(op->get_req());
   if (m->fsid != monmap->fsid) {
     dout(0) << "handle_command on fsid " << m->fsid << " != " << monmap->fsid << dendl;
@@ -3250,7 +3250,7 @@ void Monitor::handle_tell_command(MonOpRequestRef op)
   }
   // see if command is allowed
   if (!session->caps.is_capable(
-      g_ceph_context,
+      g_stone_context,
       session->entity_name,
       "mon", prefix, param_str_map,
       true, true, true,
@@ -3263,7 +3263,7 @@ void Monitor::handle_tell_command(MonOpRequestRef op)
 
 void Monitor::handle_command(MonOpRequestRef op)
 {
-  ceph_assert(op->is_type_command());
+  stone_assert(op->is_type_command());
   auto m = op->get_req<MMonCommand>();
   if (m->fsid != monmap->fsid) {
     dout(0) << "handle_command on fsid " << m->fsid << " != " << monmap->fsid
@@ -3450,7 +3450,7 @@ void Monitor::handle_command(MonOpRequestRef op)
   // pre-octopus clients and (2) octopus clients with a mix of pre-octopus
   // and octopus mons.
   if ((!HAVE_FEATURE(m->get_connection()->get_features(), SERVER_OCTOPUS) ||
-       monmap->min_mon_release < ceph_release_t::octopus) &&
+       monmap->min_mon_release < stone_release_t::octopus) &&
       (prefix == "injectargs" ||
        prefix == "smart" ||
        prefix == "mon_status" ||
@@ -3650,7 +3650,7 @@ void Monitor::handle_command(MonOpRequestRef op)
         ds << '\n';
       }
     } else {
-      ceph_abort_msg("We should never get here!");
+      stone_abort_msg("We should never get here!");
       return;
     }
     rdata.append(ds);
@@ -3663,9 +3663,9 @@ void Monitor::handle_command(MonOpRequestRef op)
       f.reset(Formatter::create("json-pretty"));
     f->open_object_section("report");
     f->dump_stream("cluster_fingerprint") << fingerprint;
-    f->dump_string("version", ceph_version_to_str());
+    f->dump_string("version", stone_version_to_str());
     f->dump_string("commit", git_version_to_str());
-    f->dump_stream("timestamp") << ceph_clock_now();
+    f->dump_stream("timestamp") << stone_clock_now();
 
     vector<string> tagsvec;
     cmd_getval(cmdmap, "tags", tagsvec);
@@ -3688,7 +3688,7 @@ void Monitor::handle_command(MonOpRequestRef op)
     f->flush(rdata);
 
     ostringstream ss2;
-    ss2 << "report " << rdata.crc32c(CEPH_MON_PORT_LEGACY);
+    ss2 << "report " << rdata.crc32c(STONE_MON_PORT_LEGACY);
     rs = ss2.str();
     r = 0;
   } else if (prefix == "osd last-stat-seq") {
@@ -3794,7 +3794,7 @@ void Monitor::handle_command(MonOpRequestRef op)
   } else if (prefix == "mon versions") {
     if (!f)
       f.reset(Formatter::create("json-pretty"));
-    count_metadata("ceph_version", f.get());
+    count_metadata("stone_version", f.get());
     f->flush(ds);
     rdata.append(ds);
     rs = "";
@@ -3892,7 +3892,7 @@ void Monitor::handle_command(MonOpRequestRef op)
     f->open_object_section("version");
     map<string,int> mon, mgr, osd, mds;
 
-    count_metadata("ceph_version", &mon);
+    count_metadata("stone_version", &mon);
     f->open_object_section("mon");
     for (auto& p : mon) {
       f->dump_int(p.first.c_str(), p.second);
@@ -3900,7 +3900,7 @@ void Monitor::handle_command(MonOpRequestRef op)
     }
     f->close_section();
 
-    mgrmon()->count_metadata("ceph_version", &mgr);
+    mgrmon()->count_metadata("stone_version", &mgr);
     f->open_object_section("mgr");
     for (auto& p : mgr) {
       f->dump_int(p.first.c_str(), p.second);
@@ -3908,7 +3908,7 @@ void Monitor::handle_command(MonOpRequestRef op)
     }
     f->close_section();
 
-    osdmon()->count_metadata("ceph_version", &osd);
+    osdmon()->count_metadata("stone_version", &osd);
     f->open_object_section("osd");
     for (auto& p : osd) {
       f->dump_int(p.first.c_str(), p.second);
@@ -3916,7 +3916,7 @@ void Monitor::handle_command(MonOpRequestRef op)
     }
     f->close_section();
 
-    mdsmon()->count_metadata("ceph_version", &mds);
+    mdsmon()->count_metadata("stone_version", &mds);
     f->open_object_section("mds");
     for (auto& p : mds) {
       f->dump_int(p.first.c_str(), p.second);
@@ -3926,12 +3926,12 @@ void Monitor::handle_command(MonOpRequestRef op)
 
     for (auto& p : mgrstatmon()->get_service_map().services) {
       auto &service = p.first;
-      if (ServiceMap::is_normal_ceph_entity(service)) {
+      if (ServiceMap::is_normal_stone_entity(service)) {
         continue;
       }
       f->open_object_section(service.c_str());
       map<string,int> m;
-      p.second.count_metadata("ceph_version", &m);
+      p.second.count_metadata("stone_version", &m);
       for (auto& q : m) {
 	f->dump_int(q.first.c_str(), q.second);
 	overall[q.first] += q.second;
@@ -3965,7 +3965,7 @@ void Monitor::reply_command(MonOpRequestRef op, int rc, const string &rs,
                             bufferlist& rdata, version_t version)
 {
   auto m = op->get_req<MMonCommand>();
-  ceph_assert(m->get_type() == MSG_MON_COMMAND);
+  stone_assert(m->get_type() == MSG_MON_COMMAND);
   MMonCommandAck *reply = new MMonCommandAck(m->cmd, rc, rs, version);
   reply->set_tid(m->get_tid());
   reply->set_data(rdata);
@@ -3976,7 +3976,7 @@ void Monitor::reply_tell_command(
   MonOpRequestRef op, int rc, const string &rs)
 {
   MCommand *m = static_cast<MCommand*>(op->get_req());
-  ceph_assert(m->get_type() == MSG_COMMAND);
+  stone_assert(m->get_type() == MSG_COMMAND);
   MCommandReply *reply = new MCommandReply(rc, rs);
   reply->set_tid(m->get_tid());
   m->get_connection()->send_message(reply);
@@ -4008,7 +4008,7 @@ void Monitor::forward_request_leader(MonOpRequestRef op)
     rr->tid = ++routed_request_tid;
     rr->con = req->get_connection();
     rr->con_features = rr->con->get_features();
-    encode_message(req, CEPH_FEATURES_ALL, rr->request_bl);   // for my use only; use all features
+    encode_message(req, STONE_FEATURES_ALL, rr->request_bl);   // for my use only; use all features
     rr->session = static_cast<MonSession *>(session->get());
     rr->op = op;
     routed_requests[rr->tid] = rr;
@@ -4025,11 +4025,11 @@ void Monitor::forward_request_leader(MonOpRequestRef op)
     if (session->auth_handler) {
       forward->entity_name = session->entity_name;
     } else if (req->get_source().is_mon()) {
-      forward->entity_name.set_type(CEPH_ENTITY_TYPE_MON);
+      forward->entity_name.set_type(STONE_ENTITY_TYPE_MON);
     }
     send_mon_message(forward, mon);
     op->mark_forwarded();
-    ceph_assert(op->get_req()->get_type() != 0);
+    stone_assert(op->get_req()->get_type() != 0);
   } else {
     dout(10) << "forward_request no session for request " << *req << dendl;
   }
@@ -4040,10 +4040,10 @@ struct AnonConnection : public Connection {
   entity_addr_t socket_addr;
 
   int send_message(Message *m) override {
-    ceph_assert(!"send_message on anonymous connection");
+    stone_assert(!"send_message on anonymous connection");
   }
   void send_keepalive() override {
-    ceph_assert(!"send_keepalive on anonymous connection");
+    stone_assert(!"send_keepalive on anonymous connection");
   }
   void mark_down() override {
     // silently ignore
@@ -4058,7 +4058,7 @@ struct AnonConnection : public Connection {
 
 private:
   FRIEND_MAKE_REF(AnonConnection);
-  explicit AnonConnection(CephContext *cct, const entity_addr_t& sa)
+  explicit AnonConnection(StoneContext *cct, const entity_addr_t& sa)
     : Connection(cct, nullptr),
       socket_addr(sa) {}
 };
@@ -4068,11 +4068,11 @@ void Monitor::handle_forward(MonOpRequestRef op)
 {
   auto m = op->get_req<MForward>();
   dout(10) << "received forwarded message from "
-	   << ceph_entity_type_name(m->client_type)
+	   << stone_entity_type_name(m->client_type)
 	   << " " << m->client_addrs
 	   << " via " << m->get_source_inst() << dendl;
   MonSession *session = op->get_session();
-  ceph_assert(session);
+  stone_assert(session);
 
   if (!session->is_capable("mon", MON_CAP_X)) {
     dout(0) << "forward from entity with insufficient caps! " 
@@ -4081,9 +4081,9 @@ void Monitor::handle_forward(MonOpRequestRef op)
     // see PaxosService::dispatch(); we rely on this being anon
     // (c->msgr == NULL)
     PaxosServiceMessage *req = m->claim_message();
-    ceph_assert(req != NULL);
+    stone_assert(req != NULL);
 
-    auto c = ceph::make_ref<AnonConnection>(cct, m->client_socket_addr);
+    auto c = stone::make_ref<AnonConnection>(cct, m->client_socket_addr);
     MonSession *s = new MonSession(static_cast<Connection*>(c.get()));
     s->_ident(req->get_source(),
 	      req->get_source_addrs());
@@ -4128,11 +4128,11 @@ void Monitor::send_reply(MonOpRequestRef op, Message *reply)
   op->mark_event(__func__);
 
   MonSession *session = op->get_session();
-  ceph_assert(session);
+  stone_assert(session);
   Message *req = op->get_req();
   ConnectionRef con = op->get_connection();
 
-  reply->set_cct(g_ceph_context);
+  reply->set_cct(g_stone_context);
   dout(2) << __func__ << " " << op << " " << reply << " " << *reply << dendl;
 
   if (!con) {
@@ -4219,7 +4219,7 @@ void Monitor::handle_route(MonOpRequestRef op)
     osdmon()->send_incremental(m->send_osdmap_first, rr->session,
 			       true, MonOpRequestRef());
   }
-  ceph_assert(rr->tid == m->session_mon_tid && rr->session->routed_request_tids.count(m->session_mon_tid));
+  stone_assert(rr->tid == m->session_mon_tid && rr->session->routed_request_tids.count(m->session_mon_tid));
   routed_requests.erase(found);
   rr->session->routed_request_tids.erase(m->session_mon_tid);
 }
@@ -4239,7 +4239,7 @@ void Monitor::resend_routed_requests()
       rr->op->mark_event("retry routed request");
       retry.push_back(new C_RetryMessage(this, rr->op));
       if (rr->session) {
-        ceph_assert(rr->session->routed_request_tids.count(p->first));
+        stone_assert(rr->session->routed_request_tids.count(p->first));
         rr->session->routed_request_tids.erase(p->first);
       }
       delete rr;
@@ -4264,7 +4264,7 @@ void Monitor::resend_routed_requests()
   }
   if (mon == rank) {
     routed_requests.clear();
-    finish_contexts(g_ceph_context, retry);
+    finish_contexts(g_stone_context, retry);
   }
 }
 
@@ -4272,12 +4272,12 @@ void Monitor::remove_session(MonSession *s)
 {
   dout(10) << "remove_session " << s << " " << s->name << " " << s->addrs
 	   << " features 0x" << std::hex << s->con_features << std::dec << dendl;
-  ceph_assert(s->con);
-  ceph_assert(!s->closed);
+  stone_assert(s->con);
+  stone_assert(!s->closed);
   for (set<uint64_t>::iterator p = s->routed_request_tids.begin();
        p != s->routed_request_tids.end();
        ++p) {
-    ceph_assert(routed_requests.count(*p));
+    stone_assert(routed_requests.count(*p));
     RoutedRequest *rr = routed_requests[*p];
     dout(10) << " dropping routed request " << rr->tid << dendl;
     delete rr;
@@ -4325,8 +4325,8 @@ void Monitor::waitlist_or_zap_client(MonOpRequestRef op)
   Message *m = op->get_req();
   MonSession *s = op->get_session();
   ConnectionRef con = op->get_connection();
-  utime_t too_old = ceph_clock_now();
-  too_old -= g_ceph_context->_conf->mon_lease;
+  utime_t too_old = stone_clock_now();
+  too_old -= g_stone_context->_conf->mon_lease;
   if (m->get_recv_stamp() > too_old &&
       con->is_connected()) {
     dout(5) << "waitlisting message " << *m << dendl;
@@ -4389,9 +4389,9 @@ void Monitor::_ms_dispatch(Message *m)
     // and considering that we are creating a new session it is safe to
     // assume that the sender hasn't authenticated yet, so we have no way
     // of assessing whether we should handle it or not.
-    if (!src_is_mon && (m->get_type() != CEPH_MSG_AUTH &&
-			m->get_type() != CEPH_MSG_MON_GET_MAP &&
-			m->get_type() != CEPH_MSG_PING)) {
+    if (!src_is_mon && (m->get_type() != STONE_MSG_AUTH &&
+			m->get_type() != STONE_MSG_MON_GET_MAP &&
+			m->get_type() != STONE_MSG_PING)) {
       dout(1) << __func__ << " dropping stray message " << *m
 	      << " from " << m->get_source_inst() << dendl;
       return;
@@ -4404,7 +4404,7 @@ void Monitor::_ms_dispatch(Message *m)
 				  m->get_source_addrs(),
 				  con.get());
     }
-    ceph_assert(s);
+    stone_assert(s);
     con->set_priv(RefCountedPtr{s, false});
     dout(10) << __func__ << " new session " << s << " " << *s
 	     << " features 0x" << std::hex
@@ -4426,9 +4426,9 @@ void Monitor::_ms_dispatch(Message *m)
 	     << dendl;
   }
 
-  ceph_assert(s);
+  stone_assert(s);
 
-  s->session_timeout = ceph_clock_now();
+  s->session_timeout = stone_clock_now();
   s->session_timeout += g_conf()->mon_session_timeout;
 
   if (s->auth_handler) {
@@ -4447,7 +4447,7 @@ void Monitor::_ms_dispatch(Message *m)
   if ((is_synchronizing() ||
        (!s->authenticated && !exited_quorum.is_zero())) &&
       !src_is_mon &&
-      m->get_type() != CEPH_MSG_PING) {
+      m->get_type() != STONE_MSG_PING) {
     waitlist_or_zap_client(op);
   } else {
     dispatch_op(op);
@@ -4459,7 +4459,7 @@ void Monitor::dispatch_op(MonOpRequestRef op)
 {
   op->mark_event("mon:dispatch_op");
   MonSession *s = op->get_session();
-  ceph_assert(s);
+  stone_assert(s);
   if (s->closed) {
     dout(10) << " session closed, dropping " << op->get_req() << dendl;
     return;
@@ -4471,13 +4471,13 @@ void Monitor::dispatch_op(MonOpRequestRef op)
   switch (op->get_req()->get_type()) {
     // auth
     case MSG_MON_GLOBAL_ID:
-    case CEPH_MSG_AUTH:
+    case STONE_MSG_AUTH:
       op->set_type_service();
       /* no need to check caps here */
       paxos_service[PAXOS_AUTH]->dispatch(op);
       return;
 
-    case CEPH_MSG_PING:
+    case STONE_MSG_PING:
       handle_ping(op);
       return;
     case MSG_COMMAND:
@@ -4494,8 +4494,8 @@ void Monitor::dispatch_op(MonOpRequestRef op)
   }
 
   // global_id_status == NONE: all sessions for auth_none and krb,
-  // mon <-> mon sessions (including proxied sessions) for cephx
-  ceph_assert(s->global_id_status == global_id_status_t::NONE ||
+  // mon <-> mon sessions (including proxied sessions) for stonex
+  stone_assert(s->global_id_status == global_id_status_t::NONE ||
               s->global_id_status == global_id_status_t::NEW_OK ||
               s->global_id_status == global_id_status_t::NEW_NOT_EXPOSED ||
               s->global_id_status == global_id_status_t::RECLAIM_OK ||
@@ -4507,11 +4507,11 @@ void Monitor::dispatch_op(MonOpRequestRef op)
   // ->send_attempts reaches 0)
   if (cct->_conf->auth_expose_insecure_global_id_reclaim &&
       s->global_id_status == global_id_status_t::NEW_NOT_EXPOSED &&
-      op->get_req()->get_type() != CEPH_MSG_MON_GET_MAP) {
+      op->get_req()->get_type() != STONE_MSG_MON_GET_MAP) {
     dout(5) << __func__ << " " << op->get_req()->get_source_inst()
             << " may omit old_ticket on reconnects, discarding "
             << *op->get_req() << " and forcing reconnect" << dendl;
-    ceph_assert(s->con && !s->proxy_con);
+    stone_assert(s->con && !s->proxy_con);
     s->con->mark_down();
     {
       std::lock_guard l(session_map_lock);
@@ -4522,7 +4522,7 @@ void Monitor::dispatch_op(MonOpRequestRef op)
   }
 
   switch (op->get_req()->get_type()) {
-    case CEPH_MSG_MON_GET_MAP:
+    case STONE_MSG_MON_GET_MAP:
       handle_mon_get_map(op);
       return;
 
@@ -4530,7 +4530,7 @@ void Monitor::dispatch_op(MonOpRequestRef op)
       configmon()->handle_get_config(op);
       return;
 
-    case CEPH_MSG_MON_SUBSCRIBE:
+    case STONE_MSG_MON_SUBSCRIBE:
       /* FIXME: check what's being subscribed, filter accordingly */
       handle_subscribe(op);
       return;
@@ -4542,8 +4542,8 @@ void Monitor::dispatch_op(MonOpRequestRef op)
   switch (op->get_req()->get_type()) {
 
     // OSDs
-    case CEPH_MSG_MON_GET_OSDMAP:
-    case CEPH_MSG_POOLOP:
+    case STONE_MSG_MON_GET_OSDMAP:
+    case STONE_MSG_POOLOP:
     case MSG_OSD_BEACON:
     case MSG_OSD_MARK_ME_DOWN:
     case MSG_OSD_MARK_ME_DEAD:
@@ -4572,7 +4572,7 @@ void Monitor::dispatch_op(MonOpRequestRef op)
 
     // MgrStat
     case MSG_MON_MGR_REPORT:
-    case CEPH_MSG_STATFS:
+    case STONE_MSG_STATFS:
     case MSG_GETPOOLSTATS:
       paxos_service[PAXOS_MGRSTAT]->dispatch(op);
       return;
@@ -4604,7 +4604,7 @@ void Monitor::dispatch_op(MonOpRequestRef op)
 
   switch (op->get_req()->get_type()) {
     // misc
-    case CEPH_MSG_MON_GET_VERSION:
+    case STONE_MSG_MON_GET_VERSION:
       handle_get_version(op);
       return;
   }
@@ -4747,7 +4747,7 @@ void Monitor::timecheck_start()
   dout(10) << __func__ << dendl;
   timecheck_cleanup();
   if (get_quorum_mon_features().contains_all(
-	ceph::features::mon::FEATURE_NAUTILUS)) {
+	stone::features::mon::FEATURE_NAUTILUS)) {
     timecheck_start_round();
   }
 }
@@ -4761,16 +4761,16 @@ void Monitor::timecheck_finish()
 void Monitor::timecheck_start_round()
 {
   dout(10) << __func__ << " curr " << timecheck_round << dendl;
-  ceph_assert(is_leader());
+  stone_assert(is_leader());
 
   if (monmap->size() == 1) {
-    ceph_abort_msg("We are alone; this shouldn't have been scheduled!");
+    stone_abort_msg("We are alone; this shouldn't have been scheduled!");
     return;
   }
 
   if (timecheck_round % 2) {
     dout(10) << __func__ << " there's a timecheck going on" << dendl;
-    utime_t curr_time = ceph_clock_now();
+    utime_t curr_time = stone_clock_now();
     double max = g_conf()->mon_timecheck_interval*3;
     if (curr_time - timecheck_round_start < max) {
       dout(10) << __func__ << " keep current round going" << dendl;
@@ -4782,10 +4782,10 @@ void Monitor::timecheck_start_round()
     }
   }
 
-  ceph_assert(timecheck_round % 2 == 0);
+  stone_assert(timecheck_round % 2 == 0);
   timecheck_acks = 0;
   timecheck_round ++;
-  timecheck_round_start = ceph_clock_now();
+  timecheck_round_start = stone_clock_now();
   dout(10) << __func__ << " new " << timecheck_round << dendl;
 
   timecheck();
@@ -4797,13 +4797,13 @@ out:
 void Monitor::timecheck_finish_round(bool success)
 {
   dout(10) << __func__ << " curr " << timecheck_round << dendl;
-  ceph_assert(timecheck_round % 2);
+  stone_assert(timecheck_round % 2);
   timecheck_round ++;
   timecheck_round_start = utime_t();
 
   if (success) {
-    ceph_assert(timecheck_waiting.empty());
-    ceph_assert(timecheck_acks == quorum.size());
+    stone_assert(timecheck_waiting.empty());
+    stone_assert(timecheck_acks == quorum.size());
     timecheck_report();
     timecheck_check_skews();
     return;
@@ -4870,13 +4870,13 @@ void Monitor::timecheck_reset_event()
 void Monitor::timecheck_check_skews()
 {
   dout(10) << __func__ << dendl;
-  ceph_assert(is_leader());
-  ceph_assert((timecheck_round % 2) == 0);
+  stone_assert(is_leader());
+  stone_assert((timecheck_round % 2) == 0);
   if (monmap->size() == 1) {
-    ceph_abort_msg("We are alone; we shouldn't have gotten here!");
+    stone_abort_msg("We are alone; we shouldn't have gotten here!");
     return;
   }
-  ceph_assert(timecheck_latencies.size() == timecheck_skews.size());
+  stone_assert(timecheck_latencies.size() == timecheck_skews.size());
 
   bool found_skew = false;
   for (auto& p : timecheck_skews) {
@@ -4907,14 +4907,14 @@ void Monitor::timecheck_check_skews()
 void Monitor::timecheck_report()
 {
   dout(10) << __func__ << dendl;
-  ceph_assert(is_leader());
-  ceph_assert((timecheck_round % 2) == 0);
+  stone_assert(is_leader());
+  stone_assert((timecheck_round % 2) == 0);
   if (monmap->size() == 1) {
-    ceph_abort_msg("We are alone; we shouldn't have gotten here!");
+    stone_abort_msg("We are alone; we shouldn't have gotten here!");
     return;
   }
 
-  ceph_assert(timecheck_latencies.size() == timecheck_skews.size());
+  stone_assert(timecheck_latencies.size() == timecheck_skews.size());
   bool do_output = true; // only output report once
   for (set<int>::iterator q = quorum.begin(); q != quorum.end(); ++q) {
     if (monmap->get_name(*q) == name)
@@ -4946,12 +4946,12 @@ void Monitor::timecheck_report()
 void Monitor::timecheck()
 {
   dout(10) << __func__ << dendl;
-  ceph_assert(is_leader());
+  stone_assert(is_leader());
   if (monmap->size() == 1) {
-    ceph_abort_msg("We are alone; we shouldn't have gotten here!");
+    stone_abort_msg("We are alone; we shouldn't have gotten here!");
     return;
   }
-  ceph_assert(timecheck_round % 2 != 0);
+  stone_assert(timecheck_round % 2 != 0);
 
   timecheck_acks = 1; // we ack ourselves
 
@@ -4966,7 +4966,7 @@ void Monitor::timecheck()
     if (monmap->get_name(*it) == name)
       continue;
 
-    utime_t curr_time = ceph_clock_now();
+    utime_t curr_time = stone_clock_now();
     timecheck_waiting[*it] = curr_time;
     MTimeCheck2 *m = new MTimeCheck2(MTimeCheck2::OP_PING);
     m->epoch = get_epoch();
@@ -4981,7 +4981,7 @@ health_status_t Monitor::timecheck_status(ostringstream &ss,
                                           const double latency)
 {
   health_status_t status = HEALTH_OK;
-  ceph_assert(latency >= 0);
+  stone_assert(latency >= 0);
 
   double abs_skew;
   if (timecheck_has_skew(skew_bound, &abs_skew)) {
@@ -4998,7 +4998,7 @@ void Monitor::handle_timecheck_leader(MonOpRequestRef op)
   auto m = op->get_req<MTimeCheck2>();
   dout(10) << __func__ << " " << *m << dendl;
   /* handles PONG's */
-  ceph_assert(m->op == MTimeCheck2::OP_PONG);
+  stone_assert(m->op == MTimeCheck2::OP_PONG);
 
   int other = m->get_source().num();
   if (m->epoch < get_epoch()) {
@@ -5008,7 +5008,7 @@ void Monitor::handle_timecheck_leader(MonOpRequestRef op)
             << " -- severely lagged? discard" << dendl;
     return;
   }
-  ceph_assert(m->epoch == get_epoch());
+  stone_assert(m->epoch == get_epoch());
 
   if (m->round < timecheck_round) {
     dout(1) << __func__ << " got old round " << m->round
@@ -5017,9 +5017,9 @@ void Monitor::handle_timecheck_leader(MonOpRequestRef op)
     return;
   }
 
-  utime_t curr_time = ceph_clock_now();
+  utime_t curr_time = stone_clock_now();
 
-  ceph_assert(timecheck_waiting.count(other) > 0);
+  stone_assert(timecheck_waiting.count(other) > 0);
   utime_t timecheck_sent = timecheck_waiting[other];
   timecheck_waiting.erase(other);
   if (curr_time < timecheck_sent) {
@@ -5078,7 +5078,7 @@ void Monitor::handle_timecheck_leader(MonOpRequestRef op)
    * may be masked by an even higher latency, but with high latencies
    * we probably have worse issues to deal with than just skewed clocks.
    */
-  ceph_assert(latency >= 0);
+  stone_assert(latency >= 0);
 
   double delta = ((double) m->timestamp) - ((double) curr_time);
   double abs_delta = (delta > 0 ? delta : -delta);
@@ -5104,8 +5104,8 @@ void Monitor::handle_timecheck_leader(MonOpRequestRef op)
   if (timecheck_acks == quorum.size()) {
     dout(10) << __func__ << " got pongs from everybody ("
              << timecheck_acks << " total)" << dendl;
-    ceph_assert(timecheck_skews.size() == timecheck_acks);
-    ceph_assert(timecheck_waiting.empty());
+    stone_assert(timecheck_skews.size() == timecheck_acks);
+    stone_assert(timecheck_waiting.empty());
     // everyone has acked, so bump the round to finish it.
     timecheck_finish_round();
   }
@@ -5116,8 +5116,8 @@ void Monitor::handle_timecheck_peon(MonOpRequestRef op)
   auto m = op->get_req<MTimeCheck2>();
   dout(10) << __func__ << " " << *m << dendl;
 
-  ceph_assert(is_peon());
-  ceph_assert(m->op == MTimeCheck2::OP_PING || m->op == MTimeCheck2::OP_REPORT);
+  stone_assert(is_peon());
+  stone_assert(m->op == MTimeCheck2::OP_PING || m->op == MTimeCheck2::OP_REPORT);
 
   if (m->epoch != get_epoch()) {
     dout(1) << __func__ << " got wrong epoch "
@@ -5136,15 +5136,15 @@ void Monitor::handle_timecheck_peon(MonOpRequestRef op)
   timecheck_round = m->round;
 
   if (m->op == MTimeCheck2::OP_REPORT) {
-    ceph_assert((timecheck_round % 2) == 0);
+    stone_assert((timecheck_round % 2) == 0);
     timecheck_latencies.swap(m->latencies);
     timecheck_skews.swap(m->skews);
     return;
   }
 
-  ceph_assert((timecheck_round % 2) != 0);
+  stone_assert((timecheck_round % 2) != 0);
   MTimeCheck2 *reply = new MTimeCheck2(MTimeCheck2::OP_PONG);
-  utime_t curr_time = ceph_clock_now();
+  utime_t curr_time = stone_clock_now();
   reply->timestamp = curr_time;
   reply->epoch = m->epoch;
   reply->round = m->round;
@@ -5183,13 +5183,13 @@ void Monitor::handle_subscribe(MonOpRequestRef op)
   bool reply = false;
 
   MonSession *s = op->get_session();
-  ceph_assert(s);
+  stone_assert(s);
 
   if (m->hostname.size()) {
     s->remote_host = m->hostname;
   }
 
-  for (map<string,ceph_mon_subscribe_item>::iterator p = m->what.begin();
+  for (map<string,stone_mon_subscribe_item>::iterator p = m->what.begin();
        p != m->what.end();
        ++p) {
     if (p->first == "monmap" || p->first == "config") {
@@ -5202,7 +5202,7 @@ void Monitor::handle_subscribe(MonOpRequestRef op)
     }
 
     // if there are any non-onetime subscriptions, we need to reply to start the resubscribe timer
-    if ((p->second.flags & CEPH_SUBSCRIBE_ONETIME) == 0)
+    if ((p->second.flags & STONE_SUBSCRIBE_ONETIME) == 0)
       reply = true;
 
     // remove conflicting subscribes
@@ -5221,15 +5221,15 @@ void Monitor::handle_subscribe(MonOpRequestRef op)
     {
       std::lock_guard l(session_map_lock);
       session_map.add_update_sub(s, p->first, p->second.start,
-				 p->second.flags & CEPH_SUBSCRIBE_ONETIME,
-				 m->get_connection()->has_feature(CEPH_FEATURE_INCSUBOSDMAP));
+				 p->second.flags & STONE_SUBSCRIBE_ONETIME,
+				 m->get_connection()->has_feature(STONE_FEATURE_INCSUBOSDMAP));
     }
 
     if (p->first.compare(0, 6, "mdsmap") == 0 || p->first.compare(0, 5, "fsmap") == 0) {
       dout(10) << __func__ << ": MDS sub '" << p->first << "'" << dendl;
       if ((int)s->is_capable("mds", MON_CAP_R)) {
         Subscription *sub = s->sub_map[p->first];
-        ceph_assert(sub != nullptr);
+        stone_assert(sub != nullptr);
         mdsmon()->check_sub(sub);
       }
     } else if (p->first == "osdmap") {
@@ -5263,7 +5263,7 @@ void Monitor::handle_subscribe(MonOpRequestRef op)
     // we only need to reply if the client is old enough to think it
     // has to send renewals.
     ConnectionRef con = m->get_connection();
-    if (!con->has_feature(CEPH_FEATURE_MON_STATEFUL_SUB))
+    if (!con->has_feature(STONE_FEATURE_MON_STATEFUL_SUB))
       m->get_connection()->send_message(new MMonSubscribeAck(
 	monmap->get_fsid(), (int)g_conf()->mon_subscribe_interval));
   }
@@ -5277,7 +5277,7 @@ void Monitor::handle_get_version(MonOpRequestRef op)
   PaxosService *svc = NULL;
 
   MonSession *s = op->get_session();
-  ceph_assert(s);
+  stone_assert(s);
 
   if (!is_leader() && !is_peon()) {
     dout(10) << " waiting for quorum" << dendl;
@@ -5320,7 +5320,7 @@ bool Monitor::ms_handle_reset(Connection *con)
   dout(10) << "ms_handle_reset " << con << " " << con->get_peer_addr() << dendl;
 
   // ignore lossless monitor sessions
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_MON)
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_MON)
     return false;
 
   auto priv = con->get_priv();
@@ -5382,7 +5382,7 @@ int Monitor::load_metadata()
 
 int Monitor::get_mon_metadata(int mon, Formatter *f, ostream& err)
 {
-  ceph_assert(f);
+  stone_assert(f);
   if (!mon_metadata.count(mon)) {
     err << "mon." << mon << " not found";
     return -EINVAL;
@@ -5433,7 +5433,7 @@ void Monitor::get_all_versions(std::map<string, list<string> > &versions)
 void Monitor::get_versions(std::map<string, list<string> > &versions)
 {
   for (auto& [rank, metadata] : mon_metadata) {
-    auto q = metadata.find("ceph_version_short");
+    auto q = metadata.find("stone_version_short");
     if (q == metadata.end()) {
       // not likely
       continue;
@@ -5466,7 +5466,7 @@ int Monitor::print_nodes(Formatter *f, ostream& err)
 int Monitor::scrub_start()
 {
   dout(10) << __func__ << dendl;
-  ceph_assert(is_leader());
+  stone_assert(is_leader());
 
   if (!scrub_result.empty()) {
     clog->info() << "scrub already in progress";
@@ -5483,8 +5483,8 @@ int Monitor::scrub_start()
 
 int Monitor::scrub()
 {
-  ceph_assert(is_leader());
-  ceph_assert(scrub_state);
+  stone_assert(is_leader());
+  stone_assert(scrub_state);
 
   scrub_cancel_timeout();
   wait_for_paxos_write();
@@ -5520,7 +5520,7 @@ int Monitor::scrub()
   scrub_reset_timeout();
 
   if (quorum.size() == 1) {
-    ceph_assert(scrub_state->finished == true);
+    stone_assert(scrub_state->finished == true);
     scrub_finish();
   }
   return 0;
@@ -5561,7 +5561,7 @@ void Monitor::handle_scrub(MonOpRequestRef op)
       scrub_reset_timeout();
 
       int from = m->get_source().num();
-      ceph_assert(scrub_result.count(from) == 0);
+      stone_assert(scrub_result.count(from) == 0);
       scrub_result[from] = m->result;
 
       if (scrub_result.size() == quorum.size()) {
@@ -5581,9 +5581,9 @@ bool Monitor::_scrub(ScrubResult *r,
                      pair<string,string> *start,
                      int *num_keys)
 {
-  ceph_assert(r != NULL);
-  ceph_assert(start != NULL);
-  ceph_assert(num_keys != NULL);
+  stone_assert(r != NULL);
+  stone_assert(start != NULL);
+  stone_assert(num_keys != NULL);
 
   set<string> prefixes = get_sync_targets_names();
   prefixes.erase("paxos");  // exclude paxos, as this one may have extra states for proposals, etc.
@@ -5614,7 +5614,7 @@ bool Monitor::_scrub(ScrubResult *r,
 
     bufferlist bl;
     int err = store->get(k.first, k.second, bl);
-    ceph_assert(err == 0);
+    stone_assert(err == 0);
     
     uint32_t key_crc = bl.crc32c(0);
     dout(30) << __func__ << " " << k << " bl " << bl.length() << " bytes"
@@ -5691,7 +5691,7 @@ void Monitor::scrub_reset()
   scrub_state.reset();
 }
 
-inline void Monitor::scrub_update_interval(ceph::timespan interval)
+inline void Monitor::scrub_update_interval(stone::timespan interval)
 {
   // we don't care about changes if we are not the leader.
   // changes will be visible if we become the leader.
@@ -5772,7 +5772,7 @@ void Monitor::tick()
 {
   // ok go.
   dout(11) << "tick" << dendl;
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
   
   // Check if we need to emit any delayed health check updated messages
   if (is_leader()) {
@@ -5856,7 +5856,7 @@ void Monitor::tick()
   sync_trim_providers();
 
   if (!maybe_wait_for_quorum.empty()) {
-    finish_contexts(g_ceph_context, maybe_wait_for_quorum);
+    finish_contexts(g_stone_context, maybe_wait_for_quorum);
   }
 
   if (is_leader() && paxos->is_active() && fingerprint.is_zero()) {
@@ -5875,7 +5875,7 @@ vector<DaemonHealthMetric> Monitor::get_health_metrics()
   vector<DaemonHealthMetric> metrics;
 
   utime_t oldest_secs;
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
   auto too_old = now;
   too_old -= g_conf().get_val<std::chrono::seconds>("mon_op_complaint_time").count();
   int slow = 0;
@@ -5920,7 +5920,7 @@ int Monitor::check_fsid()
   int r = store->get(MONITOR_NAME, "cluster_uuid", ebl);
   if (r == -ENOENT)
     return r;
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   string es(ebl.c_str(), ebl.length());
 
@@ -5967,7 +5967,7 @@ int Monitor::write_fsid(MonitorDBStore::TransactionRef t)
 }
 
 /*
- * this is the closest thing to a traditional 'mkfs' for ceph.
+ * this is the closest thing to a traditional 'mkfs' for stone.
  * initialize the monitor state machines to their initial values.
  */
 int Monitor::mkfs(bufferlist& osdmapbl)
@@ -5980,7 +5980,7 @@ int Monitor::mkfs(bufferlist& osdmapbl)
     return r;
 
   bufferlist magicbl;
-  magicbl.append(CEPH_MON_ONDISK_MAGIC);
+  magicbl.append(STONE_MON_ONDISK_MAGIC);
   magicbl.append("\n");
   t->put(MONITOR_NAME, "magic", magicbl);
 
@@ -5990,7 +5990,7 @@ int Monitor::mkfs(bufferlist& osdmapbl)
 
   // save monmap, osdmap, keyring.
   bufferlist monmapbl;
-  monmap->encode(monmapbl, CEPH_FEATURES_ALL);
+  monmap->encode(monmapbl, STONE_FEATURES_ALL);
   monmap->set_epoch(0);     // must be 0 to avoid confusing first MonmapMonitor::update_from_paxos()
   t->put("mkfs", "monmap", monmapbl);
 
@@ -6000,7 +6000,7 @@ int Monitor::mkfs(bufferlist& osdmapbl)
       OSDMap om;
       om.decode(osdmapbl);
     }
-    catch (ceph::buffer::error& e) {
+    catch (stone::buffer::error& e) {
       derr << "error decoding provided osdmap: " << e.what() << dendl;
       return -EINVAL;
     }
@@ -6011,7 +6011,7 @@ int Monitor::mkfs(bufferlist& osdmapbl)
     KeyRing keyring;
     string keyring_filename;
 
-    r = ceph_resolve_file_search(g_conf()->keyring, keyring_filename);
+    r = stone_resolve_file_search(g_conf()->keyring, keyring_filename);
     if (r) {
       if (g_conf()->key != "") {
 	string keyring_plaintext = "[mon.]\n\tkey = " + g_conf()->key +
@@ -6022,7 +6022,7 @@ int Monitor::mkfs(bufferlist& osdmapbl)
 	  auto i = bl.cbegin();
 	  keyring.decode_plaintext(i);
 	}
-	catch (const ceph::buffer::error& e) {
+	catch (const stone::buffer::error& e) {
 	  derr << "error decoding keyring " << keyring_plaintext
 	       << ": " << e.what() << dendl;
 	  return -EINVAL;
@@ -6033,7 +6033,7 @@ int Monitor::mkfs(bufferlist& osdmapbl)
 	return r;
       }
     } else {
-      r = keyring.load(g_ceph_context, keyring_filename);
+      r = keyring.load(g_stone_context, keyring_filename);
       if (r < 0) {
 	derr << "unable to load initial keyring " << g_conf()->keyring << dendl;
 	return r;
@@ -6078,7 +6078,7 @@ int Monitor::write_default_keyring(bufferlist& bl)
 void Monitor::extract_save_mon_key(KeyRing& keyring)
 {
   EntityName mon_name;
-  mon_name.set_type(CEPH_ENTITY_TYPE_MON);
+  mon_name.set_type(STONE_ENTITY_TYPE_MON);
   EntityAuth mon_key;
   if (keyring.get_auth(mon_name, mon_key)) {
     dout(10) << "extract_save_mon_key moving mon. key to separate keyring" << dendl;
@@ -6100,8 +6100,8 @@ int Monitor::get_auth_request(
   bufferlist *out)
 {
   std::scoped_lock l(auth_lock);
-  if (con->get_peer_type() != CEPH_ENTITY_TYPE_MON &&
-      con->get_peer_type() != CEPH_ENTITY_TYPE_MGR) {
+  if (con->get_peer_type() != STONE_ENTITY_TYPE_MON &&
+      con->get_peer_type() != STONE_ENTITY_TYPE_MGR) {
     return -EACCES;
   }
   AuthAuthorizer *auth;
@@ -6168,36 +6168,36 @@ int Monitor::handle_auth_bad_method(
 
 bool Monitor::get_authorizer(int service_id, AuthAuthorizer **authorizer)
 {
-  dout(10) << "get_authorizer for " << ceph_entity_type_name(service_id)
+  dout(10) << "get_authorizer for " << stone_entity_type_name(service_id)
 	   << dendl;
 
   if (is_shutdown())
     return false;
 
   // we only connect to other monitors and mgr; every else connects to us.
-  if (service_id != CEPH_ENTITY_TYPE_MON &&
-      service_id != CEPH_ENTITY_TYPE_MGR)
+  if (service_id != STONE_ENTITY_TYPE_MON &&
+      service_id != STONE_ENTITY_TYPE_MGR)
     return false;
 
-  if (!auth_cluster_required.is_supported_auth(CEPH_AUTH_CEPHX)) {
+  if (!auth_cluster_required.is_supported_auth(STONE_AUTH_STONEX)) {
     // auth_none
     dout(20) << __func__ << " building auth_none authorizer" << dendl;
-    AuthNoneClientHandler handler{g_ceph_context};
+    AuthNoneClientHandler handler{g_stone_context};
     handler.set_global_id(0);
     *authorizer = handler.build_authorizer(service_id);
     return true;
   }
 
-  CephXServiceTicketInfo auth_ticket_info;
-  CephXSessionAuthInfo info;
+  StoneXServiceTicketInfo auth_ticket_info;
+  StoneXSessionAuthInfo info;
   int ret;
 
   EntityName name;
-  name.set_type(CEPH_ENTITY_TYPE_MON);
+  name.set_type(STONE_ENTITY_TYPE_MON);
   auth_ticket_info.ticket.name = name;
   auth_ticket_info.ticket.global_id = 0;
 
-  if (service_id == CEPH_ENTITY_TYPE_MON) {
+  if (service_id == STONE_ENTITY_TYPE_MON) {
     // mon to mon authentication uses the private monitor shared key and not the
     // rotating key
     CryptoKey secret;
@@ -6222,7 +6222,7 @@ bool Monitor::get_authorizer(int service_id, AuthAuthorizer **authorizer)
 	      << cpp_strerror(ret) << dendl;
       return false;
     }
-  } else if (service_id == CEPH_ENTITY_TYPE_MGR) {
+  } else if (service_id == STONE_ENTITY_TYPE_MGR) {
     // mgr
     ret = key_server.build_session_auth_info(
       service_id, auth_ticket_info.ticket, info);
@@ -6232,11 +6232,11 @@ bool Monitor::get_authorizer(int service_id, AuthAuthorizer **authorizer)
       return false;
     }
   } else {
-    ceph_abort();  // see check at top of fn
+    stone_abort();  // see check at top of fn
   }
 
-  CephXTicketBlob blob;
-  if (!cephx_build_service_ticket_blob(cct, info, blob)) {
+  StoneXTicketBlob blob;
+  if (!stonex_build_service_ticket_blob(cct, info, blob)) {
     dout(0) << "get_authorizer failed to build service ticket" << dendl;
     return false;
   }
@@ -6244,7 +6244,7 @@ bool Monitor::get_authorizer(int service_id, AuthAuthorizer **authorizer)
   encode(blob, ticket_data);
 
   auto iter = ticket_data.cbegin();
-  CephXTicketHandler handler(g_ceph_context, service_id);
+  StoneXTicketHandler handler(g_stone_context, service_id);
   decode(handler.ticket, iter);
 
   handler.session_key = info.session_key;
@@ -6273,7 +6273,7 @@ int Monitor::handle_auth_request(
 	   << dendl;
   if (!payload.length()) {
     if (!con->is_msgr2() &&
-	con->get_peer_type() != CEPH_ENTITY_TYPE_MON) {
+	con->get_peer_type() != STONE_ENTITY_TYPE_MON) {
       // for v1 connections, we tolerate no authorizer (from
       // non-monitors), because authentication happens via MAuth
       // messages.
@@ -6341,7 +6341,7 @@ int Monitor::handle_auth_request(
 
     // handler?
     unique_ptr<AuthServiceHandler> auth_handler{get_auth_service_handler(
-      auth_method, g_ceph_context, &key_server)};
+      auth_method, g_stone_context, &key_server)};
     if (!auth_handler) {
       dout(1) << __func__ << " auth_method " << auth_method << " not supported"
 	      << dendl;
@@ -6361,16 +6361,16 @@ int Monitor::handle_auth_request(
       assert(mode >= AUTH_MODE_MON && mode <= AUTH_MODE_MON_MAX);
       decode(entity_name, p);
       decode(con->peer_global_id, p);
-    } catch (ceph::buffer::error& e) {
+    } catch (stone::buffer::error& e) {
       dout(1) << __func__ << " failed to decode, " << e.what() << dendl;
       return -EACCES;
     }
 
     // supported method?
-    if (entity_name.get_type() == CEPH_ENTITY_TYPE_MON ||
-	entity_name.get_type() == CEPH_ENTITY_TYPE_OSD ||
-	entity_name.get_type() == CEPH_ENTITY_TYPE_MDS ||
-	entity_name.get_type() == CEPH_ENTITY_TYPE_MGR) {
+    if (entity_name.get_type() == STONE_ENTITY_TYPE_MON ||
+	entity_name.get_type() == STONE_ENTITY_TYPE_OSD ||
+	entity_name.get_type() == STONE_ENTITY_TYPE_MDS ||
+	entity_name.get_type() == STONE_ENTITY_TYPE_MGR) {
       if (!auth_cluster_required.is_supported_auth(auth_method)) {
 	dout(10) << __func__ << " entity " << entity_name << " method "
 		 << auth_method << " not among supported "
@@ -6469,7 +6469,7 @@ void Monitor::ms_handle_accept(Connection *con)
 
 int Monitor::ms_handle_authentication(Connection *con)
 {
-  if (con->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
+  if (con->get_peer_type() == STONE_ENTITY_TYPE_MON) {
     // mon <-> mon connections need no Session, and setting one up
     // creates an awkward ref cycle between Session and Connection.
     return 1;
@@ -6505,7 +6505,7 @@ int Monitor::ms_handle_authentication(Connection *con)
     string str;
     try {
       decode(str, p);
-    } catch (const ceph::buffer::error &err) {
+    } catch (const stone::buffer::error &err) {
       derr << __func__ << " corrupt cap data for " << con->get_peer_entity_name()
 	   << " in auth db" << dendl;
       str.clear();
@@ -6625,7 +6625,7 @@ void Monitor::do_stretch_mode_election_work()
   for (unsigned i = 0; i < monmap->size(); ++i) {
     const auto &mi = monmap->mon_info[monmap->get_name(i)];
     auto ci = mi.crush_loc.find(stretch_bucket_divider);
-    ceph_assert(ci != mi.crush_loc.end());
+    stone_assert(ci != mi.crush_loc.end());
     if (quorum.count(i)) {
       up_mon_buckets.insert(ci->second);
     } else {
@@ -6671,7 +6671,7 @@ void Monitor::go_recovery_stretch_mode()
   if (is_recovering_stretch_mode()) return;
 
   if (dead_mon_buckets.size()) {
-    ceph_assert( 0 == "how did we try and do stretch recovery while we have dead monitor buckets?");
+    stone_assert( 0 == "how did we try and do stretch recovery while we have dead monitor buckets?");
     // we can't recover if we are missing monitors in a zone!
     return;
   }
@@ -6704,7 +6704,7 @@ void Monitor::maybe_go_degraded_stretch_mode()
     osdmon()->wait_for_readable_ctx(new CMonGoDegraded(this));
     return;
   }
-  ceph_assert(monmap->contains(monmap->tiebreaker_mon));
+  stone_assert(monmap->contains(monmap->tiebreaker_mon));
   // filter out the tiebreaker zone and check if remaining sites are down by OSDs too
   const auto &mi = monmap->mon_info[monmap->tiebreaker_mon];
   auto ci = mi.crush_loc.find(stretch_bucket_divider);
@@ -6731,17 +6731,17 @@ void Monitor::trigger_degraded_stretch_mode(const set<string>& dead_mons,
 					    const set<int>& dead_buckets)
 {
   dout(20) << __func__ << dendl;
-  ceph_assert(osdmon()->is_writeable());
-  ceph_assert(monmon()->is_writeable());
+  stone_assert(osdmon()->is_writeable());
+  stone_assert(monmon()->is_writeable());
 
   // figure out which OSD zone(s) remains alive by removing
   // tiebreaker mon from up_mon_buckets
   set<string> live_zones = up_mon_buckets;
-  ceph_assert(monmap->contains(monmap->tiebreaker_mon));
+  stone_assert(monmap->contains(monmap->tiebreaker_mon));
   const auto &mi = monmap->mon_info[monmap->tiebreaker_mon];
   auto ci = mi.crush_loc.find(stretch_bucket_divider);
   live_zones.erase(ci->second);
-  ceph_assert(live_zones.size() == 1); // only support 2 zones right now
+  stone_assert(live_zones.size() == 1); // only support 2 zones right now
   
   osdmon()->trigger_degraded_stretch_mode(dead_buckets, live_zones);
   monmon()->trigger_degraded_stretch_mode(dead_mons);
@@ -6776,7 +6776,7 @@ void Monitor::trigger_healthy_stretch_mode()
     monmon()->wait_for_writeable_ctx(new CMonGoHealthy(this));
   }
 
-  ceph_assert(osdmon()->osdmap.recovering_stretch_mode);
+  stone_assert(osdmon()->osdmap.recovering_stretch_mode);
   osdmon()->trigger_healthy_stretch_mode();
   monmon()->trigger_healthy_stretch_mode();
 }
@@ -6800,13 +6800,13 @@ bool Monitor::session_stretch_allowed(MonSession *s, MonOpRequestRef& op)
     int barrier_id;
     int retval = osdmon()->osdmap.crush->get_validated_type_id(stretch_bucket_divider,
 							       &barrier_id);
-    ceph_assert(retval >= 0);
+    stone_assert(retval >= 0);
     int osd_bucket_id = osdmon()->osdmap.crush->get_parent_of_type(s->con->peer_id,
 								   barrier_id);
     const auto &mi = monmap->mon_info.find(name);
-    ceph_assert(mi != monmap->mon_info.end());
+    stone_assert(mi != monmap->mon_info.end());
     auto ci = mi->second.crush_loc.find(stretch_bucket_divider);
-    ceph_assert(ci != mi->second.crush_loc.end());
+    stone_assert(ci != mi->second.crush_loc.end());
     int mon_bucket_id = osdmon()->osdmap.crush->get_item_id(ci->second);
     
     if (osd_bucket_id != mon_bucket_id) {

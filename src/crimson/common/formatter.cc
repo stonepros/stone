@@ -30,13 +30,13 @@ struct fmt::formatter<seastar::lowres_system_clock::time_point> {
 };
 
 template <>
-struct fmt::formatter<ceph::coarse_real_clock::time_point> {
+struct fmt::formatter<stone::coarse_real_clock::time_point> {
   // ignore the format string
   template <typename ParseContext>
   constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
   template <typename FormatContext>
-  auto format(const ceph::coarse_real_clock::time_point& t,
+  auto format(const stone::coarse_real_clock::time_point& t,
               FormatContext& ctx) {
     std::time_t tt = std::chrono::duration_cast<std::chrono::seconds>(
       t.time_since_epoch()).count();
@@ -56,7 +56,7 @@ ostream& operator<<(ostream& out,
 }
 
 ostream& operator<<(ostream& out,
-                    const ceph::coarse_real_clock::time_point& t)
+                    const stone::coarse_real_clock::time_point& t)
 {
   return out << fmt::format("{}", t);
 }

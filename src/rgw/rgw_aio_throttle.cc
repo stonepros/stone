@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -46,7 +46,7 @@ AioResultList BlockingAioThrottle::get(const RGWSI_RADOS::Obj& obj,
     // wait for the write size to become available
     pending_size += p->cost;
     if (!is_available()) {
-      ceph_assert(waiter == Wait::None);
+      stone_assert(waiter == Wait::None);
       waiter = Wait::Available;
       cond.wait(lock, [this] { return is_available(); });
       waiter = Wait::None;
@@ -89,7 +89,7 @@ AioResultList BlockingAioThrottle::wait()
 {
   std::unique_lock lock{mutex};
   if (completed.empty() && !pending.empty()) {
-    ceph_assert(waiter == Wait::None);
+    stone_assert(waiter == Wait::None);
     waiter = Wait::Completion;
     cond.wait(lock, [this] { return has_completion(); });
     waiter = Wait::None;
@@ -101,7 +101,7 @@ AioResultList BlockingAioThrottle::drain()
 {
   std::unique_lock lock{mutex};
   if (!pending.empty()) {
-    ceph_assert(waiter == Wait::None);
+    stone_assert(waiter == Wait::None);
     waiter = Wait::Drained;
     cond.wait(lock, [this] { return is_drained(); });
     waiter = Wait::None;
@@ -136,8 +136,8 @@ AioResultList YieldingAioThrottle::get(const RGWSI_RADOS::Obj& obj,
     // wait for the write size to become available
     pending_size += p->cost;
     if (!is_available()) {
-      ceph_assert(waiter == Wait::None);
-      ceph_assert(!completion);
+      stone_assert(waiter == Wait::None);
+      stone_assert(!completion);
 
       boost::system::error_code ec;
       waiter = Wait::Available;
@@ -163,8 +163,8 @@ void YieldingAioThrottle::put(AioResult& r)
   pending_size -= p.cost;
 
   if (waiter_ready()) {
-    ceph_assert(completion);
-    ceph::async::post(std::move(completion), boost::system::error_code{});
+    stone_assert(completion);
+    stone::async::post(std::move(completion), boost::system::error_code{});
     waiter = Wait::None;
   }
 }
@@ -177,8 +177,8 @@ AioResultList YieldingAioThrottle::poll()
 AioResultList YieldingAioThrottle::wait()
 {
   if (!has_completion() && !pending.empty()) {
-    ceph_assert(waiter == Wait::None);
-    ceph_assert(!completion);
+    stone_assert(waiter == Wait::None);
+    stone_assert(!completion);
 
     boost::system::error_code ec;
     waiter = Wait::Completion;
@@ -190,8 +190,8 @@ AioResultList YieldingAioThrottle::wait()
 AioResultList YieldingAioThrottle::drain()
 {
   if (!is_drained()) {
-    ceph_assert(waiter == Wait::None);
-    ceph_assert(!completion);
+    stone_assert(waiter == Wait::None);
+    stone_assert(!completion);
 
     boost::system::error_code ec;
     waiter = Wait::Drained;

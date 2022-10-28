@@ -4,29 +4,29 @@
 #include <seastar/util/backtrace.hh>
 #include <seastar/core/reactor.hh>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "crimson/common/log.h"
 
-namespace ceph {
-  [[gnu::cold]] void __ceph_assert_fail(const ceph::assert_data &ctx)
+namespace stone {
+  [[gnu::cold]] void __stone_assert_fail(const stone::assert_data &ctx)
   {
-    __ceph_assert_fail(ctx.assertion, ctx.file, ctx.line, ctx.function);
+    __stone_assert_fail(ctx.assertion, ctx.file, ctx.line, ctx.function);
   }
 
-  [[gnu::cold]] void __ceph_assert_fail(const char* assertion,
+  [[gnu::cold]] void __stone_assert_fail(const char* assertion,
                                         const char* file, int line,
                                         const char* func)
   {
     seastar::logger& logger = crimson::get_logger(0);
-    logger.error("{}:{} : In function '{}', ceph_assert(%s)\n"
+    logger.error("{}:{} : In function '{}', stone_assert(%s)\n"
                  "{}",
                  file, line, func, assertion,
                  seastar::current_backtrace());
     std::cout << std::flush;
     abort();
   }
-  [[gnu::cold]] void __ceph_assertf_fail(const char *assertion,
+  [[gnu::cold]] void __stone_assertf_fail(const char *assertion,
                                          const char *file, int line,
                                          const char *func, const char* msg,
                                          ...)
@@ -38,7 +38,7 @@ namespace ceph {
     va_end(args);
 
     seastar::logger& logger = crimson::get_logger(0);
-    logger.error("{}:{} : In function '{}', ceph_assert(%s)\n"
+    logger.error("{}:{} : In function '{}', stone_assert(%s)\n"
                  "{}\n{}\n",
                  file, line, func, assertion,
                  buf,
@@ -47,7 +47,7 @@ namespace ceph {
     abort();
   }
 
-  [[gnu::cold]] void __ceph_abort(const char* file, int line,
+  [[gnu::cold]] void __stone_abort(const char* file, int line,
                                   const char* func, const std::string& msg)
   {
     seastar::logger& logger = crimson::get_logger(0);
@@ -59,7 +59,7 @@ namespace ceph {
     abort();
   }
 
-  [[gnu::cold]] void __ceph_abortf(const char* file, int line,
+  [[gnu::cold]] void __stone_abortf(const char* file, int line,
                                    const char* func, const char* fmt,
                                    ...)
   {

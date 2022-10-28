@@ -6,7 +6,7 @@
 #include "librbd/ExclusiveLock.h"
 #include "librbd/ImageCtx.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::InvalidateRequest: "
 
@@ -23,8 +23,8 @@ InvalidateRequest<I>* InvalidateRequest<I>::create(I &image_ctx,
 template <typename I>
 void InvalidateRequest<I>::send() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
-  ceph_assert(ceph_mutex_is_wlocked(image_ctx.image_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_wlocked(image_ctx.image_lock));
 
   uint64_t snap_flags;
   int r = image_ctx.get_flags(m_snap_id, &snap_flags);
@@ -33,7 +33,7 @@ void InvalidateRequest<I>::send() {
     return;
   }
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   lderr(cct) << this << " invalidating object map in-memory" << dendl;
 
   // update in-memory flags
@@ -50,7 +50,7 @@ void InvalidateRequest<I>::send() {
 
   // do not update on-disk flags if not image owner
   if (image_ctx.image_watcher == nullptr ||
-      (!m_force && m_snap_id == CEPH_NOSNAP &&
+      (!m_force && m_snap_id == STONE_NOSNAP &&
        image_ctx.exclusive_lock != nullptr &&
        !image_ctx.exclusive_lock->is_lock_owner())) {
     this->async_complete(-EROFS);
@@ -65,14 +65,14 @@ void InvalidateRequest<I>::send() {
     this->create_callback_completion();
   r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, rados_completion,
                                    &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 template <typename I>
 bool InvalidateRequest<I>::should_complete(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   lderr(cct) << this << " " << __func__ << ": r=" << r << dendl;
   return true;
 }

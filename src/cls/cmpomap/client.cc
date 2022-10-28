@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc
  *
@@ -20,7 +20,7 @@ namespace cls::cmpomap {
 
 int cmp_vals(librados::ObjectReadOperation& op,
              Mode mode, Op comparison, ComparisonMap values,
-             std::optional<ceph::bufferlist> default_value)
+             std::optional<stone::bufferlist> default_value)
 {
   if (values.size() > max_keys) {
     return -E2BIG;
@@ -39,7 +39,7 @@ int cmp_vals(librados::ObjectReadOperation& op,
 
 int cmp_set_vals(librados::ObjectWriteOperation& op,
                  Mode mode, Op comparison, ComparisonMap values,
-                 std::optional<ceph::bufferlist> default_value)
+                 std::optional<stone::bufferlist> default_value)
 {
   if (values.size() > max_keys) {
     return -E2BIG;

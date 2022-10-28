@@ -20,8 +20,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_DPDK_TCP_H_
-#define CEPH_DPDK_TCP_H_
+#ifndef STONE_DPDK_TCP_H_
+#define STONE_DPDK_TCP_H_
 
 #include <unordered_map>
 #include <map>
@@ -346,7 +346,7 @@ class tcp {
       uint32_t partial_ack = 0;
       tcp_sequence recover;
       bool window_probe = false;
-      send(CephContext *c): user_queue_space(c, "DPDK::tcp::tcb::user_queue_space", 81920) {}
+      send(StoneeContext *c): user_queue_space(c, "DPDK::tcp::tcb::user_queue_space", 81920) {}
     } _snd;
     struct receive {
       tcp_sequence next;
@@ -620,7 +620,7 @@ class tcp {
     friend class C_all_data_acked;
   };
 
-  CephContext *cct;
+  StoneeContext *cct;
   // ipv4_l4<ip_protocol_num::tcp>
   inet_type& _inet;
   EventCenter *center;
@@ -740,7 +740,7 @@ class tcp {
     friend class tcp;
   };
  public:
-  explicit tcp(CephContext *c, inet_type& inet, EventCenter *cen);
+  explicit tcp(StoneeContext *c, inet_type& inet, EventCenter *cen);
   void received(Packet p, ipaddr from, ipaddr to);
   bool forward(forward_hash& out_hash_data, Packet& p, size_t off);
   listener listen(uint16_t port, size_t queue_length = 100);
@@ -766,7 +766,7 @@ class tcp {
 };
 
 template <typename InetTraits>
-tcp<InetTraits>::tcp(CephContext *c, inet_type& inet, EventCenter *cen)
+tcp<InetTraits>::tcp(StoneeContext *c, inet_type& inet, EventCenter *cen)
     : cct(c), _inet(inet), center(cen),
       manager(static_cast<DPDKDriver*>(cen->get_driver())->manager),
       _e(_rd()), _queue_space(cct, "DPDK::tcp::queue_space", 81920) {

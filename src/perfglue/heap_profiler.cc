@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network/Sage Weil <sage@newdream.net>
  *
@@ -26,43 +26,43 @@
 #include "global/global_context.h"
 #include "common/debug.h"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
-bool ceph_using_tcmalloc()
+bool stone_using_tcmalloc()
 {
   return true;
 }
 
-void ceph_heap_profiler_init()
+void stone_heap_profiler_init()
 {
   // Two other interesting environment variables to set are:
   // HEAP_PROFILE_ALLOCATION_INTERVAL, HEAP_PROFILE_INUSE_INTERVAL
-  if (get_env_bool("CEPH_HEAP_PROFILER_INIT")) {
-    ceph_heap_profiler_start();
+  if (get_env_bool("STONE_HEAP_PROFILER_INIT")) {
+    stone_heap_profiler_start();
   }
 }
 
-void ceph_heap_profiler_stats(char *buf, int length)
+void stone_heap_profiler_stats(char *buf, int length)
 {
   MallocExtension::instance()->GetStats(buf, length);
 }
 
-void ceph_heap_release_free_memory()
+void stone_heap_release_free_memory()
 {
   MallocExtension::instance()->ReleaseFreeMemory();
 }
 
-double ceph_heap_get_release_rate()
+double stone_heap_get_release_rate()
 {
   return MallocExtension::instance()->GetMemoryReleaseRate();
 }
 
-void ceph_heap_set_release_rate(double val)
+void stone_heap_set_release_rate(double val)
 {
   MallocExtension::instance()->SetMemoryReleaseRate(val);
 }
 
-bool ceph_heap_get_numeric_property(
+bool stone_heap_get_numeric_property(
   const char *property, size_t *value)
 {
   return MallocExtension::instance()->GetNumericProperty(
@@ -70,7 +70,7 @@ bool ceph_heap_get_numeric_property(
     value);
 }
 
-bool ceph_heap_set_numeric_property(
+bool stone_heap_set_numeric_property(
   const char *property, size_t value)
 {
   return MallocExtension::instance()->SetNumericProperty(
@@ -78,7 +78,7 @@ bool ceph_heap_set_numeric_property(
     value);
 }
 
-bool ceph_heap_profiler_running()
+bool stone_heap_profiler_running()
 {
 #ifdef HAVE_LIBTCMALLOC
   return IsHeapProfilerRunning();
@@ -113,7 +113,7 @@ static void get_profile_name(char *profile_name, int profile_name_len)
 #endif
 }
 
-void ceph_heap_profiler_start()
+void stone_heap_profiler_start()
 {
 #ifdef HAVE_LIBTCMALLOC
   char profile_name[PATH_MAX];
@@ -124,14 +124,14 @@ void ceph_heap_profiler_start()
 #endif
 }
 
-void ceph_heap_profiler_stop()
+void stone_heap_profiler_stop()
 {
 #ifdef HAVE_LIBTCMALLOC
   HeapProfilerStop();
 #endif
 }
 
-void ceph_heap_profiler_dump(const char *reason)
+void stone_heap_profiler_dump(const char *reason)
 {
 #ifdef HAVE_LIBTCMALLOC
   HeapProfilerDump(reason);
@@ -140,38 +140,38 @@ void ceph_heap_profiler_dump(const char *reason)
 
 #define HEAP_PROFILER_STATS_SIZE 2048
 
-void ceph_heap_profiler_handle_command(const std::vector<std::string>& cmd,
+void stone_heap_profiler_handle_command(const std::vector<std::string>& cmd,
                                        std::ostream& out)
 {
 #ifdef HAVE_LIBTCMALLOC
   if (cmd.size() == 1 && cmd[0] == "dump") {
-    if (!ceph_heap_profiler_running()) {
+    if (!stone_heap_profiler_running()) {
       out << "heap profiler not running; can't dump";
       return;
     }
     char heap_stats[HEAP_PROFILER_STATS_SIZE];
-    ceph_heap_profiler_stats(heap_stats, sizeof(heap_stats));
+    stone_heap_profiler_stats(heap_stats, sizeof(heap_stats));
     out << g_conf()->name << " dumping heap profile now.\n"
 	<< heap_stats;
-    ceph_heap_profiler_dump("admin request");
+    stone_heap_profiler_dump("admin request");
   } else if (cmd.size() == 1 && cmd[0] == "start_profiler") {
-    ceph_heap_profiler_start();
+    stone_heap_profiler_start();
     out << g_conf()->name << " started profiler";
   } else if (cmd.size() == 1 && cmd[0] == "stop_profiler") {
-    ceph_heap_profiler_stop();
+    stone_heap_profiler_stop();
     out << g_conf()->name << " stopped profiler";
   } else if (cmd.size() == 1 && cmd[0] == "release") {
-    ceph_heap_release_free_memory();
+    stone_heap_release_free_memory();
     out << g_conf()->name << " releasing free RAM back to system.";
   } else if (cmd.size() == 1 && cmd[0] == "get_release_rate") {
     out << g_conf()->name << " release rate: " 
-	<< std::setprecision(4) << ceph_heap_get_release_rate() << "\n";
+	<< std::setprecision(4) << stone_heap_get_release_rate() << "\n";
   } else if (cmd.size() == 2 && cmd[0] == "set_release_rate") {
     try {
       double val = std::stod(cmd[1]);
-      ceph_heap_set_release_rate(val);
+      stone_heap_set_release_rate(val);
       out << g_conf()->name <<  " release rate changed to: " 
-          << std::setprecision(4) << ceph_heap_get_release_rate() << "\n";
+          << std::setprecision(4) << stone_heap_get_release_rate() << "\n";
     } catch (...) {
       out << g_conf()->name <<  " *** need an numerical value. ";
     }
@@ -179,7 +179,7 @@ void ceph_heap_profiler_handle_command(const std::vector<std::string>& cmd,
 #endif
   if (cmd.size() == 1 && cmd[0] == "stats") {
     char heap_stats[HEAP_PROFILER_STATS_SIZE];
-    ceph_heap_profiler_stats(heap_stats, sizeof(heap_stats));
+    stone_heap_profiler_stats(heap_stats, sizeof(heap_stats));
     out << g_conf()->name << " tcmalloc heap stats:"
 	<< heap_stats;
   } else {

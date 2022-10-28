@@ -18,7 +18,7 @@
 
 #include <boost/asio/yield.hpp>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #undef dout_prefix
 #define dout_prefix (*_dout << "data trim: ")

@@ -4,11 +4,11 @@
 #include "PGStateUtils.h"
 #include "common/Clock.h"
 
-using ceph::Formatter;
+using stone::Formatter;
 
 /*------NamedState----*/
 NamedState::NamedState(PGStateHistory *pgsh, const char *state_name)
-  : pgsh(pgsh), state_name(state_name), enter_time(ceph_clock_now()) {
+  : pgsh(pgsh), state_name(state_name), enter_time(stone_clock_now()) {
   if(pgsh) {
     pgsh->enter(enter_time, state_name);
   }
@@ -31,7 +31,7 @@ void PGStateHistory::enter(const utime_t entime, const char* state)
 
 void PGStateHistory::exit(const char* state) {
   pi->setepoch(es.get_osdmap_epoch());
-  pi->exit_state(ceph_clock_now());
+  pi->exit_state(stone_clock_now());
   if (pi->empty()) {
     reset();
   }

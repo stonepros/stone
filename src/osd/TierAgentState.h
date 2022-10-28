@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2013 Sage Weil <sage@inktank.com>
  *
@@ -11,8 +11,8 @@
  *
  */
 
-#ifndef CEPH_OSD_TIERAGENT_H
-#define CEPH_OSD_TIERAGENT_H
+#ifndef STONE_OSD_TIERAGENT_H
+#define STONE_OSD_TIERAGENT_H
 
 #include <ctime>
 #include <list>

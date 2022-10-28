@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -128,12 +128,12 @@ struct PGLogTestBase {
 
 class PGLogTest : virtual public ::testing::Test, protected PGLog, public PGLogTestBase  {
 public:
-  PGLogTest() : PGLog(g_ceph_context) {}
+  PGLogTest() : PGLog(g_stone_context) {}
   void SetUp() override {
     missing.may_include_deletes = true;
   }
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 
   void TearDown() override {
@@ -311,7 +311,7 @@ public:
     proc_replica_log(
       oinfo, olog, omissing, pg_shard_t(1, shard_id_t(0)));
 
-    ceph_assert(oinfo.last_update >= log.tail);
+    stone_assert(oinfo.last_update >= log.tail);
 
     if (!tcase.base.empty()) {
       ASSERT_EQ(tcase.base.rbegin()->version, oinfo.last_update);
@@ -2077,8 +2077,8 @@ TEST_F(PGLogTest, filter_log_1) {
     OSDMap *osdmap = new OSDMap;
     uuid_d test_uuid;
     test_uuid.generate_random();
-    osdmap->build_simple_with_pool(g_ceph_context, epoch, test_uuid, max_osd, bits, bits);
-    osdmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    osdmap->build_simple_with_pool(g_stone_context, epoch, test_uuid, max_osd, bits, bits);
+    osdmap->set_state(osd_id, STONE_OSD_EXISTS);
 
     const string hit_set_namespace("internal");
 
@@ -2376,7 +2376,7 @@ class PGLogMergeDupsTest : protected PGLog, public StoreTestFixture {
 
 public:
 
-  PGLogMergeDupsTest() : PGLog(g_ceph_context), StoreTestFixture("memstore") { }
+  PGLogMergeDupsTest() : PGLog(g_stone_context), StoreTestFixture("memstore") { }
 
   void SetUp() override {
     StoreTestFixture::SetUp();
@@ -2678,7 +2678,7 @@ struct PGLogTrimTest :
   public PGLogTestBase,
   public PGLog::IndexedLog
 {
-  CephContext *cct = g_ceph_context;
+  StoneContext *cct = g_stone_context;
 
   using ::testing::Test::SetUp;
   void SetUp(unsigned dup_track) {
@@ -2693,7 +2693,7 @@ struct PGLogTrimTest :
 }; // struct PGLogTrimTest
 
 
-TEST_F(PGLogTrimTest, TestMakingCephContext)
+TEST_F(PGLogTrimTest, TestMakingStoneContext)
 {
   SetUp(5);
 

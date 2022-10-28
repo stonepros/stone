@@ -35,7 +35,7 @@ struct ListWatchersRequest<MockTestImageCtx> {
   static ListWatchersRequest *create(MockTestImageCtx &image_ctx, int flags,
                                      std::list<obj_watch_t> *watchers,
                                      Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->watchers = watchers;
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -87,7 +87,7 @@ template<> bool can_create_primary_snapshot(librbd::MockTestImageCtx *image_ctx,
 template <>
 struct CreateNonPrimaryRequest<MockTestImageCtx> {
   std::string primary_mirror_uuid;
-  uint64_t primary_snap_id = CEPH_NOSNAP;
+  uint64_t primary_snap_id = STONE_NOSNAP;
   Context* on_finish = nullptr;
   static CreateNonPrimaryRequest* s_instance;
   static CreateNonPrimaryRequest *create(MockTestImageCtx *image_ctx,
@@ -98,7 +98,7 @@ struct CreateNonPrimaryRequest<MockTestImageCtx> {
                                          const ImageState &image_state,
                                          uint64_t *snap_id,
                                          Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->primary_mirror_uuid = primary_mirror_uuid;
     s_instance->primary_snap_id = primary_snap_id;
     s_instance->on_finish = on_finish;
@@ -126,7 +126,7 @@ struct CreatePrimaryRequest<MockTestImageCtx> {
                                       uint64_t snap_create_flags,
                                       uint32_t flags, uint64_t *snap_id,
                                       Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->demoted = ((flags & CREATE_PRIMARY_FLAG_DEMOTED) != 0);
     s_instance->force = ((flags & CREATE_PRIMARY_FLAG_FORCE) != 0);
     s_instance->on_finish = on_finish;
@@ -274,7 +274,7 @@ TEST_F(TestMockMirrorSnapshotPromoteRequest, Success) {
   InSequence seq;
 
   MockUtils mock_utils;
-  expect_can_create_primary_snapshot(mock_utils, true, false, CEPH_NOSNAP,
+  expect_can_create_primary_snapshot(mock_utils, true, false, STONE_NOSNAP,
                                      true);
   MockCreatePrimaryRequest mock_create_primary_request;
   expect_create_promote_snapshot(mock_image_ctx, mock_create_primary_request,
@@ -302,7 +302,7 @@ TEST_F(TestMockMirrorSnapshotPromoteRequest, SuccessForce) {
   InSequence seq;
 
   MockUtils mock_utils;
-  expect_can_create_primary_snapshot(mock_utils, true, true, CEPH_NOSNAP, true);
+  expect_can_create_primary_snapshot(mock_utils, true, true, STONE_NOSNAP, true);
   MockCreateNonPrimaryRequest mock_create_non_primary_request;
   expect_create_orphan_snapshot(mock_image_ctx, mock_create_non_primary_request,
                                 0);
@@ -374,7 +374,7 @@ TEST_F(TestMockMirrorSnapshotPromoteRequest, ErrorCannotRollback) {
   InSequence seq;
 
   MockUtils mock_utils;
-  expect_can_create_primary_snapshot(mock_utils, true, false, CEPH_NOSNAP,
+  expect_can_create_primary_snapshot(mock_utils, true, false, STONE_NOSNAP,
                                      false);
 
   C_SaferCond ctx;

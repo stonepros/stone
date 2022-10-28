@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_JOURNAL_JOURNAL_METADATA_LISTENER_H
-#define CEPH_JOURNAL_JOURNAL_METADATA_LISTENER_H
+#ifndef STONE_JOURNAL_JOURNAL_METADATA_LISTENER_H
+#define STONE_JOURNAL_JOURNAL_METADATA_LISTENER_H
 
 namespace journal {
 
@@ -26,5 +26,5 @@ struct JournalMetadataListener {
 
 } // namespace journal
 
-#endif // CEPH_JOURNAL_JOURNAL_METADATA_LISTENER_H
+#endif // STONE_JOURNAL_JOURNAL_METADATA_LISTENER_H
 

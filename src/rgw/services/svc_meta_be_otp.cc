@@ -7,10 +7,10 @@
 #include "rgw/rgw_metadata.h"
 #include "rgw/rgw_mdlog.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
-RGWSI_MetaBackend_OTP::RGWSI_MetaBackend_OTP(CephContext *cct) : RGWSI_MetaBackend_SObj(cct) {
+RGWSI_MetaBackend_OTP::RGWSI_MetaBackend_OTP(StoneContext *cct) : RGWSI_MetaBackend_SObj(cct) {
 }
 
 RGWSI_MetaBackend_OTP::~RGWSI_MetaBackend_OTP() {
@@ -31,7 +31,7 @@ RGWSI_MetaBackend::Context *RGWSI_MetaBackend_OTP::alloc_ctx()
   return new Context_OTP(sysobj_svc);
 }
 
-int RGWSI_MetaBackend_OTP::call_with_get_params(ceph::real_time *pmtime, std::function<int(RGWSI_MetaBackend::GetParams&)> cb)
+int RGWSI_MetaBackend_OTP::call_with_get_params(stone::real_time *pmtime, std::function<int(RGWSI_MetaBackend::GetParams&)> cb)
 {
   otp_devices_list_t devices;
   RGWSI_MBOTP_GetParams params;

@@ -113,7 +113,7 @@ void generate_random_iomap(librbd::Image &image, int num_objects, int object_siz
     layout.stripe_count = stripe_count;
 
     vector<ObjectExtent> ex;
-    Striper::file_to_extents(g_ceph_context, 1, &layout, imageoff, TEST_IO_SIZE, 0, ex);
+    Striper::file_to_extents(g_stone_context, 1, &layout, imageoff, TEST_IO_SIZE, 0, ex);
 
     // lets not worry if IO spans multiple extents (>1 object). in such
     // as case we would perform the write multiple times to the same
@@ -619,7 +619,7 @@ TEST_F(TestInternal, SnapshotCopyup)
   ASSERT_EQ(0, flush_writeback_cache(ictx2));
   librados::IoCtx snap_ctx;
   snap_ctx.dup(ictx2->data_ctx);
-  snap_ctx.snap_set_read(CEPH_SNAPDIR);
+  snap_ctx.snap_set_read(STONE_SNAPDIR);
 
   librados::snap_set_t snap_set;
   ASSERT_EQ(0, snap_ctx.list_snaps(ictx2->get_object_name(0), &snap_set));
@@ -630,10 +630,10 @@ TEST_F(TestInternal, SnapshotCopyup)
       std::make_pair(0, 256))(
       std::make_pair(512, copyup_end - 512));
   ASSERT_EQ(2U, snap_set.clones.size());
-  ASSERT_NE(CEPH_NOSNAP, snap_set.clones[0].cloneid);
+  ASSERT_NE(STONE_NOSNAP, snap_set.clones[0].cloneid);
   ASSERT_EQ(2U, snap_set.clones[0].snaps.size());
   ASSERT_EQ(expected_overlap, snap_set.clones[0].overlap);
-  ASSERT_EQ(CEPH_NOSNAP, snap_set.clones[1].cloneid);
+  ASSERT_EQ(STONE_NOSNAP, snap_set.clones[1].cloneid);
 
   bufferptr read_ptr(256);
   bufferlist read_bl;
@@ -764,14 +764,14 @@ TEST_F(TestInternal, SnapshotCopyupZeros)
 
   librados::IoCtx snap_ctx;
   snap_ctx.dup(ictx2->data_ctx);
-  snap_ctx.snap_set_read(CEPH_SNAPDIR);
+  snap_ctx.snap_set_read(STONE_SNAPDIR);
 
   librados::snap_set_t snap_set;
   ASSERT_EQ(0, snap_ctx.list_snaps(ictx2->get_object_name(0), &snap_set));
 
   // verify that snapshot wasn't affected
   ASSERT_EQ(1U, snap_set.clones.size());
-  ASSERT_EQ(CEPH_NOSNAP, snap_set.clones[0].cloneid);
+  ASSERT_EQ(STONE_NOSNAP, snap_set.clones[0].cloneid);
 
   bufferptr read_ptr(256);
   bufferlist read_bl;
@@ -849,14 +849,14 @@ TEST_F(TestInternal, SnapshotCopyupZerosMigration)
 
   librados::IoCtx snap_ctx;
   snap_ctx.dup(ictx2->data_ctx);
-  snap_ctx.snap_set_read(CEPH_SNAPDIR);
+  snap_ctx.snap_set_read(STONE_SNAPDIR);
 
   librados::snap_set_t snap_set;
   ASSERT_EQ(0, snap_ctx.list_snaps(ictx2->get_object_name(0), &snap_set));
 
   // verify that snapshot wasn't affected
   ASSERT_EQ(1U, snap_set.clones.size());
-  ASSERT_EQ(CEPH_NOSNAP, snap_set.clones[0].cloneid);
+  ASSERT_EQ(STONE_NOSNAP, snap_set.clones[0].cloneid);
 
   bufferptr read_ptr(256);
   bufferlist read_bl;
@@ -972,7 +972,7 @@ TEST_F(TestInternal, DiscardCopyup)
 {
   REQUIRE_FEATURE(RBD_FEATURE_LAYERING);
 
-  CephContext* cct = reinterpret_cast<CephContext*>(_rados.cct());
+  StoneContext* cct = reinterpret_cast<StoneContext*>(_rados.cct());
   REQUIRE(!cct->_conf.get_val<bool>("rbd_skip_partial_discard"));
 
   m_image_name = get_temp_image_name();
@@ -1736,7 +1736,7 @@ TEST_F(TestInternal, MissingDataPool) {
   }
   ASSERT_EQ(r, -ENOENT);
   bufferlist bl;
-  using ceph::encode;
+  using stone::encode;
   encode(pool_id, bl);
   ASSERT_EQ(0, m_ioctx.omap_set(header_oid, {{"data_pool_id", bl}}));
 

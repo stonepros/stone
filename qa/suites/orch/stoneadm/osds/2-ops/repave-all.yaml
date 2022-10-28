@@ -1,0 +1,13 @@
+tasks:
+- stoneadm.shell:
+    host.a:
+      - |
+        set -e
+        set -x
+        stone orch ps
+        stone orch device ls
+        stone osd tree
+        for osd in `stone osd ls` ; do
+            stone orch osd rm $osd --force --zap --replace
+        done
+        while stone orch osd rm ls | wc | grep ^1 ; do sleep 10 ; done

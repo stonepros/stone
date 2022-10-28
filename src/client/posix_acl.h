@@ -1,5 +1,5 @@
-#ifndef CEPH_POSIX_ACL
-#define CEPH_POSIX_ACL
+#ifndef STONE_POSIX_ACL
+#define STONE_POSIX_ACL
 
 #define ACL_EA_VERSION          0x0002
 

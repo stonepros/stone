@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IMAGE_LIST_WATCHERS_REQUEST_H
-#define CEPH_LIBRBD_IMAGE_LIST_WATCHERS_REQUEST_H
+#ifndef STONE_LIBRBD_IMAGE_LIST_WATCHERS_REQUEST_H
+#define STONE_LIBRBD_IMAGE_LIST_WATCHERS_REQUEST_H
 
 #include "include/rados/rados_types.hpp"
 
@@ -59,7 +59,7 @@ private:
   std::list<obj_watch_t> *m_watchers;
   Context *m_on_finish;
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   int m_ret_val;
   bufferlist m_out_bl;
   std::list<obj_watch_t> m_object_watchers;
@@ -79,4 +79,4 @@ private:
 
 extern template class librbd::image::ListWatchersRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_IMAGE_LIST_WATCHERS_REQUEST_H
+#endif // STONE_LIBRBD_IMAGE_LIST_WATCHERS_REQUEST_H

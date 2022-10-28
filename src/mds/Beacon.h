@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 Red Hat
  *
@@ -45,7 +45,7 @@ public:
   using clock = ceph::coarse_mono_clock;
   using time = ceph::coarse_mono_time;
 
-  Beacon(CephContext *cct, MonClient *monc, std::string_view name);
+  Beacon(StoneContext *cct, MonClient *monc, std::string_view name);
   ~Beacon() override;
 
   void init(const MDSMap &mdsmap);

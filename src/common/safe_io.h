@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_SAFE_IO
-#define CEPH_SAFE_IO
+#ifndef STONE_SAFE_IO
+#define STONE_SAFE_IO
 
 #include "common/compiler_extensions.h"
 #include <sys/types.h>
@@ -41,7 +41,7 @@ extern "C" {
       WARN_UNUSED_RESULT;
   ssize_t safe_pwrite(int fd, const void *buf, size_t count, off_t offset)
       WARN_UNUSED_RESULT;
-#ifdef CEPH_HAVE_SPLICE
+#ifdef STONE_HAVE_SPLICE
   /*
    * Similar to the above (non-exact version) and below (exact version).
    * See splice(2) for parameter descriptions.

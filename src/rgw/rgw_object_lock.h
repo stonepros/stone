@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 
-#ifndef CEPH_RGW_OBJECT_LOCK_H
-#define CEPH_RGW_OBJECT_LOCK_H
+#ifndef STONE_RGW_OBJECT_LOCK_H
+#define STONE_RGW_OBJECT_LOCK_H
 
 #include <string>
 #include "common/ceph_time.h"
@@ -221,4 +221,4 @@ public:
   bool is_enabled() const;
 };
 WRITE_CLASS_ENCODER(RGWObjectLegalHold)
-#endif //CEPH_RGW_OBJECT_LOCK_H
+#endif //STONE_RGW_OBJECT_LOCK_H

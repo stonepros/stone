@@ -1,5 +1,5 @@
-#include "common/ceph_argparse.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_argparse.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include "global/global_init.h"
 #include "include/Context.h"
@@ -21,7 +21,7 @@ namespace
   int array_idx;
   TestContext* test_contexts[MAX_TEST_CONTEXTS];
 
-  ceph::mutex array_lock = ceph::make_mutex("test_timers_mutex");
+  stone::mutex array_lock = stone::make_mutex("test_timers_mutex");
 }
 
 class TestContext : public Context
@@ -75,7 +75,7 @@ static void print_status(const char *str, int ret)
 }
 
 template <typename T>
-static int basic_timer_test(T &timer, ceph::mutex *lock)
+static int basic_timer_test(T &timer, stone::mutex *lock)
 {
   int ret = 0;
   memset(&test_array, 0, sizeof(test_array));
@@ -92,7 +92,7 @@ static int basic_timer_test(T &timer, ceph::mutex *lock)
   for (int i = 0; i < MAX_TEST_CONTEXTS; ++i) {
     if (lock)
       lock->lock();
-    auto t = ceph::real_clock::now() + std::chrono::seconds(2 * i);
+    auto t = stone::real_clock::now() + std::chrono::seconds(2 * i);
     timer.add_event_at(t, test_contexts[i]);
     if (lock)
       lock->unlock();
@@ -116,7 +116,7 @@ static int basic_timer_test(T &timer, ceph::mutex *lock)
   return ret;
 }
 
-static int test_out_of_order_insertion(SafeTimer &timer, ceph::mutex *lock)
+static int test_out_of_order_insertion(SafeTimer &timer, stone::mutex *lock)
 {
   int ret = 0;
   memset(&test_array, 0, sizeof(test_array));
@@ -129,13 +129,13 @@ static int test_out_of_order_insertion(SafeTimer &timer, ceph::mutex *lock)
   test_contexts[1] = new StrictOrderTestContext(1);
 
   {
-    auto t = ceph::real_clock::now() + 100s;
+    auto t = stone::real_clock::now() + 100s;
     std::lock_guard locker{*lock};
     timer.add_event_at(t, test_contexts[0]);
   }
 
   {
-    auto t = ceph::real_clock::now() + 2s;
+    auto t = stone::real_clock::now() + 2s;
     std::lock_guard locker{*lock};
     timer.add_event_at(t, test_contexts[1]);
   }
@@ -160,7 +160,7 @@ static int test_out_of_order_insertion(SafeTimer &timer, ceph::mutex *lock)
 }
 
 static int safe_timer_cancel_all_test(SafeTimer &safe_timer,
-                                      ceph::mutex& safe_timer_lock)
+                                      stone::mutex& safe_timer_lock)
 {
   cout << __PRETTY_FUNCTION__ << std::endl;
 
@@ -175,7 +175,7 @@ static int safe_timer_cancel_all_test(SafeTimer &safe_timer,
 
   safe_timer_lock.lock();
   for (int i = 0; i < MAX_TEST_CONTEXTS; ++i) {
-    auto t = ceph::real_clock::now() + std::chrono::seconds(4 * i);
+    auto t = stone::real_clock::now() + std::chrono::seconds(4 * i);
     safe_timer.add_event_at(t, test_contexts[i]);
   }
   safe_timer_lock.unlock();
@@ -198,7 +198,7 @@ static int safe_timer_cancel_all_test(SafeTimer &safe_timer,
 }
 
 static int safe_timer_cancellation_test(SafeTimer &safe_timer,
-                                        ceph::mutex& safe_timer_lock)
+                                        stone::mutex& safe_timer_lock)
 {
   cout << __PRETTY_FUNCTION__ << std::endl;
 
@@ -213,7 +213,7 @@ static int safe_timer_cancellation_test(SafeTimer &safe_timer,
 
   safe_timer_lock.lock();
   for (int i = 0; i < MAX_TEST_CONTEXTS; ++i) {
-    auto t = ceph::real_clock::now() + std::chrono::seconds(4 * i);
+    auto t = stone::real_clock::now() + std::chrono::seconds(4 * i);
     safe_timer.add_event_at(t, test_contexts[i]);
   }
   safe_timer_lock.unlock();
@@ -247,14 +247,14 @@ int main(int argc, const char **argv)
   vector<const char*> args;
   argv_to_vec(argc, argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   int ret;
-  ceph::mutex safe_timer_lock = ceph::make_mutex("safe_timer_lock");
-  SafeTimer safe_timer(g_ceph_context, safe_timer_lock);
+  stone::mutex safe_timer_lock = stone::make_mutex("safe_timer_lock");
+  SafeTimer safe_timer(g_stone_context, safe_timer_lock);
   safe_timer.init();
 
   ret = basic_timer_test <SafeTimer>(safe_timer, &safe_timer_lock);

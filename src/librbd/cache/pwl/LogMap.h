@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CACHE_RWL_LOG_MAP_H
-#define CEPH_LIBRBD_CACHE_RWL_LOG_MAP_H
+#ifndef STONE_LIBRBD_CACHE_RWL_LOG_MAP_H
+#define STONE_LIBRBD_CACHE_RWL_LOG_MAP_H
 
 #include "librbd/BlockGuard.h"
 #include <list>
@@ -37,7 +37,7 @@ using LogMapEntries = std::list<LogMapEntry<T>>;
 template <typename T>
 class LogMap {
 public:
-  LogMap(CephContext *cct);
+  LogMap(StoneContext *cct);
   LogMap(const LogMap&) = delete;
   LogMap &operator=(const LogMap&) = delete;
 
@@ -69,7 +69,7 @@ private:
   using BlockExtentToLogMapEntries = std::set<LogMapEntryT,
                                               LogMapEntryCompare>;
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   ceph::mutex m_lock;
   BlockExtentToLogMapEntries m_block_to_log_entry_map;
 };
@@ -78,4 +78,4 @@ private:
 } //namespace cache
 } //namespace librbd
 
-#endif //CEPH_LIBRBD_CACHE_RWL_LOG_MAP_H
+#endif //STONE_LIBRBD_CACHE_RWL_LOG_MAP_H

@@ -12,7 +12,7 @@
 #include "librbd/migration/RawFormat.h"
 #include "librbd/migration/RawSnapshot.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::migration::SourceSpecBuilder: " << this \
                            << " " << __func__ << ": "

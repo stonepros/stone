@@ -371,7 +371,7 @@ void get_list_arguments(po::options_description *positional,
 }
 
 int execute_list(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -430,7 +430,7 @@ void get_create_arguments(po::options_description *positional,
 }
 
 int execute_create(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -481,14 +481,14 @@ void get_remove_arguments(po::options_description *positional,
 }
 
 int execute_remove(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
   std::string image_name;
   std::string snap_name;
   std::string image_id;
-  uint64_t snap_id = CEPH_NOSNAP;
+  uint64_t snap_id = STONE_NOSNAP;
   bool force = vm["force"].as<bool>();
   bool no_progress = vm[at::NO_PROGRESS].as<bool>();
 
@@ -502,7 +502,7 @@ int execute_remove(const po::variables_map &vm,
   int r = utils::get_pool_image_snapshot_names(
     vm, at::ARGUMENT_MODIFIER_NONE, &arg_index, &pool_name, &namespace_name,
     &image_name, &snap_name, image_id.empty(),
-    (snap_id == CEPH_NOSNAP ? utils::SNAPSHOT_PRESENCE_REQUIRED :
+    (snap_id == STONE_NOSNAP ? utils::SNAPSHOT_PRESENCE_REQUIRED :
                               utils::SNAPSHOT_PRESENCE_PERMITTED),
     utils::SPEC_VALIDATION_NONE);
   if (r < 0) {
@@ -513,11 +513,11 @@ int execute_remove(const po::variables_map &vm,
     std::cerr << "rbd: trying to access image using both name and id."
               << std::endl;
     return -EINVAL;
-  } else if (!snap_name.empty() && snap_id != CEPH_NOSNAP) {
+  } else if (!snap_name.empty() && snap_id != STONE_NOSNAP) {
     std::cerr << "rbd: trying to access snapshot using both name and id."
               << std::endl;
     return -EINVAL;
-  } else if ((force || no_progress) && snap_id != CEPH_NOSNAP) {
+  } else if ((force || no_progress) && snap_id != STONE_NOSNAP) {
     std::cerr << "rbd: force and no-progress options not permitted when "
               << "removing by id." << std::endl;
     return -EINVAL;
@@ -570,7 +570,7 @@ void get_purge_arguments(po::options_description *positional,
 }
 
 int execute_purge(const po::variables_map &vm,
-                  const std::vector<std::string> &ceph_global_init_args) {
+                  const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -632,7 +632,7 @@ void get_rollback_arguments(po::options_description *positional,
 }
 
 int execute_rollback(const po::variables_map &vm,
-                     const std::vector<std::string> &ceph_global_init_args) {
+                     const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -670,7 +670,7 @@ void get_protect_arguments(po::options_description *positional,
 }
 
 int execute_protect(const po::variables_map &vm,
-                    const std::vector<std::string> &ceph_global_init_args) {
+                    const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -720,7 +720,7 @@ void get_unprotect_arguments(po::options_description *positional,
 }
 
 int execute_unprotect(const po::variables_map &vm,
-                      const std::vector<std::string> &ceph_global_init_args) {
+                      const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -791,7 +791,7 @@ void get_set_limit_arguments(po::options_description *pos,
 }
 
 int execute_set_limit(const po::variables_map &vm,
-                      const std::vector<std::string> &ceph_global_init_args) {
+                      const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -838,7 +838,7 @@ void get_clear_limit_arguments(po::options_description *pos,
 }
 
 int execute_clear_limit(const po::variables_map &vm,
-                        const std::vector<std::string> &ceph_global_init_args) {
+                        const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -878,7 +878,7 @@ void get_rename_arguments(po::options_description *positional,
 }
 
 int execute_rename(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;

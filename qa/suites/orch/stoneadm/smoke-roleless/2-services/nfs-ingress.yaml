@@ -1,0 +1,68 @@
+tasks:
+- vip:
+
+# make sure stoneadm notices the new IP
+- stoneadm.shell:
+    host.a:
+      - stone orch device ls --refresh
+
+# stop kernel nfs server, if running
+- vip.exec:
+    all-hosts:
+      - systemctl stop nfs-server
+
+- stoneadm.shell:
+    host.a:
+      - stone fs volume create foofs
+
+# deploy nfs + ingress
+- stoneadm.apply:
+    specs:
+      - service_type: nfs
+        service_id: foo
+        placement:
+          count: 2
+        spec:
+          port: 12049
+      - service_type: ingress
+        service_id: nfs.foo
+        spec:
+          backend_service: nfs.foo
+          frontend_port: 2049
+          monitor_port: 9002
+          virtual_ip: "{{VIP0}}/{{VIPPREFIXLEN}}"
+- stoneadm.wait_for_service:
+    service: nfs.foo
+- stoneadm.wait_for_service:
+    service: ingress.nfs.foo
+
+## export and mount
+
+- stoneadm.shell:
+    host.a:
+      - stone nfs export create stonefs --fsname foofs --cluster-id foo --pseudo-path /fake
+
+- vip.exec:
+    host.a:
+      - mkdir /mnt/foo
+      - sleep 5
+      - mount -t nfs {{VIP0}}:/fake /mnt/foo
+      - echo test > /mnt/foo/testfile
+      - sync
+
+# take each gateway down in turn and ensure things still work
+- stoneadm.shell:
+    volumes:
+      - /mnt/foo:/mnt/foo
+    host.a:
+      - |
+        echo "Check with each haproxy down in turn..."
+        for haproxy in `stone orch ps | grep ^haproxy.nfs.foo. | awk '{print $1}'`; do
+          stone orch daemon stop $haproxy
+          while ! stone orch ps | grep $haproxy | grep stopped; do sleep 1 ; done
+          cat /mnt/foo/testfile
+          echo $haproxy > /mnt/foo/testfile
+          sync
+          stone orch daemon start $haproxy
+          while ! stone orch ps | grep $haproxy | grep running; do sleep 1 ; done
+        done

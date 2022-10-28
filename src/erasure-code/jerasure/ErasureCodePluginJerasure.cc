@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -15,14 +15,14 @@
  * 
  */
 
-#include "ceph_ver.h"
+#include "stone_ver.h"
 #include "common/debug.h"
 #include "ErasureCodeJerasure.h"
 #include "ErasureCodePluginJerasure.h"
 #include "jerasure_init.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_osd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 
@@ -32,8 +32,8 @@ static std::ostream& _prefix(std::ostream* _dout)
 }
 
 int ErasureCodePluginJerasure::factory(const std::string& directory,
-				       ceph::ErasureCodeProfile &profile,
-				       ceph::ErasureCodeInterfaceRef *erasure_code,
+				       stone::ErasureCodeProfile &profile,
+				       stone::ErasureCodeInterfaceRef *erasure_code,
 				       std::ostream *ss) {
     ErasureCodeJerasure *interface;
     std::string t;
@@ -66,15 +66,15 @@ int ErasureCodePluginJerasure::factory(const std::string& directory,
       delete interface;
       return r;
     }
-    *erasure_code = ceph::ErasureCodeInterfaceRef(interface);
+    *erasure_code = stone::ErasureCodeInterfaceRef(interface);
     return 0;
 }
 
-const char *__erasure_code_version() { return CEPH_GIT_NICE_VER; }
+const char *__erasure_code_version() { return STONE_GIT_NICE_VER; }
 
 int __erasure_code_init(char *plugin_name, char *directory)
 {
-  auto& instance = ceph::ErasureCodePluginRegistry::instance();
+  auto& instance = stone::ErasureCodePluginRegistry::instance();
   int w[] = { 4, 8, 16, 32 };
   int r = jerasure_init(4, w);
   if (r) {

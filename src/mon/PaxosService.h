@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_PAXOSSERVICE_H
-#define CEPH_PAXOSSERVICE_H
+#ifndef STONE_PAXOSSERVICE_H
+#define STONE_PAXOSSERVICE_H
 
 #include "include/Context.h"
 #include "Paxos.h"

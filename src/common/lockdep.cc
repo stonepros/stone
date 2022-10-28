@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2008-2011 New Dream Network
  *
@@ -12,12 +12,12 @@
  *
  */
 #include "lockdep.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/dout.h"
 #include "common/valgrind.h"
 
 /******* Constants **********/
-#define lockdep_dout(v) lsubdout(g_lockdep_ceph_ctx, lockdep, v)
+#define lockdep_dout(v) lsubdout(g_lockdep_stone_ctx, lockdep, v)
 #define MAX_LOCKS  4096   // increase me as needed
 #define BACKTRACE_SKIP 2
 
@@ -32,38 +32,38 @@ struct lockdep_stopper_t {
 
 
 static pthread_mutex_t lockdep_mutex = PTHREAD_MUTEX_INITIALIZER;
-static CephContext *g_lockdep_ceph_ctx = NULL;
+static StoneContext *g_lockdep_stone_ctx = NULL;
 static lockdep_stopper_t lockdep_stopper;
-static ceph::unordered_map<std::string, int> lock_ids;
+static stone::unordered_map<std::string, int> lock_ids;
 static std::map<int, std::string> lock_names;
 static std::map<int, int> lock_refs;
 static char free_ids[MAX_LOCKS/8]; // bit set = free
-static ceph::unordered_map<pthread_t, std::map<int,ceph::BackTrace*> > held;
+static stone::unordered_map<pthread_t, std::map<int,stone::BackTrace*> > held;
 static char follows[MAX_LOCKS][MAX_LOCKS/8]; // follows[a][b] means b taken after a
-static ceph::BackTrace *follows_bt[MAX_LOCKS][MAX_LOCKS];
+static stone::BackTrace *follows_bt[MAX_LOCKS][MAX_LOCKS];
 unsigned current_maxid;
 int last_freed_id = -1;
 static bool free_ids_inited;
 
 static bool lockdep_force_backtrace()
 {
-  return (g_lockdep_ceph_ctx != NULL &&
-          g_lockdep_ceph_ctx->_conf->lockdep_force_backtrace);
+  return (g_lockdep_stone_ctx != NULL &&
+          g_lockdep_stone_ctx->_conf->lockdep_force_backtrace);
 }
 
 /******* Functions **********/
-void lockdep_register_ceph_context(CephContext *cct)
+void lockdep_register_stone_context(StoneContext *cct)
 {
   static_assert((MAX_LOCKS > 0) && (MAX_LOCKS % 8 == 0),                   
     "lockdep's MAX_LOCKS needs to be divisible by 8 to operate correctly.");
   pthread_mutex_lock(&lockdep_mutex);
-  if (g_lockdep_ceph_ctx == NULL) {
-    ANNOTATE_BENIGN_RACE_SIZED(&g_lockdep_ceph_ctx, sizeof(g_lockdep_ceph_ctx),
+  if (g_lockdep_stone_ctx == NULL) {
+    ANNOTATE_BENIGN_RACE_SIZED(&g_lockdep_stone_ctx, sizeof(g_lockdep_stone_ctx),
                                "lockdep cct");
     ANNOTATE_BENIGN_RACE_SIZED(&g_lockdep, sizeof(g_lockdep),
                                "lockdep enabled");
     g_lockdep = true;
-    g_lockdep_ceph_ctx = cct;
+    g_lockdep_stone_ctx = cct;
     lockdep_dout(1) << "lockdep start" << dendl;
     if (!free_ids_inited) {
       free_ids_inited = true;
@@ -74,14 +74,14 @@ void lockdep_register_ceph_context(CephContext *cct)
   pthread_mutex_unlock(&lockdep_mutex);
 }
 
-void lockdep_unregister_ceph_context(CephContext *cct)
+void lockdep_unregister_stone_context(StoneContext *cct)
 {
   pthread_mutex_lock(&lockdep_mutex);
-  if (cct == g_lockdep_ceph_ctx) {
+  if (cct == g_lockdep_stone_ctx) {
     lockdep_dout(1) << "lockdep stop" << dendl;
     // this cct is going away; shut it down!
     g_lockdep = false;
-    g_lockdep_ceph_ctx = NULL;
+    g_lockdep_stone_ctx = NULL;
 
     // blow away all of our state, too, in case it starts up again.
     for (unsigned i = 0; i < current_maxid; ++i) {
@@ -95,7 +95,7 @@ void lockdep_unregister_ceph_context(CephContext *cct)
     lock_ids.clear();
     // FIPS zeroization audit 20191115: these memsets are not security related.
     memset((void*)&follows[0][0], 0, current_maxid * MAX_LOCKS/8);
-    memset((void*)&follows_bt[0][0], 0, sizeof(ceph::BackTrace*) * current_maxid * MAX_LOCKS);
+    memset((void*)&follows_bt[0][0], 0, sizeof(stone::BackTrace*) * current_maxid * MAX_LOCKS);
   }
   pthread_mutex_unlock(&lockdep_mutex);
 }
@@ -159,7 +159,7 @@ static int _lockdep_register(const char *name)
 
   if (!g_lockdep)
     return id;
-  ceph::unordered_map<std::string, int>::iterator p = lock_ids.find(name);
+  stone::unordered_map<std::string, int>::iterator p = lock_ids.find(name);
   if (p == lock_ids.end()) {
     id = lockdep_get_free_id();
     if (id < 0) {
@@ -168,7 +168,7 @@ static int _lockdep_register(const char *name)
       for (auto& p : lock_names) {
 	lockdep_dout(0) << "  lock " << p.first << " " << p.second << dendl;
       }
-      ceph_abort();
+      stone_abort();
     }
     if (current_maxid <= (unsigned)id) {
         current_maxid = (unsigned)id + 1;
@@ -295,7 +295,7 @@ int lockdep_will_lock(const char *name, int id, bool force_backtrace,
       if (!recursive) {
 	lockdep_dout(0) << "\n";
 	*_dout << "recursive lock of " << name << " (" << id << ")\n";
-	auto bt = new ceph::BackTrace(BACKTRACE_SKIP);
+	auto bt = new stone::BackTrace(BACKTRACE_SKIP);
 	bt->print(*_dout);
 	if (p->second) {
 	  *_dout << "\npreviously locked at\n";
@@ -303,7 +303,7 @@ int lockdep_will_lock(const char *name, int id, bool force_backtrace,
 	}
 	delete bt;
 	*_dout << dendl;
-	ceph_abort();
+	stone_abort();
       }
     }
     else if (!(follows[p->first][id/8] & (1 << (id % 8)))) {
@@ -311,7 +311,7 @@ int lockdep_will_lock(const char *name, int id, bool force_backtrace,
 
       // did we just create a cycle?
       if (does_follow(id, p->first)) {
-        auto bt = new ceph::BackTrace(BACKTRACE_SKIP);
+        auto bt = new stone::BackTrace(BACKTRACE_SKIP);
 	lockdep_dout(0) << "new dependency " << lock_names[p->first]
 		<< " (" << p->first << ") -> " << name << " (" << id << ")"
 		<< " creates a cycle at\n";
@@ -333,11 +333,11 @@ int lockdep_will_lock(const char *name, int id, bool force_backtrace,
 	// don't add this dependency, or we'll get aMutex. cycle in the graph, and
 	// does_follow() won't terminate.
 
-	ceph_abort();  // actually, we should just die here.
+	stone_abort();  // actually, we should just die here.
       } else {
-	ceph::BackTrace* bt = NULL;
+	stone::BackTrace* bt = NULL;
         if (force_backtrace || lockdep_force_backtrace()) {
-          bt = new ceph::BackTrace(BACKTRACE_SKIP);
+          bt = new stone::BackTrace(BACKTRACE_SKIP);
         }
         follows[p->first][id/8] |= 1 << (id % 8);
         follows_bt[p->first][id] = bt;
@@ -362,7 +362,7 @@ int lockdep_locked(const char *name, int id, bool force_backtrace)
 
   lockdep_dout(20) << "_locked " << name << dendl;
   if (force_backtrace || lockdep_force_backtrace())
-    held[p][id] = new ceph::BackTrace(BACKTRACE_SKIP);
+    held[p][id] = new stone::BackTrace(BACKTRACE_SKIP);
   else
     held[p][id] = 0;
 out:
@@ -376,7 +376,7 @@ int lockdep_will_unlock(const char *name, int id)
 
   if (id < 0) {
     //id = lockdep_register(name);
-    ceph_assert(id == -1);
+    stone_assert(id == -1);
     return id;
   }
 

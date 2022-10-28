@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Haomai Wang
  *
@@ -22,7 +22,7 @@
 
 using namespace std;
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
 #include "common/Cycles.h"
 #include "global/global_init.h"
@@ -39,11 +39,11 @@ class MessengerClient {
     ClientThread *thread;
 
    public:
-    ClientDispatcher(uint64_t delay, ClientThread *t): Dispatcher(g_ceph_context), think_time(delay), thread(t) {}
+    ClientDispatcher(uint64_t delay, ClientThread *t): Dispatcher(g_stone_context), think_time(delay), thread(t) {}
     bool ms_can_fast_dispatch_any() const override { return true; }
     bool ms_can_fast_dispatch(const Message *m) const override {
       switch (m->get_type()) {
-      case CEPH_MSG_OSD_OPREPLY:
+      case STONE_MSG_OSD_OPREPLY:
         return true;
       default:
         return false;
@@ -76,8 +76,8 @@ class MessengerClient {
     ClientDispatcher dispatcher;
 
    public:
-    ceph::mutex lock = ceph::make_mutex("MessengerBenchmark::ClientThread::lock");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("MessengerBenchmark::ClientThread::lock");
+    stone::condition_variable cond;
     uint64_t inflight;
 
     ClientThread(Messenger *m, int c, ConnectionRef con, int len, int ops, int think_time_us):
@@ -94,7 +94,7 @@ class MessengerClient {
         if (inflight > uint64_t(concurrent)) {
 	  cond.wait(locker);
         }
-	hobject_t hobj(oid, oloc.key, CEPH_NOSNAP, pgid.ps(), pgid.pool(),
+	hobject_t hobj(oid, oloc.key, STONE_NOSNAP, pgid.ps(), pgid.pool(),
 		       oloc.nspace);
 	spg_t spgid(pgid);
         MOSDOp *m = new MOSDOp(client_inc, 0, hobj, spgid, 0, 0, 0);
@@ -120,7 +120,7 @@ class MessengerClient {
  public:
   MessengerClient(const string &t, const string &addr, int delay):
       type(t), serveraddr(addr), think_time_us(delay),
-      dummy_auth(g_ceph_context) {
+      dummy_auth(g_stone_context) {
   }
   ~MessengerClient() {
     for (uint64_t i = 0; i < clients.size(); ++i)
@@ -136,7 +136,7 @@ class MessengerClient {
     addr.set_nonce(0);
     dummy_auth.auth_registry.refresh_config();
     for (int i = 0; i < jobs; ++i) {
-      Messenger *msgr = Messenger::create(g_ceph_context, type, entity_name_t::CLIENT(0), "client", getpid()+i);
+      Messenger *msgr = Messenger::create(g_stone_context, type, entity_name_t::CLIENT(0), "client", getpid()+i);
       msgr->set_default_policy(Messenger::Policy::lossless_client(0));
       msgr->set_auth_client(&dummy_auth);
       msgr->start();
@@ -180,11 +180,11 @@ int main(int argc, char **argv)
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.apply_changes(nullptr);
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.apply_changes(nullptr);
 
   if (args.size() < 6) {
     usage(argv[0]);
@@ -197,7 +197,7 @@ int main(int argc, char **argv)
   int think_time = atoi(args[4]);
   int len = atoi(args[5]);
 
-  std::string public_msgr_type = g_ceph_context->_conf->ms_public_type.empty() ? g_ceph_context->_conf.get_val<std::string>("ms_type") : g_ceph_context->_conf->ms_public_type;
+  std::string public_msgr_type = g_stone_context->_conf->ms_public_type.empty() ? g_stone_context->_conf.get_val<std::string>("ms_type") : g_stone_context->_conf->ms_public_type;
 
   cout << " using ms-public-type " << public_msgr_type << std::endl;
   cout << "       server ip:port " << args[0] << std::endl;

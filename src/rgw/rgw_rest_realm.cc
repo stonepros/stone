@@ -11,9 +11,9 @@
 #include "services/svc_zone.h"
 #include "services/svc_mdlog.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 // reject 'period push' if we would have to fetch too many intermediate periods
 static const uint32_t PERIOD_HISTORY_FETCH_MAX = 64;
@@ -280,7 +280,7 @@ void RGWOp_Realm_Get::execute(optional_yield y)
 
   // read realm
   realm.reset(new RGWRealm(id, name));
-  op_ret = realm->init(this, g_ceph_context, store->svc()->sysobj, y);
+  op_ret = realm->init(this, g_stone_context, store->svc()->sysobj, y);
   if (op_ret < 0)
     ldpp_dout(this, -1) << "failed to read realm id=" << id
         << " name=" << name << dendl;

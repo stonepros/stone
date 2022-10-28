@@ -52,7 +52,7 @@ template<> bool can_create_non_primary_snapshot(
 
 template <>
 struct WriteImageStateRequest<MockTestImageCtx> {
-  uint64_t snap_id = CEPH_NOSNAP;
+  uint64_t snap_id = STONE_NOSNAP;
   ImageState image_state;
   Context* on_finish = nullptr;
   static WriteImageStateRequest* s_instance;
@@ -60,7 +60,7 @@ struct WriteImageStateRequest<MockTestImageCtx> {
                                         uint64_t snap_id,
                                         const ImageState &image_state,
                                         Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->snap_id = snap_id;
     s_instance->image_state = image_state;
     s_instance->on_finish = on_finish;
@@ -123,7 +123,7 @@ public:
   void expect_get_mirror_image(MockTestImageCtx &mock_image_ctx,
                                const cls::rbd::MirrorImage &mirror_image,
                                int r) {
-    using ceph::encode;
+    using stone::encode;
     bufferlist bl;
     encode(mirror_image, bl);
 
@@ -143,7 +143,7 @@ public:
   void expect_get_mirror_peers(MockTestImageCtx &mock_image_ctx,
                                const std::vector<cls::rbd::MirrorPeer> &peers,
                                int r) {
-    using ceph::encode;
+    using stone::encode;
     bufferlist bl;
     encode(peers, bl);
 
@@ -219,7 +219,7 @@ TEST_F(TestMockMirrorSnapshotCreateNonPrimaryRequest, SuccessDemoted) {
   MockUtils mock_utils;
   expect_can_create_non_primary_snapshot(mock_utils, true);
   expect_get_mirror_peers(mock_image_ctx,
-                          {{"uuid", cls::rbd::MIRROR_PEER_DIRECTION_TX, "ceph",
+                          {{"uuid", cls::rbd::MIRROR_PEER_DIRECTION_TX, "stone",
                             "mirror", "mirror uuid"}}, 0);
   expect_create_snapshot(mock_image_ctx, 0);
   MockWriteImageStateRequest mock_write_image_state_request;

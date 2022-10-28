@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MFSMAP_H
-#define CEPH_MFSMAP_H
+#ifndef STONE_MFSMAP_H
+#define STONE_MFSMAP_H
 
 #include "msg/Message.h"
 #include "mds/FSMap.h"
@@ -28,9 +28,9 @@ public:
   const FSMap& get_fsmap() const {return fsmap;}
 
   MFSMap() : 
-    Message{CEPH_MSG_FS_MAP}, epoch(0) {}
+    Message{STONE_MSG_FS_MAP}, epoch(0) {}
   MFSMap(const uuid_d &f, const FSMap &fsmap_) :
-    Message{CEPH_MSG_FS_MAP},
+    Message{STONE_MSG_FS_MAP},
     epoch(fsmap_.get_epoch()),
     fsmap{fsmap_}
   {}

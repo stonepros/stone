@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_AUTHSERVICEHANDLER_H
-#define CEPH_AUTHSERVICEHANDLER_H
+#ifndef STONE_AUTHSERVICEHANDLER_H
+#define STONE_AUTHSERVICEHANDLER_H
 
 #include <stddef.h>              // for NULL
 #include <stdint.h>              // for uint64_t
@@ -27,13 +27,13 @@ struct AuthCapsInfo;
 
 enum class global_id_status_t {
   NONE,
-  // fresh client (global_id == 0); waiting for CephXAuthenticate
+  // fresh client (global_id == 0); waiting for StoneeXAuthenticate
   NEW_PENDING,
   // connected client; new enough to correctly reclaim global_id
   NEW_OK,
   // connected client; unknown whether it can reclaim global_id correctly
   NEW_NOT_EXPOSED,
-  // reconnecting client (global_id != 0); waiting for CephXAuthenticate
+  // reconnecting client (global_id != 0); waiting for StoneeXAuthenticate
   RECLAIM_PENDING,
   // reconnected client; correctly reclaimed global_id
   RECLAIM_OK,
@@ -46,13 +46,13 @@ std::ostream& operator<<(std::ostream& os,
 
 struct AuthServiceHandler {
 protected:
-  CephContext *cct;
+  StoneeContext *cct;
   EntityName entity_name;
   uint64_t global_id = 0;
   global_id_status_t global_id_status = global_id_status_t::NONE;
 
 public:
-  explicit AuthServiceHandler(CephContext *cct_) : cct(cct_) {}
+  explicit AuthServiceHandler(StoneeContext *cct_) : cct(cct_) {}
 
   virtual ~AuthServiceHandler() { }
 
@@ -78,6 +78,6 @@ private:
 			       AuthCapsInfo *caps) = 0;
 };
 
-extern AuthServiceHandler *get_auth_service_handler(int type, CephContext *cct, KeyServer *ks);
+extern AuthServiceHandler *get_auth_service_handler(int type, StoneeContext *cct, KeyServer *ks);
 
 #endif

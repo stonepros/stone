@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Yehuda Sadeh <yehuda@redhat.com>
  * Copyright (C) 2015 Robin H. Johnson <robin.johnson@dreamhost.com>
@@ -15,7 +15,7 @@
  */
 
 #include "common/debug.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "acconfig.h"
 

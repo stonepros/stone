@@ -3,18 +3,18 @@
 
 #include "rgw_ldap.h"
 
-#include "common/ceph_crypto.h"
-#include "common/ceph_context.h"
+#include "common/stone_crypto.h"
+#include "common/stone_context.h"
 #include "common/common_init.h"
 #include "common/dout.h"
 #include "common/safe_io.h"
 #include <boost/algorithm/string.hpp>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
-std::string parse_rgw_ldap_bindpw(CephContext* ctx)
+std::string parse_rgw_ldap_bindpw(StoneContext* ctx)
 {
   string ldap_bindpw;
   string ldap_secret = ctx->_conf->rgw_ldap_secret;
@@ -36,7 +36,7 @@ std::string parse_rgw_ldap_bindpw(CephContext* ctx)
         if (ldap_bindpw.back() == '\n')
           ldap_bindpw.pop_back();
       }
-      ::ceph::crypto::zeroize_for_security(bindpw, sizeof(bindpw));
+      ::stone::crypto::zeroize_for_security(bindpw, sizeof(bindpw));
   }
 
   return ldap_bindpw;
@@ -78,7 +78,7 @@ namespace rgw {
         }
       }
     }
-    ldout(g_ceph_context, 12)
+    ldout(g_stone_context, 12)
       << __func__ << " search filter: " << filter
       << dendl;
     char *attrs[] = { const_cast<char*>(dnattr.c_str()), nullptr };
@@ -96,21 +96,21 @@ namespace rgw {
 	char *dn = ldap_get_dn(ldap, entry);
 	ret = simple_bind(dn, pwd);
 	if (ret != LDAP_SUCCESS) {
-	  ldout(g_ceph_context, 10)
+	  ldout(g_stone_context, 10)
 	    << __func__ << " simple_bind failed uid=" << uid
 	    << "ldap err=" << ret
 	    << dendl;
 	}
 	ldap_memfree(dn);
       } else {
-	ldout(g_ceph_context, 12)
+	ldout(g_stone_context, 12)
 	  << __func__ << " ldap_search_s no user matching uid=" << uid
 	  << dendl;
 	ret = LDAP_NO_SUCH_ATTRIBUTE; // fixup result
       }
       ldap_msgfree(answer);
     } else {
-      ldout(g_ceph_context, 5)
+      ldout(g_stone_context, 5)
 	<< __func__ << " ldap_search_s error uid=" << uid
 	<< " ldap err=" << ret
 	<< dendl;

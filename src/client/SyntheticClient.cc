@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -35,11 +35,11 @@
 #include <sys/statvfs.h>
 
 #include "common/errno.h"
-#include "include/ceph_assert.h"
-#include "include/cephfs/ceph_ll_client.h"
+#include "include/stone_assert.h"
+#include "include/stonefs/stone_ll_client.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_client
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_client
 #undef dout_prefix
 #define dout_prefix *_dout << "client." << (whoami >= 0 ? whoami:client->get_nodeid()) << " "
 
@@ -248,12 +248,12 @@ void parse_syn_options(vector<const char*>& args)
 	syn_sargs.push_back(args[++i]);
       } else {
         cerr << "unknown syn arg " << args[i] << std::endl;
-        ceph_abort();
+        stone_abort();
       }
     }
     else if (strcmp(args[i], "localize_reads") == 0) {
-      cerr << "set CEPH_OSD_FLAG_LOCALIZE_READS" << std::endl;
-      syn_filer_flags |= CEPH_OSD_FLAG_LOCALIZE_READS;
+      cerr << "set STONE_OSD_FLAG_LOCALIZE_READS" << std::endl;
+      syn_filer_flags |= STONE_OSD_FLAG_LOCALIZE_READS;
     }
     else {
       nargs.push_back(args[i]);
@@ -279,7 +279,7 @@ SyntheticClient::SyntheticClient(StandaloneClient *client, int w)
   this->iargs = syn_iargs;
   this->sargs = syn_sargs;
 
-  run_start = ceph_clock_now();
+  run_start = stone_clock_now();
 }
 
 
@@ -328,7 +328,7 @@ int SyntheticClient::run()
     return -1;
   }
 
-  //run_start = ceph_clock_now(client->cct);
+  //run_start = stone_clock_now(client->cct);
   run_until = utime_t(0,0);
   dout(5) << "run" << dendl;
 
@@ -438,7 +438,7 @@ int SyntheticClient::run()
         iargs.pop_front();
         if (iarg1 && run_me()) {
           dout(2) << "sleepuntil " << iarg1 << dendl;
-          utime_t at = ceph_clock_now() - run_start;
+          utime_t at = stone_clock_now() - run_start;
           if (at.sec() < iarg1)
             sleep(iarg1 - at.sec());
         }
@@ -793,14 +793,14 @@ int SyntheticClient::run()
 	  if (iarg1 == 0) iarg1 = 1; // play trace at least once!
 
           for (int i=0; i<iarg1; i++) {
-            utime_t start = ceph_clock_now();
+            utime_t start = stone_clock_now();
             
             if (time_to_stop()) break;
             play_trace(t, prefix, !playdata);
             if (time_to_stop()) break;
             if (iarg1 > 1) clean_dir(prefix);  // clean only if repeat
             
-            utime_t lat = ceph_clock_now();
+            utime_t lat = stone_clock_now();
             lat -= start;
             
             dout(0) << " trace " << tfile << " loop " << (i+1) << "/" << iarg1 << " done in " << (double)lat << " seconds" << dendl;
@@ -927,7 +927,7 @@ int SyntheticClient::run()
       break;
 
     default:
-      ceph_abort();
+      stone_abort();
     }
   }
   dout(1) << "syn done, unmounting " << dendl;
@@ -940,17 +940,17 @@ int SyntheticClient::run()
 
 int SyntheticClient::start_thread()
 {
-  ceph_assert(!thread_id);
+  stone_assert(!thread_id);
 
   pthread_create(&thread_id, NULL, synthetic_client_thread_entry, this);
-  ceph_assert(thread_id);
-  ceph_pthread_setname(thread_id, "client");
+  stone_assert(thread_id);
+  stone_pthread_setname(thread_id, "client");
   return 0;
 }
 
 int SyntheticClient::join_thread()
 {
-  ceph_assert(thread_id);
+  stone_assert(thread_id);
   void *rv;
   pthread_join(thread_id, &rv);
   return 0;
@@ -970,28 +970,28 @@ void SyntheticClient::init_op_dist()
 {
   op_dist.clear();
 #if 0
-  op_dist.add( CEPH_MDS_OP_STAT, 610 );
-  op_dist.add( CEPH_MDS_OP_UTIME, 0 );
-  op_dist.add( CEPH_MDS_OP_CHMOD, 1 );
-  op_dist.add( CEPH_MDS_OP_CHOWN, 1 );
+  op_dist.add( STONE_MDS_OP_STAT, 610 );
+  op_dist.add( STONE_MDS_OP_UTIME, 0 );
+  op_dist.add( STONE_MDS_OP_CHMOD, 1 );
+  op_dist.add( STONE_MDS_OP_CHOWN, 1 );
 #endif
 
-  op_dist.add( CEPH_MDS_OP_READDIR, 2 );
-  op_dist.add( CEPH_MDS_OP_MKNOD, 30 );
-  op_dist.add( CEPH_MDS_OP_LINK, 0 );
-  op_dist.add( CEPH_MDS_OP_UNLINK, 20 );
-  op_dist.add( CEPH_MDS_OP_RENAME, 40 );
+  op_dist.add( STONE_MDS_OP_READDIR, 2 );
+  op_dist.add( STONE_MDS_OP_MKNOD, 30 );
+  op_dist.add( STONE_MDS_OP_LINK, 0 );
+  op_dist.add( STONE_MDS_OP_UNLINK, 20 );
+  op_dist.add( STONE_MDS_OP_RENAME, 40 );
 
-  op_dist.add( CEPH_MDS_OP_MKDIR, 10 );
-  op_dist.add( CEPH_MDS_OP_RMDIR, 20 );
-  op_dist.add( CEPH_MDS_OP_SYMLINK, 20 );
+  op_dist.add( STONE_MDS_OP_MKDIR, 10 );
+  op_dist.add( STONE_MDS_OP_RMDIR, 20 );
+  op_dist.add( STONE_MDS_OP_SYMLINK, 20 );
 
-  op_dist.add( CEPH_MDS_OP_OPEN, 200 );
-  //op_dist.add( CEPH_MDS_OP_READ, 0 );
-  //op_dist.add( CEPH_MDS_OP_WRITE, 0 );
-  //op_dist.add( CEPH_MDS_OP_TRUNCATE, 0 );
-  //op_dist.add( CEPH_MDS_OP_FSYNC, 0 );
-  //op_dist.add( CEPH_MDS_OP_RELEASE, 200 );
+  op_dist.add( STONE_MDS_OP_OPEN, 200 );
+  //op_dist.add( STONE_MDS_OP_READ, 0 );
+  //op_dist.add( STONE_MDS_OP_WRITE, 0 );
+  //op_dist.add( STONE_MDS_OP_TRUNCATE, 0 );
+  //op_dist.add( STONE_MDS_OP_FSYNC, 0 );
+  //op_dist.add( STONE_MDS_OP_RELEASE, 200 );
   op_dist.normalize();
 }
 
@@ -1011,14 +1011,14 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
   string buf;
   string buf2;
 
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
 
-  ceph::unordered_map<int64_t, int64_t> open_files;
-  ceph::unordered_map<int64_t, dir_result_t*> open_dirs;
+  stone::unordered_map<int64_t, int64_t> open_files;
+  stone::unordered_map<int64_t, dir_result_t*> open_dirs;
 
-  ceph::unordered_map<int64_t, Fh*> ll_files;
-  ceph::unordered_map<int64_t, dir_result_t*> ll_dirs;
-  ceph::unordered_map<uint64_t, int64_t> ll_inos;
+  stone::unordered_map<int64_t, Fh*> ll_files;
+  stone::unordered_map<int64_t, dir_result_t*> ll_dirs;
+  stone::unordered_map<uint64_t, int64_t> ll_inos;
 
   Inode *i1, *i2;
 
@@ -1028,9 +1028,9 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
   const char *p = prefix.c_str();
   if (prefix.length()) {
     client->mkdir(prefix.c_str(), 0755, perms);
-    struct ceph_statx stx;
-    i1 = client->ll_get_inode(vinodeno_t(1, CEPH_NOSNAP));
-    if (client->ll_lookupx(i1, prefix.c_str(), &i2, &stx, CEPH_STATX_INO, 0, perms) == 0) {
+    struct stone_statx stx;
+    i1 = client->ll_get_inode(vinodeno_t(1, STONE_NOSNAP));
+    if (client->ll_lookupx(i1, prefix.c_str(), &i2, &stx, STONE_STATX_INO, 0, perms) == 0) {
       ll_inos[1] = stx.stx_ino;
       dout(5) << "'root' ino is " << inodeno_t(stx.stx_ino) << dendl;
       client->ll_put(i1);
@@ -1038,15 +1038,15 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       dout(0) << "warning: play_trace couldn't lookup up my per-client directory" << dendl;
     }
   } else
-    (void) client->ll_get_inode(vinodeno_t(1, CEPH_NOSNAP));
+    (void) client->ll_get_inode(vinodeno_t(1, STONE_NOSNAP));
 
   utime_t last_status = start;
 
   int n = 0;
 
   // for object traces
-  ceph::mutex lock = ceph::make_mutex("synclient foo");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("synclient foo");
+  stone::condition_variable cond;
   bool ack;
 
   while (!t.end()) {
@@ -1229,10 +1229,10 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       int64_t i = t.get_int();
       const char *name = t.get_string(buf, p);
       int64_t r = t.get_int();
-      struct ceph_statx stx;
+      struct stone_statx stx;
       if (ll_inos.count(i)) {
-	  i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
-	  if (client->ll_lookupx(i1, name, &i2, &stx, CEPH_STATX_INO, 0, perms) == 0)
+	  i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
+	  if (client->ll_lookupx(i1, name, &i2, &stx, STONE_STATX_INO, 0, perms) == 0)
 	    ll_inos[r] = stx.stx_ino;
 	  client->ll_put(i1);
       }
@@ -1241,13 +1241,13 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       int64_t n = t.get_int();
       if (ll_inos.count(i) && 
 	  client->ll_forget(
-	    client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP)), n))
+	    client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP)), n))
 	ll_inos.erase(i);
     } else if (strcmp(op, "ll_getattr") == 0) {
       int64_t i = t.get_int();
       struct stat attr;
       if (ll_inos.count(i)) {
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
 	client->ll_getattr(i1, &attr, perms);
 	client->ll_put(i1);
       }
@@ -1263,7 +1263,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       attr.st_atime = t.get_int();
       int mask = t.get_int();
       if (ll_inos.count(i)) {
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
 	client->ll_setattr(i1, &attr, mask, perms);
 	client->ll_put(i1);
       }
@@ -1271,7 +1271,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       int64_t i = t.get_int();
       if (ll_inos.count(i)) {
         char buf[PATH_MAX];
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
 	client->ll_readlink(i1, buf, sizeof(buf), perms);
 	client->ll_put(i1);
       }
@@ -1283,7 +1283,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       int64_t ri = t.get_int();
       struct stat attr;
       if (ll_inos.count(i)) {
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
 	if (client->ll_mknod(i1, n, m, r, &attr, &i2, perms) == 0)
 	  ll_inos[ri] = attr.st_ino;
 	client->ll_put(i1);
@@ -1295,7 +1295,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       int64_t ri = t.get_int();
       struct stat attr;
       if (ll_inos.count(i)) {
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
 	if (client->ll_mkdir(i1, n, m, &attr, &i2, perms) == 0)
 	  ll_inos[ri] = attr.st_ino;
 	client->ll_put(i1);
@@ -1307,7 +1307,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       int64_t ri = t.get_int();
       struct stat attr;
       if (ll_inos.count(i)) {
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
 	if (client->ll_symlink(i1, n, v, &attr, &i2, perms) == 0)
 	  ll_inos[ri] = attr.st_ino;
 	client->ll_put(i1);
@@ -1316,7 +1316,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       int64_t i = t.get_int();
       const char *n = t.get_string(buf, p);
       if (ll_inos.count(i)) {
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
 	client->ll_unlink(i1, n, perms);
 	client->ll_put(i1);
       }
@@ -1324,7 +1324,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       int64_t i = t.get_int();
       const char *n = t.get_string(buf, p);
       if (ll_inos.count(i)) {
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
 	client->ll_rmdir(i1, n, perms);
 	client->ll_put(i1);
       }
@@ -1335,8 +1335,8 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       const char *nn = t.get_string(buf2, p);
       if (ll_inos.count(i) &&
 	  ll_inos.count(ni)) {
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
-	i2 = client->ll_get_inode(vinodeno_t(ll_inos[ni],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
+	i2 = client->ll_get_inode(vinodeno_t(ll_inos[ni],STONE_NOSNAP));
 	client->ll_rename(i1, n, i2, nn, perms);
 	client->ll_put(i1);
 	client->ll_put(i2);
@@ -1347,8 +1347,8 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       const char *nn = t.get_string(buf, p);
       if (ll_inos.count(i) &&
 	  ll_inos.count(ni)) {
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
-	i2 = client->ll_get_inode(vinodeno_t(ll_inos[ni],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
+	i2 = client->ll_get_inode(vinodeno_t(ll_inos[ni],STONE_NOSNAP));
 	client->ll_link(i1, i2, nn, perms);
 	client->ll_put(i1);
 	client->ll_put(i2);
@@ -1358,7 +1358,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       int64_t r = t.get_int();
       dir_result_t *dirp;
       if (ll_inos.count(i)) {
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
 	if (client->ll_opendir(i1, O_RDONLY, &dirp, perms) == 0)
 	  ll_dirs[r] = dirp;
 	client->ll_put(i1);
@@ -1375,7 +1375,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       int64_t r = t.get_int();
       Fh *fhp;
       if (ll_inos.count(i)) {
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
 	if (client->ll_open(i1, f, &fhp, perms) == 0)
 	  ll_files[r] = fhp;
 	client->ll_put(i1);
@@ -1390,7 +1390,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       struct stat attr;
       if (ll_inos.count(i)) {
 	Fh *fhp;
-	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],CEPH_NOSNAP));
+	i1 = client->ll_get_inode(vinodeno_t(ll_inos[i],STONE_NOSNAP));
 	if (client->ll_create(i1, n, m, f, &attr, NULL, &fhp, perms) == 0) {
 	  ll_inos[ri] = attr.st_ino;
 	  ll_files[r] = fhp;
@@ -1440,7 +1440,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
     } else if (strcmp(op, "ll_statfs") == 0) {
       int64_t i = t.get_int();
       if (ll_inos.count(i))
-	{} //client->ll_statfs(vinodeno_t(ll_inos[i],CEPH_NOSNAP), perms);
+	{} //client->ll_statfs(vinodeno_t(ll_inos[i],STONE_NOSNAP), perms);
     }
 
 
@@ -1453,8 +1453,8 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       std::unique_lock locker{lock};
       object_locator_t oloc(SYNCLIENT_FIRST_POOL);
       uint64_t size;
-      ceph::real_time mtime;
-      client->objecter->stat(oid, oloc, CEPH_NOSNAP, &size, &mtime, 0,
+      stone::real_time mtime;
+      client->objecter->stat(oid, oloc, STONE_NOSNAP, &size, &mtime, 0,
 			     new C_SafeCond(lock, cond, &ack));
       cond.wait(locker, [&ack] { return ack; });
     }
@@ -1467,7 +1467,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       object_locator_t oloc(SYNCLIENT_FIRST_POOL);
       std::unique_lock locker{lock};
       bufferlist bl;
-      client->objecter->read(oid, oloc, off, len, CEPH_NOSNAP, &bl, 0,
+      client->objecter->read(oid, oloc, off, len, STONE_NOSNAP, &bl, 0,
 			     new C_SafeCond(lock, cond, &ack));
       cond.wait(locker, [&ack] { return ack; });
     }
@@ -1484,7 +1484,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       bl.push_back(bp);
       SnapContext snapc;
       client->objecter->write(oid, oloc, off, len, snapc, bl,
-			      ceph::real_clock::now(), 0,
+			      stone::real_clock::now(), 0,
 			      new C_SafeCond(lock, cond, &ack));
       cond.wait(locker, [&ack] { return ack; });
     }
@@ -1498,7 +1498,7 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
       std::unique_lock locker{lock};
       SnapContext snapc;
       client->objecter->zero(oid, oloc, off, len, snapc,
-			     ceph::real_clock::now(), 0,
+			     stone::real_clock::now(), 0,
 			     new C_SafeCond(lock, cond, &ack));
       cond.wait(locker, [&ack] { return ack; });
     }
@@ -1506,32 +1506,32 @@ int SyntheticClient::play_trace(Trace& t, string& prefix, bool metadata_only)
 
     else {
       dout(0) << (t.get_line()-1) << ": *** trace hit unrecognized symbol '" << op << "' " << dendl;
-      ceph_abort();
+      stone_abort();
     }
   }
 
   dout(10) << "trace finished on line " << t.get_line() << dendl;
 
   // close open files
-  for (ceph::unordered_map<int64_t, int64_t>::iterator fi = open_files.begin();
+  for (stone::unordered_map<int64_t, int64_t>::iterator fi = open_files.begin();
        fi != open_files.end();
        ++fi) {
     dout(1) << "leftover close " << fi->second << dendl;
     if (fi->second > 0) client->close(fi->second);
   }
-  for (ceph::unordered_map<int64_t, dir_result_t*>::iterator fi = open_dirs.begin();
+  for (stone::unordered_map<int64_t, dir_result_t*>::iterator fi = open_dirs.begin();
        fi != open_dirs.end();
        ++fi) {
     dout(1) << "leftover closedir " << fi->second << dendl;
     if (fi->second != 0) client->closedir(fi->second);
   }
-  for (ceph::unordered_map<int64_t,Fh*>::iterator fi = ll_files.begin();
+  for (stone::unordered_map<int64_t,Fh*>::iterator fi = ll_files.begin();
        fi != ll_files.end();
        ++fi) {
     dout(1) << "leftover ll_release " << fi->second << dendl;
     if (fi->second) client->ll_release(fi->second);
   }
-  for (ceph::unordered_map<int64_t,dir_result_t*>::iterator fi = ll_dirs.begin();
+  for (stone::unordered_map<int64_t,dir_result_t*>::iterator fi = ll_dirs.begin();
        fi != ll_dirs.end();
        ++fi) {
     dout(1) << "leftover ll_releasedir " << fi->second << dendl;
@@ -1593,8 +1593,8 @@ int SyntheticClient::full_walk(string& basedir)
   frag_info_t empty;
   statq.push_back(empty);
 
-  ceph::unordered_map<inodeno_t, int> nlink;
-  ceph::unordered_map<inodeno_t, int> nlink_seen;
+  stone::unordered_map<inodeno_t, int> nlink;
+  stone::unordered_map<inodeno_t, int> nlink_seen;
 
   UserPerm perms = client->pick_my_perms();
   while (!dirq.empty()) {
@@ -1673,7 +1673,7 @@ int SyntheticClient::full_walk(string& basedir)
     }
   }
 
-  for (ceph::unordered_map<inodeno_t,int>::iterator p = nlink.begin(); p != nlink.end(); ++p) {
+  for (stone::unordered_map<inodeno_t,int>::iterator p = nlink.begin(); p != nlink.end(); ++p) {
     if (nlink_seen[p->first] != p->second)
       dout(0) << p->first << " nlink " << p->second << " != " << nlink_seen[p->first] << "seen" << dendl;
   }
@@ -1802,9 +1802,9 @@ int SyntheticClient::read_dirs(const char *basedir, int dirs, int files, int dep
 
   list<string> contents;
   UserPerm perms = client->pick_my_perms();
-  utime_t s = ceph_clock_now();
+  utime_t s = stone_clock_now();
   int r = client->getdir(basedir, contents, perms);
-  utime_t e = ceph_clock_now();
+  utime_t e = stone_clock_now();
   e -= s;
   if (r < 0) {
     dout(0) << "getdir couldn't readdir " << basedir << ", stopping" << dendl;
@@ -1813,12 +1813,12 @@ int SyntheticClient::read_dirs(const char *basedir, int dirs, int files, int dep
 
   for (int i=0; i<files; i++) {
     snprintf(d, sizeof(d), "%s/file.%d", basedir, i);
-    utime_t s = ceph_clock_now();
+    utime_t s = stone_clock_now();
     if (client->lstat(d, &st, perms) < 0) {
       dout(2) << "read_dirs failed stat on " << d << ", stopping" << dendl;
       return -1;
     }
-    utime_t e = ceph_clock_now();
+    utime_t e = stone_clock_now();
     e -= s;
   }
 
@@ -1857,7 +1857,7 @@ int SyntheticClient::make_files(int num, int count, int priv, bool more)
   
   // files
   struct stat st;
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   for (int c=0; c<count; c++) {
     for (int n=0; n<num; n++) {
       snprintf(d, sizeof(d), "dir.%d.run%d/file.client%d.%d", priv ? whoami:0, c, whoami, n);
@@ -1874,7 +1874,7 @@ int SyntheticClient::make_files(int num, int count, int priv, bool more)
       if (time_to_stop()) return 0;
     }
   }
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   end -= start;
   dout(0) << "makefiles time is " << end << " or " << ((double)end / (double)num) <<" per file" << dendl;
 
@@ -1894,24 +1894,24 @@ int SyntheticClient::link_test()
   client->mkdir("orig", 0755, perms);
   client->mkdir("copy", 0755, perms);
 
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   for (int i=0; i<num; i++) {
     snprintf(d, sizeof(d), "orig/file.%d", i);
     client->mknod(d, 0755, perms);
   }
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
   end -= start;
 
   dout(0) << "orig " << end << dendl;
 
   // link
-  start = ceph_clock_now();
+  start = stone_clock_now();
   for (int i=0; i<num; i++) {
     snprintf(d, sizeof(d), "orig/file.%d", i);
     snprintf(e, sizeof(e), "copy/file.%d", i);
     client->link(d, e, perms);
   }
-  end = ceph_clock_now();
+  end = stone_clock_now();
   end -= start;
   dout(0) << "copy " << end << dendl;
 
@@ -2032,7 +2032,7 @@ int SyntheticClient::write_file(string& fn, int size, loff_t wrsize)   // size i
     return fd;
   }
 
-  utime_t from = ceph_clock_now();
+  utime_t from = stone_clock_now();
   utime_t start = from;
   uint64_t bytes = 0, total = 0;
 
@@ -2060,7 +2060,7 @@ int SyntheticClient::write_file(string& fn, int size, loff_t wrsize)   // size i
     bytes += wrsize;
     total += wrsize;
 
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     if (now - from >= 1.0) {
       double el = now - from;
       dout(0) << "write " << (bytes / el / 1048576.0) << " MB/sec" << dendl;
@@ -2071,7 +2071,7 @@ int SyntheticClient::write_file(string& fn, int size, loff_t wrsize)   // size i
 
   client->fsync(fd, true);
 
-  utime_t stop = ceph_clock_now();
+  utime_t stop = stone_clock_now();
   double el = stop - start;
   dout(0) << "write total " << (total / el / 1048576.0) << " MB/sec ("
 	  << total << " bytes in " << el << " seconds)" << dendl;
@@ -2149,7 +2149,7 @@ int SyntheticClient::read_file(const std::string& fn, int size,
     return fd;
   }
 
-  utime_t from = ceph_clock_now();
+  utime_t from = stone_clock_now();
   utime_t start = from;
   uint64_t bytes = 0, total = 0;
 
@@ -2165,7 +2165,7 @@ int SyntheticClient::read_file(const std::string& fn, int size,
     bytes += rdsize;
     total += rdsize;
 
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     if (now - from >= 1.0) {
       double el = now - from;
       dout(0) << "read " << (bytes / el / 1048576.0) << " MB/sec" << dendl;
@@ -2195,7 +2195,7 @@ int SyntheticClient::read_file(const std::string& fn, int size,
       dout(0) << " + " << (bad-1) << " other bad 16-byte bits in this block" << dendl;
   }
 
-  utime_t stop = ceph_clock_now();
+  utime_t stop = stone_clock_now();
   double el = stop - start;
   dout(0) << "read total " << (total / el / 1048576.0) << " MB/sec ("
 	  << total << " bytes in " << el << " seconds)" << dendl;
@@ -2210,11 +2210,11 @@ int SyntheticClient::read_file(const std::string& fn, int size,
 
 
 class C_Ref : public Context {
-  ceph::mutex& lock;
-  ceph::condition_variable& cond;
+  stone::mutex& lock;
+  stone::condition_variable& cond;
   int *ref;
 public:
-  C_Ref(ceph::mutex &l, ceph::condition_variable &c, int *r)
+  C_Ref(stone::mutex &l, stone::condition_variable &c, int *r)
     : lock(l), cond(c), ref(r) {
     lock_guard locker{lock};
     (*ref)++;
@@ -2254,8 +2254,8 @@ int SyntheticClient::create_objects(int nobj, int osize, int inflight)
   bufferlist bl;
   bl.push_back(bp);
 
-  ceph::mutex lock = ceph::make_mutex("create_objects lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("create_objects lock");
+  stone::condition_variable cond;
   
   int unsafe = 0;
   
@@ -2273,11 +2273,11 @@ int SyntheticClient::create_objects(int nobj, int osize, int inflight)
     }
     dout(10) << "writing " << oid << dendl;
 
-    starts.push_back(ceph_clock_now());
+    starts.push_back(stone_clock_now());
     {
       std::lock_guard locker{client->client_lock};
       client->objecter->write(oid, oloc, 0, osize, snapc, bl,
-			      ceph::real_clock::now(), 0,
+			      stone::real_clock::now(), 0,
 			      new C_Ref(lock, cond, &unsafe));
     }
     {
@@ -2289,7 +2289,7 @@ int SyntheticClient::create_objects(int nobj, int osize, int inflight)
 	return unsafe <= inflight;
       });
     }
-    utime_t lat = ceph_clock_now();
+    utime_t lat = stone_clock_now();
     lat -= starts.front();
     starts.pop_front();
   }
@@ -2339,8 +2339,8 @@ int SyntheticClient::object_rw(int nobj, int osize, int wrpc,
     prime += 2;
   }
 
-  ceph::mutex lock = ceph::make_mutex("lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("lock");
+  stone::condition_variable cond;
 
   int unack = 0;
 
@@ -2366,24 +2366,24 @@ int SyntheticClient::object_rw(int nobj, int osize, int wrpc,
     SnapContext snapc;
     
     client->client_lock.lock();
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     if (write) {
       dout(10) << "write to " << oid << dendl;
 
       ObjectOperation m;
       OSDOp op;
-      op.op.op = CEPH_OSD_OP_WRITE;
+      op.op.op = STONE_OSD_OP_WRITE;
       op.op.extent.offset = 0;
       op.op.extent.length = osize;
       op.indata = bl;
       m.ops.push_back(op);
       client->objecter->mutate(oid, oloc, m, snapc,
-			       ceph::real_clock::now(), 0,
+			       stone::real_clock::now(), 0,
 			       new C_Ref(lock, cond, &unack));
     } else {
       dout(10) << "read from " << oid << dendl;
       bufferlist inbl;
-      client->objecter->read(oid, oloc, 0, osize, CEPH_NOSNAP, &inbl, 0,
+      client->objecter->read(oid, oloc, 0, osize, STONE_NOSNAP, &inbl, 0,
 			     new C_Ref(lock, cond, &unack));
     }
     client->client_lock.unlock();
@@ -2398,7 +2398,7 @@ int SyntheticClient::object_rw(int nobj, int osize, int wrpc,
       });
     }
 
-    utime_t lat = ceph_clock_now();
+    utime_t lat = stone_clock_now();
     lat -= start;
   }
 
@@ -2675,7 +2675,7 @@ int SyntheticClient::random_walk(int num_req)
         dout(DBL) << "empty dir, up" << dendl;
         up();
       } else
-        op = CEPH_MDS_OP_READDIR;
+        op = STONE_MDS_OP_READDIR;
     } else {
       op = op_dist.sample();
     }
@@ -2684,49 +2684,49 @@ int SyntheticClient::random_walk(int num_req)
     int r = 0;
 
     // do op
-    if (op == CEPH_MDS_OP_UNLINK) {
+    if (op == STONE_MDS_OP_UNLINK) {
       if (contents.empty())
-        op = CEPH_MDS_OP_READDIR;
+        op = STONE_MDS_OP_READDIR;
       else 
         r = client->unlink(get_random_sub(), perms);   // will fail on dirs
     }
      
-    if (op == CEPH_MDS_OP_RENAME) {
+    if (op == STONE_MDS_OP_RENAME) {
       if (contents.empty())
-        op = CEPH_MDS_OP_READDIR;
+        op = STONE_MDS_OP_READDIR;
       else {
         r = client->rename(get_random_sub(), make_sub("ren"), perms);
       }
     }
     
-    if (op == CEPH_MDS_OP_MKDIR) {
+    if (op == STONE_MDS_OP_MKDIR) {
       r = client->mkdir(make_sub("mkdir"), 0755, perms);
     }
     
-    if (op == CEPH_MDS_OP_RMDIR) {
+    if (op == STONE_MDS_OP_RMDIR) {
       if (!subdirs.empty())
         r = client->rmdir(get_random_subdir(), perms);
       else
         r = client->rmdir(cwd.c_str(), perms);     // will pbly fail
     }
     
-    if (op == CEPH_MDS_OP_SYMLINK) {
+    if (op == STONE_MDS_OP_SYMLINK) {
     }
     /*
-    if (op == CEPH_MDS_OP_CHMOD) {
+    if (op == STONE_MDS_OP_CHMOD) {
       if (contents.empty())
-        op = CEPH_MDS_OP_READDIR;
+        op = STONE_MDS_OP_READDIR;
       else
         r = client->chmod(get_random_sub(), rand() & 0755, perms);
     }
     
-    if (op == CEPH_MDS_OP_CHOWN) {
+    if (op == STONE_MDS_OP_CHOWN) {
       if (contents.empty())         r = client->chown(cwd.c_str(), rand(), rand(), perms);
       else
         r = client->chown(get_random_sub(), rand(), rand(), perms);
     }
      
-    if (op == CEPH_MDS_OP_UTIME) {
+    if (op == STONE_MDS_OP_UTIME) {
       struct utimbuf b;
       memset(&b, 1, sizeof(b));
       if (contents.empty()) 
@@ -2735,28 +2735,28 @@ int SyntheticClient::random_walk(int num_req)
         r = client->utime(get_random_sub(), &b, perms);
     }
     */
-    if (op == CEPH_MDS_OP_LINK) {
+    if (op == STONE_MDS_OP_LINK) {
     }
     
-    if (op == CEPH_MDS_OP_MKNOD) {
+    if (op == STONE_MDS_OP_MKNOD) {
       r = client->mknod(make_sub("mknod"), 0644, perms);
     }
      
-    if (op == CEPH_MDS_OP_OPEN) {
+    if (op == STONE_MDS_OP_OPEN) {
       if (contents.empty())
-        op = CEPH_MDS_OP_READDIR;
+        op = STONE_MDS_OP_READDIR;
       else {
         r = client->open(get_random_sub(), O_RDONLY, perms);
         if (r > 0) {
-          ceph_assert(open_files.count(r) == 0);
+          stone_assert(open_files.count(r) == 0);
           open_files.insert(r);
         }
       }
     }
 
-    /*if (op == CEPH_MDS_OP_RELEASE) {   // actually, close
+    /*if (op == STONE_MDS_OP_RELEASE) {   // actually, close
       if (open_files.empty())
-        op = CEPH_MDS_OP_STAT;
+        op = STONE_MDS_OP_STAT;
       else {
         int fh = get_random_fh();
         r = client->close( fh );
@@ -2765,7 +2765,7 @@ int SyntheticClient::random_walk(int num_req)
     }
     */
     
-    if (op == CEPH_MDS_OP_GETATTR) {
+    if (op == STONE_MDS_OP_GETATTR) {
       struct stat st;
       if (contents.empty()) {
         if (did_readdir) {
@@ -2773,15 +2773,15 @@ int SyntheticClient::random_walk(int num_req)
             dout(DBL) << "stat in empty dir, up" << dendl;
             up();
           } else {
-            op = CEPH_MDS_OP_MKNOD;
+            op = STONE_MDS_OP_MKNOD;
           }
         } else
-          op = CEPH_MDS_OP_READDIR;
+          op = STONE_MDS_OP_READDIR;
       } else
         r = client->lstat(get_random_sub(), &st, perms);
     }
 
-    if (op == CEPH_MDS_OP_READDIR) {
+    if (op == STONE_MDS_OP_READDIR) {
       clear_dir();
       
       list<string> c;
@@ -2791,7 +2791,7 @@ int SyntheticClient::random_walk(int num_req)
            it != c.end();
            ++it) {
         //dout(DBL) << " got " << *it << dendl;
-	ceph_abort();
+	stone_abort();
 	/*contents[*it] = it->second;
         if (it->second &&
 	    S_ISDIR(it->second->st_mode)) 
@@ -2901,18 +2901,18 @@ void SyntheticClient::foo()
     char buffer[8192]; 
     client->unlink(fn, perms);
     int handle = client->open(fn, O_CREAT|O_RDWR, perms, S_IRWXU);
-    ceph_assert(handle>=0);
+    stone_assert(handle>=0);
     int r=client->write(handle,buffer,8192);
-    ceph_assert(r>=0);
+    stone_assert(r>=0);
     r=client->close(handle);
-    ceph_assert(r>=0);
+    stone_assert(r>=0);
          
     handle = client->open(fn, O_RDWR, perms); // open the same  file, it must have some data already
-    ceph_assert(handle>=0);      
+    stone_assert(handle>=0);      
     r=client->read(handle,buffer,8192);
-    ceph_assert(r==8192); //  THIS ASSERTION FAILS with disabled cache
+    stone_assert(r==8192); //  THIS ASSERTION FAILS with disabled cache
     r=client->close(handle);
-    ceph_assert(r>=0);
+    stone_assert(r>=0);
 
     return;
   }
@@ -3209,7 +3209,7 @@ void SyntheticClient::import_find(const char *base, const char *find, bool data)
     client->mkdir(base, 0755, process_perms);
 
   ifstream f(find);
-  ceph_assert(f.is_open());
+  stone_assert(f.is_open());
   
   int dirnum = 0;
 
@@ -3238,7 +3238,7 @@ void SyntheticClient::import_find(const char *base, const char *find, bool data)
     if (filename == ".") continue;
 
     // remove leading ./
-    ceph_assert(filename[0] == '.' && filename[1] == '/');
+    stone_assert(filename[0] == '.' && filename[1] == '/');
     filename = filename.substr(2);
 
     // new leading dir?
@@ -3252,7 +3252,7 @@ void SyntheticClient::import_find(const char *base, const char *find, bool data)
     }
 
     // parse the mode
-    ceph_assert(modestring.length() == 10);
+    stone_assert(modestring.length() == 10);
     mode_t mode = 0;
     switch (modestring[0]) {
     case 'd': mode |= S_IFDIR; break;
@@ -3275,7 +3275,7 @@ void SyntheticClient::import_find(const char *base, const char *find, bool data)
     if (S_ISLNK(mode)) {
       // target vs destination
       int pos = filename.find(" -> ");
-      ceph_assert(pos > 0);
+      stone_assert(pos > 0);
       string link;
       if (base[0] != '-') {
 	link = base;
@@ -3303,7 +3303,7 @@ void SyntheticClient::import_find(const char *base, const char *find, bool data)
 	client->mkdir(f.c_str(), mode, perms);
       } else {
 	int fd = client->open(f.c_str(), O_WRONLY|O_CREAT, perms, mode & 0777);
-	ceph_assert(fd > 0);	
+	stone_assert(fd > 0);	
 	if (data) {
 	  client->write(fd, "", 0, size);
 	} else {
@@ -3360,21 +3360,21 @@ int SyntheticClient::chunk_file(string &filename)
   inode_t inode{};
   inode.ino = st.st_ino;
   ret = client->fdescribe_layout(fd, &inode.layout);
-  ceph_assert(ret == 0); // otherwise fstat did a bad thing
+  stone_assert(ret == 0); // otherwise fstat did a bad thing
 
   uint64_t pos = 0;
   bufferlist from_before;
   while (pos < size) {
     int get = std::min<int>(size - pos, 1048576);
 
-    ceph::mutex flock = ceph::make_mutex("synclient chunk_file lock");
-    ceph::condition_variable cond;
+    stone::mutex flock = stone::make_mutex("synclient chunk_file lock");
+    stone::condition_variable cond;
     bool done;
     bufferlist bl;
     {
       std::unique_lock locker{flock};
       Context *onfinish = new C_SafeCond(flock, cond, &done);
-      client->filer->read(inode.ino, &inode.layout, CEPH_NOSNAP, pos, get, &bl, 0,
+      client->filer->read(inode.ino, &inode.layout, STONE_NOSNAP, pos, get, &bl, 0,
 			  onfinish);
       cond.wait(locker, [&done] { return done; });
     }

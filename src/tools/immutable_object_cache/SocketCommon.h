@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CACHE_SOCKET_COMMON_H
-#define CEPH_CACHE_SOCKET_COMMON_H
+#ifndef STONE_CACHE_SOCKET_COMMON_H
+#define STONE_CACHE_SOCKET_COMMON_H
 
 namespace ceph {
 namespace immutable_obj_cache {
@@ -28,4 +28,4 @@ typedef std::function<void(CacheSession*, ObjectCacheRequest*)> ProcessMsg;
 
 }  // namespace immutable_obj_cache
 }  // namespace ceph
-#endif  // CEPH_CACHE_SOCKET_COMMON_H
+#endif  // STONE_CACHE_SOCKET_COMMON_H

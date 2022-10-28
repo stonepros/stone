@@ -5,7 +5,7 @@
 #include "test/librbd/test_support.h"
 #include "test/librbd/mock/MockImageCtx.h"
 #include "test/journal/mock/MockJournaler.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "cls/journal/cls_journal_types.h"
 #include "librbd/journal/OpenRequest.h"
 #include "librbd/journal/Types.h"
@@ -87,7 +87,7 @@ public:
                                   WithArg<2>(CompleteContext(r, mock_image_ctx.image_ctx->op_work_queue))));
   }
 
-  ceph::mutex m_lock = ceph::make_mutex("m_lock");
+  stone::mutex m_lock = stone::make_mutex("m_lock");
   ImageClientMeta m_client_meta;
   uint64_t m_tag_tid = 0;
   TagData m_tag_data;

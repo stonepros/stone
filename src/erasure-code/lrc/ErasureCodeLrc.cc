@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -28,13 +28,13 @@
 
 #include "ErasureCodeLrc.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_osd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 
 using namespace std;
-using namespace ceph;
+using namespace stone;
 
 static ostream& _prefix(std::ostream* _dout)
 {
@@ -81,15 +81,15 @@ int ErasureCodeLrc::create_rule(const string &name,
   int ret;
   ret = crush.add_rule(rno, steps, pg_pool_t::TYPE_ERASURE,
 		       min_rep, max_rep);
-  ceph_assert(ret == rno);
+  stone_assert(ret == rno);
   int step = 0;
 
   ret = crush.set_rule_step(rno, step++, CRUSH_RULE_SET_CHOOSELEAF_TRIES, 5, 0);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
   ret = crush.set_rule_step(rno, step++, CRUSH_RULE_SET_CHOOSE_TRIES, 100, 0);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
   ret = crush.set_rule_step(rno, step++, CRUSH_RULE_TAKE, root, 0);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
   // [ [ "choose", "rack", 2 ],
   //   [ "chooseleaf", "host", 5 ] ]
   for (vector<Step>::const_iterator i = rule_steps.begin();
@@ -103,10 +103,10 @@ int ErasureCodeLrc::create_rule(const string &name,
       return -EINVAL;
     }
     ret = crush.set_rule_step(rno, step++, op, i->n, type);
-    ceph_assert(ret == 0);
+    stone_assert(ret == 0);
   }
   ret = crush.set_rule_step(rno, step++, CRUSH_RULE_EMIT, 0, 0);
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
   crush.set_rule_name(rno, name);
   return rno;
 }

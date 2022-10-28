@@ -1,7 +1,7 @@
 tasks:
 - exec:
     client.0:
-      - sudo ceph osd pool create low_tier 4
+      - sudo stone osd pool create low_tier 4
 - rados:
     clients: [client.0]
     low_tier_pool: 'low_tier'

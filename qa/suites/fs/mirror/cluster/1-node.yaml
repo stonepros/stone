@@ -1,5 +1,5 @@
 meta:
-- desc: 1 ceph cluster with 1 mon, 1 mgr, 3 osds, 5 mdss
+- desc: 1 stone cluster with 1 mon, 1 mgr, 3 osds, 5 mdss
 roles:
 - - mon.a
   - mgr.x

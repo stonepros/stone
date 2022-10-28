@@ -9,25 +9,25 @@
 */
 
 #include "include/compat.h"
-#include "include/cephfs/libcephfs.h"
+#include "include/stonefs/libstonefs.h"
 
-#include "ceph_dokan.h"
+#include "stone_dokan.h"
 #include "utils.h"
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/config.h"
 
 #include "global/global_init.h"
 
 void print_usage() {
   const char* usage_str = R"(
-Usage: ceph-dokan.exe -l <mountpoint>
-                      map -l <mountpoint>    Map a CephFS filesystem
-                      unmap -l <mountpoint>  Unmap a CephFS filesystem
+Usage: stone-dokan.exe -l <mountpoint>
+                      map -l <mountpoint>    Map a StoneFS filesystem
+                      unmap -l <mountpoint>  Unmap a StoneFS filesystem
 
 Map options:
   -l [ --mountpoint ] arg     mountpoint (path or drive letter) (e.g -l x)
-  -x [ --root-path ] arg      mount a Ceph filesystem subdirectory
+  -x [ --root-path ] arg      mount a Stone filesystem subdirectory
 
   -t [ --thread-count] arg    thread count
   --operation-timeout arg     Dokan operation timeout. Default: 120s.
@@ -39,7 +39,7 @@ Map options:
   -o [ --win-mount-mgr]       use the Windows mount manager
   --current-session-only      expose the mount only to the current user session
   --removable                 use a removable drive
-  --win-vol-name arg          The Windows volume name. Default: Ceph - <fs_name>.
+  --win-vol-name arg          The Windows volume name. Default: Stone - <fs_name>.
 
 Unmap options:
   -l [ --mountpoint ] arg     mountpoint (path or drive letter) (e.g -l x).
@@ -60,14 +60,14 @@ int parse_args(
   Command *command, Config *cfg)
 {
   if (args.empty()) {
-    std::cout << "ceph-dokan: -h or --help for usage" << std::endl;
+    std::cout << "stone-dokan: -h or --help for usage" << std::endl;
     return -EINVAL;
   }
 
   std::string conf_file_list;
   std::string cluster;
-  CephInitParameters iparams = ceph_argparse_early_args(
-    args, CEPH_ENTITY_TYPE_CLIENT, &cluster, &conf_file_list);
+  StoneInitParameters iparams = stone_argparse_early_args(
+    args, STONE_ENTITY_TYPE_CLIENT, &cluster, &conf_file_list);
 
   ConfigProxy config{false};
   config->name = iparams.name;
@@ -77,7 +77,7 @@ int parse_args(
   } else {
     config.parse_config_files(nullptr, nullptr, 0);
   }
-  config.parse_env(CEPH_ENTITY_TYPE_CLIENT);
+  config.parse_env(STONE_ENTITY_TYPE_CLIENT);
   config.parse_argv(args);
 
   std::vector<const char*>::iterator i;
@@ -86,49 +86,49 @@ int parse_args(
   std::string win_vol_name;
 
   for (i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_flag(args, i, "-h", "--help", (char*)NULL)) {
+    if (stone_argparse_flag(args, i, "-h", "--help", (char*)NULL)) {
       *command = Command::Help;
       return 0;
-    } else if (ceph_argparse_flag(args, i, "-v", "--version", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "-v", "--version", (char*)NULL)) {
       *command = Command::Version;
-    } else if (ceph_argparse_witharg(args, i, &mountpoint,
+    } else if (stone_argparse_witharg(args, i, &mountpoint,
                                      "--mountpoint", "-l", (char *)NULL)) {
       cfg->mountpoint = to_wstring(mountpoint);
-    } else if (ceph_argparse_witharg(args, i, &cfg->root_path,
+    } else if (stone_argparse_witharg(args, i, &cfg->root_path,
                                      "--root-path", "-x", (char *)NULL)) {
-    } else if (ceph_argparse_flag(args, i, "--debug", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--debug", (char *)NULL)) {
       cfg->debug = true;
-    } else if (ceph_argparse_flag(args, i, "--dokan-stderr", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--dokan-stderr", (char *)NULL)) {
       cfg->dokan_stderr = true;
-    } else if (ceph_argparse_flag(args, i, "--read-only", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--read-only", (char *)NULL)) {
       cfg->readonly = true;
-    } else if (ceph_argparse_flag(args, i, "--removable", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--removable", (char *)NULL)) {
       cfg->removable = true;
-    } else if (ceph_argparse_flag(args, i, "--win-mount-mgr", "-o", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--win-mount-mgr", "-o", (char *)NULL)) {
       cfg->use_win_mount_mgr = true;
-    } else if (ceph_argparse_witharg(args, i, &win_vol_name,
+    } else if (stone_argparse_witharg(args, i, &win_vol_name,
                                      "--win-vol-name", (char *)NULL)) {
       cfg->win_vol_name = to_wstring(win_vol_name);
-    } else if (ceph_argparse_flag(args, i, "--current-session-only", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--current-session-only", (char *)NULL)) {
       cfg->current_session_only = true;
-    } else if (ceph_argparse_witharg(args, i, (int*)&cfg->thread_count,
+    } else if (stone_argparse_witharg(args, i, (int*)&cfg->thread_count,
                                      err, "--thread-count", "-t", (char *)NULL)) {
       if (!err.str().empty()) {
-        *err_msg << "ceph-dokan: " << err.str();
+        *err_msg << "stone-dokan: " << err.str();
         return -EINVAL;
       }
       if (cfg->thread_count < 0) {
-        *err_msg << "ceph-dokan: Invalid argument for thread-count";
+        *err_msg << "stone-dokan: Invalid argument for thread-count";
         return -EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, (int*)&cfg->operation_timeout,
+    } else if (stone_argparse_witharg(args, i, (int*)&cfg->operation_timeout,
                                      err, "--operation-timeout", (char *)NULL)) {
       if (!err.str().empty()) {
-        *err_msg << "ceph-dokan: " << err.str();
+        *err_msg << "stone-dokan: " << err.str();
         return -EINVAL;
       }
       if (cfg->operation_timeout < 0) {
-        *err_msg << "ceph-dokan: Invalid argument for operation-timeout";
+        *err_msg << "stone-dokan: Invalid argument for operation-timeout";
         return -EINVAL;
       }
     } else {
@@ -137,7 +137,7 @@ int parse_args(
   }
 
   if (cfg->use_win_mount_mgr && cfg->current_session_only) {
-    *err_msg << "ceph-dokan: The mount manager always mounts the drive "
+    *err_msg << "stone-dokan: The mount manager always mounts the drive "
              << "for all user sessions.";
     return -EINVAL;
   }
@@ -153,7 +153,7 @@ int parse_args(
     } else if (strcmp(*args.begin(), "unmap") == 0) {
       cmd = Command::Unmap;
     } else {
-      *err_msg << "ceph-dokan: unknown command: " <<  *args.begin();
+      *err_msg << "stone-dokan: unknown command: " <<  *args.begin();
       return -EINVAL;
     }
     args.erase(args.begin());
@@ -167,7 +167,7 @@ int parse_args(
     case Command::Map:
     case Command::Unmap:
       if (cfg->mountpoint.empty()) {
-        *err_msg << "ceph-dokan: missing mountpoint.";
+        *err_msg << "stone-dokan: missing mountpoint.";
         return -EINVAL;
       }
       break;
@@ -176,7 +176,7 @@ int parse_args(
   }
 
   if (args.begin() != args.end()) {
-    *err_msg << "ceph-dokan: unknown args: " << *args.begin();
+    *err_msg << "stone-dokan: unknown args: " << *args.begin();
     return -EINVAL;
   }
 

@@ -1,5 +1,5 @@
 set(completions
-  ceph
+  stone
   rados)
 
 if(WITH_RBD)

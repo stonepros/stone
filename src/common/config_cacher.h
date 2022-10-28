@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_CONFIG_CACHER_H
-#define CEPH_CONFIG_CACHER_H
+#ifndef STONE_CONFIG_CACHER_H
+#define STONE_CONFIG_CACHER_H
 
 #include "common/config_obs.h"
 #include "common/config.h"
@@ -55,5 +55,5 @@ public:
   }
 };
 
-#endif // CEPH_CONFIG_CACHER_H
+#endif // STONE_CONFIG_CACHER_H
 

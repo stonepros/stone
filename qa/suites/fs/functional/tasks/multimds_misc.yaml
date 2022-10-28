@@ -1,9 +1,9 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - Scrub error on inode
 
 tasks:
-- cephfs_test_runner:
+- stonefs_test_runner:
     modules:
-      - tasks.cephfs.test_multimds_misc
+      - tasks.stonefs.test_multimds_misc

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2013,2014 Inktank Storage, Inc.
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -52,7 +52,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
   */
  class PGBackend {
  public:
-   CephContext* cct;
+   StoneeContext* cct;
  protected:
    ObjectStore *store;
    const coll_t coll;
@@ -309,7 +309,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
    };
    Listener *parent;
    Listener *get_parent() const { return parent; }
-   PGBackend(CephContext* cct, Listener *l, ObjectStore *store, const coll_t &coll,
+   PGBackend(StoneeContext* cct, Listener *l, ObjectStore *store, const coll_t &coll,
 	     ObjectStore::CollectionHandle &ch) :
      cct(cct),
      store(store),
@@ -635,7 +635,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
      coll_t coll,
      ObjectStore::CollectionHandle &ch,
      ObjectStore *store,
-     CephContext *cct);
+     StoneeContext *cct);
 };
 
 #endif

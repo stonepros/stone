@@ -5,7 +5,7 @@
 #include "tools/rbd/ArgumentTypes.h"
 #include "tools/rbd/IndentStream.h"
 #include "tools/rbd/OptionPrinter.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/config.h"
 #include "global/global_context.h"
 #include "global/global_init.h"
@@ -25,19 +25,19 @@ static const std::string APP_NAME("rbd");
 static const std::string HELP_SPEC("help");
 static const std::string BASH_COMPLETION_SPEC("bash-completion");
 
-boost::intrusive_ptr<CephContext> global_init(
+boost::intrusive_ptr<StoneContext> global_init(
     int argc, const char **argv, std::vector<std::string> *command_args,
     std::vector<std::string> *global_init_args) {
   std::vector<const char*> cmd_args;
   argv_to_vec(argc, argv, cmd_args);
   std::vector<const char*> args(cmd_args);
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY,
                          CINIT_FLAG_NO_MON_CONFIG);
 
   *command_args = {args.begin(), args.end()};
 
-  // Scan command line arguments for ceph global init args (those are
+  // Scan command line arguments for stone global init args (those are
   // filtered out from args vector by global_init).
 
   auto cursor = args.begin();
@@ -74,7 +74,7 @@ std::string format_alias_spec(const Shell::CommandSpec &spec,
       alias_it++;
       level++;
     }
-    ceph_assert(spec_it != spec.end() && alias_it != alias_spec.end());
+    stone_assert(spec_it != spec.end() && alias_it != alias_spec.end());
 
     if (level < 2) {
       return joinify<std::string>(alias_spec.begin(), alias_spec.end(), " ");
@@ -133,8 +133,8 @@ void print_deprecated_warning(po::option_description option, std::string descrip
 
 int Shell::execute(int argc, const char **argv) {
   std::vector<std::string> arguments;
-  std::vector<std::string> ceph_global_init_args;
-  auto cct = global_init(argc, argv, &arguments, &ceph_global_init_args);
+  std::vector<std::string> stone_global_init_args;
+  auto cct = global_init(argc, argv, &arguments, &stone_global_init_args);
 
   std::vector<std::string> command_spec;
   get_command_spec(arguments, &command_spec);
@@ -210,7 +210,7 @@ int Shell::execute(int argc, const char **argv) {
       return EXIT_FAILURE;
     }
 
-    int r = (*action->execute)(vm, ceph_global_init_args);
+    int r = (*action->execute)(vm, stone_global_init_args);
 
     if (vm.size() > 0) {
       for (auto opt : vm) {
@@ -229,8 +229,8 @@ int Shell::execute(int argc, const char **argv) {
 
     po::options_description global_opts;
     get_global_options(&global_opts);
-    auto it = ceph_global_init_args.begin();
-    for ( ; it != ceph_global_init_args.end(); ++it) {
+    auto it = stone_global_init_args.begin();
+    for ( ; it != stone_global_init_args.end(); ++it) {
       auto  pos = (*it).find_last_of("-");
       auto prefix_style = po::command_line_style::allow_long;
       if (pos == 0) {
@@ -350,7 +350,7 @@ void Shell::get_global_options(po::options_description *opts) {
 void Shell::print_help() {
   std::cout << "usage: " << APP_NAME << " <command> ..."
             << std::endl << std::endl
-            << "Command-line interface for managing Ceph RBD images."
+            << "Command-line interface for managing Stone RBD images."
             << std::endl << std::endl;
 
   std::vector<Action *> actions(get_actions());

@@ -19,8 +19,8 @@
 #include "tools/rbd_mirror/image_sync/SyncPointPruneRequest.h"
 #include "tools/rbd_mirror/image_sync/Types.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::ImageSync: " \
                            << this << " " << __func__
@@ -67,7 +67,7 @@ ImageSync<I>::ImageSync(
     m_sync_point_handler(sync_point_handler),
     m_instance_watcher(instance_watcher),
     m_progress_ctx(progress_ctx),
-    m_lock(ceph::make_mutex(unique_lock_name("ImageSync::m_lock", this))),
+    m_lock(stone::make_mutex(unique_lock_name("ImageSync::m_lock", this))),
     m_update_sync_point_interval(
       m_local_image_ctx->cct->_conf.template get_val<double>(
         "rbd_mirror_sync_point_update_age")) {
@@ -75,9 +75,9 @@ ImageSync<I>::ImageSync(
 
 template <typename I>
 ImageSync<I>::~ImageSync() {
-  ceph_assert(m_image_copy_request == nullptr);
-  ceph_assert(m_image_copy_prog_handler == nullptr);
-  ceph_assert(m_update_sync_ctx == nullptr);
+  stone_assert(m_image_copy_request == nullptr);
+  stone_assert(m_image_copy_prog_handler == nullptr);
+  stone_assert(m_update_sync_ctx == nullptr);
 }
 
 template <typename I>
@@ -218,20 +218,20 @@ void ImageSync<I>::send_copy_image() {
 
   m_snap_seqs_copy = m_sync_point_handler->get_snap_seqs();
   m_sync_points_copy = m_sync_point_handler->get_sync_points();
-  ceph_assert(!m_sync_points_copy.empty());
+  stone_assert(!m_sync_points_copy.empty());
   auto &sync_point = m_sync_points_copy.front();
 
   {
     std::shared_lock image_locker{m_remote_image_ctx->image_lock};
     snap_id_end = m_remote_image_ctx->get_snap_id(
 	cls::rbd::UserSnapshotNamespace(), sync_point.snap_name);
-    if (snap_id_end == CEPH_NOSNAP) {
+    if (snap_id_end == STONE_NOSNAP) {
       derr << ": failed to locate snapshot: " << sync_point.snap_name << dendl;
       r = -ENOENT;
     } else if (!sync_point.from_snap_name.empty()) {
       snap_id_start = m_remote_image_ctx->get_snap_id(
         cls::rbd::UserSnapshotNamespace(), sync_point.from_snap_name);
-      if (snap_id_start == CEPH_NOSNAP) {
+      if (snap_id_start == STONE_NOSNAP) {
         derr << ": failed to locate from snapshot: "
              << sync_point.from_snap_name << dendl;
         r = -ENOENT;
@@ -323,7 +323,7 @@ void ImageSync<I>::handle_copy_image_update_progress(uint64_t object_no,
 
 template <typename I>
 void ImageSync<I>::send_update_sync_point() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   m_update_sync_ctx = nullptr;
 
@@ -331,7 +331,7 @@ void ImageSync<I>::send_update_sync_point() {
     return;
   }
 
-  ceph_assert(!m_sync_points_copy.empty());
+  stone_assert(!m_sync_points_copy.empty());
   auto sync_point = &m_sync_points_copy.front();
 
   if (sync_point->object_number &&
@@ -354,7 +354,7 @@ void ImageSync<I>::send_update_sync_point() {
 
 template <typename I>
 void ImageSync<I>::handle_update_sync_point(int r) {
-  CephContext *cct = m_local_image_ctx->cct;
+  StoneContext *cct = m_local_image_ctx->cct;
   ldout(cct, 20) << ": r=" << r << dendl;
 
   {
@@ -385,7 +385,7 @@ void ImageSync<I>::send_flush_sync_point() {
 
   update_progress("FLUSH_SYNC_POINT");
 
-  ceph_assert(!m_sync_points_copy.empty());
+  stone_assert(!m_sync_points_copy.empty());
   auto sync_point = &m_sync_points_copy.front();
 
   if (m_image_copy_object_no > 0) {

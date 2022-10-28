@@ -1,5 +1,5 @@
 tasks:
 - install:
-- ceph:
+- stone:
 - rgw: [client.0]
 

@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 Mirantis, Inc.
  *
@@ -26,7 +26,7 @@ class ISALCryptoPlugin : public CryptoPlugin {
 
 public:
 
-  explicit ISALCryptoPlugin(CephContext* cct) : CryptoPlugin(cct)
+  explicit ISALCryptoPlugin(StoneeContext* cct) : CryptoPlugin(cct)
   {}
   ~ISALCryptoPlugin()
   {}

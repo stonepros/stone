@@ -2328,7 +2328,7 @@ public:
     if (src_value.version != 0 && !src_value.deleted())
       op.assert_version(src_value.version);
     op.set_chunk(offset, length, context->low_tier_io_ctx, 
-		 context->prefix+oid_tgt, tgt_offset, CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+		 context->prefix+oid_tgt, tgt_offset, STONE_OSD_OP_FLAG_WITH_REFERENCE);
 
     pair<TestOp*, TestOp::CallbackInfo*> *cb_arg =
       new pair<TestOp*, TestOp::CallbackInfo*>(this,

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 XSKY <haomai@xsky.com>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_MSG_RDMASTACK_H
-#define CEPH_MSG_RDMASTACK_H
+#ifndef STONE_MSG_RDMASTACK_H
+#define STONE_MSG_RDMASTACK_H
 
 #include <sys/eventfd.h>
 
@@ -39,7 +39,7 @@ class RDMADispatcher {
   typedef Infiniband::QueuePair QueuePair;
 
   std::thread t;
-  CephContext *cct;
+  StoneeContext *cct;
   std::shared_ptr<Infiniband> ib;
   Infiniband::CompletionQueue* tx_cq = nullptr;
   Infiniband::CompletionQueue* rx_cq = nullptr;
@@ -82,7 +82,7 @@ class RDMADispatcher {
  public:
   PerfCounters *perf_logger;
 
-  explicit RDMADispatcher(CephContext* c, std::shared_ptr<Infiniband>& ib);
+  explicit RDMADispatcher(StoneeContext* c, std::shared_ptr<Infiniband>& ib);
   virtual ~RDMADispatcher();
   void handle_async_event();
 
@@ -138,7 +138,7 @@ class RDMAWorker : public Worker {
 
  public:
   PerfCounters *perf_logger;
-  explicit RDMAWorker(CephContext *c, unsigned i);
+  explicit RDMAWorker(StoneeContext *c, unsigned i);
   virtual ~RDMAWorker();
   virtual int listen(entity_addr_t &addr,
 		     unsigned addr_slot,
@@ -173,7 +173,7 @@ class RDMAConnectedSocketImpl : public ConnectedSocketImpl {
   typedef Infiniband::CompletionQueue CompletionQueue;
 
  protected:
-  CephContext *cct;
+  StoneeContext *cct;
   Infiniband::QueuePair *qp;
   uint32_t peer_qpn = 0;
   uint32_t local_qpn = 0;
@@ -205,7 +205,7 @@ class RDMAConnectedSocketImpl : public ConnectedSocketImpl {
       const decltype(std::cbegin(pending_bl.buffers()))& end);
 
  public:
-  RDMAConnectedSocketImpl(CephContext *cct, std::shared_ptr<Infiniband>& ib,
+  RDMAConnectedSocketImpl(StoneeContext *cct, std::shared_ptr<Infiniband>& ib,
 			  std::shared_ptr<RDMADispatcher>& rdma_dispatcher, RDMAWorker *w);
   virtual ~RDMAConnectedSocketImpl();
 
@@ -251,7 +251,7 @@ enum RDMA_CM_STATUS {
 
 class RDMAIWARPConnectedSocketImpl : public RDMAConnectedSocketImpl {
   public:
-  RDMAIWARPConnectedSocketImpl(CephContext *cct, std::shared_ptr<Infiniband>& ib,
+  RDMAIWARPConnectedSocketImpl(StoneeContext *cct, std::shared_ptr<Infiniband>& ib,
 			       std::shared_ptr<RDMADispatcher>& rdma_dispatcher,
 			       RDMAWorker *w, RDMACMInfo *info = nullptr);
     ~RDMAIWARPConnectedSocketImpl();
@@ -285,7 +285,7 @@ class RDMAIWARPConnectedSocketImpl : public RDMAConnectedSocketImpl {
 
 class RDMAServerSocketImpl : public ServerSocketImpl {
   protected:
-    CephContext *cct;
+    StoneeContext *cct;
     ceph::NetHandler net;
     int server_setup_socket;
     std::shared_ptr<Infiniband> ib;
@@ -294,7 +294,7 @@ class RDMAServerSocketImpl : public ServerSocketImpl {
     entity_addr_t sa;
 
  public:
-  RDMAServerSocketImpl(CephContext *cct, std::shared_ptr<Infiniband>& ib,
+  RDMAServerSocketImpl(StoneeContext *cct, std::shared_ptr<Infiniband>& ib,
                        std::shared_ptr<RDMADispatcher>& rdma_dispatcher,
 		       RDMAWorker *w, entity_addr_t& a, unsigned slot);
 
@@ -307,7 +307,7 @@ class RDMAServerSocketImpl : public ServerSocketImpl {
 class RDMAIWARPServerSocketImpl : public RDMAServerSocketImpl {
   public:
     RDMAIWARPServerSocketImpl(
-      CephContext *cct, std::shared_ptr<Infiniband>& ib,
+      StoneeContext *cct, std::shared_ptr<Infiniband>& ib,
       std::shared_ptr<RDMADispatcher>& rdma_dispatcher,
       RDMAWorker* w, entity_addr_t& addr, unsigned addr_slot);
     virtual int listen(entity_addr_t &sa, const SocketOptions &opt) override;
@@ -326,12 +326,12 @@ class RDMAStack : public NetworkStack {
 
   std::atomic<bool> fork_finished = {false};
 
-  virtual Worker* create_worker(CephContext *c, unsigned worker_id) override {
+  virtual Worker* create_worker(StoneeContext *c, unsigned worker_id) override {
     return new RDMAWorker(c, worker_id);
   }
 
  public:
-  explicit RDMAStack(CephContext *cct);
+  explicit RDMAStack(StoneeContext *cct);
   virtual ~RDMAStack();
   virtual bool nonblock_connect_need_writable_event() const override { return false; }
 

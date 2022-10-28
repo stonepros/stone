@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -57,7 +57,7 @@ ssize_t safe_recv(int fd, void *buf, size_t count)
         // EOF
         return cnt;
       }
-      int err = ceph_sock_errno();
+      int err = stone_sock_errno();
       if (err == EAGAIN || err == EINTR) {
         continue;
       }
@@ -118,7 +118,7 @@ ssize_t safe_send(int fd, const void *buf, size_t count)
   while (count > 0) {
     ssize_t r = send(fd, (SOCKOPT_VAL_TYPE)buf, count, 0);
     if (r < 0) {
-      int err = ceph_sock_errno();
+      int err = stone_sock_errno();
       if (err == EINTR || err == EAGAIN) {
         continue;
       }
@@ -184,7 +184,7 @@ ssize_t safe_pwrite(int fd, const void *buf, size_t count, off_t offset)
 	return 0;
 }
 
-#ifdef CEPH_HAVE_SPLICE
+#ifdef STONE_HAVE_SPLICE
 ssize_t safe_splice(int fd_in, off_t *off_in, int fd_out, off_t *off_out,
 		    size_t len, unsigned int flags)
 {

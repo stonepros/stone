@@ -22,7 +22,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 }
 
@@ -114,26 +114,26 @@ seastar::future<std::vector<coll_t>> SeaStore::list_collections()
   return seastar::make_ready_future<std::vector<coll_t>>();
 }
 
-SeaStore::read_errorator::future<ceph::bufferlist> SeaStore::read(
+SeaStore::read_errorator::future<stone::bufferlist> SeaStore::read(
   CollectionRef ch,
   const ghobject_t& oid,
   uint64_t offset,
   size_t len,
   uint32_t op_flags)
 {
-  return read_errorator::make_ready_future<ceph::bufferlist>();
+  return read_errorator::make_ready_future<stone::bufferlist>();
 }
 
-SeaStore::read_errorator::future<ceph::bufferlist> SeaStore::readv(
+SeaStore::read_errorator::future<stone::bufferlist> SeaStore::readv(
   CollectionRef ch,
   const ghobject_t& oid,
   interval_set<uint64_t>& m,
   uint32_t op_flags)
 {
-  return read_errorator::make_ready_future<ceph::bufferlist>();
+  return read_errorator::make_ready_future<stone::bufferlist>();
 }
 
-SeaStore::get_attr_errorator::future<ceph::bufferptr> SeaStore::get_attr(
+SeaStore::get_attr_errorator::future<stone::bufferptr> SeaStore::get_attr(
   CollectionRef ch,
   const ghobject_t& oid,
   std::string_view name) const
@@ -225,7 +225,7 @@ seastar::future<std::map<uint64_t, uint64_t>> fiemap(
 
 seastar::future<> SeaStore::do_transaction(
   CollectionRef _ch,
-  ceph::os::Transaction&& _t)
+  stone::os::Transaction&& _t)
 {
   return seastar::do_with(
     _t.begin(),
@@ -294,14 +294,14 @@ SeaStore::write_ertr::future<> SeaStore::_do_transaction_step(
   TransactionRef &trans,
   CollectionRef &col,
   std::vector<OnodeRef> &onodes,
-  ceph::os::Transaction::iterator &i)
+  stone::os::Transaction::iterator &i)
 {
   auto get_onode = [&onodes](size_t i) -> OnodeRef& {
-    ceph_assert(i < onodes.size());
+    stone_assert(i < onodes.size());
     return onodes[i];
   };
 
-  using ceph::os::Transaction;
+  using stone::os::Transaction;
   try {
     switch (auto op = i.decode_op(); op->op) {
     case Transaction::OP_NOP:
@@ -321,7 +321,7 @@ SeaStore::write_ertr::future<> SeaStore::_do_transaction_step(
       uint64_t off = op->off;
       uint64_t len = op->len;
       uint32_t fadvise_flags = i.get_fadvise_flags();
-      ceph::bufferlist bl;
+      stone::bufferlist bl;
       i.decode_bl(bl);
       return _write(trans, get_onode(op->oid), off, len, bl, fadvise_flags);
     }
@@ -335,7 +335,7 @@ SeaStore::write_ertr::future<> SeaStore::_do_transaction_step(
     case Transaction::OP_SETATTR:
     {
       std::string name = i.decode_string();
-      ceph::bufferlist bl;
+      stone::bufferlist bl;
       i.decode_bl(bl);
       std::map<std::string, bufferptr> to_set;
       to_set[name] = bufferptr(bl.c_str(), bl.length());
@@ -350,14 +350,14 @@ SeaStore::write_ertr::future<> SeaStore::_do_transaction_step(
     break;
     case Transaction::OP_OMAP_SETKEYS:
     {
-      std::map<std::string, ceph::bufferlist> aset;
+      std::map<std::string, stone::bufferlist> aset;
       i.decode_attrset(aset);
       return _omap_set_values(trans, get_onode(op->oid), std::move(aset));
     }
     break;
     case Transaction::OP_OMAP_SETHEADER:
     {
-      ceph::bufferlist bl;
+      stone::bufferlist bl;
       i.decode_bl(bl);
       return _omap_set_header(trans, get_onode(op->oid), bl);
     }
@@ -379,7 +379,7 @@ SeaStore::write_ertr::future<> SeaStore::_do_transaction_step(
     break;
     case Transaction::OP_COLL_HINT:
     {
-      ceph::bufferlist hint;
+      stone::bufferlist hint;
       i.decode_bl(hint);
       return write_ertr::now();
     }
@@ -414,7 +414,7 @@ SeaStore::write_ertr::future<> SeaStore::_touch(
 SeaStore::write_ertr::future<> SeaStore::_write(
   TransactionRef &trans,
   OnodeRef &onode,
-  uint64_t offset, size_t len, const ceph::bufferlist& bl,
+  uint64_t offset, size_t len, const stone::bufferlist& bl,
   uint32_t fadvise_flags)
 {
   logger().debug("{}: {} {} ~ {}",
@@ -437,7 +437,7 @@ SeaStore::write_ertr::future<> SeaStore::_write(
 SeaStore::write_ertr::future<> SeaStore::_omap_set_values(
   TransactionRef &trans,
   OnodeRef &onode,
-  std::map<std::string, ceph::bufferlist> &&aset)
+  std::map<std::string, stone::bufferlist> &&aset)
 {
   logger().debug(
     "{}: {} {} keys",
@@ -449,7 +449,7 @@ SeaStore::write_ertr::future<> SeaStore::_omap_set_values(
 SeaStore::write_ertr::future<> SeaStore::_omap_set_header(
   TransactionRef &trans,
   OnodeRef &onode,
-  const ceph::bufferlist &header)
+  const stone::bufferlist &header)
 {
   logger().debug(
     "{}: {} {} bytes",

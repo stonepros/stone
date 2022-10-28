@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_MANAGED_LOCK_H
-#define CEPH_LIBRBD_MANAGED_LOCK_H
+#ifndef STONE_LIBRBD_MANAGED_LOCK_H
+#define STONE_LIBRBD_MANAGED_LOCK_H
 
 #include "include/int_types.h"
 #include "include/Context.h"
@@ -210,7 +210,7 @@ private:
   };
 
   librados::IoCtx& m_ioctx;
-  CephContext *m_cct;
+  StoneContext *m_cct;
   AsioEngine& m_asio_engine;
   asio::ContextWQ* m_work_queue;
   std::string m_oid;
@@ -267,4 +267,4 @@ private:
 
 extern template class librbd::ManagedLock<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_MANAGED_LOCK_H
+#endif // STONE_LIBRBD_MANAGED_LOCK_H

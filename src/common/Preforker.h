@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_COMMON_PREFORKER_H
-#define CEPH_COMMON_PREFORKER_H
+#ifndef STONE_COMMON_PREFORKER_H
+#define STONE_COMMON_PREFORKER_H
 
 #include <signal.h>
 #include <sys/socket.h>

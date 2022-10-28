@@ -9,7 +9,7 @@
 #include "librbd/object_map/InvalidateRequest.h"
 #include "cls/lock/cls_lock_client.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::SnapshotRemoveRequest: " \
                            << this << " " << __func__ << ": "
@@ -18,12 +18,12 @@ namespace librbd {
 namespace object_map {
 
 void SnapshotRemoveRequest::send() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(ceph_mutex_is_wlocked(m_image_ctx.image_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_wlocked(m_image_ctx.image_lock));
 
   if ((m_image_ctx.features & RBD_FEATURE_FAST_DIFF) != 0) {
     int r = m_image_ctx.get_flags(m_snap_id, &m_flags);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
 
     compute_next_snap_id();
     load_map();
@@ -33,7 +33,7 @@ void SnapshotRemoveRequest::send() {
 }
 
 void SnapshotRemoveRequest::load_map() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   std::string snap_oid(ObjectMap<>::object_map_name(m_image_ctx.id, m_snap_id));
   ldout(cct, 5) << "snap_oid=" << snap_oid << dendl;
 
@@ -44,12 +44,12 @@ void SnapshotRemoveRequest::load_map() {
     SnapshotRemoveRequest, &SnapshotRemoveRequest::handle_load_map>(this);
   int r = m_image_ctx.md_ctx.aio_operate(snap_oid, rados_completion, &op,
                                          &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 void SnapshotRemoveRequest::handle_load_map(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r == 0) {
@@ -85,12 +85,12 @@ void SnapshotRemoveRequest::remove_snapshot() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, m_next_snap_id));
   ldout(cct, 5) << "oid=" << oid << dendl;
 
   librados::ObjectWriteOperation op;
-  if (m_next_snap_id == CEPH_NOSNAP) {
+  if (m_next_snap_id == STONE_NOSNAP) {
     rados::cls::lock::assert_locked(&op, RBD_LOCK_NAME, ClsLockType::EXCLUSIVE, "", "");
   }
   cls_client::object_map_snap_remove(&op, m_snap_object_map);
@@ -99,12 +99,12 @@ void SnapshotRemoveRequest::remove_snapshot() {
     SnapshotRemoveRequest,
     &SnapshotRemoveRequest::handle_remove_snapshot>(this);
   int r = m_image_ctx.md_ctx.aio_operate(oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 void SnapshotRemoveRequest::handle_remove_snapshot(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
   if (r < 0 && r != -ENOENT) {
     std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id,
@@ -124,10 +124,10 @@ void SnapshotRemoveRequest::handle_remove_snapshot(int r) {
 }
 
 void SnapshotRemoveRequest::invalidate_next_map() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(ceph_mutex_is_wlocked(m_image_ctx.image_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_wlocked(m_image_ctx.image_lock));
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << dendl;
 
   auto ctx = librbd::util::create_context_callback<
@@ -139,7 +139,7 @@ void SnapshotRemoveRequest::invalidate_next_map() {
 }
 
 void SnapshotRemoveRequest::handle_invalidate_next_map(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -155,7 +155,7 @@ void SnapshotRemoveRequest::handle_invalidate_next_map(int r) {
 }
 
 void SnapshotRemoveRequest::remove_map() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, m_snap_id));
   ldout(cct, 5) << "oid=" << oid << dendl;
 
@@ -165,12 +165,12 @@ void SnapshotRemoveRequest::remove_map() {
   auto rados_completion = librbd::util::create_rados_callback<
     SnapshotRemoveRequest, &SnapshotRemoveRequest::handle_remove_map>(this);
   int r = m_image_ctx.md_ctx.aio_operate(oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 void SnapshotRemoveRequest::handle_remove_map(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r < 0 && r != -ENOENT) {
@@ -185,12 +185,12 @@ void SnapshotRemoveRequest::handle_remove_map(int r) {
 }
 
 void SnapshotRemoveRequest::compute_next_snap_id() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.image_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.image_lock));
 
-  m_next_snap_id = CEPH_NOSNAP;
+  m_next_snap_id = STONE_NOSNAP;
   std::map<librados::snap_t, SnapInfo>::const_iterator it =
     m_image_ctx.snap_info.find(m_snap_id);
-  ceph_assert(it != m_image_ctx.snap_info.end());
+  stone_assert(it != m_image_ctx.snap_info.end());
 
   ++it;
   if (it != m_image_ctx.snap_info.end()) {
@@ -199,10 +199,10 @@ void SnapshotRemoveRequest::compute_next_snap_id() {
 }
 
 void SnapshotRemoveRequest::update_object_map() {
-  assert(ceph_mutex_is_locked(m_image_ctx.image_lock));
+  assert(stone_mutex_is_locked(m_image_ctx.image_lock));
   std::unique_lock object_map_locker{*m_object_map_lock};
-  if (m_next_snap_id == m_image_ctx.snap_id && m_next_snap_id == CEPH_NOSNAP) {
-    CephContext *cct = m_image_ctx.cct;
+  if (m_next_snap_id == m_image_ctx.snap_id && m_next_snap_id == STONE_NOSNAP) {
+    StoneContext *cct = m_image_ctx.cct;
     ldout(cct, 5) << dendl;
 
     auto it = m_object_map.begin();

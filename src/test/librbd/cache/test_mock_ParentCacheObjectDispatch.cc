@@ -14,7 +14,7 @@
 #include "test/librbd/test_mock_fixture.h"
 #include "test/librbd/mock/MockImageCtx.h"
 
-using namespace ceph::immutable_obj_cache;
+using namespace stone::immutable_obj_cache;
 
 namespace librbd {
 
@@ -33,7 +33,7 @@ namespace cache {
 
 template<>
 struct TypeTraits<MockParentImageCacheImageCtx> {
-  typedef ceph::immutable_obj_cache::MockCacheClient CacheClient;
+  typedef stone::immutable_obj_cache::MockCacheClient CacheClient;
 };
 
 } // namespace cache
@@ -285,7 +285,7 @@ TEST_F(TestMockParentCacheObjectDispatch, test_disble_interface) {
                                                               mock_plugin_api);
 
   std::string temp_oid("12345");
-  ceph::bufferlist temp_bl;
+  stone::bufferlist temp_bl;
   IOContext io_context = mock_image_ctx.get_data_io_context();
   io::DispatchResult* temp_dispatch_result = nullptr;
   io::Extents temp_buffer_extents;
@@ -410,7 +410,7 @@ TEST_F(TestMockParentCacheObjectDispatch, test_read_dne) {
   expect_cache_lookup_object(*mock_parent_image_cache, "");
 
   io::ReadExtents extents = {{0, 4096}};
-  expect_read_parent(mock_plugin_api, 0, &extents, CEPH_NOSNAP, 0);
+  expect_read_parent(mock_plugin_api, 0, &extents, STONE_NOSNAP, 0);
 
   C_SaferCond on_dispatched;
   io::DispatchResult dispatch_result;

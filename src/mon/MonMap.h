@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MONMAP_H
-#define CEPH_MONMAP_H
+#ifndef STONE_MONMAP_H
+#define STONE_MONMAP_H
 
 #ifdef WITH_SEASTAR
 #include <seastar/core/future.hh>

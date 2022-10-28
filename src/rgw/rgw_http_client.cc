@@ -21,8 +21,8 @@
 #include <atomic>
 #include <string_view>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 RGWHTTPManager *rgw_http_manager;
 
@@ -47,11 +47,11 @@ struct rgw_http_req_data : public RefCountedObject {
 
   optional<int> user_ret;
 
-  ceph::mutex lock = ceph::make_mutex("rgw_http_req_data::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("rgw_http_req_data::lock");
+  stone::condition_variable cond;
 
   using Signature = void(boost::system::error_code);
-  using Completion = ceph::async::Completion<Signature>;
+  using Completion = stone::async::Completion<Signature>;
   std::unique_ptr<Completion> completion;
 
   rgw_http_req_data() : id(-1) {
@@ -158,10 +158,10 @@ void rgw_http_req_data::set_state(int bitmask) {
 #define MAXIDLE 5
 class RGWCurlHandles : public Thread {
 public:
-  ceph::mutex cleaner_lock = ceph::make_mutex("RGWCurlHandles::cleaner_lock");
+  stone::mutex cleaner_lock = stone::make_mutex("RGWCurlHandles::cleaner_lock");
   std::vector<RGWCurlHandle*> saved_curl;
   int cleaner_shutdown;
-  ceph::condition_variable cleaner_cond;
+  stone::condition_variable cleaner_cond;
 
   RGWCurlHandles() :
     cleaner_shutdown{0} {
@@ -408,14 +408,14 @@ size_t RGWHTTPClient::send_http_data(void * const ptr,
   return ret;
 }
 
-ceph::mutex& RGWHTTPClient::get_req_lock()
+stone::mutex& RGWHTTPClient::get_req_lock()
 {
   return req_data->lock;
 }
 
 void RGWHTTPClient::_set_write_paused(bool pause)
 {
-  ceph_assert(ceph_mutex_is_locked(req_data->lock));
+  stone_assert(stone_mutex_is_locked(req_data->lock));
   
   RGWHTTPManager *mgr = req_data->mgr;
   if (pause == req_data->write_paused) {
@@ -430,7 +430,7 @@ void RGWHTTPClient::_set_write_paused(bool pause)
 
 void RGWHTTPClient::_set_read_paused(bool pause)
 {
-  ceph_assert(ceph_mutex_is_locked(req_data->lock));
+  stone_assert(stone_mutex_is_locked(req_data->lock));
   
   RGWHTTPManager *mgr = req_data->mgr;
   if (pause == req_data->read_paused) {
@@ -514,7 +514,7 @@ int RGWHTTPClient::get_req_retcode()
  */
 int RGWHTTPClient::init_request(rgw_http_req_data *_req_data)
 {
-  ceph_assert(!req_data);
+  stone_assert(!req_data);
   _req_data->get();
   req_data = _req_data;
 
@@ -685,7 +685,7 @@ static int clear_signal(int fd)
 static std::once_flag detect_flag;
 static bool curl_multi_wait_bug_present = false;
 
-static int detect_curl_multi_wait_bug(CephContext *cct, CURLM *handle,
+static int detect_curl_multi_wait_bug(StoneContext *cct, CURLM *handle,
                                       int write_fd, int read_fd)
 {
   int ret = 0;
@@ -742,7 +742,7 @@ static bool is_signaled(const curl_waitfd& wait_fd)
   return wait_fd.revents > 0;
 }
 
-static int do_curl_wait(CephContext *cct, CURLM *handle, int signal_fd)
+static int do_curl_wait(StoneContext *cct, CURLM *handle, int signal_fd)
 {
   int num_fds;
   struct curl_waitfd wait_fd;
@@ -769,7 +769,7 @@ static int do_curl_wait(CephContext *cct, CURLM *handle, int signal_fd)
 
 #else
 
-static int do_curl_wait(CephContext *cct, CURLM *handle, int signal_fd)
+static int do_curl_wait(StoneContext *cct, CURLM *handle, int signal_fd)
 {
   fd_set fdread;
   fd_set fdwrite;
@@ -832,7 +832,7 @@ void *RGWHTTPManager::ReqsThread::entry()
 /*
  * RGWHTTPManager has two modes of operation: threaded and non-threaded.
  */
-RGWHTTPManager::RGWHTTPManager(CephContext *_cct, RGWCompletionManager *_cm) : cct(_cct),
+RGWHTTPManager::RGWHTTPManager(StoneContext *_cct, RGWCompletionManager *_cm) : cct(_cct),
                                                     completion_mgr(_cm)
 {
   multi_handle = (void *)curl_multi_init();
@@ -1051,7 +1051,7 @@ int RGWHTTPManager::set_request_state(RGWHTTPClient *client, RGWHTTPRequestSetSt
 {
   rgw_http_req_data *req_data = client->get_req_data();
 
-  ceph_assert(ceph_mutex_is_locked(req_data->lock));
+  stone_assert(stone_mutex_is_locked(req_data->lock));
 
   /* can only do that if threaded */
   if (!is_started) {
@@ -1256,7 +1256,7 @@ void *RGWHTTPManager::reqs_thread_entry()
   return 0;
 }
 
-void rgw_http_client_init(CephContext *cct)
+void rgw_http_client_init(StoneContext *cct)
 {
   curl_global_init(CURL_GLOBAL_ALL);
   rgw_http_manager = new RGWHTTPManager(cct);

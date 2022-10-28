@@ -51,7 +51,7 @@ struct GetMetadataRequest<MockRefreshImageCtx> {
                                     uint32_t max_results,
                                     std::map<std::string, bufferlist>* pairs,
                                     Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     EXPECT_EQ("conf_", filter_key_prefix);
     EXPECT_EQ("conf_", last_key);
     s_instance->oid = oid;
@@ -74,14 +74,14 @@ struct RefreshParentRequest<MockRefreshImageCtx> {
                                       const ParentImageInfo &parent_md,
                                       const MigrationInfo &migration_info,
                                       Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
   static bool is_refresh_required(MockRefreshImageCtx &mock_image_ctx,
                                   const ParentImageInfo& parent_md,
                                   const MigrationInfo &migration_info) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance->is_refresh_required();
   }
 

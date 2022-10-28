@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -19,13 +19,13 @@
 #include <algorithm>
 #include <boost/algorithm/string/replace.hpp>
 #include "auth/KeyRing.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "common/debug.h"
 #include "common/errno.h"
 #include "common/Formatter.h"
 
-#define dout_subsys ceph_subsys_auth
+#define dout_subsys stone_subsys_auth
 
 #undef dout_prefix
 #define dout_prefix *_dout << "auth: "
@@ -35,15 +35,15 @@ using std::ostream;
 using std::ostringstream;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
-int KeyRing::from_ceph_context(CephContext *cct)
+int KeyRing::from_stone_context(StoneContext *cct)
 {
   const auto& conf = cct->_conf;
   string filename;
 
-  int ret = ceph_resolve_file_search(conf->keyring, filename);
+  int ret = stone_resolve_file_search(conf->keyring, filename);
   if (!ret) {
     ret = load(cct, filename);
     if (ret < 0)
@@ -61,7 +61,7 @@ int KeyRing::from_ceph_context(CephContext *cct)
       add(conf->name, ea);
       return 0;
     }
-    catch (ceph::buffer::error& e) {
+    catch (stone::buffer::error& e) {
       lderr(cct) << "failed to decode key '" << conf->key << "'" << dendl;
       return -EINVAL;
     }
@@ -81,7 +81,7 @@ int KeyRing::from_ceph_context(CephContext *cct)
       ea.key.decode_base64(k);
       add(conf->name, ea);
     }
-    catch (ceph::buffer::error& e) {
+    catch (stone::buffer::error& e) {
       lderr(cct) << "failed to decode key '" << k << "'" << dendl;
       return -EINVAL;
     }
@@ -104,7 +104,7 @@ int KeyRing::set_modifier(const char *type,
     string l(val);
     try {
       key.decode_base64(l);
-    } catch (const ceph::buffer::error& err) {
+    } catch (const stone::buffer::error& err) {
       return -EINVAL;
     }
     set_key(name, key);
@@ -151,7 +151,7 @@ void KeyRing::encode_formatted(string label, Formatter *f, bufferlist& bl)
 	 ++q) {
       auto dataiter = q->second.cbegin();
       string caps;
-      using ceph::decode;
+      using stone::decode;
       decode(caps, dataiter);
       f->dump_string(q->first.c_str(), caps);
     }
@@ -170,7 +170,7 @@ void KeyRing::decode_plaintext(bufferlist::const_iterator& bli)
   ConfFile cf;
 
   if (cf.parse_bufferlist(&bl, nullptr) != 0) {
-    throw ceph::buffer::malformed_input("cannot parse buffer");
+    throw stone::buffer::malformed_input("cannot parse buffer");
   }
 
   for (auto& [name, section] : cf) {
@@ -182,7 +182,7 @@ void KeyRing::decode_plaintext(bufferlist::const_iterator& bli)
     if (!ename.from_str(name)) {
       ostringstream oss;
       oss << "bad entity name in keyring: " << name;
-      throw ceph::buffer::malformed_input(oss.str().c_str());
+      throw stone::buffer::malformed_input(oss.str().c_str());
     }
 
     for (auto& [k, val] : section) {
@@ -195,7 +195,7 @@ void KeyRing::decode_plaintext(bufferlist::const_iterator& bli)
 	ostringstream oss;
 	oss << "error setting modifier for [" << name << "] type=" << key
 	    << " val=" << val;
-	throw ceph::buffer::malformed_input(oss.str().c_str());
+	throw stone::buffer::malformed_input(oss.str().c_str());
       }
     }
   }
@@ -205,16 +205,16 @@ void KeyRing::decode(bufferlist::const_iterator& bl) {
   __u8 struct_v;
   auto start_pos = bl;
   try {
-    using ceph::decode;
+    using stone::decode;
     decode(struct_v, bl);
     decode(keys, bl);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     keys.clear();
     decode_plaintext(start_pos);
   }
 }
 
-int KeyRing::load(CephContext *cct, const std::string &filename)
+int KeyRing::load(StoneContext *cct, const std::string &filename)
 {
   if (filename.empty())
     return -EINVAL;
@@ -231,7 +231,7 @@ int KeyRing::load(CephContext *cct, const std::string &filename)
     auto iter = bl.cbegin();
     decode(iter);
   }
-  catch (const ceph::buffer::error& err) {
+  catch (const stone::buffer::error& err) {
     lderr(cct) << "error parsing file " << filename << ": " << err.what() << dendl;
     return -EIO;
   }
@@ -253,7 +253,7 @@ void KeyRing::print(ostream& out)
 	 ++q) {
       auto dataiter = q->second.cbegin();
       string caps;
-      using ceph::decode;
+      using stone::decode;
       decode(caps, dataiter);
       boost::replace_all(caps, "\"", "\\\"");
       out << "\tcaps " << q->first << " = \"" << caps << '"' << std::endl;
@@ -261,7 +261,7 @@ void KeyRing::print(ostream& out)
   }
 }
 
-void KeyRing::import(CephContext *cct, KeyRing& other)
+void KeyRing::import(StoneContext *cct, KeyRing& other)
 {
   for (map<EntityName, EntityAuth>::iterator p = other.keys.begin();
        p != other.keys.end();

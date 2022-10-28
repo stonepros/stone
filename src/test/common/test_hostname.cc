@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -43,7 +43,7 @@ std::string exec(const char* cmd) {
 }
 
 TEST(Hostname, full) {
-  std::string hn = ceph_get_hostname();
+  std::string hn = stone_get_hostname();
   if (const char *nn = getenv("NODE_NAME")) {
     // we are in a container
     std::cout << "we are in a container on " << nn << ", reporting " << hn
@@ -55,7 +55,7 @@ TEST(Hostname, full) {
 }
 
 TEST(Hostname, short) {
-  std::string shn = ceph_get_short_hostname();
+  std::string shn = stone_get_short_hostname();
   if (const char *nn = getenv("NODE_NAME")) {
     // we are in a container
     std::cout << "we are in a container on " << nn << ", reporting short " << shn

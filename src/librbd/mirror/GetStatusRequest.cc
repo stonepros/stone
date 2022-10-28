@@ -11,7 +11,7 @@
 #include "librbd/Utils.h"
 #include "librbd/mirror/GetInfoRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::GetStatusRequest: " << this \
                            << " " << __func__ << ": "
@@ -33,7 +33,7 @@ void GetStatusRequest<I>::send() {
 
 template <typename I>
 void GetStatusRequest<I>::get_info() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   auto ctx = create_context_callback<
@@ -46,7 +46,7 @@ void GetStatusRequest<I>::get_info() {
 
 template <typename I>
 void GetStatusRequest<I>::handle_get_info(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -66,7 +66,7 @@ void GetStatusRequest<I>::handle_get_info(int r) {
 
 template <typename I>
 void GetStatusRequest<I>::get_status() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   librados::ObjectReadOperation op;
@@ -76,13 +76,13 @@ void GetStatusRequest<I>::get_status() {
   librados::AioCompletion *comp = create_rados_callback<
     GetStatusRequest<I>, &GetStatusRequest<I>::handle_get_status>(this);
   int r = m_image_ctx.md_ctx.aio_operate(RBD_MIRRORING, comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void GetStatusRequest<I>::handle_get_status(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r == 0) {
@@ -103,7 +103,7 @@ void GetStatusRequest<I>::handle_get_status(int r) {
 
 template <typename I>
 void GetStatusRequest<I>::finish(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

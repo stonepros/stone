@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 Sebastien Ponce <sebastien.ponce@cern.ch>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_LIBRADOS_XATTRITER_H
-#define CEPH_LIBRADOS_XATTRITER_H
+#ifndef STONE_LIBRADOS_XATTRITER_H
+#define STONE_LIBRADOS_XATTRITER_H
 
 #include <string>
 #include <map>

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_FILEPATH_H
-#define CEPH_FILEPATH_H
+#ifndef STONE_FILEPATH_H
+#define STONE_FILEPATH_H
 
 /*
  * BUG:  /a/b/c is equivalent to a/b/c in dentry-breakdown, but not string.

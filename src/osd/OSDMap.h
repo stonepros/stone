@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -16,8 +16,8 @@
  */
 
 
-#ifndef CEPH_OSDMAP_H
-#define CEPH_OSDMAP_H
+#ifndef STONE_OSDMAP_H
+#define STONE_OSDMAP_H
 
 /*
  * describe properties of the OSD cluster.
@@ -429,7 +429,7 @@ public:
 
     void encode_client_old(ceph::buffer::list& bl) const;
     void encode_classic(ceph::buffer::list& bl, uint64_t features) const;
-    void encode(ceph::buffer::list& bl, uint64_t features=CEPH_FEATURES_ALL) const;
+    void encode(ceph::buffer::list& bl, uint64_t features=STONE_FEATURES_ALL) const;
     void decode_classic(ceph::buffer::list::const_iterator &p);
     void decode(ceph::buffer::list::const_iterator &bl);
     void dump(ceph::Formatter *f) const;
@@ -466,7 +466,7 @@ public:
     }
 
     /// propagate update pools' (snap and other) metadata to any of their tiers
-    int propagate_base_properties_to_tiers(CephContext *cct, const OSDMap &base);
+    int propagate_base_properties_to_tiers(StoneeContext *cct, const OSDMap &base);
 
     /// filter out osds with any pending state changing
     size_t get_pending_state_osds(std::vector<int> *osds) {
@@ -531,8 +531,8 @@ private:
   int32_t max_osd;
   std::vector<uint32_t> osd_state;
 
-  mempool::osdmap::map<int32_t,uint32_t> crush_node_flags; // crush node -> CEPH_OSD_* flags
-  mempool::osdmap::map<int32_t,uint32_t> device_class_flags; // device class -> CEPH_OSD_* flags
+  mempool::osdmap::map<int32_t,uint32_t> crush_node_flags; // crush node -> STONE_OSD_* flags
+  mempool::osdmap::map<int32_t,uint32_t> device_class_flags; // device class -> STONE_OSD_* flags
 
   utime_t last_up_change, last_in_change;
 
@@ -540,19 +540,19 @@ private:
   // encoding of some type embedded therein (CrushWrapper, something
   // from osd_types, etc.).
   static constexpr uint64_t SIGNIFICANT_FEATURES =
-    CEPH_FEATUREMASK_PGID64 |
-    CEPH_FEATUREMASK_PGPOOL3 |
-    CEPH_FEATUREMASK_OSDENC |
-    CEPH_FEATUREMASK_OSDMAP_ENC |
-    CEPH_FEATUREMASK_OSD_POOLRESEND |
-    CEPH_FEATUREMASK_NEW_OSDOP_ENCODING |
-    CEPH_FEATUREMASK_MSG_ADDR2 |
-    CEPH_FEATUREMASK_CRUSH_TUNABLES5 |
-    CEPH_FEATUREMASK_CRUSH_CHOOSE_ARGS |
-    CEPH_FEATUREMASK_SERVER_LUMINOUS |
-    CEPH_FEATUREMASK_SERVER_MIMIC |
-    CEPH_FEATUREMASK_SERVER_NAUTILUS |
-    CEPH_FEATUREMASK_SERVER_OCTOPUS;
+    STONE_FEATUREMASK_PGID64 |
+    STONE_FEATUREMASK_PGPOOL3 |
+    STONE_FEATUREMASK_OSDENC |
+    STONE_FEATUREMASK_OSDMAP_ENC |
+    STONE_FEATUREMASK_OSD_POOLRESEND |
+    STONE_FEATUREMASK_NEW_OSDOP_ENCODING |
+    STONE_FEATUREMASK_MSG_ADDR2 |
+    STONE_FEATUREMASK_CRUSH_TUNABLES5 |
+    STONE_FEATUREMASK_CRUSH_CHOOSE_ARGS |
+    STONE_FEATUREMASK_SERVER_LUMINOUS |
+    STONE_FEATUREMASK_SERVER_MIMIC |
+    STONE_FEATUREMASK_SERVER_NAUTILUS |
+    STONE_FEATUREMASK_SERVER_OCTOPUS;
 
   struct addrs_s {
     mempool::osdmap::vector<std::shared_ptr<entity_addrvec_t> > client_addrs;
@@ -713,7 +713,7 @@ public:
   float get_nearfull_ratio() const {
     return nearfull_ratio;
   }
-  void get_full_pools(CephContext *cct,
+  void get_full_pools(StoneeContext *cct,
                       std::set<int64_t> *full,
                       std::set<int64_t> *backfillfull,
                       std::set<int64_t> *nearfull) const;
@@ -772,14 +772,14 @@ public:
     ceph_assert(o < max_osd);
     osd_weight[o] = w;
     if (w)
-      osd_state[o] |= CEPH_OSD_EXISTS;
+      osd_state[o] |= STONE_OSD_EXISTS;
   }
   unsigned get_weight(int o) const {
     ceph_assert(o < max_osd);
     return osd_weight[o];
   }
   float get_weightf(int o) const {
-    return (float)get_weight(o) / (float)CEPH_OSD_IN;
+    return (float)get_weight(o) / (float)STONE_OSD_IN;
   }
   void adjust_osd_weights(const std::map<int,double>& weights, Incremental& inc) const;
 
@@ -788,24 +788,24 @@ public:
     if (!osd_primary_affinity)
       osd_primary_affinity.reset(
 	new mempool::osdmap::vector<__u32>(
-	  max_osd, CEPH_OSD_DEFAULT_PRIMARY_AFFINITY));
+	  max_osd, STONE_OSD_DEFAULT_PRIMARY_AFFINITY));
     (*osd_primary_affinity)[o] = w;
   }
   unsigned get_primary_affinity(int o) const {
     ceph_assert(o < max_osd);
     if (!osd_primary_affinity)
-      return CEPH_OSD_DEFAULT_PRIMARY_AFFINITY;
+      return STONE_OSD_DEFAULT_PRIMARY_AFFINITY;
     return (*osd_primary_affinity)[o];
   }
   float get_primary_affinityf(int o) const {
-    return (float)get_primary_affinity(o) / (float)CEPH_OSD_MAX_PRIMARY_AFFINITY;
+    return (float)get_primary_affinity(o) / (float)STONE_OSD_MAX_PRIMARY_AFFINITY;
   }
 
   bool has_erasure_code_profile(const std::string &name) const {
     auto i = erasure_code_profiles.find(name);
     return i != erasure_code_profiles.end();
   }
-  int get_erasure_code_profile_default(CephContext *cct,
+  int get_erasure_code_profile_default(StoneeContext *cct,
 				       std::map<std::string,std::string> &profile_map,
 				       std::ostream *ss);
   void set_erasure_code_profile(const std::string &name,
@@ -827,15 +827,15 @@ public:
 
   bool exists(int osd) const {
     //assert(osd >= 0);
-    return osd >= 0 && osd < max_osd && (osd_state[osd] & CEPH_OSD_EXISTS);
+    return osd >= 0 && osd < max_osd && (osd_state[osd] & STONE_OSD_EXISTS);
   }
 
   bool is_destroyed(int osd) const {
-    return exists(osd) && (osd_state[osd] & CEPH_OSD_DESTROYED);
+    return exists(osd) && (osd_state[osd] & STONE_OSD_DESTROYED);
   }
 
   bool is_up(int osd) const {
-    return exists(osd) && (osd_state[osd] & CEPH_OSD_UP);
+    return exists(osd) && (osd_state[osd] & STONE_OSD_UP);
   }
 
   bool has_been_up_since(int osd, epoch_t epoch) const {
@@ -848,11 +848,11 @@ public:
 
   bool is_stop(int osd) const {
     return exists(osd) && is_down(osd) &&
-           (osd_state[osd] & CEPH_OSD_STOP);
+           (osd_state[osd] & STONE_OSD_STOP);
   }
 
   bool is_out(int osd) const {
-    return !exists(osd) || get_weight(osd) == CEPH_OSD_OUT;
+    return !exists(osd) || get_weight(osd) == STONE_OSD_OUT;
   }
 
   bool is_in(int osd) const {
@@ -871,69 +871,69 @@ public:
   unsigned get_device_class_flags(int id) const;
 
   bool is_noup_by_osd(int osd) const {
-    return exists(osd) && (osd_state[osd] & CEPH_OSD_NOUP);
+    return exists(osd) && (osd_state[osd] & STONE_OSD_NOUP);
   }
 
   bool is_nodown_by_osd(int osd) const {
-    return exists(osd) && (osd_state[osd] & CEPH_OSD_NODOWN);
+    return exists(osd) && (osd_state[osd] & STONE_OSD_NODOWN);
   }
 
   bool is_noin_by_osd(int osd) const {
-    return exists(osd) && (osd_state[osd] & CEPH_OSD_NOIN);
+    return exists(osd) && (osd_state[osd] & STONE_OSD_NOIN);
   }
 
   bool is_noout_by_osd(int osd) const {
-    return exists(osd) && (osd_state[osd] & CEPH_OSD_NOOUT);
+    return exists(osd) && (osd_state[osd] & STONE_OSD_NOOUT);
   }
 
   bool is_noup(int osd) const {
-    if (test_flag(CEPH_OSDMAP_NOUP)) // global?
+    if (test_flag(STONE_OSDMAP_NOUP)) // global?
       return true;
     if (is_noup_by_osd(osd)) // by osd?
       return true;
-    if (get_osd_crush_node_flags(osd) & CEPH_OSD_NOUP) // by crush-node?
+    if (get_osd_crush_node_flags(osd) & STONE_OSD_NOUP) // by crush-node?
       return true;
     if (auto class_id = crush->get_item_class_id(osd); class_id >= 0 &&
-        get_device_class_flags(class_id) & CEPH_OSD_NOUP) // by device-class?
+        get_device_class_flags(class_id) & STONE_OSD_NOUP) // by device-class?
       return true;
     return false;
   }
 
   bool is_nodown(int osd) const {
-    if (test_flag(CEPH_OSDMAP_NODOWN))
+    if (test_flag(STONE_OSDMAP_NODOWN))
       return true;
     if (is_nodown_by_osd(osd))
       return true;
-    if (get_osd_crush_node_flags(osd) & CEPH_OSD_NODOWN)
+    if (get_osd_crush_node_flags(osd) & STONE_OSD_NODOWN)
       return true;
     if (auto class_id = crush->get_item_class_id(osd); class_id >= 0 &&
-        get_device_class_flags(class_id) & CEPH_OSD_NODOWN)
+        get_device_class_flags(class_id) & STONE_OSD_NODOWN)
       return true;
     return false;
   }
 
   bool is_noin(int osd) const {
-    if (test_flag(CEPH_OSDMAP_NOIN))
+    if (test_flag(STONE_OSDMAP_NOIN))
       return true;
     if (is_noin_by_osd(osd))
       return true;
-    if (get_osd_crush_node_flags(osd) & CEPH_OSD_NOIN)
+    if (get_osd_crush_node_flags(osd) & STONE_OSD_NOIN)
       return true;
     if (auto class_id = crush->get_item_class_id(osd); class_id >= 0 &&
-        get_device_class_flags(class_id) & CEPH_OSD_NOIN)
+        get_device_class_flags(class_id) & STONE_OSD_NOIN)
       return true;
     return false;
   }
 
   bool is_noout(int osd) const {
-    if (test_flag(CEPH_OSDMAP_NOOUT))
+    if (test_flag(STONE_OSDMAP_NOOUT))
       return true;
     if (is_noout_by_osd(osd))
       return true;
-    if (get_osd_crush_node_flags(osd) & CEPH_OSD_NOOUT)
+    if (get_osd_crush_node_flags(osd) & STONE_OSD_NOOUT)
       return true;
     if (auto class_id = crush->get_item_class_id(osd); class_id >= 0 &&
-        get_device_class_flags(class_id) & CEPH_OSD_NOOUT)
+        get_device_class_flags(class_id) & STONE_OSD_NOOUT)
       return true;
     return false;
   }
@@ -942,9 +942,9 @@ public:
    * check if an entire crush subtree is down
    */
   bool subtree_is_down(int id, std::set<int> *down_cache) const;
-  bool containing_subtree_is_down(CephContext *cct, int osd, int subtree_type, std::set<int> *down_cache) const;
+  bool containing_subtree_is_down(StoneeContext *cct, int osd, int subtree_type, std::set<int> *down_cache) const;
 
-  bool subtree_type_is_down(CephContext *cct, int id, int subtree_type, std::set<int> *down_in_osds, std::set<int> *up_in_osds,
+  bool subtree_type_is_down(StoneeContext *cct, int id, int subtree_type, std::set<int> *down_in_osds, std::set<int> *up_in_osds,
                             std::set<int> *subtree_up, std::unordered_map<int, std::set<int> > *subtree_type_down) const;
 
   int identify_osd(const entity_addr_t& addr) const;
@@ -1069,23 +1069,23 @@ public:
 
   void get_upmap_pgs(std::vector<pg_t> *upmap_pgs) const;
   bool check_pg_upmaps(
-    CephContext *cct,
+    StoneeContext *cct,
     const std::vector<pg_t>& to_check,
     std::vector<pg_t> *to_cancel,
     std::map<pg_t, mempool::osdmap::vector<std::pair<int,int>>> *to_remap) const;
   void clean_pg_upmaps(
-    CephContext *cct,
+    StoneeContext *cct,
     Incremental *pending_inc,
     const std::vector<pg_t>& to_cancel,
     const std::map<pg_t, mempool::osdmap::vector<std::pair<int,int>>>& to_remap) const;
-  bool clean_pg_upmaps(CephContext *cct, Incremental *pending_inc) const;
+  bool clean_pg_upmaps(StoneeContext *cct, Incremental *pending_inc) const;
 
   int apply_incremental(const Incremental &inc);
 
   /// try to re-use/reference addrs in oldmap from newmap
   static void dedup(const OSDMap *oldmap, OSDMap *newmap);
 
-  static void clean_temps(CephContext *cct,
+  static void clean_temps(StoneeContext *cct,
 			  const OSDMap& oldmap,
 			  const OSDMap& nextmap,
 			  Incremental *pending_inc);
@@ -1097,7 +1097,7 @@ private:
   void decode_classic(ceph::buffer::list::const_iterator& p);
   void post_decode();
 public:
-  void encode(ceph::buffer::list& bl, uint64_t features=CEPH_FEATURES_ALL) const;
+  void encode(ceph::buffer::list& bl, uint64_t features=STONE_FEATURES_ALL) const;
   void decode(ceph::buffer::list& bl);
   void decode(ceph::buffer::list::const_iterator& bl);
 
@@ -1336,7 +1336,7 @@ public:
       }
     }
   }
-  void get_pool_ids_by_osd(CephContext *cct,
+  void get_pool_ids_by_osd(StoneeContext *cct,
                            int osd,
                            std::set<int64_t> *pool_ids) const;
   const std::string& get_pool_name(int64_t p) const {
@@ -1417,7 +1417,7 @@ public:
   }
 
   bool try_pg_upmap(
-    CephContext *cct,
+    StoneeContext *cct,
     pg_t pg,                       ///< pg to potentially remap
     const std::set<int>& overfull,      ///< osds we'd want to evacuate
     const std::vector<int>& underfull,  ///< osds to move to, in order of preference
@@ -1426,7 +1426,7 @@ public:
     std::vector<int> *out);             ///< resulting alternative mapping
 
   int calc_pg_upmaps(
-    CephContext *cct,
+    StoneeContext *cct,
     uint32_t max_deviation, ///< max deviation from target (value >= 1)
     int max_iterations,  ///< max iterations to run
     const std::set<int64_t>& pools,        ///< [optional] restrict to pool
@@ -1442,7 +1442,7 @@ public:
 
   bool check_full(const std::set<pg_shard_t> &missing_on) const {
     for (auto shard : missing_on) {
-      if (get_state(shard.osd) & CEPH_OSD_FULL)
+      if (get_state(shard.osd) & STONE_OSD_FULL)
 	return true;
     }
     return false;
@@ -1464,27 +1464,27 @@ public:
    * @return **0** on success, negative errno on error.
    */
 private:
-  int build_simple_optioned(CephContext *cct, epoch_t e, uuid_d &fsid,
+  int build_simple_optioned(StoneeContext *cct, epoch_t e, uuid_d &fsid,
 			    int num_osd, int pg_bits, int pgp_bits,
 			    bool default_pool);
 public:
-  int build_simple(CephContext *cct, epoch_t e, uuid_d &fsid,
+  int build_simple(StoneeContext *cct, epoch_t e, uuid_d &fsid,
 		   int num_osd) {
     return build_simple_optioned(cct, e, fsid, num_osd, 0, 0, false);
   }
-  int build_simple_with_pool(CephContext *cct, epoch_t e, uuid_d &fsid,
+  int build_simple_with_pool(StoneeContext *cct, epoch_t e, uuid_d &fsid,
 			     int num_osd, int pg_bits, int pgp_bits) {
     return build_simple_optioned(cct, e, fsid, num_osd,
 				 pg_bits, pgp_bits, true);
   }
   static int _build_crush_types(CrushWrapper& crush);
-  static int build_simple_crush_map(CephContext *cct, CrushWrapper& crush,
+  static int build_simple_crush_map(StoneeContext *cct, CrushWrapper& crush,
 				    int num_osd, std::ostream *ss);
-  static int build_simple_crush_map_from_conf(CephContext *cct,
+  static int build_simple_crush_map_from_conf(StoneeContext *cct,
 					      CrushWrapper& crush,
 					      std::ostream *ss);
   static int build_simple_crush_rules(
-    CephContext *cct, CrushWrapper& crush,
+    StoneeContext *cct, CrushWrapper& crush,
     const std::string& root,
     std::ostream *ss);
 
@@ -1535,7 +1535,7 @@ public:
   static void generate_test_instances(std::list<OSDMap*>& o);
   bool check_new_blocklist_entries() const { return new_blocklist_entries; }
 
-  void check_health(CephContext *cct, health_check_map_t *checks) const;
+  void check_health(StoneeContext *cct, health_check_map_t *checks) const;
 
   int parse_osd_id_list(const std::vector<std::string>& ls,
 			std::set<int> *out,

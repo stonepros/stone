@@ -279,7 +279,7 @@ private:
   TestOp *gen_op(RadosTestContext &context, TestOpType type)
   {
     string oid, oid2;
-    ceph_assert(context.oid_not_in_use.size());
+    stone_assert(context.oid_not_in_use.size());
 
     switch (type) {
     case TEST_OP_READ:
@@ -442,7 +442,7 @@ private:
 
     default:
       cerr << m_op << ": Invalid op type " << type << std::endl;
-      ceph_abort();
+      stone_abort();
       return nullptr;
     }
   }
@@ -598,7 +598,7 @@ int main(int argc, char **argv)
     } else if (strcmp(argv[i], "--low_tier_pool") == 0) {
       /*
        * disallow redirect or chunk object into the same pool
-       * to prevent the race. see https://github.com/ceph/ceph/pull/20096
+       * to prevent the race. see https://github.com/stone/stone/pull/20096
        */
       low_tier_pool_name = argv[++i];
     } else if (strcmp(argv[i], "--enable_dedup") == 0) {
@@ -653,7 +653,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  char *id = getenv("CEPH_CLIENT_ID");
+  char *id = getenv("STONE_CLIENT_ID");
   RadosTestContext context(
     pool_name,
     max_in_flight,

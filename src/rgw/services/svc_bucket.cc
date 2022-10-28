@@ -4,7 +4,7 @@
 
 #include "svc_bucket.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 string RGWSI_Bucket::get_entrypoint_meta_key(const rgw_bucket& bucket)
 {

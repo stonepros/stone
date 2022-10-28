@@ -7,7 +7,7 @@ openstack:
     size: 10 # GB
 tasks:
 - install:
-- ceph:
+- stone:
     conf:
       client:
         debug ms: 1

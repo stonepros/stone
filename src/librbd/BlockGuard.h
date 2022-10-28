@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IO_BLOCK_GUARD_H
-#define CEPH_LIBRBD_IO_BLOCK_GUARD_H
+#ifndef STONE_LIBRBD_IO_BLOCK_GUARD_H
+#define STONE_LIBRBD_IO_BLOCK_GUARD_H
 
 #include "include/int_types.h"
 #include "common/dout.h"
@@ -54,7 +54,7 @@ private:
 public:
   typedef std::list<BlockOperation> BlockOperations;
 
-  BlockGuard(CephContext *cct)
+  BlockGuard(StoneContext *cct)
     : m_cct(cct) {
   }
 
@@ -158,7 +158,7 @@ private:
     boost::intrusive::key_of_value<DetainedBlockExtentKey> >
       BlockExtentToDetainedBlockExtents;
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
 
   ceph::mutex m_lock = ceph::make_mutex("librbd::BlockGuard::m_lock");
   DetainedBlockExtentsPool m_detained_block_extent_pool;
@@ -173,4 +173,4 @@ private:
 #undef dout_prefix
 #define dout_prefix *_dout
 
-#endif // CEPH_LIBRBD_IO_BLOCK_GUARD_H
+#endif // STONE_LIBRBD_IO_BLOCK_GUARD_H

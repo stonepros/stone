@@ -20,7 +20,7 @@ using namespace crimson::os::seastore;
 
 namespace {
   [[maybe_unused]] seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_test);
+    return crimson::get_logger(stone_subsys_test);
   }
 }
 
@@ -194,8 +194,8 @@ struct transaction_manager_test_t :
     test_transaction_t &t,
     laddr_t addr,
     extent_len_t len) {
-    ceph_assert(t.mappings.count(addr));
-    ceph_assert(t.mappings[addr].desc.len == len);
+    stone_assert(t.mappings.count(addr));
+    stone_assert(t.mappings[addr].desc.len == len);
 
     auto ret_list = tm->read_extents<TestBlock>(
       *t.t, addr, len
@@ -212,8 +212,8 @@ struct transaction_manager_test_t :
   TestBlockRef mutate_extent(
     test_transaction_t &t,
     TestBlockRef ref) {
-    ceph_assert(t.mappings.count(ref->get_laddr()));
-    ceph_assert(t.mappings[ref->get_laddr()].desc.len == ref->get_length());
+    stone_assert(t.mappings.count(ref->get_laddr()));
+    stone_assert(t.mappings[ref->get_laddr()].desc.len == ref->get_length());
     auto ext = tm->get_mutable_extent(*t.t, ref)->cast<TestBlock>();
     EXPECT_EQ(ext->get_laddr(), ref->get_laddr());
     EXPECT_EQ(ext->get_desc(), ref->get_desc());
@@ -223,16 +223,16 @@ struct transaction_manager_test_t :
   }
 
   void inc_ref(test_transaction_t &t, laddr_t offset) {
-    ceph_assert(t.mappings.count(offset));
-    ceph_assert(t.mappings[offset].refcount > 0);
+    stone_assert(t.mappings.count(offset));
+    stone_assert(t.mappings[offset].refcount > 0);
     auto refcnt = tm->inc_ref(*t.t, offset).unsafe_get0();
     t.mappings[offset].refcount++;
     EXPECT_EQ(refcnt, t.mappings[offset].refcount);
   }
 
   void dec_ref(test_transaction_t &t, laddr_t offset) {
-    ceph_assert(t.mappings.count(offset));
-    ceph_assert(t.mappings[offset].refcount > 0);
+    stone_assert(t.mappings.count(offset));
+    stone_assert(t.mappings[offset].refcount > 0);
     auto refcnt = tm->dec_ref(*t.t, offset).unsafe_get0();
     t.mappings[offset].refcount--;
     EXPECT_EQ(refcnt, t.mappings[offset].refcount);

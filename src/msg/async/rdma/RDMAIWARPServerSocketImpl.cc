@@ -3,12 +3,12 @@
 #include "msg/async/net_handler.h"
 #include "RDMAStack.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #undef dout_prefix
 #define dout_prefix *_dout << " RDMAIWARPServerSocketImpl "
 
 RDMAIWARPServerSocketImpl::RDMAIWARPServerSocketImpl(
-  CephContext *cct, std::shared_ptr<Infiniband>& ib,
+  StoneContext *cct, std::shared_ptr<Infiniband>& ib,
   std::shared_ptr<RDMADispatcher>& rdma_dispatcher, RDMAWorker *w,
   entity_addr_t& a, unsigned addr_slot)
   : RDMAServerSocketImpl(cct, ib, rdma_dispatcher, w, a, addr_slot)
@@ -56,14 +56,14 @@ int RDMAIWARPServerSocketImpl::accept(ConnectedSocket *sock, const SocketOptions
 {
   ldout(cct, 15) << __func__ << dendl;
 
-  ceph_assert(sock);
+  stone_assert(sock);
   struct pollfd pfd = {
     .fd = cm_channel->fd,
     .events = POLLIN,
     .revents = 0,
   };
   int ret = poll(&pfd, 1, 0);
-  ceph_assert(ret >= 0);
+  stone_assert(ret >= 0);
   if (!ret)
     return -EAGAIN;
 

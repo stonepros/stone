@@ -1,5 +1,5 @@
-#ifndef CEPH_RBD_GGATE_DEBUG_H
-#define CEPH_RBD_GGATE_DEBUG_H
+#ifndef STONE_RBD_GGATE_DEBUG_H
+#define STONE_RBD_GGATE_DEBUG_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,4 +14,4 @@ void errx(const char *fmt, ...) __printflike(1, 2);
 }
 #endif
 
-#endif // CEPH_RBD_GGATE_DEBUG_H
+#endif // STONE_RBD_GGATE_DEBUG_H

@@ -46,7 +46,7 @@ seastar::future<> ConfigProxy::start()
   });
 }
 
-void ConfigProxy::show_config(ceph::Formatter* f) const {
+void ConfigProxy::show_config(stone::Formatter* f) const {
   get_config().show_config(*values, f);
 }
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -25,11 +25,11 @@
 #include "common/errno.h"
 #include "common/Finisher.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << rank << "." << table_name << ": "
 
@@ -41,7 +41,7 @@ class MDSTableIOContext : public MDSIOContextBase
     MDSRank *get_mds() override {return ida->mds;}
   public:
     explicit MDSTableIOContext(MDSTable *ida_) : ida(ida_) {
-      ceph_assert(ida != NULL);
+      stone_assert(ida != NULL);
     }
 };
 
@@ -69,7 +69,7 @@ void MDSTable::save(MDSContext *onfinish, version_t v)
   }
   
   dout(10) << "save v " << version << dendl;
-  ceph_assert(is_active());
+  stone_assert(is_active());
   
   bufferlist bl;
   encode(version, bl);
@@ -86,7 +86,7 @@ void MDSTable::save(MDSContext *onfinish, version_t v)
   object_locator_t oloc(mds->get_metadata_pool());
   mds->objecter->write_full(oid, oloc,
 			    snapc,
-			    bl, ceph::real_clock::now(), 0,
+			    bl, stone::real_clock::now(), 0,
 			    new C_OnFinisher(new C_IO_MT_Save(this, version),
 					     mds->finisher));
 }
@@ -112,7 +112,7 @@ void MDSTable::save_2(int r, version_t v)
     ls.insert(ls.end(), v.begin(), v.end());
     waitfor_save.erase(it);
   }
-  finish_contexts(g_ceph_context, ls, 0);
+  finish_contexts(g_stone_context, ls, 0);
 }
 
 
@@ -154,21 +154,21 @@ void MDSTable::load(MDSContext *onfinish)
 { 
   dout(10) << "load" << dendl;
 
-  ceph_assert(is_undef());
+  stone_assert(is_undef());
   state = STATE_OPENING;
 
   C_IO_MT_Load *c = new C_IO_MT_Load(this, onfinish);
   object_t oid = get_object_name();
   object_locator_t oloc(mds->get_metadata_pool());
-  mds->objecter->read_full(oid, oloc, CEPH_NOSNAP, &c->bl, 0,
+  mds->objecter->read_full(oid, oloc, STONE_NOSNAP, &c->bl, 0,
 			   new C_OnFinisher(c, mds->finisher));
 }
 
 void MDSTable::load_2(int r, bufferlist& bl, Context *onfinish)
 {
-  ceph_assert(is_opening());
+  stone_assert(is_opening());
   state = STATE_ACTIVE;
-  if (r == -CEPHFS_EBLOCKLISTED) {
+  if (r == -STONEFS_EBLOCKLISTED) {
     mds->respawn();
     return;
   }
@@ -177,7 +177,7 @@ void MDSTable::load_2(int r, bufferlist& bl, Context *onfinish)
     mds->clog->error() << "error reading table object '" << get_object_name()
                        << "' " << r << " (" << cpp_strerror(r) << ")";
     mds->damaged();
-    ceph_assert(r >= 0);  // Should be unreachable because damaged() calls respawn()
+    stone_assert(r >= 0);  // Should be unreachable because damaged() calls respawn()
   }
 
   dout(10) << "load_2 got " << bl.length() << " bytes" << dendl;
@@ -192,7 +192,7 @@ void MDSTable::load_2(int r, bufferlist& bl, Context *onfinish)
     mds->clog->error() << "error decoding table object '" << get_object_name()
                        << "': " << e.what();
     mds->damaged();
-    ceph_assert(r >= 0);  // Should be unreachable because damaged() calls respawn()
+    stone_assert(r >= 0);  // Should be unreachable because damaged() calls respawn()
   }
 
   if (onfinish) {

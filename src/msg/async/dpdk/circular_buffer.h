@@ -20,8 +20,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_CIRCULAR_BUFFER_HH_
-#define CEPH_CIRCULAR_BUFFER_HH_
+#ifndef STONE_CIRCULAR_BUFFER_HH_
+#define STONE_CIRCULAR_BUFFER_HH_
 
 // A growable double-ended queue container that can be efficiently
 // extended (and shrunk) from both ends.  Implementation is a single
@@ -344,4 +344,4 @@ inline T& circular_buffer<T, Alloc>::access_element_unsafe(size_t idx) {
   return _impl.storage[mask(_impl.begin + idx)];
 }
 
-#endif /* CEPH_CIRCULAR_BUFFER_HH_ */
+#endif /* STONE_CIRCULAR_BUFFER_HH_ */

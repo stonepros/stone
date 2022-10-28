@@ -4,18 +4,18 @@
 #include "common/config.h"
 #include "common/debug.h"
 
-#define dout_subsys ceph_subsys_auth
+#define dout_subsys stone_subsys_auth
 
 #define AES_KEY_LEN	16
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 int main(int argc, char *argv[])
 {
   char aes_key[AES_KEY_LEN];
   memset(aes_key, 0x77, sizeof(aes_key));
   bufferptr keybuf(aes_key, sizeof(aes_key));
-  CryptoKey key(CEPH_CRYPTO_AES, ceph_clock_now(), keybuf);
+  CryptoKey key(STONE_CRYPTO_AES, stone_clock_now(), keybuf);
 
   const char *msg="hello! this is a message\n";
   char pad[16];
@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
 
   bufferlist enc_out;
   std::string error;
-  if (key.encrypt(g_ceph_context, enc_in, enc_out, &error) < 0) {
-    ceph_assert(!error.empty());
+  if (key.encrypt(g_stone_context, enc_in, enc_out, &error) < 0) {
+    stone_assert(!error.empty());
     dout(0) << "couldn't encode! error " << error << dendl;
     exit(1);
   }
@@ -44,8 +44,8 @@ int main(int argc, char *argv[])
 
   dec_in = enc_out;
 
-  if (key.decrypt(g_ceph_context, dec_in, dec_out, &error) < 0) {
-    ceph_assert(!error.empty());
+  if (key.decrypt(g_stone_context, dec_in, dec_out, &error) < 0) {
+    stone_assert(!error.empty());
     dout(0) << "couldn't decode! error " << error << dendl;
     exit(1);
   }

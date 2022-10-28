@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CLIENT_METAREQUEST_H
-#define CEPH_CLIENT_METAREQUEST_H
+#ifndef STONE_CLIENT_METAREQUEST_H
+#define STONE_CLIENT_METAREQUEST_H
 
 
 #include "include/types.h"
@@ -181,7 +181,7 @@ public:
   uid_t get_gid() { return perms.gid(); }
   void set_data(const bufferlist &d) { data = d; }
   void set_dentry_wanted() {
-    head.flags = head.flags | CEPH_MDS_FLAG_WANT_DENTRY;
+    head.flags = head.flags | STONE_MDS_FLAG_WANT_DENTRY;
   }
   int get_op() { return head.op; }
   ceph_tid_t get_tid() { return tid; }
@@ -190,19 +190,19 @@ public:
 
   bool is_write() {
     return
-      (head.op & CEPH_MDS_OP_WRITE) || 
-      (head.op == CEPH_MDS_OP_OPEN && (head.args.open.flags & (O_CREAT|O_TRUNC)));
+      (head.op & STONE_MDS_OP_WRITE) || 
+      (head.op == STONE_MDS_OP_OPEN && (head.args.open.flags & (O_CREAT|O_TRUNC)));
   }
   bool can_forward() {
-    if ((head.op & CEPH_MDS_OP_WRITE) ||
-	head.op == CEPH_MDS_OP_OPEN)   // do not forward _any_ open request.
+    if ((head.op & STONE_MDS_OP_WRITE) ||
+	head.op == STONE_MDS_OP_OPEN)   // do not forward _any_ open request.
       return false;
     return true;
   }
   bool auth_is_best() {
-    if ((head.op & CEPH_MDS_OP_WRITE) || head.op == CEPH_MDS_OP_OPEN ||
-        (head.op == CEPH_MDS_OP_GETATTR && (head.args.getattr.mask & CEPH_STAT_RSTAT)) ||
-	head.op == CEPH_MDS_OP_READDIR || send_to_auth) 
+    if ((head.op & STONE_MDS_OP_WRITE) || head.op == STONE_MDS_OP_OPEN ||
+        (head.op == STONE_MDS_OP_GETATTR && (head.args.getattr.mask & STONE_STAT_RSTAT)) ||
+	head.op == STONE_MDS_OP_READDIR || send_to_auth) 
       return true;
     return false;    
   }

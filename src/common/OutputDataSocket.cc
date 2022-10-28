@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -24,9 +24,9 @@
 #include "include/sock_compat.h"
 
 // re-include our assert to clobber the system one; fix dout:
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_asok
+#define dout_subsys stone_subsys_asok
 #undef dout_prefix
 #define dout_prefix *_dout << "asok(" << (void*)m_cct << ") "
 
@@ -86,7 +86,7 @@ static void add_cleanup_file(const char *file)
 }
 
 
-OutputDataSocket::OutputDataSocket(CephContext *cct, uint64_t _backlog)
+OutputDataSocket::OutputDataSocket(StoneContext *cct, uint64_t _backlog)
   : m_cct(cct),
     data_max_backlog(_backlog),
     m_sock_fd(-1),
@@ -255,7 +255,7 @@ bool OutputDataSocket::do_accept()
 
 void OutputDataSocket::handle_connection(int fd)
 {
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
 
   m_lock.lock();
   init_connection(bl);
@@ -300,7 +300,7 @@ int OutputDataSocket::dump_data(int fd)
   m_lock.unlock();
 
   for (auto iter = l.begin(); iter != l.end(); ++iter) {
-    ceph::buffer::list& bl = *iter;
+    stone::buffer::list& bl = *iter;
     int ret = safe_write(fd, bl.c_str(), bl.length());
     if (ret >= 0) {
       ret = safe_write(fd, delim.c_str(), delim.length());
@@ -308,7 +308,7 @@ int OutputDataSocket::dump_data(int fd)
     if (ret < 0) {
       std::scoped_lock lock(m_lock);
       for (; iter != l.end(); ++iter) {
-        ceph::buffer::list& bl = *iter;
+        stone::buffer::list& bl = *iter;
 	data.push_back(bl);
 	data_size += bl.length();
       }
@@ -384,7 +384,7 @@ void OutputDataSocket::shutdown()
   m_path.clear();
 }
 
-void OutputDataSocket::append_output(ceph::buffer::list& bl)
+void OutputDataSocket::append_output(stone::buffer::list& bl)
 {
   std::lock_guard l(m_lock);
 

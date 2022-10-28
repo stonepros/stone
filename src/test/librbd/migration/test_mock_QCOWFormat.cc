@@ -5,7 +5,7 @@
 #include "test/librbd/test_support.h"
 #include "test/librbd/mock/migration/MockStreamInterface.h"
 #include "include/rbd_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/migration/QCOWFormat.h"
 #include "librbd/migration/SourceSpecBuilder.h"
 #include "acconfig.h"
@@ -723,7 +723,7 @@ TEST_F(TestMockMigrationQCOWFormat, GetImageSize) {
 
   uint64_t size = 0;
   C_SaferCond ctx2;
-  mock_qcow_format.get_image_size(CEPH_NOSNAP, &size, &ctx2);
+  mock_qcow_format.get_image_size(STONE_NOSNAP, &size, &ctx2);
   ASSERT_EQ(0, ctx2.wait());
   ASSERT_EQ(1<<30, size);
 
@@ -835,7 +835,7 @@ TEST_F(TestMockMigrationQCOWFormat, Read) {
     &ctx2, m_image_ctx, io::AIO_TYPE_READ);
   bufferlist bl;
   io::ReadResult read_result{&bl};
-  ASSERT_TRUE(mock_qcow_format.read(aio_comp, CEPH_NOSNAP, {{65659, 123}},
+  ASSERT_TRUE(mock_qcow_format.read(aio_comp, STONE_NOSNAP, {{65659, 123}},
                                     std::move(read_result), 0, 0, {}));
   ASSERT_EQ(123, ctx2.wait());
   ASSERT_EQ(expect_bl, bl);
@@ -870,7 +870,7 @@ TEST_F(TestMockMigrationQCOWFormat, ReadL1DNE) {
     &ctx2, m_image_ctx, io::AIO_TYPE_READ);
   bufferlist bl;
   io::ReadResult read_result{&bl};
-  ASSERT_TRUE(mock_qcow_format.read(aio_comp, CEPH_NOSNAP, {{234, 123}},
+  ASSERT_TRUE(mock_qcow_format.read(aio_comp, STONE_NOSNAP, {{234, 123}},
                                     std::move(read_result), 0, 0, {}));
   ASSERT_EQ(123, ctx2.wait());
   bufferlist expect_bl;
@@ -910,7 +910,7 @@ TEST_F(TestMockMigrationQCOWFormat, ReadL2DNE) {
     &ctx2, m_image_ctx, io::AIO_TYPE_READ);
   bufferlist bl;
   io::ReadResult read_result{&bl};
-  ASSERT_TRUE(mock_qcow_format.read(aio_comp, CEPH_NOSNAP, {{234, 123}},
+  ASSERT_TRUE(mock_qcow_format.read(aio_comp, STONE_NOSNAP, {{234, 123}},
                                     std::move(read_result), 0, 0, {}));
   ASSERT_EQ(123, ctx2.wait());
   bufferlist expect_bl;
@@ -950,7 +950,7 @@ TEST_F(TestMockMigrationQCOWFormat, ReadZero) {
     &ctx2, m_image_ctx, io::AIO_TYPE_READ);
   bufferlist bl;
   io::ReadResult read_result{&bl};
-  ASSERT_TRUE(mock_qcow_format.read(aio_comp, CEPH_NOSNAP, {{65659, 123}},
+  ASSERT_TRUE(mock_qcow_format.read(aio_comp, STONE_NOSNAP, {{65659, 123}},
                                     std::move(read_result), 0, 0, {}));
   ASSERT_EQ(123, ctx2.wait());
   bufferlist expect_bl;
@@ -1090,7 +1090,7 @@ TEST_F(TestMockMigrationQCOWFormat, ReadClusterCacheHit) {
     &ctx2, m_image_ctx, io::AIO_TYPE_READ);
   bufferlist bl1;
   io::ReadResult read_result1{&bl1};
-  ASSERT_TRUE(mock_qcow_format.read(aio_comp1, CEPH_NOSNAP, {{65659, 123}},
+  ASSERT_TRUE(mock_qcow_format.read(aio_comp1, STONE_NOSNAP, {{65659, 123}},
                                     std::move(read_result1), 0, 0, {}));
   ASSERT_EQ(123, ctx2.wait());
   ASSERT_EQ(expect_bl1, bl1);
@@ -1100,7 +1100,7 @@ TEST_F(TestMockMigrationQCOWFormat, ReadClusterCacheHit) {
     &ctx3, m_image_ctx, io::AIO_TYPE_READ);
   bufferlist bl2;
   io::ReadResult read_result2{&bl2};
-  ASSERT_TRUE(mock_qcow_format.read(aio_comp2, CEPH_NOSNAP, {{66016, 234}},
+  ASSERT_TRUE(mock_qcow_format.read(aio_comp2, STONE_NOSNAP, {{66016, 234}},
                                     std::move(read_result2), 0, 0, {}));
   ASSERT_EQ(234, ctx3.wait());
   ASSERT_EQ(expect_bl2, bl2);
@@ -1142,7 +1142,7 @@ TEST_F(TestMockMigrationQCOWFormat, ReadClusterError) {
     &ctx2, m_image_ctx, io::AIO_TYPE_READ);
   bufferlist bl;
   io::ReadResult read_result{&bl};
-  ASSERT_TRUE(mock_qcow_format.read(aio_comp, CEPH_NOSNAP, {{65659, 123}},
+  ASSERT_TRUE(mock_qcow_format.read(aio_comp, STONE_NOSNAP, {{65659, 123}},
                                     std::move(read_result), 0, 0, {}));
   ASSERT_EQ(-EIO, ctx2.wait());
 
@@ -1179,7 +1179,7 @@ TEST_F(TestMockMigrationQCOWFormat, ReadL2TableError) {
     &ctx2, m_image_ctx, io::AIO_TYPE_READ);
   bufferlist bl;
   io::ReadResult read_result{&bl};
-  ASSERT_TRUE(mock_qcow_format.read(aio_comp, CEPH_NOSNAP, {{65659, 123}},
+  ASSERT_TRUE(mock_qcow_format.read(aio_comp, STONE_NOSNAP, {{65659, 123}},
                                     std::move(read_result), 0, 0, {}));
   ASSERT_EQ(-EIO, ctx2.wait());
 
@@ -1240,14 +1240,14 @@ TEST_F(TestMockMigrationQCOWFormat, ListSnaps) {
 
   C_SaferCond ctx2;
   io::SnapshotDelta snapshot_delta;
-  mock_qcow_format.list_snaps({{0, 196608}}, {1, CEPH_NOSNAP}, 0,
+  mock_qcow_format.list_snaps({{0, 196608}}, {1, STONE_NOSNAP}, 0,
                               &snapshot_delta, {}, &ctx2);
   ASSERT_EQ(0, ctx2.wait());
 
   io::SnapshotDelta expected_snapshot_delta;
   expected_snapshot_delta[{1, 1}] = sparse_extents_1;
-  expected_snapshot_delta[{CEPH_NOSNAP, 2}] = sparse_extents_2;
-  expected_snapshot_delta[{CEPH_NOSNAP, CEPH_NOSNAP}] = sparse_extents_head;
+  expected_snapshot_delta[{STONE_NOSNAP, 2}] = sparse_extents_2;
+  expected_snapshot_delta[{STONE_NOSNAP, STONE_NOSNAP}] = sparse_extents_head;
   ASSERT_EQ(expected_snapshot_delta, snapshot_delta);
 
   C_SaferCond ctx3;

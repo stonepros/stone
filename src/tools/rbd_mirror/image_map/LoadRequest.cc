@@ -11,8 +11,8 @@
 #include "UpdateRequest.h"
 #include "LoadRequest.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_map::LoadRequest: "   \
                            << this << " " << __func__
@@ -54,7 +54,7 @@ void LoadRequest<I>::image_map_list() {
 
   m_out_bl.clear();
   int r = m_ioctx.aio_operate(RBD_MIRROR_LEADER, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -97,7 +97,7 @@ void LoadRequest<I>::mirror_image_list() {
     LoadRequest<I>,
     &LoadRequest<I>::handle_mirror_image_list>(this);
   int r = m_ioctx.aio_operate(RBD_MIRRORING, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

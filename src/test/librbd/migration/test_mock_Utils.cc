@@ -17,27 +17,27 @@ public:
 
 TEST_F(TestMockMigrationUtils, ParseUrl) {
    UrlSpec url_spec;
-   ASSERT_EQ(-EINVAL, parse_url(g_ceph_context, "", &url_spec));
-   ASSERT_EQ(-EINVAL, parse_url(g_ceph_context, "jttp://google.com/path",
+   ASSERT_EQ(-EINVAL, parse_url(g_stone_context, "", &url_spec));
+   ASSERT_EQ(-EINVAL, parse_url(g_stone_context, "jttp://google.com/path",
                                 &url_spec));
-   ASSERT_EQ(-EINVAL, parse_url(g_ceph_context, "http://google.com:absd/path",
+   ASSERT_EQ(-EINVAL, parse_url(g_stone_context, "http://google.com:absd/path",
                                 &url_spec));
 
-   ASSERT_EQ(0, parse_url(g_ceph_context, "ceph.io/path", &url_spec));
-   ASSERT_EQ(UrlSpec(URL_SCHEME_HTTP, "ceph.io", "80", "/path"), url_spec);
+   ASSERT_EQ(0, parse_url(g_stone_context, "stone.io/path", &url_spec));
+   ASSERT_EQ(UrlSpec(URL_SCHEME_HTTP, "stone.io", "80", "/path"), url_spec);
 
-   ASSERT_EQ(0, parse_url(g_ceph_context, "http://google.com/path", &url_spec));
+   ASSERT_EQ(0, parse_url(g_stone_context, "http://google.com/path", &url_spec));
    ASSERT_EQ(UrlSpec(URL_SCHEME_HTTP, "google.com", "80", "/path"), url_spec);
 
-   ASSERT_EQ(0, parse_url(g_ceph_context, "https://ceph.io/", &url_spec));
-   ASSERT_EQ(UrlSpec(URL_SCHEME_HTTPS, "ceph.io", "443", "/"), url_spec);
+   ASSERT_EQ(0, parse_url(g_stone_context, "https://stone.io/", &url_spec));
+   ASSERT_EQ(UrlSpec(URL_SCHEME_HTTPS, "stone.io", "443", "/"), url_spec);
 
-   ASSERT_EQ(0, parse_url(g_ceph_context,
+   ASSERT_EQ(0, parse_url(g_stone_context,
                           "http://google.com:1234/some/other/path", &url_spec));
    ASSERT_EQ(UrlSpec(URL_SCHEME_HTTP, "google.com", "1234", "/some/other/path"),
              url_spec);
 
-   ASSERT_EQ(0, parse_url(g_ceph_context,
+   ASSERT_EQ(0, parse_url(g_stone_context,
                           "http://1.2.3.4/", &url_spec));
    ASSERT_EQ(UrlSpec(URL_SCHEME_HTTP, "1.2.3.4", "80", "/"), url_spec);
 }

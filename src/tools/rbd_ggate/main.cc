@@ -20,7 +20,7 @@
 #include "common/Formatter.h"
 #include "common/Preforker.h"
 #include "common/TextTable.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/config_proxy.h"
 #include "common/debug.h"
 #include "common/errno.h"
@@ -35,8 +35,8 @@
 #include "Server.h"
 #include "Watcher.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd-ggate: " << __func__ << ": "
 
@@ -67,8 +67,8 @@ static void handle_signal(int signum)
 {
   derr << "*** Got signal " << sig_str(signum) << " ***" << dendl;
 
-  ceph_assert(signum == SIGINT || signum == SIGTERM);
-  ceph_assert(drv);
+  stone_assert(signum == SIGINT || signum == SIGTERM);
+  stone_assert(drv);
 
   drv->shut_down();
 }
@@ -90,12 +90,12 @@ static int do_map(int argc, const char *argv[])
   vector<const char*> args;
   argv_to_vec(argc, argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_DAEMON,
                          CINIT_FLAG_UNPRIVILEGED_DAEMON_DEFAULTS);
-  g_ceph_context->_conf.set_val_or_die("pid_file", "");
+  g_stone_context->_conf.set_val_or_die("pid_file", "");
 
-  if (global_init_prefork(g_ceph_context) >= 0) {
+  if (global_init_prefork(g_stone_context) >= 0) {
     std::string err;
     r = forker.prefork(err);
     if (r < 0) {
@@ -108,14 +108,14 @@ static int do_map(int argc, const char *argv[])
       }
       return 0;
     }
-    global_init_postfork_start(g_ceph_context);
+    global_init_postfork_start(g_stone_context);
   }
 
-  common_init_finish(g_ceph_context);
-  global_init_chdir(g_ceph_context);
+  common_init_finish(g_stone_context);
+  global_init_chdir(g_stone_context);
 
   if (poolname.empty()) {
-    poolname = g_ceph_context->_conf.get_val<std::string>("rbd_default_pool");
+    poolname = g_stone_context->_conf.get_val<std::string>("rbd_default_pool");
   }
 
   std::string devname = boost::starts_with(devpath, "/dev/") ?
@@ -123,7 +123,7 @@ static int do_map(int argc, const char *argv[])
   std::unique_ptr<rbd::ggate::Watcher> watcher;
   uint64_t handle;
 
-  r = rados.init_with_context(g_ceph_context);
+  r = rados.init_with_context(g_stone_context);
   if (r < 0) {
     goto done;
   }
@@ -203,7 +203,7 @@ static int do_map(int argc, const char *argv[])
   std::cout << "/dev/" << drv->get_devname() << std::endl;
 
   if (g_conf()->daemonize) {
-    global_init_postfork_finish(g_ceph_context);
+    global_init_postfork_finish(g_stone_context);
     forker.daemonize();
   }
 
@@ -220,7 +220,7 @@ static int do_map(int argc, const char *argv[])
   shutdown_async_signal_handler();
 
   r = image.update_unwatch(handle);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
 done:
   image.close();
@@ -328,7 +328,7 @@ static int do_list(const std::string &format, bool pretty_format)
     return -r;
   }
 
-  std::unique_ptr<ceph::Formatter> f;
+  std::unique_ptr<stone::Formatter> f;
   TextTable tbl;
 
   if (format == "json") {
@@ -409,11 +409,11 @@ int main(int argc, const char *argv[]) {
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
-  // filter out ceph config options
+  // filter out stone config options
   ConfigProxy{false}.parse_argv(args);
 
   std::string format;
@@ -421,18 +421,18 @@ int main(int argc, const char *argv[]) {
   std::vector<const char*>::iterator i;
 
   for (i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_flag(args, i, "-h", "--help", (char*)NULL)) {
+    if (stone_argparse_flag(args, i, "-h", "--help", (char*)NULL)) {
       usage();
       return 0;
-    } else if (ceph_argparse_witharg(args, i, &devpath, "--device",
+    } else if (stone_argparse_witharg(args, i, &devpath, "--device",
                                      (char *)NULL)) {
-    } else if (ceph_argparse_flag(args, i, "--read-only", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--read-only", (char *)NULL)) {
       readonly = true;
-    } else if (ceph_argparse_flag(args, i, "--exclusive", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--exclusive", (char *)NULL)) {
       exclusive = true;
-    } else if (ceph_argparse_witharg(args, i, &format, "--format",
+    } else if (stone_argparse_witharg(args, i, &format, "--format",
                                      (char *)NULL)) {
-    } else if (ceph_argparse_flag(args, i, "--pretty-format", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--pretty-format", (char *)NULL)) {
       pretty_format = true;
     } else {
       ++i;

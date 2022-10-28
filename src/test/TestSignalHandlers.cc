@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2010 Dreamhost
  *
@@ -15,9 +15,9 @@
 /*
  * TestSignalHandlers
  *
- * Test the Ceph signal handlers
+ * Test the Stone signal handlers
  */
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "common/errno.h"
 #include "common/debug.h"
@@ -28,7 +28,7 @@
 #include <sstream>
 #include <string>
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 using std::string;
 
 // avoid compiler warning about dereferencing NULL pointer
@@ -82,23 +82,23 @@ int main(int argc, const char **argv)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   test_fn_t fn = NULL;
   for (std::vector<const char*>::iterator i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_double_dash(args, i)) {
+    if (stone_argparse_double_dash(args, i)) {
       break;
-    } else if (ceph_argparse_flag(args, i, "--infinite_recursion", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--infinite_recursion", (char*)NULL)) {
       fn = infinite_recursion_test;
-    } else if (ceph_argparse_flag(args, i, "-s", "--simple_segv", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "-s", "--simple_segv", (char*)NULL)) {
       fn = simple_segv_test;
     } else {
       cerr << "unrecognized argument: " << *i << std::endl;

@@ -42,10 +42,10 @@ public:
                            const std::string& mirror_uuid,
                            const std::string& value, int r) {
     bufferlist in_bl;
-    ceph::encode(util::get_image_meta_key(mirror_uuid), in_bl);
+    stone::encode(util::get_image_meta_key(mirror_uuid), in_bl);
 
     bufferlist out_bl;
-    ceph::encode(value, out_bl);
+    stone::encode(value, out_bl);
 
     EXPECT_CALL(get_mock_io_ctx(mock_image_ctx.md_ctx),
                 exec(mock_image_ctx.header_oid, _, StrEq("rbd"),
@@ -61,7 +61,7 @@ public:
     value_bl.append(value);
 
     bufferlist in_bl;
-    ceph::encode(
+    stone::encode(
       std::map<std::string, bufferlist>{
         {util::get_image_meta_key(mirror_uuid), value_bl}},
       in_bl);

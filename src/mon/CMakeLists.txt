@@ -1,6 +1,6 @@
 set(lib_mon_srcs
-  ${CMAKE_SOURCE_DIR}/src/auth/cephx/CephxKeyServer.cc
-  ${CMAKE_SOURCE_DIR}/src/auth/cephx/CephxServiceHandler.cc
+  ${CMAKE_SOURCE_DIR}/src/auth/stonex/StonexKeyServer.cc
+  ${CMAKE_SOURCE_DIR}/src/auth/stonex/StonexServiceHandler.cc
   ${CMAKE_SOURCE_DIR}/src/auth/AuthServiceHandler.cc
   Paxos.cc
   PaxosService.cc

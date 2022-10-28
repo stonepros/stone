@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat Inc.
  *
@@ -221,7 +221,7 @@ class PGOpItem : public PGOpQueueable {
 
   const MOSDOp *maybe_get_mosd_op() const {
     auto req = op->get_req();
-    if (req->get_type() == CEPH_MSG_OSD_OP) {
+    if (req->get_type() == STONE_MSG_OSD_OP) {
       return op->get_req<MOSDOp>();
     } else {
       return nullptr;
@@ -245,8 +245,8 @@ public:
 
   op_scheduler_class get_scheduler_class() const final {
     auto type = op->get_req()->get_type();
-    if (type == CEPH_MSG_OSD_OP ||
-	type == CEPH_MSG_OSD_BACKOFF) {
+    if (type == STONE_MSG_OSD_OP ||
+	type == STONE_MSG_OSD_BACKOFF) {
       return op_scheduler_class::client;
     } else {
       return op_scheduler_class::immediate;
@@ -617,7 +617,7 @@ public:
 
   op_scheduler_class get_scheduler_class() const final {
     auto priority = op->get_req()->get_priority();
-    if (priority >= CEPH_MSG_PRIO_HIGH) {
+    if (priority >= STONE_MSG_PRIO_HIGH) {
       return op_scheduler_class::immediate;
     }
     return op_scheduler_class::background_recovery;

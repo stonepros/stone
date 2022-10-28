@@ -8,7 +8,7 @@
 #include "cls/lock/cls_lock_client.h"
 #include <iostream>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::SnapshotCreateRequest: "
 
@@ -43,7 +43,7 @@ void SnapshotCreateRequest::send() {
 }
 
 bool SnapshotCreateRequest::should_complete(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": state=" << m_state << ", "
                 << "r=" << r << dendl;
   if (r < 0 && m_ret_val == 0) {
@@ -68,17 +68,17 @@ bool SnapshotCreateRequest::should_complete(int r) {
     finished = true;
     break;
   default:
-    ceph_abort();
+    stone_abort();
     break;
   }
   return finished;
 }
 
 void SnapshotCreateRequest::send_read_map() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.image_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.image_lock));
 
-  CephContext *cct = m_image_ctx.cct;
-  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, CEPH_NOSNAP));
+  StoneContext *cct = m_image_ctx.cct;
+  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, STONE_NOSNAP));
   ldout(cct, 5) << this << " " << __func__ << ": oid=" << oid << dendl;
   m_state = STATE_READ_MAP;
 
@@ -89,12 +89,12 @@ void SnapshotCreateRequest::send_read_map() {
   librados::AioCompletion *rados_completion = create_callback_completion();
   int r = m_image_ctx.md_ctx.aio_operate(oid, rados_completion, &op,
                                          &m_read_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 void SnapshotCreateRequest::send_write_map() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   std::string snap_oid(ObjectMap<>::object_map_name(m_image_ctx.id, m_snap_id));
   ldout(cct, 5) << this << " " << __func__ << ": snap_oid=" << snap_oid
                 << dendl;
@@ -105,7 +105,7 @@ void SnapshotCreateRequest::send_write_map() {
 
   librados::AioCompletion *rados_completion = create_callback_completion();
   int r = m_image_ctx.md_ctx.aio_operate(snap_oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
@@ -115,8 +115,8 @@ bool SnapshotCreateRequest::send_add_snapshot() {
     return true;
   }
 
-  CephContext *cct = m_image_ctx.cct;
-  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, CEPH_NOSNAP));
+  StoneContext *cct = m_image_ctx.cct;
+  std::string oid(ObjectMap<>::object_map_name(m_image_ctx.id, STONE_NOSNAP));
   ldout(cct, 5) << this << " " << __func__ << ": oid=" << oid << dendl;
   m_state = STATE_ADD_SNAPSHOT;
 
@@ -126,7 +126,7 @@ bool SnapshotCreateRequest::send_add_snapshot() {
 
   librados::AioCompletion *rados_completion = create_callback_completion();
   int r = m_image_ctx.md_ctx.aio_operate(oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
   return false;
 }

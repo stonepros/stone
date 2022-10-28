@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_AUTHCLIENTHANDLER_H
-#define CEPH_AUTHCLIENTHANDLER_H
+#ifndef STONE_AUTHCLIENTHANDLER_H
+#define STONE_AUTHCLIENTHANDLER_H
 
 
 #include "auth/Auth.h"
@@ -24,7 +24,7 @@ class RotatingKeyRing;
 
 class AuthClientHandler {
 protected:
-  CephContext *cct;
+  StoneContext *cct;
   EntityName name;
   uint64_t global_id;
   uint32_t want;
@@ -32,8 +32,8 @@ protected:
   uint32_t need;
 
 public:
-  explicit AuthClientHandler(CephContext *cct_)
-    : cct(cct_), global_id(0), want(CEPH_ENTITY_TYPE_AUTH), have(0), need(0)
+  explicit AuthClientHandler(StoneContext *cct_)
+    : cct(cct_), global_id(0), want(STONE_ENTITY_TYPE_AUTH), have(0), need(0)
   {}
   virtual ~AuthClientHandler() {}
 
@@ -42,7 +42,7 @@ public:
   void init(const EntityName& n) { name = n; }
   
   void set_want_keys(__u32 keys) {
-    want = keys | CEPH_ENTITY_TYPE_AUTH;
+    want = keys | STONE_ENTITY_TYPE_AUTH;
     validate_tickets();
   }
 
@@ -65,7 +65,7 @@ public:
 
   virtual void set_global_id(uint64_t id) = 0;
 
-  static AuthClientHandler* create(CephContext* cct, int proto, RotatingKeyRing* rkeys);
+  static AuthClientHandler* create(StoneContext* cct, int proto, RotatingKeyRing* rkeys);
 protected:
   virtual void validate_tickets() = 0;
 };

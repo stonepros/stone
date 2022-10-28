@@ -12,7 +12,7 @@
 #include "librbd/managed_lock/Types.h"
 #include "librbd/managed_lock/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::managed_lock::GetLockerRequest: " \
                            << this << " " << __func__ << ": "
@@ -26,7 +26,7 @@ template <typename I>
 GetLockerRequest<I>::GetLockerRequest(librados::IoCtx& ioctx,
 				      const std::string& oid, bool exclusive,
                                       Locker *locker, Context *on_finish)
-  : m_ioctx(ioctx), m_cct(reinterpret_cast<CephContext *>(m_ioctx.cct())),
+  : m_ioctx(ioctx), m_cct(reinterpret_cast<StoneContext *>(m_ioctx.cct())),
     m_oid(oid), m_exclusive(exclusive), m_locker(locker),
     m_on_finish(on_finish) {
 }
@@ -48,7 +48,7 @@ void GetLockerRequest<I>::send_get_lockers() {
     create_rados_callback<klass, &klass::handle_get_lockers>(this);
   m_out_bl.clear();
   int r = m_ioctx.aio_operate(m_oid, rados_completion, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 

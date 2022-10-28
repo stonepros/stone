@@ -9,8 +9,8 @@
  * Foundation.  See file COPYING.
  */
 
-#ifndef CEPH_EXTATTR_H
-#define CEPH_EXTATTR_H
+#ifndef STONE_EXTATTR_H
+#define STONE_EXTATTR_H
 
 
 #ifdef __cplusplus
@@ -43,4 +43,4 @@ int ceph_os_fremovexattr(int fd, const char *name);
 }
 #endif
 
-#endif /* !CEPH_EXTATTR_H */
+#endif /* !STONE_EXTATTR_H */

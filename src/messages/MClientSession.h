@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MCLIENTSESSION_H
-#define CEPH_MCLIENTSESSION_H
+#ifndef STONE_MCLIENTSESSION_H
+#define STONE_MCLIENTSESSION_H
 
 #include "msg/Message.h"
 #include "mds/mdstypes.h"
@@ -39,16 +39,16 @@ public:
   int get_max_leases() const { return head.max_leases; }
 
 protected:
-  MClientSession() : SafeMessage{CEPH_MSG_CLIENT_SESSION, HEAD_VERSION, COMPAT_VERSION} { }
+  MClientSession() : SafeMessage{STONE_MSG_CLIENT_SESSION, HEAD_VERSION, COMPAT_VERSION} { }
   MClientSession(int o, version_t s=0, unsigned msg_flags=0) :
-    SafeMessage{CEPH_MSG_CLIENT_SESSION, HEAD_VERSION, COMPAT_VERSION},
+    SafeMessage{STONE_MSG_CLIENT_SESSION, HEAD_VERSION, COMPAT_VERSION},
     flags(msg_flags) {
     memset(&head, 0, sizeof(head));
     head.op = o;
     head.seq = s;
   }
   MClientSession(int o, utime_t st) : 
-    SafeMessage{CEPH_MSG_CLIENT_SESSION, HEAD_VERSION, COMPAT_VERSION} {
+    SafeMessage{STONE_MSG_CLIENT_SESSION, HEAD_VERSION, COMPAT_VERSION} {
     memset(&head, 0, sizeof(head));
     head.op = o;
     head.seq = 0;
@@ -62,7 +62,7 @@ public:
     out << "client_session(" << ceph_session_op_name(get_op());
     if (get_seq())
       out << " seq " << get_seq();
-    if (get_op() == CEPH_SESSION_RECALL_STATE)
+    if (get_op() == STONE_SESSION_RECALL_STATE)
       out << " max_caps " << head.max_caps << " max_leases " << head.max_leases;
     out << ")";
   }

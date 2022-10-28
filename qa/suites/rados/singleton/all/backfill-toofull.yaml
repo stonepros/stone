@@ -13,10 +13,10 @@ openstack:
       size: 10 # GB
 tasks:
 - install:
-- ceph:
+- stone:
     create_rbd_pool: false
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     log-ignorelist:
       - Error
       - overall HEALTH_

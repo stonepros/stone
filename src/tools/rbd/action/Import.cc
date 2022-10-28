@@ -17,10 +17,10 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 #include <boost/scoped_ptr.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 
 namespace rbd {
 namespace action {
@@ -269,13 +269,13 @@ static int do_image_io(ImportDiffContext *idiffctx, bool write_zeroes,
       bool zeroed = false;
       utils::calc_sparse_extent(bp, sparse_size, buffer_offset, buffer_length,
 				&write_length, &zeroed);
-      ceph_assert(write_length > 0);
+      stone_assert(write_length > 0);
 
       bufferlist write_bl;
       if (!zeroed) {
 	bufferptr write_ptr(bp, buffer_offset, write_length);
 	write_bl.push_back(write_ptr);
-	ceph_assert(write_bl.length() == write_length);
+	stone_assert(write_bl.length() == write_length);
       }
 
       C_ImportDiff *ctx = new C_ImportDiff(idiffctx, write_bl,
@@ -476,7 +476,7 @@ void get_arguments_diff(po::options_description *positional,
 }
 
 int execute_diff(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   std::string path;
   size_t arg_index = 0;
   int r = utils::get_path(vm, &arg_index, &path);
@@ -779,7 +779,7 @@ static int do_import_v1(int fd, librbd::Image &image, uint64_t size,
 	bufferlist write_bl;
 	bufferptr write_ptr(blkptr, buffer_offset, write_length);
 	write_bl.push_back(write_ptr);
-	ceph_assert(write_bl.length() == write_length);
+	stone_assert(write_bl.length() == write_length);
 
 	C_Import *ctx = new C_Import(*throttle, image, write_bl,
 				     image_pos + buffer_offset);
@@ -826,7 +826,7 @@ static int do_import(librados::Rados &rados, librbd::RBD &rbd,
   utils::ProgressContext pc("Importing image", no_progress);
   std::map<std::string, std::string> imagemetas;
 
-  ceph_assert(imgname);
+  stone_assert(imgname);
 
   uint64_t order;
   if (opts.get(RBD_IMAGE_OPTION_ORDER, &order) != 0) {
@@ -871,7 +871,7 @@ static int do_import(librados::Rados &rados, librbd::RBD &rbd,
                   << std::endl;
         goto done;
       }
-      ceph_assert(bdev_size >= 0);
+      stone_assert(bdev_size >= 0);
       size = (uint64_t) bdev_size;
     }
 #ifdef HAVE_POSIX_FADVISE
@@ -946,7 +946,7 @@ void get_arguments(po::options_description *positional,
 }
 
 int execute(const po::variables_map &vm,
-            const std::vector<std::string> &ceph_global_init_args) {
+            const std::vector<std::string> &stone_global_init_args) {
   std::string path;
   size_t arg_index = 0;
   int r = utils::get_path(vm, &arg_index, &path);

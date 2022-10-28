@@ -6,9 +6,9 @@ roles:
 - [mon.a, mgr.x, mds.a, osd.0, osd.1, osd.2, client.0, client.1]
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     log-ignorelist:
       - overall HEALTH_
       - \(CACHE_POOL_NO_HIT_SET\)
@@ -21,15 +21,15 @@ tasks:
         debug ms: 1
 - exec:
     client.0:
-    - ceph osd pool create data_cache 4
-    - ceph osd tier add cephfs_data data_cache
-    - ceph osd tier cache-mode data_cache writeback
-    - ceph osd tier set-overlay cephfs_data data_cache
-    - ceph osd pool set data_cache hit_set_type bloom
-    - ceph osd pool set data_cache hit_set_count 8
-    - ceph osd pool set data_cache hit_set_period 3600
-    - ceph osd pool set data_cache min_read_recency_for_promote 0
-- ceph-fuse:
+    - stone osd pool create data_cache 4
+    - stone osd tier add stonefs_data data_cache
+    - stone osd tier cache-mode data_cache writeback
+    - stone osd tier set-overlay stonefs_data data_cache
+    - stone osd pool set data_cache hit_set_type bloom
+    - stone osd pool set data_cache hit_set_count 8
+    - stone osd pool set data_cache hit_set_period 3600
+    - stone osd pool set data_cache min_read_recency_for_promote 0
+- stone-fuse:
 - exec:
     client.0:
       - sudo chmod 777 $TESTDIR/mnt.0/

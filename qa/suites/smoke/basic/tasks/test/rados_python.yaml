@@ -1,5 +1,5 @@
 tasks:
-- ceph:
+- stone:
     log-ignorelist:
     - but it is still running
     - overall HEALTH_
@@ -8,7 +8,7 @@ tasks:
     - \(OSD_
     - \(OBJECT_
     - \(POOL_APP_NOT_ENABLED\)
-- ceph-fuse:
+- stone-fuse:
 - workunit:
     clients:
       client.0:

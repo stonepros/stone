@@ -38,7 +38,7 @@ public:
       const librbd::deep_copy::ObjectNumber &object_number,
       librbd::asio::ContextWQ *work_queue, SnapSeqs *snap_seqs,
       deep_copy::Handler *handler, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -69,7 +69,7 @@ namespace mirror {
 
 template <>
 struct Threads<librbd::MockTestImageCtx> {
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
   SafeTimer *timer;
   librbd::asio::ContextWQ *work_queue;
 
@@ -98,7 +98,7 @@ public:
                                         const std::string &mirror_uuid,
                                         image_sync::SyncPointHandler* sync_point_handler,
                                         Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -120,7 +120,7 @@ public:
                                        bool sync_complete,
                                        image_sync::SyncPointHandler* sync_point_handler,
                                        Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     s_instance->sync_complete = sync_complete;
     return s_instance;

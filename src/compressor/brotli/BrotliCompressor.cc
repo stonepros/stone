@@ -3,7 +3,7 @@
 #include "BrotliCompressor.h"
 #include "include/scope_guard.h"
 
-#define MAX_LEN (CEPH_PAGE_SIZE)
+#define MAX_LEN (STONE_PAGE_SIZE)
 
 int BrotliCompressor::compress(const bufferlist &in, bufferlist &out, boost::optional<int32_t> &compressor_message) 
 {

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IMAGE_SNAP_SET_REQUEST_H
-#define CEPH_LIBRBD_IMAGE_SNAP_SET_REQUEST_H
+#ifndef STONE_LIBRBD_IMAGE_SNAP_SET_REQUEST_H
+#define STONE_LIBRBD_IMAGE_SNAP_SET_REQUEST_H
 
 #include "cls/rbd/cls_rbd_client.h"
 #include <string>
@@ -115,4 +115,4 @@ private:
 
 extern template class librbd::image::SetSnapRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_IMAGE_SNAP_SET_REQUEST_H
+#endif // STONE_LIBRBD_IMAGE_SNAP_SET_REQUEST_H

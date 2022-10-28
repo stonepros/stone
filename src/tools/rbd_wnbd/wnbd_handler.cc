@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 SUSE LINUX GmbH
  *
@@ -10,8 +10,8 @@
  *
  */
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 
 #include "wnbd_handler.h"
 
@@ -164,7 +164,7 @@ void WnbdHandler::aio_callback(librbd::completion_t cb, void *arg)
 
 void WnbdHandler::send_io_response(WnbdHandler::IOContext *ctx) {
   std::unique_ptr<WnbdHandler::IOContext> pctx{ctx};
-  ceph_assert(WNBD_DEFAULT_MAX_TRANSFER_LENGTH >= pctx->data.length());
+  stone_assert(WNBD_DEFAULT_MAX_TRANSFER_LENGTH >= pctx->data.length());
 
   WNBD_IO_RESPONSE wnbd_rsp = {0};
   wnbd_rsp.RequestHandle = pctx->req_handle;
@@ -245,7 +245,7 @@ void WnbdHandler::Read(
   BOOLEAN ForceUnitAccess)
 {
   WnbdHandler* handler = nullptr;
-  ceph_assert(!WnbdGetUserContext(Disk, (PVOID*)&handler));
+  stone_assert(!WnbdGetUserContext(Disk, (PVOID*)&handler));
 
   WnbdHandler::IOContext* ctx = new WnbdHandler::IOContext();
   ctx->handler = handler;
@@ -253,7 +253,7 @@ void WnbdHandler::Read(
   ctx->req_type = WnbdReqTypeRead;
   ctx->req_size = BlockCount * handler->block_size;
   ctx->req_from = BlockAddress * handler->block_size;
-  ceph_assert(ctx->req_size <= WNBD_DEFAULT_MAX_TRANSFER_LENGTH);
+  stone_assert(ctx->req_size <= WNBD_DEFAULT_MAX_TRANSFER_LENGTH);
 
   int op_flags = 0;
   if (ForceUnitAccess) {
@@ -277,7 +277,7 @@ void WnbdHandler::Write(
   BOOLEAN ForceUnitAccess)
 {
   WnbdHandler* handler = nullptr;
-  ceph_assert(!WnbdGetUserContext(Disk, (PVOID*)&handler));
+  stone_assert(!WnbdGetUserContext(Disk, (PVOID*)&handler));
 
   WnbdHandler::IOContext* ctx = new WnbdHandler::IOContext();
   ctx->handler = handler;
@@ -309,7 +309,7 @@ void WnbdHandler::Flush(
   UINT32 BlockCount)
 {
   WnbdHandler* handler = nullptr;
-  ceph_assert(!WnbdGetUserContext(Disk, (PVOID*)&handler));
+  stone_assert(!WnbdGetUserContext(Disk, (PVOID*)&handler));
 
   WnbdHandler::IOContext* ctx = new WnbdHandler::IOContext();
   ctx->handler = handler;
@@ -333,8 +333,8 @@ void WnbdHandler::Unmap(
   UINT32 Count)
 {
   WnbdHandler* handler = nullptr;
-  ceph_assert(!WnbdGetUserContext(Disk, (PVOID*)&handler));
-  ceph_assert(1 == Count);
+  stone_assert(!WnbdGetUserContext(Disk, (PVOID*)&handler));
+  stone_assert(1 == Count);
 
   WnbdHandler::IOContext* ctx = new WnbdHandler::IOContext();
   ctx->handler = handler;
@@ -371,7 +371,7 @@ int WnbdHandler::start()
   WNBD_PROPERTIES wnbd_props = {0};
 
   instance_name.copy(wnbd_props.InstanceName, sizeof(wnbd_props.InstanceName));
-  ceph_assert(strlen(RBD_WNBD_OWNER_NAME) < WNBD_MAX_OWNER_LENGTH);
+  stone_assert(strlen(RBD_WNBD_OWNER_NAME) < WNBD_MAX_OWNER_LENGTH);
   strncpy(wnbd_props.Owner, RBD_WNBD_OWNER_NAME, WNBD_MAX_OWNER_LENGTH);
 
   wnbd_props.BlockCount = block_count;

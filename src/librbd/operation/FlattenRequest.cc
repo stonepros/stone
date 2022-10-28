@@ -15,7 +15,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/construct.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::operation::FlattenRequest: " << this \
                            << " " << __func__ << ": "
@@ -37,8 +37,8 @@ public:
 
   int send() override {
     I &image_ctx = this->m_image_ctx;
-    ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
-    CephContext *cct = image_ctx.cct;
+    stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
+    StoneContext *cct = image_ctx.cct;
 
     if (image_ctx.exclusive_lock != nullptr &&
         !image_ctx.exclusive_lock->is_lock_owner()) {
@@ -73,7 +73,7 @@ private:
 template <typename I>
 bool FlattenRequest<I>::should_complete(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
   if (r < 0) {
     lderr(cct) << "encountered error: " << cpp_strerror(r) << dendl;
@@ -89,12 +89,12 @@ void FlattenRequest<I>::send_op() {
 template <typename I>
 void FlattenRequest<I>::flatten_objects() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << dendl;
 
-  assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  assert(stone_mutex_is_locked(image_ctx.owner_lock));
   auto ctx = create_context_callback<
     FlattenRequest<I>,
     &FlattenRequest<I>::handle_flatten_objects>(this);
@@ -111,7 +111,7 @@ void FlattenRequest<I>::flatten_objects() {
 template <typename I>
 void FlattenRequest<I>::handle_flatten_objects(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r == -ERESTART) {
@@ -130,11 +130,11 @@ void FlattenRequest<I>::handle_flatten_objects(int r) {
 template <typename I>
 void FlattenRequest<I>::detach_child() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   // should have been canceled prior to releasing lock
   image_ctx.owner_lock.lock_shared();
-  ceph_assert(image_ctx.exclusive_lock == nullptr ||
+  stone_assert(image_ctx.exclusive_lock == nullptr ||
               image_ctx.exclusive_lock->is_lock_owner());
 
   // if there are no snaps, remove from the children object as well
@@ -162,7 +162,7 @@ void FlattenRequest<I>::detach_child() {
 template <typename I>
 void FlattenRequest<I>::handle_detach_child(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r < 0 && r != -ENOENT) {
@@ -177,12 +177,12 @@ void FlattenRequest<I>::handle_detach_child(int r) {
 template <typename I>
 void FlattenRequest<I>::detach_parent() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << dendl;
 
   // should have been canceled prior to releasing lock
   image_ctx.owner_lock.lock_shared();
-  ceph_assert(image_ctx.exclusive_lock == nullptr ||
+  stone_assert(image_ctx.exclusive_lock == nullptr ||
               image_ctx.exclusive_lock->is_lock_owner());
 
   // stop early if the parent went away - it just means
@@ -209,7 +209,7 @@ void FlattenRequest<I>::detach_parent() {
 template <typename I>
 void FlattenRequest<I>::handle_detach_parent(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r < 0) {

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Adam Crume <adamcrume@gmail.com>
  *
@@ -25,7 +25,7 @@
 #include "global/global_context.h"
 #include "rbd_replay_debug.hpp"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 using namespace rbd_replay;
 
@@ -73,12 +73,12 @@ void Worker::join() {
 }
 
 void Worker::send(Action::ptr action) {
-  ceph_assert(action);
+  stone_assert(action);
   m_buffer.push_front(action);
 }
 
 void Worker::add_pending(PendingIO::ptr io) {
-  ceph_assert(io);
+  stone_assert(io);
   std::scoped_lock lock{m_pending_ios_mutex};
   assertf(m_pending_ios.count(io->id()) == 0, "id = %d", io->id());
   m_pending_ios[io->id()] = io;
@@ -113,7 +113,7 @@ void Worker::run() {
 
 
 void Worker::remove_pending(PendingIO::ptr io) {
-  ceph_assert(io);
+  stone_assert(io);
   m_replayer.set_action_complete(io->id());
   std::scoped_lock lock{m_pending_ios_mutex};
   size_t num_erased = m_pending_ios.erase(io->id());
@@ -130,7 +130,7 @@ librbd::Image* Worker::get_image(imagectx_id_t imagectx_id) {
 
 
 void Worker::put_image(imagectx_id_t imagectx_id, librbd::Image* image) {
-  ceph_assert(image);
+  stone_assert(image);
   m_replayer.put_image(imagectx_id, image);
 }
 
@@ -183,7 +183,7 @@ void Replayer::run(const std::string& replay_file) {
   {
     librados::Rados rados;
     rados.init(NULL);
-    int r = rados.init_with_context(g_ceph_context);
+    int r = rados.init_with_context(g_stone_context);
     if (r) {
       cerr << "Failed to initialize RADOS: " << cpp_strerror(r) << std::endl;
       goto out;
@@ -288,9 +288,9 @@ librbd::Image* Replayer::get_image(imagectx_id_t imagectx_id) {
 }
 
 void Replayer::put_image(imagectx_id_t imagectx_id, librbd::Image *image) {
-  ceph_assert(image);
+  stone_assert(image);
   std::unique_lock lock{m_images_mutex};
-  ceph_assert(m_images.count(imagectx_id) == 0);
+  stone_assert(m_images.count(imagectx_id) == 0);
   m_images[imagectx_id] = image;
 }
 
@@ -303,7 +303,7 @@ void Replayer::erase_image(imagectx_id_t imagectx_id) {
     JSONFormatter jf(true);
     bufferlist out;
     stringstream ss;
-    g_ceph_context->do_command(command, cmdmap, &jf, ss, &out);
+    g_stone_context->do_command(command, cmdmap, &jf, ss, &out);
     jf.flush(cout);
     cout << std::endl;
     cout.flush();
@@ -317,7 +317,7 @@ void Replayer::set_action_complete(action_id_t id) {
   auto now = std::chrono::system_clock::now();
   action_tracker_d &tracker = tracker_for(id);
   std::unique_lock lock{tracker.mutex};
-  ceph_assert(tracker.actions.count(id) == 0);
+  stone_assert(tracker.actions.count(id) == 0);
   tracker.actions[id] = now;
   tracker.condition.notify_all();
 }
@@ -373,7 +373,7 @@ void Replayer::clear_images() {
     JSONFormatter jf(true);
     bufferlist out;
     stringstream ss;
-    g_ceph_context->do_command(command, cmdmap, &jf, ss, &out);
+    g_stone_context->do_command(command, cmdmap, &jf, ss, &out);
     jf.flush(cout);
     cout << std::endl;
     cout.flush();

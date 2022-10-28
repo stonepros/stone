@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -134,7 +134,7 @@ int main(int argc, const char **argv)
    * now let's read that object back! Just for fun, we'll do it using
    * async IO instead of synchronous. (This would be more useful if we
    * wanted to send off multiple reads at once; see
-   * http://docs.ceph.com/docs/master/rados/api/librados/#asychronous-io )
+   * http://docs.stone.com/docs/master/rados/api/librados/#asychronous-io )
    */
   {
     int read_len = 4194304; // this is way more than we need

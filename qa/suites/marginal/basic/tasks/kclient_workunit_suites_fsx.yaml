@@ -11,7 +11,7 @@ tasks:
       - libtool
       - libuuid-devel
       - xfsprogs-devel
-- ceph:
+- stone:
 - kclient:
 - workunit:
     clients:

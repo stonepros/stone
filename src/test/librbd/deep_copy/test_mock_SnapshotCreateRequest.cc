@@ -37,7 +37,7 @@ public:
                                 uint64_t size,
                                 const cls::rbd::ParentImageSpec &parent_spec,
                                 uint64_t parent_overlap, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -15,7 +15,7 @@
 #include "global/global_context.h"
 
 #include <string.h>
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #if defined(WITH_SEASTAR) && !defined(WITH_ALIEN)
 #include "crimson/common/config_proxy.h"
 #endif
@@ -25,12 +25,12 @@
  * Global variables for use from process context.
  */
 namespace TOPNSPC::global {
-CephContext *g_ceph_context = NULL;
+StoneContext *g_stone_context = NULL;
 ConfigProxy& g_conf() {
 #if defined(WITH_SEASTAR) && !defined(WITH_ALIEN)
   return crimson::common::local_conf();
 #else
-  return g_ceph_context->_conf;
+  return g_stone_context->_conf;
 #endif
 }
 

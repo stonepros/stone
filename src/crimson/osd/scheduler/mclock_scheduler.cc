@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat Inc.
  *
@@ -23,7 +23,7 @@ namespace dmc = crimson::dmclock;
 using namespace std::placeholders;
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix *_dout
 
@@ -76,18 +76,18 @@ const dmc::ClientInfo *mClockScheduler::ClientRegistry::get_info(
   const scheduler_id_t &id) const {
   switch (id.class_id) {
   case scheduler_class_t::immediate:
-    ceph_assert(0 == "Cannot schedule immediate");
+    stone_assert(0 == "Cannot schedule immediate");
     return (dmc::ClientInfo*)nullptr;
   case scheduler_class_t::repop:
   case scheduler_class_t::client:
     return get_external_client(id.client_profile_id);
   default:
-    ceph_assert(static_cast<size_t>(id.class_id) < internal_client_infos.size());
+    stone_assert(static_cast<size_t>(id.class_id) < internal_client_infos.size());
     return &internal_client_infos[static_cast<size_t>(id.class_id)];
   }
 }
 
-void mClockScheduler::dump(ceph::Formatter &f) const
+void mClockScheduler::dump(stone::Formatter &f) const
 {
 }
 
@@ -122,15 +122,15 @@ item_t mClockScheduler::dequeue()
   } else {
     mclock_queue_t::PullReq result = scheduler.pull_request();
     if (result.is_future()) {
-      ceph_assert(
+      stone_assert(
 	0 == "Not implemented, user would have to be able to be woken up");
       return std::move(*(item_t*)nullptr);
     } else if (result.is_none()) {
-      ceph_assert(
+      stone_assert(
 	0 == "Impossible, must have checked empty() first");
       return std::move(*(item_t*)nullptr);
     } else {
-      ceph_assert(result.is_retn());
+      stone_assert(result.is_retn());
 
       auto &retn = result.get_retn();
       return std::move(*retn.request);

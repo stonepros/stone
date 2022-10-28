@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 CERN (Switzerland)
  *
@@ -22,8 +22,8 @@
  * ISA-L allows to use custom matrices which might be added later as implementations deriving from the base class ErasoreCodeIsa.
  */
 
-#ifndef CEPH_ERASURE_CODE_ISA_L_H
-#define CEPH_ERASURE_CODE_ISA_L_H
+#ifndef STONE_ERASURE_CODE_ISA_L_H
+#define STONE_ERASURE_CODE_ISA_L_H
 
 // -----------------------------------------------------------------------------
 #include "erasure-code/ErasureCode.h"

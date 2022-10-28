@@ -12,7 +12,7 @@
 
 #include <algorithm>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::ListWatchersRequest: " << this \
                            << " " << __func__ << ": "
@@ -36,7 +36,7 @@ ListWatchersRequest<I>::ListWatchersRequest(I &image_ctx, int flags,
                                             Context *on_finish)
   : m_image_ctx(image_ctx), m_flags(flags), m_watchers(watchers),
     m_on_finish(on_finish), m_cct(m_image_ctx.cct) {
-  ceph_assert((m_flags & LIST_WATCHERS_FILTER_OUT_MIRROR_INSTANCES) == 0 ||
+  stone_assert((m_flags & LIST_WATCHERS_FILTER_OUT_MIRROR_INSTANCES) == 0 ||
               (m_flags & LIST_WATCHERS_MIRROR_INSTANCES_ONLY) == 0);
 }
 
@@ -60,7 +60,7 @@ void ListWatchersRequest<I>::list_image_watchers() {
 
   int r = m_image_ctx.md_ctx.aio_operate(m_image_ctx.header_oid,
                                          rados_completion, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
@@ -102,7 +102,7 @@ void ListWatchersRequest<I>::list_mirror_watchers() {
   m_out_bl.clear();
   int r = m_image_ctx.md_ctx.aio_operate(RBD_MIRRORING, rados_completion,
                                          &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 

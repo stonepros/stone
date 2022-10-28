@@ -10,11 +10,11 @@
 #include "include/types.h"
 
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "rgw_common.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 void dump_array(JSONObj *obj)

@@ -10,7 +10,7 @@
 #include "rgw_xml.h"
 #include "rgw_multi_del.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 

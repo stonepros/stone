@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat
  *
@@ -174,7 +174,7 @@ void LazyOmapStatsTest::scrub() const
   cout << "Scrubbing" << endl;
   error_code ec;
   bp::ipstream is;
-  bp::system("ceph osd deep-scrub all --block", bp::std_out > is, ec);
+  bp::system("stone osd deep-scrub all --block", bp::std_out > is, ec);
   if (ec) {
     cout << "Deep scrub command failed! Error: " << ec.value() << " "
          << ec.message() << endl;

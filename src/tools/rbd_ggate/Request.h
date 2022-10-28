@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_GGATE_REQUEST_H
-#define CEPH_RBD_GGATE_REQUEST_H
+#ifndef STONE_RBD_GGATE_REQUEST_H
+#define STONE_RBD_GGATE_REQUEST_H
 
 #include "ggate_drv.h"
 
@@ -52,4 +52,4 @@ struct Request {
 } // namespace ggate
 } // namespace rbd
 
-#endif // CEPH_RBD_GGATE_REQUEST_H
+#endif // STONE_RBD_GGATE_REQUEST_H

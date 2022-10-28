@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_MMONGETVERSION_H
-#define CEPH_MMONGETVERSION_H
+#ifndef STONE_MMONGETVERSION_H
+#define STONE_MMONGETVERSION_H
 
 #include "msg/Message.h"
 
@@ -27,7 +27,7 @@
  */
 class MMonGetVersion final : public Message {
 public:
-  MMonGetVersion() : Message{CEPH_MSG_MON_GET_VERSION} {}
+  MMonGetVersion() : Message{STONE_MSG_MON_GET_VERSION} {}
 
   std::string_view get_type_name() const override {
     return "mon_get_version";

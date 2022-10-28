@@ -6,4 +6,4 @@ tasks:
     chance_pgpnum_fix: 1
     op_delay: 30
     chance_test_min_size: 0
-    ceph_objectstore_tool: false
+    stone_objectstore_tool: false

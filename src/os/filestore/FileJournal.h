@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_FILEJOURNAL_H
-#define CEPH_FILEJOURNAL_H
+#ifndef STONE_FILEJOURNAL_H
+#define STONE_FILEJOURNAL_H
 
 #include <condition_variable>
 #include <deque>
@@ -429,7 +429,7 @@ private:
         aio = false;
       }
 #ifndef HAVE_LIBAIO
-      if (aio && ::getenv("CEPH_DEV") == NULL) {
+      if (aio && ::getenv("STONE_DEV") == NULL) {
 	lderr(cct) << "FileJournal::_open_any: libaio not compiled in; disabling aio" << dendl;
         aio = false;
       }

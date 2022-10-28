@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stone - scalable distributed file system
 *
 * Copyright (C) 2012 Inktank, Inc.
 *
@@ -19,7 +19,7 @@
 #include "kv/KeyValueDB.h"
 #include <sys/types.h>
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "gtest/gtest.h"
 
 using namespace std;
@@ -33,10 +33,10 @@ public:
   boost::scoped_ptr<KeyValueDBMemory> mock;
 
   void SetUp() override {
-    ceph_assert(!store_path.empty());
+    stone_assert(!store_path.empty());
 
-    KeyValueDB *db_ptr = KeyValueDB::create(g_ceph_context, "leveldb", store_path);
-    ceph_assert(!db_ptr->create_and_open(std::cerr));
+    KeyValueDB *db_ptr = KeyValueDB::create(g_stone_context, "leveldb", store_path);
+    stone_assert(!db_ptr->create_and_open(std::cerr));
     db.reset(db_ptr);
     mock.reset(new KeyValueDBMemory());
   }
@@ -1742,13 +1742,13 @@ int main(int argc, char *argv[])
   vector<const char*> args;
   argv_to_vec(argc, (const char **) argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
+  common_init_finish(g_stone_context);
   ::testing::InitGoogleTest(&argc, argv);
 
   if (argc < 2) {
     std::cerr << "Usage: " << argv[0]
-	      << "[ceph_options] [gtest_options] <store_path>" << std::endl;
+	      << "[stone_options] [gtest_options] <store_path>" << std::endl;
     return 1;
   }
   store_path = string(argv[1]);

@@ -14,7 +14,7 @@
 
 namespace {
   [[maybe_unused]] seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_test);
+    return crimson::get_logger(stone_subsys_test);
   }
 }
 
@@ -57,7 +57,7 @@ struct btree_lba_manager_test :
   {
     auto record = cache.try_construct_record(*t);
     if (!record) {
-      ceph_assert(0 == "cannot fail");
+      stone_assert(0 == "cannot fail");
     }
 
     return journal.submit_record(std::move(*record)).safe_then(
@@ -87,7 +87,7 @@ struct btree_lba_manager_test :
 	});
     }).handle_error(
       crimson::ct_error::all_same_way([] {
-	ceph_assert(0 == "error");
+	stone_assert(0 == "error");
       })
     );
   }
@@ -214,8 +214,8 @@ struct btree_lba_manager_test :
   void decref_mapping(
     test_transaction_t &t,
     test_lba_mapping_t::iterator target) {
-    ceph_assert(target != t.mappings.end());
-    ceph_assert(target->second.refcount > 0);
+    stone_assert(target != t.mappings.end());
+    stone_assert(target->second.refcount > 0);
     target->second.refcount--;
 
     auto refcnt = lba_manager->decref_extent(
@@ -236,7 +236,7 @@ struct btree_lba_manager_test :
   void incref_mapping(
     test_transaction_t &t,
     test_lba_mapping_t::iterator target) {
-    ceph_assert(target->second.refcount > 0);
+    stone_assert(target->second.refcount > 0);
     target->second.refcount++;
     auto refcnt = lba_manager->incref_extent(
       *t.t,

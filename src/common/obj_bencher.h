@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2009 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OBJ_BENCHER_H
-#define CEPH_OBJ_BENCHER_H
+#ifndef STONE_OBJ_BENCHER_H
+#define STONE_OBJ_BENCHER_H
 
 #include "common/ceph_context.h"
 #include "common/Formatter.h"
@@ -66,7 +66,7 @@ class ObjBencher {
   Formatter *formatter = NULL;
   ostream *outstream = NULL;
 public:
-  CephContext *cct;
+  StoneeContext *cct;
 protected:
   ceph::mutex lock = ceph::make_mutex("ObjBencher::lock");
 
@@ -107,7 +107,7 @@ protected:
   ostream& out(ostream& os);
   ostream& out(ostream& os, utime_t& t);
 public:
-  explicit ObjBencher(CephContext *cct_) : show_time(false), cct(cct_), data() {}
+  explicit ObjBencher(StoneeContext *cct_) : show_time(false), cct(cct_), data() {}
   virtual ~ObjBencher() {}
   int aio_bench(
     int operation, int secondsToRun,

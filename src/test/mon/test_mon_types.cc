@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 Inktank
  *
@@ -18,8 +18,8 @@
 
 TEST(mon_features, supported_v_persistent) {
 
-  mon_feature_t supported = ceph::features::mon::get_supported();
-  mon_feature_t persistent = ceph::features::mon::get_persistent();
+  mon_feature_t supported = stone::features::mon::get_supported();
+  mon_feature_t persistent = stone::features::mon::get_persistent();
 
   ASSERT_EQ(supported.intersection(persistent), persistent);
   ASSERT_TRUE(supported.contains_all(persistent));
@@ -119,7 +119,7 @@ TEST(mon_features, set_unset) {
   mon_feature_t FEATURE_C((1ULL << 3));
 
   mon_feature_t foo;
-  ASSERT_EQ(ceph::features::mon::FEATURE_NONE, foo);
+  ASSERT_EQ(stone::features::mon::FEATURE_NONE, foo);
 
   foo.set_feature(FEATURE_A);
   ASSERT_EQ(FEATURE_A, foo);
@@ -135,6 +135,6 @@ TEST(mon_features, set_unset) {
   ASSERT_TRUE(foo.contains_all((FEATURE_B|FEATURE_C)));
 
   foo.unset_feature(FEATURE_B|FEATURE_C);
-  ASSERT_EQ(ceph::features::mon::FEATURE_NONE, foo);
+  ASSERT_EQ(stone::features::mon::FEATURE_NONE, foo);
   ASSERT_FALSE(foo.contains_any(FEATURE_A|FEATURE_B|FEATURE_C));
 }

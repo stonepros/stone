@@ -49,7 +49,7 @@ add_executable(unittest_rbd_mirror
   image_sync/test_mock_SyncPointPruneRequest.cc
   pool_watcher/test_mock_RefreshImagesRequest.cc
   )
-add_ceph_unittest(unittest_rbd_mirror)
+add_stone_unittest(unittest_rbd_mirror)
 
 add_dependencies(unittest_rbd_mirror
   cls_journal
@@ -75,11 +75,11 @@ target_link_libraries(unittest_rbd_mirror
   radostest-cxx
   )
 
-add_executable(ceph_test_rbd_mirror
+add_executable(stone_test_rbd_mirror
   test_main.cc
   )
 
-target_link_libraries(ceph_test_rbd_mirror
+target_link_libraries(stone_test_rbd_mirror
   rbd_mirror_test
   rbd_mirror_internal
   rbd_mirror_types
@@ -95,12 +95,12 @@ target_link_libraries(ceph_test_rbd_mirror
   ${UNITTEST_LIBS}
   )
 
-add_executable(ceph_test_rbd_mirror_random_write
+add_executable(stone_test_rbd_mirror_random_write
   random_write.cc)
-target_link_libraries(ceph_test_rbd_mirror_random_write
+target_link_libraries(stone_test_rbd_mirror_random_write
   librbd librados global)
 
 install(TARGETS
-  ceph_test_rbd_mirror
-  ceph_test_rbd_mirror_random_write
+  stone_test_rbd_mirror
+  stone_test_rbd_mirror_random_write
   DESTINATION ${CMAKE_INSTALL_BINDIR})

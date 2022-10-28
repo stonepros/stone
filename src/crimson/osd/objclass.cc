@@ -3,8 +3,8 @@
 
 #include <cstdarg>
 #include <cstring>
-#include "common/ceph_context.h"
-#include "common/ceph_releases.h"
+#include "common/stone_context.h"
+#include "common/stone_releases.h"
 #include "common/config.h"
 #include "common/debug.h"
 
@@ -83,20 +83,20 @@ int cls_get_request_origin(cls_method_context_t hctx, entity_inst_t *origin)
 
 int cls_cxx_create(cls_method_context_t hctx, const bool exclusive)
 {
-  OSDOp op{CEPH_OSD_OP_CREATE};
-  op.op.flags = (exclusive ? CEPH_OSD_OP_FLAG_EXCL : 0);
+  OSDOp op{STONE_OSD_OP_CREATE};
+  op.op.flags = (exclusive ? STONE_OSD_OP_FLAG_EXCL : 0);
   return execute_osd_op(hctx, op);
 }
 
 int cls_cxx_remove(cls_method_context_t hctx)
 {
-  OSDOp op{CEPH_OSD_OP_DELETE};
+  OSDOp op{STONE_OSD_OP_DELETE};
   return execute_osd_op(hctx, op);
 }
 
 int cls_cxx_stat(cls_method_context_t hctx, uint64_t *size, time_t *mtime)
 {
-  OSDOp op{CEPH_OSD_OP_STAT};
+  OSDOp op{STONE_OSD_OP_STAT};
   if (const auto ret = execute_osd_op(hctx, op); ret < 0) {
     return ret;
   }
@@ -120,7 +120,7 @@ int cls_cxx_stat(cls_method_context_t hctx, uint64_t *size, time_t *mtime)
 
 int cls_cxx_stat2(cls_method_context_t hctx,
                   uint64_t *size,
-                  ceph::real_time *mtime)
+                  stone::real_time *mtime)
 {
   return 0;
 }
@@ -131,7 +131,7 @@ int cls_cxx_read2(cls_method_context_t hctx,
                   bufferlist *outbl,
                   uint32_t op_flags)
 {
-  OSDOp op{CEPH_OSD_OP_SYNC_READ};
+  OSDOp op{STONE_OSD_OP_SYNC_READ};
   op.op.extent.offset = ofs;
   op.op.extent.length = len;
   op.op.flags = op_flags;
@@ -148,7 +148,7 @@ int cls_cxx_write2(cls_method_context_t hctx,
                    bufferlist *inbl,
                    uint32_t op_flags)
 {
-  OSDOp op{CEPH_OSD_OP_WRITE};
+  OSDOp op{STONE_OSD_OP_WRITE};
   op.op.extent.offset = ofs;
   op.op.extent.length = len;
   op.op.flags = op_flags;
@@ -158,7 +158,7 @@ int cls_cxx_write2(cls_method_context_t hctx,
 
 int cls_cxx_write_full(cls_method_context_t hctx, bufferlist * const inbl)
 {
-  OSDOp op{CEPH_OSD_OP_WRITEFULL};
+  OSDOp op{STONE_OSD_OP_WRITEFULL};
   op.op.extent.offset = 0;
   op.op.extent.length = inbl->length();
   op.indata = *inbl;
@@ -171,7 +171,7 @@ int cls_cxx_replace(cls_method_context_t hctx,
                     bufferlist *inbl)
 {
   {
-    OSDOp top{CEPH_OSD_OP_TRUNCATE};
+    OSDOp top{STONE_OSD_OP_TRUNCATE};
     top.op.extent.offset = 0;
     top.op.extent.length = 0;
     if (const auto ret = execute_osd_op(hctx, top); ret < 0) {
@@ -180,7 +180,7 @@ int cls_cxx_replace(cls_method_context_t hctx,
   }
 
   {
-    OSDOp wop{CEPH_OSD_OP_WRITE};
+    OSDOp wop{STONE_OSD_OP_WRITE};
     wop.op.extent.offset = ofs;
     wop.op.extent.length = len;
     wop.indata = *inbl;
@@ -193,7 +193,7 @@ int cls_cxx_replace(cls_method_context_t hctx,
 
 int cls_cxx_truncate(cls_method_context_t hctx, int ofs)
 {
-  OSDOp op{CEPH_OSD_OP_TRUNCATE};
+  OSDOp op{STONE_OSD_OP_TRUNCATE};
   op.op.extent.offset = ofs;
   op.op.extent.length = 0;
   return execute_osd_op(hctx, op);
@@ -201,7 +201,7 @@ int cls_cxx_truncate(cls_method_context_t hctx, int ofs)
 
 int cls_cxx_write_zero(cls_method_context_t hctx, int offset, int len)
 {
-  OSDOp op{CEPH_OSD_OP_ZERO};
+  OSDOp op{STONE_OSD_OP_ZERO};
   op.op.extent.offset = offset;
   op.op.extent.length = len;
   return execute_osd_op(hctx, op);
@@ -211,7 +211,7 @@ int cls_cxx_getxattr(cls_method_context_t hctx,
                      const char *name,
                      bufferlist *outbl)
 {
-  OSDOp op{CEPH_OSD_OP_GETXATTR};
+  OSDOp op{STONE_OSD_OP_GETXATTR};
   op.op.xattr.name_len = strlen(name);
   op.indata.append(name, op.op.xattr.name_len);
   if (const auto ret = execute_osd_op(hctx, op); ret < 0) {
@@ -231,7 +231,7 @@ int cls_cxx_setxattr(cls_method_context_t hctx,
                      const char *name,
                      bufferlist *inbl)
 {
-  OSDOp op{CEPH_OSD_OP_SETXATTR};
+  OSDOp op{STONE_OSD_OP_SETXATTR};
   op.op.xattr.name_len = std::strlen(name);
   op.op.xattr.value_len = inbl->length();
   op.indata.append(name, op.op.xattr.name_len);
@@ -241,7 +241,7 @@ int cls_cxx_setxattr(cls_method_context_t hctx,
 
 int cls_cxx_snap_revert(cls_method_context_t hctx, snapid_t snapid)
 {
-  OSDOp op{op = CEPH_OSD_OP_ROLLBACK};
+  OSDOp op{op = STONE_OSD_OP_ROLLBACK};
   op.op.snap.snapid = snapid;
   return execute_osd_op(hctx, op);
 }
@@ -259,7 +259,7 @@ int cls_cxx_map_get_keys(cls_method_context_t hctx,
                          std::set<std::string>* const keys,
                          bool* const more)
 {
-  OSDOp op{CEPH_OSD_OP_OMAPGETKEYS};
+  OSDOp op{STONE_OSD_OP_OMAPGETKEYS};
   encode(start_obj, op.indata);
   encode(max_to_get, op.indata);
   if (const auto ret = execute_osd_op(hctx, op); ret < 0) {
@@ -279,10 +279,10 @@ int cls_cxx_map_get_vals(cls_method_context_t hctx,
                          const std::string& start_obj,
                          const std::string& filter_prefix,
                          const uint64_t max_to_get,
-                         std::map<std::string, ceph::bufferlist> *vals,
+                         std::map<std::string, stone::bufferlist> *vals,
                          bool* const more)
 {
-  OSDOp op{CEPH_OSD_OP_OMAPGETVALS};
+  OSDOp op{STONE_OSD_OP_OMAPGETVALS};
   encode(start_obj, op.indata);
   encode(max_to_get, op.indata);
   encode(filter_prefix, op.indata);
@@ -301,9 +301,9 @@ int cls_cxx_map_get_vals(cls_method_context_t hctx,
 
 int cls_cxx_map_get_vals_by_keys(cls_method_context_t hctx,
 				 const std::set<std::string> &keys,
-				 std::map<std::string, ceph::bufferlist> *vals)
+				 std::map<std::string, stone::bufferlist> *vals)
 {
-  OSDOp op{CEPH_OSD_OP_OMAPGETVALSBYKEYS};
+  OSDOp op{STONE_OSD_OP_OMAPGETVALSBYKEYS};
   encode(keys, op.indata);
   if (const auto ret = execute_osd_op(hctx, op); ret < 0) {
     return ret;
@@ -319,7 +319,7 @@ int cls_cxx_map_get_vals_by_keys(cls_method_context_t hctx,
 
 int cls_cxx_map_read_header(cls_method_context_t hctx, bufferlist *outbl)
 {
-  OSDOp op{CEPH_OSD_OP_OMAPGETHEADER};
+  OSDOp op{STONE_OSD_OP_OMAPGETHEADER};
   if (const auto ret = execute_osd_op(hctx, op); ret < 0) {
     return ret;
   }
@@ -331,7 +331,7 @@ int cls_cxx_map_get_val(cls_method_context_t hctx,
                         const string &key,
                         bufferlist *outbl)
 {
-  OSDOp op{CEPH_OSD_OP_OMAPGETVALSBYKEYS};
+  OSDOp op{STONE_OSD_OP_OMAPGETVALSBYKEYS};
   {
     std::set<std::string> k{key};
     encode(k, op.indata);
@@ -339,7 +339,7 @@ int cls_cxx_map_get_val(cls_method_context_t hctx,
   if (const auto ret = execute_osd_op(hctx, op); ret < 0) {
     return ret;
   }
-  std::map<std::string, ceph::bufferlist> m;
+  std::map<std::string, stone::bufferlist> m;
   try {
     auto iter = op.outdata.cbegin();
     decode(m, iter);
@@ -358,9 +358,9 @@ int cls_cxx_map_set_val(cls_method_context_t hctx,
                         const string &key,
                         bufferlist *inbl)
 {
-  OSDOp op{CEPH_OSD_OP_OMAPSETVALS};
+  OSDOp op{STONE_OSD_OP_OMAPSETVALS};
   {
-    std::map<std::string, ceph::bufferlist> m;
+    std::map<std::string, stone::bufferlist> m;
     m[key] = *inbl;
     encode(m, op.indata);
   }
@@ -368,9 +368,9 @@ int cls_cxx_map_set_val(cls_method_context_t hctx,
 }
 
 int cls_cxx_map_set_vals(cls_method_context_t hctx,
-                         const std::map<string, ceph::bufferlist> *map)
+                         const std::map<string, stone::bufferlist> *map)
 {
-  OSDOp op{CEPH_OSD_OP_OMAPSETVALS};
+  OSDOp op{STONE_OSD_OP_OMAPSETVALS};
   encode(*map, op.indata);
   return execute_osd_op(hctx, op);
 }
@@ -382,7 +382,7 @@ int cls_cxx_map_clear(cls_method_context_t hctx)
 
 int cls_cxx_map_write_header(cls_method_context_t hctx, bufferlist *inbl)
 {
-  OSDOp op{CEPH_OSD_OP_OMAPSETHEADER};
+  OSDOp op{STONE_OSD_OP_OMAPSETHEADER};
   op.indata = std::move(*inbl);
   return execute_osd_op(hctx, op);
 }
@@ -391,7 +391,7 @@ int cls_cxx_map_remove_range(cls_method_context_t hctx,
                              const std::string& key_begin,
                              const std::string& key_end)
 {
-  OSDOp op{CEPH_OSD_OP_OMAPRMKEYRANGE};
+  OSDOp op{STONE_OSD_OP_OMAPRMKEYRANGE};
   encode(key_begin, op.indata);
   encode(key_end, op.indata);
   return execute_osd_op(hctx, op);
@@ -445,16 +445,16 @@ uint64_t cls_get_pool_stripe_width(cls_method_context_t hctx)
   return ox->get_pool_stripe_width();
 }
 
-ceph_release_t cls_get_required_osd_release(cls_method_context_t hctx)
+stone_release_t cls_get_required_osd_release(cls_method_context_t hctx)
 {
   // FIXME
-  return ceph_release_t::nautilus;
+  return stone_release_t::nautilus;
 }
 
-ceph_release_t cls_get_min_compatible_client(cls_method_context_t hctx)
+stone_release_t cls_get_min_compatible_client(cls_method_context_t hctx)
 {
   // FIXME
-  return ceph_release_t::nautilus;
+  return stone_release_t::nautilus;
 }
 
 int cls_get_snapset_seq(cls_method_context_t hctx, uint64_t *snap_seq)

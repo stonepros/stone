@@ -6,10 +6,10 @@ set(auth_srcs
   Crypto.cc
   KeyRing.cc
   RotatingKeyRing.cc
-  cephx/CephxAuthorizeHandler.cc
-  cephx/CephxClientHandler.cc
-  cephx/CephxProtocol.cc
-  cephx/CephxSessionHandler.cc
+  stonex/StonexAuthorizeHandler.cc
+  stonex/StonexClientHandler.cc
+  stonex/StonexProtocol.cc
+  stonex/StonexSessionHandler.cc
   none/AuthNoneAuthorizeHandler.cc)
 
 if(HAVE_GSSAPI)

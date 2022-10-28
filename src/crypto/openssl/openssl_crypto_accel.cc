@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Intel Corporation
  *
@@ -18,8 +18,8 @@
 #include "common/debug.h"
 
 // -----------------------------------------------------------------------------
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_crypto
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_crypto
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 
@@ -71,7 +71,7 @@ bool evp_transform(unsigned char* out, const unsigned char* in, size_t size,
     return false;
   }
 
-  ceph_assert(len_final == 0);
+  stone_assert(len_final == 0);
   return (len_update + len_final) == static_cast<int>(size);
 }
                         

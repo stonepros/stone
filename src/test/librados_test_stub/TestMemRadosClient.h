@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_TEST_MEM_RADOS_CLIENT_H
-#define CEPH_TEST_MEM_RADOS_CLIENT_H
+#ifndef STONE_TEST_MEM_RADOS_CLIENT_H
+#define STONE_TEST_MEM_RADOS_CLIENT_H
 
 #include "test/librados_test_stub/TestRadosClient.h"
 #include "include/ceph_assert.h"
@@ -16,7 +16,7 @@ class TestMemCluster;
 
 class TestMemRadosClient : public TestRadosClient {
 public:
-  TestMemRadosClient(CephContext *cct, TestMemCluster *test_mem_cluster);
+  TestMemRadosClient(StoneeContext *cct, TestMemCluster *test_mem_cluster);
   ~TestMemRadosClient() override;
 
   TestIoCtxImpl *create_ioctx(int64_t pool_id,
@@ -30,14 +30,14 @@ public:
   }
 
   int get_min_compatible_osd(int8_t* require_osd_release) override {
-    *require_osd_release = CEPH_RELEASE_OCTOPUS;
+    *require_osd_release = STONE_RELEASE_OCTOPUS;
     return 0;
   }
 
   int get_min_compatible_client(int8_t* min_compat_client,
                                 int8_t* require_min_compat_client) override {
-    *min_compat_client = CEPH_RELEASE_MIMIC;
-    *require_min_compat_client = CEPH_RELEASE_MIMIC;
+    *min_compat_client = STONE_RELEASE_MIMIC;
+    *require_min_compat_client = STONE_RELEASE_MIMIC;
     return 0;
   }
 
@@ -85,4 +85,4 @@ private:
 
 } // namespace librados
 
-#endif // CEPH_TEST_MEM_RADOS_CLIENT_H
+#endif // STONE_TEST_MEM_RADOS_CLIENT_H

@@ -1,0 +1,16 @@
+overrides:
+  stone:
+    crush_tunables: bobtail
+    mon_bind_addrvec: false
+    mon_bind_msgr2: false
+    conf:
+      global:
+        stonex require version: 1
+        stonex service require version: 1
+        ms bind msgr2: false
+tasks:
+- install:
+- stone:
+- exec:
+    client.0:
+    - "stone osd getcrushmap -o /dev/stdout | crushtool -d - | sed -e 's/alg straw2/alg straw/g' | crushtool -c /dev/stdin -o /dev/stdout | stone osd setcrushmap -i /dev/stdin"

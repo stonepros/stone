@@ -11,7 +11,7 @@
 #include "rgw_lua_version.h"
 #endif
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace rgw::lua {
 
@@ -89,7 +89,7 @@ int read_script(rgw::sal::RGWRadosStore* store, const std::string& tenant, optio
 
   auto iter = bl.cbegin();
   try {
-    ceph::decode(script, iter);
+    stone::decode(script, iter);
   } catch (buffer::error& err) {
     return -EIO;
   }
@@ -105,7 +105,7 @@ int write_script(const DoutPrefixProvider *dpp, rgw::sal::RGWRadosStore* store, 
   rgw_raw_obj obj(store->svc()->zone->get_zone_params().log_pool, script_oid(ctx, tenant));
 
   bufferlist bl;
-  ceph::encode(script, bl);
+  stone::encode(script, bl);
 
   const auto rc = rgw_put_system_obj(
       dpp,
@@ -259,12 +259,12 @@ int install_packages(const DoutPrefixProvider *dpp, rgw::sal::RGWRadosStore* sto
   // the lua rocks install dir will be created by luarocks the first time it is called
   for (const auto& package : packages) {
     bp::ipstream is;
-    bp::child c(p, "install", "--lua-version", CEPH_LUA_VERSION, "--tree", luarocks_path, "--deps-mode", "one", package, 
+    bp::child c(p, "install", "--lua-version", STONE_LUA_VERSION, "--tree", luarocks_path, "--deps-mode", "one", package, 
         bp::std_in.close(),
         (bp::std_err & bp::std_out) > is);
 
     // once package reload is supported, code should yield when reading output
-    std::string line = "CMD: luarocks install --lua-version " + std::string(CEPH_LUA_VERSION) + std::string(" --tree ") + 
+    std::string line = "CMD: luarocks install --lua-version " + std::string(STONE_LUA_VERSION) + std::string(" --tree ") + 
       luarocks_path + " --deps-mode one " + package;
 
     do {

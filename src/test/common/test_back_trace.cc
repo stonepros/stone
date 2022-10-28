@@ -16,13 +16,13 @@
 std::string foo()
 {
   std::ostringstream oss;
-  oss << ceph::BackTrace(1);
+  oss << stone::BackTrace(1);
   return oss.str();
 }
 
 // a typical backtrace looks like:
 //
-// ceph version Development (no_version)
+// stone version Development (no_version)
 // 1: (foo[abi:cxx11]()+0x4a) [0x5562231cf22a]
 // 2: (BackTrace_Basic_Test::TestBody()+0x28) [0x5562231cf2fc]
 TEST(BackTrace, Basic) {

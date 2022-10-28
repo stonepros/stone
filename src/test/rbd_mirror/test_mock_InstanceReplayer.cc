@@ -32,8 +32,8 @@ namespace mirror {
 template <>
 struct Threads<librbd::MockTestImageCtx> {
   MockSafeTimer *timer;
-  ceph::mutex &timer_lock;
-  ceph::condition_variable timer_cond;
+  stone::mutex &timer_lock;
+  stone::condition_variable timer_cond;
 
   MockContextWQ *work_queue;
 
@@ -72,18 +72,18 @@ struct ImageReplayer<librbd::MockTestImageCtx> {
       MirrorStatusUpdater<librbd::MockTestImageCtx>* local_status_updater,
       journal::CacheManagerHandler *cache_manager_handler,
       PoolMetaCache* pool_meta_cache) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->global_image_id = global_image_id;
     return s_instance;
   }
 
   ImageReplayer() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
 
   virtual ~ImageReplayer() {
-    ceph_assert(s_instance == this);
+    stone_assert(s_instance == this);
     s_instance = nullptr;
   }
 
@@ -151,7 +151,7 @@ public:
     EXPECT_CALL(*mock_threads.timer, add_event_after(_, _))
       .WillOnce(DoAll(
         WithArg<1>(Invoke([this, &mock_threads, timer_ctx](Context *ctx) {
-          ceph_assert(ceph_mutex_is_locked(mock_threads.timer_lock));
+          stone_assert(stone_mutex_is_locked(mock_threads.timer_lock));
           if (timer_ctx != nullptr) {
             *timer_ctx = ctx;
             mock_threads.timer_cond.notify_one();

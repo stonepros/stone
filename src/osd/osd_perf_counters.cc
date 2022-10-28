@@ -5,7 +5,7 @@
 #include "include/common_fwd.h"
 
 
-PerfCounters *build_osd_logger(CephContext *cct) {
+PerfCounters *build_osd_logger(StoneContext *cct) {
   PerfCountersBuilder osd_plb(cct, "osd", l_osd_first, l_osd_last);
 
   // Latency axis configuration for op histograms, values are in nanoseconds
@@ -282,7 +282,7 @@ PerfCounters *build_osd_logger(CephContext *cct) {
 }
  
 
-PerfCounters *build_recoverystate_perf(CephContext *cct) {
+PerfCounters *build_recoverystate_perf(StoneContext *cct) {
   PerfCountersBuilder rs_perf(cct, "recoverystate_perf", rs_first, rs_last);
 
   rs_perf.add_time_avg(rs_initial_latency, "initial_latency", "Initial recovery state latency");

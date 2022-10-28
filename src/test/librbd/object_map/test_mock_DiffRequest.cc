@@ -5,7 +5,7 @@
 #include "test/librbd/test_support.h"
 #include "test/librados_test_stub/MockTestMemIoCtxImpl.h"
 #include "include/rbd_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/object_map/DiffRequest.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -86,7 +86,7 @@ TEST_F(TestMockObjectMapDiffRequest, InvalidStartSnap) {
   InSequence seq;
 
   C_SaferCond ctx;
-  auto req = new MockDiffRequest(&mock_image_ctx, CEPH_NOSNAP, 0,
+  auto req = new MockDiffRequest(&mock_image_ctx, STONE_NOSNAP, 0,
                                  &m_object_diff_state, &ctx);
   req->send();
   ASSERT_EQ(-EINVAL, ctx.wait());
@@ -114,7 +114,7 @@ TEST_F(TestMockObjectMapDiffRequest, FastDiffDisabled) {
   InSequence seq;
 
   C_SaferCond ctx;
-  auto req = new MockDiffRequest(&mock_image_ctx, 0, CEPH_NOSNAP,
+  auto req = new MockDiffRequest(&mock_image_ctx, 0, STONE_NOSNAP,
                                  &m_object_diff_state, &ctx);
   req->send();
   ASSERT_EQ(-EINVAL, ctx.wait());
@@ -132,7 +132,7 @@ TEST_F(TestMockObjectMapDiffRequest, FastDiffInvalid) {
   expect_get_flags(mock_image_ctx, 1U, RBD_FLAG_FAST_DIFF_INVALID, 0);
 
   C_SaferCond ctx;
-  auto req = new MockDiffRequest(&mock_image_ctx, 0, CEPH_NOSNAP,
+  auto req = new MockDiffRequest(&mock_image_ctx, 0, STONE_NOSNAP,
                                  &m_object_diff_state, &ctx);
   req->send();
   ASSERT_EQ(-EINVAL, ctx.wait());
@@ -170,16 +170,16 @@ TEST_F(TestMockObjectMapDiffRequest, FullDelta) {
   object_map_2[3] = OBJECT_EXISTS;
   expect_load_map(mock_image_ctx, 2U, object_map_2, 0);
 
-  expect_get_flags(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_flags(mock_image_ctx, STONE_NOSNAP, 0, 0);
 
   BitVector<2> object_map_head;
   object_map_head.resize(object_count);
   object_map_head[1] = OBJECT_EXISTS_CLEAN;
   object_map_head[2] = OBJECT_EXISTS_CLEAN;
-  expect_load_map(mock_image_ctx, CEPH_NOSNAP, object_map_head, 0);
+  expect_load_map(mock_image_ctx, STONE_NOSNAP, object_map_head, 0);
 
   C_SaferCond ctx;
-  auto req = new MockDiffRequest(&mock_image_ctx, 0, CEPH_NOSNAP,
+  auto req = new MockDiffRequest(&mock_image_ctx, 0, STONE_NOSNAP,
                                  &m_object_diff_state, &ctx);
   req->send();
   ASSERT_EQ(0, ctx.wait());
@@ -264,16 +264,16 @@ TEST_F(TestMockObjectMapDiffRequest, EndDelta) {
   object_map_2[3] = OBJECT_EXISTS;
   expect_load_map(mock_image_ctx, 2U, object_map_2, 0);
 
-  expect_get_flags(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_flags(mock_image_ctx, STONE_NOSNAP, 0, 0);
 
   BitVector<2> object_map_head;
   object_map_head.resize(object_count);
   object_map_head[1] = OBJECT_EXISTS_CLEAN;
   object_map_head[2] = OBJECT_EXISTS_CLEAN;
-  expect_load_map(mock_image_ctx, CEPH_NOSNAP, object_map_head, 0);
+  expect_load_map(mock_image_ctx, STONE_NOSNAP, object_map_head, 0);
 
   C_SaferCond ctx;
-  auto req = new MockDiffRequest(&mock_image_ctx, 2, CEPH_NOSNAP,
+  auto req = new MockDiffRequest(&mock_image_ctx, 2, STONE_NOSNAP,
                                  &m_object_diff_state, &ctx);
   req->send();
   ASSERT_EQ(0, ctx.wait());
@@ -301,7 +301,7 @@ TEST_F(TestMockObjectMapDiffRequest, StartSnapDNE) {
   InSequence seq;
 
   C_SaferCond ctx;
-  auto req = new MockDiffRequest(&mock_image_ctx, 1, CEPH_NOSNAP,
+  auto req = new MockDiffRequest(&mock_image_ctx, 1, STONE_NOSNAP,
                                  &m_object_diff_state, &ctx);
   req->send();
   ASSERT_EQ(-ENOENT, ctx.wait());
@@ -358,15 +358,15 @@ TEST_F(TestMockObjectMapDiffRequest, IntermediateSnapDNE) {
   expect_load_map(mock_image_ctx, 1U, object_map_1, 0,
                   [&mock_image_ctx]() { mock_image_ctx.snap_info.erase(2); });
 
-  expect_get_flags(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_flags(mock_image_ctx, STONE_NOSNAP, 0, 0);
 
   BitVector<2> object_map_head;
   object_map_head.resize(object_count);
   object_map_head[1] = OBJECT_EXISTS_CLEAN;
-  expect_load_map(mock_image_ctx, CEPH_NOSNAP, object_map_head, 0);
+  expect_load_map(mock_image_ctx, STONE_NOSNAP, object_map_head, 0);
 
   C_SaferCond ctx;
-  auto req = new MockDiffRequest(&mock_image_ctx, 0, CEPH_NOSNAP,
+  auto req = new MockDiffRequest(&mock_image_ctx, 0, STONE_NOSNAP,
                                  &m_object_diff_state, &ctx);
   req->send();
   ASSERT_EQ(0, ctx.wait());
@@ -387,13 +387,13 @@ TEST_F(TestMockObjectMapDiffRequest, LoadObjectMapDNE) {
 
   InSequence seq;
 
-  expect_get_flags(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_flags(mock_image_ctx, STONE_NOSNAP, 0, 0);
 
   BitVector<2> object_map_head;
-  expect_load_map(mock_image_ctx, CEPH_NOSNAP, object_map_head, -ENOENT);
+  expect_load_map(mock_image_ctx, STONE_NOSNAP, object_map_head, -ENOENT);
 
   C_SaferCond ctx;
-  auto req = new MockDiffRequest(&mock_image_ctx, 0, CEPH_NOSNAP,
+  auto req = new MockDiffRequest(&mock_image_ctx, 0, STONE_NOSNAP,
                                  &m_object_diff_state, &ctx);
   req->send();
   ASSERT_EQ(-ENOENT, ctx.wait());
@@ -418,15 +418,15 @@ TEST_F(TestMockObjectMapDiffRequest, LoadIntermediateObjectMapDNE) {
   BitVector<2> object_map_1;
   expect_load_map(mock_image_ctx, 1U, object_map_1, -ENOENT);
 
-  expect_get_flags(mock_image_ctx, CEPH_NOSNAP, 0, 0);
+  expect_get_flags(mock_image_ctx, STONE_NOSNAP, 0, 0);
 
   BitVector<2> object_map_head;
   object_map_head.resize(object_count);
   object_map_head[1] = OBJECT_EXISTS_CLEAN;
-  expect_load_map(mock_image_ctx, CEPH_NOSNAP, object_map_head, 0);
+  expect_load_map(mock_image_ctx, STONE_NOSNAP, object_map_head, 0);
 
   C_SaferCond ctx;
-  auto req = new MockDiffRequest(&mock_image_ctx, 0, CEPH_NOSNAP,
+  auto req = new MockDiffRequest(&mock_image_ctx, 0, STONE_NOSNAP,
                                  &m_object_diff_state, &ctx);
   req->send();
   ASSERT_EQ(0, ctx.wait());
@@ -457,7 +457,7 @@ TEST_F(TestMockObjectMapDiffRequest, LoadObjectMapError) {
   expect_load_map(mock_image_ctx, 1U, object_map_1, -EPERM);
 
   C_SaferCond ctx;
-  auto req = new MockDiffRequest(&mock_image_ctx, 0, CEPH_NOSNAP,
+  auto req = new MockDiffRequest(&mock_image_ctx, 0, STONE_NOSNAP,
                                  &m_object_diff_state, &ctx);
   req->send();
   ASSERT_EQ(-EPERM, ctx.wait());
@@ -483,7 +483,7 @@ TEST_F(TestMockObjectMapDiffRequest, ObjectMapTooSmall) {
   expect_load_map(mock_image_ctx, 1U, object_map_1, 0);
 
   C_SaferCond ctx;
-  auto req = new MockDiffRequest(&mock_image_ctx, 0, CEPH_NOSNAP,
+  auto req = new MockDiffRequest(&mock_image_ctx, 0, STONE_NOSNAP,
                                  &m_object_diff_state, &ctx);
   req->send();
   ASSERT_EQ(-EINVAL, ctx.wait());

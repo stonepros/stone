@@ -16,12 +16,12 @@
 
 #include <boost/asio/yield.hpp>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 using Svc = RGWSI_MDLog::Svc;
 using Cursor = RGWPeriodHistory::Cursor;
 
-RGWSI_MDLog::RGWSI_MDLog(CephContext *cct, bool _run_sync) : RGWServiceInstance(cct), run_sync(_run_sync) {
+RGWSI_MDLog::RGWSI_MDLog(StoneContext *cct, bool _run_sync) : RGWServiceInstance(cct), run_sync(_run_sync) {
 }
 
 RGWSI_MDLog::~RGWSI_MDLog() {
@@ -276,7 +276,7 @@ Cursor RGWSI_MDLog::find_oldest_period(const DoutPrefixProvider *dpp, optional_y
       }
       ldpp_dout(dpp, 20) << "find_oldest_period advancing to "
           "predecessor period " << predecessor << dendl;
-      ceph_assert(cursor.has_prev());
+      stone_assert(cursor.has_prev());
     }
     cursor.prev();
   }
@@ -393,13 +393,13 @@ RGWMetadataLog* RGWSI_MDLog::get_log(const std::string& period)
 
 int RGWSI_MDLog::add_entry(const DoutPrefixProvider *dpp, const string& hash_key, const string& section, const string& key, bufferlist& bl)
 {
-  ceph_assert(current_log); // must have called init()
+  stone_assert(current_log); // must have called init()
   return current_log->add_entry(dpp, hash_key, section, key, bl);
 }
 
 int RGWSI_MDLog::get_shard_id(const string& hash_key, int *shard_id)
 {
-  ceph_assert(current_log); // must have called init()
+  stone_assert(current_log); // must have called init()
   return current_log->get_shard_id(hash_key, shard_id);
 }
 

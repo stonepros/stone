@@ -9,8 +9,8 @@ using std::ostream;
 using std::set;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
 static void append_escaped(const string &in, string *out)
 {
@@ -44,7 +44,7 @@ set<string> hobject_t::get_prefixes(
   else if (bits == 32)
     from.insert(mask);
   else
-    ceph_abort();
+    stone_abort();
 
 
   set<uint32_t> to;
@@ -90,9 +90,9 @@ string hobject_t::to_str() const
   uint32_t revhash(get_nibblewise_key_u32());
   t += snprintf(t, end - t, ".%.*X", 8, revhash);
 
-  if (snap == CEPH_NOSNAP)
+  if (snap == STONE_NOSNAP)
     t += snprintf(t, end - t, ".head");
-  else if (snap == CEPH_SNAPDIR)
+  else if (snap == STONE_SNAPDIR)
     t += snprintf(t, end - t, ".snapdir");
   else
     t += snprintf(t, end - t, ".%llx", (long long unsigned)snap);
@@ -119,7 +119,7 @@ void hobject_t::encode(bufferlist& bl) const
   encode(max, bl);
   encode(nspace, bl);
   encode(pool, bl);
-  ceph_assert(!max || (*this == hobject_t(hobject_t::get_max())));
+  stone_assert(!max || (*this == hobject_t(hobject_t::get_max())));
   ENCODE_FINISH(bl);
 }
 
@@ -148,7 +148,7 @@ void hobject_t::decode(bufferlist::const_iterator& bl)
 	!max &&
 	oid.name.empty()) {
       pool = INT64_MIN;
-      ceph_assert(is_min());
+      stone_assert(is_min());
     }
 
     // for compatibility with some earlier verisons which might encoded
@@ -202,10 +202,10 @@ void hobject_t::generate_test_instances(list<hobject_t*>& o)
   o.push_back(new hobject_t);
   o.back()->max = true;
   o.push_back(new hobject_t(object_t("oname"), string(), 1, 234, -1, ""));
-  o.push_back(new hobject_t(object_t("oname2"), string("okey"), CEPH_NOSNAP,
+  o.push_back(new hobject_t(object_t("oname2"), string("okey"), STONE_NOSNAP,
 	67, 0, "n1"));
   o.push_back(new hobject_t(object_t("oname3"), string("oname3"),
-	CEPH_SNAPDIR, 910, 1, "n2"));
+	STONE_SNAPDIR, 910, 1, "n2"));
 }
 
 static void append_out_escaped(const string &in, string *out)
@@ -303,7 +303,7 @@ bool hobject_t::parse(const string &s)
 
   unsigned long long sn;
   if (strncmp(start, "head", 4) == 0) {
-    sn = CEPH_NOSNAP;
+    sn = STONE_NOSNAP;
     start += 4;
     if (*start != 0)
       return false;
@@ -390,7 +390,7 @@ size_t ghobject_t::encoded_size() const
   // in order of known constants first, so it can be (mostly) computed
   // at compile time.
   //  - encoding header + 3 string lengths
-  size_t r = sizeof(ceph_le32) + 2 * sizeof(__u8) + 3 * sizeof(__u32);
+  size_t r = sizeof(stone_le32) + 2 * sizeof(__u8) + 3 * sizeof(__u32);
 
   // hobj.snap
   r += sizeof(uint64_t);
@@ -448,7 +448,7 @@ void ghobject_t::decode(bufferlist::const_iterator& bl)
 	!hobj.max &&
 	hobj.oid.name.empty()) {
       hobj.pool = INT64_MIN;
-      ceph_assert(hobj.is_min());
+      stone_assert(hobj.is_min());
     }
   }
   if (struct_v >= 5) {
@@ -500,22 +500,22 @@ void ghobject_t::generate_test_instances(list<ghobject_t*>& o)
   o.back()->hobj.max = true;
   o.push_back(new ghobject_t(hobject_t(object_t("oname"), string(), 1, 234, -1, "")));
 
-  o.push_back(new ghobject_t(hobject_t(object_t("oname2"), string("okey"), CEPH_NOSNAP,
+  o.push_back(new ghobject_t(hobject_t(object_t("oname2"), string("okey"), STONE_NOSNAP,
         67, 0, "n1"), 1, shard_id_t(0)));
-  o.push_back(new ghobject_t(hobject_t(object_t("oname2"), string("okey"), CEPH_NOSNAP,
+  o.push_back(new ghobject_t(hobject_t(object_t("oname2"), string("okey"), STONE_NOSNAP,
         67, 0, "n1"), 1, shard_id_t(1)));
-  o.push_back(new ghobject_t(hobject_t(object_t("oname2"), string("okey"), CEPH_NOSNAP,
+  o.push_back(new ghobject_t(hobject_t(object_t("oname2"), string("okey"), STONE_NOSNAP,
         67, 0, "n1"), 1, shard_id_t(2)));
   o.push_back(new ghobject_t(hobject_t(object_t("oname3"), string("oname3"),
-        CEPH_SNAPDIR, 910, 1, "n2"), 1, shard_id_t(0)));
+        STONE_SNAPDIR, 910, 1, "n2"), 1, shard_id_t(0)));
   o.push_back(new ghobject_t(hobject_t(object_t("oname3"), string("oname3"),
-        CEPH_SNAPDIR, 910, 1, "n2"), 2, shard_id_t(0)));
+        STONE_SNAPDIR, 910, 1, "n2"), 2, shard_id_t(0)));
   o.push_back(new ghobject_t(hobject_t(object_t("oname3"), string("oname3"),
-        CEPH_SNAPDIR, 910, 1, "n2"), 3, shard_id_t(0)));
+        STONE_SNAPDIR, 910, 1, "n2"), 3, shard_id_t(0)));
   o.push_back(new ghobject_t(hobject_t(object_t("oname3"), string("oname3"),
-        CEPH_SNAPDIR, 910, 1, "n2"), 3, shard_id_t(1)));
+        STONE_SNAPDIR, 910, 1, "n2"), 3, shard_id_t(1)));
   o.push_back(new ghobject_t(hobject_t(object_t("oname3"), string("oname3"),
-        CEPH_SNAPDIR, 910, 1, "n2"), 3, shard_id_t(2)));
+        STONE_SNAPDIR, 910, 1, "n2"), 3, shard_id_t(2)));
 }
 
 ostream& operator<<(ostream& out, const ghobject_t& o)

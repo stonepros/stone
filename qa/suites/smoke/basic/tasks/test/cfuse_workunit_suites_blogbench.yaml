@@ -1,7 +1,7 @@
 tasks:
-- ceph:
+- stone:
     fs: xfs
-- ceph-fuse:
+- stone-fuse:
 - workunit:
     clients:
       all:

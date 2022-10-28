@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2016 Western Digital Corporation
  *
@@ -17,7 +17,7 @@
 #include <stdio.h>
 
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_context.h"
 #include "gtest/gtest.h"
 #include "include/btree_map.h"
@@ -35,7 +35,7 @@ void check_usage(mempool::pool_index_t ix)
     sum += p.second.bytes;
   }
   if (sum != usage) {
-    ceph::TableFormatter jf;
+    stone::TableFormatter jf;
     pool->dump(&jf);
     jf.flush(std::cout);
   }
@@ -437,10 +437,10 @@ int main(int argc, char **argv)
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   // enable debug mode for the tests
   mempool::set_debug_mode(true);

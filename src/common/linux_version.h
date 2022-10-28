@@ -1,5 +1,5 @@
-#ifndef CEPH_LINUX_VERSION_H
-#define CEPH_LINUX_VERSION_H
+#ifndef STONE_LINUX_VERSION_H
+#define STONE_LINUX_VERSION_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,4 +19,4 @@ int get_linux_version(void);
 }
 #endif
 
-#endif /* CEPH_LINUX_VERSION_H */
+#endif /* STONE_LINUX_VERSION_H */

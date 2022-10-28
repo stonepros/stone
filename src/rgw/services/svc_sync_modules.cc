@@ -7,7 +7,7 @@
 #include "rgw/rgw_sync_module.h"
 #include "rgw/rgw_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 void RGWSI_SyncModules::init(RGWSI_Zone *zone_svc)
 {

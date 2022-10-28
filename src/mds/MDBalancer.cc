@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -38,17 +38,17 @@ using std::chrono::duration_cast;
 #include "common/config.h"
 #include "common/errno.h"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << mds->get_nodeid() << ".bal " << __func__ << " "
 #undef dout
 #define dout(lvl) \
   do {\
-    auto subsys = ceph_subsys_mds;\
-    if ((dout_context)->_conf->subsys.should_gather(ceph_subsys_mds_balancer, lvl)) {\
-      subsys = ceph_subsys_mds_balancer;\
+    auto subsys = stone_subsys_mds;\
+    if ((dout_context)->_conf->subsys.should_gather(stone_subsys_mds_balancer, lvl)) {\
+      subsys = stone_subsys_mds_balancer;\
     }\
-    dout_impl(dout_context, ceph::dout::need_dynamic(subsys), lvl) dout_prefix
+    dout_impl(dout_context, stone::dout::need_dynamic(subsys), lvl) dout_prefix
 #undef dendl
 #define dendl dendl_impl; } while (0)
 
@@ -68,7 +68,7 @@ int MDBalancer::proc_message(const cref_t<Message> &m)
 
   default:
     derr << " balancer unknown message " << m->get_type() << dendl_impl;
-    ceph_abort_msg("balancer unknown message");
+    stone_abort_msg("balancer unknown message");
   }
 
   return 0;
@@ -100,7 +100,7 @@ void MDBalancer::handle_export_pins(void)
   while (it != q.end()) {
     auto cur = it++;
     CInode *in = *cur;
-    ceph_assert(in->is_dir());
+    stone_assert(in->is_dir());
 
     mds_rank_t export_pin = in->get_export_pin(false);
     in->check_pin_policy(export_pin);
@@ -155,7 +155,7 @@ void MDBalancer::handle_export_pins(void)
 	}
       } else if (target == mds->get_nodeid()) {
         if (dir->state_test(CDir::STATE_AUXSUBTREE)) {
-          ceph_assert(dir->is_subtree_root());
+          stone_assert(dir->is_subtree_root());
         } else if (dir->state_test(CDir::STATE_CREATING) ||
 	           dir->is_frozen() || dir->is_freezing()) {
 	  // try again later
@@ -190,7 +190,7 @@ void MDBalancer::handle_export_pins(void)
   bool print_auth_subtrees = true;
 
   if (authsubs.size() > AUTH_TREES_THRESHOLD &&
-      !g_conf()->subsys.should_gather<ceph_subsys_mds, 25>()) {
+      !g_conf()->subsys.should_gather<stone_subsys_mds, 25>()) {
     dout(15) << "number of auth trees = " << authsubs.size() << "; not "
 		"printing auth trees" << dendl;
     print_auth_subtrees = false;
@@ -279,7 +279,7 @@ double mds_load_t::mds_load() const
     return cpu_load_avg;
 
   }
-  ceph_abort();
+  stone_abort();
   return 0;
 }
 
@@ -371,13 +371,13 @@ int MDBalancer::localize_balancer()
   bool ack = false;
   int r = 0;
   bufferlist lua_src;
-  ceph::mutex lock = ceph::make_mutex("lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("lock");
+  stone::condition_variable cond;
 
   /* we assume that balancer is in the metadata pool */
   object_t oid = object_t(mds->mdsmap->get_balancer());
   object_locator_t oloc(mds->get_metadata_pool());
-  ceph_tid_t tid = mds->objecter->read(oid, oloc, 0, 0, CEPH_NOSNAP, &lua_src, 0,
+  stone_tid_t tid = mds->objecter->read(oid, oloc, 0, 0, STONE_NOSNAP, &lua_src, 0,
                                        new C_SafeCond(lock, cond, &ack, &r));
   dout(15) << "launched non-blocking read tid=" << tid
            << " oid=" << oid << " oloc=" << oloc << dendl;
@@ -391,8 +391,8 @@ int MDBalancer::localize_balancer()
   /* success: store the balancer in memory and set the version. */
   if (!r) {
     if (ret_t == std::cv_status::timeout) {
-      mds->objecter->op_cancel(tid, -CEPHFS_ECANCELED);
-      return -CEPHFS_ETIMEDOUT;
+      mds->objecter->op_cancel(tid, -STONEFS_ECANCELED);
+      return -STONEFS_ETIMEDOUT;
     }
     bal_code.assign(lua_src.to_str());
     bal_version.assign(oid.name);
@@ -515,7 +515,7 @@ void MDBalancer::handle_heartbeat(const cref_t<MHeartbeat> &m)
       // let's go!
       //export_empties();  // no!
 
-      /* avoid spamming ceph -w if user does not turn mantle on */
+      /* avoid spamming stone -w if user does not turn mantle on */
       if (mds->mdsmap->get_balancer() != "") {
         int r = mantle_prep_rebalance();
         if (!r) return;
@@ -610,7 +610,7 @@ void MDBalancer::queue_merge(CDir *dir)
 {
   const auto frag = dir->dirfrag();
   auto callback = [this, frag](int r) {
-    ceph_assert(frag.frag != frag_t());
+    stone_assert(frag.frag != frag_t());
 
     // frag must be in this set because only one context is in flight
     // for a given frag at a time (because merge_pending is checked before
@@ -623,7 +623,7 @@ void MDBalancer::queue_merge(CDir *dir)
       dout(10) << "drop merge on " << frag << " because not in cache" << dendl;
       return;
     }
-    ceph_assert(dir->dirfrag() == frag);
+    stone_assert(dir->dirfrag() == frag);
 
     if(!dir->is_auth()) {
       dout(10) << "drop merge on " << *dir << " because lost auth" << dendl;
@@ -882,7 +882,7 @@ int MDBalancer::mantle_prep_rebalance()
 
   /* mantle doesn't know about cluster size, so check target len here */
   if ((int) state.targets.size() != cluster_size)
-    return -CEPHFS_EINVAL;
+    return -STONEFS_EINVAL;
   else if (ret)
     return ret;
 
@@ -963,7 +963,7 @@ void MDBalancer::try_rebalance(balance_state_t& state)
 
 	if (dir->inode->is_base())
 	  continue;
-	ceph_assert(dir->inode->authority().first == target);  // cuz that's how i put it in the map, dummy
+	stone_assert(dir->inode->authority().first == target);  // cuz that's how i put it in the map, dummy
 
 	if (pop <= amount-have) {
 	  dout(7) << "reexporting " << *dir << " pop " << pop
@@ -1073,7 +1073,7 @@ void MDBalancer::find_exports(CDir *dir,
     return;
   }
 
-  ceph_assert(dir->is_auth());
+  stone_assert(dir->is_auth());
 
   double need = amount - have;
   if (need < amount * g_conf()->mds_bal_min_start)
@@ -1096,8 +1096,8 @@ void MDBalancer::find_exports(CDir *dir,
     CInode *in = *it;
     ++it;
 
-    ceph_assert(in->is_dir());
-    ceph_assert(in->get_parent_dir() == dir);
+    stone_assert(in->is_dir());
+    stone_assert(in->get_parent_dir() == dir);
 
     auto&& dfls = in->get_nested_dirfrags();
 

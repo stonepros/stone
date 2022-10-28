@@ -18,8 +18,8 @@
 #include "ServiceDaemon.h"
 #include "Threads.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 
 using std::list;
 using std::map;
@@ -140,7 +140,7 @@ struct PriCache : public PriorityCache::PriCache {
   PriCache(const std::string &name, uint64_t min_size, uint64_t max_size)
     : m_name(name), m_base_cache_max_size(min_size),
       m_extra_cache_max_size(max_size - min_size) {
-    ceph_assert(max_size >= min_size);
+    stone_assert(max_size >= min_size);
   }
 
   void prioritize() {
@@ -194,8 +194,8 @@ struct PriCache : public PriorityCache::PriCache {
   }
 
   void set_cache_bytes(PriorityCache::Priority pri, int64_t bytes) override {
-    ceph_assert(bytes >= 0);
-    ceph_assert(pri == m_base_cache_pri || pri == m_extra_cache_pri ||
+    stone_assert(bytes >= 0);
+    stone_assert(pri == m_base_cache_pri || pri == m_extra_cache_pri ||
                 bytes == 0);
 
     dout(30) << "pri=" << pri << " " << bytes << dendl;
@@ -211,13 +211,13 @@ struct PriCache : public PriorityCache::PriCache {
   }
 
   void add_cache_bytes(PriorityCache::Priority pri, int64_t bytes) override {
-    ceph_assert(bytes >= 0);
-    ceph_assert(pri == m_base_cache_pri || pri == m_extra_cache_pri);
+    stone_assert(bytes >= 0);
+    stone_assert(pri == m_base_cache_pri || pri == m_extra_cache_pri);
 
     dout(30) << "pri=" << pri << " " << bytes << dendl;
 
     if (pri == m_base_cache_pri) {
-      ceph_assert(m_base_cache_bytes <= m_base_cache_max_size);
+      stone_assert(m_base_cache_bytes <= m_base_cache_max_size);
 
       auto chunk = std::min(m_base_cache_max_size - m_base_cache_bytes, bytes);
       m_base_cache_bytes += chunk;
@@ -268,7 +268,7 @@ struct PriCache : public PriorityCache::PriCache {
 
 class MirrorAdminSocketHook : public AdminSocketHook {
 public:
-  MirrorAdminSocketHook(CephContext *cct, Mirror *mirror) :
+  MirrorAdminSocketHook(StoneContext *cct, Mirror *mirror) :
     admin_socket(cct->get_admin_socket()) {
     std::string command;
     int r;
@@ -329,7 +329,7 @@ public:
 	   std::ostream& errss,
 	   bufferlist& out) override {
     Commands::const_iterator i = commands.find(command);
-    ceph_assert(i != commands.end());
+    stone_assert(i != commands.end());
     return i->second->call(f);
   }
 
@@ -342,7 +342,7 @@ private:
 
 class CacheManagerHandler : public journal::CacheManagerHandler {
 public:
-  CacheManagerHandler(CephContext *cct)
+  CacheManagerHandler(StoneContext *cct)
     : m_cct(cct) {
 
     if (!m_cct->_conf.get_val<bool>("rbd_mirror_memory_autotune")) {
@@ -367,8 +367,8 @@ public:
       max = ltarget - base;
     }
 
-    m_next_balance = ceph_clock_now();
-    m_next_resize = ceph_clock_now();
+    m_next_balance = stone_clock_now();
+    m_next_resize = stone_clock_now();
 
     m_cache_manager = std::make_unique<PriorityCache::Manager>(
       m_cct, min, max, target, false);
@@ -377,7 +377,7 @@ public:
   ~CacheManagerHandler() {
     std::lock_guard locker{m_lock};
 
-    ceph_assert(m_caches.empty());
+    stone_assert(m_caches.empty());
   }
 
   void register_cache(const std::string &cache_name,
@@ -395,10 +395,10 @@ public:
 
     auto p = m_caches.insert(
         {cache_name, {cache_name, min_size, max_size, handler}});
-    ceph_assert(p.second == true);
+    stone_assert(p.second == true);
 
     m_cache_manager->insert(cache_name, p.first->second.pri_cache, false);
-    m_next_balance = ceph_clock_now();
+    m_next_balance = stone_clock_now();
   }
 
   void unregister_cache(const std::string &cache_name) override {
@@ -411,11 +411,11 @@ public:
     std::lock_guard locker{m_lock};
 
     auto it = m_caches.find(cache_name);
-    ceph_assert(it != m_caches.end());
+    stone_assert(it != m_caches.end());
 
     m_cache_manager->erase(cache_name);
     m_caches.erase(it);
-    m_next_balance = ceph_clock_now();
+    m_next_balance = stone_clock_now();
   }
 
   void run_cache_manager() {
@@ -431,7 +431,7 @@ public:
     auto resize_interval = m_cct->_conf.get_val<double>(
         "rbd_mirror_memory_cache_resize_interval");
 
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
 
     if (autotune_interval > 0 && m_next_balance <= now) {
       dout(20) << "balance" << dendl;
@@ -444,17 +444,17 @@ public:
         pri_cache->prioritize();
       }
 
-      m_next_balance = ceph_clock_now();
+      m_next_balance = stone_clock_now();
       m_next_balance += autotune_interval;
     }
 
     if (resize_interval > 0 && m_next_resize < now) {
-      if (ceph_using_tcmalloc()) {
+      if (stone_using_tcmalloc()) {
         dout(20) << "tune memory" << dendl;
         m_cache_manager->tune_memory();
       }
 
-      m_next_resize = ceph_clock_now();
+      m_next_resize = stone_clock_now();
       m_next_resize += resize_interval;
     }
   }
@@ -470,10 +470,10 @@ private:
     }
   };
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
 
-  mutable ceph::mutex m_lock =
-    ceph::make_mutex("rbd::mirror::CacheManagerHandler");
+  mutable stone::mutex m_lock =
+    stone::make_mutex("rbd::mirror::CacheManagerHandler");
   std::unique_ptr<PriorityCache::Manager> m_cache_manager;
   std::map<std::string, Cache> m_caches;
 
@@ -481,7 +481,7 @@ private:
   utime_t m_next_resize;
 };
 
-Mirror::Mirror(CephContext *cct, const std::vector<const char*> &args) :
+Mirror::Mirror(StoneContext *cct, const std::vector<const char*> &args) :
   m_cct(cct),
   m_args(args),
   m_local(new librados::Rados()),
@@ -506,7 +506,7 @@ void Mirror::handle_signal(int signum)
     for (auto &it : m_pool_replayers) {
       it.second->reopen_logs();
     }
-    g_ceph_context->reopen_logs();
+    g_stone_context->reopen_logs();
     break;
 
   case SIGINT:
@@ -516,7 +516,7 @@ void Mirror::handle_signal(int signum)
     break;
 
   default:
-    ceph_abort_msgf("unexpected signal %d", signum);
+    stone_abort_msgf("unexpected signal %d", signum);
   }
 }
 
@@ -553,14 +553,14 @@ void Mirror::run()
 {
   dout(20) << "enter" << dendl;
 
-  utime_t next_refresh_pools = ceph_clock_now();
+  utime_t next_refresh_pools = stone_clock_now();
 
   while (!m_stopping) {
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     bool refresh_pools = next_refresh_pools <= now;
     if (refresh_pools) {
       m_local_cluster_watcher->refresh_pools();
-      next_refresh_pools = ceph_clock_now();
+      next_refresh_pools = stone_clock_now();
       next_refresh_pools += m_cct->_conf.get_val<uint64_t>(
           "rbd_mirror_pool_replayers_refresh_interval");
     }
@@ -682,7 +682,7 @@ void Mirror::update_pool_replayers(const PoolPeers &pool_peers,
                                    const std::string& site_name)
 {
   dout(20) << "enter" << dendl;
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   // remove stale pool replayers before creating new pool replayers
   for (auto it = m_pool_replayers.begin(); it != m_pool_replayers.end();) {

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_COMMON_OUTPUTDATASOCKET_H
-#define CEPH_COMMON_OUTPUTDATASOCKET_H
+#ifndef STONE_COMMON_OUTPUTDATASOCKET_H
+#define STONE_COMMON_OUTPUTDATASOCKET_H
 
 #include "common/ceph_mutex.h"
 #include "common/Thread.h"
@@ -24,7 +24,7 @@
 class OutputDataSocket : public Thread
 {
 public:
-  OutputDataSocket(CephContext *cct, uint64_t _backlog);
+  OutputDataSocket(StoneeContext *cct, uint64_t _backlog);
   ~OutputDataSocket() override;
 
   bool init(const std::string &path);
@@ -46,7 +46,7 @@ protected:
 
   int dump_data(int fd);
 
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   uint64_t data_max_backlog;
   std::string m_path;
   int m_sock_fd;

@@ -1,5 +1,5 @@
-#ifndef CEPH_CLS_QUEUE_CLIENT_H
-#define CEPH_CLS_QUEUE_CLIENT_H
+#ifndef STONE_CLS_QUEUE_CLIENT_H
+#define STONE_CLS_QUEUE_CLIENT_H
 
 #include "include/rados/librados.hpp"
 #include "cls/queue/cls_queue_types.h"

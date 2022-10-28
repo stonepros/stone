@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013,2014 Inktank Storage, Inc.
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -41,13 +41,13 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::ErasureCodeProfile;
-using ceph::ErasureCodeInterfaceRef;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::ErasureCodeProfile;
+using stone::ErasureCodeInterfaceRef;
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #define DOUT_PREFIX_ARGS this
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, this)
@@ -58,7 +58,7 @@ static ostream& _prefix(std::ostream *_dout, PGBackend *pgb) {
 void PGBackend::recover_delete_object(const hobject_t &oid, eversion_t v,
 				      RecoveryHandle *h)
 {
-  ceph_assert(get_parent()->get_acting_recovery_backfill_shards().size() > 0);
+  stone_assert(get_parent()->get_acting_recovery_backfill_shards().size() > 0);
   for (const auto& shard : get_parent()->get_acting_recovery_backfill_shards()) {
     if (shard == get_parent()->whoami_shard())
       continue;
@@ -133,7 +133,7 @@ bool PGBackend::handle_message(OpRequestRef op)
 void PGBackend::handle_recovery_delete(OpRequestRef op)
 {
   auto m = op->get_req<MOSDPGRecoveryDelete>();
-  ceph_assert(m->get_type() == MSG_OSD_PG_RECOVERY_DELETE);
+  stone_assert(m->get_type() == MSG_OSD_PG_RECOVERY_DELETE);
   dout(20) << __func__ << " " << op << dendl;
 
   op->mark_started();
@@ -166,7 +166,7 @@ void PGBackend::handle_recovery_delete(OpRequestRef op)
 void PGBackend::handle_recovery_delete_reply(OpRequestRef op)
 {
   auto m = op->get_req<MOSDPGRecoveryDeleteReply>();
-  ceph_assert(m->get_type() == MSG_OSD_PG_RECOVERY_DELETE_REPLY);
+  stone_assert(m->get_type() == MSG_OSD_PG_RECOVERY_DELETE_REPLY);
   dout(20) << __func__ << " " << op << dendl;
 
   for (const auto &p : m->objects) {
@@ -253,7 +253,7 @@ void PGBackend::rollback(
     }
   };
 
-  ceph_assert(entry.mod_desc.can_rollback());
+  stone_assert(entry.mod_desc.can_rollback());
   RollbackVisitor vis(entry.soid, this);
   entry.mod_desc.visit(&vis);
   t->append(vis.t);
@@ -321,7 +321,7 @@ void PGBackend::try_stash(
 void PGBackend::remove(
   const hobject_t &hoid,
   ObjectStore::Transaction *t) {
-  ceph_assert(!hoid.is_temp());
+  stone_assert(!hoid.is_temp());
   t->remove(
     coll,
     ghobject_t(hoid, ghobject_t::NO_GEN, get_parent()->whoami_shard().shard));
@@ -351,7 +351,7 @@ int PGBackend::objects_list_partial(
   vector<hobject_t> *ls,
   hobject_t *next)
 {
-  ceph_assert(ls);
+  stone_assert(ls);
   // Starts with the smallest generation to make sure the result list
   // has the marker object (it might have multiple generations
   // though, which would be filtered).
@@ -410,7 +410,7 @@ int PGBackend::objects_list_range(
   vector<hobject_t> *ls,
   vector<ghobject_t> *gen_obs)
 {
-  ceph_assert(ls);
+  stone_assert(ls);
   vector<ghobject_t> objects;
   int r;
   if (HAVE_FEATURE(parent->min_upacting_features(),
@@ -480,7 +480,7 @@ void PGBackend::rollback_setattrs(
   map<string, std::optional<bufferlist> > &old_attrs,
   ObjectStore::Transaction *t) {
   map<string, bufferlist> to_set;
-  ceph_assert(!hoid.is_temp());
+  stone_assert(!hoid.is_temp());
   for (map<string, std::optional<bufferlist> >::iterator i = old_attrs.begin();
        i != old_attrs.end();
        ++i) {
@@ -503,7 +503,7 @@ void PGBackend::rollback_append(
   const hobject_t &hoid,
   uint64_t old_size,
   ObjectStore::Transaction *t) {
-  ceph_assert(!hoid.is_temp());
+  stone_assert(!hoid.is_temp());
   t->truncate(
     coll,
     ghobject_t(hoid, ghobject_t::NO_GEN, get_parent()->whoami_shard().shard),
@@ -514,7 +514,7 @@ void PGBackend::rollback_stash(
   const hobject_t &hoid,
   version_t old_version,
   ObjectStore::Transaction *t) {
-  ceph_assert(!hoid.is_temp());
+  stone_assert(!hoid.is_temp());
   t->remove(
     coll,
     ghobject_t(hoid, ghobject_t::NO_GEN, get_parent()->whoami_shard().shard));
@@ -529,7 +529,7 @@ void PGBackend::rollback_try_stash(
   const hobject_t &hoid,
   version_t old_version,
   ObjectStore::Transaction *t) {
-  ceph_assert(!hoid.is_temp());
+  stone_assert(!hoid.is_temp());
   t->remove(
     coll,
     ghobject_t(hoid, ghobject_t::NO_GEN, get_parent()->whoami_shard().shard));
@@ -563,7 +563,7 @@ void PGBackend::trim_rollback_object(
   const hobject_t &hoid,
   version_t old_version,
   ObjectStore::Transaction *t) {
-  ceph_assert(!hoid.is_temp());
+  stone_assert(!hoid.is_temp());
   t->remove(
     coll, ghobject_t(hoid, old_version, get_parent()->whoami_shard().shard));
 }
@@ -575,7 +575,7 @@ PGBackend *PGBackend::build_pg_backend(
   coll_t coll,
   ObjectStore::CollectionHandle &ch,
   ObjectStore *store,
-  CephContext *cct)
+  StoneContext *cct)
 {
   ErasureCodeProfile ec_profile = profile;
   switch (pool.type) {
@@ -585,13 +585,13 @@ PGBackend *PGBackend::build_pg_backend(
   case pg_pool_t::TYPE_ERASURE: {
     ErasureCodeInterfaceRef ec_impl;
     stringstream ss;
-    ceph::ErasureCodePluginRegistry::instance().factory(
+    stone::ErasureCodePluginRegistry::instance().factory(
       profile.find("plugin")->second,
       cct->_conf.get_val<std::string>("erasure_code_dir"),
       ec_profile,
       &ec_impl,
       &ss);
-    ceph_assert(ec_impl);
+    stone_assert(ec_impl);
     return new ECBackend(
       l,
       coll,
@@ -602,7 +602,7 @@ PGBackend *PGBackend::build_pg_backend(
       pool.stripe_width);
   }
   default:
-    ceph_abort();
+    stone_abort();
     return NULL;
   }
 }
@@ -612,8 +612,8 @@ int PGBackend::be_scan_list(
   ScrubMapBuilder &pos)
 {
   dout(10) << __func__ << " " << pos << dendl;
-  ceph_assert(!pos.done());
-  ceph_assert(pos.pos < pos.ls.size());
+  stone_assert(!pos.done());
+  stone_assert(pos.pos < pos.ls.size());
   hobject_t& poid = pos.ls[pos.pos];
 
   struct stat st;
@@ -626,7 +626,7 @@ int PGBackend::be_scan_list(
   if (r == 0) {
     ScrubMap::object &o = map.objects[poid];
     o.size = st.st_size;
-    ceph_assert(!o.negative);
+    stone_assert(!o.negative);
     store->getattrs(
       ch,
       ghobject_t(
@@ -647,7 +647,7 @@ int PGBackend::be_scan_list(
     o.stat_error = true;
   } else {
     derr << __func__ << " got: " << cpp_strerror(r) << dendl;
-    ceph_abort();
+    stone_abort();
   }
   if (r == -EINPROGRESS) {
     return -EINPROGRESS;
@@ -721,8 +721,8 @@ bool PGBackend::be_compare_scrub_objects(
     auto can_attr = candidate.attrs.find(OI_ATTR);
     auto auth_attr = auth.attrs.find(OI_ATTR);
 
-    ceph_assert(auth_attr != auth.attrs.end());
-    ceph_assert(can_attr != candidate.attrs.end());
+    stone_assert(auth_attr != auth.attrs.end());
+    stone_assert(can_attr != candidate.attrs.end());
 
     can_bl.push_back(can_attr->second);
     auth_bl.push_back(auth_attr->second);
@@ -741,8 +741,8 @@ bool PGBackend::be_compare_scrub_objects(
       auto can_attr = candidate.attrs.find(SS_ATTR);
       auto auth_attr = auth.attrs.find(SS_ATTR);
 
-      ceph_assert(auth_attr != auth.attrs.end());
-      ceph_assert(can_attr != candidate.attrs.end());
+      stone_assert(auth_attr != auth.attrs.end());
+      stone_assert(can_attr != candidate.attrs.end());
 
       can_bl.push_back(can_attr->second);
       auth_bl.push_back(auth_attr->second);
@@ -762,8 +762,8 @@ bool PGBackend::be_compare_scrub_objects(
       auto can_hi = candidate.attrs.find(ECUtil::get_hinfo_key());
       auto auth_hi = auth.attrs.find(ECUtil::get_hinfo_key());
 
-      ceph_assert(auth_hi != auth.attrs.end());
-      ceph_assert(can_hi != candidate.attrs.end());
+      stone_assert(auth_hi != auth.attrs.end());
+      stone_assert(can_hi != candidate.attrs.end());
 
       can_bl.push_back(can_hi->second);
       auth_bl.push_back(auth_hi->second);
@@ -932,7 +932,7 @@ map<pg_shard_t, ScrubMap *>::const_iterator
     }
 
     // We won't pick an auth copy if the snapset is missing or won't decode.
-    ceph_assert(!obj.is_snapdir());
+    stone_assert(!obj.is_snapdir());
     if (obj.is_head()) {
       k = i->second.attrs.find(SS_ATTR);
       if (k == i->second.attrs.end()) {
@@ -1007,7 +1007,7 @@ map<pg_shard_t, ScrubMap *>::const_iterator
     }
 
     // This is automatically corrected in PG::_repair_oinfo_oid()
-    ceph_assert(oi.soid == obj);
+    stone_assert(oi.soid == obj);
 
     if (i->second.size != be_get_ondisk_size(oi.size)) {
       shard_info.set_obj_size_info_mismatch();
@@ -1069,7 +1069,7 @@ void PGBackend::be_compare_scrubmaps(
   const vector<int> &acting,
   ostream &errorstream)
 {
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
 
   // Check maps against master set and each other
   for (set<hobject_t>::const_iterator k = master_set.begin();
@@ -1199,7 +1199,7 @@ void PGBackend::be_compare_scrubmaps(
 
     if (fix_digest) {
       std::optional<uint32_t> data_digest, omap_digest;
-      ceph_assert(auth_object.digest_present);
+      stone_assert(auth_object.digest_present);
       data_digest = auth_object.digest;
       if (auth_object.omap_digest_present) {
         omap_digest = auth_object.omap_digest;
@@ -1227,7 +1227,7 @@ void PGBackend::be_compare_scrubmaps(
       // recorded digest != actual digest?
       if (auth_oi.is_data_digest() && auth_object.digest_present &&
 	  auth_oi.data_digest != auth_object.digest) {
-        ceph_assert(shard_map[auth->first].has_data_digest_mismatch_info());
+        stone_assert(shard_map[auth->first].has_data_digest_mismatch_info());
 	errorstream << pgid << " recorded data digest 0x"
 		    << std::hex << auth_oi.data_digest << " != on disk 0x"
 		    << auth_object.digest << std::dec << " on " << auth_oi.soid
@@ -1237,7 +1237,7 @@ void PGBackend::be_compare_scrubmaps(
       }
       if (auth_oi.is_omap_digest() && auth_object.omap_digest_present &&
 	  auth_oi.omap_digest != auth_object.omap_digest) {
-        ceph_assert(shard_map[auth->first].has_omap_digest_mismatch_info());
+        stone_assert(shard_map[auth->first].has_omap_digest_mismatch_info());
 	errorstream << pgid << " recorded omap digest 0x"
 		    << std::hex << auth_oi.omap_digest << " != on disk 0x"
 		    << auth_object.omap_digest << std::dec

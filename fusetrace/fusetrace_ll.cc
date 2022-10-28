@@ -35,14 +35,14 @@
 #include "include/hash_namespace.h"
 
 #ifndef __LP64__
-CEPH_HASH_NAMESPACE_START
+STONE_HASH_NAMESPACE_START
   template<> struct hash<uint64_t> {
     size_t operator()(uint64_t __x) const { 
       static hash<uint32_t> H;
       return H((__x >> 32) ^ (__x & 0xffffffff)); 
     }
   };
-CEPH_HASH_NAMESPACE_END
+STONE_HASH_NAMESPACE_END
 #endif
 
 
@@ -52,9 +52,9 @@ CEPH_HASH_NAMESPACE_END
 #include <set>
 using namespace std;
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
-ceph::mutex trace_lock;
+stone::mutex trace_lock;
 ofstream tracefile;
 
 #define traceout (tracefile.is_open() ? tracefile : cout)
@@ -65,7 +65,7 @@ bool do_timestamps = true;
 
 #define dout if (debug) cout
 
-ceph::mutex lock;
+stone::mutex lock;
 
 struct Inode {
     struct stat stbuf;
@@ -87,7 +87,7 @@ struct Inode {
 };
 
 Inode *root = 0;
-ceph::unordered_map<ino_t, Inode*> inode_map;
+stone::unordered_map<ino_t, Inode*> inode_map;
 
 bool make_inode_path(string &buf, Inode *in)
 {

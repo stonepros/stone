@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -20,14 +20,14 @@
 #include "MgrSession.h"
 
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr " << __func__ << " "
 
 int ActivePyModule::load(ActivePyModules *py_modules)
 {
-  ceph_assert(py_modules);
+  stone_assert(py_modules);
   Gil gil(py_module->pMyThreadState, true);
 
   // We tell the module how we name it, so that it can be consistent
@@ -58,7 +58,7 @@ void ActivePyModule::notify(const std::string &notify_type, const std::string &n
     return;
   }
 
-  ceph_assert(pClassInstance != nullptr);
+  stone_assert(pClassInstance != nullptr);
 
   Gil gil(py_module->pMyThreadState, true);
 
@@ -86,7 +86,7 @@ void ActivePyModule::notify_clog(const LogEntry &log_entry)
     return;
   }
 
-  ceph_assert(pClassInstance != nullptr);
+  stone_assert(pClassInstance != nullptr);
 
   Gil gil(py_module->pMyThreadState, true);
 
@@ -131,7 +131,7 @@ PyObject *ActivePyModule::dispatch_remote(
     PyObject *kwargs,
     std::string *err)
 {
-  ceph_assert(err != nullptr);
+  stone_assert(err != nullptr);
 
   // Rather than serializing arguments, pass the CPython objects.
   // Works because we happen to know that the subinterpreter
@@ -146,7 +146,7 @@ PyObject *ActivePyModule::dispatch_remote(
   auto boundMethod = PyObject_GetAttrString(pClassInstance, method.c_str());
 
   // Caller should have done method_exists check first!
-  ceph_assert(boundMethod != nullptr);
+  stone_assert(boundMethod != nullptr);
 
   dout(20) << "Calling " << py_module->get_name()
            << "." << method << "..." << dendl;
@@ -193,8 +193,8 @@ int ActivePyModule::handle_command(
   std::stringstream *ds,
   std::stringstream *ss)
 {
-  ceph_assert(ss != nullptr);
-  ceph_assert(ds != nullptr);
+  stone_assert(ss != nullptr);
+  stone_assert(ds != nullptr);
 
   if (pClassInstance == nullptr) {
     // Not the friendliest error string, but we could only
@@ -211,7 +211,7 @@ int ActivePyModule::handle_command(
   string instr;
   inbuf.begin().copy(inbuf.length(), instr);
 
-  ceph_assert(m_session == nullptr);
+  stone_assert(m_session == nullptr);
   m_command_perms = module_command.perm;
   m_session = &session;
 

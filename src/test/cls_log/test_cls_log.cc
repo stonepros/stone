@@ -148,7 +148,7 @@ TEST_F(cls_log, test_log_add_same_time)
   ASSERT_EQ(0, ioctx.create(oid, true));
 
   /* generate log */
-  utime_t start_time = ceph_clock_now();
+  utime_t start_time = stone_clock_now();
   utime_t to_time = get_time(start_time, 1, true);
   generate_log(ioctx, oid, 10, start_time, false);
 
@@ -209,7 +209,7 @@ TEST_F(cls_log, test_log_add_different_time)
   ASSERT_EQ(0, ioctx.create(oid, true));
 
   /* generate log */
-  utime_t start_time = ceph_clock_now();
+  utime_t start_time = stone_clock_now();
   generate_log(ioctx, oid, 10, start_time, true);
 
   list<cls_log_entry> entries;
@@ -294,7 +294,7 @@ TEST_F(cls_log, trim_by_time)
   ASSERT_EQ(0, ioctx.create(oid, true));
 
   /* generate log */
-  utime_t start_time = ceph_clock_now();
+  utime_t start_time = stone_clock_now();
   generate_log(ioctx, oid, 10, start_time, true);
 
   list<cls_log_entry> entries;
@@ -325,7 +325,7 @@ TEST_F(cls_log, trim_by_marker)
   string oid = "obj";
   ASSERT_EQ(0, ioctx.create(oid, true));
 
-  utime_t start_time = ceph_clock_now();
+  utime_t start_time = stone_clock_now();
   generate_log(ioctx, oid, 10, start_time, true);
 
   utime_t zero_time;

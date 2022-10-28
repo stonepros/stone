@@ -14,8 +14,8 @@ using std::ostream;
 using std::set;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
 /*
  * frag_info_t
@@ -262,7 +262,7 @@ ostream& operator<<(ostream& out, const client_writeable_range_t& r)
  */
 void inline_data_t::encode(bufferlist &bl) const
 {
-  using ceph::encode;
+  using stone::encode;
   encode(version, bl);
   if (blp)
     encode(*blp, bl);
@@ -271,12 +271,12 @@ void inline_data_t::encode(bufferlist &bl) const
 }
 void inline_data_t::decode(bufferlist::const_iterator &p)
 {
-  using ceph::decode;
+  using stone::decode;
   decode(version, p);
   uint32_t inline_len;
   decode(inline_len, p);
   if (inline_len > 0) {
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     decode_nohead(inline_len, bl, p);
     set_data(bl);
   } else
@@ -441,7 +441,7 @@ feature_bitset_t::feature_bitset_t(const vector<size_t>& array)
       if (bit > last)
 	last = bit;
       else
-	ceph_assert(bit == last);
+	stone_assert(bit == last);
       _vec[bit / bits_per_block] |= (block_type)1 << (bit % bits_per_block);
     }
   }
@@ -458,16 +458,16 @@ feature_bitset_t& feature_bitset_t::operator-=(const feature_bitset_t& other)
 }
 
 void feature_bitset_t::encode(bufferlist& bl) const {
-  using ceph::encode;
-  using ceph::encode_nohead;
+  using stone::encode;
+  using stone::encode_nohead;
   uint32_t len = _vec.size() * sizeof(block_type);
   encode(len, bl);
   encode_nohead(_vec, bl);
 }
 
 void feature_bitset_t::decode(bufferlist::const_iterator &p) {
-  using ceph::decode;
-  using ceph::decode_nohead;
+  using stone::decode;
+  using stone::decode_nohead;
   uint32_t len;
   decode(len, p);
 
@@ -476,7 +476,7 @@ void feature_bitset_t::decode(bufferlist::const_iterator &p) {
     decode_nohead(len / sizeof(block_type), _vec, p);
 
   if (len % sizeof(block_type)) {
-    ceph_le64 buf{};
+    stone_le64 buf{};
     p.copy(len % sizeof(block_type), (char*)&buf);
     _vec.push_back((block_type)buf);
   }
@@ -502,14 +502,14 @@ void feature_bitset_t::print(ostream& out) const
  * metric_spec_t
  */
 void metric_spec_t::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   ENCODE_START(1, 1, bl);
   encode(metric_flags, bl);
   ENCODE_FINISH(bl);
 }
 
 void metric_spec_t::decode(bufferlist::const_iterator &p) {
-  using ceph::decode;
+  using stone::decode;
   DECODE_START(1, p);
   decode(metric_flags, p);
   DECODE_FINISH(p);
@@ -577,7 +577,7 @@ void session_info_t::decode(bufferlist::const_iterator& p)
   DECODE_START_LEGACY_COMPAT_LEN(7, 2, 2, p);
   decode(inst, p);
   if (struct_v <= 2) {
-    set<ceph_tid_t> s;
+    set<stone_tid_t> s;
     decode(s, p);
     while (!s.empty()) {
       completed_requests[*s.begin()] = inodeno_t();
@@ -720,7 +720,7 @@ void MDSCacheObjectInfo::generate_test_instances(std::list<MDSCacheObjectInfo*>&
   ls.back()->ino = 1;
   ls.back()->dirfrag = dirfrag_t(2, 3);
   ls.back()->dname = "fooname";
-  ls.back()->snapid = CEPH_NOSNAP;
+  ls.back()->snapid = STONE_NOSNAP;
   ls.push_back(new MDSCacheObjectInfo);
   ls.back()->ino = 121;
   ls.back()->dirfrag = dirfrag_t(222, 0);
@@ -888,11 +888,11 @@ void cap_reconnect_t::encode(bufferlist& bl) const {
 }
 
 void cap_reconnect_t::encode_old(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(path, bl);
   capinfo.flock_len = flockbl.length();
   encode(capinfo, bl);
-  ceph::encode_nohead(flockbl, bl);
+  stone::encode_nohead(flockbl, bl);
 }
 
 void cap_reconnect_t::decode(bufferlist::const_iterator& bl) {
@@ -904,10 +904,10 @@ void cap_reconnect_t::decode(bufferlist::const_iterator& bl) {
 }
 
 void cap_reconnect_t::decode_old(bufferlist::const_iterator& bl) {
-  using ceph::decode;
+  using stone::decode;
   decode(path, bl);
   decode(capinfo, bl);
-  ceph::decode_nohead(capinfo.flock_len, flockbl, bl);
+  stone::decode_nohead(capinfo.flock_len, flockbl, bl);
 }
 
 void cap_reconnect_t::dump(Formatter *f) const
@@ -938,7 +938,7 @@ void snaprealm_reconnect_t::encode(bufferlist& bl) const {
 }
 
 void snaprealm_reconnect_t::encode_old(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(realm, bl);
 }
 
@@ -949,7 +949,7 @@ void snaprealm_reconnect_t::decode(bufferlist::const_iterator& bl) {
 }
 
 void snaprealm_reconnect_t::decode_old(bufferlist::const_iterator& bl) {
-  using ceph::decode;
+  using stone::decode;
   decode(realm, bl);
 }
 

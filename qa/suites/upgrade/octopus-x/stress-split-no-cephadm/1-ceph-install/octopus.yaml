@@ -1,14 +1,14 @@
 meta:
-- desc: install ceph/octopus latest
+- desc: install stone/octopus latest
 tasks:
 - install:
     exclude_packages:
-      - ceph-mgr-cephadm
-      - cephadm
-      - libcephfs-dev
+      - stone-mgr-stoneadm
+      - stoneadm
+      - libstonefs-dev
     branch: octopus
 - print: "**** done install octopus"
-- ceph:
+- stone:
     conf:
       global:
         bluestore_warn_on_legacy_statfs: false
@@ -22,14 +22,14 @@ tasks:
       - evicting unresponsive client
 - exec:
     osd.0:
-      - ceph osd require-osd-release octopus
-      - ceph osd set-require-min-compat-client octopus
-- print: "**** done ceph"
+      - stone osd require-osd-release octopus
+      - stone osd set-require-min-compat-client octopus
+- print: "**** done stone"
 - rgw:
    - client.0
 - print: "**** done => started rgw client.0"
 overrides:
-  ceph:
+  stone:
     conf:
       mon:
         mon warn on osd down out interval zero: false

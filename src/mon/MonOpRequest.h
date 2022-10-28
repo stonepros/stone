@@ -162,7 +162,7 @@ public:
   }
 
   bool is_src_mon() const {
-    return (con && con->get_peer_type() & CEPH_ENTITY_TYPE_MON);
+    return (con && con->get_peer_type() & STONE_ENTITY_TYPE_MON);
   }
 
   typedef boost::intrusive_ptr<MonOpRequest> Ref;

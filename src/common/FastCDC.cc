@@ -151,7 +151,7 @@ void FastCDC::calc_chunks(
 	fp = (fp << 1) ^ table[*(unsigned char*)pp];
       }
     }
-    ceph_assert(pos < len);
+    stone_assert(pos < len);
 
     // find an end marker
     if (

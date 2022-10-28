@@ -13,11 +13,11 @@
 
 #include "include/rados/librados.hpp"
 #include "include/Context.h"
-#include "common/ceph_context.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_context.h"
+#include "common/stone_mutex.h"
 #include "common/Cond.h"
 #include "include/utime.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "test/omap_bench.h"
 
 #include <string>
@@ -27,7 +27,7 @@
 #include <cmath>
 
 using namespace std;
-using ceph::bufferlist;
+using stone::bufferlist;
 
 int OmapBench::setup(int argc, const char** argv) {
   //parse key_value_store_bench args
@@ -132,10 +132,10 @@ Writer::Writer(OmapBench *omap_bench) : ob(omap_bench) {
   oid = name.str();
 }
 void Writer::start_time() {
-  begin_time = ceph_clock_now();
+  begin_time = stone_clock_now();
 }
 void Writer::stop_time() {
-  end_time = ceph_clock_now();
+  end_time = stone_clock_now();
 }
 double Writer::get_time() {
   return (end_time - begin_time) * 1000;
@@ -166,9 +166,9 @@ void AioWriter::set_aioc(librados::callback_t complete) {
 void OmapBench::aio_is_complete(rados_completion_t c, void *arg) {
   AioWriter *aiow = reinterpret_cast<AioWriter *>(arg);
   aiow->stop_time();
-  ceph::mutex * data_lock = &aiow->ob->data_lock;
-  ceph::mutex * thread_is_free_lock = &aiow->ob->thread_is_free_lock;
-  ceph::condition_variable* thread_is_free = &aiow->ob->thread_is_free;
+  stone::mutex * data_lock = &aiow->ob->data_lock;
+  stone::mutex * thread_is_free_lock = &aiow->ob->thread_is_free_lock;
+  stone::condition_variable* thread_is_free = &aiow->ob->thread_is_free;
   int &busythreads_count = aiow->ob->busythreads_count;
   o_bench_data &data = aiow->ob->data;
   int INCREMENT = aiow->ob->increment;
@@ -368,11 +368,11 @@ int OmapBench::test_write_objects_in_parallel(omap_generator_t omap_gen) {
 
   std::unique_lock l{thread_is_free_lock};
   for (int i = 0; i < objects; i++) {
-    ceph_assert(busythreads_count <= threads);
+    stone_assert(busythreads_count <= threads);
     //wait for a writer to be free
     if (busythreads_count == threads) {
       thread_is_free.wait(l);
-      ceph_assert(busythreads_count < threads);
+      stone_assert(busythreads_count < threads);
     }
 
     //set up the write

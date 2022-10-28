@@ -11,11 +11,11 @@
 
 #include "cls/rgw/cls_rgw_client.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 static string dir_oid_prefix = ".dir.";
 
-RGWSI_BucketIndex_RADOS::RGWSI_BucketIndex_RADOS(CephContext *cct) : RGWSI_BucketIndex(cct)
+RGWSI_BucketIndex_RADOS::RGWSI_BucketIndex_RADOS(StoneContext *cct) : RGWSI_BucketIndex(cct)
 {
 }
 

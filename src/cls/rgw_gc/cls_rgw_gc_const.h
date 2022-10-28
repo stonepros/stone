@@ -1,5 +1,5 @@
-#ifndef CEPH_CLS_RGW_GC_CONSTS_H
-#define CEPH_CLS_RGW_GC_CONSTS_H
+#ifndef STONE_CLS_RGW_GC_CONSTS_H
+#define STONE_CLS_RGW_GC_CONSTS_H
 
 #define RGW_GC_CLASS "rgw_gc"
 

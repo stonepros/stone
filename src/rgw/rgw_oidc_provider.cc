@@ -7,8 +7,8 @@
 
 #include "common/errno.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
-#include "common/ceph_time.h"
+#include "common/stone_json.h"
+#include "common/stone_time.h"
 #include "rgw_rados.h"
 #include "rgw_zone.h"
 
@@ -22,7 +22,7 @@
 #include "services/svc_zone.h"
 #include "services/svc_sys_obj.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 const string RGWOIDCProvider::oidc_url_oid_prefix = "oidc_url.";
 const string RGWOIDCProvider::oidc_arn_prefix = "arn:aws:iam::";
@@ -30,7 +30,7 @@ const string RGWOIDCProvider::oidc_arn_prefix = "arn:aws:iam::";
 int RGWOIDCProvider::store_url(const DoutPrefixProvider *dpp, const string& url, bool exclusive,
 			       optional_yield y)
 {
-  using ceph::encode;
+  using stone::encode;
   string oid = tenant + get_url_oid_prefix() + url;
 
   auto svc = ctl->svc;
@@ -200,7 +200,7 @@ int RGWOIDCProvider::read_url(const DoutPrefixProvider *dpp, const string& url, 
   }
 
   try {
-    using ceph::decode;
+    using stone::decode;
     auto iter = bl.cbegin();
     decode(*this, iter);
   } catch (buffer::error& err) {
@@ -275,7 +275,7 @@ int RGWOIDCProvider::get_providers(const DoutPrefixProvider *dpp, RGWRados *stor
       }
 
       try {
-        using ceph::decode;
+        using stone::decode;
         auto iter = bl.cbegin();
         decode(provider, iter);
       } catch (buffer::error& err) {

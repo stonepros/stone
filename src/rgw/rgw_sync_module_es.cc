@@ -20,7 +20,7 @@
 
 #include <boost/asio/yield.hpp>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 /*
@@ -174,7 +174,7 @@ struct ElasticConfig {
   std::map <string,string> default_headers = {{ "Content-Type", "application/json" }};
   ESInfo es_info;
 
-  void init(CephContext *cct, const JSONFormattable& config) {
+  void init(StoneContext *cct, const JSONFormattable& config) {
     string elastic_endpoint = config["endpoint"];
     id = string("elastic:") + elastic_endpoint;
     conn.reset(new RGWRESTConn(cct, nullptr, id, { elastic_endpoint }));
@@ -444,17 +444,17 @@ static size_t attr_len(const bufferlist& val)
 }
 
 struct es_obj_metadata {
-  CephContext *cct;
+  StoneContext *cct;
   ElasticConfigRef es_conf;
   RGWBucketInfo bucket_info;
   rgw_obj_key key;
-  ceph::real_time mtime;
+  stone::real_time mtime;
   uint64_t size;
   map<string, bufferlist> attrs;
   uint64_t versioned_epoch;
 
-  es_obj_metadata(CephContext *_cct, ElasticConfigRef _es_conf, const RGWBucketInfo& _bucket_info,
-                  const rgw_obj_key& _key, ceph::real_time& _mtime, uint64_t _size,
+  es_obj_metadata(StoneContext *_cct, ElasticConfigRef _es_conf, const RGWBucketInfo& _bucket_info,
+                  const rgw_obj_key& _key, stone::real_time& _mtime, uint64_t _size,
                   map<string, bufferlist>& _attrs, uint64_t _versioned_epoch) : cct(_cct), es_conf(_es_conf), bucket_info(_bucket_info), key(_key),
                                                      mtime(_mtime), size(_size), attrs(std::move(_attrs)), versioned_epoch(_versioned_epoch) {}
 
@@ -832,11 +832,11 @@ class RGWElasticRemoveRemoteObjCBCR : public RGWCoroutine {
   RGWDataSyncEnv *sync_env;
   rgw_bucket_sync_pipe sync_pipe;
   rgw_obj_key key;
-  ceph::real_time mtime;
+  stone::real_time mtime;
   ElasticConfigRef conf;
 public:
   RGWElasticRemoveRemoteObjCBCR(RGWDataSyncCtx *_sc,
-                          rgw_bucket_sync_pipe& _sync_pipe, rgw_obj_key& _key, const ceph::real_time& _mtime,
+                          rgw_bucket_sync_pipe& _sync_pipe, rgw_obj_key& _key, const stone::real_time& _mtime,
                           ElasticConfigRef _conf) : RGWCoroutine(_sc->cct), sc(_sc), sync_env(_sc->env),
                                                         sync_pipe(_sync_pipe), key(_key),
                                                         mtime(_mtime), conf(_conf) {}
@@ -864,7 +864,7 @@ public:
 class RGWElasticDataSyncModule : public RGWDataSyncModule {
   ElasticConfigRef conf;
 public:
-  RGWElasticDataSyncModule(CephContext *cct, const JSONFormattable& config) : conf(std::make_shared<ElasticConfig>()) {
+  RGWElasticDataSyncModule(StoneContext *cct, const JSONFormattable& config) : conf(std::make_shared<ElasticConfig>()) {
     conf->init(cct, config);
   }
   ~RGWElasticDataSyncModule() override {}
@@ -921,7 +921,7 @@ public:
   }
 };
 
-RGWElasticSyncModuleInstance::RGWElasticSyncModuleInstance(CephContext *cct, const JSONFormattable& config)
+RGWElasticSyncModuleInstance::RGWElasticSyncModuleInstance(StoneContext *cct, const JSONFormattable& config)
 {
   data_handler = std::unique_ptr<RGWElasticDataSyncModule>(new RGWElasticDataSyncModule(cct, config));
 }
@@ -952,7 +952,7 @@ RGWRESTMgr *RGWElasticSyncModuleInstance::get_rest_filter(int dialect, RGWRESTMg
   return new RGWRESTMgr_MDSearch_S3();
 }
 
-int RGWElasticSyncModule::create_instance(CephContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) {
+int RGWElasticSyncModule::create_instance(StoneContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) {
   string endpoint = config["endpoint"];
   instance->reset(new RGWElasticSyncModuleInstance(cct, config));
   return 0;

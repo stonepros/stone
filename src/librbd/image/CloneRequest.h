@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IMAGE_CLONE_REQUEST_H
-#define CEPH_LIBRBD_IMAGE_CLONE_REQUEST_H
+#ifndef STONE_LIBRBD_IMAGE_CLONE_REQUEST_H
+#define STONE_LIBRBD_IMAGE_CLONE_REQUEST_H
 
 #include "cls/rbd/cls_rbd_types.h"
 #include "common/config_fwd.h"
@@ -122,7 +122,7 @@ private:
   asio::ContextWQ *m_op_work_queue;
   Context *m_on_finish;
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   uint64_t m_clone_format = 2;
   bool m_use_p_features;
   uint64_t m_features;
@@ -178,4 +178,4 @@ private:
 
 extern template class librbd::image::CloneRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_IMAGE_CLONE_REQUEST_H
+#endif // STONE_LIBRBD_IMAGE_CLONE_REQUEST_H

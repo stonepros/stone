@@ -4,25 +4,25 @@
 #include "snap_types.h"
 #include "common/Formatter.h"
 
-void SnapRealmInfo::encode(ceph::buffer::list& bl) const
+void SnapRealmInfo::encode(stone::buffer::list& bl) const
 {
   h.num_snaps = my_snaps.size();
   h.num_prior_parent_snaps = prior_parent_snaps.size();
-  using ceph::encode;
+  using stone::encode;
   encode(h, bl);
-  ceph::encode_nohead(my_snaps, bl);
-  ceph::encode_nohead(prior_parent_snaps, bl);
+  stone::encode_nohead(my_snaps, bl);
+  stone::encode_nohead(prior_parent_snaps, bl);
 }
 
-void SnapRealmInfo::decode(ceph::buffer::list::const_iterator& bl)
+void SnapRealmInfo::decode(stone::buffer::list::const_iterator& bl)
 {
-  using ceph::decode;
+  using stone::decode;
   decode(h, bl);
-  ceph::decode_nohead(h.num_snaps, my_snaps, bl);
-  ceph::decode_nohead(h.num_prior_parent_snaps, prior_parent_snaps, bl);
+  stone::decode_nohead(h.num_snaps, my_snaps, bl);
+  stone::decode_nohead(h.num_prior_parent_snaps, prior_parent_snaps, bl);
 }
 
-void SnapRealmInfo::dump(ceph::Formatter *f) const
+void SnapRealmInfo::dump(stone::Formatter *f) const
 {
   f->dump_unsigned("ino", ino());
   f->dump_unsigned("parent", parent());
@@ -59,7 +59,7 @@ void SnapRealmInfo::generate_test_instances(std::list<SnapRealmInfo*>& o)
 bool SnapContext::is_valid() const
 {
   // seq is a valid snapid
-  if (seq > CEPH_MAXSNAP)
+  if (seq > STONE_MAXSNAP)
     return false;
   if (!snaps.empty()) {
     // seq >= snaps[0]
@@ -76,7 +76,7 @@ bool SnapContext::is_valid() const
   return true;
 }
 
-void SnapContext::dump(ceph::Formatter *f) const
+void SnapContext::dump(stone::Formatter *f) const
 {
   f->dump_unsigned("seq", seq);
   f->open_array_section("snaps");

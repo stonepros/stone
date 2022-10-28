@@ -11,7 +11,7 @@
 #include "os/filestore/HashIndex.h"
 #include <sys/types.h>
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include <dirent.h>
 
 #include "gtest/gtest.h"
@@ -50,12 +50,12 @@ public:
   }
 
   void set_key(const string &objname, const string &key, const string &value) {
-    set_key(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
+    set_key(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
 	    key, value);
   }
 
   void set_xattr(const string &objname, const string &key, const string &value) {
-    set_xattr(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
+    set_xattr(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
 	      key, value);
   }
 
@@ -91,7 +91,7 @@ public:
   }
 
   void set_header(const string &objname, const string &value) {
-    set_header(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
+    set_header(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
 	       value);
   }
 
@@ -103,7 +103,7 @@ public:
   }
 
   int get_header(const string &objname, string *value) {
-    return get_header(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
+    return get_header(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
 		      value);
   }
 
@@ -121,7 +121,7 @@ public:
   }
 
   int get_xattr(const string &objname, const string &key, string *value) {
-    return get_xattr(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
+    return get_xattr(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
 		     key, value);
   }
 
@@ -141,7 +141,7 @@ public:
   }
 
   int get_key(const string &objname, const string &key, string *value) {
-    return get_key(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
+    return get_key(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
 		   key, value);
   }
 
@@ -163,12 +163,12 @@ public:
   }
 
   void remove_key(const string &objname, const string &key) {
-    remove_key(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
+    remove_key(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
 	       key);
   }
 
   void remove_keys(const string &objname, const set<string> &to_remove) {
-    remove_keys(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
+    remove_keys(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
                 to_remove);
   }
 
@@ -185,7 +185,7 @@ public:
   }
 
   void remove_xattr(const string &objname, const string &key) {
-    remove_xattr(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
+    remove_xattr(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
 		 key);
   }
 
@@ -197,8 +197,8 @@ public:
   }
 
   void clone(const string &objname, const string &target) {
-    clone(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
-	  ghobject_t(hobject_t(sobject_t(target, CEPH_NOSNAP))));
+    clone(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
+	  ghobject_t(hobject_t(sobject_t(target, STONE_NOSNAP))));
   }
 
   void clone(ghobject_t hoid,
@@ -207,8 +207,8 @@ public:
   }
 
   void rename(const string &objname, const string &target) {
-    rename(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
-	  ghobject_t(hobject_t(sobject_t(target, CEPH_NOSNAP))));
+    rename(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
+	  ghobject_t(hobject_t(sobject_t(target, STONE_NOSNAP))));
   }
 
   void rename(ghobject_t hoid,
@@ -217,12 +217,12 @@ public:
   }
 
   void clear(const string &objname) {
-    clear(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))));
+    clear(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))));
   }
 
   void legacy_clone(const string &objname, const string &target) {
-    legacy_clone(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))),
-	  ghobject_t(hobject_t(sobject_t(target, CEPH_NOSNAP))));
+    legacy_clone(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))),
+	  ghobject_t(hobject_t(sobject_t(target, STONE_NOSNAP))));
   }
 
   void legacy_clone(ghobject_t hoid,
@@ -235,7 +235,7 @@ public:
   }
 
   void clear_omap(const string &objname) {
-    clear_omap(ghobject_t(hobject_t(sobject_t(objname, CEPH_NOSNAP))));
+    clear_omap(ghobject_t(hobject_t(sobject_t(objname, STONE_NOSNAP))));
   }
 
   void clear_omap(const ghobject_t &objname) {
@@ -282,7 +282,7 @@ public:
       omap[obj][i.first] = i.second;
     }
     set_keys(
-      ghobject_t(hobject_t(sobject_t(obj, CEPH_NOSNAP))),
+      ghobject_t(hobject_t(sobject_t(obj, STONE_NOSNAP))),
       to_set);
   }
 
@@ -569,7 +569,7 @@ public:
     string header;
     int r = get_header(*object, &header);
     if (r < 0) {
-      ceph_abort();
+      stone_abort();
     }
     if (header.size() == 0) {
       if (hmap.count(*object)) {
@@ -598,7 +598,7 @@ public:
   void verify_keys(const std::string &obj, ostream &out) {
     set<string> in_db;
     ObjectMap::ObjectMapIterator iter = db->get_iterator(
-      ghobject_t(hobject_t(sobject_t(obj, CEPH_NOSNAP))));
+      ghobject_t(hobject_t(sobject_t(obj, STONE_NOSNAP))));
     for (iter->seek_to_first(); iter->valid(); iter->next()) {
       in_db.insert(iter->key());
     }
@@ -634,7 +634,7 @@ public:
   void SetUp() override {
     char *path = getenv("OBJECT_MAP_PATH");
     if (!path) {
-      db.reset(new DBObjectMap(g_ceph_context, new KeyValueDBMemory()));
+      db.reset(new DBObjectMap(g_stone_context, new KeyValueDBMemory()));
       tester.db = db.get();
       return;
     }
@@ -642,10 +642,10 @@ public:
     string strpath(path);
 
     cerr << "using path " << strpath << std::endl;
-    KeyValueDB *store = KeyValueDB::create(g_ceph_context, "leveldb", strpath);
-    ceph_assert(!store->create_and_open(cerr));
+    KeyValueDB *store = KeyValueDB::create(g_stone_context, "leveldb", strpath);
+    stone_assert(!store->create_and_open(cerr));
 
-    db.reset(new DBObjectMap(g_ceph_context, store));
+    db.reset(new DBObjectMap(g_stone_context, store));
     tester.db = db.get();
   }
 
@@ -660,16 +660,16 @@ int main(int argc, char **argv) {
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
 
 TEST_F(ObjectMapTest, CreateOneObject) {
-  ghobject_t hoid(hobject_t(sobject_t("foo", CEPH_NOSNAP)), 100, shard_id_t(0));
+  ghobject_t hoid(hobject_t(sobject_t("foo", STONE_NOSNAP)), 100, shard_id_t(0));
   map<string, bufferlist> to_set;
   string key("test");
   string val("test_val");
@@ -724,8 +724,8 @@ TEST_F(ObjectMapTest, CreateOneObject) {
 }
 
 TEST_F(ObjectMapTest, CloneOneObject) {
-  ghobject_t hoid(hobject_t(sobject_t("foo", CEPH_NOSNAP)), 200, shard_id_t(0));
-  ghobject_t hoid2(hobject_t(sobject_t("foo2", CEPH_NOSNAP)), 201, shard_id_t(1));
+  ghobject_t hoid(hobject_t(sobject_t("foo", STONE_NOSNAP)), 200, shard_id_t(0));
+  ghobject_t hoid2(hobject_t(sobject_t("foo2", STONE_NOSNAP)), 201, shard_id_t(1));
 
   tester.set_key(hoid, "foo", "bar");
   tester.set_key(hoid, "foo2", "bar2");
@@ -785,8 +785,8 @@ TEST_F(ObjectMapTest, CloneOneObject) {
 }
 
 TEST_F(ObjectMapTest, OddEvenClone) {
-  ghobject_t hoid(hobject_t(sobject_t("foo", CEPH_NOSNAP)));
-  ghobject_t hoid2(hobject_t(sobject_t("foo2", CEPH_NOSNAP)));
+  ghobject_t hoid(hobject_t(sobject_t("foo", STONE_NOSNAP)));
+  ghobject_t hoid2(hobject_t(sobject_t("foo2", STONE_NOSNAP)));
 
   for (unsigned i = 0; i < 1000; ++i) {
     tester.set_key(hoid, "foo" + num_str(i), "bar" + num_str(i));
@@ -856,8 +856,8 @@ TEST_F(ObjectMapTest, OddEvenClone) {
 }
 
 TEST_F(ObjectMapTest, Rename) {
-  ghobject_t hoid(hobject_t(sobject_t("foo", CEPH_NOSNAP)));
-  ghobject_t hoid2(hobject_t(sobject_t("foo2", CEPH_NOSNAP)));
+  ghobject_t hoid(hobject_t(sobject_t("foo", STONE_NOSNAP)));
+  ghobject_t hoid2(hobject_t(sobject_t("foo2", STONE_NOSNAP)));
 
   for (unsigned i = 0; i < 1000; ++i) {
     tester.set_key(hoid, "foo" + num_str(i), "bar" + num_str(i));
@@ -907,8 +907,8 @@ TEST_F(ObjectMapTest, Rename) {
 }
 
 TEST_F(ObjectMapTest, OddEvenOldClone) {
-  ghobject_t hoid(hobject_t(sobject_t("foo", CEPH_NOSNAP)));
-  ghobject_t hoid2(hobject_t(sobject_t("foo2", CEPH_NOSNAP)));
+  ghobject_t hoid(hobject_t(sobject_t("foo", STONE_NOSNAP)));
+  ghobject_t hoid2(hobject_t(sobject_t("foo2", STONE_NOSNAP)));
 
   for (unsigned i = 0; i < 1000; ++i) {
     tester.set_key(hoid, "foo" + num_str(i), "bar" + num_str(i));
@@ -1048,7 +1048,7 @@ TEST_F(ObjectMapTest, RandomTestNoDeletesXattrs) {
 string num_to_key(unsigned i) {
   char buf[100];
   int ret = snprintf(buf, sizeof(buf), "%010u", i);
-  ceph_assert(ret > 0);
+  stone_assert(ret > 0);
   return string(buf, ret);
 }
 

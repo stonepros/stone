@@ -3,7 +3,7 @@ tasks:
 - pexec:
     clients:
       - cd $TESTDIR
-      - wget http://download.ceph.com/qa/ior.tbz2
+      - wget http://download.stone.com/qa/ior.tbz2
       - tar xvfj ior.tbz2
       - cd ior
       - ./configure

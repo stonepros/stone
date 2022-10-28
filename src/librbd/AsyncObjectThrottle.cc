@@ -15,7 +15,7 @@ AsyncObjectThrottle<T>::AsyncObjectThrottle(
     const AsyncRequest<T>* async_request, T &image_ctx,
     const ContextFactory& context_factory, Context *ctx,
     ProgressContext *prog_ctx, uint64_t object_no, uint64_t end_object_no)
-  : m_lock(ceph::make_mutex(
+  : m_lock(stone::make_mutex(
       util::unique_lock_name("librbd::AsyncThrottle::m_lock", this))),
     m_async_request(async_request), m_image_ctx(image_ctx),
     m_context_factory(context_factory), m_ctx(ctx), m_prog_ctx(prog_ctx),
@@ -26,7 +26,7 @@ AsyncObjectThrottle<T>::AsyncObjectThrottle(
 
 template <typename T>
 void AsyncObjectThrottle<T>::start_ops(uint64_t max_concurrent) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
   bool complete;
   {
     std::lock_guard l{m_lock};

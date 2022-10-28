@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Adam Crume <adamcrume@gmail.com>
  *
@@ -64,7 +64,7 @@ public:
   }
 
   void issued_io(IO::ptr io, std::set<IO::ptr> *latest_ios) {
-    ceph_assert(io);
+    stone_assert(io);
     if (m_latest_io.get() != NULL) {
       latest_ios->erase(m_latest_io);
     }
@@ -90,7 +90,7 @@ private:
 class AnonymizedImage {
 public:
   void init(const string &image_name, int index) {
-    ceph_assert(m_image_name == "");
+    stone_assert(m_image_name == "");
     m_image_name = image_name;
     ostringstream oss;
     oss << "image" << index;
@@ -195,7 +195,7 @@ public:
     struct bt_ctf_iter *itr = bt_ctf_iter_create(ctx,
 						 NULL, // begin_pos
 						 NULL); // end_pos
-    ceph_assert(itr);
+    stone_assert(itr);
 
     struct bt_iter *bt_itr = bt_ctf_get_iter(itr);
 
@@ -359,7 +359,7 @@ private:
     } else if (strcmp(event_name, "librbd:open_image_exit") == 0) {
       completed(thread->latest_io());
       boost::shared_ptr<OpenImageIO> io(boost::dynamic_pointer_cast<OpenImageIO>(thread->latest_io()));
-      ceph_assert(io);
+      stone_assert(io);
       m_open_images.insert(io->imagectx());
     } else if (strcmp(event_name, "librbd:close_image_enter") == 0) {
       imagectx_id_t imagectx = fields.uint64("imagectx");
@@ -371,7 +371,7 @@ private:
     } else if (strcmp(event_name, "librbd:close_image_exit") == 0) {
       completed(thread->latest_io());
       boost::shared_ptr<CloseImageIO> io(boost::dynamic_pointer_cast<CloseImageIO>(thread->latest_io()));
-      ceph_assert(io);
+      stone_assert(io);
       m_open_images.erase(io->imagectx());
     } else if (strcmp(event_name, "librbd:aio_open_image_enter") == 0) {
       string name(fields.string("name"));
@@ -542,7 +542,7 @@ private:
 		     const string& snap_name,
 		     bool readonly,
                      IO::ptrs *ios) {
-    ceph_assert(thread);
+    stone_assert(thread);
     if (m_open_images.count(imagectx) > 0) {
       return;
     }

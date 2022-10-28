@@ -6,18 +6,18 @@
 #include "common/debug.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_bluestore
+#define dout_subsys stone_subsys_bluestore
 #undef dout_prefix
 #define dout_prefix *_dout << "stupidalloc 0x" << this << " "
 
-StupidAllocator::StupidAllocator(CephContext* cct,
+StupidAllocator::StupidAllocator(StoneContext* cct,
                                  const std::string& name,
                                  int64_t _size,
                                  int64_t _block_size)
   : Allocator(name, _size, _block_size), cct(cct), num_free(0),
     free(10)
 {
-  ceph_assert(cct != nullptr);
+  stone_assert(cct != nullptr);
   bdev_block_size = cct->_conf->bdev_block_size;
 }
 
@@ -27,7 +27,7 @@ StupidAllocator::~StupidAllocator()
 
 unsigned StupidAllocator::_choose_bin(uint64_t orig_len)
 {
-  ceph_assert(bdev_block_size > 0);
+  stone_assert(bdev_block_size > 0);
   uint64_t len = orig_len / bdev_block_size;
   int bin = std::min((int)cbits(len), (int)free.size() - 1);
   ldout(cct, 30) << __func__ << " len 0x" << std::hex << orig_len
@@ -178,7 +178,7 @@ int64_t StupidAllocator::allocate_int(
   }
 
   num_free -= *length;
-  ceph_assert(num_free >= 0);
+  stone_assert(num_free >= 0);
   last_alloc = *offset + *length;
   return 0;
 }
@@ -260,7 +260,7 @@ uint64_t StupidAllocator::get_free()
 
 double StupidAllocator::get_fragmentation()
 {
-  ceph_assert(get_block_size());
+  stone_assert(get_block_size());
   double res;
   uint64_t max_intervals = 0;
   uint64_t intervals = 0;
@@ -274,7 +274,7 @@ double StupidAllocator::get_fragmentation()
   }
   ldout(cct, 30) << __func__ << " " << intervals << "/" << max_intervals 
                  << dendl;
-  ceph_assert(intervals <= max_intervals);
+  stone_assert(intervals <= max_intervals);
   if (!intervals || max_intervals <= 1) {
     return 0.0;
   }
@@ -358,9 +358,9 @@ void StupidAllocator::init_rm_free(uint64_t offset, uint64_t length)
       rm.subtract(overlap);
     }
   }
-  ceph_assert(rm.empty());
+  stone_assert(rm.empty());
   num_free -= length;
-  ceph_assert(num_free >= 0);
+  stone_assert(num_free >= 0);
 }
 
 

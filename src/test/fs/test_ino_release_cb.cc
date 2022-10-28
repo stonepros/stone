@@ -2,9 +2,9 @@
 #include <unistd.h>
 #include <include/fs_types.h>
 #include <mds/mdstypes.h>
-#include <include/cephfs/libcephfs.h>
+#include <include/stonefs/libstonefs.h>
 
-#define MAX_CEPH_FILES	1000
+#define MAX_STONE_FILES	1000
 #define DIRNAME		"ino_release_cb"
 
 static std::atomic<bool> cb_done = false;
@@ -16,66 +16,66 @@ static void cb(void *hdl, vinodeno_t vino)
 
 int main(int argc, char *argv[])
 {
-	inodeno_t inos[MAX_CEPH_FILES];
-	struct ceph_mount_info *cmount = NULL;
+	inodeno_t inos[MAX_STONE_FILES];
+	struct stone_mount_info *cmount = NULL;
 
-	ceph_create(&cmount, "admin");
-	ceph_conf_read_file(cmount, NULL);
-	ceph_init(cmount);
+	stone_create(&cmount, "admin");
+	stone_conf_read_file(cmount, NULL);
+	stone_init(cmount);
 
-	[[maybe_unused]] int ret = ceph_mount(cmount, NULL);
+	[[maybe_unused]] int ret = stone_mount(cmount, NULL);
 	assert(ret >= 0);
-	ret = ceph_mkdir(cmount, DIRNAME, 0755);
+	ret = stone_mkdir(cmount, DIRNAME, 0755);
 	assert(ret >= 0);
-	ret = ceph_chdir(cmount, DIRNAME);
+	ret = stone_chdir(cmount, DIRNAME);
 	assert(ret >= 0);
 
 	/* Create a bunch of files, get their inode numbers and close them */
 	int i;
-	for (i = 0; i < MAX_CEPH_FILES; ++i) {
+	for (i = 0; i < MAX_STONE_FILES; ++i) {
 		int fd;
-		struct ceph_statx stx;
+		struct stone_statx stx;
 
 		string name = std::to_string(i);
 
-		fd = ceph_open(cmount, name.c_str(), O_RDWR|O_CREAT, 0644);
+		fd = stone_open(cmount, name.c_str(), O_RDWR|O_CREAT, 0644);
 		assert(fd >= 0);
 
-		ret = ceph_fstatx(cmount, fd, &stx, CEPH_STATX_INO, 0);
+		ret = stone_fstatx(cmount, fd, &stx, STONE_STATX_INO, 0);
 		assert(ret >= 0);
 
 		inos[i] = stx.stx_ino;
-		ceph_close(cmount, fd);
+		stone_close(cmount, fd);
 	}
 
 	/* Remount */
-	ceph_unmount(cmount);
-	ceph_release(cmount);
-	ceph_create(&cmount, "admin");
-	ceph_conf_read_file(cmount, NULL);
-	ceph_init(cmount);
+	stone_unmount(cmount);
+	stone_release(cmount);
+	stone_create(&cmount, "admin");
+	stone_conf_read_file(cmount, NULL);
+	stone_init(cmount);
 
-	struct ceph_client_callback_args args = { 0 };
+	struct stone_client_callback_args args = { 0 };
 	args.ino_release_cb = cb;
-	ceph_ll_register_callbacks(cmount, &args);
+	stone_ll_register_callbacks(cmount, &args);
 
-	ret = ceph_mount(cmount, NULL);
+	ret = stone_mount(cmount, NULL);
 	assert(ret >= 0);
 
-	Inode	*inodes[MAX_CEPH_FILES];
+	Inode	*inodes[MAX_STONE_FILES];
 
-	for (i = 0; i < MAX_CEPH_FILES; ++i) {
+	for (i = 0; i < MAX_STONE_FILES; ++i) {
 		/* We can stop if we got a callback */
 		if (cb_done)
 			break;
 
-		ret = ceph_ll_lookup_inode(cmount, inos[i], &inodes[i]);
+		ret = stone_ll_lookup_inode(cmount, inos[i], &inodes[i]);
 		assert(ret >= 0);
 	}
     sleep(45);
 
 	assert(cb_done);
-	ceph_unmount(cmount);
-	ceph_release(cmount);
+	stone_unmount(cmount);
+	stone_release(cmount);
 	return 0;
 }

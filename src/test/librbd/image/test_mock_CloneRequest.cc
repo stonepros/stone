@@ -28,14 +28,14 @@ struct MockTestImageCtx : public MockImageCtx {
                                   const std::string &image_id,
                                   const char *snap, librados::IoCtx& p,
                                   bool read_only) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
   static MockTestImageCtx* create(const std::string &image_name,
                                   const std::string &image_id,
                                   librados::snap_t snap_id, IoCtx& p,
                                   bool read_only) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -58,7 +58,7 @@ struct MetadataCopyRequest<MockTestImageCtx> {
   static MetadataCopyRequest* create(MockTestImageCtx* src_image_ctx,
                                      MockTestImageCtx* dst_image_ctx,
                                      Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -88,7 +88,7 @@ struct AttachChildRequest<MockTestImageCtx> {
                                     const librados::snap_t &,
                                     uint32_t clone_format,
                                     Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->clone_format = clone_format;
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -111,7 +111,7 @@ struct AttachParentRequest<MockTestImageCtx> {
                                      const cls::rbd::ParentImageSpec& pspec,
                                      uint64_t parent_overlap, bool reattach,
                                      Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -139,7 +139,7 @@ struct CreateRequest<MockTestImageCtx> {
                                const std::string &primary_mirror_uuid,
                                asio::ContextWQ *op_work_queue,
                                Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -164,7 +164,7 @@ struct RemoveRequest<MockTestImageCtx> {
                                ProgressContext &prog_ctx,
                                asio::ContextWQ *op_work_queue,
                                Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -190,7 +190,7 @@ struct EnableRequest<MockTestImageCtx> {
                                cls::rbd::MirrorImageMode mode,
                                const std::string &non_primary_global_image_id,
                                bool image_clean, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     EXPECT_TRUE(image_clean);
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -246,7 +246,7 @@ public:
 
       uint64_t snap_id = image_ctx->snap_ids[
         {cls::rbd::UserSnapshotNamespace{}, "snap"}];
-      ASSERT_NE(CEPH_NOSNAP, snap_id);
+      ASSERT_NE(STONE_NOSNAP, snap_id);
 
       C_SaferCond ctx;
       image_ctx->state->snap_set(snap_id, &ctx);

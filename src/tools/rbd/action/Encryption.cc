@@ -31,7 +31,7 @@ void get_arguments(po::options_description *positional,
 }
 
 int execute(const po::variables_map &vm,
-            const std::vector<std::string> &ceph_global_init_args) {
+            const std::vector<std::string> &stone_global_init_args) {
   size_t arg_index = 0;
   std::string pool_name;
   std::string namespace_name;
@@ -67,7 +67,7 @@ int execute(const po::variables_map &vm,
   std::string passphrase((std::istreambuf_iterator<char>(file)),
                          (std::istreambuf_iterator<char>()));
   auto sg = make_scope_guard([&] {
-      ceph_memzero_s(&passphrase[0], passphrase.size(), passphrase.size()); });
+      stone_memzero_s(&passphrase[0], passphrase.size(), passphrase.size()); });
   file.close();
   if (!passphrase.empty() && passphrase[passphrase.length() - 1] == '\n') {
     passphrase.erase(passphrase.length() - 1);

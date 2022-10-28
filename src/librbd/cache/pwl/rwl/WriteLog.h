@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CACHE_REPLICATED_WRITE_LOG
-#define CEPH_LIBRBD_CACHE_REPLICATED_WRITE_LOG
+#ifndef STONE_LIBRBD_CACHE_REPLICATED_WRITE_LOG
+#define STONE_LIBRBD_CACHE_REPLICATED_WRITE_LOG
 
 #include <functional>
 #include <libpmemobj.h>
@@ -121,4 +121,4 @@ protected:
 
 extern template class librbd::cache::pwl::rwl::WriteLog<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_CACHE_REPLICATED_WRITE_LOG
+#endif // STONE_LIBRBD_CACHE_REPLICATED_WRITE_LOG

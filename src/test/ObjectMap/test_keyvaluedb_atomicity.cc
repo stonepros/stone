@@ -37,8 +37,8 @@ int verify(KeyValueDB *db) {
       for (map<int, KeyValueDB::Iterator>::iterator i = iterators.begin();
 	   i != iterators.end();
 	   ++i) {
-	ceph_assert(i->second->valid());
-	ceph_assert(i->second->key() == iterators.rbegin()->second->key());
+	stone_assert(i->second->valid());
+	stone_assert(i->second->key() == iterators.rbegin()->second->key());
 	bufferlist r = i->second->value();
 	bufferlist l = iterators.rbegin()->second->value();
 	i->second->next();
@@ -47,7 +47,7 @@ int verify(KeyValueDB *db) {
     for (map<int, KeyValueDB::Iterator>::iterator i = iterators.begin();
 	 i != iterators.end();
 	 ++i) {
-      ceph_assert(!i->second->valid());
+      stone_assert(!i->second->valid());
     }
   }
   return 0;
@@ -73,7 +73,7 @@ void *write(void *_db) {
     for (int j = 0; j < NUM_COPIES; ++j) {
       t->set(prefix_gen(j), to_set);
     }
-    ceph_assert(!db->submit_transaction(t));
+    stone_assert(!db->submit_transaction(t));
   }
   return 0;
 }
@@ -87,8 +87,8 @@ int main() {
   }
   string strpath(path);
   std::cerr << "Using path: " << strpath << std::endl;
-  KeyValueDB *store = KeyValueDB::create(g_ceph_context, "leveldb", strpath);
-  ceph_assert(!store->create_and_open(std::cerr));
+  KeyValueDB *store = KeyValueDB::create(g_stone_context, "leveldb", strpath);
+  stone_assert(!store->create_and_open(std::cerr));
   db.reset(store);
 
   verify(db.get());

@@ -5,7 +5,7 @@ roles:
 - [osd.9, osd.10, osd.11]
 tasks:
 - install:
-- ceph:
+- stone:
     log-ignorelist:
       - 'application not enabled'
 - workunit:

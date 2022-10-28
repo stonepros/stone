@@ -7,10 +7,10 @@ openstack:
     count: 2
     size: 10 # GB
 log-rotate:
-  ceph-mds: 10G
-  ceph-osd: 10G
+  stone-mds: 10G
+  stone-osd: 10G
 overrides:
-  ceph:
+  stone:
     conf:
       osd:
         osd shutdown pgref assert: true

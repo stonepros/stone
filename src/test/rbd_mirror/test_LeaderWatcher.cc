@@ -25,7 +25,7 @@ public:
   class Listener : public rbd::mirror::leader_watcher::Listener {
   public:
     Listener()
-      : m_test_lock(ceph::make_mutex(
+      : m_test_lock(stone::make_mutex(
           unique_lock_name("LeaderWatcher::m_test_lock", this))) {
     }
 
@@ -82,7 +82,7 @@ public:
     }
 
   private:
-    mutable ceph::mutex m_test_lock;
+    mutable stone::mutex m_test_lock;
     int m_acquire_count = 0;
     int m_release_count = 0;
     int m_on_acquire_r = 0;

@@ -10,7 +10,7 @@
 #include "rgw_b64.h"
 
 #include "common/errno.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "include/types.h"
 #include "include/str_list.h"
 
@@ -20,10 +20,10 @@
 #include "rgw_rest_s3.h"
 #include "rgw_auth_s3.h"
 
-#include "common/ceph_crypto.h"
+#include "common/stone_crypto.h"
 #include "common/Cond.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 namespace rgw {
@@ -46,7 +46,7 @@ TokenEngine::get_from_keystone(const DoutPrefixProvider* dpp, const std::string&
 
   /* The container for plain response obtained from Keystone. It will be
    * parsed token_envelope_t::parse method. */
-  ceph::bufferlist token_body_bl;
+  stone::bufferlist token_body_bl;
   RGWValidateKeystoneToken validate(cct, "GET", "", &token_body_bl);
 
   std::string url = config.get_endpoint_url();
@@ -192,7 +192,7 @@ TokenEngine::authenticate(const DoutPrefixProvider* dpp,
   /* This will be initialized on the first call to this method. In C++11 it's
    * also thread-safe. */
   static const struct RolesCacher {
-    explicit RolesCacher(CephContext* const cct) {
+    explicit RolesCacher(StoneContext* const cct) {
       get_str_vec(cct->_conf->rgw_keystone_accepted_roles, plain);
       get_str_vec(cct->_conf->rgw_keystone_accepted_admin_roles, admin);
 
@@ -298,7 +298,7 @@ EC2Engine::get_from_keystone(const DoutPrefixProvider* dpp, const std::string_vi
 
   /* The container for plain response obtained from Keystone. It will be
    * parsed token_envelope_t::parse method. */
-  ceph::bufferlist token_body_bl;
+  stone::bufferlist token_body_bl;
   RGWValidateKeystoneToken validate(cct, "POST", keystone_url, &token_body_bl);
 
   /* set required headers for keystone request */
@@ -390,7 +390,7 @@ std::pair<boost::optional<std::string>, int> EC2Engine::get_secret_from_keystone
     = rgw::keystone::Service::RGWKeystoneHTTPTransceiver;
 
   /* The container for plain response obtained from Keystone.*/
-  ceph::bufferlist token_body_bl;
+  stone::bufferlist token_body_bl;
   RGWGetAccessSecret secret(cct, "GET", keystone_url, &token_body_bl);
 
   /* set required headers for keystone request */
@@ -540,7 +540,7 @@ rgw::auth::Engine::result_t EC2Engine::authenticate(
   /* This will be initialized on the first call to this method. In C++11 it's
    * also thread-safe. */
   static const struct RolesCacher {
-    explicit RolesCacher(CephContext* const cct) {
+    explicit RolesCacher(StoneContext* const cct) {
       get_str_vec(cct->_conf->rgw_keystone_accepted_roles, plain);
       get_str_vec(cct->_conf->rgw_keystone_accepted_admin_roles, admin);
 
@@ -608,7 +608,7 @@ bool SecretCache::find(const std::string& token_id,
   secret_entry& entry = iter->second;
   secrets_lru.erase(entry.lru_iter);
 
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
   if (entry.token.expired() || now > entry.expires) {
     secrets.erase(iter);
     return false;
@@ -634,7 +634,7 @@ void SecretCache::add(const std::string& token_id,
     secrets_lru.erase(e.lru_iter);
   }
 
-  const utime_t now = ceph_clock_now();
+  const utime_t now = stone_clock_now();
   secrets_lru.push_front(token_id);
   secret_entry& entry = secrets[token_id];
   entry.token = token;

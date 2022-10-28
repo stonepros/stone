@@ -1,17 +1,17 @@
 meta:
 - desc: |
-   Run ceph on two nodes, using one of them as a client,
+   Run stone on two nodes, using one of them as a client,
    with a separate client-only node.
    Use xfs beneath the osds.
-   install ceph/pacific v16.2.5 and the v16.2.x point versions
+   install stone/pacific v16.2.5 and the v16.2.x point versions
    run workload and upgrade-sequence in parallel
    (every point release should be tested)
    run workload and upgrade-sequence in parallel
-   install ceph/pacific  latest version
+   install stone/pacific  latest version
    run workload and upgrade-sequence in parallel
    Overall upgrade path is - pacific-latest.point-1 => pacific-latest.point => pacific-latest
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
     - reached quota
     - scrub
@@ -32,7 +32,7 @@ overrides:
     - cache pools at or near target size
     - filesystem is degraded
     - OBJECT_MISPLACED
-    ### ref: https://tracker.ceph.com/issues/40251
+    ### ref: https://tracker.stone.com/issues/40251
     #removed see ^ - failed to encode map
 
     fs: xfs
@@ -74,12 +74,12 @@ tasks:
 - install:
     tag: v16.2.5
     # line below can be removed its from jewel test
-    #exclude_packages: ['ceph-mgr','libcephfs2','libcephfs-devel','libcephfs-dev', 'librgw2']
+    #exclude_packages: ['stone-mgr','libstonefs2','libstonefs-devel','libstonefs-dev', 'librgw2']
 - print: "**** done v16.2.5 install"
-- ceph:
+- stone:
    fs: xfs
    add_osds_to_crush: true
-- print: "**** done ceph xfs"
+- print: "**** done stone xfs"
 - sequential:
    - workload
 - print: "**** done workload v16.2.5"
@@ -87,7 +87,7 @@ tasks:
 
 #######  upgrade to v16.2.7
 - install.upgrade:
-    #exclude_packages: ['ceph-mgr','libcephfs2','libcephfs-devel','libcephfs-dev']
+    #exclude_packages: ['stone-mgr','libstonefs2','libstonefs-devel','libstonefs-dev']
     mon.a:
       tag: v16.2.7
     mon.b:
@@ -130,7 +130,7 @@ workload_pacific:
      - print: "**** done rgw workload_pacific"
      - s3tests:
          client.0:
-           force-branch: ceph-pacific
+           force-branch: stone-pacific
            rgw_server: client.0
            scan_for_encryption_keys: false
      - print: "**** done s3tests workload_pacific"
@@ -142,37 +142,37 @@ workload_pacific:
 upgrade-sequence_pacific:
    sequential:
    - print: "**** done branch: pacific install.upgrade"
-   - ceph.restart: [mds.a]
+   - stone.restart: [mds.a]
    - sleep:
        duration: 60
-   - ceph.restart: [osd.0]
+   - stone.restart: [osd.0]
    - sleep:
        duration: 30
-   - ceph.restart: [osd.1]
+   - stone.restart: [osd.1]
    - sleep:
        duration: 30
-   - ceph.restart: [osd.2]
+   - stone.restart: [osd.2]
    - sleep:
        duration: 30
-   - ceph.restart: [osd.3]
+   - stone.restart: [osd.3]
    - sleep:
        duration: 30
-   - ceph.restart: [osd.4]
+   - stone.restart: [osd.4]
    - sleep:
        duration: 30
-   - ceph.restart: [osd.5]
+   - stone.restart: [osd.5]
    - sleep:
        duration: 60
-   - ceph.restart: [mgr.x]
+   - stone.restart: [mgr.x]
    - sleep:
        duration: 60
-   - ceph.restart: [mon.a]
+   - stone.restart: [mon.a]
    - sleep:
        duration: 60
-   - ceph.restart: [mon.b]
+   - stone.restart: [mon.b]
    - sleep:
        duration: 60
-   - ceph.restart: [mon.c]
+   - stone.restart: [mon.c]
    - sleep:
        duration: 60
-   - print: "**** done ceph.restart all pacific branch mds/osd/mon"
+   - print: "**** done stone.restart all pacific branch mds/osd/mon"

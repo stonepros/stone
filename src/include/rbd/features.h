@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_FEATURES_H
-#define CEPH_RBD_FEATURES_H
+#ifndef STONE_RBD_FEATURES_H
+#define STONE_RBD_FEATURES_H
 
 #define RBD_FEATURE_LAYERING            (1ULL<<0)
 #define RBD_FEATURE_STRIPINGV2          (1ULL<<1)

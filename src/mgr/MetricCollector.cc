@@ -8,8 +8,8 @@
 #include "mgr/OSDPerfMetricTypes.h"
 #include "mgr/MDSPerfMetricTypes.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr.metric_collector " << __func__ << ": "
 
@@ -118,7 +118,7 @@ template <typename Query, typename Limit, typename Key, typename Report>
 int MetricCollector<Query, Limit, Key, Report>::get_counters_generic(
     MetricQueryID query_id, std::map<Key, PerformanceCounters> *c) {
   dout(20) << dendl;
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
 
   auto it = counters.find(query_id);
   if (it == counters.end()) {
@@ -135,7 +135,7 @@ int MetricCollector<Query, Limit, Key, Report>::get_counters_generic(
 template <typename Query, typename Limit, typename Key, typename Report>
 void MetricCollector<Query, Limit, Key, Report>::process_reports_generic(
     const std::map<Query, Report> &reports, UpdateCallback callback) {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
 
   if (reports.empty()) {
     return;

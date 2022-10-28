@@ -30,7 +30,7 @@ TestMemCluster::~TestMemCluster() {
   }
 }
 
-TestRadosClient *TestMemCluster::create_rados_client(CephContext *cct) {
+TestRadosClient *TestMemCluster::create_rados_client(StoneContext *cct) {
   return new TestMemRadosClient(cct, this);
 }
 
@@ -51,7 +51,7 @@ int TestMemCluster::register_object_handler(int64_t pool_id,
 
   auto& object_handlers = pool->file_handlers[locator];
   auto it = object_handlers.find(object_handler);
-  ceph_assert(it == object_handlers.end());
+  stone_assert(it == object_handlers.end());
 
   object_handlers.insert(object_handler);
   return 0;
@@ -138,7 +138,7 @@ TestMemCluster::Pool *TestMemCluster::get_pool(int64_t pool_id) {
   return get_pool(m_lock, pool_id);
 }
 
-TestMemCluster::Pool *TestMemCluster::get_pool(const ceph::mutex& lock,
+TestMemCluster::Pool *TestMemCluster::get_pool(const stone::mutex& lock,
                                                int64_t pool_id) {
   for (auto &pool_pair : m_pools) {
     if (pool_pair.second->pool_id == pool_id) {
@@ -186,13 +186,13 @@ void TestMemCluster::transaction_start(const ObjectLocator& locator) {
     return m_transactions.count(locator) == 0;
   });
   auto result = m_transactions.insert(locator);
-  ceph_assert(result.second);
+  stone_assert(result.second);
 }
 
 void TestMemCluster::transaction_finish(const ObjectLocator& locator) {
   std::lock_guard locker{m_lock};
   size_t count = m_transactions.erase(locator);
-  ceph_assert(count == 1);
+  stone_assert(count == 1);
   m_transaction_cond.notify_all();
 }
 

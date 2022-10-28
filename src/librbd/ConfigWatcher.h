@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CONFIG_WATCHER_H
-#define CEPH_LIBRBD_CONFIG_WATCHER_H
+#ifndef STONE_LIBRBD_CONFIG_WATCHER_H
+#define STONE_LIBRBD_CONFIG_WATCHER_H
 
 #include <set>
 #include <string>
@@ -44,4 +44,4 @@ private:
 
 extern template class librbd::ConfigWatcher<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_CONFIG_WATCHER_H
+#endif // STONE_LIBRBD_CONFIG_WATCHER_H

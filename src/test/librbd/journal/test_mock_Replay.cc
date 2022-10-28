@@ -34,7 +34,7 @@ struct ImageRequest<MockReplayImageCtx> {
                         Extents &&image_extents, bufferlist &&bl,
                         IOContext io_context, int op_flags,
                         const ZTracer::Trace &parent_trace) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->aio_write(c, image_extents, bl, op_flags);
   }
 
@@ -45,14 +45,14 @@ struct ImageRequest<MockReplayImageCtx> {
                           uint32_t discard_granularity_bytes,
                           IOContext io_context,
                           const ZTracer::Trace &parent_trace) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->aio_discard(c, image_extents, discard_granularity_bytes);
   }
 
   MOCK_METHOD1(aio_flush, void(AioCompletion *c));
   static void aio_flush(MockReplayImageCtx *ictx, AioCompletion *c,
                         FlushSource, const ZTracer::Trace &parent_trace) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->aio_flush(c);
   }
 
@@ -64,7 +64,7 @@ struct ImageRequest<MockReplayImageCtx> {
                             Extents&& image_extents, bufferlist &&bl,
                             IOContext io_context, int op_flags,
                             const ZTracer::Trace &parent_trace) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->aio_writesame(c, image_extents, bl, op_flags);
   }
 
@@ -77,7 +77,7 @@ struct ImageRequest<MockReplayImageCtx> {
                                     bufferlist &&bl, uint64_t *mismatch_offset,
                                     IOContext io_context, int op_flags,
                                     const ZTracer::Trace &parent_trace) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->aio_compare_and_write(c, image_extents, cmp_bl, bl,
                                       mismatch_offset, op_flags);
   }
@@ -359,8 +359,8 @@ public:
     return bl;
   }
 
-  ceph::mutex m_invoke_lock = ceph::make_mutex("m_invoke_lock");
-  ceph::condition_variable m_invoke_cond;
+  stone::mutex m_invoke_lock = stone::make_mutex("m_invoke_lock");
+  stone::condition_variable m_invoke_cond;
 };
 
 TEST_F(TestMockJournalReplay, AioDiscard) {

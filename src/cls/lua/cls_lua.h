@@ -1,5 +1,5 @@
-#ifndef CEPH_CLS_LUA_H
-#define CEPH_CLS_LUA_H
+#ifndef STONE_CLS_LUA_H
+#define STONE_CLS_LUA_H
 
 #include <lua.hpp>
 #include "include/types.h"

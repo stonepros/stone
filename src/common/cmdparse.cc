@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -27,7 +27,7 @@ using std::string_view;
 using std::vector;
 
 /**
- * Given a cmddesc like "foo baz name=bar,type=CephString",
+ * Given a cmddesc like "foo baz name=bar,type=StoneString",
  * return the prefix "foo baz".
  */
 namespace TOPNSPC::common {
@@ -88,14 +88,14 @@ std::string cmddesc_get_prenautilus_compat(const std::string &cmddesc)
     }
     auto desckv = cmddesc_get_args(word);
     auto j = desckv.find("type");
-    if (j != desckv.end() && j->second == "CephBool") {
+    if (j != desckv.end() && j->second == "StoneBool") {
       // Instruct legacy clients or mons to send --foo-bar string in place
       // of a 'true'/'false' value
       std::ostringstream oss;
       oss << std::string("--") << desckv["name"];
       std::string val = oss.str();
       std::replace(val.begin(), val.end(), '_', '-');
-      desckv["type"] = "CephChoices";
+      desckv["type"] = "StoneChoices";
       desckv["strings"] = val;
       std::ostringstream fss;
       for (auto k = desckv.begin(); k != desckv.end(); ++k) {
@@ -150,11 +150,11 @@ dump_cmd_to_json(Formatter *f, uint64_t features, const string& cmd)
     // name the individual desc object based on the name key
     f->open_object_section(desckv["name"]);
 
-    // Compatibility for pre-nautilus clients that don't know about CephBool
+    // Compatibility for pre-nautilus clients that don't know about StoneBool
     std::string val;
     if (!HAVE_FEATURE(features, SERVER_NAUTILUS)) {
       auto i = desckv.find("type");
-      if (i != desckv.end() && i->second == "CephBool") {
+      if (i != desckv.end() && i->second == "StoneBool") {
         // Instruct legacy clients to send --foo-bar string in place
         // of a 'true'/'false' value
         std::ostringstream oss;
@@ -162,7 +162,7 @@ dump_cmd_to_json(Formatter *f, uint64_t features, const string& cmd)
         val = oss.str();
         std::replace(val.begin(), val.end(), '_', '-');
 
-        desckv["type"] = "CephChoices";
+        desckv["type"] = "StoneChoices";
         desckv["strings"] = val;
       }
     }
@@ -213,7 +213,7 @@ dump_cmddesc_to_json(Formatter *jf,
 
 void cmdmap_dump(const cmdmap_t &cmdmap, Formatter *f)
 {
-  ceph_assert(f != nullptr);
+  stone_assert(f != nullptr);
 
   class dump_visitor : public boost::static_visitor<void>
   {
@@ -408,7 +408,7 @@ cmd_vartype_stringify(const cmd_vartype &v)
 
 
 void
-handle_bad_get(CephContext *cct, const string& k, const char *tname)
+handle_bad_get(StoneContext *cct, const string& k, const char *tname)
 {
   ostringstream errstr;
   int status;
@@ -524,7 +524,7 @@ bool validate_str_arg(std::string_view value,
 		      const arg_desc_t& desc,
 		      std::ostream& os)
 {
-  if (type == "CephIPAddr") {
+  if (type == "StoneIPAddr") {
     entity_addr_t addr;
     if (addr.parse(string(value).c_str())) {
       return true;
@@ -532,9 +532,9 @@ bool validate_str_arg(std::string_view value,
       os << "failed to parse addr '" << value << "', should be ip:[port]";
       return false;
     }
-  } else if (type == "CephChoices") {
+  } else if (type == "StoneChoices") {
     auto choices = desc.find("strings");
-    ceph_assert(choices != end(desc));
+    stone_assert(choices != end(desc));
     auto strings = choices->second;
     if (find_first_in(strings, "|", [=](auto choice) {
 	  return (value == choice);
@@ -545,7 +545,7 @@ bool validate_str_arg(std::string_view value,
       return false;
     }
   } else {
-    // CephString or other types like CephPgid
+    // StoneString or other types like StonePgid
     return true;
   }
 }
@@ -555,7 +555,7 @@ template<bool is_vector,
 	 typename Value = std::conditional_t<is_vector,
 					     vector<T>,
 					     T>>
-bool validate_arg(CephContext* cct,
+bool validate_arg(StoneContext* cct,
 		  const cmdmap_t& cmdmap,
 		  const arg_desc_t& desc,
 		  const std::string_view name,
@@ -597,7 +597,7 @@ bool validate_arg(CephContext* cct,
 }
 } // anonymous namespace
 
-bool validate_cmd(CephContext* cct,
+bool validate_cmd(StoneContext* cct,
 		  const std::string& desc,
 		  const cmdmap_t& cmdmap,
 		  std::ostream& os)
@@ -607,15 +607,15 @@ bool validate_cmd(CephContext* cct,
     if (arg_desc.empty()) {
       return false;
     }
-    ceph_assert(arg_desc.count("name"));
-    ceph_assert(arg_desc.count("type"));
+    stone_assert(arg_desc.count("name"));
+    stone_assert(arg_desc.count("type"));
     auto name = arg_desc["name"];
     auto type = arg_desc["type"];
     if (arg_desc.count("n")) {
-      if (type == "CephInt") {
+      if (type == "StoneInt") {
 	return !validate_arg<true, int64_t>(cct, cmdmap, arg_desc,
 					    name, type, os);
-      } else if (type == "CephFloat") {
+      } else if (type == "StoneFloat") {
 	return !validate_arg<true, double>(cct, cmdmap, arg_desc,
 					    name, type, os);
       } else {
@@ -623,10 +623,10 @@ bool validate_cmd(CephContext* cct,
 					   name, type, os);
       }
     } else {
-      if (type == "CephInt") {
+      if (type == "StoneInt") {
 	return !validate_arg<false, int64_t>(cct, cmdmap, arg_desc,
 					    name, type, os);
-      } else if (type == "CephFloat") {
+      } else if (type == "StoneFloat") {
 	return !validate_arg<false, double>(cct, cmdmap, arg_desc,
 					    name, type, os);
       } else {
@@ -641,8 +641,8 @@ bool cmd_getval(const cmdmap_t& cmdmap,
 		const std::string& k, bool& val)
 {
   /*
-   * Specialized getval for booleans.  CephBool didn't exist before Nautilus,
-   * so earlier clients are sent a CephChoices argdesc instead, and will
+   * Specialized getval for booleans.  StoneBool didn't exist before Nautilus,
+   * so earlier clients are sent a StoneChoices argdesc instead, and will
    * send us a "--foo-bar" value string for boolean arguments.
    */
   if (cmdmap.count(k)) {

@@ -12,7 +12,7 @@
 #include "librbd/mirror/snapshot/Utils.h"
 #include "librbd/watcher/Notifier.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::snapshot::ImageMeta: " \
@@ -46,7 +46,7 @@ void ImageMeta<I>::load(Context* on_finish) {
   auto aio_comp = create_rados_callback(ctx);
   int r = m_image_ctx->md_ctx.aio_operate(m_image_ctx->header_oid, aio_comp,
                                           &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -116,7 +116,7 @@ void ImageMeta<I>::save(Context* on_finish) {
   auto aio_comp = create_rados_callback(ctx);
   int r = m_image_ctx->md_ctx.aio_operate(m_image_ctx->header_oid, aio_comp,
                                           &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -153,7 +153,7 @@ void ImageMeta<I>::notify_update(Context* on_finish) {
   int r = m_image_ctx->md_ctx.aio_notify(
     m_image_ctx->header_oid, aio_comp, bl, watcher::Notifier::NOTIFY_TIMEOUT,
     &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

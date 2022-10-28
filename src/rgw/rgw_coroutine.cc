@@ -2,16 +2,16 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 #include "include/Context.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "rgw_coroutine.h"
 
 // re-include our assert to clobber the system one; fix dout:
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include <boost/asio/yield.hpp>
 
-#define dout_subsys ceph_subsys_rgw
-#define dout_context g_ceph_context
+#define dout_subsys stone_subsys_rgw
+#define dout_context g_stone_context
 
 
 class RGWCompletionManager::WaitContext : public Context {
@@ -24,7 +24,7 @@ public:
   }
 };
 
-RGWCompletionManager::RGWCompletionManager(CephContext *_cct) : cct(_cct),
+RGWCompletionManager::RGWCompletionManager(StoneContext *_cct) : cct(_cct),
                                             timer(cct, lock)
 {
   timer.init();
@@ -113,7 +113,7 @@ void RGWCompletionManager::go_down()
 void RGWCompletionManager::wait_interval(void *opaque, const utime_t& interval, void *user_info)
 {
   std::lock_guard l{lock};
-  ceph_assert(waiters.find(opaque) == waiters.end());
+  stone_assert(waiters.find(opaque) == waiters.end());
   waiters[opaque] = user_info;
   timer.add_event_after(interval, new WaitContext(this, opaque));
 }
@@ -186,7 +186,7 @@ stringstream& RGWCoroutine::Status::set_status()
   if (history.size() > (size_t)max_history) {
     history.pop_front();
   }
-  timestamp = ceph_clock_now();
+  timestamp = stone_clock_now();
 
   return status;
 }
@@ -200,7 +200,7 @@ uint64_t RGWCoroutinesManager::get_next_stack_id() {
   return (uint64_t)++max_stack_id;
 }
 
-RGWCoroutinesStack::RGWCoroutinesStack(CephContext *_cct, RGWCoroutinesManager *_ops_mgr, RGWCoroutine *start) : cct(_cct), ops_mgr(_ops_mgr),
+RGWCoroutinesStack::RGWCoroutinesStack(StoneContext *_cct, RGWCoroutinesManager *_ops_mgr, RGWCoroutine *start) : cct(_cct), ops_mgr(_ops_mgr),
                                                                                                          done_flag(false), error_flag(false), blocked_flag(false),
                                                                                                          sleep_flag(false), interval_wait_flag(false), is_scheduled(false), is_waiting_for_child(false),
 													 retcode(0), run_count(0),
@@ -254,7 +254,7 @@ int RGWCoroutinesStack::operate(const DoutPrefixProvider *dpp, RGWCoroutinesEnv 
   }
 
   /* should r ever be negative at this point? */
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
 
   return 0;
 }
@@ -557,7 +557,7 @@ bool RGWCoroutinesStack::consume_io_finish(const rgw_io_id& io_id)
 void RGWCoroutinesManager::handle_unblocked_stack(set<RGWCoroutinesStack *>& context_stacks, list<RGWCoroutinesStack *>& scheduled_stacks,
                                                   RGWCompletionManager::io_completion& io, int *blocked_count)
 {
-  ceph_assert(ceph_mutex_is_wlocked(lock));
+  stone_assert(stone_mutex_is_wlocked(lock));
   RGWCoroutinesStack *stack = static_cast<RGWCoroutinesStack *>(io.user_info);
   if (context_stacks.find(stack) == context_stacks.end()) {
     return;
@@ -589,7 +589,7 @@ void RGWCoroutinesManager::schedule(RGWCoroutinesEnv *env, RGWCoroutinesStack *s
 
 void RGWCoroutinesManager::_schedule(RGWCoroutinesEnv *env, RGWCoroutinesStack *stack)
 {
-  ceph_assert(ceph_mutex_is_wlocked(lock));
+  stone_assert(stone_mutex_is_wlocked(lock));
   if (!stack->is_scheduled) {
     env->scheduled_stacks->push_back(stack);
     stack->set_is_scheduled(true);
@@ -759,7 +759,7 @@ next:
     lderr(cct) << __func__ << "(): ERROR: deadlock detected, dumping remaining coroutines:\n";
     formatter.flush(*_dout);
     *_dout << dendl;
-    ceph_assert(context_stacks.empty() || going_down); // assert on deadlock
+    stone_assert(context_stacks.empty() || going_down); // assert on deadlock
   }
 
   for (auto stack : context_stacks) {
@@ -964,7 +964,7 @@ bool RGWCoroutine::drain_children(int num_cr_left,
                                   std::optional<std::function<void(uint64_t stack_id, int ret)> > cb)
 {
   bool done = false;
-  ceph_assert(num_cr_left >= 0);
+  stone_assert(num_cr_left >= 0);
   if (num_cr_left == 0 && skip_stack) {
     num_cr_left = 1;
   }
@@ -995,7 +995,7 @@ bool RGWCoroutine::drain_children(int num_cr_left,
                                   std::optional<std::function<int(uint64_t stack_id, int ret)> > cb)
 {
   bool done = false;
-  ceph_assert(num_cr_left >= 0);
+  stone_assert(num_cr_left >= 0);
 
   reenter(&drain_status.cr) {
     while (num_spawned() > (size_t)num_cr_left) {

@@ -1040,7 +1040,7 @@ TEST(LibRadosAio, OmapPP) {
     map<string, pair<bufferlist, int> > assertions;
     bufferlist val;
     val.append(string("bar"));
-    assertions["foo"] = pair<bufferlist, int>(val, CEPH_OSD_CMPXATTR_OP_EQ);
+    assertions["foo"] = pair<bufferlist, int>(val, STONE_OSD_CMPXATTR_OP_EQ);
 
     int r;
     op.omap_cmp(assertions, &r);

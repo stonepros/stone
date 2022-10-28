@@ -19,15 +19,15 @@
 #include <sstream>
 #include "xxhash.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 using namespace librados;
 
 static string gc_oid_prefix = "gc";
 static string gc_index_lock_name = "gc_process";
 
-void RGWGC::initialize(CephContext *_cct, RGWRados *_store) {
+void RGWGC::initialize(StoneContext *_cct, RGWRados *_store) {
   cct = _cct;
   store = _store;
 
@@ -286,7 +286,7 @@ int RGWGC::list(int *index, string& marker, uint32_t max, bool expired_only, std
 
 class RGWGCIOManager {
   const DoutPrefixProvider* dpp;
-  CephContext *cct;
+  StoneContext *cct;
   RGWGC *gc;
 
   struct IO {
@@ -312,7 +312,7 @@ class RGWGCIOManager {
   size_t max_aio{MAX_AIO_DEFAULT};
 
 public:
-  RGWGCIOManager(const DoutPrefixProvider* _dpp, CephContext *_cct, RGWGC *_gc) : dpp(_dpp),
+  RGWGCIOManager(const DoutPrefixProvider* _dpp, StoneContext *_cct, RGWGC *_gc) : dpp(_dpp),
                                                                                   cct(_cct),
                                                                                   gc(_gc) {
     max_aio = cct->_conf->rgw_gc_max_concurrent_io;
@@ -350,7 +350,7 @@ public:
   }
 
   int handle_next_completion() {
-    ceph_assert(!ios.empty());
+    stone_assert(!ios.empty());
     IO& io = ios.front();
     io.c->wait_for_complete();
     int ret = io.c->get_return_value();
@@ -501,7 +501,7 @@ int RGWGC::process(int index, int max_secs, bool expired_only,
     expired_only << dendl;
 
   rados::cls::lock::Lock l(gc_index_lock_name);
-  utime_t end = ceph_clock_now();
+  utime_t end = stone_clock_now();
 
   /* max_secs should be greater than zero. We don't want a zero max_secs
    * to be translated as no timeout, since we'd then need to break the
@@ -588,7 +588,7 @@ int RGWGC::process(int index, int max_secs, bool expired_only,
       std::list<cls_rgw_obj>::iterator liter;
       cls_rgw_obj_chain& chain = info.chain;
 
-      utime_t now = ceph_clock_now();
+      utime_t now = stone_clock_now();
       if (now >= end) {
         goto done;
       }
@@ -675,7 +675,7 @@ int RGWGC::process(bool expired_only)
 {
   int max_secs = cct->_conf->rgw_gc_processor_max_time;
 
-  const int start = ceph::util::generate_random_number(0, max_objs - 1);
+  const int start = stone::util::generate_random_number(0, max_objs - 1);
 
   RGWGCIOManager io_manager(this, store->ctx(), this);
 
@@ -726,7 +726,7 @@ std::ostream& RGWGC::gen_prefix(std::ostream& out) const
 
 void *RGWGC::GCWorker::entry() {
   do {
-    utime_t start = ceph_clock_now();
+    utime_t start = stone_clock_now();
     ldpp_dout(dpp, 2) << "garbage collection: start" << dendl;
     int r = gc->process(true);
     if (r < 0) {
@@ -737,7 +737,7 @@ void *RGWGC::GCWorker::entry() {
     if (gc->going_down())
       break;
 
-    utime_t end = ceph_clock_now();
+    utime_t end = stone_clock_now();
     end -= start;
     int secs = cct->_conf->rgw_gc_processor_period;
 

@@ -6,14 +6,14 @@
 namespace crimson::os::seastore {
 
 
-ceph::bufferlist TestBlock::get_delta() {
-  ceph::bufferlist bl;
+stone::bufferlist TestBlock::get_delta() {
+  stone::bufferlist bl;
   encode(delta, bl);
   return bl;
 }
 
 
-void TestBlock::apply_delta(const ceph::bufferlist &bl) {
+void TestBlock::apply_delta(const stone::bufferlist &bl) {
   auto biter = bl.begin();
   decltype(delta) deltas;
   decode(deltas, biter);

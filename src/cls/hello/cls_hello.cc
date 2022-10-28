@@ -40,9 +40,9 @@
 using std::string;
 using std::ostringstream;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
 
 CLS_VER(1,0)
 CLS_NAME(hello)
@@ -84,10 +84,10 @@ static int say_hello(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
  */
 static int record_hello(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
 {
-  // we can write arbitrary stuff to the ceph-osd debug log.  each log
+  // we can write arbitrary stuff to the stone-osd debug log.  each log
   // message is accompanied by an integer log level.  smaller is
   // "louder".  how much of this makes it into the log is controlled
-  // by the debug_cls option on the ceph-osd, similar to how other log
+  // by the debug_cls option on the stone-osd, similar to how other log
   // levels are controlled.  this message, at level 20, will generally
   // not be seen by anyone unless debug_cls is set at 20 or higher.
   CLS_LOG(20, "in record_hello");
@@ -161,7 +161,7 @@ static int write_return_data(cls_method_context_t hctx, bufferlist *in, bufferli
   }
 
   // try to return some data.  note that this will only reach the client
-  // if the client has set the CEPH_OSD_FLAG_RETURNVEC flag on the op.
+  // if the client has set the STONE_OSD_FLAG_RETURNVEC flag on the op.
   out->append("you might see this");
 
   // client will only see a >0 value with the RETURNVEC flag is set; otherwise
@@ -282,7 +282,7 @@ public:
     try {
       decode(xattr, params);
       decode(val, params);
-    } catch (ceph::buffer::error &e) {
+    } catch (stone::buffer::error &e) {
       return -EINVAL;
     }
     return 0;
@@ -311,7 +311,7 @@ PGLSFilter *hello_filter()
  */
 CLS_INIT(hello)
 {
-  // this log message, at level 0, will always appear in the ceph-osd
+  // this log message, at level 0, will always appear in the stone-osd
   // log file.
   CLS_LOG(0, "loading cls_hello");
 

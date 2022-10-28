@@ -98,7 +98,7 @@ TEST_F(TestMockOperationSnapshotProtectRequest, GetSnapIdMissing) {
   expect_op_work_queue(mock_image_ctx);
 
   ::testing::InSequence seq;
-  expect_get_snap_id(mock_image_ctx, CEPH_NOSNAP);
+  expect_get_snap_id(mock_image_ctx, STONE_NOSNAP);
 
   C_SaferCond cond_ctx;
   MockSnapshotProtectRequest *req = new MockSnapshotProtectRequest(

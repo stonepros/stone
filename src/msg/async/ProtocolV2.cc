@@ -7,20 +7,20 @@
 #include "AsyncMessenger.h"
 
 #include "common/EventTrace.h"
-#include "common/ceph_crypto.h"
+#include "common/stone_crypto.h"
 #include "common/errno.h"
 #include "include/random.h"
 #include "auth/AuthClient.h"
 #include "auth/AuthServer.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #undef dout_prefix
 #define dout_prefix _conn_prefix(_dout)
 std::ostream &ProtocolV2::_conn_prefix(std::ostream *_dout) {
   return *_dout << "--2- " << messenger->get_myaddrs() << " >> "
                 << *connection->peer_addrs << " conn(" << connection << " "
                 << this
-		<< " " << ceph_con_mode_name(auth_meta->con_mode)
+		<< " " << stone_con_mode_name(auth_meta->con_mode)
 		<< " :" << connection->port
                 << " s=" << get_state_name(state) << " pgs=" << peer_global_seq
                 << " cs=" << connect_seq << " l=" << connection->policy.lossy
@@ -31,7 +31,7 @@ std::ostream &ProtocolV2::_conn_prefix(std::ostream *_dout) {
                 << ").";
 }
 
-using namespace ceph::msgr::v2;
+using namespace stone::msgr::v2;
 
 using CtPtr = Ct<ProtocolV2> *;
 using CtRef = Ct<ProtocolV2> &;
@@ -45,11 +45,11 @@ void ProtocolV2::run_continuation(CtPtr pcontinuation) {
 void ProtocolV2::run_continuation(CtRef continuation) {
   try {
     CONTINUATION_RUN(continuation)
-  } catch (const ceph::buffer::error &e) {
+  } catch (const stone::buffer::error &e) {
     lderr(cct) << __func__ << " failed decoding of frame header: " << e.what()
                << dendl;
     _fault();
-  } catch (const ceph::crypto::onwire::MsgAuthError &e) {
+  } catch (const stone::crypto::onwire::MsgAuthError &e) {
     lderr(cct) << __func__ << " " << e.what() << dendl;
     _fault();
   } catch (const DecryptionError &) {
@@ -59,7 +59,7 @@ void ProtocolV2::run_continuation(CtRef continuation) {
 
 #define WRITE(B, D, C) write(D, CONTINUATION(C), B)
 
-#define READ(L, C) read(CONTINUATION(C), ceph::buffer::ptr_node::create(ceph::buffer::create(L)))
+#define READ(L, C) read(CONTINUATION(C), stone::buffer::ptr_node::create(stone::buffer::create(L)))
 
 #define READ_RXBUF(B, C) read(CONTINUATION(C), B)
 
@@ -191,7 +191,7 @@ void ProtocolV2::requeue_sent() {
     return;
   }
 
-  auto& rq = out_queue[CEPH_MSG_PRIO_HIGHEST];
+  auto& rq = out_queue[STONE_MSG_PRIO_HIGHEST];
   out_seq -= sent.size();
   while (!sent.empty()) {
     Message *m = sent.back();
@@ -207,10 +207,10 @@ void ProtocolV2::requeue_sent() {
 uint64_t ProtocolV2::discard_requeued_up_to(uint64_t out_seq, uint64_t seq) {
   ldout(cct, 10) << __func__ << " " << seq << dendl;
   std::lock_guard<std::mutex> l(connection->write_lock);
-  if (out_queue.count(CEPH_MSG_PRIO_HIGHEST) == 0) {
+  if (out_queue.count(STONE_MSG_PRIO_HIGHEST) == 0) {
     return seq;
   }
-  auto& rq = out_queue[CEPH_MSG_PRIO_HIGHEST];
+  auto& rq = out_queue[STONE_MSG_PRIO_HIGHEST];
   uint64_t count = out_seq;
   while (!rq.empty()) {
     Message* const m = rq.front().m;
@@ -222,7 +222,7 @@ uint64_t ProtocolV2::discard_requeued_up_to(uint64_t out_seq, uint64_t seq) {
     rq.pop_front();
     count++;
   }
-  if (rq.empty()) out_queue.erase(CEPH_MSG_PRIO_HIGHEST);
+  if (rq.empty()) out_queue.erase(STONE_MSG_PRIO_HIGHEST);
   return count;
 }
 
@@ -267,7 +267,7 @@ void ProtocolV2::reset_recv_state() {
 }
 
 size_t ProtocolV2::get_current_msg_size() const {
-  ceph_assert(rx_frame_asm.get_num_segments() > 0);
+  stone_assert(rx_frame_asm.get_num_segments() > 0);
   size_t sum = 0;
   // we don't include SegmentIndex::Msg::HEADER.
   for (size_t i = 1; i < rx_frame_asm.get_num_segments(); i++) {
@@ -446,7 +446,7 @@ void ProtocolV2::send_message(Message *m) {
   } else {
     ldout(cct, 5) << __func__ << " enqueueing message m=" << m
                   << " type=" << m->get_type() << " " << *m << dendl;
-    m->queue_start = ceph::mono_clock::now();
+    m->queue_start = stone::mono_clock::now();
     m->trace.event("async enqueueing message");
     out_queue[m->get_priority()].emplace_back(
       out_queue_entry_t{is_prepared, m});
@@ -501,7 +501,7 @@ ProtocolV2::out_queue_entry_t ProtocolV2::_get_next_outgoing() {
   if (!out_queue.empty()) {
     auto it = out_queue.rbegin();
     auto& entries = it->second;
-    ceph_assert(!entries.empty());
+    stone_assert(!entries.empty());
     out_entry = entries.front();
     entries.pop_front();
     if (entries.empty()) {
@@ -513,7 +513,7 @@ ProtocolV2::out_queue_entry_t ProtocolV2::_get_next_outgoing() {
 
 ssize_t ProtocolV2::write_message(Message *m, bool more) {
   FUNCTRACE(cct);
-  ceph_assert(connection->center->in_thread());
+  stone_assert(connection->center->in_thread());
   m->set_seq(++out_seq);
 
   connection->lock.lock();
@@ -521,10 +521,10 @@ ssize_t ProtocolV2::write_message(Message *m, bool more) {
   ack_left = 0;
   connection->lock.unlock();
 
-  ceph_msg_header &header = m->get_header();
-  ceph_msg_footer &footer = m->get_footer();
+  stone_msg_header &header = m->get_header();
+  stone_msg_footer &footer = m->get_footer();
 
-  ceph_msg_header2 header2{header.seq,        header.tid,
+  stone_msg_header2 header2{header.seq,        header.tid,
                            header.type,       header.priority,
                            header.version,
                            init_le32(0),      header.data_off,
@@ -563,9 +563,9 @@ ssize_t ProtocolV2::write_message(Message *m, bool more) {
   }
 
 #if defined(WITH_EVENTTRACE)
-  if (m->get_type() == CEPH_MSG_OSD_OP)
+  if (m->get_type() == STONE_MSG_OSD_OP)
     OID_EVENT_TRACE_WITH_MSG(m, "SEND_MSG_OSD_OP_END", false);
-  else if (m->get_type() == CEPH_MSG_OSD_OPREPLY)
+  else if (m->get_type() == STONE_MSG_OSD_OPREPLY)
     OID_EVENT_TRACE_WITH_MSG(m, "SEND_MSG_OSD_OPREPLY_END", false);
 #endif
   m->put();
@@ -575,10 +575,10 @@ ssize_t ProtocolV2::write_message(Message *m, bool more) {
 
 template <class F>
 bool ProtocolV2::append_frame(F& frame) {
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   try {
     bl = frame.get_buffer(tx_frame_asm);
-  } catch (ceph::crypto::onwire::TxHandlerError &e) {
+  } catch (stone::crypto::onwire::TxHandlerError &e) {
     ldout(cct, 1) << __func__ << " " << e.what() << dendl;
     return false;
   }
@@ -600,7 +600,7 @@ void ProtocolV2::handle_message_ack(uint64_t seq) {
   static const int max_pending = 128;
   int i = 0;
   Message *pending[max_pending];
-  auto now = ceph::mono_clock::now();
+  auto now = stone::mono_clock::now();
   connection->write_lock.lock();
   while (!sent.empty() && sent.front()->get_seq() <= seq && i < max_pending) {
     Message *m = sent.front();
@@ -611,7 +611,7 @@ void ProtocolV2::handle_message_ack(uint64_t seq) {
                    << dendl;
   }
   connection->write_lock.unlock();
-  connection->logger->tinc(l_msgr_handle_ack_lat, ceph::mono_clock::now() - now);
+  connection->logger->tinc(l_msgr_handle_ack_lat, stone::mono_clock::now() - now);
   for (int k = 0; k < i; k++) {
     pending[k]->put();
   }
@@ -636,7 +636,7 @@ void ProtocolV2::write_event() {
       keepalive = false;
     }
 
-    auto start = ceph::mono_clock::now();
+    auto start = stone::mono_clock::now();
     bool more;
     do {
       const auto out_entry = _get_next_outgoing();
@@ -657,9 +657,9 @@ void ProtocolV2::write_event() {
         prepare_send_message(connection->get_features(), out_entry.m);
       }
 
-      if (out_entry.m->queue_start != ceph::mono_time()) {
+      if (out_entry.m->queue_start != stone::mono_time()) {
         connection->logger->tinc(l_msgr_send_messages_queue_lat,
-				 ceph::mono_clock::now() -
+				 stone::mono_clock::now() -
 				 out_entry.m->queue_start);
       }
 
@@ -700,7 +700,7 @@ void ProtocolV2::write_event() {
     connection->write_lock.unlock();
 
     connection->logger->tinc(l_msgr_running_send_time,
-                             ceph::mono_clock::now() - start);
+                             stone::mono_clock::now() - start);
     if (r < 0) {
       ldout(cct, 1) << __func__ << " send msg failed" << dendl;
       connection->lock.lock();
@@ -748,7 +748,7 @@ CtPtr ProtocolV2::read(CONTINUATION_RXBPTR_TYPE<ProtocolV2> &next,
     [&next, this](char *buffer, int r) {
       if (unlikely(pre_auth.enabled) && r >= 0) {
         pre_auth.rxbuf.append(*next.node);
-	ceph_assert(!cct->_conf->ms_die_on_bug ||
+	stone_assert(!cct->_conf->ms_die_on_bug ||
 		    pre_auth.rxbuf.length() < 20000000);
       }
       next.r = r;
@@ -758,7 +758,7 @@ CtPtr ProtocolV2::read(CONTINUATION_RXBPTR_TYPE<ProtocolV2> &next,
     // error or done synchronously
     if (unlikely(pre_auth.enabled) && r == 0) {
       pre_auth.rxbuf.append(*next.node);
-      ceph_assert(!cct->_conf->ms_die_on_bug ||
+      stone_assert(!cct->_conf->ms_die_on_bug ||
 		  pre_auth.rxbuf.length() < 20000000);
     }
     next.r = r;
@@ -772,10 +772,10 @@ template <class F>
 CtPtr ProtocolV2::write(const std::string &desc,
                         CONTINUATION_TYPE<ProtocolV2> &next,
                         F &frame) {
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   try {
     bl = frame.get_buffer(tx_frame_asm);
-  } catch (ceph::crypto::onwire::TxHandlerError &e) {
+  } catch (stone::crypto::onwire::TxHandlerError &e) {
     ldout(cct, 1) << __func__ << " " << e.what() << dendl;
     return _fault();
   }
@@ -787,10 +787,10 @@ CtPtr ProtocolV2::write(const std::string &desc,
 
 CtPtr ProtocolV2::write(const std::string &desc,
                         CONTINUATION_TYPE<ProtocolV2> &next,
-                        ceph::bufferlist &buffer) {
+                        stone::bufferlist &buffer) {
   if (unlikely(pre_auth.enabled)) {
     pre_auth.txbuf.append(buffer);
-    ceph_assert(!cct->_conf->ms_die_on_bug ||
+    stone_assert(!cct->_conf->ms_die_on_bug ||
 		pre_auth.txbuf.length() < 20000000);
   }
 
@@ -821,13 +821,13 @@ CtPtr ProtocolV2::_banner_exchange(CtRef callback) {
   ldout(cct, 20) << __func__ << dendl;
   bannerExchangeCallback = &callback;
 
-  ceph::bufferlist banner_payload;
-  using ceph::encode;
-  encode((uint64_t)CEPH_MSGR2_SUPPORTED_FEATURES, banner_payload, 0);
-  encode((uint64_t)CEPH_MSGR2_REQUIRED_FEATURES, banner_payload, 0);
+  stone::bufferlist banner_payload;
+  using stone::encode;
+  encode((uint64_t)STONE_MSGR2_SUPPORTED_FEATURES, banner_payload, 0);
+  encode((uint64_t)STONE_MSGR2_REQUIRED_FEATURES, banner_payload, 0);
 
-  ceph::bufferlist bl;
-  bl.append(CEPH_BANNER_V2_PREFIX, strlen(CEPH_BANNER_V2_PREFIX));
+  stone::bufferlist bl;
+  bl.append(STONE_BANNER_V2_PREFIX, strlen(STONE_BANNER_V2_PREFIX));
   encode((uint16_t)banner_payload.length(), bl, 0);
   bl.claim_append(banner_payload);
 
@@ -837,7 +837,7 @@ CtPtr ProtocolV2::_banner_exchange(CtRef callback) {
 }
 
 CtPtr ProtocolV2::_wait_for_peer_banner() {
-  unsigned banner_len = strlen(CEPH_BANNER_V2_PREFIX) + sizeof(ceph_le16);
+  unsigned banner_len = strlen(STONE_BANNER_V2_PREFIX) + sizeof(stone_le16);
   return READ(banner_len, _handle_peer_banner);
 }
 
@@ -850,10 +850,10 @@ CtPtr ProtocolV2::_handle_peer_banner(rx_buffer_t &&buffer, int r) {
     return _fault();
   }
 
-  unsigned banner_prefix_len = strlen(CEPH_BANNER_V2_PREFIX);
+  unsigned banner_prefix_len = strlen(STONE_BANNER_V2_PREFIX);
 
-  if (memcmp(buffer->c_str(), CEPH_BANNER_V2_PREFIX, banner_prefix_len)) {
-    if (memcmp(buffer->c_str(), CEPH_BANNER, strlen(CEPH_BANNER)) == 0) {
+  if (memcmp(buffer->c_str(), STONE_BANNER_V2_PREFIX, banner_prefix_len)) {
+    if (memcmp(buffer->c_str(), STONE_BANNER, strlen(STONE_BANNER)) == 0) {
       lderr(cct) << __func__ << " peer " << *connection->peer_addrs
                  << " is using msgr V1 protocol" << dendl;
       return _fault();
@@ -863,15 +863,15 @@ CtPtr ProtocolV2::_handle_peer_banner(rx_buffer_t &&buffer, int r) {
   }
 
   uint16_t payload_len;
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   buffer->set_offset(banner_prefix_len);
-  buffer->set_length(sizeof(ceph_le16));
+  buffer->set_length(sizeof(stone_le16));
   bl.push_back(std::move(buffer));
   auto ti = bl.cbegin();
-  using ceph::decode;
+  using stone::decode;
   try {
     decode(payload_len, ti);
-  } catch (const ceph::buffer::error &e) {
+  } catch (const stone::buffer::error &e) {
     lderr(cct) << __func__ << " decode banner payload len failed " << dendl;
     return _fault();
   }
@@ -893,14 +893,14 @@ CtPtr ProtocolV2::_handle_peer_banner_payload(rx_buffer_t &&buffer, int r) {
   uint64_t peer_supported_features;
   uint64_t peer_required_features;
 
-  ceph::bufferlist bl;
-  using ceph::decode;
+  stone::bufferlist bl;
+  using stone::decode;
   bl.push_back(std::move(buffer));
   auto ti = bl.cbegin();
   try {
     decode(peer_supported_features, ti);
     decode(peer_required_features, ti);
-  } catch (const ceph::buffer::error &e) {
+  } catch (const stone::buffer::error &e) {
     lderr(cct) << __func__ << " decode banner payload failed " << dendl;
     return _fault();
   }
@@ -911,8 +911,8 @@ CtPtr ProtocolV2::_handle_peer_banner_payload(rx_buffer_t &&buffer, int r) {
 
   // Check feature bit compatibility
 
-  uint64_t supported_features = CEPH_MSGR2_SUPPORTED_FEATURES;
-  uint64_t required_features = CEPH_MSGR2_REQUIRED_FEATURES;
+  uint64_t supported_features = STONE_MSGR2_SUPPORTED_FEATURES;
+  uint64_t required_features = STONE_MSGR2_REQUIRED_FEATURES;
 
   if ((required_features & peer_supported_features) != required_features) {
     ldout(cct, 1) << __func__ << " peer does not support all required features"
@@ -946,7 +946,7 @@ CtPtr ProtocolV2::_handle_peer_banner_payload(rx_buffer_t &&buffer, int r) {
     state = HELLO_CONNECTING;
   }
   else {
-    ceph_assert(state == BANNER_ACCEPTING);
+    stone_assert(state == BANNER_ACCEPTING);
     state = HELLO_ACCEPTING;
   }
 
@@ -958,7 +958,7 @@ CtPtr ProtocolV2::_handle_peer_banner_payload(rx_buffer_t &&buffer, int r) {
   return WRITE(hello, "hello frame", read_frame);
 }
 
-CtPtr ProtocolV2::handle_hello(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_hello(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -983,7 +983,7 @@ CtPtr ProtocolV2::handle_hello(ceph::bufferlist &payload)
   if (connection->get_peer_type() == -1) {
     connection->set_peer_type(hello.entity_type());
 
-    ceph_assert(state == HELLO_ACCEPTING);
+    stone_assert(state == HELLO_ACCEPTING);
     connection->policy = messenger->get_policy(hello.entity_type());
     ldout(cct, 10) << __func__ << " accept of host_type "
                    << (int)hello.entity_type()
@@ -993,7 +993,7 @@ CtPtr ProtocolV2::handle_hello(ceph::bufferlist &payload)
                    << " policy.resetcheck=" << connection->policy.resetcheck
                    << dendl;
   } else {
-    ceph_assert(state == HELLO_CONNECTING);
+    stone_assert(state == HELLO_CONNECTING);
     if (connection->get_peer_type() != hello.entity_type()) {
       ldout(cct, 1) << __func__ << " connection peer type does not match what"
                     << " peer advertises " << connection->get_peer_type()
@@ -1046,7 +1046,7 @@ CtPtr ProtocolV2::handle_hello(ceph::bufferlist &payload)
   CtPtr callback;
   callback = bannerExchangeCallback;
   bannerExchangeCallback = nullptr;
-  ceph_assert(callback);
+  stone_assert(callback);
   return callback;
 }
 
@@ -1084,7 +1084,7 @@ CtPtr ProtocolV2::handle_read_frame_preamble_main(rx_buffer_t &&buffer, int r) {
   } catch (FrameError& e) {
     ldout(cct, 1) << __func__ << " " << e.what() << dendl;
     return _fault();
-  } catch (ceph::crypto::onwire::MsgAuthError&) {
+  } catch (stone::crypto::onwire::MsgAuthError&) {
     ldout(cct, 1) << __func__ << "bad auth tag" << dendl;
     return _fault();
   }
@@ -1104,7 +1104,7 @@ CtPtr ProtocolV2::handle_read_frame_preamble_main(rx_buffer_t &&buffer, int r) {
       lderr(cct) << __func__ << " not in ready state!" << dendl;
       return _fault();
     }
-    recv_stamp = ceph_clock_now();
+    recv_stamp = stone_clock_now();
     state = THROTTLE_MESSAGE;
     return CONTINUE(throttle_message);
   } else {
@@ -1163,9 +1163,9 @@ CtPtr ProtocolV2::read_frame_segment() {
   rx_buffer_t rx_buffer;
   uint16_t align = rx_frame_asm.get_segment_align(seg_idx);
   try {
-    rx_buffer = ceph::buffer::ptr_node::create(ceph::buffer::create_aligned(
+    rx_buffer = stone::buffer::ptr_node::create(stone::buffer::create_aligned(
         onwire_len, align));
-  } catch (const ceph::buffer::bad_alloc&) {
+  } catch (const stone::buffer::bad_alloc&) {
     // Catching because of potential issues with satisfying alignment.
     ldout(cct, 1) << __func__ << " can't allocate aligned rx_buffer"
                   << " len=" << onwire_len
@@ -1204,7 +1204,7 @@ CtPtr ProtocolV2::_handle_read_frame_segment() {
 }
 
 CtPtr ProtocolV2::handle_frame_payload() {
-  ceph_assert(!rx_segments_data.empty());
+  stone_assert(!rx_segments_data.empty());
   auto& payload = rx_segments_data.back();
 
   ldout(cct, 30) << __func__ << "\n";
@@ -1251,7 +1251,7 @@ CtPtr ProtocolV2::handle_frame_payload() {
     case Tag::WAIT:
       return handle_wait(payload);
     default:
-      ceph_abort();
+      stone_abort();
   }
   return nullptr;
 }
@@ -1313,7 +1313,7 @@ CtPtr ProtocolV2::_handle_read_frame_epilogue_main() {
   } catch (FrameError& e) {
     ldout(cct, 1) << __func__ << " " << e.what() << dendl;
     return _fault();
-  } catch (ceph::crypto::onwire::MsgAuthError&) {
+  } catch (stone::crypto::onwire::MsgAuthError&) {
     ldout(cct, 1) << __func__ << "bad auth tag" << dendl;
     return _fault();
   }
@@ -1331,13 +1331,13 @@ CtPtr ProtocolV2::_handle_read_frame_epilogue_main() {
 
 CtPtr ProtocolV2::handle_message() {
   ldout(cct, 20) << __func__ << dendl;
-  ceph_assert(state == THROTTLE_DONE);
+  stone_assert(state == THROTTLE_DONE);
 
   const size_t cur_msg_size = get_current_msg_size();
   auto msg_frame = MessageFrame::Decode(rx_segments_data);
 
   // XXX: paranoid copy just to avoid oops
-  ceph_msg_header2 current_header = msg_frame.header();
+  stone_msg_header2 current_header = msg_frame.header();
 
   ldout(cct, 5) << __func__
 		<< " got " << msg_frame.front_len()
@@ -1350,7 +1350,7 @@ CtPtr ProtocolV2::handle_message() {
                 << dendl;
 
   INTERCEPT(16);
-  ceph_msg_header header{current_header.seq,
+  stone_msg_header header{current_header.seq,
                          current_header.tid,
                          current_header.type,
                          current_header.priority,
@@ -1363,7 +1363,7 @@ CtPtr ProtocolV2::handle_message() {
                          current_header.compat_version,
                          current_header.reserved,
                          init_le32(0)};
-  ceph_msg_footer footer{init_le32(0), init_le32(0),
+  stone_msg_footer footer{init_le32(0), init_le32(0),
 	                 init_le32(0), init_le64(0), current_header.flags};
 
   Message *message = decode_message(cct, 0, header, footer,
@@ -1389,7 +1389,7 @@ CtPtr ProtocolV2::handle_message() {
 
   message->set_recv_stamp(recv_stamp);
   message->set_throttle_stamp(throttle_stamp);
-  message->set_recv_complete_stamp(ceph_clock_now());
+  message->set_recv_complete_stamp(stone_clock_now());
 
   // check received seq#.  if it is old, drop the message.
   // note that incoming messages may skip ahead.  this is convenient for the
@@ -1402,9 +1402,9 @@ CtPtr ProtocolV2::handle_message() {
                   << " <= " << cur_seq << " " << message << " " << *message
                   << ", discarding" << dendl;
     message->put();
-    if (connection->has_feature(CEPH_FEATURE_RECONNECT_SEQ) &&
+    if (connection->has_feature(STONE_FEATURE_RECONNECT_SEQ) &&
         cct->_conf->ms_die_on_old_message) {
-      ceph_assert(0 == "old msgs despite reconnect_seq feature");
+      stone_assert(0 == "old msgs despite reconnect_seq feature");
     }
     return nullptr;
   }
@@ -1412,18 +1412,18 @@ CtPtr ProtocolV2::handle_message() {
     ldout(cct, 0) << __func__ << " missed message?  skipped from seq "
                   << cur_seq << " to " << message->get_seq() << dendl;
     if (cct->_conf->ms_die_on_skipped_message) {
-      ceph_assert(0 == "skipped incoming seq");
+      stone_assert(0 == "skipped incoming seq");
     }
   }
 
 #if defined(WITH_EVENTTRACE)
-  if (message->get_type() == CEPH_MSG_OSD_OP ||
-      message->get_type() == CEPH_MSG_OSD_OPREPLY) {
-    utime_t ltt_processed_stamp = ceph_clock_now();
+  if (message->get_type() == STONE_MSG_OSD_OP ||
+      message->get_type() == STONE_MSG_OSD_OPREPLY) {
+    utime_t ltt_processed_stamp = stone_clock_now();
     double usecs_elapsed =
         (ltt_processed_stamp.to_nsec() - recv_stamp.to_nsec()) / 1000;
     ostringstream buf;
-    if (message->get_type() == CEPH_MSG_OSD_OP)
+    if (message->get_type() == STONE_MSG_OSD_OP)
       OID_ELAPSED_WITH_MSG(message, usecs_elapsed, "TIME_TO_DECODE_OSD_OP",
                            false);
     else
@@ -1447,7 +1447,7 @@ CtPtr ProtocolV2::handle_message() {
 
   state = READY;
 
-  ceph::mono_time fast_dispatch_time;
+  stone::mono_time fast_dispatch_time;
 
   if (connection->is_blackhole()) {
     ldout(cct, 10) << __func__ << " blackhole " << *message << dendl;
@@ -1460,7 +1460,7 @@ CtPtr ProtocolV2::handle_message() {
                           rx_frame_asm.get_frame_onwire_len());
 
   messenger->ms_fast_preprocess(message);
-  fast_dispatch_time = ceph::mono_clock::now();
+  fast_dispatch_time = stone::mono_clock::now();
   connection->logger->tinc(l_msgr_running_recv_time,
 			   fast_dispatch_time - connection->recv_start_time);
   if (connection->delay_state) {
@@ -1469,14 +1469,14 @@ CtPtr ProtocolV2::handle_message() {
       delay_period =
           cct->_conf->ms_inject_delay_max * (double)(rand() % 10000) / 10000.0;
       ldout(cct, 1) << "queue_received will delay after "
-                    << (ceph_clock_now() + delay_period) << " on " << message
+                    << (stone_clock_now() + delay_period) << " on " << message
                     << " " << *message << dendl;
     }
     connection->delay_state->queue(delay_period, message);
   } else if (messenger->ms_can_fast_dispatch(message)) {
     connection->lock.unlock();
     connection->dispatch_queue->fast_dispatch(message);
-    connection->recv_start_time = ceph::mono_clock::now();
+    connection->recv_start_time = stone::mono_clock::now();
     connection->logger->tinc(l_msgr_running_fast_dispatch_time,
                              connection->recv_start_time - fast_dispatch_time);
     connection->lock.lock();
@@ -1587,13 +1587,13 @@ CtPtr ProtocolV2::throttle_dispatch_queue() {
     }
   }
 
-  throttle_stamp = ceph_clock_now();
+  throttle_stamp = stone_clock_now();
   state = THROTTLE_DONE;
 
   return read_frame_segment();
 }
 
-CtPtr ProtocolV2::handle_keepalive2(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_keepalive2(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -1617,7 +1617,7 @@ CtPtr ProtocolV2::handle_keepalive2(ceph::bufferlist &payload)
 
   ldout(cct, 20) << __func__ << " got KEEPALIVE2 "
                  << keepalive_frame.timestamp() << dendl;
-  connection->set_last_keepalive(ceph_clock_now());
+  connection->set_last_keepalive(stone_clock_now());
 
   if (is_connected()) {
     connection->center->dispatch_event_external(connection->write_handler);
@@ -1626,7 +1626,7 @@ CtPtr ProtocolV2::handle_keepalive2(ceph::bufferlist &payload)
   return CONTINUE(read_frame);
 }
 
-CtPtr ProtocolV2::handle_keepalive2_ack(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_keepalive2_ack(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -1643,7 +1643,7 @@ CtPtr ProtocolV2::handle_keepalive2_ack(ceph::bufferlist &payload)
   return CONTINUE(read_frame);
 }
 
-CtPtr ProtocolV2::handle_message_ack(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_message_ack(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -1681,11 +1681,11 @@ CtPtr ProtocolV2::post_client_banner_exchange() {
 }
 
 CtPtr ProtocolV2::send_auth_request(std::vector<uint32_t> &allowed_methods) {
-  ceph_assert(messenger->auth_client);
+  stone_assert(messenger->auth_client);
   ldout(cct, 20) << __func__ << " peer_type " << (int)connection->peer_type
 		 << " auth_client " << messenger->auth_client << dendl;
 
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   std::vector<uint32_t> preferred_modes;
   auto am = auth_meta;
   connection->lock.unlock();
@@ -1712,7 +1712,7 @@ CtPtr ProtocolV2::send_auth_request(std::vector<uint32_t> &allowed_methods) {
   return WRITE(frame, "auth request", read_frame);
 }
 
-CtPtr ProtocolV2::handle_auth_bad_method(ceph::bufferlist &payload) {
+CtPtr ProtocolV2::handle_auth_bad_method(stone::bufferlist &payload) {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
 
@@ -1727,7 +1727,7 @@ CtPtr ProtocolV2::handle_auth_bad_method(ceph::bufferlist &payload) {
                 << ", allowed methods=" << bad_method.allowed_methods()
 		<< ", allowed modes=" << bad_method.allowed_modes()
                 << dendl;
-  ceph_assert(messenger->auth_client);
+  stone_assert(messenger->auth_client);
   auto am = auth_meta;
   connection->lock.unlock();
   int r = messenger->auth_client->handle_auth_bad_method(
@@ -1743,7 +1743,7 @@ CtPtr ProtocolV2::handle_auth_bad_method(ceph::bufferlist &payload) {
   return send_auth_request(bad_method.allowed_methods());
 }
 
-CtPtr ProtocolV2::handle_auth_reply_more(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_auth_reply_more(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -1757,8 +1757,8 @@ CtPtr ProtocolV2::handle_auth_reply_more(ceph::bufferlist &payload)
   ldout(cct, 5) << __func__
                 << " auth reply more len=" << auth_more.auth_payload().length()
                 << dendl;
-  ceph_assert(messenger->auth_client);
-  ceph::bufferlist reply;
+  stone_assert(messenger->auth_client);
+  stone::bufferlist reply;
   auto am = auth_meta;
   connection->lock.unlock();
   int r = messenger->auth_client->handle_auth_reply_more(
@@ -1777,7 +1777,7 @@ CtPtr ProtocolV2::handle_auth_reply_more(ceph::bufferlist &payload)
   return WRITE(more_reply, "auth request more", read_frame);
 }
 
-CtPtr ProtocolV2::handle_auth_done(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_auth_done(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -1789,7 +1789,7 @@ CtPtr ProtocolV2::handle_auth_done(ceph::bufferlist &payload)
 
   auto auth_done = AuthDoneFrame::Decode(payload);
 
-  ceph_assert(messenger->auth_client);
+  stone_assert(messenger->auth_client);
   auto am = auth_meta;
   connection->lock.unlock();
   int r = messenger->auth_client->handle_auth_done(
@@ -1810,7 +1810,7 @@ CtPtr ProtocolV2::handle_auth_done(ceph::bufferlist &payload)
   }
   auth_meta->con_mode = auth_done.con_mode();
   bool is_rev1 = HAVE_MSGR2_FEATURE(peer_supported_features, REVISION_1);
-  session_stream_handlers = ceph::crypto::onwire::rxtx_t::create_handler_pair(
+  session_stream_handlers = stone::crypto::onwire::rxtx_t::create_handler_pair(
       cct, *auth_meta, /*new_nonce_format=*/is_rev1, /*crossed=*/false);
 
   state = AUTH_CONNECTING_SIGN;
@@ -1825,12 +1825,12 @@ CtPtr ProtocolV2::handle_auth_done(ceph::bufferlist &payload)
 
 CtPtr ProtocolV2::finish_client_auth() {
   if (!server_cookie) {
-    ceph_assert(connect_seq == 0);
+    stone_assert(connect_seq == 0);
     state = SESSION_CONNECTING;
     return send_client_ident();
   } else {  // reconnecting to previous session
     state = SESSION_RECONNECTING;
-    ceph_assert(connect_seq > 0);
+    stone_assert(connect_seq > 0);
     return send_reconnect();
   }
 }
@@ -1839,12 +1839,12 @@ CtPtr ProtocolV2::send_client_ident() {
   ldout(cct, 20) << __func__ << dendl;
 
   if (!connection->policy.lossy && !client_cookie) {
-    client_cookie = ceph::util::generate_random_number<uint64_t>(1, -1ll);
+    client_cookie = stone::util::generate_random_number<uint64_t>(1, -1ll);
   }
 
   uint64_t flags = 0;
   if (connection->policy.lossy) {
-    flags |= CEPH_MSG_CONNECT_LOSSY;
+    flags |= STONE_MSG_CONNECT_LOSSY;
   }
 
   auto client_ident = ClientIdentFrame::Encode(
@@ -1895,7 +1895,7 @@ CtPtr ProtocolV2::send_reconnect() {
   return WRITE(reconnect, "reconnect", read_frame);
 }
 
-CtPtr ProtocolV2::handle_ident_missing_features(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_ident_missing_features(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -1914,7 +1914,7 @@ CtPtr ProtocolV2::handle_ident_missing_features(ceph::bufferlist &payload)
   return _fault();
 }
 
-CtPtr ProtocolV2::handle_session_reset(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_session_reset(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -1940,7 +1940,7 @@ CtPtr ProtocolV2::handle_session_reset(ceph::bufferlist &payload)
   return send_client_ident();
 }
 
-CtPtr ProtocolV2::handle_session_retry(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_session_retry(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -1960,7 +1960,7 @@ CtPtr ProtocolV2::handle_session_retry(ceph::bufferlist &payload)
   return send_reconnect();
 }
 
-CtPtr ProtocolV2::handle_session_retry_global(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_session_retry_global(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -1980,7 +1980,7 @@ CtPtr ProtocolV2::handle_session_retry_global(ceph::bufferlist &payload)
   return send_reconnect();
 }
 
-CtPtr ProtocolV2::handle_wait(ceph::bufferlist &payload) {
+CtPtr ProtocolV2::handle_wait(stone::bufferlist &payload) {
   ldout(cct, 20) << __func__
 		 << " received WAIT (connection race)"
 		 << " payload.length()=" << payload.length()
@@ -1996,7 +1996,7 @@ CtPtr ProtocolV2::handle_wait(ceph::bufferlist &payload) {
   return _fault();
 }
 
-CtPtr ProtocolV2::handle_reconnect_ok(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_reconnect_ok(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -2019,7 +2019,7 @@ CtPtr ProtocolV2::handle_reconnect_ok(ceph::bufferlist &payload)
                  << connection->get_features() << dendl;
 
   if (connection->delay_state) {
-    ceph_assert(connection->delay_state->ready());
+    stone_assert(connection->delay_state->ready());
   }
 
   connection->dispatch_queue->queue_connect(connection);
@@ -2028,7 +2028,7 @@ CtPtr ProtocolV2::handle_reconnect_ok(ceph::bufferlist &payload)
   return ready();
 }
 
-CtPtr ProtocolV2::handle_server_ident(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_server_ident(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -2066,7 +2066,7 @@ CtPtr ProtocolV2::handle_server_ident(ceph::bufferlist &payload)
                            connection->policy.features_supported);
   peer_global_seq = server_ident.global_seq();
 
-  connection->policy.lossy = server_ident.flags() & CEPH_MSG_CONNECT_LOSSY;
+  connection->policy.lossy = server_ident.flags() & STONE_MSG_CONNECT_LOSSY;
 
   backoff = utime_t();
   ldout(cct, 10) << __func__ << " connect success " << connect_seq
@@ -2074,7 +2074,7 @@ CtPtr ProtocolV2::handle_server_ident(ceph::bufferlist &payload)
                  << connection->get_features() << dendl;
 
   if (connection->delay_state) {
-    ceph_assert(connection->delay_state->ready());
+    stone_assert(connection->delay_state->ready());
   }
 
   connection->dispatch_queue->queue_connect(connection);
@@ -2103,7 +2103,7 @@ CtPtr ProtocolV2::post_server_banner_exchange() {
   return CONTINUE(read_frame);
 }
 
-CtPtr ProtocolV2::handle_auth_request(ceph::bufferlist &payload) {
+CtPtr ProtocolV2::handle_auth_request(stone::bufferlist &payload) {
   ldout(cct, 20) << __func__ << " payload.length()=" << payload.length()
                  << dendl;
 
@@ -2121,7 +2121,7 @@ CtPtr ProtocolV2::handle_auth_request(ceph::bufferlist &payload) {
   auth_meta->con_mode = messenger->auth_server->pick_con_mode(
     connection->get_peer_type(), auth_meta->auth_method,
     request.preferred_modes());
-  if (auth_meta->con_mode == CEPH_CON_MODE_UNKNOWN) {
+  if (auth_meta->con_mode == STONE_CON_MODE_UNKNOWN) {
     return _auth_bad_method(-EOPNOTSUPP);
   }
   return _handle_auth_request(request.auth_payload(), false);
@@ -2129,7 +2129,7 @@ CtPtr ProtocolV2::handle_auth_request(ceph::bufferlist &payload) {
 
 CtPtr ProtocolV2::_auth_bad_method(int r)
 {
-  ceph_assert(r < 0);
+  stone_assert(r < 0);
   std::vector<uint32_t> allowed_methods;
   std::vector<uint32_t> allowed_modes;
   messenger->auth_server->get_supported_auth_methods(
@@ -2144,12 +2144,12 @@ CtPtr ProtocolV2::_auth_bad_method(int r)
   return WRITE(bad_method, "bad auth method", read_frame);
 }
 
-CtPtr ProtocolV2::_handle_auth_request(ceph::bufferlist& auth_payload, bool more)
+CtPtr ProtocolV2::_handle_auth_request(stone::bufferlist& auth_payload, bool more)
 {
   if (!messenger->auth_server) {
     return _fault();
   }
-  ceph::bufferlist reply;
+  stone::bufferlist reply;
   auto am = auth_meta;
   connection->lock.unlock();
   int r = messenger->auth_server->handle_auth_request(
@@ -2161,7 +2161,7 @@ CtPtr ProtocolV2::_handle_auth_request(ceph::bufferlist& auth_payload, bool more
     ldout(cct, 1) << __func__
                   << " state changed while accept, it must be mark_down"
                   << dendl;
-    ceph_assert(state == CLOSED);
+    stone_assert(state == CLOSED);
     return _fault();
   }
   if (r == 1) {
@@ -2187,11 +2187,11 @@ CtPtr ProtocolV2::_handle_auth_request(ceph::bufferlist& auth_payload, bool more
 
 CtPtr ProtocolV2::finish_auth()
 {
-  ceph_assert(auth_meta);
+  stone_assert(auth_meta);
   // TODO: having a possibility to check whether we're server or client could
   // allow reusing finish_auth().
   bool is_rev1 = HAVE_MSGR2_FEATURE(peer_supported_features, REVISION_1);
-  session_stream_handlers = ceph::crypto::onwire::rxtx_t::create_handler_pair(
+  session_stream_handlers = stone::crypto::onwire::rxtx_t::create_handler_pair(
       cct, *auth_meta, /*new_nonce_format=*/is_rev1, /*crossed=*/true);
 
   const auto sig = auth_meta->session_key.empty() ? sha256_digest_t() :
@@ -2202,7 +2202,7 @@ CtPtr ProtocolV2::finish_auth()
   return WRITE(sig_frame, "auth signature", read_frame);
 }
 
-CtPtr ProtocolV2::handle_auth_request_more(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_auth_request_more(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -2216,7 +2216,7 @@ CtPtr ProtocolV2::handle_auth_request_more(ceph::bufferlist &payload)
   return _handle_auth_request(auth_more.auth_payload(), true);
 }
 
-CtPtr ProtocolV2::handle_auth_signature(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_auth_signature(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -2254,11 +2254,11 @@ CtPtr ProtocolV2::handle_auth_signature(ceph::bufferlist &payload)
     // this happened at client side
     return finish_client_auth();
   } else {
-    ceph_abort("state corruption");
+    stone_abort("state corruption");
   }
 }
 
-CtPtr ProtocolV2::handle_client_ident(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_client_ident(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -2347,7 +2347,7 @@ CtPtr ProtocolV2::handle_client_ident(ceph::bufferlist &payload)
       ldout(cct, 1) << __func__
 		    << " state changed while accept, it must be mark_down"
 		    << dendl;
-      ceph_assert(state == CLOSED);
+      stone_assert(state == CLOSED);
       return _fault();
     }
 
@@ -2360,7 +2360,7 @@ CtPtr ProtocolV2::handle_client_ident(ceph::bufferlist &payload)
   return send_server_ident();
 }
 
-CtPtr ProtocolV2::handle_reconnect(ceph::bufferlist &payload)
+CtPtr ProtocolV2::handle_reconnect(stone::bufferlist &payload)
 {
   ldout(cct, 20) << __func__
 		 << " payload.length()=" << payload.length() << dendl;
@@ -2406,7 +2406,7 @@ CtPtr ProtocolV2::handle_reconnect(ceph::bufferlist &payload)
     ldout(cct, 1) << __func__
                   << " state changed while accept, it must be mark_down"
                   << dendl;
-    ceph_assert(state == CLOSED);
+    stone_assert(state == CLOSED);
     return _fault();
   }
 
@@ -2424,7 +2424,7 @@ CtPtr ProtocolV2::handle_reconnect(ceph::bufferlist &payload)
   ProtocolV2 *exproto = dynamic_cast<ProtocolV2 *>(existing->protocol.get());
   if (!exproto) {
     ldout(cct, 1) << __func__ << " existing=" << existing << dendl;
-    ceph_assert(false);
+    stone_assert(false);
   }
 
   if (exproto->state == CLOSED) {
@@ -2528,7 +2528,7 @@ CtPtr ProtocolV2::handle_existing_connection(const AsyncConnectionRef& existing)
   ProtocolV2 *exproto = dynamic_cast<ProtocolV2 *>(existing->protocol.get());
   if (!exproto) {
     ldout(cct, 1) << __func__ << " existing=" << existing << dendl;
-    ceph_assert(false);
+    stone_assert(false);
   }
 
   if (exproto->state == CLOSED) {
@@ -2609,7 +2609,7 @@ CtPtr ProtocolV2::handle_existing_connection(const AsyncConnectionRef& existing)
         << __func__
         << " connection race detected, this connection loses to existing="
         << existing << dendl;
-    ceph_assert(connection->peer_addrs->msgr2_addr() >
+    stone_assert(connection->peer_addrs->msgr2_addr() >
                 messenger->get_myaddrs().msgr2_addr());
 
     // make sure we follow through with opening the existing
@@ -2635,7 +2635,7 @@ CtPtr ProtocolV2::reuse_connection(const AsyncConnectionRef& existing,
 
   if (existing->delay_state) {
     existing->delay_state->flush();
-    ceph_assert(!connection->delay_state);
+    stone_assert(!connection->delay_state);
   }
   exproto->reset_recv_state();
   exproto->pre_auth.enabled = false;
@@ -2652,7 +2652,7 @@ CtPtr ProtocolV2::reuse_connection(const AsyncConnectionRef& existing,
   }
   exproto->peer_global_seq = peer_global_seq;
 
-  ceph_assert(connection->center->in_thread());
+  stone_assert(connection->center->in_thread());
   auto temp_cs = std::move(connection->cs);
   EventCenter *new_center = connection->center;
   Worker *new_worker = connection->worker;
@@ -2682,7 +2682,7 @@ CtPtr ProtocolV2::reuse_connection(const AsyncConnectionRef& existing,
   // Discard existing prefetch buffer in `recv_buf`
   existing->recv_start = existing->recv_end = 0;
   // there shouldn't exist any buffer
-  ceph_assert(connection->recv_start == connection->recv_end);
+  stone_assert(connection->recv_start == connection->recv_end);
 
   auto deactivate_existing = std::bind(
       [ existing,
@@ -2722,7 +2722,7 @@ CtPtr ProtocolV2::reuse_connection(const AsyncConnectionRef& existing,
                                   std::move(back_to_close), true);
             return;
           } else {
-            ceph_abort();
+            stone_abort();
           }
         }
 
@@ -2733,13 +2733,13 @@ CtPtr ProtocolV2::reuse_connection(const AsyncConnectionRef& existing,
         auto transfer_existing = [existing, exproto]() mutable {
           std::lock_guard<std::mutex> l(existing->lock);
           if (exproto->state == CLOSED) return;
-          ceph_assert(exproto->state == NONE);
+          stone_assert(exproto->state == NONE);
 
           exproto->state = SESSION_ACCEPTING;
           // we have called shutdown_socket above
-          ceph_assert(existing->last_tick_id == 0);
+          stone_assert(existing->last_tick_id == 0);
           // restart timer since we are going to re-build connection
-          existing->last_connect_started = ceph::coarse_mono_clock::now();
+          existing->last_connect_started = stone::coarse_mono_clock::now();
           existing->last_tick_id = existing->center->create_time_event(
             existing->connect_timeout_us, existing->tick_handler);
           existing->state = AsyncConnection::STATE_CONNECTION_ESTABLISHED;
@@ -2772,12 +2772,12 @@ CtPtr ProtocolV2::send_server_ident() {
   in_seq = 0;
 
   if (!connection->policy.lossy) {
-    server_cookie = ceph::util::generate_random_number<uint64_t>(1, -1ll);
+    server_cookie = stone::util::generate_random_number<uint64_t>(1, -1ll);
   }
 
   uint64_t flags = 0;
   if (connection->policy.lossy) {
-    flags = flags | CEPH_MSG_CONNECT_LOSSY;
+    flags = flags | STONE_MSG_CONNECT_LOSSY;
   }
 
   uint64_t gs = messenger->get_global_seq();
@@ -2820,7 +2820,7 @@ CtPtr ProtocolV2::send_server_ident() {
     ldout(cct, 1) << __func__
                   << " state changed while accept_conn, it must be mark_down"
                   << dendl;
-    ceph_assert(state == CLOSED || state == NONE);
+    stone_assert(state == CLOSED || state == NONE);
     messenger->unregister_conn(connection);
     connection->inject_delay();
     return _fault();
@@ -2841,7 +2841,7 @@ CtPtr ProtocolV2::server_ready() {
   ldout(cct, 20) << __func__ << dendl;
 
   if (connection->delay_state) {
-    ceph_assert(connection->delay_state->ready());
+    stone_assert(connection->delay_state->ready());
   }
 
   return ready();
@@ -2877,7 +2877,7 @@ CtPtr ProtocolV2::send_reconnect_ok() {
     ldout(cct, 1) << __func__
                   << " state changed while accept_conn, it must be mark_down"
                   << dendl;
-    ceph_assert(state == CLOSED || state == NONE);
+    stone_assert(state == CLOSED || state == NONE);
     messenger->unregister_conn(connection);
     connection->inject_delay();
     return _fault();

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 John Spray <john.spray@inktank.com>
  *
@@ -35,8 +35,8 @@
 #include "DaemonKey.h"
 #include "DaemonServer.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr " << __func__ << " "
 
@@ -52,7 +52,7 @@ ActivePyModules::ActivePyModules(
 : module_config(module_config_), daemon_state(ds), cluster_state(cs),
   monc(mc), clog(clog_), audit_clog(audit_clog_), objecter(objecter_),
   client(client_), finisher(f),
-  cmd_finisher(g_ceph_context, "cmd_finisher", "cmdfin"),
+  cmd_finisher(g_stone_context, "cmd_finisher", "cmdfin"),
   server(server), py_module_registry(pmr)
 {
   store_cache = std::move(store_data);
@@ -71,18 +71,18 @@ void ActivePyModules::dump_server(const std::string &hostname,
 {
   f->dump_string("hostname", hostname);
   f->open_array_section("services");
-  std::string ceph_version;
+  std::string stone_version;
 
   for (const auto &[key, state] : dmc) {
     std::string id;
-    without_gil([&ceph_version, &id, state=state] {
+    without_gil([&stone_version, &id, state=state] {
       std::lock_guard l(state->lock);
       // TODO: pick the highest version, and make sure that
       // somewhere else (during health reporting?) we are
       // indicating to the user if we see mixed versions
-      auto ver_iter = state->metadata.find("ceph_version");
+      auto ver_iter = state->metadata.find("stone_version");
       if (ver_iter != state->metadata.end()) {
-        ceph_version = state->metadata.at("ceph_version");
+        stone_version = state->metadata.at("stone_version");
       }
       if (state->metadata.find("id") != state->metadata.end()) {
         id = state->metadata.at("id");
@@ -98,7 +98,7 @@ void ActivePyModules::dump_server(const std::string &hostname,
   }
   f->close_section();
 
-  f->dump_string("ceph_version", ceph_version);
+  f->dump_string("stone_version", stone_version);
 }
 
 PyObject *ActivePyModules::get_server_python(const std::string &hostname)
@@ -218,7 +218,7 @@ PyObject *ActivePyModules::get_python(const std::string &what)
     without_gil_t no_gil;
     bufferlist rdata;
     cluster_state.with_osdmap([&](const OSDMap &osd_map){
-      osd_map.crush->encode(rdata, CEPH_FEATURES_SUPPORTED_DEFAULT);
+      osd_map.crush->encode(rdata, STONE_FEATURES_SUPPORTED_DEFAULT);
     });
     std::string crush_text = rdata.to_str();
     with_gil_t with_gil{no_gil};
@@ -448,14 +448,14 @@ PyObject *ActivePyModules::get_python(const std::string &what)
     });
   } else if (what == "health") {
     without_gil_t no_gil;
-    cluster_state.with_health([&](const ceph::bufferlist &health_json) {
+    cluster_state.with_health([&](const stone::bufferlist &health_json) {
       no_gil.acquire_gil();
       f.dump_string("json", health_json.to_str());
     });
   } else if (what == "mon_status") {
     without_gil_t no_gil;
     cluster_state.with_mon_status(
-        [&](const ceph::bufferlist &mon_status_json) {
+        [&](const stone::bufferlist &mon_status_json) {
       with_gil_t with_gil{no_gil};
       f.dump_string("json", mon_status_json.to_str());
     });
@@ -531,7 +531,7 @@ void ActivePyModules::start_one(PyModuleRef py_module)
            << dendl;
     } else {
       auto em = modules.emplace(name, active_module);
-      ceph_assert(em.second); // actually inserted
+      stone_assert(em.second); // actually inserted
 
       dout(4) << "Starting thread for " << name << dendl;
       active_module->thread.create(active_module->get_thread_name());
@@ -640,7 +640,7 @@ PyObject *ActivePyModules::dispatch_remote(
     std::string *err)
 {
   auto mod_iter = modules.find(other_module);
-  ceph_assert(mod_iter != modules.end());
+  stone_assert(mod_iter != modules.end());
 
   return mod_iter->second->dispatch_remote(method, args, kwargs, err);
 }
@@ -833,7 +833,7 @@ void ActivePyModules::_refresh_config_map()
        ++p) {
     string key = p->first.substr(7);
     if (key.find("mgr/") == 0) {
-      // NOTE: for now, we ignore module options.  see also ceph_foreign_option_get().
+      // NOTE: for now, we ignore module options.  see also stone_foreign_option_get().
       continue;
     }
     string value = p->second;
@@ -1001,7 +1001,7 @@ PyObject* ActivePyModules::get_perf_schema_python(
   if (!daemons.empty()) {
     for (auto& [key, state] : daemons) {
       std::lock_guard l(state->lock);
-      with_gil(no_gil, [&, key=ceph::to_string(key), state=state] {
+      with_gil(no_gil, [&, key=stone::to_string(key), state=state] {
         f.open_object_section(key.c_str());
         for (auto ctr_inst_iter : state->perf_counters.instances) {
           const auto &counter_name = ctr_inst_iter.first;
@@ -1031,10 +1031,10 @@ PyObject *ActivePyModules::get_context()
   auto l = without_gil([&] {
     return std::lock_guard(lock);
   });
-  // Construct a capsule containing ceph context.
+  // Construct a capsule containing stone context.
   // Not incrementing/decrementing ref count on the context because
   // it's the global one and it has process lifetime.
-  auto capsule = PyCapsule_New(g_ceph_context, nullptr, nullptr);
+  auto capsule = PyCapsule_New(g_stone_context, nullptr, nullptr);
   return capsule;
 }
 
@@ -1052,7 +1052,7 @@ PyObject *construct_with_capsule(
     derr << "Failed to import python module:" << dendl;
     derr << handle_pyerror() << dendl;
   }
-  ceph_assert(module);
+  stone_assert(module);
 
   PyObject *wrapper_type = PyObject_GetAttrString(
       module, (const char*)clsname.c_str());
@@ -1060,11 +1060,11 @@ PyObject *construct_with_capsule(
     derr << "Failed to get python type:" << dendl;
     derr << handle_pyerror() << dendl;
   }
-  ceph_assert(wrapper_type);
+  stone_assert(wrapper_type);
 
   // Construct a capsule containing an OSDMap.
   auto wrapped_capsule = PyCapsule_New(wrapped, nullptr, nullptr);
-  ceph_assert(wrapped_capsule);
+  stone_assert(wrapped_capsule);
 
   // Construct the python OSDMap
   auto pArgs = PyTuple_Pack(1, wrapped_capsule);
@@ -1073,7 +1073,7 @@ PyObject *construct_with_capsule(
     derr << "Failed to construct python OSDMap:" << dendl;
     derr << handle_pyerror() << dendl;
   }
-  ceph_assert(wrapper_instance != nullptr);
+  stone_assert(wrapper_instance != nullptr);
   Py_DECREF(pArgs);
   Py_DECREF(wrapped_capsule);
 
@@ -1099,12 +1099,12 @@ PyObject *ActivePyModules::get_foreign_config(
   const std::string& who,
   const std::string& name)
 {
-  dout(10) << "ceph_foreign_option_get " << who << " " << name << dendl;
+  dout(10) << "stone_foreign_option_get " << who << " " << name << dendl;
 
   // NOTE: for now this will only work with build-in options, not module options.
   const Option *opt = g_conf().find_option(name);
   if (!opt) {
-    dout(4) << "ceph_foreign_option_get " << name << " not found " << dendl;
+    dout(4) << "stone_foreign_option_get " << name << " not found " << dendl;
     PyErr_Format(PyExc_KeyError, "option not found: %s", name.c_str());
     return nullptr;
   }
@@ -1125,7 +1125,7 @@ PyObject *ActivePyModules::get_foreign_config(
 	"\"key\": \""s + name + "\"}");
     }
     cmd.wait();
-    dout(10) << "ceph_foreign_option_get (mon command) " << who << " " << name << " = "
+    dout(10) << "stone_foreign_option_get (mon command) " << who << " " << name << " = "
 	     << cmd.outbl.to_str() << dendl;
     with_gil_t gil(no_gil);
     return get_python_typed_option_value(opt->type, cmd.outbl.to_str());
@@ -1184,7 +1184,7 @@ PyObject *ActivePyModules::get_foreign_config(
     }
   }
 
-  dout(10) << "ceph_foreign_option_get (configmap) " << who << " " << name << " = "
+  dout(10) << "stone_foreign_option_get (configmap) " << who << " " << name << " = "
 	   << value << dendl;
   lock.unlock();
   with_gil_t with_gil(no_gil);
@@ -1253,13 +1253,13 @@ void ActivePyModules::update_progress_event(
   const std::string& evid,
   const std::string& desc,
   float progress,
-  bool add_to_ceph_s)
+  bool add_to_stone_s)
 {
   std::lock_guard l(lock);
   auto& pe = progress_events[evid];
   pe.message = desc;
   pe.progress = progress;
-  pe.add_to_ceph_s = add_to_ceph_s;
+  pe.add_to_stone_s = add_to_stone_s;
 }
 
 void ActivePyModules::complete_progress_event(const std::string& evid)
@@ -1468,7 +1468,7 @@ void ActivePyModules::cluster_log(const std::string &channel, clog_type prio,
   map<string,string> log_to_graylog_port;
   uuid_d fsid;
   string host;
-  if (parse_log_client_options(g_ceph_context, log_to_monitors, log_to_syslog,
+  if (parse_log_client_options(g_stone_context, log_to_monitors, log_to_syslog,
 			       log_channel, log_prio, log_to_graylog,
 			       log_to_graylog_host, log_to_graylog_port,
 			       fsid, host) == 0)

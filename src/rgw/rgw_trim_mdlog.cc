@@ -15,7 +15,7 @@
 
 #include <boost/asio/yield.hpp>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #undef dout_prefix
 #define dout_prefix (*_dout << "meta trim: ")
@@ -82,7 +82,7 @@ int PurgePeriodLogsCR::operate(const DoutPrefixProvider *dpp)
     if (retcode < 0) {
       return set_cr_error(retcode);
     }
-    ceph_assert(cursor);
+    stone_assert(cursor);
     ldpp_dout(dpp, 20) << "oldest log realm_epoch=" << cursor.get_epoch()
         << " period=" << cursor.get_period().get_id() << dendl;
 
@@ -123,7 +123,7 @@ int PurgePeriodLogsCR::operate(const DoutPrefixProvider *dpp)
         *last_trim_epoch = cursor.get_epoch();
       }
 
-      ceph_assert(cursor.has_next()); // get_current() should always come after
+      stone_assert(cursor.has_next()); // get_current() should always come after
       cursor.next();
     }
     return set_cr_done();
@@ -167,7 +167,7 @@ bool operator<(const rgw_meta_sync_marker& lhs, const rgw_meta_sync_marker& rhs)
 /// populate the status with the minimum stable marker of each shard for any
 /// peer whose realm_epoch matches the minimum realm_epoch in the input
 template <typename Iter>
-int take_min_status(CephContext *cct, Iter first, Iter last,
+int take_min_status(StoneContext *cct, Iter first, Iter last,
                     rgw_meta_sync_status *status)
 {
   if (first == last) {
@@ -236,7 +236,7 @@ struct MasterTrimEnv : public TrimEnv {
 
 struct PeerTrimEnv : public TrimEnv {
   /// last trim timestamp for each shard, only applies to current period's mdlog
-  std::vector<ceph::real_time> last_trim_timestamps;
+  std::vector<stone::real_time> last_trim_timestamps;
 
   PeerTrimEnv(const DoutPrefixProvider *dpp, rgw::sal::RGWRadosStore *store, RGWHTTPManager *http, int num_shards)
     : TrimEnv(dpp, store, http, num_shards),
@@ -414,14 +414,14 @@ class MetaPeerTrimShardCR : public RGWCoroutine {
   const std::string& period_id;
   const int shard_id;
   RGWMetadataLogInfo info;
-  ceph::real_time stable; //< safe timestamp to trim, according to master
-  ceph::real_time *last_trim; //< last trimmed timestamp, updated on trim
+  stone::real_time stable; //< safe timestamp to trim, according to master
+  stone::real_time *last_trim; //< last trimmed timestamp, updated on trim
   rgw_mdlog_shard_data result; //< result from master's mdlog listing
 
  public:
   MetaPeerTrimShardCR(RGWMetaSyncEnv& env, RGWMetadataLog *mdlog,
                       const std::string& period_id, int shard_id,
-                      ceph::real_time *last_trim)
+                      stone::real_time *last_trim)
     : RGWCoroutine(env.store->ctx()), env(env), mdlog(mdlog),
       period_id(period_id), shard_id(shard_id), last_trim(last_trim)
   {}
@@ -457,7 +457,7 @@ int MetaPeerTrimShardCR::operate(const DoutPrefixProvider *dpp)
             << ": " << cpp_strerror(retcode) << dendl;
         return set_cr_error(retcode);
       }
-      if (ceph::real_clock::is_zero(info.last_update)) {
+      if (stone::real_clock::is_zero(info.last_update)) {
         return set_cr_done(); // nothing to trim
       }
       ldpp_dout(dpp, 10) << "got mdlog shard info with last update="

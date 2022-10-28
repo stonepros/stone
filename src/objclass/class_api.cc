@@ -2,8 +2,8 @@
 // vim: ts=8 sw=2 smarttab
 
 #include <cstdarg>
-#include "common/ceph_context.h"
-#include "common/ceph_releases.h"
+#include "common/stone_context.h"
+#include "common/stone_releases.h"
 #include "common/config.h"
 #include "common/debug.h"
 
@@ -15,7 +15,7 @@
 
 #define dout_context ClassHandler::get_instance().cct
 
-static constexpr int dout_subsys = ceph_subsys_objclass;
+static constexpr int dout_subsys = stone_subsys_objclass;
 
 void *cls_alloc(size_t size)
 {
@@ -93,13 +93,13 @@ void cls_unregister_filter(cls_filter_handle_t handle)
 }
 
 int cls_cxx_read(cls_method_context_t hctx, int ofs, int len,
-		 ceph::buffer::list *outbl)
+		 stone::buffer::list *outbl)
 {
   return cls_cxx_read2(hctx, ofs, len, outbl, 0);
 }
 
 int cls_cxx_write(cls_method_context_t hctx, int ofs, int len,
-		  ceph::buffer::list *inbl)
+		  stone::buffer::list *inbl)
 {
   return cls_cxx_write2(hctx, ofs, len, inbl, 0);
 }
@@ -122,10 +122,10 @@ int cls_gen_rand_base64(char *dest, int size) /* size should be the required str
     return -1;
   }
 
-  ret = ceph_armor(tmp_dest, &tmp_dest[sizeof(tmp_dest)],
+  ret = stone_armor(tmp_dest, &tmp_dest[sizeof(tmp_dest)],
 		   (const char *)buf, ((const char *)buf) + ((size - 1) * 3 + 4 - 1) / 4);
   if (ret < 0) {
-    derr << "ceph_armor failed" << dendl;
+    derr << "stone_armor failed" << dendl;
     return -1;
   }
   tmp_dest[ret] = '\0';
@@ -159,7 +159,7 @@ int cls_log(int level, const char *format, ...)
      va_end(ap);
 #define MAX_SIZE 8196
      if ((n > -1 && n < size) || size > MAX_SIZE) {
-       dout(ceph::dout::need_dynamic(level)) << buf << dendl;
+       dout(stone::dout::need_dynamic(level)) << buf << dendl;
        return n;
      }
      size *= 2;

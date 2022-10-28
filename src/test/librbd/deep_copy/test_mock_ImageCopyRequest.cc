@@ -27,7 +27,7 @@ struct MockTestImageCtx : public librbd::MockImageCtx {
                                   const std::string &image_id,
                                   librados::snap_t snap_id, librados::IoCtx& p,
                                   bool read_only) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -56,7 +56,7 @@ struct ObjectCopyRequest<librbd::MockTestImageCtx> {
       const SnapMap &snap_map,
       uint64_t object_number, uint32_t flags, Handler* handler,
       Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     std::lock_guard locker{s_instance->lock};
     s_instance->snap_map = &snap_map;
     s_instance->flags = flags;
@@ -67,8 +67,8 @@ struct ObjectCopyRequest<librbd::MockTestImageCtx> {
 
   MOCK_METHOD0(send, void());
 
-  ceph::mutex lock = ceph::make_mutex("lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("lock");
+  stone::condition_variable cond;
 
   const SnapMap *snap_map = nullptr;
   std::map<uint64_t, Context *> object_contexts;
@@ -94,7 +94,7 @@ struct DiffRequest<MockTestImageCtx> {
                              uint64_t snap_id_start, uint64_t snap_id_end,
                              BitVector<2>* object_diff_state,
                              Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->object_diff_state = object_diff_state;
     s_instance->on_finish = on_finish;
     return s_instance;

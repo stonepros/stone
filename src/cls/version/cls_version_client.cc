@@ -70,7 +70,7 @@ public:
         auto iter = outbl.cbegin();
         decode(ret, iter);
 	*objv = ret.objv;
-      } catch (ceph::buffer::error& err) {
+      } catch (stone::buffer::error& err) {
         // nothing we can do about it atm
       }
     }
@@ -94,7 +94,7 @@ int cls_version_read(librados::IoCtx& io_ctx, std::string& oid, obj_version *ver
   try {
     auto iter = out.cbegin();
     decode(ret, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     return -EIO;
   }
 

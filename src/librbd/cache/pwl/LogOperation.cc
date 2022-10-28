@@ -5,7 +5,7 @@
 #include "LogOperation.h"
 #include "librbd/cache/pwl/Types.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::LogOperation: " << this \
                            << " " <<  __func__ << ": "
@@ -33,11 +33,11 @@ std::ostream &operator<<(std::ostream &os,
   return op.format(os);
 }
 
-SyncPointLogOperation::SyncPointLogOperation(ceph::mutex &lock,
+SyncPointLogOperation::SyncPointLogOperation(stone::mutex &lock,
                                              std::shared_ptr<SyncPoint> sync_point,
                                              utime_t dispatch_time,
                                              PerfCounters *perfcounter,
-                                             CephContext *cct)
+                                             StoneContext *cct)
   : GenericLogOperation(dispatch_time, perfcounter), m_cct(cct), m_lock(lock),
     sync_point(sync_point) {
 }
@@ -69,8 +69,8 @@ std::vector<Context*> SyncPointLogOperation::append_sync_point() {
 
 void SyncPointLogOperation::clear_earlier_sync_point() {
   std::lock_guard locker(m_lock);
-  ceph_assert(sync_point->later_sync_point);
-  ceph_assert(sync_point->later_sync_point->earlier_sync_point == sync_point);
+  stone_assert(sync_point->later_sync_point);
+  stone_assert(sync_point->later_sync_point->earlier_sync_point == sync_point);
   sync_point->later_sync_point->earlier_sync_point = nullptr;
   sync_point->later_sync_point = nullptr;
 }
@@ -83,7 +83,7 @@ std::vector<Context*> SyncPointLogOperation::swap_on_sync_point_persisted() {
 }
 
 void SyncPointLogOperation::appending() {
-  ceph_assert(sync_point);
+  stone_assert(sync_point);
   ldout(m_cct, 20) << "Sync point op=[" << *this
                    << "] appending" << dendl;
   auto appending_contexts = append_sync_point();
@@ -93,7 +93,7 @@ void SyncPointLogOperation::appending() {
 }
 
 void SyncPointLogOperation::complete(int result) {
-  ceph_assert(sync_point);
+  stone_assert(sync_point);
   ldout(m_cct, 20) << "Sync point op =[" << *this
                    << "] completed" << dendl;
   clear_earlier_sync_point();
@@ -112,9 +112,9 @@ void SyncPointLogOperation::complete(int result) {
 GenericWriteLogOperation::GenericWriteLogOperation(std::shared_ptr<SyncPoint> sync_point,
                                                    utime_t dispatch_time,
                                                    PerfCounters *perfcounter,
-                                                   CephContext *cct)
+                                                   StoneContext *cct)
   : GenericLogOperation(dispatch_time, perfcounter),
-  m_lock(ceph::make_mutex(pwl::unique_lock_name(
+  m_lock(stone::make_mutex(pwl::unique_lock_name(
     "librbd::cache::pwl::GenericWriteLogOperation::m_lock", this))),
   m_cct(cct),
   sync_point(sync_point) {
@@ -166,7 +166,7 @@ void GenericWriteLogOperation::complete(int result) {
 
 WriteLogOperation::WriteLogOperation(
     WriteLogOperationSet &set, uint64_t image_offset_bytes,
-    uint64_t write_bytes, CephContext *cct,
+    uint64_t write_bytes, StoneContext *cct,
     std::shared_ptr<WriteLogEntry> write_log_entry)
   : GenericWriteLogOperation(set.sync_point, set.dispatch_time,
                              set.perfcounter, cct),
@@ -181,7 +181,7 @@ WriteLogOperation::WriteLogOperation(WriteLogOperationSet &set,
                                      uint64_t image_offset_bytes,
                                      uint64_t write_bytes,
                                      uint32_t data_len,
-                                     CephContext *cct,
+                                     StoneContext *cct,
                                      std::shared_ptr<WriteLogEntry> writesame_log_entry)
   : WriteLogOperation(set, image_offset_bytes, write_bytes, cct,
                       writesame_log_entry) {
@@ -238,7 +238,7 @@ void WriteLogOperation::complete(int result) {
 }
 
 WriteLogOperationSet::WriteLogOperationSet(utime_t dispatched, PerfCounters *perfcounter, std::shared_ptr<SyncPoint> sync_point,
-                                           bool persist_on_flush, CephContext *cct, Context *on_finish)
+                                           bool persist_on_flush, StoneContext *cct, Context *on_finish)
   : m_cct(cct), m_on_finish(on_finish),
     persist_on_flush(persist_on_flush),
     dispatch_time(dispatched),
@@ -281,7 +281,7 @@ DiscardLogOperation::DiscardLogOperation(std::shared_ptr<SyncPoint> sync_point,
                                          uint32_t discard_granularity_bytes,
                                          utime_t dispatch_time,
                                          PerfCounters *perfcounter,
-                                         CephContext *cct)
+                                         StoneContext *cct)
   : GenericWriteLogOperation(sync_point, dispatch_time, perfcounter, cct),
     log_entry(std::make_shared<DiscardLogEntry>(sync_point->log_entry,
                                                 image_offset_bytes,

@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_BTRFSFILESTOREBACKEDN_H
-#define CEPH_BTRFSFILESTOREBACKEDN_H
+#ifndef STONE_BTRFSFILESTOREBACKEDN_H
+#define STONE_BTRFSFILESTOREBACKEDN_H
 
 #if defined(__linux__)
 #include "GenericFileStoreBackend.h"

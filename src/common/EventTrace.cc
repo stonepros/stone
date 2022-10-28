@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) Intel Corporation.
  * All rights reserved.
@@ -32,7 +32,7 @@
 TracepointProvider::Traits event_tracepoint_traits("libeventtrace_tp.so", "event_tracing");
 bool EventTrace::tpinit = false;
 
-void EventTrace::init_tp(CephContext *_ctx)
+void EventTrace::init_tp(StoneContext *_ctx)
 {
   if (unlikely(!_ctx))
     return;
@@ -46,9 +46,9 @@ void EventTrace::init_tp(CephContext *_ctx)
 void EventTrace::set_message_attrs(const Message *m, string& oid, string& context, bool incl_oid)
 {
   // arg1 = oid, arg2 = message type, arg3 = source!source_addr!tid!sequence
-  if (m && (m->get_type() == CEPH_MSG_OSD_OP || m->get_type() == CEPH_MSG_OSD_OPREPLY)) {
+  if (m && (m->get_type() == STONE_MSG_OSD_OP || m->get_type() == STONE_MSG_OSD_OPREPLY)) {
     if (incl_oid) {
-      if (m->get_type() == CEPH_MSG_OSD_OP)
+      if (m->get_type() == STONE_MSG_OSD_OP)
         oid = ((MOSDOp *)m)->get_oid().name;
       else
         oid = ((MOSDOpReply *)m)->get_oid().name;
@@ -61,7 +61,7 @@ void EventTrace::set_message_attrs(const Message *m, string& oid, string& contex
   }
 }
 
-EventTrace::EventTrace(CephContext *_ctx, const char *_file, const char *_func, int _line) :
+EventTrace::EventTrace(StoneContext *_ctx, const char *_file, const char *_func, int _line) :
   ctx(_ctx),
   file(_file),
   func(_func),
@@ -69,7 +69,7 @@ EventTrace::EventTrace(CephContext *_ctx, const char *_file, const char *_func, 
 {
   if (unlikely(!ctx)) 
     return;
-  last_ts = ceph_clock_now();
+  last_ts = stone_clock_now();
   init_tp(ctx);
 
   lsubdout(ctx, eventtrace, LOG_LEVEL) << "ENTRY (" <<  func << ") " << file << ":" << line << dendl;
@@ -86,7 +86,7 @@ EventTrace::~EventTrace()
 
 void EventTrace::log_event_latency(const char *event)
 {
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   double usecs = (now.to_nsec()-last_ts.to_nsec())/1000;
   OID_ELAPSED("", usecs, event);
   last_ts = now;
@@ -95,9 +95,9 @@ void EventTrace::log_event_latency(const char *event)
 void EventTrace::trace_oid_event(const char *oid, const char *event, const char *context,
   const char *file, const char *func, int line)
 {
-  if (unlikely(!g_ceph_context))
+  if (unlikely(!g_stone_context))
     return;
-  init_tp(g_ceph_context);
+  init_tp(g_stone_context);
   tracepoint(eventtrace, oid_event, oid, event, context, file, func, line);
 }
 
@@ -112,9 +112,9 @@ void EventTrace::trace_oid_event(const Message *m, const char *event, const char
 void EventTrace::trace_oid_elapsed(const char *oid, const char *event, const char *context,
   double elapsed, const char *file, const char *func, int line)
 {
-  if (unlikely(!g_ceph_context))
+  if (unlikely(!g_stone_context))
     return;
-  init_tp(g_ceph_context);
+  init_tp(g_stone_context);
   tracepoint(eventtrace, oid_elapsed, oid, event, context, elapsed, file, func, line);
 }
 

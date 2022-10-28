@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Inktank Storage, Inc.
  *
@@ -44,7 +44,7 @@ static int run_command(const char *command)
 
 	if (status < 0) {
 		char error_buf[80];
-		char* errp = ceph_strerror_r(errno, error_buf, sizeof(error_buf));
+		char* errp = stone_strerror_r(errno, error_buf, sizeof(error_buf));
 		fprintf(stderr, "couldn't run '%s': %s\n", command,
 			errp);
 	} else if (WIFSIGNALED(status)) {

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -271,7 +271,7 @@ bool ConfFile::parse_buffer(std::string_view buf, std::ostream* err)
 			  grammar, skipper, *this);
 }
 
-int ConfFile::parse_bufferlist(ceph::bufferlist *bl,
+int ConfFile::parse_bufferlist(stone::bufferlist *bl,
 			       std::ostream *warnings)
 {
   clear();

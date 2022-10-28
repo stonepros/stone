@@ -15,7 +15,7 @@ using namespace crimson::os::seastore;
 
 namespace {
   [[maybe_unused]] seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_test);
+    return crimson::get_logger(stone_subsys_test);
   }
 }
 
@@ -49,7 +49,7 @@ struct record_validator_t {
       paddr_t base,
       const delta_info_t &di) mutable {
       EXPECT_EQ(base, record_final_offset);
-      ceph_assert(iter != record.deltas.end());
+      stone_assert(iter != record.deltas.end());
       EXPECT_EQ(di, *iter++);
       EXPECT_EQ(base, record_final_offset);
       return iter != record.deltas.end();
@@ -117,7 +117,7 @@ struct journal_test_t : seastar_test_suite_t, JournalSegmentProvider {
     auto record_iter = records.begin();
     decltype(record_iter->get_replay_handler()) delta_checker = std::nullopt;
     auto advance = [this, &record_iter, &delta_checker] {
-      ceph_assert(!delta_checker);
+      stone_assert(!delta_checker);
       while (record_iter != records.end()) {
 	auto checker = record_iter->get_replay_handler();
 	record_iter++;

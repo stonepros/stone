@@ -8,7 +8,7 @@
 
 namespace {
 
-using namespace ceph;
+using namespace stone;
 
 int wait_for_healthy(rados_t *cluster)
 {
@@ -45,7 +45,7 @@ int wait_for_healthy(rados_t *cluster)
 
     json_spirit::mValue root;
     [[maybe_unused]] bool json_parse_success = json_spirit::read(out, root);
-    ceph_assert(json_parse_success);
+    stone_assert(json_parse_success);
     json_spirit::mObject root_obj = root.get_obj();
     json_spirit::mObject pgmap = root_obj["pgmap"].get_obj();
     json_spirit::mArray pgs_by_state = pgmap["pgs_by_state"].get_array();

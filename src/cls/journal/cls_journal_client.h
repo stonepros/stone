@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CLS_JOURNAL_CLIENT_H
-#define CEPH_CLS_JOURNAL_CLIENT_H
+#ifndef STONE_CLS_JOURNAL_CLIENT_H
+#define STONE_CLS_JOURNAL_CLIENT_H
 
 #include "include/rados/librados_fwd.hpp"
 #include "cls/journal/cls_journal_types.h"
@@ -106,4 +106,4 @@ void append(librados::ObjectWriteOperation *op, uint64_t soft_max_size,
 } // namespace journal
 } // namespace cls
 
-#endif // CEPH_CLS_JOURNAL_CLIENT_H
+#endif // STONE_CLS_JOURNAL_CLIENT_H

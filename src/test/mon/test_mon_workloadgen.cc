@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -41,19 +41,19 @@
 #include "msg/Messenger.h"
 #include "common/async/context_pool.h"
 #include "common/Timer.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "global/signal_handler.h"
 #include "common/config.h"
 #include "common/debug.h"
 #include "common/errno.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/strtol.h"
 #include "common/LogEntry.h"
 #include "auth/KeyRing.h"
 #include "auth/AuthAuthorizeHandler.h"
 #include "include/uuid.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "messages/MOSDBoot.h"
 #include "messages/MOSDAlive.h"
@@ -66,8 +66,8 @@
 
 using namespace std;
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, get_name())
 static ostream& _prefix(std::ostream *_dout, const string &n) {
@@ -83,11 +83,11 @@ class TestStub : public Dispatcher
 {
  protected:
   MessengerRef messenger;
-  ceph::async::io_context_pool poolctx;
+  stone::async::io_context_pool poolctx;
   MonClient monc;
 
-  ceph::mutex lock;
-  ceph::condition_variable cond;
+  stone::mutex lock;
+  stone::condition_variable cond;
   SafeTimer timer;
 
   bool do_shutdown;
@@ -178,10 +178,10 @@ class TestStub : public Dispatcher
       messenger->wait();
   }
 
-  TestStub(CephContext *cct, string who)
+  TestStub(StoneContext *cct, string who)
     : Dispatcher(cct),
       monc(cct, poolctx),
-      lock(ceph::make_mutex(who.append("::lock"))),
+      lock(stone::make_mutex(who.append("::lock"))),
       timer(cct, lock),
       do_shutdown(false),
       tick_seconds(0.0) { }
@@ -197,7 +197,7 @@ class ClientStub : public TestStub
     std::lock_guard l{lock};
     dout(1) << "client::" << __func__ << " " << *m << dendl;
     switch (m->get_type()) {
-    case CEPH_MSG_OSD_MAP:
+    case STONE_MSG_OSD_MAP:
       objecter->handle_osd_map((MOSDMap*)m);
       cond.notify_all();
       break;
@@ -240,7 +240,7 @@ class ClientStub : public TestStub
   }
 
  public:
-  explicit ClientStub(CephContext *cct)
+  explicit ClientStub(StoneContext *cct)
     : TestStub(cct, "client"),
       gen((int) time(NULL))
   { }
@@ -256,22 +256,22 @@ class ClientStub : public TestStub
     }
 
     messenger.reset(Messenger::create_client_messenger(cct, "stubclient"));
-    ceph_assert(messenger.get() != NULL);
+    stone_assert(messenger.get() != NULL);
 
     messenger->set_default_policy(
-	Messenger::Policy::lossy_client(CEPH_FEATURE_OSDREPLYMUX));
+	Messenger::Policy::lossy_client(STONE_FEATURE_OSDREPLYMUX));
     dout(10) << "ClientStub::" << __func__ << " starting messenger at "
 	    << messenger->get_myaddrs() << dendl;
 
     objecter.reset(new Objecter(cct, messenger.get(), &monc, poolctx));
-    ceph_assert(objecter.get() != NULL);
+    stone_assert(objecter.get() != NULL);
     objecter->set_balanced_budget();
 
     monc.set_messenger(messenger.get());
     objecter->init();
     messenger->add_dispatcher_head(this);
     messenger->start();
-    monc.set_want_keys(CEPH_ENTITY_TYPE_MON|CEPH_ENTITY_TYPE_OSD);
+    monc.set_want_keys(STONE_ENTITY_TYPE_MON|STONE_ENTITY_TYPE_OSD);
 
     err = monc.init();
     if (err < 0) {
@@ -350,7 +350,7 @@ class OSDStub : public TestStub
   };
 
 
-  OSDStub(int _whoami, CephContext *cct)
+  OSDStub(int _whoami, StoneContext *cct)
     : TestStub(cct, "osd"),
       whoami(_whoami),
       gen(whoami),
@@ -364,7 +364,7 @@ class OSDStub : public TestStub
     messenger.reset(Messenger::create(cct, public_msgr_type, entity_name_t::OSD(whoami),
 				      ss.str().c_str(), getpid()));
 
-    Throttle throttler(g_ceph_context, "osd_client_bytes",
+    Throttle throttler(g_stone_context, "osd_client_bytes",
 	g_conf()->osd_client_message_size_cap);
 
     messenger->set_default_policy(
@@ -373,9 +373,9 @@ class OSDStub : public TestStub
 				    &throttler, NULL);
     messenger->set_policy(entity_name_t::TYPE_MON,
 	Messenger::Policy::lossy_client(
-	  CEPH_FEATURE_UID |
-	  CEPH_FEATURE_PGID64 |
-	  CEPH_FEATURE_OSDENC));
+	  STONE_FEATURE_UID |
+	  STONE_FEATURE_PGID64 |
+	  STONE_FEATURE_OSDENC));
     messenger->set_policy(entity_name_t::TYPE_OSD,
 	Messenger::Policy::stateless_server(0));
 
@@ -401,7 +401,7 @@ class OSDStub : public TestStub
 
     timer.init();
     messenger->add_dispatcher_head(this);
-    monc.set_want_keys(CEPH_ENTITY_TYPE_MON | CEPH_ENTITY_TYPE_OSD);
+    monc.set_want_keys(STONE_ENTITY_TYPE_MON | STONE_ENTITY_TYPE_OSD);
 
     int err = monc.init();
     if (err < 0) {
@@ -417,7 +417,7 @@ class OSDStub : public TestStub
       monc.shutdown();
       return err;
     }
-    ceph_assert(!monc.get_fsid().is_zero());
+    stone_assert(!monc.get_fsid().is_zero());
 
     monc.wait_auth_rotating(30.0);
 
@@ -447,7 +447,7 @@ class OSDStub : public TestStub
   void boot() {
     dout(1) << __func__ << " boot?" << dendl;
 
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     if ((last_boot_attempt > 0.0)
 	&& ((now - last_boot_attempt)) <= STUB_BOOT_INTERVAL) {
       dout(1) << __func__ << " backoff and try again later." << dendl;
@@ -463,7 +463,7 @@ class OSDStub : public TestStub
 
   void add_pg(pg_t pgid, epoch_t epoch, pg_t parent) {
 
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
 
     pg_stat_t s;
     s.created = epoch;
@@ -551,7 +551,7 @@ class OSDStub : public TestStub
       if (pgs.count(pgid) == 0) {
 	derr << __func__
 	     << " pgid " << pgid << " not on our map" << dendl;
-	ceph_abort_msg("pgid not on our map");
+	stone_abort_msg("pgid not on our map");
       }
       pg_stat_t &s = pgs[pgid];
       mstats->pg_stat[pgid] = s;
@@ -570,10 +570,10 @@ class OSDStub : public TestStub
 
   void modify_pg(pg_t pgid) {
     dout(10) << __func__ << " pg " << pgid << dendl;
-    ceph_assert(pgs.count(pgid) > 0);
+    stone_assert(pgs.count(pgid) > 0);
 
     pg_stat_t &s = pgs[pgid];
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
 
     if (now - s.last_change < 10.0) {
       dout(10) << __func__
@@ -617,7 +617,7 @@ class OSDStub : public TestStub
 	++it;
 	++pgs_at;
       }
-      ceph_assert(it != pgs.end());
+      stone_assert(it != pgs.end());
       dout(20) << __func__
 	       << " pg at pos " << at << ": " << it->first << dendl;
       modify_pg(it->first);
@@ -664,7 +664,7 @@ class OSDStub : public TestStub
     modify_pgs();
     if (!pgs_changes.empty())
       send_pg_stats();
-    monc.sub_want("osd_pg_creates", 0, CEPH_SUBSCRIBE_ONETIME);
+    monc.sub_want("osd_pg_creates", 0, STONE_SUBSCRIBE_ONETIME);
     monc.renew_subs();
 
     dout(20) << __func__ << " pg pools:\n";
@@ -697,7 +697,7 @@ class OSDStub : public TestStub
     dout(10) << __func__
 	     << " send " << num_entries << " log messages" << dendl;
 
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     int seq = 0;
     for (; num_entries > 0; --num_entries) {
       LogEntry e;
@@ -744,7 +744,7 @@ class OSDStub : public TestStub
   }
 
   void handle_pg_create(MOSDPGCreate *m) {
-    ceph_assert(m != NULL);
+    stone_assert(m != NULL);
     if (m->epoch < osdmap.get_epoch()) {
       std::cout << __func__ << " epoch " << m->epoch << " < "
 	       << osdmap.get_epoch() << "; dropping" << std::endl;
@@ -781,7 +781,7 @@ class OSDStub : public TestStub
               << dendl;
       dout(0) << monc.get_monmap() << dendl;
     }
-    ceph_assert(m->fsid == monc.get_fsid());
+    stone_assert(m->fsid == monc.get_fsid());
 
     epoch_t first = m->get_first();
     epoch_t last = m->get_last();
@@ -801,7 +801,7 @@ class OSDStub : public TestStub
       if ((m->oldest_map < first && osdmap.get_epoch() == 0) ||
 	  m->oldest_map <= osdmap.get_epoch()) {
 	monc.sub_want("osdmap", osdmap.get_epoch()+1,
-		       CEPH_SUBSCRIBE_ONETIME);
+		       STONE_SUBSCRIBE_ONETIME);
 	monc.renew_subs();
 	m->put();
 	return;
@@ -842,7 +842,7 @@ class OSDStub : public TestStub
 	derr << "osd." << whoami << "::" << __func__
 	     << "** ERROR: applying incremental: "
 	     << cpp_strerror(err) << dendl;
-	ceph_abort_msg("error applying incremental");
+	stone_abort_msg("error applying incremental");
       }
     }
     dout(30) << __func__ << "\nosdmap:\n";
@@ -860,7 +860,7 @@ class OSDStub : public TestStub
     if (m->newest_map && m->newest_map > last) {
       dout(1) << __func__
 	      << " they have more maps; requesting them!" << dendl;
-      monc.sub_want("osdmap", osdmap.get_epoch()+1, CEPH_SUBSCRIBE_ONETIME);
+      monc.sub_want("osdmap", osdmap.get_epoch()+1, STONE_SUBSCRIBE_ONETIME);
       monc.renew_subs();
     }
 
@@ -875,7 +875,7 @@ class OSDStub : public TestStub
     case MSG_OSD_PG_CREATE:
       handle_pg_create((MOSDPGCreate*)m);
       break;
-    case CEPH_MSG_OSD_MAP:
+    case STONE_MSG_OSD_MAP:
       handle_osd_map((MOSDMap*)m);
       break;
     default:
@@ -887,7 +887,7 @@ class OSDStub : public TestStub
 
   void ms_handle_connect(Connection *con) override {
     dout(1) << __func__ << " " << con << dendl;
-    if (con->get_peer_type() == CEPH_ENTITY_TYPE_MON) {
+    if (con->get_peer_type() == STONE_ENTITY_TYPE_MON) {
       dout(10) << __func__ << " on mon" << dendl;
     }
   }
@@ -917,8 +917,8 @@ double const OSDStub::STUB_BOOT_INTERVAL = 10.0;
 
 const char *our_name = NULL;
 vector<TestStub*> stubs;
-ceph::mutex shutdown_lock = ceph::make_mutex("main::shutdown_lock");
-ceph::condition_variable shutdown_cond;
+stone::mutex shutdown_lock = stone::make_mutex("main::shutdown_lock");
+stone::condition_variable shutdown_cond;
 Context *shutdown_cb = NULL;
 SafeTimer *shutdown_timer = NULL;
 
@@ -944,7 +944,7 @@ void handle_test_signal(int signum)
 }
 
 void usage() {
-  ceph_assert(our_name != NULL);
+  stone_assert(our_name != NULL);
 
   std::cout << "usage: " << our_name
 	    << " <--stub-id ID> [--stub-id ID...]"
@@ -995,11 +995,11 @@ int main(int argc, const char *argv[])
   argv_to_vec(argc, argv, args);
 
   auto cct = global_init(NULL, args,
-			 CEPH_ENTITY_TYPE_OSD, CODE_ENVIRONMENT_UTILITY,
+			 STONE_ENTITY_TYPE_OSD, CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
 
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.apply_changes(nullptr);
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.apply_changes(nullptr);
 
   set<int> stub_ids;
   double duration = 300.0;
@@ -1007,9 +1007,9 @@ int main(int argc, const char *argv[])
   for (std::vector<const char*>::iterator i = args.begin(); i != args.end();) {
     string val;
 
-    if (ceph_argparse_double_dash(args, i)) {
+    if (stone_argparse_double_dash(args, i)) {
       break;
-    } else if (ceph_argparse_witharg(args, i, &val,
+    } else if (stone_argparse_witharg(args, i, &val,
         "--stub-id", (char*) NULL)) {
       int first = -1, last = -1;
       if (get_id_interval(first, last, val) < 0) {
@@ -1019,7 +1019,7 @@ int main(int argc, const char *argv[])
 
       for (; first <= last; ++first)
 	stub_ids.insert(first);
-    } else if (ceph_argparse_witharg(args, i, &val,
+    } else if (stone_argparse_witharg(args, i, &val,
 	"--duration", (char*) NULL)) {
       string err;
       duration = (double) strict_strtol(val.c_str(), 10, &err);
@@ -1028,7 +1028,7 @@ int main(int argc, const char *argv[])
 		  << err << std::endl;
 	exit(1);
       }
-    } else if (ceph_argparse_flag(args, i, "--help", (char*) NULL)) {
+    } else if (stone_argparse_flag(args, i, "--help", (char*) NULL)) {
       usage();
       exit(0);
     } else {
@@ -1048,7 +1048,7 @@ int main(int argc, const char *argv[])
     int whoami = *i;
 
     std::cout << __func__ << " starting stub." << whoami << std::endl;
-    OSDStub *stub = new OSDStub(whoami, g_ceph_context);
+    OSDStub *stub = new OSDStub(whoami, g_stone_context);
     int err = stub->init();
     if (err < 0) {
       std::cerr << "** osd stub error: " << cpp_strerror(-err) << std::endl;
@@ -1058,7 +1058,7 @@ int main(int argc, const char *argv[])
   }
 
   std::cout << __func__ << " starting client stub" << std::endl;
-  ClientStub *cstub = new ClientStub(g_ceph_context);
+  ClientStub *cstub = new ClientStub(g_stone_context);
   int err = cstub->init();
   if (err < 0) {
     std::cerr << "** client stub error: " << cpp_strerror(-err) << std::endl;
@@ -1072,7 +1072,7 @@ int main(int argc, const char *argv[])
 
   {
     unique_lock locker{shutdown_lock};
-    shutdown_timer = new SafeTimer(g_ceph_context, shutdown_lock);
+    shutdown_timer = new SafeTimer(g_stone_context, shutdown_lock);
     shutdown_timer->init();
     if (duration != 0) {
       std::cout << __func__

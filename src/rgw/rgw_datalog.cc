@@ -19,15 +19,15 @@
 #include "rgw_log_backing.h"
 #include "rgw_tools.h"
 
-#define dout_context g_ceph_context
-static constexpr auto dout_subsys = ceph_subsys_rgw;
+#define dout_context g_stone_context
+static constexpr auto dout_subsys = stone_subsys_rgw;
 
 namespace bs = boost::system;
 namespace lr = librados;
 
-using ceph::containers::tiny_vector;
+using stone::containers::tiny_vector;
 
-void rgw_data_change::dump(ceph::Formatter *f) const
+void rgw_data_change::dump(stone::Formatter *f) const
 {
   std::string type;
   switch (entity_type) {
@@ -90,10 +90,10 @@ public:
   }
   ~RGWDataChangesOmap() override = default;
 
-  void prepare(ceph::real_time ut, const std::string& key,
-	       ceph::buffer::list&& entry, entries& out) override {
+  void prepare(stone::real_time ut, const std::string& key,
+	       stone::buffer::list&& entry, entries& out) override {
     if (!std::holds_alternative<centries>(out)) {
-      ceph_assert(std::visit([](const auto& v) { return std::empty(v); }, out));
+      stone_assert(std::visit([](const auto& v) { return std::empty(v); }, out));
       out = centries();
     }
 
@@ -112,9 +112,9 @@ public:
     }
     return r;
   }
-  int push(const DoutPrefixProvider *dpp, int index, ceph::real_time now,
+  int push(const DoutPrefixProvider *dpp, int index, stone::real_time now,
 	   const std::string& key,
-	   ceph::buffer::list&& bl) override {
+	   stone::buffer::list&& bl) override {
     lr::ObjectWriteOperation op;
     cls_log_add(op, utime_t(now), {}, key, bl);
     auto r = rgw_rados_operate(dpp, ioctx, oids[index], &op, null_yield);
@@ -152,7 +152,7 @@ public:
       auto liter = iter->data.cbegin();
       try {
 	decode(log_entry.entry, liter);
-      } catch (ceph::buffer::error& err) {
+      } catch (stone::buffer::error& err) {
 	ldpp_dout(dpp, -1) << __PRETTY_FUNCTION__
 		   << ": failed to decode data changes log entry: "
 		   << err.what() << dendl;
@@ -232,7 +232,7 @@ public:
 };
 
 class RGWDataChangesFIFO final : public RGWDataChangesBE {
-  using centries = std::vector<ceph::buffer::list>;
+  using centries = std::vector<stone::buffer::list>;
   tiny_vector<LazyFIFO> fifos;
 
 public:
@@ -244,10 +244,10 @@ public:
 	emplacer.emplace(ioctx, get_oid(i));
       }) {}
   ~RGWDataChangesFIFO() override = default;
-  void prepare(ceph::real_time, const std::string&,
-	       ceph::buffer::list&& entry, entries& out) override {
+  void prepare(stone::real_time, const std::string&,
+	       stone::buffer::list&& entry, entries& out) override {
     if (!std::holds_alternative<centries>(out)) {
-      ceph_assert(std::visit([](auto& v) { return std::empty(v); }, out));
+      stone_assert(std::visit([](auto& v) { return std::empty(v); }, out));
       out = centries();
     }
     std::get<centries>(out).push_back(std::move(entry));
@@ -261,9 +261,9 @@ public:
     }
     return r;
   }
-  int push(const DoutPrefixProvider *dpp, int index, ceph::real_time,
+  int push(const DoutPrefixProvider *dpp, int index, stone::real_time,
 	   const std::string&,
-	   ceph::buffer::list&& bl) override {
+	   stone::buffer::list&& bl) override {
     auto r = fifos[index].push(dpp, std::move(bl), null_yield);
     if (r < 0) {
       ldpp_dout(dpp, -1) << __PRETTY_FUNCTION__
@@ -322,7 +322,7 @@ public:
     auto p = m.head_part_num;
     if (p < 0) {
       info->marker = ""s;
-      info->last_update = ceph::real_clock::zero();
+      info->last_update = stone::real_clock::zero();
       return 0;
     }
     rgw::cls::fifo::part_info h;
@@ -381,7 +381,7 @@ public:
   }
 };
 
-RGWDataChangesLog::RGWDataChangesLog(CephContext* cct)
+RGWDataChangesLog::RGWDataChangesLog(StoneContext* cct)
   : cct(cct),
     num_shards(cct->_conf->rgw_data_log_num_shards),
     prefix(get_prefix()),
@@ -452,11 +452,11 @@ int RGWDataChangesLog::start(const DoutPrefixProvider *dpp,
 			     librados::Rados* lr)
 {
   zone = _zone;
-  ceph_assert(zone);
+  stone_assert(zone);
   auto defbacking = to_log_type(
     cct->_conf.get_val<std::string>("rgw_default_data_log_backing"));
   // Should be guaranteed by `set_enum_allowed`
-  ceph_assert(defbacking);
+  stone_assert(defbacking);
   auto log_pool = zoneparams.log_pool;
   auto r = rgw_init_ioctx(dpp, lr, log_pool, ioctx, true, false);
   if (r < 0) {
@@ -477,7 +477,7 @@ int RGWDataChangesLog::start(const DoutPrefixProvider *dpp,
     ldpp_dout(dpp, -1) << __PRETTY_FUNCTION__
 	       << ": Error initializing backends: "
 	       << besr.error().message() << dendl;
-    return ceph::from_error_code(besr.error());
+    return stone::from_error_code(besr.error());
   }
 
   bes = std::move(*besr);
@@ -489,7 +489,7 @@ int RGWDataChangesLog::start(const DoutPrefixProvider *dpp,
 int RGWDataChangesLog::choose_oid(const rgw_bucket_shard& bs) {
   const auto& name = bs.bucket.name;
   auto shard_shift = (bs.shard_id > 0 ? bs.shard_id : 0);
-  auto r = (ceph_str_hash_linux(name.data(), name.size()) +
+  auto r = (stone_str_hash_linux(name.data(), name.size()) +
 	    shard_shift) % num_shards;
   return static_cast<int>(r);
 }
@@ -539,7 +539,7 @@ int RGWDataChangesLog::renew_entries(const DoutPrefixProvider *dpp)
     }
 
     auto expiration = now;
-    expiration += ceph::make_timespan(cct->_conf->rgw_data_log_window);
+    expiration += stone::make_timespan(cct->_conf->rgw_data_log_window);
     for (auto& bs : buckets) {
       update_renewed(bs, expiration);
     }
@@ -551,7 +551,7 @@ int RGWDataChangesLog::renew_entries(const DoutPrefixProvider *dpp)
 void RGWDataChangesLog::_get_change(const rgw_bucket_shard& bs,
 				    ChangeStatusPtr& status)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   if (!changes.find(bs, status)) {
     status = ChangeStatusPtr(new ChangeStatus);
     changes.add(bs, status);
@@ -641,7 +641,7 @@ int RGWDataChangesLog::add_entry(const DoutPrefixProvider *dpp, const RGWBucketI
   if (status->pending) {
     cond = status->cond;
 
-    ceph_assert(cond);
+    stone_assert(cond);
 
     status->cond->get();
     sl.unlock();
@@ -657,7 +657,7 @@ int RGWDataChangesLog::add_entry(const DoutPrefixProvider *dpp, const RGWBucketI
   status->cond = new RefCountedCond;
   status->pending = true;
 
-  ceph::real_time expiration;
+  stone::real_time expiration;
 
   int ret;
 
@@ -665,11 +665,11 @@ int RGWDataChangesLog::add_entry(const DoutPrefixProvider *dpp, const RGWBucketI
     status->cur_sent = now;
 
     expiration = now;
-    expiration += ceph::make_timespan(cct->_conf->rgw_data_log_window);
+    expiration += stone::make_timespan(cct->_conf->rgw_data_log_window);
 
     sl.unlock();
 
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     rgw_data_change change;
     change.entity_type = ENTITY_TYPE_BUCKET;
     change.key = bs.get_key();
@@ -915,11 +915,11 @@ int DataLogBackends::trim_generations(const DoutPrefixProvider *dpp, std::option
     }
     auto ec = empty_to(dpp, *highest, null_yield);
     if (ec) {
-      return ceph::from_error_code(ec);
+      return stone::from_error_code(ec);
     }
   }
 
-  return ceph::from_error_code(remove_empty(dpp, null_yield));
+  return stone::from_error_code(remove_empty(dpp, null_yield));
 }
 
 
@@ -1010,7 +1010,7 @@ std::string RGWDataChangesLog::max_marker() const {
 }
 
 int RGWDataChangesLog::change_format(const DoutPrefixProvider *dpp, log_type type, optional_yield y) {
-  return ceph::from_error_code(bes->new_backing(dpp, type, y));
+  return stone::from_error_code(bes->new_backing(dpp, type, y));
 }
 
 int RGWDataChangesLog::trim_generations(const DoutPrefixProvider *dpp, std::optional<uint64_t>& through) {

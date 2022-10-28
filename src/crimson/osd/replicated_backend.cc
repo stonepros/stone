@@ -13,7 +13,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -27,7 +27,7 @@ ReplicatedBackend::ReplicatedBackend(pg_t pgid,
     shard_services{shard_services}
 {}
 
-ReplicatedBackend::ll_read_errorator::future<ceph::bufferlist>
+ReplicatedBackend::ll_read_errorator::future<stone::bufferlist>
 ReplicatedBackend::_read(const hobject_t& hoid,
                          const uint64_t off,
                          const uint64_t len,
@@ -42,7 +42,7 @@ ReplicatedBackend::_read(const hobject_t& hoid,
 seastar::future<crimson::osd::acked_peers_t>
 ReplicatedBackend::_submit_transaction(std::set<pg_shard_t>&& pg_shards,
                                        const hobject_t& hoid,
-                                       ceph::os::Transaction&& txn,
+                                       stone::os::Transaction&& txn,
                                        const osd_op_params_t& osd_op_p,
                                        epoch_t min_epoch, epoch_t map_epoch,
 				       std::vector<pg_log_entry_t>&& log_entries)
@@ -54,7 +54,7 @@ ReplicatedBackend::_submit_transaction(std::set<pg_shard_t>&& pg_shards,
     throw crimson::common::actingset_changed(peering->is_primary);
   }
 
-  const ceph_tid_t tid = next_txn_id++;
+  const stone_tid_t tid = next_txn_id++;
   auto req_id = osd_op_p.req->get_reqid();
   auto pending_txn =
     pending_trans.emplace(tid, pg_shards.size()).first;
@@ -69,7 +69,7 @@ ReplicatedBackend::_submit_transaction(std::set<pg_shard_t>&& pg_shards,
       } else {
         auto m = make_message<MOSDRepOp>(req_id, whoami,
                                          spg_t{pgid, pg_shard.shard}, hoid,
-                                         CEPH_OSD_FLAG_ACK | CEPH_OSD_FLAG_ONDISK,
+                                         STONE_OSD_FLAG_ACK | STONE_OSD_FLAG_ONDISK,
                                          map_epoch, min_epoch,
                                          tid, osd_op_p.at_version);
         m->set_data(encoded_txn);

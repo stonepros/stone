@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 Inktank Storage, Inc.
  *
@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef CEPH_MODULE_H
-#define CEPH_MODULE_H
+#ifndef STONE_MODULE_H
+#define STONE_MODULE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,4 +24,4 @@ int module_load(const char *module, const char *options);
 }
 #endif
 
-#endif /* CEPH_MODULE_H */
+#endif /* STONE_MODULE_H */

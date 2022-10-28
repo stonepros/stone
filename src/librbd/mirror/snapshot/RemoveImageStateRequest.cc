@@ -9,7 +9,7 @@
 #include "librbd/mirror/snapshot/Types.h"
 #include "librbd/mirror/snapshot/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::snapshot::RemoveImageStateRequest: " \
@@ -29,7 +29,7 @@ void RemoveImageStateRequest<I>::send() {
 
 template <typename I>
 void RemoveImageStateRequest<I>::get_object_count() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
 
   auto oid = util::image_state_object_name(m_image_ctx, m_snap_id, 0);
   ldout(cct, 15) << oid << dendl;
@@ -41,13 +41,13 @@ void RemoveImageStateRequest<I>::get_object_count() {
     RemoveImageStateRequest<I>,
     &RemoveImageStateRequest<I>::handle_get_object_count>(this);
   int r = m_image_ctx->md_ctx.aio_operate(oid, comp, &op, nullptr);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void RemoveImageStateRequest<I>::handle_get_object_count(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -60,7 +60,7 @@ void RemoveImageStateRequest<I>::handle_get_object_count(int r) {
   ImageStateHeader header(1);
   auto iter = m_bl.cbegin();
   try {
-    using ceph::decode;
+    using stone::decode;
     
     decode(header, iter);
   } catch (const buffer::error &err) {
@@ -75,9 +75,9 @@ void RemoveImageStateRequest<I>::handle_get_object_count(int r) {
 
 template <typename I>
 void RemoveImageStateRequest<I>::remove_object() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
 
-  ceph_assert(m_object_count > 0);
+  stone_assert(m_object_count > 0);
   m_object_count--;
 
   auto oid = util::image_state_object_name(m_image_ctx, m_snap_id,
@@ -91,13 +91,13 @@ void RemoveImageStateRequest<I>::remove_object() {
     RemoveImageStateRequest<I>,
     &RemoveImageStateRequest<I>::handle_remove_object>(this);
   int r = m_image_ctx->md_ctx.aio_operate(oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void RemoveImageStateRequest<I>::handle_remove_object(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0 && r != -ENOENT) {
@@ -117,7 +117,7 @@ void RemoveImageStateRequest<I>::handle_remove_object(int r) {
 
 template <typename I>
 void RemoveImageStateRequest<I>::finish(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

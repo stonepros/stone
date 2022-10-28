@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_TRASH_MOVE_REQUEST_H
-#define CEPH_LIBRBD_TRASH_MOVE_REQUEST_H
+#ifndef STONE_LIBRBD_TRASH_MOVE_REQUEST_H
+#define STONE_LIBRBD_TRASH_MOVE_REQUEST_H
 
 #include "include/common_fwd.h"
 #include "include/utime.h"
@@ -33,7 +33,7 @@ public:
               Context* on_finish)
     : m_io_ctx(io_ctx), m_image_id(image_id),
       m_trash_image_spec(trash_image_spec), m_on_finish(on_finish),
-      m_cct(reinterpret_cast<CephContext *>(io_ctx.cct())) {
+      m_cct(reinterpret_cast<StoneContext *>(io_ctx.cct())) {
   }
 
   void send();
@@ -64,7 +64,7 @@ private:
   cls::rbd::TrashImageSpec m_trash_image_spec;
   Context *m_on_finish;
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
 
   void trash_add();
   void handle_trash_add(int r);
@@ -84,4 +84,4 @@ private:
 
 extern template class librbd::trash::MoveRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_TRASH_MOVE_REQUEST_H
+#endif // STONE_LIBRBD_TRASH_MOVE_REQUEST_H

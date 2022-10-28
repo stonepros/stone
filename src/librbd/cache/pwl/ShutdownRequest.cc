@@ -13,7 +13,7 @@
 #include "librbd/cache/pwl/AbstractWriteLog.h"
 #include "librbd/plugin/Api.h"
 
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl:ShutdownRequest: " \
                            << this << " " << __func__ << ": "
@@ -54,7 +54,7 @@ void ShutdownRequest<I>::send() {
 
 template <typename I>
 void ShutdownRequest<I>::send_shutdown_image_cache() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   if (m_image_cache == nullptr) {
@@ -71,7 +71,7 @@ void ShutdownRequest<I>::send_shutdown_image_cache() {
 
 template <typename I>
 void ShutdownRequest<I>::handle_shutdown_image_cache(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   if (r < 0) {
@@ -89,7 +89,7 @@ void ShutdownRequest<I>::handle_shutdown_image_cache(int r) {
 
 template <typename I>
 void ShutdownRequest<I>::send_remove_feature_bit() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   uint64_t new_features = m_image_ctx.features & ~RBD_FEATURE_DIRTY_CACHE;
@@ -110,7 +110,7 @@ void ShutdownRequest<I>::send_remove_feature_bit() {
 
 template <typename I>
 void ShutdownRequest<I>::handle_remove_feature_bit(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   if (r < 0) {
@@ -125,7 +125,7 @@ void ShutdownRequest<I>::handle_remove_feature_bit(int r) {
 
 template <typename I>
 void ShutdownRequest<I>::send_remove_image_cache_state() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = ShutdownRequest<I>;
@@ -137,7 +137,7 @@ void ShutdownRequest<I>::send_remove_image_cache_state() {
 
 template <typename I>
 void ShutdownRequest<I>::handle_remove_image_cache_state(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   if (r < 0) {

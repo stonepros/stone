@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  * Copyright (C) 2018 Red Hat, Inc.
@@ -78,7 +78,7 @@ int on_zfs(int basedir_fd) {
   #endif
 }
 
-int ceph_posix_fallocate(int fd, off_t offset, off_t len) {
+int stone_posix_fallocate(int fd, off_t offset, off_t len) {
   // Return 0 if oke, otherwise errno > 0
 
 #ifdef HAVE_POSIX_FALLOCATE
@@ -217,7 +217,7 @@ int sched_setaffinity(pid_t pid, size_t cpusetsize,
 }
 #endif
 
-char *ceph_strerror_r(int errnum, char *buf, size_t buflen)
+char *stone_strerror_r(int errnum, char *buf, size_t buflen)
 {
 #ifdef _WIN32
   strerror_s(buf, buflen, errnum);
@@ -232,7 +232,7 @@ char *ceph_strerror_r(int errnum, char *buf, size_t buflen)
 #endif
 }
 
-int ceph_memzero_s(void *dest, size_t destsz, size_t count) {
+int stone_memzero_s(void *dest, size_t destsz, size_t count) {
 #ifdef __STDC_LIB_EXT1__
     return memset_s(dest, destsz, 0, count);
 #elif defined(_WIN32)
@@ -399,7 +399,7 @@ void apply_tls_workaround() {
   pthread_key_delete(key);
 }
 
-CEPH_CONSTRUCTOR(ceph_windows_init) {
+STONE_CONSTRUCTOR(stone_windows_init) {
   // This will run at startup time before invoking main().
   WSADATA wsaData;
   int error;
@@ -473,7 +473,7 @@ int _win_socketpair(int socks[2])
     // Worth noting that Windows kernel objects use 32b. For now,
     // we're just adding a check.
     //
-    // Ideally, we should update ceph to use the right type but this
+    // Ideally, we should update stone to use the right type but this
     // can be quite difficult, especially considering that there are
     // a significant number of functions that accept both sockets and
     // file descriptors.

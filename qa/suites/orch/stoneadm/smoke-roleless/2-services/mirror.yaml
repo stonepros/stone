@@ -1,0 +1,9 @@
+tasks:
+- stoneadm.shell:
+    host.a:
+      - stone orch apply rbd-mirror "--placement=*"
+      - stone orch apply stonefs-mirror "--placement=*"
+- stoneadm.wait_for_service:
+    service: rbd-mirror
+- stoneadm.wait_for_service:
+    service: stonefs-mirror

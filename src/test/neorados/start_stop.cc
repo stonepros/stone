@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -19,7 +19,7 @@
 #include "include/neorados/RADOS.hpp"
 
 #include "common/async/context_pool.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 
 #include "global/global_init.h"
 
@@ -34,139 +34,139 @@ int main(int argc, char** argv)
   argv_to_vec(argc, const_cast<const char**>(argv), args);
   env_to_vec(args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY, 0);
   common_init_finish(cct.get());
 
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(30s);
   }
   std::this_thread::sleep_for(30s);
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(30s);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(1s);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(1s);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(1s);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(1s);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(1s);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(1s);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(1s);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(500ms);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(500ms);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(50ms);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(50ms);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(50ms);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(5ms);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(5ms);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(5ms);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(5ms);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(5ms);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(5us);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(5us);
   }
   {
-    ceph::async::io_context_pool p(1);
+    stone::async::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p,
 					 boost::asio::use_future).get();
     std::this_thread::sleep_for(5us);

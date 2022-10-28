@@ -26,16 +26,16 @@ void chunk_refs_t::clear()
 }
 
 
-void chunk_refs_t::encode(ceph::buffer::list& bl) const
+void chunk_refs_t::encode(stone::buffer::list& bl) const
 {
   bufferlist t;
   _encode_r(t);
   _encode_final(bl, t);
 }
 
-void chunk_refs_t::_encode_r(ceph::bufferlist& bl) const
+void chunk_refs_t::_encode_r(stone::bufferlist& bl) const
 {
-  using ceph::encode;
+  using stone::encode;
   switch (r->get_type()) {
   case TYPE_BY_OBJECT:
     encode(*(chunk_refs_by_object_t*)r.get(), bl);
@@ -50,11 +50,11 @@ void chunk_refs_t::_encode_r(ceph::bufferlist& bl) const
     encode(*(chunk_refs_count_t*)r.get(), bl);
     break;
   default:
-    ceph_abort("unrecognized ref type");
+    stone_abort("unrecognized ref type");
   }
 }
 
-void chunk_refs_t::dynamic_encode(ceph::buffer::list& bl, size_t max)
+void chunk_refs_t::dynamic_encode(stone::buffer::list& bl, size_t max)
 {
   bufferlist t;
   while (true) {
@@ -93,7 +93,7 @@ void chunk_refs_t::_encode_final(bufferlist& bl, bufferlist& t) const
   ENCODE_FINISH(bl);
 }
 
-void chunk_refs_t::decode(ceph::buffer::list::const_iterator& p)
+void chunk_refs_t::decode(stone::buffer::list::const_iterator& p)
 {
   DECODE_START(1, p);
   uint8_t t;
@@ -128,7 +128,7 @@ void chunk_refs_t::decode(ceph::buffer::list::const_iterator& p)
     }
     break;
   default:
-    throw ceph::buffer::malformed_input(
+    throw stone::buffer::malformed_input(
       "unrecognized chunk ref encoding type "s + stringify((int)t));
   }
   DECODE_FINISH(p);

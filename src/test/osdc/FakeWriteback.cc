@@ -8,26 +8,26 @@
 #include "common/debug.h"
 #include "common/Cond.h"
 #include "common/Finisher.h"
-#include "common/ceph_mutex.h"
-#include "include/ceph_assert.h"
-#include "common/ceph_time.h"
+#include "common/stone_mutex.h"
+#include "include/stone_assert.h"
+#include "common/stone_time.h"
 
 #include "FakeWriteback.h"
 
-#define dout_subsys ceph_subsys_objectcacher
+#define dout_subsys stone_subsys_objectcacher
 #undef dout_prefix
 #define dout_prefix *_dout << "FakeWriteback(" << this << ") "
 
 class C_Delay : public Context {
-  CephContext *m_cct;
+  StoneContext *m_cct;
   Context *m_con;
-  ceph::timespan m_delay;
-  ceph::mutex *m_lock;
+  stone::timespan m_delay;
+  stone::mutex *m_lock;
   bufferlist *m_bl;
   uint64_t m_off;
 
 public:
-  C_Delay(CephContext *cct, Context *c, ceph::mutex *lock, uint64_t off,
+  C_Delay(StoneContext *cct, Context *c, stone::mutex *lock, uint64_t off,
 	  bufferlist *pbl, uint64_t delay_ns=0)
     : m_cct(cct), m_con(c), m_delay(delay_ns * std::chrono::nanoseconds(1)),
       m_lock(lock), m_bl(pbl), m_off(off) {}
@@ -44,7 +44,7 @@ public:
   }
 };
 
-FakeWriteback::FakeWriteback(CephContext *cct, ceph::mutex *lock, uint64_t delay_ns)
+FakeWriteback::FakeWriteback(StoneContext *cct, stone::mutex *lock, uint64_t delay_ns)
   : m_cct(cct), m_lock(lock), m_delay_ns(delay_ns)
 {
   m_finisher = new Finisher(cct);
@@ -70,13 +70,13 @@ void FakeWriteback::read(const object_t& oid, uint64_t object_no,
   m_finisher->queue(wrapper, len);
 }
 
-ceph_tid_t FakeWriteback::write(const object_t& oid,
+stone_tid_t FakeWriteback::write(const object_t& oid,
 				const object_locator_t& oloc,
 				uint64_t off, uint64_t len,
 				const SnapContext& snapc,
-				const bufferlist &bl, ceph::real_time mtime,
+				const bufferlist &bl, stone::real_time mtime,
 				uint64_t trunc_size, __u32 trunc_seq,
-				ceph_tid_t journal_tid,
+				stone_tid_t journal_tid,
                                 const ZTracer::Trace &parent_trace,
                                 Context *oncommit)
 {

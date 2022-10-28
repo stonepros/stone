@@ -106,8 +106,8 @@ e 12v
  *
  */
 
-#ifndef CEPH_MON_PAXOS_H
-#define CEPH_MON_PAXOS_H
+#ifndef STONE_MON_PAXOS_H
+#define STONE_MON_PAXOS_H
 
 #include "include/types.h"
 #include "mon_types.h"

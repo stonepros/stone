@@ -9,7 +9,7 @@
 #include "librbd/Utils.h"
 #include "librbd/image/RefreshRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::AttachChildRequest: " << this \
                            << " " << __func__ << ": "
@@ -54,7 +54,7 @@ void AttachChildRequest<I>::v1_add_child() {
   librados::AioCompletion *comp =
     create_rados_callback<klass, &klass::handle_v1_add_child>(this);
   int r = m_image_ctx->md_ctx.aio_operate(RBD_CHILDREN, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -125,7 +125,7 @@ void AttachChildRequest<I>::v1_remove_child_from_old_parent() {
   librados::AioCompletion *comp = create_rados_callback<
       klass, &klass::handle_v1_remove_child_from_old_parent>(this);
   int r = m_image_ctx->md_ctx.aio_operate(RBD_CHILDREN, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -155,7 +155,7 @@ void AttachChildRequest<I>::v2_set_op_feature() {
       klass, &klass::handle_v2_set_op_feature>(this);
   int r = m_image_ctx->md_ctx.aio_operate(m_image_ctx->header_oid, aio_comp,
                                           &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -187,7 +187,7 @@ void AttachChildRequest<I>::v2_child_attach() {
       klass, &klass::handle_v2_child_attach>(this);
   int r = m_parent_image_ctx->md_ctx.aio_operate(m_parent_image_ctx->header_oid,
                                                  aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -229,7 +229,7 @@ void AttachChildRequest<I>::v2_child_detach_from_old_parent() {
       klass, &klass::handle_v2_child_detach_from_old_parent>(this);
   int r = m_old_parent_image_ctx->md_ctx.aio_operate(
       m_old_parent_image_ctx->header_oid, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

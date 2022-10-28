@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MESSAGE_H
-#define CEPH_MESSAGE_H
+#ifndef STONE_MESSAGE_H
+#define STONE_MESSAGE_H
 
 #include <cstdlib>
 #include <ostream>
@@ -515,7 +515,7 @@ public:
   void encode(uint64_t features, int crcflags, bool skip_header_crc = false);
 };
 
-extern Message *decode_message(CephContext *cct,
+extern Message *decode_message(StoneeContext *cct,
                                int crcflags,
                                ceph_msg_header& header,
                                ceph_msg_footer& footer,
@@ -531,7 +531,7 @@ inline std::ostream& operator<<(std::ostream& out, const Message& m) {
 }
 
 extern void encode_message(Message *m, uint64_t features, ceph::buffer::list& bl);
-extern Message *decode_message(CephContext *cct, int crcflags,
+extern Message *decode_message(StoneeContext *cct, int crcflags,
                                ceph::buffer::list::const_iterator& bl);
 
 /// this is a "safe" version of Message. it does not allow calling get/put

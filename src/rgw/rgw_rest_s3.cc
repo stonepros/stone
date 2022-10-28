@@ -6,11 +6,11 @@
 #include <string.h>
 #include <string_view>
 
-#include "common/ceph_crypto.h"
+#include "common/stone_crypto.h"
 #include "common/split.h"
 #include "common/Formatter.h"
 #include "common/utf8.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/safe_io.h"
 #include "common/errno.h"
 #include "auth/Crypto.h"
@@ -60,18 +60,18 @@
 #include "services/svc_zone.h"
 #include "services/svc_cls.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "rgw_role.h"
 #include "rgw_rest_sts.h"
 #include "rgw_rest_iam.h"
 #include "rgw_sts.h"
 #include "rgw_sal_rados.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 using namespace rgw;
-using namespace ceph::crypto;
+using namespace stone::crypto;
 
 using std::get;
 
@@ -108,15 +108,15 @@ void rgw_get_errno_s3(rgw_http_error *e , int err_no)
 
 static inline std::string get_s3_expiration_header(
   struct req_state* s,
-  const ceph::real_time& mtime)
+  const stone::real_time& mtime)
 {
   return rgw::lc::s3_expiration_header(
     s, s->object->get_key(), s->tagset, mtime, s->bucket_attrs);
 }
 
 static inline bool get_s3_multipart_abort_header(
-  struct req_state* s, const ceph::real_time& mtime,
-  ceph::real_time& date, std::string& rule_id)
+  struct req_state* s, const stone::real_time& mtime,
+  stone::real_time& date, std::string& rule_id)
 {
   return rgw::lc::s3_multipart_abort_header(
           s, s->object->get_key(), mtime, s->bucket_attrs, date, rule_id);
@@ -144,7 +144,7 @@ int RGWGetObj_ObjStore_S3Website::send_response_data(bufferlist& bl, off_t bl_of
     bufferlist &bl = iter->second;
     s->redirect = bl.c_str();
     s->err.http_ret = 301;
-    ldpp_dout(this, 20) << __CEPH_ASSERT_FUNCTION << " redirecting per x-amz-website-redirect-location=" << s->redirect << dendl;
+    ldpp_dout(this, 20) << __STONE_ASSERT_FUNCTION << " redirecting per x-amz-website-redirect-location=" << s->redirect << dendl;
     op_ret = -ERR_WEBSITE_REDIRECT;
     set_req_state_err(s, op_ret);
     dump_errno(s);
@@ -393,7 +393,7 @@ int RGWGetObj_ObjStore_S3::send_response_data(bufferlist& bl, off_t bl_ofs,
         try {
           decode(retention, iter->second);
           dump_header(s, "x-amz-object-lock-mode", retention.get_mode());
-          string date = ceph::to_iso_8601(retention.get_retain_until_date());
+          string date = stone::to_iso_8601(retention.get_retain_until_date());
           dump_header(s, "x-amz-object-lock-retain-until-date", date.c_str());
         } catch (buffer::error& err) {
           ldpp_dout(this, 0) << "ERROR: failed to decode RGWObjectRetention" << dendl;
@@ -480,8 +480,8 @@ int RGWGetObj_ObjStore_S3::override_range_hdr(const rgw::auth::StrategyRegistry&
   const char hdrs_split[2] = {(char)178,'\0'};
   const char kv_split[2] = {(char)177,'\0'};
   const char* cache_hdr = rgw_env->get("HTTP_X_AMZ_CACHE");
-  for (std::string_view hdr : ceph::split(cache_hdr, hdrs_split)) {
-    auto kv = ceph::split(hdr, kv_split);
+  for (std::string_view hdr : stone::split(cache_hdr, hdrs_split)) {
+    auto kv = stone::split(hdr, kv_split);
     auto k = kv.begin();
     if (std::distance(k, kv.end()) != 2) {
       return -EINVAL;
@@ -712,7 +712,7 @@ struct ReplicationConfiguration {
         encode_xml("Status", status, f);
       }
 
-      bool is_valid(CephContext *cct) const {
+      bool is_valid(StoneContext *cct) const {
         bool result = is_valid_status(status);
         if (!result) {
           ldout(cct, 5) << "NOTICE: bad status provided in DeleteMarkerReplication element (status=" << status << ")" << dendl;
@@ -852,7 +852,7 @@ struct ReplicationConfiguration {
         encode_xml("And", and_elements, f);
       }
 
-      bool is_valid(CephContext *cct) const {
+      bool is_valid(StoneContext *cct) const {
         if (tag && prefix) {
           ldout(cct, 5) << "NOTICE: both tag and prefix were provided in replication filter rule" << dendl;
           return false;
@@ -867,7 +867,7 @@ struct ReplicationConfiguration {
         return true;
       };
 
-      int to_sync_pipe_filter(CephContext *cct,
+      int to_sync_pipe_filter(StoneContext *cct,
                               rgw_sync_pipe_filter *f) const {
         if (!is_valid(cct)) {
           return -EINVAL;
@@ -999,7 +999,7 @@ struct ReplicationConfiguration {
       encode_xml("Status", status, f);
     }
 
-    bool is_valid(CephContext *cct) const {
+    bool is_valid(StoneContext *cct) const {
       if (!is_valid_status(status)) {
         ldout(cct, 5) << "NOTICE: bad status provided in rule (status=" << status << ")" << dendl;
         return false;
@@ -2401,8 +2401,8 @@ int RGWPutObj_ObjStore_S3::get_params(optional_yield y)
   auto obj_lock_date_str = s->info.env->get("HTTP_X_AMZ_OBJECT_LOCK_RETAIN_UNTIL_DATE");
   auto obj_legal_hold_str = s->info.env->get("HTTP_X_AMZ_OBJECT_LOCK_LEGAL_HOLD");
   if (obj_lock_mode_str && obj_lock_date_str) {
-    boost::optional<ceph::real_time> date = ceph::from_iso_8601(obj_lock_date_str);
-    if (boost::none == date || ceph::real_clock::to_time_t(*date) <= ceph_clock_now()) {
+    boost::optional<stone::real_time> date = stone::from_iso_8601(obj_lock_date_str);
+    if (boost::none == date || stone::real_clock::to_time_t(*date) <= stone_clock_now()) {
         ret = -EINVAL;
         ldpp_dout(this,0) << "invalid x-amz-object-lock-retain-until-date value" << dendl;
         return ret;
@@ -2672,7 +2672,7 @@ int RGWPostObj_ObjStore_S3::get_params(optional_yield y)
     if (r < 0)
       return r;
 
-    if (s->cct->_conf->subsys.should_gather<ceph_subsys_rgw, 20>()) {
+    if (s->cct->_conf->subsys.should_gather<stone_subsys_rgw, 20>()) {
       ldpp_dout(this, 20) << "read part header -- part.name="
                         << part.name << dendl;
 
@@ -2734,7 +2734,7 @@ int RGWPostObj_ObjStore_S3::get_params(optional_yield y)
 
   part_str(parts, "Content-Type", &content_type);
 
-  /* AWS permits POST without Content-Type: http://tracker.ceph.com/issues/20201 */
+  /* AWS permits POST without Content-Type: http://tracker.stone.com/issues/20201 */
   if (! content_type.empty()) {
     env.add_var("Content-Type", content_type);
   }
@@ -2924,7 +2924,7 @@ int RGWPostObj_ObjStore_S3::get_policy(optional_yield y)
       ldpp_dout(this, 20) << "Successful Signature Verification!" << dendl;
     }
 
-    ceph::bufferlist decoded_policy;
+    stone::bufferlist decoded_policy;
     try {
       decoded_policy.decode_base64(s->auth.s3_postobj_creds.encoded_policy);
     } catch (buffer::error& err) {
@@ -2994,7 +2994,7 @@ int RGWPostObj_ObjStore_S3::complete_get_params()
       return r;
     }
 
-    ceph::bufferlist part_data;
+    stone::bufferlist part_data;
     bool boundary;
     uint64_t chunk_size = s->cct->_conf->rgw_max_chunk_size;
     r = read_data(part.data, chunk_size, boundary, done);
@@ -3008,7 +3008,7 @@ int RGWPostObj_ObjStore_S3::complete_get_params()
   return 0;
 }
 
-int RGWPostObj_ObjStore_S3::get_data(ceph::bufferlist& bl, bool& again)
+int RGWPostObj_ObjStore_S3::get_data(stone::bufferlist& bl, bool& again)
 {
   bool boundary;
   bool done;
@@ -3522,7 +3522,7 @@ int RGWPutCORS_ObjStore_S3::get_params(optional_yield y)
     in_data.append(data);
   }
 
-  if (s->cct->_conf->subsys.should_gather<ceph_subsys_rgw, 15>()) {
+  if (s->cct->_conf->subsys.should_gather<stone_subsys_rgw, 15>()) {
     ldpp_dout(this, 15) << "CORSConfiguration";
     cors_config->to_xml(*_dout);
     *_dout << dendl;
@@ -3677,7 +3677,7 @@ void RGWInitMultipart_ObjStore_S3::send_response()
   dump_errno(s);
   for (auto &it : crypt_http_responses)
      dump_header(s, it.first, it.second);
-  ceph::real_time abort_date;
+  stone::real_time abort_date;
   string rule_id;
   bool exist_multipart_abort = get_s3_multipart_abort_header(s, mtime, abort_date, rule_id);
   if (exist_multipart_abort) {
@@ -5620,7 +5620,7 @@ AWSEngine::authenticate(const DoutPrefixProvider* dpp, const req_state* const s,
 rgw::LDAPHelper* rgw::auth::s3::LDAPEngine::ldh = nullptr;
 std::mutex rgw::auth::s3::LDAPEngine::mtx;
 
-void rgw::auth::s3::LDAPEngine::init(CephContext* const cct)
+void rgw::auth::s3::LDAPEngine::init(StoneContext* const cct)
 {
   if (! cct->_conf->rgw_s3_auth_use_ldap ||
       cct->_conf->rgw_ldap_uri.empty()) {
@@ -5812,7 +5812,7 @@ rgw::auth::s3::STSEngine::get_session_token(const DoutPrefixProvider* dpp, const
     return -EINVAL;
   }
 
-  auto* cryptohandler = cct->get_crypto_handler(CEPH_CRYPTO_AES);
+  auto* cryptohandler = cct->get_crypto_handler(STONE_CRYPTO_AES);
   if (! cryptohandler) {
     return -EINVAL;
   }
@@ -5883,7 +5883,7 @@ rgw::auth::s3::STSEngine::authenticate(
   if (! token.expiration.empty()) {
     std::string expiration = token.expiration;
     if (! expiration.empty()) {
-      boost::optional<real_clock::time_point> exp = ceph::from_iso_8601(expiration, false);
+      boost::optional<real_clock::time_point> exp = stone::from_iso_8601(expiration, false);
       if (exp) {
         real_clock::time_point now = real_clock::now();
         if (now >= *exp) {

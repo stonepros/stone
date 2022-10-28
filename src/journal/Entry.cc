@@ -7,7 +7,7 @@
 #include "common/Formatter.h"
 #include <strstream>
 
-#define dout_subsys ceph_subsys_journaler
+#define dout_subsys stone_subsys_journaler
 #undef dout_prefix
 #define dout_prefix *_dout << "Entry: " << this << " "
 
@@ -25,7 +25,7 @@ uint32_t Entry::get_fixed_size() {
 }
 
 void Entry::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   bufferlist data_bl;
   encode(preamble, data_bl);
   encode(static_cast<uint8_t>(1), data_bl);
@@ -37,11 +37,11 @@ void Entry::encode(bufferlist &bl) const {
   uint32_t bl_offset = bl.length();
   bl.claim_append(data_bl);
   encode(crc, bl);
-  ceph_assert(get_fixed_size() + m_data.length() + bl_offset == bl.length());
+  stone_assert(get_fixed_size() + m_data.length() + bl_offset == bl.length());
 }
 
 void Entry::decode(bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   uint32_t start_offset = iter.get_off();
   uint64_t bl_preamble;
   decode(bl_preamble, iter);
@@ -83,7 +83,7 @@ void Entry::dump(Formatter *f) const {
 }
 
 bool Entry::is_readable(bufferlist::const_iterator iter, uint32_t *bytes_needed) {
-  using ceph::decode;
+  using stone::decode;
   uint32_t start_off = iter.get_off();
   if (iter.get_remaining() < HEADER_FIXED_SIZE) {
     bufferlist sub_bl;

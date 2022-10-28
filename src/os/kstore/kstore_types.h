@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OSD_KSTORE_TYPES_H
-#define CEPH_OSD_KSTORE_TYPES_H
+#ifndef STONE_OSD_KSTORE_TYPES_H
+#define STONE_OSD_KSTORE_TYPES_H
 
 #include <ostream>
 #include "include/types.h"

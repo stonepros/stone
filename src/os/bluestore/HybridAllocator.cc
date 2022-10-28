@@ -9,7 +9,7 @@
 #include "common/debug.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_bluestore
+#define dout_subsys stone_subsys_bluestore
 #undef  dout_prefix
 #define dout_prefix *_dout << "HybridAllocator "
 
@@ -27,8 +27,8 @@ int64_t HybridAllocator::allocate(
                  << " max_alloc_size 0x" << max_alloc_size
                  << " hint 0x" << hint
                  << std::dec << dendl;
-  ceph_assert(isp2(unit));
-  ceph_assert(want % unit == 0);
+  stone_assert(isp2(unit));
+  stone_assert(want % unit == 0);
 
   if (max_alloc_size == 0) {
     max_alloc_size = want;
@@ -172,7 +172,7 @@ void HybridAllocator::init_rm_free(uint64_t offset, uint64_t length)
             << "Uexpected extent: "
             << " 0x" << o << "~" << l
             << std::dec << dendl;
-          ceph_assert(false);
+          stone_assert(false);
         }
       }
     });
@@ -197,7 +197,7 @@ void HybridAllocator::_spillover_range(uint64_t start, uint64_t end)
     << start << "~" << size
     << std::dec
     << dendl;
-  ceph_assert(size);
+  stone_assert(size);
   if (!bmap_alloc) {
     dout(1) << __func__
       << std::hex
@@ -216,7 +216,7 @@ void HybridAllocator::_add_to_tree(uint64_t start, uint64_t size)
   if (bmap_alloc) {
     uint64_t head = bmap_alloc->claim_free_to_left(start);
     uint64_t tail = bmap_alloc->claim_free_to_right(start + size);
-    ceph_assert(head <= start);
+    stone_assert(head <= start);
     start -= head;
     size += head + tail;
   }

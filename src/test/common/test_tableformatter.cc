@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 
-using namespace ceph;
+using namespace stone;
 
 TEST(tableformatter, singleline)
 {

@@ -1,5 +1,5 @@
-#ifndef CEPH_CLIENT_FH_H
-#define CEPH_CLIENT_FH_H
+#ifndef STONE_CLIENT_FH_H
+#define STONE_CLIENT_FH_H
 
 #include "common/Readahead.h"
 #include "include/types.h"

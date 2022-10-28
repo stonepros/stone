@@ -2,7 +2,7 @@
 // vim: ts=2 sw=2 smarttab
 
 #include <stdlib.h>
-#include "include/cephfs/libcephfs.h"
+#include "include/stonefs/libstonefs.h"
 #include "include/rados/librados.h"
 
 #ifdef __cplusplus
@@ -19,9 +19,9 @@ int main(int argc, char **argv)
 	if (ret < 0) {
 		return EXIT_FAILURE;
 	}
-	/* libcephfs.h */
-	struct ceph_mount_info *cmount;
-	ret = ceph_create(&cmount, NULL);
+	/* libstonefs.h */
+	struct stone_mount_info *cmount;
+	ret = stone_create(&cmount, NULL);
 	if (ret < 0) {
 		return EXIT_FAILURE;
 	}

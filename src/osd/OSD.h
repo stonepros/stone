@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OSD_H
-#define CEPH_OSD_H
+#ifndef STONE_OSD_H
+#define STONE_OSD_H
 
 #include "PG.h"
 
@@ -54,7 +54,7 @@
 #include "osd/osd_perf_counters.h"
 #include "common/Finisher.h"
 
-#define CEPH_OSD_PROTOCOL    10 /* cluster internal */
+#define STONE_OSD_PROTOCOL    10 /* cluster internal */
 
 /*
 
@@ -98,7 +98,7 @@ class OSDService {
   using OpSchedulerItem = ceph::osd::scheduler::OpSchedulerItem;
 public:
   OSD *osd;
-  CephContext *cct;
+  StoneeContext *cct;
   ObjectStore::CollectionHandle meta_ch;
   const int whoami;
   ObjectStore *&store;
@@ -269,7 +269,7 @@ private:
 
 public:
   struct ScrubJob {
-    CephContext* cct;
+    StoneeContext* cct;
     /// pg to be scrubbed
     spg_t pgid;
     /// a time scheduled for scrub. but the scrub could be delayed if system
@@ -278,7 +278,7 @@ public:
     /// the hard upper bound of scrub time
     utime_t deadline;
     ScrubJob() : cct(nullptr) {}
-    explicit ScrubJob(CephContext* cct, const spg_t& pg,
+    explicit ScrubJob(StoneeContext* cct, const spg_t& pg,
 		      const utime_t& timestamp,
 		      double pool_scrub_min_interval = 0,
 		      double pool_scrub_max_interval = 0, bool must = true);
@@ -1030,7 +1030,7 @@ struct OSDShardPGSlot {
 
 struct OSDShard {
   const unsigned shard_id;
-  CephContext *cct;
+  StoneeContext *cct;
   OSD *osd;
 
   std::string shard_name;
@@ -1112,7 +1112,7 @@ struct OSDShard {
 
   OSDShard(
     int id,
-    CephContext *cct,
+    StoneeContext *cct,
     OSD *osd);
 };
 
@@ -1232,7 +1232,7 @@ public:
     return ghobject_t(hobject_t(sobject_t(object_t(s.c_str()), 0)));
   }
   static ghobject_t make_infos_oid() {
-    hobject_t oid(sobject_t("infos", CEPH_NOSNAP));
+    hobject_t oid(sobject_t("infos", STONE_NOSNAP));
     return ghobject_t(oid);
   }
 
@@ -1241,14 +1241,14 @@ public:
       hobject_t(
 	sobject_t(
 	  object_t(std::string("final_pool_") + stringify(pool)),
-	  CEPH_NOSNAP)));
+	  STONE_NOSNAP)));
   }
 
   static ghobject_t make_pg_num_history_oid() {
-    return ghobject_t(hobject_t(sobject_t("pg_num_history", CEPH_NOSNAP)));
+    return ghobject_t(hobject_t(sobject_t("pg_num_history", STONE_NOSNAP)));
   }
 
-  static void recursive_remove_collection(CephContext* cct,
+  static void recursive_remove_collection(StoneeContext* cct,
 					  ObjectStore *store,
 					  spg_t pgid,
 					  coll_t tmp);
@@ -1553,7 +1553,7 @@ public:
     bool ms_can_fast_dispatch_any() const override { return true; }
     bool ms_can_fast_dispatch(const Message *m) const override {
       switch (m->get_type()) {
-      case CEPH_MSG_PING:
+      case STONE_MSG_PING:
       case MSG_OSD_PING:
 	return true;
       default:
@@ -1985,9 +1985,9 @@ private:
   bool ms_can_fast_dispatch_any() const override { return true; }
   bool ms_can_fast_dispatch(const Message *m) const override {
     switch (m->get_type()) {
-    case CEPH_MSG_PING:
-    case CEPH_MSG_OSD_OP:
-    case CEPH_MSG_OSD_BACKOFF:
+    case STONE_MSG_PING:
+    case STONE_MSG_OSD_OP:
+    case STONE_MSG_OSD_BACKOFF:
     case MSG_OSD_SCRUB2:
     case MSG_OSD_FORCE_RECOVERY:
     case MSG_MON_COMMAND:
@@ -2042,7 +2042,7 @@ private:
  public:
   /* internal and external can point to the same messenger, they will still
    * be cleaned up properly*/
-  OSD(CephContext *cct_,
+  OSD(StoneeContext *cct_,
       ObjectStore *store_,
       int id,
       Messenger *internal,
@@ -2057,7 +2057,7 @@ private:
   ~OSD() override;
 
   // static bits
-  static int mkfs(CephContext *cct, ObjectStore *store, uuid_d fsid, int whoami, std::string osdspec_affinity);
+  static int mkfs(StoneeContext *cct, ObjectStore *store, uuid_d fsid, int whoami, std::string osdspec_affinity);
 
   /* remove any non-user xattrs from a std::map of them */
   void filter_xattrs(std::map<std::string, ceph::buffer::ptr>& attrs) {
@@ -2075,7 +2075,7 @@ private:
   int update_crush_device_class();
   int update_crush_location();
 
-  static int write_meta(CephContext *cct,
+  static int write_meta(StoneeContext *cct,
 			ObjectStore *store,
 			uuid_d& cluster_fsid, uuid_d& osd_fsid, int whoami, std::string& osdspec_affinity);
 
@@ -2149,4 +2149,4 @@ extern const CompatSet::Feature ceph_osd_feature_compat[];
 extern const CompatSet::Feature ceph_osd_feature_ro_compat[];
 extern const CompatSet::Feature ceph_osd_feature_incompat[];
 
-#endif // CEPH_OSD_H
+#endif // STONE_OSD_H

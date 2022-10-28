@@ -33,7 +33,7 @@ struct RefreshRequest<MockTestImageCtx> {
   static RefreshRequest* create(MockTestImageCtx &image_ctx,
                                 bool acquiring_lock, bool skip_open_parent,
                                 Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -82,7 +82,7 @@ public:
 
       uint64_t snap_id = image_ctx->snap_ids[
         {cls::rbd::UserSnapshotNamespace{}, "snap"}];
-      ASSERT_NE(CEPH_NOSNAP, snap_id);
+      ASSERT_NE(STONE_NOSNAP, snap_id);
 
       C_SaferCond ctx;
       image_ctx->state->snap_set(snap_id, &ctx);

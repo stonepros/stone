@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  */
 
-#ifndef CEPH_MGRMONITOR_H
-#define CEPH_MGRMONITOR_H
+#ifndef STONE_MGRMONITOR_H
+#define STONE_MGRMONITOR_H
 
 #include <map>
 #include <set>

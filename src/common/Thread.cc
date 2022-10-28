@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2011 New Dream Network
  *
@@ -32,7 +32,7 @@
 #endif
 
 
-pid_t ceph_gettid(void)
+pid_t stone_gettid(void)
 {
 #ifdef __linux__
   return syscall(SYS_gettid);
@@ -77,13 +77,13 @@ void *Thread::_entry_func(void *arg) {
 
 void *Thread::entry_wrapper()
 {
-  int p = ceph_gettid(); // may return -ENOSYS on other platforms
+  int p = stone_gettid(); // may return -ENOSYS on other platforms
   if (p > 0)
     pid = p;
   if (pid && cpuid >= 0)
     _set_affinity(cpuid);
 
-  ceph_pthread_setname(pthread_self(), thread_name.c_str());
+  stone_pthread_setname(pthread_self(), thread_name.c_str());
   return entry();
 }
 
@@ -115,7 +115,7 @@ int Thread::try_create(size_t stacksize)
   pthread_attr_t *thread_attr = NULL;
   pthread_attr_t thread_attr_loc;
   
-  stacksize &= CEPH_PAGE_MASK;  // must be multiple of page
+  stacksize &= STONE_PAGE_MASK;  // must be multiple of page
   if (stacksize) {
     thread_attr = &thread_attr_loc;
     pthread_attr_init(thread_attr);
@@ -153,7 +153,7 @@ int Thread::try_create(size_t stacksize)
 
 void Thread::create(const char *name, size_t stacksize)
 {
-  ceph_assert(strlen(name) < 16);
+  stone_assert(strlen(name) < 16);
   thread_name = name;
 
   int ret = try_create(stacksize);
@@ -162,14 +162,14 @@ void Thread::create(const char *name, size_t stacksize)
     snprintf(buf, sizeof(buf), "Thread::try_create(): pthread_create "
 	     "failed with error %d", ret);
     dout_emergency(buf);
-    ceph_assert(ret == 0);
+    stone_assert(ret == 0);
   }
 }
 
 int Thread::join(void **prval)
 {
   if (thread_id == 0) {
-    ceph_abort_msg("join on thread that was never started");
+    stone_abort_msg("join on thread that was never started");
     return -EINVAL;
   }
 
@@ -179,7 +179,7 @@ int Thread::join(void **prval)
     snprintf(buf, sizeof(buf), "Thread::join(): pthread_join "
              "failed with error %d\n", status);
     dout_emergency(buf);
-    ceph_assert(status == 0);
+    stone_assert(status == 0);
   }
 
   thread_id = 0;
@@ -195,7 +195,7 @@ int Thread::set_affinity(int id)
 {
   int r = 0;
   cpuid = id;
-  if (pid && ceph_gettid() == pid)
+  if (pid && stone_gettid() == pid)
     r = _set_affinity(id);
   return r;
 }
@@ -204,7 +204,7 @@ int Thread::set_affinity(int id)
 // =========================
 
 void set_thread_name(std::thread& t, const std::string& s) {
-  int r = ceph_pthread_setname(t.native_handle(), s.c_str());
+  int r = stone_pthread_setname(t.native_handle(), s.c_str());
   if (r != 0) {
     throw std::system_error(r, std::generic_category());
   }
@@ -212,7 +212,7 @@ void set_thread_name(std::thread& t, const std::string& s) {
 std::string get_thread_name(const std::thread& t) {
   std::string s(256, '\0');
 
-  int r = ceph_pthread_getname(const_cast<std::thread&>(t).native_handle(),
+  int r = stone_pthread_getname(const_cast<std::thread&>(t).native_handle(),
 			       s.data(), s.length());
   if (r != 0) {
     throw std::system_error(r, std::generic_category());

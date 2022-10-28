@@ -10,7 +10,7 @@
 #include "common/dout.h"
 #include "common/errno.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::crypto::luks::Header: " << this << " " \
                            << __func__ << ": "
@@ -19,7 +19,7 @@ namespace librbd {
 namespace crypto {
 namespace luks {
 
-Header::Header(CephContext* cct) : m_cct(cct), m_fd(-1), m_cd(nullptr) {
+Header::Header(StoneContext* cct) : m_cct(cct), m_fd(-1), m_cd(nullptr) {
 }
 
 Header::~Header() {
@@ -82,8 +82,8 @@ int Header::init() {
   return 0;
 }
 
-int Header::write(const ceph::bufferlist& bl) {
-  ceph_assert(m_fd != -1);
+int Header::write(const stone::bufferlist& bl) {
+  stone_assert(m_fd != -1);
 
   auto r = bl.write_fd(m_fd);
   if (r != 0) {
@@ -92,8 +92,8 @@ int Header::write(const ceph::bufferlist& bl) {
   return r;
 }
 
-ssize_t Header::read(ceph::bufferlist* bl) {
-  ceph_assert(m_fd != -1);
+ssize_t Header::read(stone::bufferlist* bl) {
+  stone_assert(m_fd != -1);
 
   // get current header size
   struct stat st;
@@ -118,7 +118,7 @@ int Header::format(const char* type, const char* alg, const char* key,
                    size_t key_size, const char* cipher_mode,
                    uint32_t sector_size, uint32_t data_alignment,
                    bool insecure_fast_mode) {
-  ceph_assert(m_cd != nullptr);
+  stone_assert(m_cd != nullptr);
 
   ldout(m_cct, 20) << "sector size: " << sector_size << ", data alignment: "
                    << data_alignment << dendl;
@@ -179,7 +179,7 @@ int Header::format(const char* type, const char* alg, const char* key,
 }
 
 int Header::add_keyslot(const char* passphrase, size_t passphrase_size) {
-  ceph_assert(m_cd != nullptr);
+  stone_assert(m_cd != nullptr);
 
   auto r = crypt_keyslot_add_by_volume_key(
           m_cd, CRYPT_ANY_SLOT, NULL, 0, passphrase, passphrase_size);
@@ -193,7 +193,7 @@ int Header::add_keyslot(const char* passphrase, size_t passphrase_size) {
 }
 
 int Header::load(const char* type) {
-  ceph_assert(m_cd != nullptr);
+  stone_assert(m_cd != nullptr);
 
   // libcryptsetup checks if device size matches the header and keyslots size
   // in LUKS2, 2 X 4MB header + 128MB keyslots
@@ -217,7 +217,7 @@ int Header::load(const char* type) {
 
 int Header::read_volume_key(const char* passphrase, size_t passphrase_size,
                             char* volume_key, size_t* volume_key_size) {
-  ceph_assert(m_cd != nullptr);
+  stone_assert(m_cd != nullptr);
 
   auto r = crypt_volume_key_get(
           m_cd, CRYPT_ANY_SLOT, volume_key, volume_key_size, passphrase,
@@ -232,22 +232,22 @@ int Header::read_volume_key(const char* passphrase, size_t passphrase_size,
 }
 
 int Header::get_sector_size() {
-  ceph_assert(m_cd != nullptr);
+  stone_assert(m_cd != nullptr);
   return crypt_get_sector_size(m_cd);
 }
 
 uint64_t Header::get_data_offset() {
-  ceph_assert(m_cd != nullptr);
+  stone_assert(m_cd != nullptr);
   return crypt_get_data_offset(m_cd) << 9;
 }
 
 const char* Header::get_cipher() {
-  ceph_assert(m_cd != nullptr);
+  stone_assert(m_cd != nullptr);
   return crypt_get_cipher(m_cd);
 }
 
 const char* Header::get_cipher_mode() {
-  ceph_assert(m_cd != nullptr);
+  stone_assert(m_cd != nullptr);
   return crypt_get_cipher_mode(m_cd);
 }
 

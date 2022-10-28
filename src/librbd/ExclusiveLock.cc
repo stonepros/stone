@@ -13,10 +13,10 @@
 #include "librbd/io/ImageDispatcherInterface.h"
 #include "librbd/Utils.h"
 #include "librbd/asio/ContextWQ.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/dout.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::ExclusiveLock: " << this << " " \
                            <<  __func__
@@ -69,7 +69,7 @@ bool ExclusiveLock<I>::accept_ops() const {
 }
 
 template <typename I>
-bool ExclusiveLock<I>::accept_ops(const ceph::mutex &lock) const {
+bool ExclusiveLock<I>::accept_ops(const stone::mutex &lock) const {
   return (!ML<I>::is_state_shutdown() &&
           (ML<I>::is_state_locked() || ML<I>::is_state_post_acquiring()));
 }
@@ -102,7 +102,7 @@ template <typename I>
 void ExclusiveLock<I>::unblock_requests() {
   std::lock_guard locker{ML<I>::m_lock};
 
-  ceph_assert(m_request_blocked_count > 0);
+  stone_assert(m_request_blocked_count > 0);
   m_request_blocked_count--;
   if (m_request_blocked_count == 0) {
     m_request_blocked_ret_val = 0;
@@ -121,7 +121,7 @@ int ExclusiveLock<I>::get_unlocked_op_error() const {
 
 template <typename I>
 void ExclusiveLock<I>::init(uint64_t features, Context *on_init) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
 
   on_init = create_context_callback<Context>(on_init, this);
 
@@ -158,7 +158,7 @@ template <typename I>
 void ExclusiveLock<I>::shut_down(Context *on_shut_down) {
   ldout(m_image_ctx.cct, 10) << dendl;
 
-  auto ref = ceph::ref_t<ExclusiveLock<I>>(this);
+  auto ref = stone::ref_t<ExclusiveLock<I>>(this);
   on_shut_down = create_context_callback<Context>(on_shut_down, this);
 
   ML<I>::shut_down(on_shut_down);
@@ -175,7 +175,7 @@ void ExclusiveLock<I>::handle_peer_notification(int r) {
   }
 
   ldout(m_image_ctx.cct, 10) << dendl;
-  ceph_assert(ML<I>::is_action_acquire_lock());
+  stone_assert(ML<I>::is_action_acquire_lock());
 
   m_acquire_lock_peer_ret_val = r;
   ML<I>::execute_next_action();
@@ -183,7 +183,7 @@ void ExclusiveLock<I>::handle_peer_notification(int r) {
 
 template <typename I>
 Context *ExclusiveLock<I>::start_op(int* ret_val) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
   std::lock_guard locker{ML<I>::m_lock};
 
   if (!accept_ops(ML<I>::m_lock)) {
@@ -247,7 +247,7 @@ void ExclusiveLock<I>::post_acquire_lock_handler(int r, Context *on_finish) {
     return;
   } else if (r < 0) {
     ML<I>::m_lock.lock();
-    ceph_assert(ML<I>::is_state_acquiring());
+    stone_assert(ML<I>::is_state_acquiring());
 
     // PostAcquire state machine will not run, so we need complete prepare
     m_image_ctx.state->handle_prepare_lock_complete();
@@ -293,7 +293,7 @@ void ExclusiveLock<I>::handle_post_acquiring_lock(int r) {
 
   std::lock_guard locker{ML<I>::m_lock};
 
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   // lock is owned at this point
   ML<I>::set_state_post_acquiring();
@@ -306,7 +306,7 @@ void ExclusiveLock<I>::handle_post_acquired_lock(int r) {
   Context *on_finish = nullptr;
   {
     std::lock_guard locker{ML<I>::m_lock};
-    ceph_assert(ML<I>::is_state_acquiring() ||
+    stone_assert(ML<I>::is_state_acquiring() ||
                 ML<I>::is_state_post_acquiring());
 
     assert (m_pre_post_callback != nullptr);
@@ -319,7 +319,7 @@ void ExclusiveLock<I>::handle_post_acquired_lock(int r) {
   }
 
   m_image_ctx.perfcounter->tset(l_librbd_lock_acquired_time,
-                                ceph_clock_now());
+                                stone_clock_now());
   m_image_ctx.image_watcher->notify_acquired_lock();
   m_image_dispatch->unset_require_lock(io::DIRECTION_BOTH);
 
@@ -348,7 +348,7 @@ void ExclusiveLock<I>::post_release_lock_handler(bool shutting_down, int r,
   if (!shutting_down) {
     {
       std::lock_guard locker{ML<I>::m_lock};
-      ceph_assert(ML<I>::is_state_pre_releasing() ||
+      stone_assert(ML<I>::is_state_pre_releasing() ||
                   ML<I>::is_state_releasing());
     }
 

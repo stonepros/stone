@@ -17,9 +17,9 @@ CLS_NAME(journal)
 
 using std::string;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
 
 namespace {
 
@@ -74,7 +74,7 @@ int read_key(cls_method_context_t hctx, const string &key, T *t,
   try {
     auto iter = bl.cbegin();
     decode(*t, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -133,7 +133,7 @@ int expire_tags(cls_method_context_t hctx, const std::string *skip_client_id) {
       auto iter = val.second.cbegin();
       try {
         decode(client, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
         CLS_ERR("error decoding registered client: %s",
                 val.first.c_str());
         return -EIO;
@@ -182,7 +182,7 @@ int expire_tags(cls_method_context_t hctx, const std::string *skip_client_id) {
       auto iter = val.second.cbegin();
       try {
         decode(tag, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
         CLS_ERR("error decoding tag: %s", val.first.c_str());
         return -EIO;
       }
@@ -245,7 +245,7 @@ int get_client_list_range(cls_method_context_t hctx,
       cls::journal::Client client;
       decode(client, iter);
       clients->insert(client);
-    } catch (const ceph::buffer::error &err) {
+    } catch (const stone::buffer::error &err) {
       CLS_ERR("could not decode client '%s': %s", it->first.c_str(),
               err.what());
       return -EIO;
@@ -320,7 +320,7 @@ int journal_create(cls_method_context_t hctx, bufferlist *in, bufferlist *out) {
     decode(order, iter);
     decode(splay_width, iter);
     decode(pool_id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -466,7 +466,7 @@ int journal_set_minimum_set(cls_method_context_t hctx, bufferlist *in,
   try {
     auto iter = in->cbegin();
     decode(object_set, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -537,7 +537,7 @@ int journal_set_active_set(cls_method_context_t hctx, bufferlist *in,
   try {
     auto iter = in->cbegin();
     decode(object_set, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -589,7 +589,7 @@ int journal_get_client(cls_method_context_t hctx, bufferlist *in,
   try {
     auto iter = in->cbegin();
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -621,7 +621,7 @@ int journal_client_register(cls_method_context_t hctx, bufferlist *in,
     auto iter = in->cbegin();
     decode(id, iter);
     decode(data, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -671,7 +671,7 @@ int journal_client_update_data(cls_method_context_t hctx, bufferlist *in,
     auto iter = in->cbegin();
     decode(id, iter);
     decode(data, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -710,7 +710,7 @@ int journal_client_update_state(cls_method_context_t hctx, bufferlist *in,
     uint8_t state_raw;
     decode(state_raw, iter);
     state = static_cast<cls::journal::ClientState>(state_raw);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -743,7 +743,7 @@ int journal_client_unregister(cls_method_context_t hctx, bufferlist *in,
   try {
     auto iter = in->cbegin();
     decode(id, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -786,7 +786,7 @@ int journal_client_commit(cls_method_context_t hctx, bufferlist *in,
     auto iter = in->cbegin();
     decode(id, iter);
     decode(commit_position, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -837,7 +837,7 @@ int journal_client_list(cls_method_context_t hctx, bufferlist *in,
     auto iter = in->cbegin();
     decode(start_after, iter);
     decode(max_return, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -884,7 +884,7 @@ int journal_get_tag(cls_method_context_t hctx, bufferlist *in,
   try {
     auto iter = in->cbegin();
     decode(tag_tid, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -919,7 +919,7 @@ int journal_tag_create(cls_method_context_t hctx, bufferlist *in,
     decode(tag_tid, iter);
     decode(tag_class, iter);
     decode(data, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -1014,7 +1014,7 @@ int journal_tag_list(cls_method_context_t hctx, bufferlist *in,
     decode(max_return, iter);
     decode(client_id, iter);
     decode(tag_class, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -1055,7 +1055,7 @@ int journal_tag_list(cls_method_context_t hctx, bufferlist *in,
       auto iter = val.second.cbegin();
       try {
         decode(tag, iter);
-      } catch (const ceph::buffer::error &err) {
+      } catch (const stone::buffer::error &err) {
         CLS_ERR("error decoding tag: %s", val.first.c_str());
         return -EIO;
       }
@@ -1109,7 +1109,7 @@ int journal_object_guard_append(cls_method_context_t hctx, bufferlist *in,
   try {
     auto iter = in->cbegin();
     decode(soft_max_size, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -1149,7 +1149,7 @@ int journal_object_append(cls_method_context_t hctx, bufferlist *in,
     auto iter = in->cbegin();
     decode(soft_max_size, iter);
     decode(data, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("failed to decode input parameters: %s", err.what());
     return -EINVAL;
   }
@@ -1169,13 +1169,13 @@ int journal_object_append(cls_method_context_t hctx, bufferlist *in,
 
   auto offset = size;
   r = cls_cxx_write2(hctx, offset, data.length(), &data,
-                     CEPH_OSD_OP_FLAG_FADVISE_DONTNEED);
+                     STONE_OSD_OP_FLAG_FADVISE_DONTNEED);
   if (r < 0) {
     CLS_ERR("append: error when writing: %s", cpp_strerror(r).c_str());
     return r;
   }
 
-  if (cls_get_min_compatible_client(hctx) < ceph_release_t::octopus) {
+  if (cls_get_min_compatible_client(hctx) < stone_release_t::octopus) {
     return 0;
   }
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Haomai Wang
  *
@@ -22,7 +22,7 @@
 
 using namespace std;
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/debug.h"
 #include "common/WorkQueue.h"
 #include "global/global_init.h"
@@ -38,7 +38,7 @@ class ServerDispatcher : public Dispatcher {
     list<Message*> messages;
 
    public:
-    OpWQ(ceph::timespan timeout, ceph::timespan suicide_timeout, ThreadPool *tp)
+    OpWQ(stone::timespan timeout, stone::timespan suicide_timeout, ThreadPool *tp)
       : ThreadPool::WorkQueue<Message>("ServerDispatcher::OpWQ", timeout, suicide_timeout, tp) {}
 
     bool _enqueue(Message *m) override {
@@ -46,7 +46,7 @@ class ServerDispatcher : public Dispatcher {
       return true;
     }
     void _dequeue(Message *m) override {
-      ceph_abort();
+      stone_abort();
     }
     bool _empty() override {
       return messages.empty();
@@ -66,14 +66,14 @@ class ServerDispatcher : public Dispatcher {
     }
     void _process_finish(Message *m) override { }
     void _clear() override {
-      ceph_assert(messages.empty());
+      stone_assert(messages.empty());
     }
   } op_wq;
 
  public:
-  ServerDispatcher(int threads, uint64_t delay): Dispatcher(g_ceph_context), think_time(delay),
-    op_tp(g_ceph_context, "ServerDispatcher::op_tp", "tp_serv_disp", threads, "serverdispatcher_op_threads"),
-    op_wq(ceph::make_timespan(30), ceph::make_timespan(30), &op_tp) {
+  ServerDispatcher(int threads, uint64_t delay): Dispatcher(g_stone_context), think_time(delay),
+    op_tp(g_stone_context, "ServerDispatcher::op_tp", "tp_serv_disp", threads, "serverdispatcher_op_threads"),
+    op_wq(stone::make_timespan(30), stone::make_timespan(30), &op_tp) {
     op_tp.start();
   }
   ~ServerDispatcher() override {
@@ -82,7 +82,7 @@ class ServerDispatcher : public Dispatcher {
   bool ms_can_fast_dispatch_any() const override { return true; }
   bool ms_can_fast_dispatch(const Message *m) const override {
     switch (m->get_type()) {
-    case CEPH_MSG_OSD_OP:
+    case STONE_MSG_OSD_OP:
       return true;
     default:
       return false;
@@ -115,8 +115,8 @@ class MessengerServer {
  public:
   MessengerServer(const string &t, const string &addr, int threads, int delay):
       msgr(NULL), type(t), bindaddr(addr), dispatcher(threads, delay),
-      dummy_auth(g_ceph_context) {
-    msgr = Messenger::create(g_ceph_context, type, entity_name_t::OSD(0), "server", 0);
+      dummy_auth(g_stone_context) {
+    msgr = Messenger::create(g_stone_context, type, entity_name_t::OSD(0), "server", 0);
     msgr->set_default_policy(Messenger::Policy::stateless_server(0));
     dummy_auth.auth_registry.refresh_config();
       msgr->set_auth_server(&dummy_auth);
@@ -147,11 +147,11 @@ int main(int argc, char **argv)
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.apply_changes(nullptr);
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.apply_changes(nullptr);
 
   if (args.size() < 3) {
     usage(argv[0]);
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
 
   int worker_threads = atoi(args[1]);
   int think_time = atoi(args[2]);
-  std::string public_msgr_type = g_ceph_context->_conf->ms_public_type.empty() ? g_ceph_context->_conf.get_val<std::string>("ms_type") : g_ceph_context->_conf->ms_public_type;
+  std::string public_msgr_type = g_stone_context->_conf->ms_public_type.empty() ? g_stone_context->_conf.get_val<std::string>("ms_type") : g_stone_context->_conf->ms_public_type;
 
   cerr << " This tool won't handle connection error alike things, " << std::endl;
   cerr << "please ensure the proper network environment to test." << std::endl;

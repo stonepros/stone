@@ -17,9 +17,9 @@ using ceph::bufferlist;
 
 struct assert_size_args {
   uint64_t bound; //the size to compare to - should be k or 2k
-  uint64_t comparator; //should be CEPH_OSD_CMPXATTR_OP_EQ,
-		  //CEPH_OSD_CMPXATTR_OP_LT, or
-		  //CEPH_OSD_CMPXATTR_OP_GT
+  uint64_t comparator; //should be STONE_OSD_CMPXATTR_OP_EQ,
+		  //STONE_OSD_CMPXATTR_OP_LT, or
+		  //STONE_OSD_CMPXATTR_OP_GT
 
   void encode(bufferlist &bl) const {
     ENCODE_START(1,1,bl);

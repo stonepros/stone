@@ -1,9 +1,9 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - client session with non-allowable root
 tasks:
-  - cephfs_test_runner:
+  - stonefs_test_runner:
       fail_on_skip: false
       modules:
-        - tasks.cephfs.test_sessionmap
+        - tasks.stonefs.test_sessionmap

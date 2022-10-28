@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -162,7 +162,7 @@ class MDSRank {
     friend class C_ScrubExecAndReply;
     friend class C_ScrubControlExecAndReply;
 
-    CephContext *cct;
+    StoneContext *cct;
 
     MDSRank(
         mds_rank_t whoami_,

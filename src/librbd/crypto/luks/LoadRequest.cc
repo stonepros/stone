@@ -11,7 +11,7 @@
 #include "librbd/io/ImageDispatchSpec.h"
 #include "librbd/io/ReadResult.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::crypto::luks::LoadRequest: " << this \
                            << " " << __func__ << ": "
@@ -25,7 +25,7 @@ using librbd::util::create_context_callback;
 template <typename I>
 LoadRequest<I>::LoadRequest(
         I* image_ctx, encryption_format_t format, std::string&& passphrase,
-        ceph::ref_t<CryptoInterface>* result_crypto,
+        stone::ref_t<CryptoInterface>* result_crypto,
         Context* on_finish) : m_image_ctx(image_ctx),
                               m_format(format),
                               m_passphrase(std::move(passphrase)),
@@ -184,7 +184,7 @@ void LoadRequest<I>::read_volume_key() {
 
 template <typename I>
 void LoadRequest<I>::finish(int r) {
-  ceph_memzero_s(&m_passphrase[0], m_passphrase.size(), m_passphrase.size());
+  stone_memzero_s(&m_passphrase[0], m_passphrase.size(), m_passphrase.size());
   m_on_finish->complete(r);
   delete this;
 }

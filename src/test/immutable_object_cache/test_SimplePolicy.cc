@@ -8,7 +8,7 @@
 #include "include/Context.h"
 #include "tools/immutable_object_cache/SimplePolicy.h"
 
-using namespace ceph::immutable_obj_cache;
+using namespace stone::immutable_obj_cache;
 
 std::string generate_file_name(uint64_t index) {
   std::string pre_name("object_cache_file_");
@@ -30,7 +30,7 @@ public:
   static void SetUpTestCase() {}
   static void TearDownTestCase() {}
   void SetUp() override {
-    m_simple_policy = new SimplePolicy(g_ceph_context, m_cache_size, 128, 0.9);
+    m_simple_policy = new SimplePolicy(g_stone_context, m_cache_size, 128, 0.9);
     // populate 50 entries
     for (uint64_t i = 0; i < m_cache_size / 2; i++, m_entry_index++) {
       insert_entry_into_promoted_lru(generate_file_name(m_entry_index));

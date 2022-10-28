@@ -7,7 +7,7 @@
 #include "test/librados_test_stub/MockTestMemIoCtxImpl.h"
 #include "test/librados_test_stub/MockTestMemRadosClient.h"
 #include "common/Cond.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librados/AioCompletionImpl.h"
 #include "librbd/Watcher.h"
 #include "librbd/watcher/RewatchRequest.h"
@@ -128,8 +128,8 @@ public:
     return true;
   }
 
-  ceph::mutex m_lock = ceph::make_mutex("TestMockWatcher::m_lock");
-  ceph::condition_variable m_cond;
+  stone::mutex m_lock = stone::make_mutex("TestMockWatcher::m_lock");
+  stone::condition_variable m_cond;
   size_t m_watch_count = 0;
 };
 
@@ -207,7 +207,7 @@ TEST_F(TestMockWatcher, Reregister) {
   mock_image_watcher.register_watch(&register_ctx);
   ASSERT_EQ(0, register_ctx.wait());
 
-  ceph_assert(m_watch_ctx != nullptr);
+  stone_assert(m_watch_ctx != nullptr);
   m_watch_ctx->handle_error(0, -ESHUTDOWN);
 
   // wait for recovery unwatch/watch
@@ -237,7 +237,7 @@ TEST_F(TestMockWatcher, ReregisterUnwatchError) {
   mock_image_watcher.register_watch(&register_ctx);
   ASSERT_EQ(0, register_ctx.wait());
 
-  ceph_assert(m_watch_ctx != nullptr);
+  stone_assert(m_watch_ctx != nullptr);
   m_watch_ctx->handle_error(0, -ESHUTDOWN);
 
   // wait for recovery unwatch/watch
@@ -268,7 +268,7 @@ TEST_F(TestMockWatcher, ReregisterWatchError) {
   mock_image_watcher.register_watch(&register_ctx);
   ASSERT_EQ(0, register_ctx.wait());
 
-  ceph_assert(m_watch_ctx != nullptr);
+  stone_assert(m_watch_ctx != nullptr);
   m_watch_ctx->handle_error(0, -ESHUTDOWN);
 
   // wait for recovery unwatch/watch
@@ -298,7 +298,7 @@ TEST_F(TestMockWatcher, ReregisterWatchBlocklist) {
   ASSERT_TRUE(wait_for_watch(mock_image_ctx, 1));
   ASSERT_EQ(0, register_ctx.wait());
 
-  ceph_assert(m_watch_ctx != nullptr);
+  stone_assert(m_watch_ctx != nullptr);
   m_watch_ctx->handle_error(0, -EBLOCKLISTED);
 
   // wait for recovery unwatch/watch
@@ -333,7 +333,7 @@ TEST_F(TestMockWatcher, ReregisterUnwatchPendingUnregister) {
   mock_image_watcher.register_watch(&register_ctx);
   ASSERT_EQ(0, register_ctx.wait());
 
-  ceph_assert(m_watch_ctx != nullptr);
+  stone_assert(m_watch_ctx != nullptr);
   m_watch_ctx->handle_error(0, -EBLOCKLISTED);
 
   ASSERT_EQ(0, unregister_ctx.wait());
@@ -363,7 +363,7 @@ TEST_F(TestMockWatcher, ReregisterWatchPendingUnregister) {
   mock_image_watcher.register_watch(&register_ctx);
   ASSERT_EQ(0, register_ctx.wait());
 
-  ceph_assert(m_watch_ctx != nullptr);
+  stone_assert(m_watch_ctx != nullptr);
   m_watch_ctx->handle_error(0, -ESHUTDOWN);
 
   ASSERT_EQ(0, unregister_ctx.wait());
@@ -395,7 +395,7 @@ TEST_F(TestMockWatcher, ReregisterPendingUnregister) {
   mock_image_watcher.register_watch(&register_ctx);
   ASSERT_EQ(0, register_ctx.wait());
 
-  ceph_assert(m_watch_ctx != nullptr);
+  stone_assert(m_watch_ctx != nullptr);
   m_watch_ctx->handle_error(0, -ESHUTDOWN);
 
   ASSERT_EQ(0, unregister_ctx.wait());

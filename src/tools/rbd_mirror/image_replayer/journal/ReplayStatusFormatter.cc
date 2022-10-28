@@ -11,8 +11,8 @@
 #include "librbd/Journal.h"
 #include "librbd/Utils.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::journal::" \
                            << "ReplayStatusFormatter: " << this << " " \
@@ -49,7 +49,7 @@ ReplayStatusFormatter<I>::ReplayStatusFormatter(Journaler *journaler,
 						const std::string &mirror_uuid)
   : m_journaler(journaler),
     m_mirror_uuid(mirror_uuid),
-    m_lock(ceph::make_mutex(unique_lock_name("ReplayStatusFormatter::m_lock", this))) {
+    m_lock(stone::make_mutex(unique_lock_name("ReplayStatusFormatter::m_lock", this))) {
 }
 
 template <typename I>
@@ -119,7 +119,7 @@ bool ReplayStatusFormatter<I>::get_or_send_update(std::string *description,
 
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_on_finish == on_finish);
+    stone_assert(m_on_finish == on_finish);
     m_on_finish = nullptr;
   }
 
@@ -192,7 +192,7 @@ void ReplayStatusFormatter<I>::send_update_tag_cache(uint64_t master_tag_tid,
       std::swap(m_on_finish, on_finish);
     }
 
-    ceph_assert(on_finish);
+    stone_assert(on_finish);
     on_finish->complete(0);
     return;
   }

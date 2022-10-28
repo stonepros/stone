@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_CONFUTILS_H
-#define CEPH_CONFUTILS_H
+#ifndef STONE_CONFUTILS_H
+#define STONE_CONFUTILS_H
 
 #include <deque>
 #include <map>
@@ -25,7 +25,7 @@
 #include "include/buffer_fwd.h"
 
 /*
- * Ceph configuration file support.
+ * Stonee configuration file support.
  *
  * This class loads an INI-style configuration from a file or bufferlist, and
  * holds it in memory. In general, an INI configuration file is composed of

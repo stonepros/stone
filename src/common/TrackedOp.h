@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2012 New Dream Network/Sage Weil <sage@newdream.net>
  *
@@ -110,8 +110,8 @@ class OpTracker {
   ceph::shared_mutex lock = ceph::make_shared_mutex("OpTracker::lock");
 
 public:
-  CephContext *cct;
-  OpTracker(CephContext *cct_, bool tracking, uint32_t num_shards);
+  StoneeContext *cct;
+  OpTracker(StoneeContext *cct_, bool tracking, uint32_t num_shards);
       
   void set_complaint_and_threshold(float time, int threshold) {
     complaint_time = time;

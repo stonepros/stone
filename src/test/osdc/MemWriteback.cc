@@ -8,30 +8,30 @@
 #include "common/debug.h"
 #include "common/Cond.h"
 #include "common/Finisher.h"
-#include "common/ceph_mutex.h"
-#include "include/ceph_assert.h"
-#include "common/ceph_time.h"
+#include "common/stone_mutex.h"
+#include "include/stone_assert.h"
+#include "common/stone_time.h"
 
 #include "MemWriteback.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_objectcacher
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_objectcacher
 #undef dout_prefix
 #define dout_prefix *_dout << "MemWriteback(" << this << ") "
 
 class C_DelayRead : public Context {
   MemWriteback *wb;
-  CephContext *m_cct;
+  StoneContext *m_cct;
   Context *m_con;
-  ceph::timespan m_delay;
-  ceph::mutex *m_lock;
+  stone::timespan m_delay;
+  stone::mutex *m_lock;
   object_t m_oid;
   uint64_t m_off;
   uint64_t m_len;
   bufferlist *m_bl;
 
 public:
-  C_DelayRead(MemWriteback *mwb, CephContext *cct, Context *c, ceph::mutex *lock,
+  C_DelayRead(MemWriteback *mwb, StoneContext *cct, Context *c, stone::mutex *lock,
 	      const object_t& oid, uint64_t off, uint64_t len, bufferlist *pbl,
 	      uint64_t delay_ns=0)
     : wb(mwb), m_cct(cct), m_con(c),
@@ -48,17 +48,17 @@ public:
 
 class C_DelayWrite : public Context {
   MemWriteback *wb;
-  CephContext *m_cct;
+  StoneContext *m_cct;
   Context *m_con;
-  ceph::timespan m_delay;
-  ceph::mutex *m_lock;
+  stone::timespan m_delay;
+  stone::mutex *m_lock;
   object_t m_oid;
   uint64_t m_off;
   uint64_t m_len;
   const bufferlist& m_bl;
 
 public:
-  C_DelayWrite(MemWriteback *mwb, CephContext *cct, Context *c, ceph::mutex *lock,
+  C_DelayWrite(MemWriteback *mwb, StoneContext *cct, Context *c, stone::mutex *lock,
 	       const object_t& oid, uint64_t off, uint64_t len,
 	       const bufferlist& bl, uint64_t delay_ns=0)
     : wb(mwb), m_cct(cct), m_con(c),
@@ -73,7 +73,7 @@ public:
   }
 };
 
-MemWriteback::MemWriteback(CephContext *cct, ceph::mutex *lock, uint64_t delay_ns)
+MemWriteback::MemWriteback(StoneContext *cct, stone::mutex *lock, uint64_t delay_ns)
   : m_cct(cct), m_lock(lock), m_delay_ns(delay_ns)
 {
   m_finisher = new Finisher(cct);
@@ -94,23 +94,23 @@ void MemWriteback::read(const object_t& oid, uint64_t object_no,
                          const ZTracer::Trace &parent_trace,
                          Context *onfinish)
 {
-  ceph_assert(snapid == CEPH_NOSNAP);
+  stone_assert(snapid == STONE_NOSNAP);
   C_DelayRead *wrapper = new C_DelayRead(this, m_cct, onfinish, m_lock, oid,
 					 off, len, pbl, m_delay_ns);
   m_finisher->queue(wrapper, len);
 }
 
-ceph_tid_t MemWriteback::write(const object_t& oid,
+stone_tid_t MemWriteback::write(const object_t& oid,
 				const object_locator_t& oloc,
 				uint64_t off, uint64_t len,
 				const SnapContext& snapc,
-				const bufferlist &bl, ceph::real_time mtime,
+				const bufferlist &bl, stone::real_time mtime,
 				uint64_t trunc_size, __u32 trunc_seq,
-				ceph_tid_t journal_tid,
+				stone_tid_t journal_tid,
                                 const ZTracer::Trace &parent_trace,
                                 Context *oncommit)
 {
-  ceph_assert(snapc.seq == 0);
+  stone_assert(snapc.seq == 0);
   C_DelayWrite *wrapper = new C_DelayWrite(this, m_cct, oncommit, m_lock, oid,
 					   off, len, bl, m_delay_ns);
   m_finisher->queue(wrapper, 0);
@@ -121,7 +121,7 @@ void MemWriteback::write_object_data(const object_t& oid, uint64_t off, uint64_t
 				     const bufferlist& data_bl)
 {
   dout(1) << "writing " << oid << " " << off << "~" << len  << dendl;
-  ceph_assert(len == data_bl.length());
+  stone_assert(len == data_bl.length());
   bufferlist& obj_bl = object_data[oid];
   bufferlist new_obj_bl;
   // ensure size, or set it if new object

@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OS_XFS_H
-#define CEPH_OS_XFS_H
+#ifndef STONE_OS_XFS_H
+#define STONE_OS_XFS_H
 
 #include "FS.h"
 

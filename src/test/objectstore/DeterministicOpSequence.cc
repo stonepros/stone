@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stone - scalable distributed file system
 *
 * Copyright (C) 2012 New Dream Network
 *
@@ -19,7 +19,7 @@
 #include <signal.h>
 #include <sstream>
 #include "os/ObjectStore.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "common/debug.h"
 #include <boost/scoped_ptr.hpp>
@@ -27,10 +27,10 @@
 
 #include "DeterministicOpSequence.h"
 #include "common/config.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_filestore
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_filestore
 #undef dout_prefix
 #define dout_prefix *_dout << "deterministic_seq "
 
@@ -79,7 +79,7 @@ bool DeterministicOpSequence::run_one_op(int op, rngen_t& gen)
 
   default:
     cout << "bad op " << op << std::endl;
-    ceph_abort_msg("bad op");
+    stone_abort_msg("bad op");
   }
   return ok;
 }
@@ -145,7 +145,7 @@ bool DeterministicOpSequence::do_touch(rngen_t& gen)
   int obj_id = _gen_obj_id(gen);
 
   coll_entry_t *entry = get_coll_at(coll_id);
-  ceph_assert(entry != NULL);
+  stone_assert(entry != NULL);
 
   // Don't care about other collections if already exists
   if (!entry->check_for_obj(obj_id)) {
@@ -153,7 +153,7 @@ bool DeterministicOpSequence::do_touch(rngen_t& gen)
     auto it = m_collections.begin();
     for (; it != m_collections.end(); ++it) {
       if (it->second->check_for_obj(obj_id)) {
-        ceph_assert(it->first != entry->m_cid);
+        stone_assert(it->first != entry->m_cid);
         other_found = true;
       }
     }
@@ -175,7 +175,7 @@ bool DeterministicOpSequence::do_remove(rngen_t& gen)
   int coll_id = _gen_coll_id(gen);
 
   coll_entry_t *entry = get_coll_at(coll_id);
-  ceph_assert(entry != NULL);
+  stone_assert(entry != NULL);
 
   if (entry->m_objects.size() == 0) {
     dout(0) << "do_remove no objects in collection" << dendl;
@@ -183,13 +183,13 @@ bool DeterministicOpSequence::do_remove(rngen_t& gen)
   }
   int obj_id = entry->get_random_obj_id(gen);
   hobject_t *obj = entry->touch_obj(obj_id);
-  ceph_assert(obj);
+  stone_assert(obj);
 
   dout(0) << "do_remove " << entry->m_cid << "/" << obj << dendl;
 
   _do_remove(entry, *obj);
   hobject_t *rmobj = entry->remove_obj(obj_id);
-  ceph_assert(rmobj);
+  stone_assert(rmobj);
   delete rmobj;
   return true;
 }
@@ -231,7 +231,7 @@ bool DeterministicOpSequence::do_set_attrs(rngen_t& gen)
   int coll_id = _gen_coll_id(gen);
 
   coll_entry_t *entry = get_coll_at(coll_id);
-  ceph_assert(entry != NULL);
+  stone_assert(entry != NULL);
 
   if (entry->m_objects.size() == 0) {
     dout(0) << "do_set_attrs no objects in collection" << dendl;
@@ -239,7 +239,7 @@ bool DeterministicOpSequence::do_set_attrs(rngen_t& gen)
   }
   int obj_id = entry->get_random_obj_id(gen);
   hobject_t *obj = entry->touch_obj(obj_id);
-  ceph_assert(obj);
+  stone_assert(obj);
 
   map<string, bufferlist> out;
   gen_attrs(gen, &out);
@@ -254,7 +254,7 @@ bool DeterministicOpSequence::do_write(rngen_t& gen)
   int coll_id = _gen_coll_id(gen);
 
   coll_entry_t *entry = get_coll_at(coll_id);
-  ceph_assert(entry != NULL);
+  stone_assert(entry != NULL);
 
   if (entry->m_objects.size() == 0) {
     dout(0) << "do_write no objects in collection" << dendl;
@@ -262,7 +262,7 @@ bool DeterministicOpSequence::do_write(rngen_t& gen)
   }
   int obj_id = entry->get_random_obj_id(gen);
   hobject_t *obj = entry->touch_obj(obj_id);
-  ceph_assert(obj);
+  stone_assert(obj);
 
   boost::uniform_int<> size_rng(100, (2 << 19));
   size_t size = (size_t) size_rng(gen);
@@ -287,7 +287,7 @@ bool DeterministicOpSequence::_prepare_clone(
   int coll_id = _gen_coll_id(gen);
 
   coll_entry_t *entry = get_coll_at(coll_id);
-  ceph_assert(entry != NULL);
+  stone_assert(entry != NULL);
 
   if (entry->m_objects.size() < 2) {
     dout(0) << "_prepare_clone coll " << entry->m_cid
@@ -297,13 +297,13 @@ bool DeterministicOpSequence::_prepare_clone(
 
   *orig_obj_id = entry->get_random_obj_id(gen);
   hobject_t *orig_obj = entry->touch_obj(*orig_obj_id);
-  ceph_assert(orig_obj);
+  stone_assert(orig_obj);
 
   do {
     *new_obj_id = entry->get_random_obj_id(gen);
   } while (*new_obj_id == *orig_obj_id);
   hobject_t *new_obj = entry->touch_obj(*new_obj_id);
-  ceph_assert(new_obj);
+  stone_assert(new_obj);
 
   *entry_ret = entry;
   *orig_obj_ret = *orig_obj;

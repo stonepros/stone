@@ -1,5 +1,5 @@
-#ifndef CEPH_MDSCACHEOBJECT_H
-#define CEPH_MDSCACHEOBJECT_H
+#ifndef STONE_MDSCACHEOBJECT_H
+#define STONE_MDSCACHEOBJECT_H
 
 #include <ostream>
 #include <string_view>

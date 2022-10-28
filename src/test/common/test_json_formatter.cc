@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat Inc.
  *
@@ -15,7 +15,7 @@
 #include <errno.h>
 #include <gtest/gtest.h>
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/Clock.h"
 
 #include <sstream>
@@ -61,7 +61,7 @@ TEST(formatter, utime)
 {
   JSONFormatter formatter;
 
-  utime_t input = ceph_clock_now();
+  utime_t input = stone_clock_now();
   input.gmtime_nsec(formatter.dump_stream("timestamp"));
 
   bufferlist bl;

@@ -29,7 +29,7 @@ struct MockTestImageCtx : public librbd::MockImageCtx {
                                   const std::string &image_id,
                                   const char *snap, librados::IoCtx& p,
                                   bool read_only) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -49,7 +49,7 @@ struct TrashWatcher<MockTestImageCtx> {
   static void notify_image_added(librados::IoCtx&, const std::string& image_id,
                                  const cls::rbd::TrashImageSpec& spec,
                                  Context *ctx) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->notify_image_added(image_id, spec, ctx);
   }
 
@@ -77,7 +77,7 @@ struct ResetRequest<MockTestImageCtx> {
                               const std::string &mirror_uuid,
                               ContextWQ *op_work_queue,
                               Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     EXPECT_EQ(librbd::Journal<>::LOCAL_MIRROR_UUID, mirror_uuid);
     s_instance->on_finish = on_finish;
     return s_instance;
@@ -111,7 +111,7 @@ struct GetInfoRequest<librbd::MockTestImageCtx> {
                                 PromotionState *promotion_state,
                                 std::string* primary_mirror_uuid,
                                 Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->mirror_image = mirror_image;
     s_instance->promotion_state = promotion_state;
     s_instance->primary_mirror_uuid = primary_mirror_uuid;
@@ -120,7 +120,7 @@ struct GetInfoRequest<librbd::MockTestImageCtx> {
   }
 
   GetInfoRequest() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
   ~GetInfoRequest() {
@@ -143,7 +143,7 @@ struct ImageRemoveRequest<librbd::MockTestImageCtx> {
                                     const std::string& global_image_id,
                                     const std::string& image_id,
                                     Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->global_image_id = global_image_id;
     s_instance->image_id = image_id;
     s_instance->on_finish = on_finish;
@@ -151,7 +151,7 @@ struct ImageRemoveRequest<librbd::MockTestImageCtx> {
   }
 
   ImageRemoveRequest() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
   ~ImageRemoveRequest() {
@@ -177,7 +177,7 @@ struct MoveRequest<MockTestImageCtx> {
                              const std::string& image_id,
                              const cls::rbd::TrashImageSpec& trash_image_spec,
                              Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->construct(image_id, trash_image_spec);
     s_instance->on_finish = on_finish;
     return s_instance;

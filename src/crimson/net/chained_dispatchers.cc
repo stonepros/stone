@@ -6,7 +6,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_ms);
+    return crimson::get_logger(stone_subsys_ms);
   }
 }
 
@@ -23,14 +23,14 @@ ChainedDispatchers::ms_dispatch(crimson::net::ConnectionRef conn,
         ).handle_exception([conn] (std::exception_ptr eptr) {
           logger().error("{} got unexpected exception in ms_dispatch() throttling {}",
                          *conn, eptr);
-          ceph_abort();
+          stone_abort();
         });
       }
     }
   } catch (...) {
     logger().error("{} got unexpected exception in ms_dispatch() {}",
                    *conn, std::current_exception());
-    ceph_abort();
+    stone_abort();
   }
   if (!dispatchers.empty()) {
     logger().error("ms_dispatch unhandled message {}", *m);
@@ -47,7 +47,7 @@ ChainedDispatchers::ms_handle_accept(crimson::net::ConnectionRef conn) {
   } catch (...) {
     logger().error("{} got unexpected exception in ms_handle_accept() {}",
                    *conn, std::current_exception());
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -60,7 +60,7 @@ ChainedDispatchers::ms_handle_connect(crimson::net::ConnectionRef conn) {
   } catch (...) {
     logger().error("{} got unexpected exception in ms_handle_connect() {}",
                    *conn, std::current_exception());
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -73,7 +73,7 @@ ChainedDispatchers::ms_handle_reset(crimson::net::ConnectionRef conn, bool is_re
   } catch (...) {
     logger().error("{} got unexpected exception in ms_handle_reset() {}",
                    *conn, std::current_exception());
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -86,7 +86,7 @@ ChainedDispatchers::ms_handle_remote_reset(crimson::net::ConnectionRef conn) {
   } catch (...) {
     logger().error("{} got unexpected exception in ms_handle_remote_reset() {}",
                    *conn, std::current_exception());
-    ceph_abort();
+    stone_abort();
   }
 }
 

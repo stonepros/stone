@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/RWLock.h"
 #include "common/RefCountedObj.h"
 #include "common/WorkQueue.h"
@@ -40,7 +40,7 @@
 #include <boost/asio/yield.hpp>
 #include <string_view>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #undef dout_prefix
 #define dout_prefix (*_dout << "data sync: ")
@@ -733,7 +733,7 @@ int RGWRemoteDataLog::init_sync_status(const DoutPrefixProvider *dpp, int num_sh
   }
   RGWDataSyncEnv sync_env_local = sync_env;
   sync_env_local.http_manager = &http_manager;
-  auto instance_id = ceph::util::generate_random_number<uint64_t>();
+  auto instance_id = stone::util::generate_random_number<uint64_t>();
   RGWDataSyncCtx sc_local = sc;
   sc_local.env = &sync_env_local;
   ret = crs.run(dpp, new RGWInitDataSyncStatusCoroutine(&sc_local, num_shards, instance_id, tn, &sync_status));
@@ -996,7 +996,7 @@ class RGWRunBucketSyncCoroutine : public RGWCoroutine {
   rgw_bucket_shard_sync_info sync_status;
   RGWMetaSyncEnv meta_sync_env;
   RGWObjVersionTracker objv_tracker;
-  ceph::real_time* progress;
+  stone::real_time* progress;
 
   const std::string status_oid;
 
@@ -1007,7 +1007,7 @@ public:
                             boost::intrusive_ptr<const RGWContinuousLeaseCR> lease_cr,
                             const rgw_bucket_sync_pair_info& _sync_pair,
                             const RGWSyncTraceNodeRef& _tn_parent,
-                            ceph::real_time* progress)
+                            stone::real_time* progress)
     : RGWCoroutine(_sc->cct), sc(_sc), sync_env(_sc->env),
       lease_cr(std::move(lease_cr)), sync_pair(_sync_pair), progress(progress),
       status_oid(RGWBucketPipeSyncStatusManager::status_oid(sc->source_zone, sync_pair)),
@@ -1217,11 +1217,11 @@ class RGWRunBucketSourcesSyncCR : public RGWCoroutine {
   rgw_bucket_sync_pair_info sync_pair;
 
   RGWSyncTraceNodeRef tn;
-  ceph::real_time* progress;
-  std::map<uint64_t, ceph::real_time> shard_progress;
+  stone::real_time* progress;
+  std::map<uint64_t, stone::real_time> shard_progress;
 
-  ceph::real_time *cur_progress{nullptr};
-  std::optional<ceph::real_time> min_progress;
+  stone::real_time *cur_progress{nullptr};
+  std::optional<stone::real_time> min_progress;
 
   RGWRESTConn *conn{nullptr};
   rgw_zone_id last_zone;
@@ -1239,7 +1239,7 @@ public:
                             std::optional<rgw_bucket_shard> _target_bs,
                             std::optional<rgw_bucket_shard> _source_bs,
                             const RGWSyncTraceNodeRef& _tn_parent,
-                            ceph::real_time* progress);
+                            stone::real_time* progress);
 
   int operate(const DoutPrefixProvider *dpp) override;
 
@@ -1275,7 +1275,7 @@ class RGWDataSyncSingleEntryCR : public RGWCoroutine {
   boost::intrusive_ptr<const RGWContinuousLeaseCR> lease_cr;
   RGWSyncTraceNodeRef tn;
 
-  ceph::real_time progress;
+  stone::real_time progress;
   int sync_status = 0;
 public:
   RGWDataSyncSingleEntryCR(RGWDataSyncCtx *_sc, rgw::bucket_sync::Handle state,
@@ -1315,11 +1315,11 @@ public:
 
         // loop until the latest obligation is satisfied, because other callers
         // may update the obligation while we're syncing
-        while ((state->obligation->timestamp == ceph::real_time() ||
+        while ((state->obligation->timestamp == stone::real_time() ||
                 state->progress_timestamp < state->obligation->timestamp) &&
                obligation_counter != state->counter) {
           obligation_counter = state->counter;
-          progress = ceph::real_time{};
+          progress = stone::real_time{};
 
           ldout(cct, 4) << "starting sync on " << bucket_shard_str{state->key}
               << ' ' << *state->obligation << dendl;
@@ -1357,7 +1357,7 @@ public:
             tn->log(0, SSTR("ERROR: failed to log sync failure: retcode=" << retcode));
           }
         }
-        if (complete->timestamp != ceph::real_time{}) {
+        if (complete->timestamp != stone::real_time{}) {
           tn->log(10, SSTR("writing " << *complete << " to error repo for retry"));
           yield call(rgw_error_repo_write_cr(sync_env->store->svc()->rados, error_repo,
                                             complete->key, complete->timestamp));
@@ -1415,8 +1415,8 @@ class RGWDataSyncShardCR : public RGWCoroutine {
   list<rgw_data_change_log_entry>::iterator log_iter;
   bool truncated = false;
 
-  ceph::mutex inc_lock = ceph::make_mutex("RGWDataSyncShardCR::inc_lock");
-  ceph::condition_variable inc_cond;
+  stone::mutex inc_lock = stone::make_mutex("RGWDataSyncShardCR::inc_lock");
+  stone::condition_variable inc_cond;
 
   boost::asio::coroutine incremental_cr;
   boost::asio::coroutine full_cr;
@@ -1438,10 +1438,10 @@ class RGWDataSyncShardCR : public RGWCoroutine {
   rgw_raw_obj error_repo;
   std::map<std::string, bufferlist> error_entries;
   string error_marker;
-  ceph::real_time entry_timestamp;
+  stone::real_time entry_timestamp;
   static constexpr int max_error_entries = DATA_SYNC_MAX_ERR_ENTRIES;
 
-  ceph::coarse_real_time error_retry_time;
+  stone::coarse_real_time error_retry_time;
 
 #define RETRY_BACKOFF_SECS_MIN 60
 #define RETRY_BACKOFF_SECS_DEFAULT 60
@@ -1463,7 +1463,7 @@ class RGWDataSyncShardCR : public RGWCoroutine {
   RGWCoroutine* sync_single_entry(const rgw_bucket_shard& src,
                                   const std::string& key,
                                   const std::string& marker,
-                                  ceph::real_time timestamp, bool retry) {
+                                  stone::real_time timestamp, bool retry) {
     auto state = bucket_shard_cache->get(src);
     auto obligation = rgw_data_sync_obligation{key, marker, timestamp, retry};
     return new RGWDataSyncSingleEntryCR(sc, std::move(state), std::move(obligation),
@@ -1674,10 +1674,10 @@ public:
           }
           tn->log(20, SSTR("received async update notification: " << *modified_iter));
           spawn(sync_single_entry(source_bs, *modified_iter, string(),
-                                  ceph::real_time{}, false), false);
+                                  stone::real_time{}, false), false);
         }
 
-        if (error_retry_time <= ceph::coarse_real_clock::now()) {
+        if (error_retry_time <= stone::coarse_real_clock::now()) {
           /* process bucket shards that previously failed */
           omapvals = std::make_shared<RGWRadosGetOmapValsCR::Result>();
           yield call(new RGWRadosGetOmapValsCR(sync_env->store, error_repo,
@@ -1709,7 +1709,7 @@ public:
             } else {
               retry_backoff_secs = RETRY_BACKOFF_SECS_DEFAULT;
             }
-            error_retry_time = ceph::coarse_real_clock::now() + make_timespan(retry_backoff_secs);
+            error_retry_time = stone::coarse_real_clock::now() + make_timespan(retry_backoff_secs);
             error_marker.clear();
           }
         }
@@ -1771,9 +1771,9 @@ public:
 
   utime_t get_idle_interval() const {
 #define INCREMENTAL_INTERVAL 20
-    ceph::timespan interval = std::chrono::seconds(INCREMENTAL_INTERVAL);
-    if (!ceph::coarse_real_clock::is_zero(error_retry_time)) {
-      auto now = ceph::coarse_real_clock::now();
+    stone::timespan interval = std::chrono::seconds(INCREMENTAL_INTERVAL);
+    if (!stone::coarse_real_clock::is_zero(error_retry_time)) {
+      auto now = stone::coarse_real_clock::now();
       if (error_retry_time > now) {
         auto d = error_retry_time - now;
         if (interval > d) {
@@ -1782,7 +1782,7 @@ public:
       }
     }
     // convert timespan -> time_point -> utime_t
-    return utime_t(ceph::coarse_real_clock::zero() + interval);
+    return utime_t(stone::coarse_real_clock::zero() + interval);
   }
 };
 
@@ -1836,8 +1836,8 @@ class RGWDataSyncCR : public RGWCoroutine {
 
   rgw_data_sync_status sync_status;
 
-  ceph::mutex shard_crs_lock =
-    ceph::make_mutex("RGWDataSyncCR::shard_crs_lock");
+  stone::mutex shard_crs_lock =
+    stone::make_mutex("RGWDataSyncCR::shard_crs_lock");
   map<int, RGWDataSyncShardControlCR *> shard_crs;
 
   bool *reset_backoff;
@@ -1877,7 +1877,7 @@ public:
         tn->log(20, SSTR("init"));
         sync_status.sync_info.num_shards = num_shards;
         uint64_t instance_id;
-        instance_id = ceph::util::generate_random_number<uint64_t>();
+        instance_id = stone::util::generate_random_number<uint64_t>();
         yield call(new RGWInitDataSyncStatusCoroutine(sc, num_shards, instance_id, tn, &sync_status));
         if (retcode < 0) {
           tn->log(0, SSTR("ERROR: failed to init sync, retcode=" << retcode));
@@ -1983,7 +1983,7 @@ public:
   }
 };
 
-int RGWDefaultSyncModule::create_instance(CephContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance)
+int RGWDefaultSyncModule::create_instance(StoneContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance)
 {
   instance->reset(new RGWDefaultSyncModuleInstance());
   return 0;
@@ -2079,7 +2079,7 @@ public:
                                   int perm);
   };
 
-  static int policy_from_attrs(CephContext *cct,
+  static int policy_from_attrs(StoneContext *cct,
                                const map<string, bufferlist>& attrs,
                                RGWAccessControlPolicy *acl) {
     acl->set_ctx(cct);
@@ -2162,7 +2162,7 @@ class RGWFetchObjFilter_Sync : public RGWFetchObjFilter_Default {
   std::shared_ptr<RGWUserPermHandler::Bucket> bucket_perms;
   std::optional<rgw_sync_pipe_dest_params> verify_dest_params;
 
-  std::optional<ceph::real_time> mtime;
+  std::optional<stone::real_time> mtime;
   std::optional<string> etag;
   std::optional<uint64_t> obj_size;
 
@@ -2181,7 +2181,7 @@ public:
     *need_retry = false;
   }
 
-  int filter(CephContext *cct,
+  int filter(StoneContext *cct,
              const rgw_obj_key& source_key,
              const RGWBucketInfo& dest_bucket_info,
              std::optional<rgw_placement_rule> dest_placement_rule,
@@ -2190,7 +2190,7 @@ public:
              const rgw_placement_rule **prule) override;
 };
 
-int RGWFetchObjFilter_Sync::filter(CephContext *cct,
+int RGWFetchObjFilter_Sync::filter(StoneContext *cct,
                                    const rgw_obj_key& source_key,
                                    const RGWBucketInfo& dest_bucket_info,
                                    std::optional<rgw_placement_rule> dest_placement_rule,
@@ -2278,7 +2278,7 @@ class RGWObjFetchCR : public RGWCoroutine {
   bool need_more_info{false};
   bool check_change{false};
 
-  ceph::real_time src_mtime;
+  stone::real_time src_mtime;
   uint64_t src_size;
   string src_etag;
   map<string, bufferlist> src_attrs;
@@ -2500,7 +2500,7 @@ public:
   }
 };
 
-int RGWArchiveSyncModule::create_instance(CephContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance)
+int RGWArchiveSyncModule::create_instance(StoneContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance)
 {
   instance->reset(new RGWArchiveSyncModuleInstance());
   return 0;
@@ -2573,7 +2573,7 @@ public:
   }
 
   void wakeup(int shard_id, set<string>& keys) {
-    ceph::mutex& m = cr_lock();
+    stone::mutex& m = cr_lock();
 
     m.lock();
     RGWDataSyncCR *cr = static_cast<RGWDataSyncCR *>(get_cr());
@@ -2623,7 +2623,7 @@ int RGWRemoteDataLog::run_sync(const DoutPrefixProvider *dpp, int num_shards)
   return 0;
 }
 
-CephContext *RGWDataSyncStatusManager::get_cct() const
+StoneContext *RGWDataSyncStatusManager::get_cct() const
 {
   return store->ctx();
 }
@@ -2800,7 +2800,7 @@ public:
             status.state = rgw_bucket_shard_sync_info::StateIncrementalSync;
           }
           write_status = true;
-          status.inc_marker.timestamp = ceph::real_clock::now();
+          status.inc_marker.timestamp = stone::real_clock::now();
         }
 
         if (write_status) {
@@ -2869,7 +2869,7 @@ RGWCoroutine *RGWRemoteBucketManager::init_sync_status_cr(int num, RGWObjVersion
 #define BUCKET_SYNC_ATTR_PREFIX RGW_ATTR_PREFIX "bucket-sync."
 
 template <class T>
-static bool decode_attr(CephContext *cct, map<string, bufferlist>& attrs, const string& attr_name, T *val)
+static bool decode_attr(StoneContext *cct, map<string, bufferlist>& attrs, const string& attr_name, T *val)
 {
   map<string, bufferlist>::iterator iter = attrs.find(attr_name);
   if (iter == attrs.end()) {
@@ -2887,7 +2887,7 @@ static bool decode_attr(CephContext *cct, map<string, bufferlist>& attrs, const 
   return true;
 }
 
-void rgw_bucket_shard_sync_info::decode_from_attrs(CephContext *cct, map<string, bufferlist>& attrs)
+void rgw_bucket_shard_sync_info::decode_from_attrs(StoneContext *cct, map<string, bufferlist>& attrs)
 {
   if (!decode_attr(cct, attrs, BUCKET_SYNC_ATTR_PREFIX "state", &state)) {
     decode_attr(cct, attrs, "state", &state);
@@ -2909,19 +2909,19 @@ void rgw_bucket_shard_sync_info::encode_all_attrs(map<string, bufferlist>& attrs
 
 void rgw_bucket_shard_sync_info::encode_state_attr(map<string, bufferlist>& attrs)
 {
-  using ceph::encode;
+  using stone::encode;
   encode(state, attrs[BUCKET_SYNC_ATTR_PREFIX "state"]);
 }
 
 void rgw_bucket_shard_full_sync_marker::encode_attr(map<string, bufferlist>& attrs)
 {
-  using ceph::encode;
+  using stone::encode;
   encode(*this, attrs[BUCKET_SYNC_ATTR_PREFIX "full_marker"]);
 }
 
 void rgw_bucket_shard_inc_sync_marker::encode_attr(map<string, bufferlist>& attrs)
 {
-  using ceph::encode;
+  using stone::encode;
   encode(*this, attrs[BUCKET_SYNC_ATTR_PREFIX "inc_marker"]);
 }
 
@@ -3168,7 +3168,7 @@ RGWBucketPipeSyncStatusManager::~RGWBucketPipeSyncStatusManager()
   delete error_logger;
 }
 
-CephContext *RGWBucketPipeSyncStatusManager::get_cct() const
+StoneContext *RGWBucketPipeSyncStatusManager::get_cct() const
 {
   return store->ctx();
 }
@@ -3204,10 +3204,10 @@ struct bucket_list_entry {
     struct tm t;
     uint32_t nsec;
     if (parse_iso8601(mtime_str.c_str(), &t, &nsec)) {
-      ceph_timespec ts;
+      stone_timespec ts;
       ts.tv_sec = (uint64_t)internal_timegm(&t);
       ts.tv_nsec = nsec;
-      mtime = real_clock::from_ceph_timespec(ts);
+      mtime = real_clock::from_stone_timespec(ts);
     }
     JSONDecoder::decode_json("ETag", etag, obj);
     JSONDecoder::decode_json("Size", size, obj);
@@ -3379,14 +3379,14 @@ class RGWWriteBucketShardIncSyncStatus : public RGWCoroutine {
   RGWDataSyncEnv *sync_env;
   rgw_raw_obj obj;
   rgw_bucket_shard_inc_sync_marker sync_marker;
-  ceph::real_time* stable_timestamp;
+  stone::real_time* stable_timestamp;
   RGWObjVersionTracker& objv_tracker;
   std::map<std::string, bufferlist> attrs;
  public:
   RGWWriteBucketShardIncSyncStatus(RGWDataSyncEnv *sync_env,
                                    const rgw_raw_obj& obj,
                                    const rgw_bucket_shard_inc_sync_marker& sync_marker,
-                                   ceph::real_time* stable_timestamp,
+                                   stone::real_time* stable_timestamp,
                                    RGWObjVersionTracker& objv_tracker)
     : RGWCoroutine(sync_env->cct), sync_env(sync_env), obj(obj),
       sync_marker(sync_marker), stable_timestamp(stable_timestamp),
@@ -3428,7 +3428,7 @@ class RGWBucketIncSyncShardMarkerTrack : public RGWSyncShardMarkerTrack<string, 
 
   RGWSyncTraceNodeRef tn;
   RGWObjVersionTracker& objv_tracker;
-  ceph::real_time* stable_timestamp;
+  stone::real_time* stable_timestamp;
 
   void handle_finish(const string& marker) override {
     auto iter = marker_to_op.find(marker);
@@ -3450,7 +3450,7 @@ public:
                          const rgw_bucket_shard_inc_sync_marker& _marker,
                          RGWSyncTraceNodeRef tn,
                          RGWObjVersionTracker& objv_tracker,
-                         ceph::real_time* stable_timestamp)
+                         stone::real_time* stable_timestamp)
     : RGWSyncShardMarkerTrack(BUCKET_SYNC_UPDATE_MARKER_WINDOW),
       sc(_sc), sync_env(_sc->env),
       obj(sync_env->svc->zone->get_zone_params().log_pool, _marker_oid),
@@ -3899,7 +3899,7 @@ public:
                                   rgw_bucket_shard_sync_info& sync_info,
                                   RGWSyncTraceNodeRef& _tn_parent,
                                   RGWObjVersionTracker& objv_tracker,
-                                  ceph::real_time* stable_timestamp)
+                                  stone::real_time* stable_timestamp)
     : RGWCoroutine(_sc->cct), sc(_sc), sync_env(_sc->env),
       sync_pipe(_sync_pipe), bs(_sync_pipe.info.source_bs),
       lease_cr(std::move(lease_cr)), sync_info(sync_info),
@@ -4297,7 +4297,7 @@ RGWRunBucketSourcesSyncCR::RGWRunBucketSourcesSyncCR(RGWDataSyncCtx *_sc,
                                                      std::optional<rgw_bucket_shard> _target_bs,
                                                      std::optional<rgw_bucket_shard> _source_bs,
                                                      const RGWSyncTraceNodeRef& _tn_parent,
-                                                     ceph::real_time* progress)
+                                                     stone::real_time* progress)
   : RGWCoroutine(_sc->env->cct), sc(_sc), sync_env(_sc->env),
     lease_cr(std::move(lease_cr)), target_bs(_target_bs), source_bs(_source_bs),
     tn(sync_env->sync_tracer->add_node(_tn_parent, "bucket_sync_sources",

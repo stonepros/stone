@@ -1,8 +1,8 @@
 // -*- mode:C; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_RBD_GGATE_GGATE_DRV_H
-#define CEPH_RBD_GGATE_GGATE_DRV_H
+#ifndef STONE_RBD_GGATE_GGATE_DRV_H
+#define STONE_RBD_GGATE_GGATE_DRV_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,4 +61,4 @@ int ggate_drv_list(struct ggate_drv_info *info, size_t *size);
 }
 #endif
 
-#endif // CEPH_RBD_GGATE_GGATE_DRV_H
+#endif // STONE_RBD_GGATE_GGATE_DRV_H

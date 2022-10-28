@@ -18,7 +18,7 @@
 #include "rgw_iam_policy.h"
 
 namespace {
-constexpr int dout_subsys = ceph_subsys_rgw;
+constexpr int dout_subsys = stone_subsys_rgw;
 }
 
 using std::bitset;
@@ -189,7 +189,7 @@ struct ParseState {
   bool array_end();
 
   bool key(const char* s, size_t l);
-  bool do_string(CephContext* cct, const char* s, size_t l);
+  bool do_string(StoneContext* cct, const char* s, size_t l);
   bool number(const char* str, size_t l);
 };
 
@@ -197,7 +197,7 @@ struct ParseState {
 struct PolicyParser : public BaseReaderHandler<UTF8<>, PolicyParser> {
   keyword_hash tokens;
   std::vector<ParseState> s;
-  CephContext* cct;
+  StoneContext* cct;
   const string& tenant;
   Policy& policy;
   uint32_t v = 0;
@@ -239,7 +239,7 @@ struct PolicyParser : public BaseReaderHandler<UTF8<>, PolicyParser> {
     case TokenID::CanonicalUser:
       return 0x8000;
     default:
-      ceph_abort();
+      stone_abort();
     }
   }
   bool test(TokenID in) {
@@ -302,7 +302,7 @@ struct PolicyParser : public BaseReaderHandler<UTF8<>, PolicyParser> {
     v = 0;
   }
 
-  PolicyParser(CephContext* cct, const string& tenant, Policy& policy)
+  PolicyParser(StoneContext* cct, const string& tenant, Policy& policy)
     : cct(cct), tenant(tenant), policy(policy) {}
   PolicyParser(const PolicyParser& policy) = delete;
 
@@ -431,7 +431,7 @@ bool ParseState::key(const char* s, size_t l) {
 
 // I should just rewrite a few helper functions to use iterators,
 // which will make all of this ever so much nicer.
-static boost::optional<Principal> parse_principal(CephContext* cct, TokenID t,
+static boost::optional<Principal> parse_principal(StoneContext* cct, TokenID t,
 						  string&& s) {
   // Wildcard!
   if ((t == TokenID::AWS) && (s == "*")) {
@@ -487,7 +487,7 @@ static boost::optional<Principal> parse_principal(CephContext* cct, TokenID t,
   return boost::none;
 }
 
-bool ParseState::do_string(CephContext* cct, const char* s, size_t l) {
+bool ParseState::do_string(StoneContext* cct, const char* s, size_t l) {
   auto k = pp->tokens.lookup(s, l);
   Policy& p = pp->policy;
   bool is_action = false;
@@ -726,24 +726,24 @@ bool Condition::eval(const Environment& env) const {
 
     // Date!
   case TokenID::DateEquals:
-    return shortible(std::equal_to<ceph::real_time>(), as_date, s, vals);
+    return shortible(std::equal_to<stone::real_time>(), as_date, s, vals);
 
   case TokenID::DateNotEquals:
-    return shortible(std::not_fn(std::equal_to<ceph::real_time>()),
+    return shortible(std::not_fn(std::equal_to<stone::real_time>()),
 		     as_date, s, vals);
 
   case TokenID::DateLessThan:
-    return shortible(std::less<ceph::real_time>(), as_date, s, vals);
+    return shortible(std::less<stone::real_time>(), as_date, s, vals);
 
 
   case TokenID::DateLessThanEquals:
-    return shortible(std::less_equal<ceph::real_time>(), as_date, s, vals);
+    return shortible(std::less_equal<stone::real_time>(), as_date, s, vals);
 
   case TokenID::DateGreaterThan:
-    return shortible(std::greater<ceph::real_time>(), as_date, s, vals);
+    return shortible(std::greater<stone::real_time>(), as_date, s, vals);
 
   case TokenID::DateGreaterThanEquals:
-    return shortible(std::greater_equal<ceph::real_time>(), as_date, s,
+    return shortible(std::greater_equal<stone::real_time>(), as_date, s,
 		     vals);
 
     // Bool!
@@ -752,7 +752,7 @@ bool Condition::eval(const Environment& env) const {
 
     // Binary!
   case TokenID::BinaryEquals:
-    return shortible(std::equal_to<ceph::bufferlist>(), as_binary, s,
+    return shortible(std::equal_to<stone::bufferlist>(), as_binary, s,
 		     vals);
 
     // IP Address!
@@ -1398,7 +1398,7 @@ ostream& operator <<(ostream& m, const Statement& s) {
   return m << " }";
 }
 
-Policy::Policy(CephContext* cct, const string& tenant,
+Policy::Policy(StoneContext* cct, const string& tenant,
 	       const bufferlist& _text)
   : text(_text.to_str()) {
   StringStream ss(text.data());

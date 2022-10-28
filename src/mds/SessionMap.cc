@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -22,11 +22,11 @@
 #include "common/config.h"
 #include "common/errno.h"
 #include "common/DecayCounter.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/stringify.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << rank << ".sessionmap "
 
@@ -38,14 +38,14 @@ class SessionMapIOContext : public MDSIOContextBase
     MDSRank *get_mds() override {return sessionmap->mds;}
   public:
     explicit SessionMapIOContext(SessionMap *sessionmap_) : sessionmap(sessionmap_) {
-      ceph_assert(sessionmap != NULL);
+      stone_assert(sessionmap != NULL);
     }
 };
 };
 
 void SessionMap::register_perfcounters()
 {
-  PerfCountersBuilder plb(g_ceph_context, "mds_sessions",
+  PerfCountersBuilder plb(g_stone_context, "mds_sessions",
       l_mdssm_first, l_mdssm_last);
 
   plb.add_u64(l_mdssm_session_count, "session_count",
@@ -66,13 +66,13 @@ void SessionMap::register_perfcounters()
                "Average session uptime");
 
   logger = plb.create_perf_counters();
-  g_ceph_context->get_perfcounters_collection()->add(logger);
+  g_stone_context->get_perfcounters_collection()->add(logger);
 }
 
 void SessionMap::dump()
 {
   dout(10) << "dump" << dendl;
-  for (ceph::unordered_map<entity_name_t,Session*>::iterator p = session_map.begin();
+  for (stone::unordered_map<entity_name_t,Session*>::iterator p = session_map.begin();
        p != session_map.end();
        ++p) 
     dout(10) << p->first << " " << p->second
@@ -184,7 +184,7 @@ void SessionMap::_load_finish(
                        << "' " << operation_r << " ("
                        << cpp_strerror(operation_r) << ")";
     mds->damaged();
-    ceph_abort();  // Should be unreachable because damaged() calls respawn()
+    stone_abort();  // Should be unreachable because damaged() calls respawn()
   }
 
   // Decode header
@@ -194,7 +194,7 @@ void SessionMap::_load_finish(
       mds->clog->error() << "error reading sessionmap header "
                          << header_r << " (" << cpp_strerror(header_r) << ")";
       mds->damaged();
-      ceph_abort();  // Should be unreachable because damaged() calls respawn()
+      stone_abort();  // Should be unreachable because damaged() calls respawn()
     }
 
     if(header_bl.length() == 0) {
@@ -208,7 +208,7 @@ void SessionMap::_load_finish(
     } catch (buffer::error &e) {
       mds->clog->error() << "corrupt sessionmap header: " << e.what();
       mds->damaged();
-      ceph_abort();  // Should be unreachable because damaged() calls respawn()
+      stone_abort();  // Should be unreachable because damaged() calls respawn()
     }
     dout(10) << __func__ << " loaded version " << version << dendl;
   }
@@ -219,7 +219,7 @@ void SessionMap::_load_finish(
     mds->clog->error() << "error reading sessionmap values: " 
                        << values_r << " (" << cpp_strerror(values_r) << ")";
     mds->damaged();
-    ceph_abort();  // Should be unreachable because damaged() calls respawn()
+    stone_abort();  // Should be unreachable because damaged() calls respawn()
   }
 
   // Decode session_vals
@@ -228,7 +228,7 @@ void SessionMap::_load_finish(
   } catch (buffer::error &e) {
     mds->clog->error() << "corrupt sessionmap values: " << e.what();
     mds->damaged();
-    ceph_abort();  // Should be unreachable because damaged() calls respawn()
+    stone_abort();  // Should be unreachable because damaged() calls respawn()
   }
 
   if (more_session_vals) {
@@ -242,12 +242,12 @@ void SessionMap::_load_finish(
     ObjectOperation op;
     op.omap_get_vals(last_key, "", g_conf()->mds_sessionmap_keys_per_op,
 		     &c->session_vals, &c->more_session_vals, &c->values_r);
-    mds->objecter->read(oid, oloc, op, CEPH_NOSNAP, NULL, 0,
+    mds->objecter->read(oid, oloc, op, STONE_NOSNAP, NULL, 0,
         new C_OnFinisher(c, mds->finisher));
   } else {
     // I/O is complete.  Update `by_state`
     dout(10) << __func__ << ": omap load complete" << dendl;
-    for (ceph::unordered_map<entity_name_t, Session*>::iterator i = session_map.begin();
+    for (stone::unordered_map<entity_name_t, Session*>::iterator i = session_map.begin();
          i != session_map.end(); ++i) {
       Session *s = i->second;
       auto by_state_entry = by_state.find(s->get_state());
@@ -262,7 +262,7 @@ void SessionMap::_load_finish(
 	   << ", " << session_map.size() << " sessions" << dendl;
     projected = committing = committed = version;
     dump();
-    finish_contexts(g_ceph_context, waiting_for_load);
+    finish_contexts(g_stone_context, waiting_for_load);
   }
 }
 
@@ -286,7 +286,7 @@ void SessionMap::load(MDSContext *onload)
   op.omap_get_vals("", "", g_conf()->mds_sessionmap_keys_per_op,
 		   &c->session_vals, &c->more_session_vals, &c->values_r);
 
-  mds->objecter->read(oid, oloc, op, CEPH_NOSNAP, NULL, 0, new C_OnFinisher(c, mds->finisher));
+  mds->objecter->read(oid, oloc, op, STONE_NOSNAP, NULL, 0, new C_OnFinisher(c, mds->finisher));
 }
 
 namespace {
@@ -318,7 +318,7 @@ void SessionMap::load_legacy()
   object_t oid = get_object_name();
   object_locator_t oloc(mds->get_metadata_pool());
 
-  mds->objecter->read_full(oid, oloc, CEPH_NOSNAP, &c->bl, 0,
+  mds->objecter->read_full(oid, oloc, STONE_NOSNAP, &c->bl, 0,
 			   new C_OnFinisher(c, mds->finisher));
 }
 
@@ -327,7 +327,7 @@ void SessionMap::_load_legacy_finish(int r, bufferlist &bl)
   auto blp = bl.cbegin();
   if (r < 0) {
     derr << "_load_finish got " << cpp_strerror(r) << dendl;
-    ceph_abort_msg("failed to load sessionmap");
+    stone_abort_msg("failed to load sessionmap");
   }
   dump();
   decode_legacy(blp);  // note: this sets last_cap_renew = now()
@@ -340,7 +340,7 @@ void SessionMap::_load_legacy_finish(int r, bufferlist &bl)
 
   // Mark all sessions dirty, so that on next save() we will write
   // a complete OMAP version of the data loaded from the legacy format
-  for (ceph::unordered_map<entity_name_t, Session*>::iterator i = session_map.begin();
+  for (stone::unordered_map<entity_name_t, Session*>::iterator i = session_map.begin();
        i != session_map.end(); ++i) {
     // Don't use mark_dirty because on this occasion we want to ignore the
     // keys_per_op limit and do one big write (upgrade must be atomic)
@@ -348,7 +348,7 @@ void SessionMap::_load_legacy_finish(int r, bufferlist &bl)
   }
   loaded_legacy = true;
 
-  finish_contexts(g_ceph_context, waiting_for_load);
+  finish_contexts(g_stone_context, waiting_for_load);
 }
 
 
@@ -378,7 +378,7 @@ void SessionMap::save(MDSContext *onsave, version_t needv)
   dout(10) << __func__ << ": needv " << needv << ", v " << version << dendl;
  
   if (needv && committing >= needv) {
-    ceph_assert(committing > committed);
+    stone_assert(committing > committed);
     commit_waiters[committing].push_back(onsave);
     return;
   }
@@ -455,7 +455,7 @@ void SessionMap::save(MDSContext *onsave, version_t needv)
   null_sessions.clear();
 
   mds->objecter->mutate(oid, oloc, op, snapc,
-			ceph::real_clock::now(),
+			stone::real_clock::now(),
 			0,
 			new C_OnFinisher(new C_IO_SM_Save(this, version),
 					 mds->finisher));
@@ -466,7 +466,7 @@ void SessionMap::_save_finish(version_t v)
   dout(10) << "_save_finish v" << v << dendl;
   committed = v;
 
-  finish_contexts(g_ceph_context, commit_waiters[v]);
+  finish_contexts(g_stone_context, commit_waiters[v]);
   commit_waiters.erase(v);
 }
 
@@ -480,7 +480,7 @@ void SessionMap::decode_legacy(bufferlist::const_iterator &p)
   SessionMapStore::decode_legacy(p);
 
   // Update `by_state`
-  for (ceph::unordered_map<entity_name_t, Session*>::iterator i = session_map.begin();
+  for (stone::unordered_map<entity_name_t, Session*>::iterator i = session_map.begin();
        i != session_map.end(); ++i) {
     Session *s = i->second;
     auto by_state_entry = by_state.find(s->get_state());
@@ -521,7 +521,7 @@ void SessionMapStore::decode_legacy(bufferlist::const_iterator& p)
   decode(pre, p);
   if (pre == (uint64_t)-1) {
     DECODE_START_LEGACY_COMPAT_LEN(3, 3, 3, p);
-    ceph_assert(struct_v >= 2);
+    stone_assert(struct_v >= 2);
     
     decode(version, p);
     
@@ -642,7 +642,7 @@ void SessionMap::wipe()
 
 void SessionMap::wipe_ino_prealloc()
 {
-  for (ceph::unordered_map<entity_name_t,Session*>::iterator p = session_map.begin(); 
+  for (stone::unordered_map<entity_name_t,Session*>::iterator p = session_map.begin(); 
        p != session_map.end(); 
        ++p) {
     p->second->pending_prealloc_inos.clear();
@@ -657,7 +657,7 @@ void SessionMap::add_session(Session *s)
 {
   dout(10) << __func__ << " s=" << s << " name=" << s->info.inst.name << dendl;
 
-  ceph_assert(session_map.count(s->info.inst.name) == 0);
+  stone_assert(session_map.count(s->info.inst.name) == 0);
   session_map[s->info.inst.name] = s;
   auto by_state_entry = by_state.find(s->state);
   if (by_state_entry == by_state.end())
@@ -694,7 +694,7 @@ void SessionMap::touch_session(Session *session)
 
   // Move to the back of the session list for this state (should
   // already be on a list courtesy of add_session and set_state)
-  ceph_assert(session->item_session_list.is_on_list());
+  stone_assert(session->item_session_list.is_on_list());
   auto by_state_entry = by_state.find(session->state);
   if (by_state_entry == by_state.end())
     by_state_entry = by_state.emplace(session->state,
@@ -782,7 +782,7 @@ void SessionMap::replay_open_sessions(version_t event_cmapv,
 bad:
   mds->clog->error() << "error replaying open sessions(" << client_map.size()
 		     << ") sessionmap v " << event_cmapv << " table " << version;
-  ceph_assert(g_conf()->mds_wipe_sessions);
+  stone_assert(g_conf()->mds_wipe_sessions);
   mds->sessionmap.wipe();
   mds->sessionmap.set_version(event_cmapv);
 }
@@ -819,7 +819,7 @@ public:
 void SessionMap::save_if_dirty(const std::set<entity_name_t> &tgt_sessions,
                                MDSGatherBuilder *gather_bld)
 {
-  ceph_assert(gather_bld != NULL);
+  stone_assert(gather_bld != NULL);
 
   std::vector<entity_name_t> write_sessions;
 
@@ -888,7 +888,7 @@ void SessionMap::save_if_dirty(const std::set<entity_name_t> &tgt_sessions,
       object_locator_t oloc(mds->get_metadata_pool());
       MDSContext *on_safe = gather_bld->new_sub();
       mds->objecter->mutate(oid, oloc, op, snapc,
-			    ceph::real_clock::now(), 0,
+			    stone::real_clock::now(), 0,
 			    new C_OnFinisher(
 			      new C_IO_SM_Save_One(this, on_safe),
 			      mds->finisher));
@@ -917,7 +917,7 @@ size_t Session::get_request_count() const
 }
 
 /**
- * Capped in response to a CEPH_MSG_CLIENT_CAPRELEASE message,
+ * Capped in response to a STONE_MSG_CLIENT_CAPRELEASE message,
  * with n_caps equal to the number of caps that were released
  * in the message.  Used to update state about how many caps a
  * client has released since it was last instructed to RECALL_STATE.
@@ -929,7 +929,7 @@ void Session::notify_cap_release(size_t n_caps)
 }
 
 /**
- * Called when a CEPH_MSG_CLIENT_SESSION->CEPH_SESSION_RECALL_STATE
+ * Called when a STONE_MSG_CLIENT_SESSION->STONE_SESSION_RECALL_STATE
  * message is sent to the client.  Update our recall-related state
  * in order to generate health metrics if the session doesn't see
  * a commensurate number of calls to ::notify_cap_release
@@ -937,7 +937,7 @@ void Session::notify_cap_release(size_t n_caps)
 uint64_t Session::notify_recall_sent(size_t new_limit)
 {
   const auto num_caps = caps.size();
-  ceph_assert(new_limit < num_caps);  // Behaviour of Server::recall_client_state
+  stone_assert(new_limit < num_caps);  // Behaviour of Server::recall_client_state
   const auto count = num_caps-new_limit;
   uint64_t new_change;
   if (recall_limit != new_limit) {
@@ -1021,16 +1021,16 @@ int Session::check_access(CInode *in, unsigned mask,
   if (in->is_dir() &&
       inode->has_layout() &&
       inode->layout.pool_ns.length() &&
-      !connection->has_feature(CEPH_FEATURE_FS_FILE_LAYOUT_V2)) {
+      !connection->has_feature(STONE_FEATURE_FS_FILE_LAYOUT_V2)) {
     dout(10) << __func__ << " client doesn't support FS_FILE_LAYOUT_V2" << dendl;
-    return -CEPHFS_EIO;
+    return -STONEFS_EIO;
   }
 
   if (!auth_caps.is_capable(path, inode->uid, inode->gid, inode->mode,
 			    caller_uid, caller_gid, caller_gid_list, mask,
 			    new_uid, new_gid,
 			    info.inst.addr)) {
-    return -CEPHFS_EACCES;
+    return -STONEFS_EACCES;
   }
   return 0;
 }
@@ -1040,7 +1040,7 @@ void SessionMap::hit_session(Session *session) {
   uint64_t sessions = get_session_count_in_state(Session::STATE_OPEN) +
                       get_session_count_in_state(Session::STATE_STALE) +
                       get_session_count_in_state(Session::STATE_CLOSING);
-  ceph_assert(sessions != 0);
+  stone_assert(sessions != 0);
 
   double total_load = total_load_avg.hit();
   double avg_load = total_load / sessions;
@@ -1122,7 +1122,7 @@ int SessionFilter::parse(
     const std::vector<std::string> &args,
     std::ostream *ss)
 {
-  ceph_assert(ss != NULL);
+  stone_assert(ss != NULL);
 
   for (const auto &s : args) {
     dout(20) << __func__ << " parsing filter '" << s << "'" << dendl;
@@ -1135,7 +1135,7 @@ int SessionFilter::parse(
       id = strict_strtoll(s.c_str(), 10, &err);
       if (!err.empty()) {
 	*ss << "Invalid filter '" << s << "'";
-	return -CEPHFS_EINVAL;
+	return -STONEFS_EINVAL;
       }
       return 0;
     }
@@ -1165,17 +1165,17 @@ int SessionFilter::parse(
       id = strict_strtoll(v.c_str(), 10, &err);
       if (!err.empty()) {
         *ss << err;
-        return -CEPHFS_EINVAL;
+        return -STONEFS_EINVAL;
       }
     } else if (k == "reconnecting") {
 
       /**
        * Strict boolean parser.  Allow true/false/0/1.
-       * Anything else is -CEPHFS_EINVAL.
+       * Anything else is -STONEFS_EINVAL.
        */
       auto is_true = [](std::string_view bstr, bool *out) -> bool
       {
-        ceph_assert(out != nullptr);
+        stone_assert(out != nullptr);
 
         if (bstr == "true" || bstr == "1") {
           *out = true;
@@ -1184,7 +1184,7 @@ int SessionFilter::parse(
           *out = false;
           return 0;
         } else {
-          return -CEPHFS_EINVAL;
+          return -STONEFS_EINVAL;
         }
       };
 
@@ -1194,11 +1194,11 @@ int SessionFilter::parse(
         set_reconnecting(bval);
       } else {
         *ss << "Invalid boolean value '" << v << "'";
-        return -CEPHFS_EINVAL;
+        return -STONEFS_EINVAL;
       }
     } else {
       *ss << "Invalid filter key '" << k << "'";
-      return -CEPHFS_EINVAL;
+      return -STONEFS_EINVAL;
     }
   }
 

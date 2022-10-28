@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_AUTH_CRYPTO_H
-#define CEPH_AUTH_CRYPTO_H
+#ifndef STONE_AUTH_CRYPTO_H
+#define STONE_AUTH_CRYPTO_H
 
 #include "include/common_fwd.h"
 #include "include/types.h"
@@ -149,14 +149,14 @@ public:
   void encode_plaintext(ceph::buffer::list &bl);
 
   // --
-  int create(CephContext *cct, int type);
-  int encrypt(CephContext *cct, const ceph::buffer::list& in,
+  int create(StoneeContext *cct, int type);
+  int encrypt(StoneeContext *cct, const ceph::buffer::list& in,
 	      ceph::buffer::list& out,
 	      std::string *error) const {
     ceph_assert(ckh); // Bad key?
     return ckh->encrypt(in, out, error);
   }
-  int decrypt(CephContext *cct, const ceph::buffer::list& in,
+  int decrypt(StoneeContext *cct, const ceph::buffer::list& in,
 	      ceph::buffer::list& out,
 	      std::string *error) const {
     ceph_assert(ckh); // Bad key?
@@ -166,18 +166,18 @@ public:
   using in_slice_t = CryptoKeyHandler::in_slice_t;
   using out_slice_t = CryptoKeyHandler::out_slice_t;
 
-  std::size_t encrypt(CephContext*, const in_slice_t& in,
+  std::size_t encrypt(StoneeContext*, const in_slice_t& in,
 		      const out_slice_t& out) {
     ceph_assert(ckh);
     return ckh->encrypt(in, out);
   }
-  std::size_t decrypt(CephContext*, const in_slice_t& in,
+  std::size_t decrypt(StoneeContext*, const in_slice_t& in,
 		      const out_slice_t& out) {
     ceph_assert(ckh);
     return ckh->encrypt(in, out);
   }
 
-  sha256_digest_t hmac_sha256(CephContext*, const ceph::buffer::list& in) {
+  sha256_digest_t hmac_sha256(StoneeContext*, const ceph::buffer::list& in) {
     ceph_assert(ckh);
     return ckh->hmac_sha256(in);
   }

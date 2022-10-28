@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 John Spray <john.spray@inktank.com>
  *
@@ -19,8 +19,8 @@
 #include <time.h>
 #include <boost/range/adaptor/reversed.hpp>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr " << __func__ << " "
 
@@ -129,7 +129,7 @@ void ClusterState::ingest_pgstats(ref_t<MPGStats> stats)
 
 void ClusterState::update_delta_stats()
 {
-  pending_inc.stamp = ceph_clock_now();
+  pending_inc.stamp = stone_clock_now();
   pending_inc.version = pg_map.version + 1; // to make apply_incremental happy
   dout(10) << " v" << pending_inc.version << dendl;
 
@@ -143,19 +143,19 @@ void ClusterState::update_delta_stats()
   jf.dump_object("pending_inc", pending_inc);
   jf.flush(*_dout);
   *_dout << dendl;
-  pg_map.apply_incremental(g_ceph_context, pending_inc);
+  pg_map.apply_incremental(g_stone_context, pending_inc);
   pending_inc = PGMap::Incremental();
 }
 
 void ClusterState::notify_osdmap(const OSDMap &osd_map)
 {
-  assert(ceph_mutex_is_locked(lock));
+  assert(stone_mutex_is_locked(lock));
 
-  pending_inc.stamp = ceph_clock_now();
+  pending_inc.stamp = stone_clock_now();
   pending_inc.version = pg_map.version + 1; // to make apply_incremental happy
   dout(10) << " v" << pending_inc.version << dendl;
 
-  PGMapUpdater::check_osd_map(g_ceph_context, osd_map, pg_map, &pending_inc);
+  PGMapUpdater::check_osd_map(g_stone_context, osd_map, pg_map, &pending_inc);
 
   // update our list of pools that exist, so that we can filter pg_map updates
   // in synchrony with this OSDMap.
@@ -181,7 +181,7 @@ void ClusterState::notify_osdmap(const OSDMap &osd_map)
   jf.flush(*_dout);
   *_dout << dendl;
 
-  pg_map.apply_incremental(g_ceph_context, pending_inc);
+  pg_map.apply_incremental(g_stone_context, pending_inc);
   pending_inc = PGMap::Incremental();
   // TODO: Complete the separation of PG state handling so
   // that a cut-down set of functionality remains in PGMonitor
@@ -211,18 +211,18 @@ public:
 
 void ClusterState::final_init()
 {
-  AdminSocket *admin_socket = g_ceph_context->get_admin_socket();
+  AdminSocket *admin_socket = g_stone_context->get_admin_socket();
   asok_hook = new ClusterSocketHook(this);
   int r = admin_socket->register_command(
-    "dump_osd_network name=value,type=CephInt,req=false", asok_hook,
+    "dump_osd_network name=value,type=StoneInt,req=false", asok_hook,
     "Dump osd heartbeat network ping times");
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 }
 
 void ClusterState::shutdown()
 {
   // unregister commands
-  g_ceph_context->get_admin_socket()->unregister_commands(asok_hook);
+  g_stone_context->get_admin_socket()->unregister_commands(asok_hook);
   delete asok_hook;
   asok_hook = NULL;
 }
@@ -239,7 +239,7 @@ bool ClusterState::asok_command(
     // Default to health warning level if nothing specified
     if (!(TOPNSPC::common::cmd_getval(cmdmap, "value", value))) {
       // Convert milliseconds to microseconds
-      value = static_cast<int64_t>(g_ceph_context->_conf.get_val<double>("mon_warn_on_slow_ping_time")) * 1000;
+      value = static_cast<int64_t>(g_stone_context->_conf.get_val<double>("mon_warn_on_slow_ping_time")) * 1000;
       if (value == 0) {
         double ratio = g_conf().get_val<double>("mon_warn_on_slow_ping_ratio");
 	value = g_conf().get_val<int64_t>("osd_heartbeat_grace");
@@ -281,13 +281,13 @@ bool ClusterState::asok_command(
     };
 
     set<mgr_ping_time_t> sorted;
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     for (auto i : pg_map.osd_stat) {
       for (auto j : i.second.hb_pingtime) {
 
 	if (j.second.last_update == 0)
 	  continue;
-	auto stale_time = g_ceph_context->_conf.get_val<int64_t>("osd_mon_heartbeat_stat_stale");
+	auto stale_time = g_stone_context->_conf.get_val<int64_t>("osd_mon_heartbeat_stat_stale");
 	if (now.sec() - j.second.last_update > stale_time) {
 	  dout(20) << __func__ << " time out heartbeat for osd " << i.first
 	           << " last_update " << j.second.last_update << dendl;
@@ -343,7 +343,7 @@ bool ClusterState::asok_command(
     f->dump_int("threshold", value / 1000);
     f->open_array_section("entries");
     for (auto &sitem : boost::adaptors::reverse(sorted)) {
-      ceph_assert(!value || sitem.pingtime >= value);
+      stone_assert(!value || sitem.pingtime >= value);
 
       f->open_object_section("entry");
 
@@ -351,9 +351,9 @@ bool ClusterState::asok_command(
       char buffer[26];
       string lustr(ctime_r(&lu, buffer));
       lustr.pop_back();   // Remove trailing \n
-      auto stale = g_ceph_context->_conf.get_val<int64_t>("osd_heartbeat_stale");
+      auto stale = g_stone_context->_conf.get_val<int64_t>("osd_heartbeat_stale");
       f->dump_string("last update", lustr);
-      f->dump_bool("stale", ceph_clock_now().sec() - sitem.last_update > stale);
+      f->dump_bool("stale", stone_clock_now().sec() - sitem.last_update > stale);
       f->dump_int("from osd", sitem.from);
       f->dump_int("to osd", sitem.to);
       f->dump_string("interface", (sitem.back ? "back" : "front"));
@@ -378,7 +378,7 @@ bool ClusterState::asok_command(
     f->close_section(); // entries
     f->close_section(); // network_ping_times
   } else {
-    ceph_abort_msg("broken asok registration");
+    stone_abort_msg("broken asok registration");
   }
   return true;
 }

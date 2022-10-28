@@ -11,7 +11,7 @@
 #include "librbd/Utils.h"
 #include "librbd/mirror/snapshot/CreatePrimaryRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::snapshot::DemoteRequest: " \
                            << this << " " << __func__ << ": "
@@ -30,7 +30,7 @@ void DemoteRequest<I>::send() {
 
 template <typename I>
 void DemoteRequest<I>::enable_non_primary_feature() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << dendl;
 
   // ensure image is flagged with non-primary feature so that
@@ -44,13 +44,13 @@ void DemoteRequest<I>::enable_non_primary_feature() {
     &DemoteRequest<I>::handle_enable_non_primary_feature>(this);
   int r = m_image_ctx->md_ctx.aio_operate(m_image_ctx->header_oid, aio_comp,
                                           &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
 template <typename I>
 void DemoteRequest<I>::handle_enable_non_primary_feature(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -65,14 +65,14 @@ void DemoteRequest<I>::handle_enable_non_primary_feature(int r) {
 
 template <typename I>
 void DemoteRequest<I>::create_snapshot() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   auto ctx = create_context_callback<
     DemoteRequest<I>, &DemoteRequest<I>::handle_create_snapshot>(this);
 
   auto req = CreatePrimaryRequest<I>::create(
-    m_image_ctx, m_global_image_id, CEPH_NOSNAP,
+    m_image_ctx, m_global_image_id, STONE_NOSNAP,
     SNAP_CREATE_FLAG_SKIP_NOTIFY_QUIESCE,
     (snapshot::CREATE_PRIMARY_FLAG_IGNORE_EMPTY_PEERS |
      snapshot::CREATE_PRIMARY_FLAG_DEMOTED), nullptr, ctx);
@@ -81,7 +81,7 @@ void DemoteRequest<I>::create_snapshot() {
 
 template <typename I>
 void DemoteRequest<I>::handle_create_snapshot(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -96,7 +96,7 @@ void DemoteRequest<I>::handle_create_snapshot(int r) {
 
 template <typename I>
 void DemoteRequest<I>::finish(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

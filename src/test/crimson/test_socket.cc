@@ -29,7 +29,7 @@ static seastar::logger logger{"crimsontest"};
 static entity_addr_t get_server_addr() {
   static int port = 9020;
   ++port;
-  ceph_assert(port < 9030 && "socket and messenger test ports should not overlap");
+  stone_assert(port < 9030 && "socket and messenger test ports should not overlap");
   entity_addr_t saddr;
   saddr.parse("127.0.0.1", nullptr);
   saddr.set_port(port);
@@ -49,17 +49,17 @@ future<> test_refused() {
   auto saddr = get_server_addr();
   return socket_connect(saddr).discard_result().then([saddr] {
     logger.error("test_refused(): connection to {} is not refused", saddr);
-    ceph_abort();
+    stone_abort();
   }).handle_exception_type([] (const std::system_error& e) {
     if (e.code() != std::errc::connection_refused) {
       logger.error("test_refused() got unexpeted error {}", e);
-      ceph_abort();
+      stone_abort();
     } else {
       logger.info("test_refused() ok\n");
     }
   }).handle_exception([] (auto eptr) {
     logger.error("test_refused() got unexpeted exception {}", eptr);
-    ceph_abort();
+    stone_abort();
   });
 }
 
@@ -72,7 +72,7 @@ future<> test_bind_same() {
       return FixedCPUServerSocket::create().then([saddr] (auto pss2) {
         return pss2->listen(saddr).safe_then([] {
           logger.error("test_bind_same() should raise address_in_use");
-          ceph_abort();
+          stone_abort();
         }, FixedCPUServerSocket::listen_ertr::all_same_way(
             [] (const std::error_code& e) {
           if (e == std::errc::address_in_use) {
@@ -80,7 +80,7 @@ future<> test_bind_same() {
             logger.info("test_bind_same() ok\n");
           } else {
             logger.error("test_bind_same() got unexpected error {}", e);
-            ceph_abort();
+            stone_abort();
           }
           // Note: need to return a explicit ready future, or there will be a
           // runtime error: member access within null pointer of type 'struct promise_base'
@@ -93,12 +93,12 @@ future<> test_bind_same() {
         [saddr] (const std::error_code& e) {
       logger.error("test_bind_same(): there is another instance running at {}",
                    saddr);
-      ceph_abort();
+      stone_abort();
     })).then([pss1] {
       return pss1->destroy();
     }).handle_exception([] (auto eptr) {
       logger.error("test_bind_same() got unexpeted exception {}", eptr);
-      ceph_abort();
+      stone_abort();
     });
   });
 }
@@ -118,7 +118,7 @@ future<> test_accept() {
         [saddr] (const std::error_code& e) {
       logger.error("test_accept(): there is another instance running at {}",
                    saddr);
-      ceph_abort();
+      stone_abort();
     })).then([saddr] {
       return seastar::when_all(
         socket_connect(saddr).then([] (auto socket) {
@@ -137,7 +137,7 @@ future<> test_accept() {
       return pss->destroy();
     }).handle_exception([] (auto eptr) {
       logger.error("test_accept() got unexpeted exception {}", eptr);
-      ceph_abort();
+      stone_abort();
     });
   });
 }
@@ -164,7 +164,7 @@ class SocketFactory {
             [saddr] (const std::error_code& e) {
           logger.error("dispatch_sockets(): there is another instance running at {}",
                        saddr);
-          ceph_abort();
+          stone_abort();
         }));
       });
     }).then([psf, saddr] {
@@ -207,7 +207,7 @@ class SocketFactory {
           }).handle_exception([] (auto eptr) {
             logger.error("dispatch_sockets():"
                 " cb_client() got unexpeted exception {}", eptr);
-            ceph_abort();
+            stone_abort();
           });
         }),
         seastar::smp::submit_to(1u, [socket = psf->server_socket.get(),
@@ -218,7 +218,7 @@ class SocketFactory {
           }).handle_exception([] (auto eptr) {
             logger.error("dispatch_sockets():"
                 " cb_server() got unexpeted exception {}", eptr);
-            ceph_abort();
+            stone_abort();
           });
         })
       );
@@ -234,8 +234,8 @@ class Connection {
   std::array<uint64_t, DATA_SIZE> data = {0};
 
   void verify_data_read(const uint64_t read_data[]) {
-    ceph_assert(read_data[0] == read_count);
-    ceph_assert(data[DATA_SIZE - 1] = DATA_TAIL);
+    stone_assert(read_data[0] == read_count);
+    stone_assert(data[DATA_SIZE - 1] = DATA_TAIL);
   }
 
   Socket* socket = nullptr;
@@ -278,7 +278,7 @@ class Connection {
   future<> dispatch_write_unbounded() {
     return dispatch_write(
     ).then([] {
-      ceph_abort();
+      stone_abort();
     }).handle_exception_type([this] (const std::system_error& e) {
       if (e.code() != std::errc::broken_pipe &&
           e.code() != std::errc::connection_reset) {
@@ -312,10 +312,10 @@ class Connection {
           // we want to test both Socket::read() and Socket::read_exactly()
           if (read_count % 2) {
             return socket->read(DATA_SIZE * sizeof(uint64_t)
-            ).then([this] (ceph::bufferlist bl) {
+            ).then([this] (stone::bufferlist bl) {
               uint64_t read_data[DATA_SIZE];
               auto p = bl.cbegin();
-              ::ceph::decode_raw(read_data, p);
+              ::stone::decode_raw(read_data, p);
               verify_data_read(read_data);
             });
           } else {
@@ -336,7 +336,7 @@ class Connection {
   future<> dispatch_read_unbounded() {
     return dispatch_read(
     ).then([] {
-      ceph_abort();
+      stone_abort();
     }).handle_exception_type([this] (const std::system_error& e) {
       if (e.code() != error::read_eof
        && e.code() != std::errc::connection_reset) {
@@ -362,7 +362,7 @@ class Connection {
                  round, force_shut);
     return seastar::do_with(Connection{socket},
                             [round, force_shut] (auto& conn) {
-      ceph_assert(round != 0);
+      stone_assert(round != 0);
       return seastar::when_all_succeed(
         conn.dispatch_write(round, force_shut),
         conn.dispatch_read(round, force_shut)
@@ -404,7 +404,7 @@ future<> test_read_write() {
     logger.info("test_read_write() ok\n");
   }).handle_exception([] (auto eptr) {
     logger.error("test_read_write() got unexpeted exception {}", eptr);
-    ceph_abort();
+    stone_abort();
   });
 }
 
@@ -415,7 +415,7 @@ future<> test_unexpected_down() {
       return Connection::dispatch_rw_bounded(cs, 128, true
         ).handle_exception_type([] (const std::system_error& e) {
         logger.debug("test_unexpected_down(): client get error {}", e);
-        ceph_assert(e.code() == error::read_eof);
+        stone_assert(e.code() == error::read_eof);
       });
     },
     [] (auto ss) { return Connection::dispatch_rw_unbounded(ss); }
@@ -423,7 +423,7 @@ future<> test_unexpected_down() {
     logger.info("test_unexpected_down() ok\n");
   }).handle_exception([] (auto eptr) {
     logger.error("test_unexpected_down() got unexpeted exception {}", eptr);
-    ceph_abort();
+    stone_abort();
   });
 }
 
@@ -440,7 +440,7 @@ future<> test_shutdown_propagated() {
     logger.info("test_shutdown_propagated() ok\n");
   }).handle_exception([] (auto eptr) {
     logger.error("test_shutdown_propagated() got unexpeted exception {}", eptr);
-    ceph_abort();
+    stone_abort();
   });
 }
 
@@ -453,7 +453,7 @@ future<> test_preemptive_down() {
     logger.info("test_preemptive_down() ok\n");
   }).handle_exception([] (auto eptr) {
     logger.error("test_preemptive_down() got unexpeted exception {}", eptr);
-    ceph_abort();
+    stone_abort();
   });
 }
 

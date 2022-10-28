@@ -43,7 +43,7 @@ public:
 
   MOSDPGInfo2() : MOSDPeeringOp{MSG_OSD_PG_INFO2,
 				  HEAD_VERSION, COMPAT_VERSION} {
-    set_priority(CEPH_MSG_PRIO_HIGH);
+    set_priority(STONE_MSG_PRIO_HIGH);
   }
   MOSDPGInfo2(
     spg_t s,
@@ -59,7 +59,7 @@ public:
       info(q),
       lease(l),
       lease_ack(la) {
-    set_priority(CEPH_MSG_PRIO_HIGH);
+    set_priority(STONE_MSG_PRIO_HIGH);
   }
 
 private:

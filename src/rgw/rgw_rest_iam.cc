@@ -13,8 +13,8 @@
 #include "rgw_rest_user_policy.h"
 #include "rgw_rest_oidc_provider.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 void RGWHandler_REST_IAM::rgw_iam_parse_input()
 {

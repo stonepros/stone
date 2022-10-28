@@ -1,0 +1,39 @@
+roles:
+- - host.a
+  - osd.0
+  - osd.1
+  - osd.2
+  - osd.3
+  - client.0
+- - host.b
+  - osd.4
+  - osd.5
+  - osd.6
+  - osd.7
+  - client.1
+openstack:
+- volumes: # attached to each instance
+    count: 4
+    size: 10 # GB
+overrides:
+  stone:
+    conf:
+      osd:
+        osd shutdown pgref assert: true
+tasks:
+- install:
+- stoneadm:
+    roleless: true
+- stoneadm.shell:
+    host.a:
+      - stone orch status
+      - stone orch ps
+      - stone orch ls
+      - stone orch host ls
+      - stone orch device ls
+- stoneadm.shell:
+    host.a:
+      - stone fs volume create foo
+      - stone fs volume create bar
+- fs.ready:
+    timeout: 300

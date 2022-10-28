@@ -1,31 +1,31 @@
 #include <string>
 #include <lua.hpp>
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/dout.h"
 #include "rgw_lua_utils.h"
 #include "rgw_lua_version.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace rgw::lua {
 
 // TODO - add the folowing generic functions
 // lua_push(lua_State* L, const std::string& str)
 // template<typename T> lua_push(lua_State* L, const std::optional<T>& val)
-// lua_push(lua_State* L, const ceph::real_time& tp)
+// lua_push(lua_State* L, const stone::real_time& tp)
 
 constexpr const char* RGWDebugLogAction{"RGWDebugLog"};
 
 int RGWDebugLog(lua_State* L) 
 {
-  auto cct = reinterpret_cast<CephContext*>(lua_touserdata(L, lua_upvalueindex(1)));
+  auto cct = reinterpret_cast<StoneContext*>(lua_touserdata(L, lua_upvalueindex(1)));
 
   auto message = luaL_checkstring(L, 1);
   ldout(cct, 20) << "Lua INFO: " << message << dendl;
   return 0;
 }
 
-void create_debug_action(lua_State* L, CephContext* cct) {
+void create_debug_action(lua_State* L, StoneContext* cct) {
   lua_pushlightuserdata(L, cct);
   lua_pushcclosure(L, RGWDebugLog, ONE_UPVAL);
   lua_setglobal(L, RGWDebugLogAction);
@@ -50,11 +50,11 @@ void set_package_path(lua_State* L, const std::string& install_dir) {
   if (!lua_istable(L, -1)) {
     return;
   }
-  const auto path = install_dir+"/share/lua/"+CEPH_LUA_VERSION+"/?.lua";  
+  const auto path = install_dir+"/share/lua/"+STONE_LUA_VERSION+"/?.lua";  
   pushstring(L, path);
   lua_setfield(L, -2, "path");
   
-  const auto cpath = install_dir+"/lib/lua/"+CEPH_LUA_VERSION+"/?.so";
+  const auto cpath = install_dir+"/lib/lua/"+STONE_LUA_VERSION+"/?.so";
   pushstring(L, cpath);
   lua_setfield(L, -2, "cpath");
 }

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MEMORYMODEL_H
-#define CEPH_MEMORYMODEL_H
+#ifndef STONE_MEMORYMODEL_H
+#define STONE_MEMORYMODEL_H
 
 #include "include/common_fwd.h"
 
@@ -39,11 +39,11 @@ public:
   } last;
 
 private:
-  CephContext *cct;
+  StoneeContext *cct;
   void _sample(snap *p);
 
 public:
-  explicit MemoryModel(CephContext *cct);
+  explicit MemoryModel(StoneeContext *cct);
   void sample(snap *p = 0) {
     _sample(&last);
     if (p)

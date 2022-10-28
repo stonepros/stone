@@ -133,7 +133,7 @@ add_custom_target(mgr-dashboard-frontend-build
 add_dependencies(tests mgr-dashboard-frontend-build)
 
 if(WITH_TESTS)
-  include(AddCephTest)
+  include(AddStoneTest)
   add_tox_test(mgr-dashboard-py3 TOX_ENVS py3)
   add_tox_test(mgr-dashboard-lint TOX_ENVS lint)
   add_tox_test(mgr-dashboard-check TOX_ENVS check)

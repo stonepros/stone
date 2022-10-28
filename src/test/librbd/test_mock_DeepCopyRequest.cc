@@ -50,7 +50,7 @@ public:
       bool flatten, const ObjectNumber &object_number,
       const SnapSeqs &snap_seqs, Handler *handler,
       Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -78,7 +78,7 @@ public:
   static MetadataCopyRequest* create(librbd::MockTestImageCtx *src_image_ctx,
                                      librbd::MockTestImageCtx *dst_image_ctx,
                                      Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -104,7 +104,7 @@ public:
                                      bool flatten,
                                      librbd::asio::ContextWQ *work_queue,
                                      SnapSeqs *snap_seqs, Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -192,7 +192,7 @@ public:
 
   void expect_create_object_map(librbd::MockTestImageCtx &mock_image_ctx,
                                 librbd::MockObjectMap *mock_object_map) {
-    EXPECT_CALL(mock_image_ctx, create_object_map(CEPH_NOSNAP))
+    EXPECT_CALL(mock_image_ctx, create_object_map(STONE_NOSNAP))
       .WillOnce(Return(mock_object_map));
   }
 
@@ -273,7 +273,7 @@ TEST_F(TestMockDeepCopyRequest, SimpleCopy) {
   librbd::SnapSeqs snap_seqs;
   librbd::deep_copy::NoOpHandler no_op;
   auto request = librbd::DeepCopyRequest<librbd::MockTestImageCtx>::create(
-      &mock_src_image_ctx, &mock_dst_image_ctx, 0, CEPH_NOSNAP, 0, false,
+      &mock_src_image_ctx, &mock_dst_image_ctx, 0, STONE_NOSNAP, 0, false,
       boost::none, m_work_queue, &snap_seqs, &no_op, &ctx);
   request->send();
   ASSERT_EQ(0, ctx.wait());
@@ -291,7 +291,7 @@ TEST_F(TestMockDeepCopyRequest, ErrorOnCopySnapshots) {
   librbd::SnapSeqs snap_seqs;
   librbd::deep_copy::NoOpHandler no_op;
   auto request = librbd::DeepCopyRequest<librbd::MockTestImageCtx>::create(
-      &mock_src_image_ctx, &mock_dst_image_ctx, 0, CEPH_NOSNAP, 0, false,
+      &mock_src_image_ctx, &mock_dst_image_ctx, 0, STONE_NOSNAP, 0, false,
       boost::none, m_work_queue, &snap_seqs, &no_op, &ctx);
   request->send();
   ASSERT_EQ(-EINVAL, ctx.wait());
@@ -324,7 +324,7 @@ TEST_F(TestMockDeepCopyRequest, ErrorOnRefreshObjectMap) {
   librbd::SnapSeqs snap_seqs;
   librbd::deep_copy::NoOpHandler no_op;
   auto request = librbd::DeepCopyRequest<librbd::MockTestImageCtx>::create(
-      &mock_src_image_ctx, &mock_dst_image_ctx, 0, CEPH_NOSNAP, 0, false,
+      &mock_src_image_ctx, &mock_dst_image_ctx, 0, STONE_NOSNAP, 0, false,
       boost::none, m_work_queue, &snap_seqs, &no_op, &ctx);
   request->send();
   ASSERT_EQ(-EINVAL, ctx.wait());
@@ -344,7 +344,7 @@ TEST_F(TestMockDeepCopyRequest, ErrorOnCopyImage) {
   librbd::SnapSeqs snap_seqs;
   librbd::deep_copy::NoOpHandler no_op;
   auto request = librbd::DeepCopyRequest<librbd::MockTestImageCtx>::create(
-      &mock_src_image_ctx, &mock_dst_image_ctx, 0, CEPH_NOSNAP, 0, false,
+      &mock_src_image_ctx, &mock_dst_image_ctx, 0, STONE_NOSNAP, 0, false,
       boost::none, m_work_queue, &snap_seqs, &no_op, &ctx);
   request->send();
   ASSERT_EQ(-EINVAL, ctx.wait());
@@ -381,7 +381,7 @@ TEST_F(TestMockDeepCopyRequest, ErrorOnCopyMetadata) {
   librbd::SnapSeqs snap_seqs;
   librbd::deep_copy::NoOpHandler no_op;
   auto request = librbd::DeepCopyRequest<librbd::MockTestImageCtx>::create(
-      &mock_src_image_ctx, &mock_dst_image_ctx, 0, CEPH_NOSNAP, 0, false,
+      &mock_src_image_ctx, &mock_dst_image_ctx, 0, STONE_NOSNAP, 0, false,
       boost::none, m_work_queue, &snap_seqs, &no_op, &ctx);
   request->send();
   ASSERT_EQ(-EINVAL, ctx.wait());

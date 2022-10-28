@@ -20,8 +20,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_DPDK_DEV_H
-#define CEPH_DPDK_DEV_H
+#ifndef STONE_DPDK_DEV_H
+#define STONE_DPDK_DEV_H
 
 #include <memory>
 #include <functional>
@@ -140,7 +140,7 @@ class DPDKQueuePair {
      *         failure
      */
     static tx_buf* from_packet_zc(
-            CephContext *cct, Packet&& p, DPDKQueuePair& qp);
+            StoneeContext *cct, Packet&& p, DPDKQueuePair& qp);
 
     /**
      * Copy the contents of the "packet" into the given cluster of
@@ -432,7 +432,7 @@ class DPDKQueuePair {
     //
     static constexpr int gc_count = 1;
    public:
-    tx_buf_factory(CephContext *c, DPDKDevice *dev, uint8_t qid);
+    tx_buf_factory(StoneeContext *c, DPDKDevice *dev, uint8_t qid);
     ~tx_buf_factory() {
       // put all mbuf back into mempool in order to make the next factory work
       while (gc());
@@ -515,13 +515,13 @@ class DPDKQueuePair {
     }
 
    private:
-    CephContext *cct;
+    StoneeContext *cct;
     std::vector<tx_buf*> _ring;
     rte_mempool* _pool = nullptr;
   };
 
  public:
-  explicit DPDKQueuePair(CephContext *c, EventCenter *cen, DPDKDevice* dev, uint8_t qid);
+  explicit DPDKQueuePair(StoneeContext *c, EventCenter *cen, DPDKDevice* dev, uint8_t qid);
   ~DPDKQueuePair() {
     if (device_stat_time_fd) {
       center->delete_time_event(device_stat_time_fd);
@@ -654,7 +654,7 @@ class DPDKQueuePair {
   Tub<Packet> from_mbuf_lro(rte_mbuf* m);
 
  private:
-  CephContext *cct;
+  StoneeContext *cct;
   std::vector<packet_provider_type> _pkt_providers;
   Tub<std::array<uint8_t, 128>> _sw_reta;
   circular_buffer<Packet> _proxy_packetq;
@@ -675,7 +675,7 @@ class DPDKQueuePair {
   size_t _num_rx_free_segs = 0;
   uint64_t device_stat_time_fd = 0;
 
-#ifdef CEPH_PERF_DEV
+#ifdef STONE_PERF_DEV
   uint64_t rx_cycles = 0;
   uint64_t rx_count = 0;
   uint64_t tx_cycles = 0;
@@ -735,7 +735,7 @@ class DPDKQueuePair {
 
 class DPDKDevice {
  public:
-  CephContext *cct;
+  StoneeContext *cct;
   PerfCounters *perf_logger;
   std::vector<std::unique_ptr<DPDKQueuePair>> _queues;
   std::vector<DPDKWorker*> workers;
@@ -798,7 +798,7 @@ class DPDKDevice {
   void set_hw_flow_control();
 
  public:
-  DPDKDevice(CephContext *c, uint8_t port_idx, uint16_t num_queues, bool use_lro, bool enable_fc):
+  DPDKDevice(StoneeContext *c, uint8_t port_idx, uint16_t num_queues, bool use_lro, bool enable_fc):
       cct(c), _port_idx(port_idx), _num_queues(num_queues),
       _home_cpu(0), _use_lro(use_lro),
       _enable_fc(enable_fc) {
@@ -849,7 +849,7 @@ class DPDKDevice {
   }
   const rss_key_type& rss_key() const { return _rss_key; }
   uint16_t hw_queues_count() { return _num_queues; }
-  std::unique_ptr<DPDKQueuePair> init_local_queue(CephContext *c, EventCenter *center, string hugepages, uint16_t qid) {
+  std::unique_ptr<DPDKQueuePair> init_local_queue(StoneeContext *c, EventCenter *center, string hugepages, uint16_t qid) {
     std::unique_ptr<DPDKQueuePair> qp;
     qp = std::unique_ptr<DPDKQueuePair>(new DPDKQueuePair(c, center, this, qid));
     return qp;
@@ -909,7 +909,7 @@ class DPDKDevice {
 
 
 std::unique_ptr<DPDKDevice> create_dpdk_net_device(
-    CephContext *c, unsigned cores, uint8_t port_idx = 0,
+    StoneeContext *c, unsigned cores, uint8_t port_idx = 0,
     bool use_lro = true, bool enable_fc = true);
 
 
@@ -918,4 +918,4 @@ std::unique_ptr<DPDKDevice> create_dpdk_net_device(
  */
 uint32_t qp_mempool_obj_size();
 
-#endif // CEPH_DPDK_DEV_H
+#endif // STONE_DPDK_DEV_H

@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "librbd/object_map/CreateRequest.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/dout.h"
 #include "common/errno.h"
 #include "cls/rbd/cls_rbd_client.h"
@@ -11,7 +11,7 @@
 #include "librbd/ObjectMap.h"
 #include "librbd/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::CreateRequest: "
 
@@ -28,13 +28,13 @@ CreateRequest<I>::CreateRequest(I *image_ctx, Context *on_finish)
 
 template <typename I>
 void CreateRequest<I>::send() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
 
   uint64_t max_size = m_image_ctx->size;
 
   {
     std::unique_lock image_locker{m_image_ctx->image_lock};
-    m_snap_ids.push_back(CEPH_NOSNAP);
+    m_snap_ids.push_back(STONE_NOSNAP);
     for (auto it : m_image_ctx->snap_info) {
       max_size = std::max(max_size, it.second.size);
       m_snap_ids.push_back(it.first);
@@ -52,7 +52,7 @@ void CreateRequest<I>::send() {
 
 template <typename I>
 void CreateRequest<I>::send_object_map_resize() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   Context *ctx = create_context_callback<
@@ -70,7 +70,7 @@ void CreateRequest<I>::send_object_map_resize() {
     std::string oid(ObjectMap<>::object_map_name(m_image_ctx->id, snap_id));
     librados::AioCompletion *comp = create_rados_callback(gather_ctx->new_sub());
     int r = m_image_ctx->md_ctx.aio_operate(oid, comp, &op);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
   gather_ctx->activate();
@@ -78,7 +78,7 @@ void CreateRequest<I>::send_object_map_resize() {
 
 template <typename I>
 Context *CreateRequest<I>::handle_object_map_resize(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {

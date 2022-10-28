@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -128,7 +128,7 @@ class PurgeQueue
 {
 public:
   PurgeQueue(
-      CephContext *cct_,
+      StoneContext *cct_,
       mds_rank_t rank_,
       const int64_t metadata_pool_,
       Objecter *objecter_,
@@ -198,7 +198,7 @@ private:
 
   void _go_readonly(int r);
 
-  CephContext *cct;
+  StoneContext *cct;
   const mds_rank_t rank;
   ceph::mutex lock = ceph::make_mutex("PurgeQueue");
   bool readonly = false;

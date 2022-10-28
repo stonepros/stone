@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MOCK_IMAGE_SYNC_SYNC_POINT_HANDLER_H
-#define CEPH_MOCK_IMAGE_SYNC_SYNC_POINT_HANDLER_H
+#ifndef STONE_MOCK_IMAGE_SYNC_SYNC_POINT_HANDLER_H
+#define STONE_MOCK_IMAGE_SYNC_SYNC_POINT_HANDLER_H
 
 #include "tools/rbd_mirror/image_sync/Types.h"
 #include <gmock/gmock.h>
@@ -26,4 +26,4 @@ struct MockSyncPointHandler : public SyncPointHandler{
 } // namespace mirror
 } // namespace rbd
 
-#endif // CEPH_MOCK_IMAGE_SYNC_SYNC_POINT_HANDLER_H
+#endif // STONE_MOCK_IMAGE_SYNC_SYNC_POINT_HANDLER_H

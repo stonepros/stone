@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_MSG_EVENTEPOLL_H
-#define CEPH_MSG_EVENTEPOLL_H
+#ifndef STONE_MSG_EVENTEPOLL_H
+#define STONE_MSG_EVENTEPOLL_H
 
 #include <unistd.h>
 #include <sys/epoll.h>
@@ -25,11 +25,11 @@
 class EpollDriver : public EventDriver {
   int epfd;
   struct epoll_event *events;
-  CephContext *cct;
+  StoneeContext *cct;
   int nevent;
 
  public:
-  explicit EpollDriver(CephContext *c): epfd(-1), events(NULL), cct(c), nevent(0) {}
+  explicit EpollDriver(StoneeContext *c): epfd(-1), events(NULL), cct(c), nevent(0) {}
   ~EpollDriver() override {
     if (epfd != -1)
       close(epfd);

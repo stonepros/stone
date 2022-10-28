@@ -159,7 +159,7 @@ TEST(LibRadosService, StatusFormat) {
 
     // wait for 2 seconds to make sure all the
     // services have been successfully updated
-    // to ceph mon, then retry it.
+    // to stone mon, then retry it.
     sleep(2);
     retry--;
   }

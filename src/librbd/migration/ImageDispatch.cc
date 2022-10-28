@@ -8,7 +8,7 @@
 #include "librbd/io/AioCompletion.h"
 #include "librbd/migration/FormatInterface.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::migration::ImageDispatch: " << this \
                            << " " << __func__ << ": "
@@ -44,7 +44,7 @@ bool ImageDispatch<I>::read(
   ldout(cct, 20) << dendl;
 
   *dispatch_result = io::DISPATCH_RESULT_COMPLETE;
-  return m_format->read(aio_comp, io_context->read_snap().value_or(CEPH_NOSNAP),
+  return m_format->read(aio_comp, io_context->read_snap().value_or(STONE_NOSNAP),
                         std::move(image_extents), std::move(read_result),
                         op_flags, read_flags, parent_trace);
 }

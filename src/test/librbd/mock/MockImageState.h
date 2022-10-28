@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_TEST_LIBRBD_MOCK_IMAGE_STATE_H
-#define CEPH_TEST_LIBRBD_MOCK_IMAGE_STATE_H
+#ifndef STONE_TEST_LIBRBD_MOCK_IMAGE_STATE_H
+#define STONE_TEST_LIBRBD_MOCK_IMAGE_STATE_H
 
 #include <gmock/gmock.h>
 
@@ -36,4 +36,4 @@ struct MockImageState {
 
 } // namespace librbd
 
-#endif // CEPH_TEST_LIBRBD_MOCK_IMAGE_STATE_H
+#endif // STONE_TEST_LIBRBD_MOCK_IMAGE_STATE_H

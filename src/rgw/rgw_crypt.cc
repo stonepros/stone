@@ -12,7 +12,7 @@
 #include <auth/Crypto.h>
 #include <rgw/rgw_b64.h>
 #include <rgw/rgw_rest_s3.h>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "crypto/crypto_accel.h"
 #include "crypto/crypto_plugin.h"
 #include "rgw/rgw_kms.h"
@@ -24,8 +24,8 @@
 
 #include <openssl/evp.h>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 using namespace rgw;
 
@@ -34,10 +34,10 @@ template<typename M>
 class canonical_char_sorter {
 private:
     const icu::Normalizer2* normalizer;
-    CephContext *cct;
+    StoneContext *cct;
 
 public:
-    canonical_char_sorter(CephContext *cct) : cct(cct) {
+    canonical_char_sorter(StoneContext *cct) : cct(cct) {
         UErrorCode status = U_ZERO_ERROR;
         normalizer = icu::Normalizer2::getNFCInstance(status);
         if (U_FAILURE(status)) {
@@ -288,7 +288,7 @@ mec_option::empty };
 }
 
 
-CryptoAccelRef get_crypto_accel(CephContext *cct)
+CryptoAccelRef get_crypto_accel(StoneContext *cct)
 {
   CryptoAccelRef ca_impl = nullptr;
   stringstream ss;
@@ -311,7 +311,7 @@ CryptoAccelRef get_crypto_accel(CephContext *cct)
 
 template <std::size_t KeySizeV, std::size_t IvSizeV>
 static inline
-bool evp_sym_transform(CephContext* const cct,
+bool evp_sym_transform(StoneContext* const cct,
                        const EVP_CIPHER* const type,
                        unsigned char* const out,
                        const unsigned char* const in,
@@ -336,10 +336,10 @@ bool evp_sym_transform(CephContext* const cct,
 
   // we want to support ciphers that don't use IV at all like AES-256-ECB
   if constexpr (static_cast<bool>(IvSizeV)) {
-    ceph_assert(EVP_CIPHER_CTX_iv_length(pctx.get()) == IvSizeV);
-    ceph_assert(EVP_CIPHER_CTX_block_size(pctx.get()) == IvSizeV);
+    stone_assert(EVP_CIPHER_CTX_iv_length(pctx.get()) == IvSizeV);
+    stone_assert(EVP_CIPHER_CTX_block_size(pctx.get()) == IvSizeV);
   }
-  ceph_assert(EVP_CIPHER_CTX_key_length(pctx.get()) == KeySizeV);
+  stone_assert(EVP_CIPHER_CTX_key_length(pctx.get()) == KeySizeV);
 
   if (1 != EVP_CipherInit_ex(pctx.get(), nullptr, nullptr, key, iv, encrypt)) {
     ldout(cct, 5) << "EVP: failed to 2nd initialization stage" << dendl;
@@ -354,7 +354,7 @@ bool evp_sym_transform(CephContext* const cct,
 
   // operate!
   int written = 0;
-  ceph_assert(size <= static_cast<size_t>(std::numeric_limits<int>::max()));
+  stone_assert(size <= static_cast<size_t>(std::numeric_limits<int>::max()));
   if (1 != EVP_CipherUpdate(pctx.get(), out, &written, in, size)) {
     ldout(cct, 5) << "EVP: EVP_CipherUpdate failed" << dendl;
     return false;
@@ -368,7 +368,7 @@ bool evp_sym_transform(CephContext* const cct,
   }
 
   // padding is disabled so EVP_CipherFinal_ex should not append anything
-  ceph_assert(finally_written == 0);
+  stone_assert(finally_written == 0);
   return (written + finally_written) == static_cast<int>(size);
 }
 
@@ -405,13 +405,13 @@ public:
   static const size_t CHUNK_SIZE = 4096;
 private:
   static const uint8_t IV[AES_256_IVSIZE];
-  CephContext* cct;
+  StoneContext* cct;
   uint8_t key[AES_256_KEYSIZE];
 public:
-  explicit AES_256_CBC(CephContext* cct): cct(cct) {
+  explicit AES_256_CBC(StoneContext* cct): cct(cct) {
   }
   ~AES_256_CBC() {
-    ::ceph::crypto::zeroize_for_security(key, AES_256_KEYSIZE);
+    ::stone::crypto::zeroize_for_security(key, AES_256_KEYSIZE);
   }
   bool set_key(const uint8_t* _key, size_t key_size) {
     if (key_size != AES_256_KEYSIZE) {
@@ -599,7 +599,7 @@ public:
 };
 
 
-std::unique_ptr<BlockCrypt> AES_256_CBC_create(CephContext* cct, const uint8_t* key, size_t len)
+std::unique_ptr<BlockCrypt> AES_256_CBC_create(StoneContext* cct, const uint8_t* key, size_t len)
 {
   auto cbc = std::unique_ptr<AES_256_CBC>(new AES_256_CBC(cct));
   cbc->set_key(key, AES_256_KEYSIZE);
@@ -611,7 +611,7 @@ const uint8_t AES_256_CBC::IV[AES_256_CBC::AES_256_IVSIZE] =
     { 'a', 'e', 's', '2', '5', '6', 'i', 'v', '_', 'c', 't', 'r', '1', '3', '3', '7' };
 
 
-bool AES_256_ECB_encrypt(CephContext* cct,
+bool AES_256_ECB_encrypt(StoneContext* cct,
                          const uint8_t* key,
                          size_t key_size,
                          const uint8_t* data_in,
@@ -629,7 +629,7 @@ bool AES_256_ECB_encrypt(CephContext* cct,
 }
 
 
-RGWGetObj_BlockDecrypt::RGWGetObj_BlockDecrypt(CephContext* cct,
+RGWGetObj_BlockDecrypt::RGWGetObj_BlockDecrypt(StoneContext* cct,
                                                RGWGetObj_Filter* next,
                                                std::unique_ptr<BlockCrypt> crypt):
     RGWGetObj_Filter(next),
@@ -664,7 +664,7 @@ int RGWGetObj_BlockDecrypt::read_manifest(const DoutPrefixProvider *dpp, bufferl
       }
       parts_len.back() += mi.get_stripe_size();
     }
-    if (cct->_conf->subsys.should_gather<ceph_subsys_rgw, 20>()) {
+    if (cct->_conf->subsys.should_gather<stone_subsys_rgw, 20>()) {
       for (size_t i = 0; i<parts_len.size(); i++) {
         ldpp_dout(dpp, 20) << "Manifest part " << i << ", size=" << parts_len[i] << dendl;
       }
@@ -790,7 +790,7 @@ int RGWGetObj_BlockDecrypt::flush() {
   return res;
 }
 
-RGWPutObj_BlockEncrypt::RGWPutObj_BlockEncrypt(CephContext* cct,
+RGWPutObj_BlockEncrypt::RGWPutObj_BlockEncrypt(StoneContext* cct,
                                                rgw::putobj::DataProcessor *next,
                                                std::unique_ptr<BlockCrypt> crypt)
   : Pipe(next),
@@ -805,7 +805,7 @@ int RGWPutObj_BlockEncrypt::process(bufferlist&& data, uint64_t logical_offset)
   ldout(cct, 25) << "Encrypt " << data.length() << " bytes" << dendl;
 
   // adjust logical offset to beginning of cached data
-  ceph_assert(logical_offset >= cache.length());
+  stone_assert(logical_offset >= cache.length());
   logical_offset -= cache.length();
 
   const bool flush = (data.length() == 0);
@@ -835,7 +835,7 @@ int RGWPutObj_BlockEncrypt::process(bufferlist&& data, uint64_t logical_offset)
 }
 
 
-std::string create_random_key_selector(CephContext * const cct) {
+std::string create_random_key_selector(StoneContext * const cct) {
   char random[AES_256_KEYSIZE];
   cct->random()->get_bytes(&random[0], sizeof(random));
   return std::string(random, sizeof(random));
@@ -895,7 +895,7 @@ static std::string_view get_crypt_attribute(
 
 
 int rgw_s3_prepare_encrypt(struct req_state* s,
-                           std::map<std::string, ceph::bufferlist>& attrs,
+                           std::map<std::string, stone::bufferlist>& attrs,
                            std::map<std::string,
                                     RGWPostObj_ObjStore::post_form_part,
                                     const ltstr_nocase>* parts,
@@ -956,7 +956,7 @@ int rgw_s3_prepare_encrypt(struct req_state* s,
         return -EINVAL;
       }
 
-      if (keymd5_bin.size() != CEPH_CRYPTO_MD5_DIGESTSIZE) {
+      if (keymd5_bin.size() != STONE_CRYPTO_MD5_DIGESTSIZE) {
         ldpp_dout(s, 5) << "ERROR: Invalid key md5 size" << dendl;
         s->err.message = "Requests specifying Server Side Encryption with Customer "
                          "provided keys must provide an appropriate secret key md5.";
@@ -966,11 +966,11 @@ int rgw_s3_prepare_encrypt(struct req_state* s,
       MD5 key_hash;
       // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
       key_hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
-      unsigned char key_hash_res[CEPH_CRYPTO_MD5_DIGESTSIZE];
+      unsigned char key_hash_res[STONE_CRYPTO_MD5_DIGESTSIZE];
       key_hash.Update(reinterpret_cast<const unsigned char*>(key_bin.c_str()), key_bin.size());
       key_hash.Final(key_hash_res);
 
-      if (memcmp(key_hash_res, keymd5_bin.c_str(), CEPH_CRYPTO_MD5_DIGESTSIZE) != 0) {
+      if (memcmp(key_hash_res, keymd5_bin.c_str(), STONE_CRYPTO_MD5_DIGESTSIZE) != 0) {
         ldpp_dout(s, 5) << "ERROR: Invalid key md5 hash" << dendl;
         s->err.message = "The calculated MD5 hash of the key did not match the hash that was provided.";
         return -EINVAL;
@@ -1062,7 +1062,7 @@ int rgw_s3_prepare_encrypt(struct req_state* s,
 	  aes->set_key(reinterpret_cast<const uint8_t*>(actual_key.c_str()), AES_256_KEYSIZE);
 	  *block_crypt = std::move(aes);
 	}
-        ::ceph::crypto::zeroize_for_security(actual_key.data(), actual_key.length());
+        ::stone::crypto::zeroize_for_security(actual_key.data(), actual_key.length());
 
 	crypt_http_responses["x-amz-server-side-encryption"] = "aws:kms";
 	crypt_http_responses["x-amz-server-side-encryption-aws-kms-key-id"] = std::string(key_id);
@@ -1121,7 +1121,7 @@ int rgw_s3_prepare_encrypt(struct req_state* s,
                               reinterpret_cast<const uint8_t*>(master_encryption_key.c_str()), AES_256_KEYSIZE,
                               reinterpret_cast<const uint8_t*>(key_selector.c_str()),
                               actual_key, AES_256_KEYSIZE) != true) {
-        ::ceph::crypto::zeroize_for_security(actual_key, sizeof(actual_key));
+        ::stone::crypto::zeroize_for_security(actual_key, sizeof(actual_key));
         return -EIO;
       }
       if (block_crypt) {
@@ -1129,7 +1129,7 @@ int rgw_s3_prepare_encrypt(struct req_state* s,
         aes->set_key(reinterpret_cast<const uint8_t*>(actual_key), AES_256_KEYSIZE);
         *block_crypt = std::move(aes);
       }
-      ::ceph::crypto::zeroize_for_security(actual_key, sizeof(actual_key));
+      ::stone::crypto::zeroize_for_security(actual_key, sizeof(actual_key));
       return 0;
     }
   }
@@ -1208,7 +1208,7 @@ int rgw_s3_prepare_decrypt(struct req_state* s,
     }
 
 
-    if (keymd5_bin.size() != CEPH_CRYPTO_MD5_DIGESTSIZE) {
+    if (keymd5_bin.size() != STONE_CRYPTO_MD5_DIGESTSIZE) {
       ldpp_dout(s, 5) << "ERROR: Invalid key md5 size " << dendl;
       s->err.message = "Requests specifying Server Side Encryption with Customer "
                        "provided keys must provide an appropriate secret key md5.";
@@ -1218,11 +1218,11 @@ int rgw_s3_prepare_decrypt(struct req_state* s,
     MD5 key_hash;
     // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
     key_hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
-    uint8_t key_hash_res[CEPH_CRYPTO_MD5_DIGESTSIZE];
+    uint8_t key_hash_res[STONE_CRYPTO_MD5_DIGESTSIZE];
     key_hash.Update(reinterpret_cast<const unsigned char*>(key_bin.c_str()), key_bin.size());
     key_hash.Final(key_hash_res);
 
-    if ((memcmp(key_hash_res, keymd5_bin.c_str(), CEPH_CRYPTO_MD5_DIGESTSIZE) != 0) ||
+    if ((memcmp(key_hash_res, keymd5_bin.c_str(), STONE_CRYPTO_MD5_DIGESTSIZE) != 0) ||
         (get_str_attribute(attrs, RGW_ATTR_CRYPT_KEYMD5) != keymd5_bin)) {
       s->err.message = "The calculated MD5 hash of the key did not match the hash that was provided.";
       return -EINVAL;
@@ -1295,12 +1295,12 @@ int rgw_s3_prepare_decrypt(struct req_state* s,
                             AES_256_KEYSIZE,
                             reinterpret_cast<const uint8_t*>(attr_key_selector.c_str()),
                             actual_key, AES_256_KEYSIZE) != true) {
-      ::ceph::crypto::zeroize_for_security(actual_key, sizeof(actual_key));
+      ::stone::crypto::zeroize_for_security(actual_key, sizeof(actual_key));
       return -EIO;
     }
     auto aes = std::unique_ptr<AES_256_CBC>(new AES_256_CBC(s->cct));
     aes->set_key(actual_key, AES_256_KEYSIZE);
-    ::ceph::crypto::zeroize_for_security(actual_key, sizeof(actual_key));
+    ::stone::crypto::zeroize_for_security(actual_key, sizeof(actual_key));
     if (block_crypt) *block_crypt = std::move(aes);
     return 0;
   }

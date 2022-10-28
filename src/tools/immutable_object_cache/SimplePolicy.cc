@@ -4,16 +4,16 @@
 #include "common/debug.h"
 #include "SimplePolicy.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_immutable_obj_cache
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_immutable_obj_cache
 #undef dout_prefix
-#define dout_prefix *_dout << "ceph::cache::SimplePolicy: " << this << " " \
+#define dout_prefix *_dout << "stone::cache::SimplePolicy: " << this << " " \
                            << __func__ << ": "
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
-SimplePolicy::SimplePolicy(CephContext *cct, uint64_t cache_size,
+SimplePolicy::SimplePolicy(StoneContext *cct, uint64_t cache_size,
                            uint64_t max_inflight, double watermark)
   : cct(cct), m_watermark(watermark), m_max_inflight_ops(max_inflight),
     m_max_cache_size(cache_size) {
@@ -49,7 +49,7 @@ cache_status_t SimplePolicy::alloc_entry(std::string file_name) {
   if ((m_cache_size < m_max_cache_size) &&
       (inflight_ops < m_max_inflight_ops)) {
     Entry* entry = new Entry();
-    ceph_assert(entry != nullptr);
+    stone_assert(entry != nullptr);
     m_cache_map[file_name] = entry;
     wlocker.unlock();
     update_status(file_name, OBJ_CACHE_SKIP);
@@ -94,7 +94,7 @@ void SimplePolicy::update_status(std::string file_name,
     return;
   }
 
-  ceph_assert(entry_it != m_cache_map.end());
+  stone_assert(entry_it != m_cache_map.end());
   Entry* entry = entry_it->second;
 
   // to promote
@@ -213,4 +213,4 @@ std::string SimplePolicy::get_evict_entry() {
 }
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone

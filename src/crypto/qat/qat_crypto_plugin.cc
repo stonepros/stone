@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Intel Corporation
  *
@@ -16,16 +16,16 @@
 
 #include "crypto/qat/qat_crypto_plugin.h"
 
-#include "ceph_ver.h"
+#include "stone_ver.h"
 
 std::mutex QccCryptoPlugin::qat_init;
 
-const char *__ceph_plugin_version()
+const char *__stone_plugin_version()
 {
-  return CEPH_GIT_NICE_VER;
+  return STONE_GIT_NICE_VER;
 }
 
-int __ceph_plugin_init(CephContext *cct,
+int __stone_plugin_init(StoneContext *cct,
     const std::string& type,
     const std::string& name)
 {

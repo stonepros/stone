@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MOSDOPREPLY_H
-#define CEPH_MOSDOPREPLY_H
+#ifndef STONE_MOSDOPREPLY_H
+#define STONE_MOSDOPREPLY_H
 
 #include "msg/Message.h"
 
@@ -53,8 +53,8 @@ public:
   const pg_t&     get_pg() const { return pgid; }
   int      get_flags() const { return flags; }
 
-  bool     is_ondisk() const { return get_flags() & CEPH_OSD_FLAG_ONDISK; }
-  bool     is_onnvram() const { return get_flags() & CEPH_OSD_FLAG_ONNVRAM; }
+  bool     is_ondisk() const { return get_flags() & STONE_OSD_FLAG_ONDISK; }
+  bool     is_onnvram() const { return get_flags() & STONE_OSD_FLAG_ONNVRAM; }
   
   int get_result() const { return result; }
   const eversion_t& get_replay_version() const { return replay_version; }
@@ -136,20 +136,20 @@ public:
 
 public:
   MOSDOpReply()
-    : Message{CEPH_MSG_OSD_OPREPLY, HEAD_VERSION, COMPAT_VERSION},
+    : Message{STONE_MSG_OSD_OPREPLY, HEAD_VERSION, COMPAT_VERSION},
     bdata_encode(false) {
     do_redirect = false;
   }
   MOSDOpReply(const MOSDOp *req, int r, epoch_t e, int acktype,
 	      bool ignore_out_data)
-    : Message{CEPH_MSG_OSD_OPREPLY, HEAD_VERSION, COMPAT_VERSION},
+    : Message{STONE_MSG_OSD_OPREPLY, HEAD_VERSION, COMPAT_VERSION},
       oid(req->hobj.oid), pgid(req->pgid.pgid), ops(req->ops),
       bdata_encode(false) {
 
     set_tid(req->get_tid());
     result = r;
     flags =
-      (req->flags & ~(CEPH_OSD_FLAG_ONDISK|CEPH_OSD_FLAG_ONNVRAM|CEPH_OSD_FLAG_ACK)) | acktype;
+      (req->flags & ~(STONE_OSD_FLAG_ONDISK|STONE_OSD_FLAG_ONNVRAM|STONE_OSD_FLAG_ACK)) | acktype;
     osdmap_epoch = e;
     user_version = 0;
     retry_attempt = req->get_retry_attempt();
@@ -175,7 +175,7 @@ public:
       bdata_encode = true;
     }
 
-    if ((features & CEPH_FEATURE_PGID64) == 0) {
+    if ((features & STONE_FEATURE_PGID64) == 0) {
       header.version = 1;
       ceph_osd_reply_head head;
       memset(&head, 0, sizeof(head));
@@ -212,7 +212,7 @@ public:
 
       encode(replay_version, payload);
       encode(user_version, payload);
-      if ((features & CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING) == 0) {
+      if ((features & STONE_FEATURE_NEW_OSDOPREPLY_ENCODING) == 0) {
         header.version = 6;
         encode(redirect, payload);
       } else {

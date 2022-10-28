@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 Stanislav Sedov <stas@FreeBSD.org>
  *
@@ -9,8 +9,8 @@
  * Foundation.  See file COPYING.
  */
 
-#ifndef CEPH_COMPAT_H
-#define CEPH_COMPAT_H
+#ifndef STONE_COMPAT_H
+#define STONE_COMPAT_H
 
 #include "acconfig.h"
 #include <sys/types.h>
@@ -225,8 +225,8 @@ int ceph_memzero_s(void *dest, size_t destsz, size_t count);
 #include "include/win32/win32_errno.h"
 #include "include/win32/fs_compat.h"
 
-// There are a few name collisions between Windows headers and Ceph.
-// Updating Ceph definitions would be the prefferable fix in order to avoid
+// There are a few name collisions between Windows headers and Stone.
+// Updating Stone definitions would be the prefferable fix in order to avoid
 // confussion, unless it requires too many changes, in which case we're going
 // to redefine Windows values by adding the "WIN32_" prefix.
 #define WIN32_DELETE 0x00010000L
@@ -366,18 +366,18 @@ static inline int compat_closesocket(int fildes) {
 /* Supplies code to be run at startup time before invoking main().
  * Use as:
  *
- *     CEPH_CONSTRUCTOR(my_constructor) {
+ *     STONE_CONSTRUCTOR(my_constructor) {
  *         ...some code...
  *     }
  */
 #ifdef _MSC_VER
 #pragma section(".CRT$XCU",read)
-#define CEPH_CONSTRUCTOR(f) \
+#define STONE_CONSTRUCTOR(f) \
   static void __cdecl f(void); \
   __declspec(allocate(".CRT$XCU")) static void (__cdecl*f##_)(void) = f; \
   static void __cdecl f(void)
 #else
-#define CEPH_CONSTRUCTOR(f) \
+#define STONE_CONSTRUCTOR(f) \
   static void f(void) __attribute__((constructor)); \
   static void f(void)
 #endif
@@ -398,4 +398,4 @@ static inline int ceph_sock_errno() {
 #define O_BINARY 0
 #endif
 
-#endif /* !CEPH_COMPAT_H */
+#endif /* !STONE_COMPAT_H */

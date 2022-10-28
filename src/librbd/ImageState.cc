@@ -17,7 +17,7 @@
 #include "librbd/image/RefreshRequest.h"
 #include "librbd/image/SetSnapRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::ImageState: " << this << " "
 
@@ -29,15 +29,15 @@ using util::create_context_callback;
 class ImageUpdateWatchers {
 public:
 
-  explicit ImageUpdateWatchers(CephContext *cct) : m_cct(cct),
-    m_lock(ceph::make_mutex(util::unique_lock_name("librbd::ImageUpdateWatchers::m_lock", this))) {
+  explicit ImageUpdateWatchers(StoneContext *cct) : m_cct(cct),
+    m_lock(stone::make_mutex(util::unique_lock_name("librbd::ImageUpdateWatchers::m_lock", this))) {
   }
 
   ~ImageUpdateWatchers() {
-    ceph_assert(m_watchers.empty());
-    ceph_assert(m_in_flight.empty());
-    ceph_assert(m_pending_unregister.empty());
-    ceph_assert(m_on_shut_down_finish == nullptr);
+    stone_assert(m_watchers.empty());
+    stone_assert(m_in_flight.empty());
+    stone_assert(m_pending_unregister.empty());
+    stone_assert(m_on_shut_down_finish == nullptr);
 
     destroy_work_queue();
   }
@@ -66,7 +66,7 @@ public:
     ldout(m_cct, 20) << "ImageUpdateWatchers::" << __func__ << dendl;
     {
       std::lock_guard locker{m_lock};
-      ceph_assert(m_on_shut_down_finish == nullptr);
+      stone_assert(m_on_shut_down_finish == nullptr);
       m_watchers.clear();
       if (!m_in_flight.empty()) {
 	m_on_shut_down_finish = on_finish;
@@ -83,7 +83,7 @@ public:
                      << watcher << dendl;
 
     std::lock_guard locker{m_lock};
-    ceph_assert(m_on_shut_down_finish == nullptr);
+    stone_assert(m_on_shut_down_finish == nullptr);
 
     create_work_queue();
 
@@ -102,7 +102,7 @@ public:
 	r = -ENOENT;
       } else {
 	if (m_in_flight.find(handle) != m_in_flight.end()) {
-	  ceph_assert(m_pending_unregister.find(handle) == m_pending_unregister.end());
+	  stone_assert(m_pending_unregister.find(handle) == m_pending_unregister.end());
 	  m_pending_unregister[handle] = on_finish;
 	  on_finish = nullptr;
 	}
@@ -127,7 +127,7 @@ public:
   }
 
   void send_notify(uint64_t handle, UpdateWatchCtx *watcher) {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone_assert(stone_mutex_is_locked(m_lock));
 
     ldout(m_cct, 20) << "ImageUpdateWatchers::" << __func__ << ": handle="
 		     << handle << ", watcher=" << watcher << dendl;
@@ -156,7 +156,7 @@ public:
       std::lock_guard locker{m_lock};
 
       auto in_flight_it = m_in_flight.find(handle);
-      ceph_assert(in_flight_it != m_in_flight.end());
+      stone_assert(in_flight_it != m_in_flight.end());
       m_in_flight.erase(in_flight_it);
 
       // If there is no more in flight notifications for this watcher
@@ -170,7 +170,7 @@ public:
       }
 
       if (m_in_flight.empty()) {
-	ceph_assert(m_pending_unregister.empty());
+	stone_assert(m_pending_unregister.empty());
 	if (m_on_shut_down_finish != nullptr) {
 	  std::swap(m_on_shut_down_finish, on_shut_down_finish);
 	}
@@ -193,7 +193,7 @@ public:
 private:
   class ThreadPoolSingleton : public ThreadPool {
   public:
-    explicit ThreadPoolSingleton(CephContext *cct)
+    explicit ThreadPoolSingleton(StoneContext *cct)
       : ThreadPool(cct, "librbd::ImageUpdateWatchers::thread_pool", "tp_librbd",
 		   1) {
       start();
@@ -203,8 +203,8 @@ private:
     }
   };
 
-  CephContext *m_cct;
-  ceph::mutex m_lock;
+  StoneContext *m_cct;
+  stone::mutex m_lock;
   ContextWQ *m_work_queue = nullptr;
   std::map<uint64_t, UpdateWatchCtx*> m_watchers;
   uint64_t m_next_handle = 0;
@@ -220,7 +220,7 @@ private:
       ThreadPoolSingleton>("librbd::ImageUpdateWatchers::thread_pool",
 			   false, m_cct);
     m_work_queue = new ContextWQ("librbd::ImageUpdateWatchers::work_queue",
-                                 ceph::make_timespan(
+                                 stone::make_timespan(
                                    m_cct->_conf.get_val<uint64_t>("rbd_op_thread_timeout")),
                                  &thread_pool);
   }
@@ -236,16 +236,16 @@ private:
 
 class QuiesceWatchers {
 public:
-  explicit QuiesceWatchers(CephContext *cct, asio::ContextWQ* work_queue)
+  explicit QuiesceWatchers(StoneContext *cct, asio::ContextWQ* work_queue)
     : m_cct(cct),
       m_work_queue(work_queue),
-      m_lock(ceph::make_mutex(util::unique_lock_name(
+      m_lock(stone::make_mutex(util::unique_lock_name(
         "librbd::QuiesceWatchers::m_lock", this))) {
   }
 
   ~QuiesceWatchers() {
-    ceph_assert(m_pending_unregister.empty());
-    ceph_assert(m_on_notify == nullptr);
+    stone_assert(m_pending_unregister.empty());
+    stone_assert(m_on_notify == nullptr);
   }
 
   void register_watcher(QuiesceWatchCtx *watcher, uint64_t *handle) {
@@ -267,7 +267,7 @@ public:
         r = -ENOENT;
       } else {
         if (m_on_notify != nullptr) {
-          ceph_assert(!m_pending_unregister.count(handle));
+          stone_assert(!m_pending_unregister.count(handle));
           m_pending_unregister[handle] = on_finish;
           on_finish = nullptr;
         }
@@ -303,8 +303,8 @@ public:
     Context *on_notify = nullptr;
     {
       std::lock_guard locker{m_lock};
-      ceph_assert(m_on_notify != nullptr);
-      ceph_assert(m_handle_quiesce_cnt > 0);
+      stone_assert(m_on_notify != nullptr);
+      stone_assert(m_handle_quiesce_cnt > 0);
 
       m_handle_quiesce_cnt--;
 
@@ -329,10 +329,10 @@ public:
 private:
   enum EventType {QUIESCE, UNQUIESCE};
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   asio::ContextWQ *m_work_queue;
 
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   std::map<uint64_t, QuiesceWatchCtx*> m_watchers;
   uint64_t m_next_handle = 0;
   Context *m_on_notify = nullptr;
@@ -344,7 +344,7 @@ private:
   int m_ret_val = 0;
 
   void notify(EventType event_type, Context *on_finish) {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone_assert(stone_mutex_is_locked(m_lock));
 
     if (m_watchers.empty()) {
       m_work_queue->queue(on_finish);
@@ -356,16 +356,16 @@ private:
 
     Context *ctx = nullptr;
     if (event_type == QUIESCE) {
-      ceph_assert(!m_blocked);
-      ceph_assert(m_handle_quiesce_cnt == 0);
+      stone_assert(!m_blocked);
+      stone_assert(m_handle_quiesce_cnt == 0);
 
       m_blocked = true;
       m_handle_quiesce_cnt = m_watchers.size();
       m_failed_watchers.clear();
       m_ret_val = 0;
     } else {
-      ceph_assert(event_type == UNQUIESCE);
-      ceph_assert(m_blocked);
+      stone_assert(event_type == UNQUIESCE);
+      stone_assert(m_blocked);
 
       ctx = create_async_context_callback(
         m_work_queue, create_context_callback<
@@ -373,7 +373,7 @@ private:
     }
     auto gather_ctx = new C_Gather(m_cct, ctx);
 
-    ceph_assert(m_on_notify == nullptr);
+    stone_assert(m_on_notify == nullptr);
 
     m_on_notify = on_finish;
 
@@ -407,7 +407,7 @@ private:
           watcher->handle_unquiesce();
           break;
         default:
-          ceph_abort_msgf("invalid event_type %d", event_type);
+          stone_abort_msgf("invalid event_type %d", event_type);
         }
 
         on_finish->complete(0);
@@ -420,7 +420,7 @@ private:
     ldout(m_cct, 20) << "QuiesceWatchers::" << __func__ << ": r=" << r
                      << dendl;
 
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
 
     std::unique_lock locker{m_lock};
 
@@ -439,7 +439,7 @@ private:
     Context *on_notify = nullptr;
     std::swap(on_notify, m_on_notify);
 
-    ceph_assert(m_blocked);
+    stone_assert(m_blocked);
     m_blocked = false;
 
     if (!m_pending_notify.empty()) {
@@ -456,7 +456,7 @@ private:
 template <typename I>
 ImageState<I>::ImageState(I *image_ctx)
   : m_image_ctx(image_ctx), m_state(STATE_UNINITIALIZED),
-    m_lock(ceph::make_mutex(util::unique_lock_name("librbd::ImageState::m_lock", this))),
+    m_lock(stone::make_mutex(util::unique_lock_name("librbd::ImageState::m_lock", this))),
     m_last_refresh(0), m_refresh_seq(0),
     m_update_watchers(new ImageUpdateWatchers(image_ctx->cct)),
     m_quiesce_watchers(new QuiesceWatchers(
@@ -465,7 +465,7 @@ ImageState<I>::ImageState(I *image_ctx)
 
 template <typename I>
 ImageState<I>::~ImageState() {
-  ceph_assert(m_state == STATE_UNINITIALIZED || m_state == STATE_CLOSED);
+  stone_assert(m_state == STATE_UNINITIALIZED || m_state == STATE_CLOSED);
   delete m_update_watchers;
   delete m_quiesce_watchers;
 }
@@ -481,11 +481,11 @@ int ImageState<I>::open(uint64_t flags) {
 
 template <typename I>
 void ImageState<I>::open(uint64_t flags, Context *on_finish) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   m_lock.lock();
-  ceph_assert(m_state == STATE_UNINITIALIZED);
+  stone_assert(m_state == STATE_UNINITIALIZED);
   m_open_flags = flags;
 
   Action action(ACTION_TYPE_OPEN);
@@ -505,11 +505,11 @@ int ImageState<I>::close() {
 
 template <typename I>
 void ImageState<I>::close(Context *on_finish) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   m_lock.lock();
-  ceph_assert(!is_closed());
+  stone_assert(!is_closed());
 
   Action action(ACTION_TYPE_CLOSE);
   action.refresh_seq = m_refresh_seq;
@@ -521,7 +521,7 @@ void ImageState<I>::handle_update_notification() {
   std::lock_guard locker{m_lock};
   ++m_refresh_seq;
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << ": refresh_seq = " << m_refresh_seq << ", "
 		 << "last_refresh = " << m_last_refresh << dendl;
 
@@ -554,7 +554,7 @@ int ImageState<I>::refresh() {
 
 template <typename I>
 void ImageState<I>::refresh(Context *on_finish) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   m_lock.lock();
@@ -598,7 +598,7 @@ int ImageState<I>::refresh_if_required() {
 template <typename I>
 const typename ImageState<I>::Action *
 ImageState<I>::find_pending_refresh() const {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   auto it = std::find_if(m_actions_contexts.rbegin(),
                          m_actions_contexts.rend(),
@@ -613,7 +613,7 @@ ImageState<I>::find_pending_refresh() const {
 
 template <typename I>
 void ImageState<I>::snap_set(uint64_t snap_id, Context *on_finish) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << ": snap_id=" << snap_id << dendl;
 
   Action action(ACTION_TYPE_SET_SNAP);
@@ -625,7 +625,7 @@ void ImageState<I>::snap_set(uint64_t snap_id, Context *on_finish) {
 
 template <typename I>
 void ImageState<I>::prepare_lock(Context *on_ready) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << dendl;
 
   m_lock.lock();
@@ -642,7 +642,7 @@ void ImageState<I>::prepare_lock(Context *on_ready) {
 
 template <typename I>
 void ImageState<I>::handle_prepare_lock_complete() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << __func__ << dendl;
 
   m_lock.lock();
@@ -657,7 +657,7 @@ void ImageState<I>::handle_prepare_lock_complete() {
 template <typename I>
 int ImageState<I>::register_update_watcher(UpdateWatchCtx *watcher,
 					 uint64_t *handle) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   m_update_watchers->register_watcher(watcher, handle);
@@ -669,7 +669,7 @@ int ImageState<I>::register_update_watcher(UpdateWatchCtx *watcher,
 template <typename I>
 void ImageState<I>::unregister_update_watcher(uint64_t handle,
                                               Context *on_finish) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << ": handle=" << handle << dendl;
 
   m_update_watchers->unregister_watcher(handle, on_finish);
@@ -684,7 +684,7 @@ int ImageState<I>::unregister_update_watcher(uint64_t handle) {
 
 template <typename I>
 void ImageState<I>::flush_update_watchers(Context *on_finish) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   m_update_watchers->flush(on_finish);
@@ -692,7 +692,7 @@ void ImageState<I>::flush_update_watchers(Context *on_finish) {
 
 template <typename I>
 void ImageState<I>::shut_down_update_watchers(Context *on_finish) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   m_update_watchers->shut_down(on_finish);
@@ -717,7 +717,7 @@ bool ImageState<I>::is_transition_state() const {
 
 template <typename I>
 bool ImageState<I>::is_closed() const {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   return ((m_state == STATE_CLOSED) ||
           (!m_actions_contexts.empty() &&
@@ -726,7 +726,7 @@ bool ImageState<I>::is_closed() const {
 
 template <typename I>
 void ImageState<I>::append_context(const Action &action, Context *context) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   ActionContexts *action_contexts = nullptr;
   for (auto &action_ctxs : m_actions_contexts) {
@@ -748,8 +748,8 @@ void ImageState<I>::append_context(const Action &action, Context *context) {
 
 template <typename I>
 void ImageState<I>::execute_next_action_unlock() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(!m_actions_contexts.empty());
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(!m_actions_contexts.empty());
   switch (m_actions_contexts.front().first.action_type) {
   case ACTION_TYPE_OPEN:
     send_open_unlock();
@@ -767,13 +767,13 @@ void ImageState<I>::execute_next_action_unlock() {
     send_prepare_lock_unlock();
     return;
   }
-  ceph_abort();
+  stone_abort();
 }
 
 template <typename I>
 void ImageState<I>::execute_action_unlock(const Action &action,
                                           Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   append_context(action, on_finish);
   if (!is_transition_state()) {
@@ -785,8 +785,8 @@ void ImageState<I>::execute_action_unlock(const Action &action,
 
 template <typename I>
 void ImageState<I>::complete_action_unlock(State next_state, int r) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  ceph_assert(!m_actions_contexts.empty());
+  stone_assert(stone_mutex_is_locked(m_lock));
+  stone_assert(!m_actions_contexts.empty());
 
   ActionContexts action_contexts(std::move(m_actions_contexts.front()));
   m_actions_contexts.pop_front();
@@ -827,8 +827,8 @@ void ImageState<I>::complete_action_unlock(State next_state, int r) {
 
 template <typename I>
 void ImageState<I>::send_open_unlock() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  CephContext *cct = m_image_ctx->cct;
+  stone_assert(stone_mutex_is_locked(m_lock));
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_state = STATE_OPENING;
@@ -844,7 +844,7 @@ void ImageState<I>::send_open_unlock() {
 
 template <typename I>
 void ImageState<I>::handle_open(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   if (r < 0 && r != -ENOENT) {
@@ -857,8 +857,8 @@ void ImageState<I>::handle_open(int r) {
 
 template <typename I>
 void ImageState<I>::send_close_unlock() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  CephContext *cct = m_image_ctx->cct;
+  stone_assert(stone_mutex_is_locked(m_lock));
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_state = STATE_CLOSING;
@@ -874,7 +874,7 @@ void ImageState<I>::send_close_unlock() {
 
 template <typename I>
 void ImageState<I>::handle_close(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   if (r < 0) {
@@ -888,14 +888,14 @@ void ImageState<I>::handle_close(int r) {
 
 template <typename I>
 void ImageState<I>::send_refresh_unlock() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
-  CephContext *cct = m_image_ctx->cct;
+  stone_assert(stone_mutex_is_locked(m_lock));
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   m_state = STATE_REFRESHING;
-  ceph_assert(!m_actions_contexts.empty());
+  stone_assert(!m_actions_contexts.empty());
   auto &action_context = m_actions_contexts.front().first;
-  ceph_assert(action_context.action_type == ACTION_TYPE_REFRESH);
+  stone_assert(action_context.action_type == ACTION_TYPE_REFRESH);
 
   Context *ctx = create_async_context_callback(
     *m_image_ctx, create_context_callback<
@@ -909,15 +909,15 @@ void ImageState<I>::send_refresh_unlock() {
 
 template <typename I>
 void ImageState<I>::handle_refresh(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << r << dendl;
 
   m_lock.lock();
-  ceph_assert(!m_actions_contexts.empty());
+  stone_assert(!m_actions_contexts.empty());
 
   ActionContexts &action_contexts(m_actions_contexts.front());
-  ceph_assert(action_contexts.first.action_type == ACTION_TYPE_REFRESH);
-  ceph_assert(m_last_refresh <= action_contexts.first.refresh_seq);
+  stone_assert(action_contexts.first.action_type == ACTION_TYPE_REFRESH);
+  stone_assert(m_last_refresh <= action_contexts.first.refresh_seq);
 
   if (r == -ERESTART) {
     ldout(cct, 5) << "incomplete refresh: not updating sequence" << dendl;
@@ -931,15 +931,15 @@ void ImageState<I>::handle_refresh(int r) {
 
 template <typename I>
 void ImageState<I>::send_set_snap_unlock() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   m_state = STATE_SETTING_SNAP;
 
-  ceph_assert(!m_actions_contexts.empty());
+  stone_assert(!m_actions_contexts.empty());
   ActionContexts &action_contexts(m_actions_contexts.front());
-  ceph_assert(action_contexts.first.action_type == ACTION_TYPE_SET_SNAP);
+  stone_assert(action_contexts.first.action_type == ACTION_TYPE_SET_SNAP);
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << ": "
                  << "snap_id=" << action_contexts.first.snap_id << dendl;
 
@@ -955,7 +955,7 @@ void ImageState<I>::send_set_snap_unlock() {
 
 template <typename I>
 void ImageState<I>::handle_set_snap(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << " r=" << r << dendl;
 
   if (r < 0 && r != -ENOENT) {
@@ -968,15 +968,15 @@ void ImageState<I>::handle_set_snap(int r) {
 
 template <typename I>
 void ImageState<I>::send_prepare_lock_unlock() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   m_state = STATE_PREPARING_LOCK;
 
-  ceph_assert(!m_actions_contexts.empty());
+  stone_assert(!m_actions_contexts.empty());
   ActionContexts &action_contexts(m_actions_contexts.front());
-  ceph_assert(action_contexts.first.action_type == ACTION_TYPE_LOCK);
+  stone_assert(action_contexts.first.action_type == ACTION_TYPE_LOCK);
 
   Context *on_ready = action_contexts.first.on_ready;
   m_lock.unlock();
@@ -993,7 +993,7 @@ void ImageState<I>::send_prepare_lock_unlock() {
 template <typename I>
 int ImageState<I>::register_quiesce_watcher(QuiesceWatchCtx *watcher,
                                                 uint64_t *handle) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   m_quiesce_watchers->register_watcher(watcher, handle);
@@ -1004,7 +1004,7 @@ int ImageState<I>::register_quiesce_watcher(QuiesceWatchCtx *watcher,
 
 template <typename I>
 int ImageState<I>::unregister_quiesce_watcher(uint64_t handle) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << ": handle=" << handle << dendl;
 
   C_SaferCond ctx;
@@ -1014,7 +1014,7 @@ int ImageState<I>::unregister_quiesce_watcher(uint64_t handle) {
 
 template <typename I>
 void ImageState<I>::notify_quiesce(Context *on_finish) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   m_quiesce_watchers->notify_quiesce(on_finish);
@@ -1022,7 +1022,7 @@ void ImageState<I>::notify_quiesce(Context *on_finish) {
 
 template <typename I>
 void ImageState<I>::notify_unquiesce(Context *on_finish) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   m_quiesce_watchers->notify_unquiesce(on_finish);
@@ -1030,7 +1030,7 @@ void ImageState<I>::notify_unquiesce(Context *on_finish) {
 
 template <typename I>
 void ImageState<I>::quiesce_complete(uint64_t handle, int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << ": handle=" << handle << " r=" << r << dendl;
   m_quiesce_watchers->quiesce_complete(handle, r);
 }

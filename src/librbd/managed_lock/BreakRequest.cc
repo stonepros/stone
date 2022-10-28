@@ -15,7 +15,7 @@
 #include "librbd/asio/Utils.h"
 #include "librbd/managed_lock/GetLockerRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::managed_lock::BreakRequest: " << this \
                            << " " << __func__ << ": "
@@ -33,7 +33,7 @@ BreakRequest<I>::BreakRequest(librados::IoCtx& ioctx,
                               bool exclusive, bool blocklist_locker,
                               uint32_t blocklist_expire_seconds,
                               bool force_break_lock, Context *on_finish)
-  : m_ioctx(ioctx), m_cct(reinterpret_cast<CephContext *>(m_ioctx.cct())),
+  : m_ioctx(ioctx), m_cct(reinterpret_cast<StoneContext *>(m_ioctx.cct())),
     m_asio_engine(asio_engine), m_oid(oid), m_locker(locker),
     m_exclusive(exclusive), m_blocklist_locker(blocklist_locker),
     m_blocklist_expire_seconds(blocklist_expire_seconds),
@@ -57,7 +57,7 @@ void BreakRequest<I>::send_get_watchers() {
     create_rados_callback<klass, &klass::handle_get_watchers>(this);
   m_out_bl.clear();
   int r = m_ioctx.aio_operate(m_oid, rados_completion, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
@@ -218,7 +218,7 @@ void BreakRequest<I>::send_break_lock() {
   librados::AioCompletion *rados_completion =
     create_rados_callback<klass, &klass::handle_break_lock>(this);
   int r = m_ioctx.aio_operate(m_oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 

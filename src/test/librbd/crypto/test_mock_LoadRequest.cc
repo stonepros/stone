@@ -17,7 +17,7 @@ template <>
 struct CryptoObjectDispatch<MockImageCtx> : public io::MockObjectDispatch {
 
   static CryptoObjectDispatch* create(
-          MockImageCtx* image_ctx,ceph::ref_t<CryptoInterface> crypto) {
+          MockImageCtx* image_ctx,stone::ref_t<CryptoInterface> crypto) {
     return new CryptoObjectDispatch();
   }
 

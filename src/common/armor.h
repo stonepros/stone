@@ -1,5 +1,5 @@
-#ifndef CEPH_ARMOR_H
-#define CEPH_ARMOR_H
+#ifndef STONE_ARMOR_H
+#define STONE_ARMOR_H
 
 #ifdef __cplusplus
 extern "C" {

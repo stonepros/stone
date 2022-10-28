@@ -5,8 +5,8 @@
 #include "tools/rbd/Schedule.h"
 #include "tools/rbd/Shell.h"
 #include "tools/rbd/Utils.h"
-#include "common/ceph_context.h"
-#include "common/ceph_json.h"
+#include "common/stone_context.h"
+#include "common/stone_json.h"
 #include "common/errno.h"
 #include "common/Formatter.h"
 #include "common/TextTable.h"
@@ -125,7 +125,7 @@ void get_arguments_add(po::options_description *positional,
 }
 
 int execute_add(const po::variables_map &vm,
-                const std::vector<std::string> &ceph_global_init_args) {
+                const std::vector<std::string> &stone_global_init_args) {
   std::map<std::string, std::string> args;
 
   int r = get_level_spec_args(vm, &args);
@@ -160,7 +160,7 @@ void get_arguments_remove(po::options_description *positional,
 }
 
 int execute_remove(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   std::map<std::string, std::string> args;
 
   int r = get_level_spec_args(vm, &args);
@@ -197,7 +197,7 @@ void get_arguments_list(po::options_description *positional,
 }
 
 int execute_list(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   std::map<std::string, std::string> args;
 
   int r = get_level_spec_args(vm, &args);
@@ -262,7 +262,7 @@ void get_arguments_status(po::options_description *positional,
 }
 
 int execute_status(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   std::map<std::string, std::string> args;
 
   int r = get_level_spec_args(vm, &args);

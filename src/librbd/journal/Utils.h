@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_JOURNAL_UTILS_H
-#define CEPH_LIBRBD_JOURNAL_UTILS_H
+#ifndef STONE_LIBRBD_JOURNAL_UTILS_H
+#define STONE_LIBRBD_JOURNAL_UTILS_H
 
 #include "include/common_fwd.h"
 #include "include/int_types.h"
@@ -19,7 +19,7 @@ struct TagData;
 namespace util {
 
 struct C_DecodeTag : public Context {
-  CephContext *cct;
+  StoneContext *cct;
   ceph::mutex *lock;
   uint64_t *tag_tid;
   TagData *tag_data;
@@ -27,7 +27,7 @@ struct C_DecodeTag : public Context {
 
   cls::journal::Tag tag;
 
-  C_DecodeTag(CephContext *cct, ceph::mutex *lock, uint64_t *tag_tid,
+  C_DecodeTag(StoneContext *cct, ceph::mutex *lock, uint64_t *tag_tid,
               TagData *tag_data, Context *on_finish)
     : cct(cct), lock(lock), tag_tid(tag_tid), tag_data(tag_data),
       on_finish(on_finish) {
@@ -49,7 +49,7 @@ struct C_DecodeTag : public Context {
 struct C_DecodeTags : public Context {
   typedef std::list<cls::journal::Tag> Tags;
 
-  CephContext *cct;
+  StoneContext *cct;
   ceph::mutex *lock;
   uint64_t *tag_tid;
   TagData *tag_data;
@@ -57,7 +57,7 @@ struct C_DecodeTags : public Context {
 
   Tags tags;
 
-  C_DecodeTags(CephContext *cct, ceph::mutex *lock, uint64_t *tag_tid,
+  C_DecodeTags(StoneContext *cct, ceph::mutex *lock, uint64_t *tag_tid,
                TagData *tag_data, Context *on_finish)
     : cct(cct), lock(lock), tag_tid(tag_tid), tag_data(tag_data),
       on_finish(on_finish) {
@@ -77,4 +77,4 @@ struct C_DecodeTags : public Context {
 } // namespace journal
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_JOURNAL_UTILS_H
+#endif // STONE_LIBRBD_JOURNAL_UTILS_H

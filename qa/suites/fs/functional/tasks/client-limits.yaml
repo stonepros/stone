@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - responding to mclientcaps\(revoke\)
       - not advance its oldest_client_tid
@@ -12,7 +12,7 @@ overrides:
       - \(MDS_CLIENT_OLDEST_TID\)
       - \(MDS_CACHE_OVERSIZED\)
 tasks:
-  - cephfs_test_runner:
+  - stonefs_test_runner:
       fail_on_skip: false
       modules:
-        - tasks.cephfs.test_client_limits
+        - tasks.stonefs.test_client_limits

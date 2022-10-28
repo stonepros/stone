@@ -11,13 +11,13 @@
 
 using std::list;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 CLS_VER(1,0)
 CLS_NAME(version)
 
 
-#define VERSION_ATTR "ceph.objclass.version"
+#define VERSION_ATTR "stone.objclass.version"
 
 static int set_version(cls_method_context_t hctx, struct obj_version *objv)
 {
@@ -70,7 +70,7 @@ static int read_version(cls_method_context_t hctx, obj_version *objv, bool impli
   try {
     auto iter = bl.cbegin();
     decode(*objv, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(0, "ERROR: read_version(): failed to decode version entry\n");
     return -EIO;
   }
@@ -86,7 +86,7 @@ static int cls_version_set(cls_method_context_t hctx, bufferlist *in, bufferlist
   cls_version_set_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_version_get(): failed to decode entry\n");
     return -EINVAL;
   }
@@ -152,7 +152,7 @@ static int cls_version_inc(cls_method_context_t hctx, bufferlist *in, bufferlist
   cls_version_inc_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_version_get(): failed to decode entry\n");
     return -EINVAL;
   }
@@ -181,7 +181,7 @@ static int cls_version_check(cls_method_context_t hctx, bufferlist *in, bufferli
   cls_version_check_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_version_get(): failed to decode entry\n");
     return -EINVAL;
   }

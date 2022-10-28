@@ -13,8 +13,8 @@
 #include "tools/rbd_mirror/MirrorStatusWatcher.h"
 #include "tools/rbd_mirror/Threads.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::MirrorStatusUpdater " << this \
                            << " " << __func__ << ": "
@@ -34,7 +34,7 @@ MirrorStatusUpdater<I>::MirrorStatusUpdater(
     const std::string& local_mirror_uuid)
   : m_io_ctx(io_ctx), m_threads(threads),
     m_local_mirror_uuid(local_mirror_uuid),
-    m_lock(ceph::make_mutex("rbd::mirror::MirrorStatusUpdater " +
+    m_lock(stone::make_mutex("rbd::mirror::MirrorStatusUpdater " +
                               stringify(m_io_ctx.get_id()))) {
   dout(10) << "local_mirror_uuid=" << local_mirror_uuid << ", "
            << "pool_id=" << m_io_ctx.get_id() << dendl;
@@ -42,7 +42,7 @@ MirrorStatusUpdater<I>::MirrorStatusUpdater(
 
 template <typename I>
 MirrorStatusUpdater<I>::~MirrorStatusUpdater() {
-  ceph_assert(!m_initialized);
+  stone_assert(!m_initialized);
   delete m_mirror_status_watcher;
 }
 
@@ -50,7 +50,7 @@ template <typename I>
 void MirrorStatusUpdater<I>::init(Context* on_finish) {
   dout(10) << dendl;
 
-  ceph_assert(!m_initialized);
+  stone_assert(!m_initialized);
   m_initialized = true;
 
   {
@@ -101,13 +101,13 @@ void MirrorStatusUpdater<I>::shut_down(Context* on_finish) {
 
   {
     std::lock_guard timer_locker{m_threads->timer_lock};
-    ceph_assert(m_timer_task != nullptr);
+    stone_assert(m_timer_task != nullptr);
     m_threads->timer->cancel_event(m_timer_task);
   }
 
   {
     std::unique_lock locker(m_lock);
-    ceph_assert(m_initialized);
+    stone_assert(m_initialized);
     m_initialized = false;
   }
 
@@ -250,8 +250,8 @@ template <typename I>
 void MirrorStatusUpdater<I>::schedule_timer_task() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_threads->timer_lock));
-  ceph_assert(m_timer_task == nullptr);
+  stone_assert(stone_mutex_is_locked(m_threads->timer_lock));
+  stone_assert(m_timer_task == nullptr);
   m_timer_task = create_context_callback<
     MirrorStatusUpdater<I>,
     &MirrorStatusUpdater<I>::handle_timer_task>(this);
@@ -262,8 +262,8 @@ template <typename I>
 void MirrorStatusUpdater<I>::handle_timer_task(int r) {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_threads->timer_lock));
-  ceph_assert(m_timer_task != nullptr);
+  stone_assert(stone_mutex_is_locked(m_threads->timer_lock));
+  stone_assert(m_timer_task != nullptr);
   m_timer_task = nullptr;
   schedule_timer_task();
 
@@ -277,7 +277,7 @@ void MirrorStatusUpdater<I>::handle_timer_task(int r) {
 
 template <typename I>
 void MirrorStatusUpdater<I>::queue_update_task(
-  std::unique_lock<ceph::mutex>&& locker) {
+  std::unique_lock<stone::mutex>&& locker) {
   if (!m_initialized) {
     return;
   }
@@ -291,8 +291,8 @@ void MirrorStatusUpdater<I>::queue_update_task(
   }
 
   m_update_in_progress = true;
-  ceph_assert(!m_update_in_flight);
-  ceph_assert(!m_update_requested);
+  stone_assert(!m_update_in_flight);
+  stone_assert(!m_update_requested);
   locker.unlock();
 
   dout(10) << dendl;
@@ -307,8 +307,8 @@ void MirrorStatusUpdater<I>::update_task(int r) {
   dout(10) << dendl;
 
   std::unique_lock locker(m_lock);
-  ceph_assert(m_update_in_progress);
-  ceph_assert(!m_update_in_flight);
+  stone_assert(m_update_in_progress);
+  stone_assert(!m_update_in_flight);
   m_update_in_flight = true;
 
   std::swap(m_updating_global_image_ids, m_update_global_image_ids);
@@ -324,7 +324,7 @@ void MirrorStatusUpdater<I>::update_task(int r) {
     return;
   }
 
-  auto gather = new C_Gather(g_ceph_context, ctx);
+  auto gather = new C_Gather(g_stone_context, ctx);
 
   auto it = updating_global_image_ids.begin();
   while (it != updating_global_image_ids.end()) {
@@ -351,7 +351,7 @@ void MirrorStatusUpdater<I>::update_task(int r) {
 
     auto aio_comp = create_rados_callback(gather->new_sub());
     int r = m_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     aio_comp->release();
   }
 
@@ -371,10 +371,10 @@ void MirrorStatusUpdater<I>::handle_update_task(int r) {
   Contexts on_finish_ctxs;
   std::swap(on_finish_ctxs, m_update_on_finish_ctxs);
 
-  ceph_assert(m_update_in_progress);
+  stone_assert(m_update_in_progress);
   m_update_in_progress = false;
 
-  ceph_assert(m_update_in_flight);
+  stone_assert(m_update_in_flight);
   m_update_in_flight = false;
 
   m_updating_global_image_ids.clear();

@@ -12,8 +12,8 @@
 #include "librbd/journal/Policy.h"
 #include "tools/rbd_mirror/image_deleter/Types.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_deleter::SnapshotPurgeRequest: " \
                            << this << " " << __func__ << ": "

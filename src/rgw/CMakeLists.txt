@@ -266,7 +266,7 @@ target_link_libraries(rgw_a
   PRIVATE
   librados cls_otp_client cls_lock_client cls_rgw_client cls_refcount_client
   cls_log_client cls_timeindex_client cls_version_client cls_cmpomap_client
-  cls_user_client cls_rgw_gc_client cls_2pc_queue_client ceph-common common_utf8 global
+  cls_user_client cls_rgw_gc_client cls_2pc_queue_client stone-common common_utf8 global
   ${CURL_LIBRARIES}
   ${EXPAT_LIBRARIES}
   ${OPENLDAP_LIBRARIES} ${CRYPTO_LIBS}
@@ -441,21 +441,21 @@ set_target_properties(rgw PROPERTIES OUTPUT_NAME rgw VERSION 2.0.0
 install(TARGETS rgw DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(WITH_TESTS)
-  add_executable(ceph_rgw_jsonparser
+  add_executable(stone_rgw_jsonparser
     rgw_jsonparser.cc)
-  target_link_libraries(ceph_rgw_jsonparser
+  target_link_libraries(stone_rgw_jsonparser
     ${rgw_libs}
     global)
 
-  add_executable(ceph_rgw_multiparser
+  add_executable(stone_rgw_multiparser
     rgw_multiparser.cc)
-  target_link_libraries(ceph_rgw_multiparser
+  target_link_libraries(stone_rgw_multiparser
     ${rgw_libs}
     global)
 
   install(TARGETS
-    ceph_rgw_jsonparser
-    ceph_rgw_multiparser
+    stone_rgw_jsonparser
+    stone_rgw_multiparser
     DESTINATION bin)
 endif(WITH_TESTS)
 

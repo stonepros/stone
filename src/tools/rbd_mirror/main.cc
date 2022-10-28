@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/config.h"
 #include "common/debug.h"
 #include "common/errno.h"
@@ -41,20 +41,20 @@ int main(int argc, const char **argv)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
 
-  auto cct = global_init(nullptr, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(nullptr, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_DAEMON,
 			 CINIT_FLAG_UNPRIVILEGED_DAEMON_DEFAULTS);
 
   if (g_conf()->daemonize) {
-    global_init_daemonize(g_ceph_context);
+    global_init_daemonize(g_stone_context);
   }
 
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   init_async_signal_handler();
   register_async_signal_handler(SIGHUP, handle_signal);
@@ -65,12 +65,12 @@ int main(int argc, const char **argv)
   argv_to_vec(argc, argv, cmd_args);
 
   // disable unnecessary librbd cache
-  g_ceph_context->_conf.set_val_or_die("rbd_cache", "false");
+  g_stone_context->_conf.set_val_or_die("rbd_cache", "false");
 
   auto prio =
-      g_ceph_context->_conf.get_val<int64_t>("rbd_mirror_perf_stats_prio");
+      g_stone_context->_conf.get_val<int64_t>("rbd_mirror_perf_stats_prio");
   {
-    PerfCountersBuilder plb(g_ceph_context, "rbd_mirror",
+    PerfCountersBuilder plb(g_stone_context, "rbd_mirror",
                             rbd::mirror::l_rbd_mirror_journal_first,
                             rbd::mirror::l_rbd_mirror_journal_last);
     plb.add_u64_counter(rbd::mirror::l_rbd_mirror_replay, "replay", "Replays",
@@ -82,7 +82,7 @@ int main(int argc, const char **argv)
     g_journal_perf_counters = plb.create_perf_counters();
   }
   {
-    PerfCountersBuilder plb(g_ceph_context, "rbd_mirror_snapshot",
+    PerfCountersBuilder plb(g_stone_context, "rbd_mirror_snapshot",
                             rbd::mirror::l_rbd_mirror_snapshot_first,
                             rbd::mirror::l_rbd_mirror_snapshot_last);
     plb.add_u64_counter(rbd::mirror::l_rbd_mirror_snapshot_replay_snapshots,
@@ -94,10 +94,10 @@ int main(int argc, const char **argv)
                         unit_t(UNIT_BYTES));
     g_snapshot_perf_counters = plb.create_perf_counters();
   }
-  g_ceph_context->get_perfcounters_collection()->add(g_journal_perf_counters);
-  g_ceph_context->get_perfcounters_collection()->add(g_snapshot_perf_counters);
+  g_stone_context->get_perfcounters_collection()->add(g_journal_perf_counters);
+  g_stone_context->get_perfcounters_collection()->add(g_snapshot_perf_counters);
 
-  mirror = new rbd::mirror::Mirror(g_ceph_context, cmd_args);
+  mirror = new rbd::mirror::Mirror(g_stone_context, cmd_args);
   int r = mirror->init();
   if (r < 0) {
     std::cerr << "failed to initialize: " << cpp_strerror(r) << std::endl;
@@ -112,8 +112,8 @@ int main(int argc, const char **argv)
   unregister_async_signal_handler(SIGTERM, handle_signal);
   shutdown_async_signal_handler();
 
-  g_ceph_context->get_perfcounters_collection()->remove(g_journal_perf_counters);
-  g_ceph_context->get_perfcounters_collection()->remove(g_snapshot_perf_counters);
+  g_stone_context->get_perfcounters_collection()->remove(g_journal_perf_counters);
+  g_stone_context->get_perfcounters_collection()->remove(g_snapshot_perf_counters);
 
   delete mirror;
   delete g_journal_perf_counters;

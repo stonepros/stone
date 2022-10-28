@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -18,8 +18,8 @@
 #include "mds/MDCache.h"
 #include "mds/MDSContinuation.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, mdcache->mds)
 static ostream& _prefix(std::ostream *_dout, MDSRank *mds) {
@@ -41,7 +41,7 @@ std::ostream &operator<<(std::ostream &os, const ScrubStack::State &state) {
     os << "PAUSED";
     break;
   default:
-    ceph_abort();
+    stone_abort();
   }
 
   return os;
@@ -50,7 +50,7 @@ std::ostream &operator<<(std::ostream &os, const ScrubStack::State &state) {
 void ScrubStack::dequeue(MDSCacheObject *obj)
 {
   dout(20) << "dequeue " << *obj << " from ScrubStack" << dendl;
-  ceph_assert(obj->item_scrub.is_on_list());
+  stone_assert(obj->item_scrub.is_on_list());
   obj->put(MDSCacheObject::PIN_SCRUBQUEUE);
   obj->item_scrub.remove_myself();
   stack_size--;
@@ -58,11 +58,11 @@ void ScrubStack::dequeue(MDSCacheObject *obj)
 
 int ScrubStack::_enqueue(MDSCacheObject *obj, ScrubHeaderRef& header, bool top)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(mdcache->mds->mds_lock));
+  stone_assert(stone_mutex_is_locked_by_me(mdcache->mds->mds_lock));
   if (CInode *in = dynamic_cast<CInode*>(obj)) {
     if (in->scrub_is_in_progress()) {
       dout(10) << __func__ << " with {" << *in << "}" << ", already in scrubbing" << dendl;
-      return -CEPHFS_EBUSY;
+      return -STONEFS_EBUSY;
     }
 
     dout(10) << __func__ << " with {" << *in << "}" << ", top=" << top << dendl;
@@ -70,7 +70,7 @@ int ScrubStack::_enqueue(MDSCacheObject *obj, ScrubHeaderRef& header, bool top)
   } else if (CDir *dir = dynamic_cast<CDir*>(obj)) {
     if (dir->scrub_is_in_progress()) {
       dout(10) << __func__ << " with {" << *dir << "}" << ", already in scrubbing" << dendl;
-      return -CEPHFS_EBUSY;
+      return -STONEFS_EBUSY;
     }
 
     dout(10) << __func__ << " with {" << *dir << "}" << ", top=" << top << dendl;
@@ -78,7 +78,7 @@ int ScrubStack::_enqueue(MDSCacheObject *obj, ScrubHeaderRef& header, bool top)
     dir->auth_pin(this);
     dir->scrub_initialize(header);
   } else {
-    ceph_assert(0 == "queue dentry to scrub stack");
+    stone_assert(0 == "queue dentry to scrub stack");
   }
 
   dout(20) << "enqueue " << *obj << " to " << (top ? "top" : "bottom") << " of ScrubStack" << dendl;
@@ -97,14 +97,14 @@ int ScrubStack::enqueue(CInode *in, ScrubHeaderRef& header, bool top)
 {
   // abort in progress
   if (clear_stack)
-    return -CEPHFS_EAGAIN;
+    return -STONEFS_EAGAIN;
 
   header->set_origin(in->ino());
   auto ret = scrubbing_map.emplace(header->get_tag(), header);
   if (!ret.second) {
     dout(10) << __func__ << " with {" << *in << "}"
 	     << ", conflicting tag " << header->get_tag() << dendl;
-    return -CEPHFS_EEXIST;
+    return -STONEFS_EEXIST;
   }
 
   int r = _enqueue(in, header, top);
@@ -151,7 +151,7 @@ private:
 
 void ScrubStack::kick_off_scrubs()
 {
-  ceph_assert(ceph_mutex_is_locked(mdcache->mds->mds_lock));
+  stone_assert(stone_mutex_is_locked(mdcache->mds->mds_lock));
   dout(20) << __func__ << ": state=" << state << dendl;
 
   if (clear_stack || state == STATE_PAUSING || state == STATE_PAUSED) {
@@ -228,7 +228,7 @@ void ScrubStack::kick_off_scrubs()
 	it = next;
       }
     } else {
-      ceph_assert(0 == "dentry in scrub stack");
+      stone_assert(0 == "dentry in scrub stack");
     }
   }
 }
@@ -252,12 +252,12 @@ bool ScrubStack::validate_inode_auth(CInode *in)
       mds->wait_for_cluster_recovered(new C_RetryScrub(this, in));
     } else {
       ScrubHeaderRef header = in->get_scrub_header();
-      ceph_assert(header);
+      stone_assert(header);
 
       auto ret = remote_scrubs.emplace(std::piecewise_construct,
 				       std::forward_as_tuple(in),
 				       std::forward_as_tuple());
-      ceph_assert(ret.second); // FIXME: parallel scrubs?
+      stone_assert(ret.second); // FIXME: parallel scrubs?
       auto &scrub_r = ret.first->second;
       scrub_r.tag = header->get_tag();
 
@@ -281,13 +281,13 @@ bool ScrubStack::validate_inode_auth(CInode *in)
 void ScrubStack::scrub_dir_inode(CInode *in, bool *added_children, bool *done)
 {
   dout(10) << __func__ << " " << *in << dendl;
-  ceph_assert(in->is_auth());
+  stone_assert(in->is_auth());
   MDSRank *mds = mdcache->mds;
 
   ScrubHeaderRef header = in->get_scrub_header();
-  ceph_assert(header);
+  stone_assert(header);
 
-  MDSGatherBuilder gather(g_ceph_context);
+  MDSGatherBuilder gather(g_stone_context);
 
   auto &queued = in->scrub_queued_frags();
   std::map<mds_rank_t, fragset_t> scrub_remote;
@@ -335,7 +335,7 @@ void ScrubStack::scrub_dir_inode(CInode *in, bool *added_children, bool *done)
     auto ret = remote_scrubs.emplace(std::piecewise_construct,
 				     std::forward_as_tuple(in),
 				     std::forward_as_tuple());
-    ceph_assert(ret.second); // FIXME: parallel scrubs?
+    stone_assert(ret.second); // FIXME: parallel scrubs?
     auto &scrub_r = ret.first->second;
     scrub_r.tag = header->get_tag();
 
@@ -391,7 +391,7 @@ void ScrubStack::scrub_dir_inode_final(CInode *in)
 
 void ScrubStack::scrub_dirfrag(CDir *dir, bool *done)
 {
-  ceph_assert(dir != NULL);
+  stone_assert(dir != NULL);
 
   dout(10) << __func__ << " " << *dir << dendl;
 
@@ -405,7 +405,7 @@ void ScrubStack::scrub_dirfrag(CDir *dir, bool *done)
   version_t last_scrub = dir->scrub_info()->last_recursive.version;
   if (header->get_recursive()) {
     for (auto it = dir->begin(); it != dir->end(); ++it) {
-      if (it->first.snapid != CEPH_NOSNAP)
+      if (it->first.snapid != STONE_NOSNAP)
 	continue;
       CDentry *dn = it->second;
       CDentry::linkage_t *dnl = dn->get_linkage();
@@ -497,7 +497,7 @@ void ScrubStack::_validate_inode_done(CInode *in, int r,
 }
 
 void ScrubStack::complete_control_contexts(int r) {
-  ceph_assert(ceph_mutex_is_locked_by_me(mdcache->mds->mds_lock));
+  stone_assert(stone_mutex_is_locked_by_me(mdcache->mds->mds_lock));
 
   for (auto &ctx : control_ctxs) {
     ctx->complete(r);
@@ -515,7 +515,7 @@ void ScrubStack::set_state(State next_state) {
 }
 
 bool ScrubStack::scrub_in_transition_state() {
-  ceph_assert(ceph_mutex_is_locked_by_me(mdcache->mds->mds_lock));
+  stone_assert(stone_mutex_is_locked_by_me(mdcache->mds->mds_lock));
   dout(20) << __func__ << ": state=" << state << dendl;
 
   // STATE_RUNNING is considered as a transition state so as to
@@ -528,7 +528,7 @@ bool ScrubStack::scrub_in_transition_state() {
 }
 
 std::string_view ScrubStack::scrub_summary() {
-  ceph_assert(ceph_mutex_is_locked_by_me(mdcache->mds->mds_lock));
+  stone_assert(stone_mutex_is_locked_by_me(mdcache->mds->mds_lock));
 
   bool have_more = false;
   CachedStackStringStream cs;
@@ -582,7 +582,7 @@ std::string_view ScrubStack::scrub_summary() {
 }
 
 void ScrubStack::scrub_status(Formatter *f) {
-  ceph_assert(ceph_mutex_is_locked_by_me(mdcache->mds->mds_lock));
+  stone_assert(stone_mutex_is_locked_by_me(mdcache->mds->mds_lock));
 
   f->open_object_section("result");
 
@@ -660,8 +660,8 @@ void ScrubStack::scrub_status(Formatter *f) {
 }
 
 void ScrubStack::abort_pending_scrubs() {
-  ceph_assert(ceph_mutex_is_locked_by_me(mdcache->mds->mds_lock));
-  ceph_assert(clear_stack);
+  stone_assert(stone_mutex_is_locked_by_me(mdcache->mds->mds_lock));
+  stone_assert(clear_stack);
 
   auto abort_one = [this](MDSCacheObject *obj) {
     if (CInode *in = dynamic_cast<CInode*>(obj))  {
@@ -670,7 +670,7 @@ void ScrubStack::abort_pending_scrubs() {
       dir->scrub_aborted();
       dir->auth_unpin(this);
     } else {
-      ceph_abort(0 == "dentry in scrub stack");
+      stone_abort(0 == "dentry in scrub stack");
     }
   };
   for (auto it = scrub_stack.begin(); !it.end(); ++it)
@@ -702,7 +702,7 @@ void ScrubStack::send_state_message(int op) {
 }
 
 void ScrubStack::scrub_abort(Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked_by_me(mdcache->mds->mds_lock));
+  stone_assert(stone_mutex_is_locked_by_me(mdcache->mds->mds_lock));
 
   dout(10) << __func__ << ": aborting with " << scrubs_in_progress
            << " scrubs in progress and " << stack_size << " in the"
@@ -730,7 +730,7 @@ void ScrubStack::scrub_abort(Context *on_finish) {
 }
 
 void ScrubStack::scrub_pause(Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked_by_me(mdcache->mds->mds_lock));
+  stone_assert(stone_mutex_is_locked_by_me(mdcache->mds->mds_lock));
 
   dout(10) << __func__ << ": pausing with " << scrubs_in_progress
            << " scrubs in progress and " << stack_size << " in the"
@@ -742,7 +742,7 @@ void ScrubStack::scrub_pause(Context *on_finish) {
   // abort is in progress
   if (clear_stack) {
     if (on_finish)
-      on_finish->complete(-CEPHFS_EINVAL);
+      on_finish->complete(-STONEFS_EINVAL);
     return;
   }
 
@@ -760,7 +760,7 @@ void ScrubStack::scrub_pause(Context *on_finish) {
 }
 
 bool ScrubStack::scrub_resume() {
-  ceph_assert(ceph_mutex_is_locked_by_me(mdcache->mds->mds_lock));
+  stone_assert(stone_mutex_is_locked_by_me(mdcache->mds->mds_lock));
   dout(20) << __func__ << ": state=" << state << dendl;
 
   if (mdcache->mds->get_nodeid() == 0)
@@ -769,10 +769,10 @@ bool ScrubStack::scrub_resume() {
   int r = 0;
 
   if (clear_stack) {
-    r = -CEPHFS_EINVAL;
+    r = -STONEFS_EINVAL;
   } else if (state == STATE_PAUSING) {
     set_state(STATE_RUNNING);
-    complete_control_contexts(-CEPHFS_ECANCELED);
+    complete_control_contexts(-STONEFS_ECANCELED);
   } else if (state == STATE_PAUSED) {
     set_state(STATE_RUNNING);
     kick_off_scrubs();
@@ -811,7 +811,7 @@ void ScrubStack::dispatch(const cref_t<Message> &m)
 
   default:
     derr << " scrub stack unknown message " << m->get_type() << dendl_impl;
-    ceph_abort_msg("scrub stack unknown message");
+    stone_abort_msg("scrub stack unknown message");
   }
 }
 
@@ -825,10 +825,10 @@ void ScrubStack::handle_scrub(const cref_t<MMDSScrub> &m)
   case MMDSScrub::OP_QUEUEDIR:
     {
       CInode *diri = mdcache->get_inode(m->get_ino());
-      ceph_assert(diri);
+      stone_assert(diri);
 
       std::vector<CDir*> dfs;
-      MDSGatherBuilder gather(g_ceph_context);
+      MDSGatherBuilder gather(g_stone_context);
       for (const auto& fg : m->get_frags()) {
 	CDir *dir = diri->get_dirfrag(fg);
 	if (!dir) {
@@ -881,7 +881,7 @@ void ScrubStack::handle_scrub(const cref_t<MMDSScrub> &m)
   case MMDSScrub::OP_QUEUEDIR_ACK:
     {
       CInode *diri = mdcache->get_inode(m->get_ino());
-      ceph_assert(diri);
+      stone_assert(diri);
       auto it = remote_scrubs.find(diri);
       if (it != remote_scrubs.end() &&
 	  m->get_tag() == it->second.tag) {
@@ -905,7 +905,7 @@ void ScrubStack::handle_scrub(const cref_t<MMDSScrub> &m)
   case MMDSScrub::OP_QUEUEINO:
     {
       CInode *in = mdcache->get_inode(m->get_ino());
-      ceph_assert(in);
+      stone_assert(in);
 
       ScrubHeaderRef header;
       if (auto it = scrubbing_map.find(m->get_tag()); it != scrubbing_map.end()) {
@@ -931,12 +931,12 @@ void ScrubStack::handle_scrub(const cref_t<MMDSScrub> &m)
   case MMDSScrub::OP_QUEUEINO_ACK:
     {
       CInode *in = mdcache->get_inode(m->get_ino());
-      ceph_assert(in);
+      stone_assert(in);
       auto it = remote_scrubs.find(in);
       if (it != remote_scrubs.end() &&
 	  m->get_tag() == it->second.tag &&
 	  it->second.gather_set.erase(from)) {
-	ceph_assert(it->second.gather_set.empty());
+	stone_assert(it->second.gather_set.empty());
 	remote_scrubs.erase(it);
 
 	remove_from_waiting(in, false);
@@ -961,7 +961,7 @@ void ScrubStack::handle_scrub(const cref_t<MMDSScrub> &m)
     break;
   default:
     derr << " scrub stack unknown scrub operation " << m->get_op() << dendl_impl;
-    ceph_abort_msg("scrub stack unknown scrub operation");
+    stone_abort_msg("scrub stack unknown scrub operation");
   }
 }
 

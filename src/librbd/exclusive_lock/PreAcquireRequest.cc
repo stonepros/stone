@@ -10,7 +10,7 @@
 #include "librbd/ImageState.h"
 #include "librbd/asio/ContextWQ.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::exclusive_lock::PreAcquireRequest: " \
                            << this << " " << __func__ << ": "
@@ -46,7 +46,7 @@ void PreAcquireRequest<I>::send() {
 
 template <typename I>
 void PreAcquireRequest<I>::send_prepare_lock() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   // acquire the lock if the image is not busy performing other actions
@@ -57,7 +57,7 @@ void PreAcquireRequest<I>::send_prepare_lock() {
 
 template <typename I>
 void PreAcquireRequest<I>::handle_prepare_lock(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   send_flush_notifies();
@@ -65,7 +65,7 @@ void PreAcquireRequest<I>::handle_prepare_lock(int r) {
 
 template <typename I>
 void PreAcquireRequest<I>::send_flush_notifies() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PreAcquireRequest<I>;
@@ -76,10 +76,10 @@ void PreAcquireRequest<I>::send_flush_notifies() {
 
 template <typename I>
 void PreAcquireRequest<I>::handle_flush_notifies(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   finish();
 }
 

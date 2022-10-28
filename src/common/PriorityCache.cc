@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat
  *
@@ -16,7 +16,7 @@
 #include "common/dout.h"
 #include "perfglue/heap_profiler.h"
 #define dout_context cct
-#define dout_subsys ceph_subsys_prioritycache
+#define dout_subsys stone_subsys_prioritycache
 #undef dout_prefix
 #define dout_prefix *_dout << "prioritycache "
 
@@ -58,7 +58,7 @@ namespace PriorityCache
     return val;
   }
 
-  Manager::Manager(CephContext *c,
+  Manager::Manager(StoneContext *c,
                    uint64_t min,
                    uint64_t max,
                    uint64_t target,
@@ -114,9 +114,9 @@ namespace PriorityCache
     size_t unmapped = 0;
     uint64_t mapped = 0;
 
-    ceph_heap_release_free_memory();
-    ceph_heap_get_numeric_property("generic.heap_size", &heap_size);
-    ceph_heap_get_numeric_property("tcmalloc.pageheap_unmapped_bytes", &unmapped);
+    stone_heap_release_free_memory();
+    stone_heap_get_numeric_property("generic.heap_size", &heap_size);
+    stone_heap_get_numeric_property("tcmalloc.pageheap_unmapped_bytes", &unmapped);
     mapped = heap_size - unmapped;
 
     uint64_t new_size = tuned_mem;
@@ -152,8 +152,8 @@ namespace PriorityCache
   void Manager::insert(const std::string& name, std::shared_ptr<PriCache> c,
                        bool enable_perf_counters)
   {
-    ceph_assert(!caches.count(name));
-    ceph_assert(!indexes.count(name));
+    stone_assert(!caches.count(name));
+    stone_assert(!indexes.count(name));
 
     caches.emplace(name, c);
 
@@ -168,7 +168,7 @@ namespace PriorityCache
     int start = cur_index++;
     int end = cur_index + Extra::E_LAST + 1;
 
-    ceph_assert(end < PERF_COUNTER_MAX_BOUND);
+    stone_assert(end < PERF_COUNTER_MAX_BOUND);
     indexes.emplace(name, std::vector<int>(Extra::E_LAST + 1));
 
     PerfCountersBuilder b(cct, this->name + ":" + name, start, end);
@@ -290,18 +290,18 @@ namespace PriorityCache
       // Update the per-priority perf counters
       for (auto &l : loggers) {
         auto it = caches.find(l.first);
-        ceph_assert(it != caches.end());
+        stone_assert(it != caches.end());
 
         auto bytes = it->second->get_cache_bytes(pri);
         l.second->set(indexes[it->first][pri], bytes);
       }
     }
     // assert if we assigned more memory than is available.
-    ceph_assert(mem_avail >= 0);
+    stone_assert(mem_avail >= 0);
 
     for (auto &l : loggers) {
       auto it = caches.find(l.first);
-      ceph_assert(it != caches.end());
+      stone_assert(it != caches.end());
 
       // Commit the new cache size
       int64_t committed = it->second->commit_cache_size(tuned_mem);

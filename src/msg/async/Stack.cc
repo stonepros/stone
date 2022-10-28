@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 XSky <haomai@xsky.com>
  *
@@ -28,9 +28,9 @@
 #endif
 
 #include "common/dout.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #undef dout_prefix
 #define dout_prefix *_dout << "stack "
 
@@ -40,7 +40,7 @@ std::function<void ()> NetworkStack::add_thread(unsigned worker_id)
   return [this, w]() {
       char tp_name[16];
       sprintf(tp_name, "msgr-worker-%u", w->id);
-      ceph_pthread_setname(pthread_self(), tp_name);
+      stone_pthread_setname(pthread_self(), tp_name);
       const unsigned EventMaxWaitUs = 30000000;
       w->center.set_owner();
       ldout(cct, 10) << __func__ << " starting" << dendl;
@@ -49,7 +49,7 @@ std::function<void ()> NetworkStack::add_thread(unsigned worker_id)
       while (!w->done) {
         ldout(cct, 30) << __func__ << " calling event process" << dendl;
 
-        ceph::timespan dur;
+        stone::timespan dur;
         int r = w->center.process_events(EventMaxWaitUs, &dur);
         if (r < 0) {
           ldout(cct, 20) << __func__ << " process events failed: "
@@ -63,7 +63,7 @@ std::function<void ()> NetworkStack::add_thread(unsigned worker_id)
   };
 }
 
-std::shared_ptr<NetworkStack> NetworkStack::create(CephContext *c,
+std::shared_ptr<NetworkStack> NetworkStack::create(StoneContext *c,
 						   const std::string &t)
 {
   std::shared_ptr<NetworkStack> stack = nullptr;
@@ -82,7 +82,7 @@ std::shared_ptr<NetworkStack> NetworkStack::create(CephContext *c,
   if (stack == nullptr) {
     lderr(c) << __func__ << " ms_async_transport_type " << t <<
     " is not supported! " << dendl;
-    ceph_abort();
+    stone_abort();
     return nullptr;
   }
   
@@ -98,10 +98,10 @@ std::shared_ptr<NetworkStack> NetworkStack::create(CephContext *c,
   return stack;
 }
 
-NetworkStack::NetworkStack(CephContext *c)
+NetworkStack::NetworkStack(StoneContext *c)
   : cct(c)
 {
-  ceph_assert(cct->_conf->ms_async_op_threads > 0);
+  stone_assert(cct->_conf->ms_async_op_threads > 0);
 
   num_workers = cct->_conf->ms_async_op_threads;
   if (num_workers >= EventCenter::MAX_EVENTCENTER) {
@@ -155,7 +155,7 @@ Worker* NetworkStack::get_worker()
   }
 
   pool_spin.unlock();
-  ceph_assert(current_best);
+  stone_assert(current_best);
   ++current_best->references;
   return current_best;
 }
@@ -172,8 +172,8 @@ void NetworkStack::stop()
 }
 
 class C_drain : public EventCallback {
-  ceph::mutex drain_lock = ceph::make_mutex("C_drain::drain_lock");
-  ceph::condition_variable drain_cond;
+  stone::mutex drain_lock = stone::make_mutex("C_drain::drain_lock");
+  stone::condition_variable drain_cond;
   unsigned drain_count;
 
  public:
@@ -197,7 +197,7 @@ void NetworkStack::drain()
   pool_spin.lock();
   C_drain drain(num_workers);
   for (unsigned i = 0; i < num_workers; ++i) {
-    ceph_assert(cur != workers[i]->center.get_owner());
+    stone_assert(cur != workers[i]->center.get_owner());
     workers[i]->center.dispatch_event_external(EventCallbackRef(&drain));
   }
   pool_spin.unlock();

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat, Inc.
  *
@@ -14,10 +14,10 @@
 
 
 /*
- * This test is linked against librados and libcephfs to try and detect issues
+ * This test is linked against librados and libstonefs to try and detect issues
  * with global, static, non-POD variables as seen in the following trackers.
- * http://tracker.ceph.com/issues/16504
- * http://tracker.ceph.com/issues/16686
+ * http://tracker.stone.com/issues/16504
+ * http://tracker.stone.com/issues/16686
  * In those trackers such variables caused segfaults with glibc reporting
  * "double free or corruption".
  *

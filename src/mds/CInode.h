@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_CINODE_H
-#define CEPH_CINODE_H
+#ifndef STONE_CINODE_H
+#define STONE_CINODE_H
 
 #include <list>
 #include <map>
@@ -169,7 +169,7 @@ public:
 
   mempool::mds_co::string	symlink;      // symlink dest, if symlink
   fragtree_t			dirfragtree;  // dir frag tree, if any.  always consistent with our dirfrag map.
-  snapid_t 			oldest_snap = CEPH_NOSNAP;
+  snapid_t 			oldest_snap = STONE_NOSNAP;
   damage_flags_t 		damage_flags = 0;
 
 protected:
@@ -405,7 +405,7 @@ class CInode : public MDSCacheObject, public InodeStoreBase, public Counter<CIno
 
   // ---------------------------
   CInode() = delete;
-  CInode(MDCache *c, bool auth=true, snapid_t f=2, snapid_t l=CEPH_NOSNAP);
+  CInode(MDCache *c, bool auth=true, snapid_t f=2, snapid_t l=STONE_NOSNAP);
   ~CInode() override {
     close_dirfrags();
     close_snaprealm();
@@ -647,7 +647,7 @@ class CInode : public MDSCacheObject, public InodeStoreBase, public Counter<CIno
   inodeno_t ino() const { return get_inode()->ino; }
   vinodeno_t vino() const { return vinodeno_t(ino(), last); }
   int d_type() const { return IFTODT(get_inode()->mode); }
-  bool is_root() const { return ino() == CEPH_INO_ROOT; }
+  bool is_root() const { return ino() == STONE_INO_ROOT; }
   bool is_stray() const { return MDS_INO_IS_STRAY(ino()); }
   mds_rank_t get_stray_owner() const {
     return (mds_rank_t)MDS_INO_STRAY_OWNER(ino());
@@ -660,7 +660,7 @@ class CInode : public MDSCacheObject, public InodeStoreBase, public Counter<CIno
   bool is_symlink() const { return get_inode()->is_symlink(); }
   bool is_dir() const     { return get_inode()->is_dir(); }
 
-  bool is_head() const { return last == CEPH_NOSNAP; }
+  bool is_head() const { return last == STONE_NOSNAP; }
 
   // note: this overloads MDSCacheObject
   bool is_ambiguous_auth() const {
@@ -792,7 +792,7 @@ class CInode : public MDSCacheObject, public InodeStoreBase, public Counter<CIno
   
   // for giving to clients
   int encode_inodestat(ceph::buffer::list& bl, Session *session, SnapRealm *realm,
-		       snapid_t snapid=CEPH_NOSNAP, unsigned max_bytes=0,
+		       snapid_t snapid=STONE_NOSNAP, unsigned max_bytes=0,
 		       int getattr_wants=0);
   void encode_cap_message(const ceph::ref_t<MClientCaps> &m, Capability *cap);
 
@@ -1117,7 +1117,7 @@ class CInode : public MDSCacheObject, public InodeStoreBase, public Counter<CIno
 protected:
   ceph_lock_state_t *get_fcntl_lock_state() {
     if (!fcntl_locks)
-      fcntl_locks = new ceph_lock_state_t(g_ceph_context, CEPH_LOCK_FCNTL);
+      fcntl_locks = new ceph_lock_state_t(g_ceph_context, STONE_LOCK_FCNTL);
     return fcntl_locks;
   }
   void clear_fcntl_lock_state() {
@@ -1126,7 +1126,7 @@ protected:
   }
   ceph_lock_state_t *get_flock_lock_state() {
     if (!flock_locks)
-      flock_locks = new ceph_lock_state_t(g_ceph_context, CEPH_LOCK_FLOCK);
+      flock_locks = new ceph_lock_state_t(g_ceph_context, STONE_LOCK_FLOCK);
     return flock_locks;
   }
   void clear_flock_lock_state() {

@@ -8,7 +8,7 @@
 #endif
 
 FreelistManager *FreelistManager::create(
-  CephContext* cct,
+  StoneContext* cct,
   std::string type,
   std::string prefix)
 {
@@ -16,7 +16,7 @@ FreelistManager *FreelistManager::create(
   // put the freelistmanagers in different prefixes because the merge
   // op is per prefix, has to done pre-db-open, and we don't know the
   // freelist type until after we open the db.
-  ceph_assert(prefix == "B");
+  stone_assert(prefix == "B");
   if (type == "bitmap")
     return new BitmapFreelistManager(cct, "B", "b");
 

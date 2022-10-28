@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -20,7 +20,7 @@
 #include "PurgeQueue.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_mds
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, rank) << __func__ << ": "
 static ostream& _prefix(std::ostream *_dout, mds_rank_t rank) {
@@ -40,7 +40,7 @@ void PurgeItem::encode(bufferlist &bl) const
   encode((uint8_t)action, bl);
   encode(ino, bl);
   encode(size, bl);
-  encode(layout, bl, CEPH_FEATURE_FS_FILE_LAYOUT_V2);
+  encode(layout, bl, STONE_FEATURE_FS_FILE_LAYOUT_V2);
   encode(old_pools, bl);
   encode(snapc, bl);
   encode(fragtree, bl);
@@ -99,7 +99,7 @@ void PurgeItem::decode(bufferlist::const_iterator &p)
 // if Objecter has any slow requests, take that as a hint and
 // slow down our rate of purging
 PurgeQueue::PurgeQueue(
-      CephContext *cct_,
+      StoneContext *cct_,
       mds_rank_t rank_,
       const int64_t metadata_pool_,
       Objecter *objecter_,
@@ -113,27 +113,27 @@ PurgeQueue::PurgeQueue(
     filer(objecter_, &finisher),
     objecter(objecter_),
     journaler("pq", MDS_INO_PURGE_QUEUE + rank, metadata_pool,
-      CEPH_FS_ONDISK_MAGIC, objecter_, nullptr, 0,
+      STONE_FS_ONDISK_MAGIC, objecter_, nullptr, 0,
       &finisher),
     on_error(on_error_)
 {
-  ceph_assert(cct != nullptr);
-  ceph_assert(on_error != nullptr);
-  ceph_assert(objecter != nullptr);
+  stone_assert(cct != nullptr);
+  stone_assert(on_error != nullptr);
+  stone_assert(objecter != nullptr);
   journaler.set_write_error_handler(on_error);
 }
 
 PurgeQueue::~PurgeQueue()
 {
   if (logger) {
-    g_ceph_context->get_perfcounters_collection()->remove(logger.get());
+    g_stone_context->get_perfcounters_collection()->remove(logger.get());
   }
   delete on_error;
 }
 
 void PurgeQueue::create_logger()
 {
-  PerfCountersBuilder pcb(g_ceph_context, "purge_queue", l_pq_first, l_pq_last);
+  PerfCountersBuilder pcb(g_stone_context, "purge_queue", l_pq_first, l_pq_last);
 
   pcb.add_u64_counter(l_pq_executed, "pq_executed", "Purge queue tasks executed",
                       "purg", PerfCountersBuilder::PRIO_INTERESTING);
@@ -146,14 +146,14 @@ void PurgeQueue::create_logger()
   pcb.add_u64(l_pq_item_in_journal, "pq_item_in_journal", "Purge item left in journal");
 
   logger.reset(pcb.create_perf_counters());
-  g_ceph_context->get_perfcounters_collection()->add(logger.get());
+  g_stone_context->get_perfcounters_collection()->add(logger.get());
 }
 
 void PurgeQueue::init()
 {
   std::lock_guard l(lock);
 
-  ceph_assert(logger != nullptr);
+  stone_assert(logger != nullptr);
 
   finisher.start();
   timer.init();
@@ -209,7 +209,7 @@ void PurgeQueue::open(Context *completion)
     waiting_for_recovery.push_back(completion);
 
   journaler.recover(new LambdaContext([this](int r){
-    if (r == -CEPHFS_ENOENT) {
+    if (r == -STONEFS_ENOENT) {
       dout(1) << "Purge Queue not found, assuming this is an upgrade and "
                  "creating it." << dendl;
       create(NULL);
@@ -229,7 +229,7 @@ void PurgeQueue::open(Context *completion)
 
       journaler.set_writeable();
       recovered = true;
-      finish_contexts(g_ceph_context, waiting_for_recovery);
+      finish_contexts(g_stone_context, waiting_for_recovery);
     } else {
       derr << "Error " << r << " loading Journaler" << dendl;
       _go_readonly(r);
@@ -244,7 +244,7 @@ void PurgeQueue::wait_for_recovery(Context* c)
     c->complete(0);
   } else if (readonly) {
     dout(10) << "cannot wait for recovery: PurgeQueue is readonly" << dendl;
-    c->complete(-CEPHFS_EROFS);
+    c->complete(-STONEFS_EROFS);
   } else {
     waiting_for_recovery.push_back(c);
   }
@@ -252,7 +252,7 @@ void PurgeQueue::wait_for_recovery(Context* c)
 
 void PurgeQueue::_recover()
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   // Journaler::is_readable() adjusts write_pos if partial entry is encountered
   while (1) {
@@ -279,13 +279,13 @@ void PurgeQueue::_recover()
       journaler.set_read_pos(journaler.last_committed.expire_pos);
       journaler.set_writeable();
       recovered = true;
-      finish_contexts(g_ceph_context, waiting_for_recovery);
+      finish_contexts(g_stone_context, waiting_for_recovery);
       return;
     }
 
     bufferlist bl;
     bool readable = journaler.try_read_entry(bl);
-    ceph_assert(readable);  // we checked earlier
+    stone_assert(readable);  // we checked earlier
   }
 }
 
@@ -307,7 +307,7 @@ void PurgeQueue::create(Context *fin)
       _go_readonly(r);
     } else {
       recovered = true;
-      finish_contexts(g_ceph_context, waiting_for_recovery);
+      finish_contexts(g_stone_context, waiting_for_recovery);
     }
   }));
 }
@@ -322,12 +322,12 @@ void PurgeQueue::push(const PurgeItem &pi, Context *completion)
 
   if (readonly) {
     dout(10) << "cannot push inode: PurgeQueue is readonly" << dendl;
-    completion->complete(-CEPHFS_EROFS);
+    completion->complete(-STONEFS_EROFS);
     return;
   }
 
   // Callers should have waited for open() before using us
-  ceph_assert(!journaler.is_readonly());
+  stone_assert(!journaler.is_readonly());
 
   bufferlist bl;
 
@@ -426,12 +426,12 @@ void PurgeQueue::_go_readonly(int r)
   finisher.queue(on_error, r);
   on_error = nullptr;
   journaler.set_readonly();
-  finish_contexts(g_ceph_context, waiting_for_recovery, r);
+  finish_contexts(g_stone_context, waiting_for_recovery, r);
 }
 
 bool PurgeQueue::_consume()
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   bool could_consume = false;
   while(_can_consume()) {
@@ -459,7 +459,7 @@ bool PurgeQueue::_consume()
           std::lock_guard l(lock);
           if (r == 0) {
             _consume();
-          } else if (r != -CEPHFS_EAGAIN) {
+          } else if (r != -STONEFS_EAGAIN) {
             _go_readonly(r);
           }
         }));
@@ -472,7 +472,7 @@ bool PurgeQueue::_consume()
     // The journaler is readable: consume an entry
     bufferlist bl;
     bool readable = journaler.try_read_entry(bl);
-    ceph_assert(readable);  // we checked earlier
+    stone_assert(readable);  // we checked earlier
 
     dout(20) << " decoding entry" << dendl;
     PurgeItem item;
@@ -482,7 +482,7 @@ bool PurgeQueue::_consume()
     } catch (const buffer::error &err) {
       derr << "Decode error at read_pos=0x" << std::hex
            << journaler.get_read_pos() << dendl;
-      _go_readonly(CEPHFS_EIO);
+      _go_readonly(STONEFS_EIO);
     }
     dout(20) << " executing item (" << item.ino << ")" << dendl;
     _execute_item(item, journaler.get_read_pos());
@@ -535,35 +535,35 @@ void PurgeQueue::_commit_ops(int r, const std::vector<PurgeItemCommitOp>& ops_ve
       }
 
       filer.purge_range(op.item.ino, &op.item.layout, op.item.snapc,
-                        first_obj, num_obj, ceph::real_clock::now(), op.flags,
+                        first_obj, num_obj, stone::real_clock::now(), op.flags,
                         gather.new_sub());
     } else if (op.type == PurgeItemCommitOp::PURGE_OP_REMOVE) {
       if (op.item.action == PurgeItem::PURGE_DIR) {
         objecter->remove(op.oid, op.oloc, nullsnapc,
-                         ceph::real_clock::now(), op.flags,
+                         stone::real_clock::now(), op.flags,
                          gather.new_sub());
       } else {
         objecter->remove(op.oid, op.oloc, op.item.snapc,
-                         ceph::real_clock::now(), op.flags,
+                         stone::real_clock::now(), op.flags,
                          gather.new_sub());
       }
     } else if (op.type == PurgeItemCommitOp::PURGE_OP_ZERO) {
       filer.zero(op.item.ino, &op.item.layout, op.item.snapc,
-                 0, op.item.layout.object_size, ceph::real_clock::now(), 0, true,
+                 0, op.item.layout.object_size, stone::real_clock::now(), 0, true,
                  gather.new_sub());
     } else {
       derr << "Invalid purge op: " << op.type << dendl;
-      ceph_abort();
+      stone_abort();
     }
   }
 
-  ceph_assert(gather.has_subs());
+  stone_assert(gather.has_subs());
 
   gather.set_finisher(new C_OnFinisher(
 	              new LambdaContext([this, expire_to](int r) {
     std::lock_guard l(lock);
 
-    if (r == -CEPHFS_EBLOCKLISTED) {
+    if (r == -STONEFS_EBLOCKLISTED) {
       finisher.queue(on_error, r);
       on_error = nullptr;
       return;
@@ -590,7 +590,7 @@ void PurgeQueue::_execute_item(
     const PurgeItem &item,
     uint64_t expire_to)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
 
   in_flight[expire_to] = item;
   logger->set(l_pq_executing, in_flight.size());
@@ -674,12 +674,12 @@ void PurgeQueue::_execute_item(
 void PurgeQueue::_execute_item_complete(
     uint64_t expire_to)
 {
-  ceph_assert(ceph_mutex_is_locked_by_me(lock));
+  stone_assert(stone_mutex_is_locked_by_me(lock));
   dout(10) << "complete at 0x" << std::hex << expire_to << std::dec << dendl;
-  ceph_assert(in_flight.count(expire_to) == 1);
+  stone_assert(in_flight.count(expire_to) == 1);
 
   auto iter = in_flight.find(expire_to);
-  ceph_assert(iter != in_flight.end());
+  stone_assert(iter != in_flight.end());
   if (iter == in_flight.begin()) {
     uint64_t pos = expire_to;
     if (!pending_expire.empty()) {
@@ -804,9 +804,9 @@ bool PurgeQueue::drain(
     return true;
   }
 
-  ceph_assert(progress != nullptr);
-  ceph_assert(progress_total != nullptr);
-  ceph_assert(in_flight_count != nullptr);
+  stone_assert(progress != nullptr);
+  stone_assert(progress_total != nullptr);
+  stone_assert(in_flight_count != nullptr);
 
   const bool done = in_flight.empty() && (
       journaler.get_read_pos() == journaler.get_write_pos());

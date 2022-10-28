@@ -19,16 +19,16 @@
 #include "common/debug.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_bluestore
+#define dout_subsys stone_subsys_bluestore
 #undef dout_prefix
 #define dout_prefix *_dout << "zoned freelist "
 
 using std::string;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::decode;
-using ceph::encode;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::decode;
+using stone::encode;
 
 void ZonedFreelistManager::write_zone_state_to_db(
     uint64_t zone_num,
@@ -48,7 +48,7 @@ void ZonedFreelistManager::load_zone_state_from_db(
   string k = it->key();
   uint64_t zone_num_from_db;
   _key_decode_u64(k.c_str(), &zone_num_from_db);
-  ceph_assert(zone_num_from_db == zone_num);
+  stone_assert(zone_num_from_db == zone_num);
 
   bufferlist bl = it->value();
   auto p = bl.cbegin();
@@ -70,7 +70,7 @@ void ZonedFreelistManager::setup_merge_operator(KeyValueDB *db, string prefix) {
 }
 
 ZonedFreelistManager::ZonedFreelistManager(
-    CephContext* cct,
+    StoneContext* cct,
     string meta_prefix,
     string info_prefix)
   : FreelistManager(cct),
@@ -93,7 +93,7 @@ int ZonedFreelistManager::create(
   starting_zone_num = (granularity & 0xffff000000000000) >> 48;
   enumerate_zone_num = ~0UL;
 
-  ceph_assert(size % zone_size == 0);
+  stone_assert(size % zone_size == 0);
 
   dout(1) << __func__ << std::hex
 	  << " size 0x" << size
@@ -142,7 +142,7 @@ int ZonedFreelistManager::init(
     return r;
   }
 
-  ceph_assert(num_zones == size / zone_size);
+  stone_assert(num_zones == size / zone_size);
 
   dout(10) << __func__ << std::hex
 	   << " size 0x" << size
@@ -186,7 +186,7 @@ bool ZonedFreelistManager::enumerate_next(
     dout(30) << __func__ << " start" << dendl;
     enumerate_p = kvdb->get_iterator(info_prefix);
     enumerate_p->lower_bound(string());
-    ceph_assert(enumerate_p->valid());
+    stone_assert(enumerate_p->valid());
     enumerate_zone_num = 0;
   } else {
     enumerate_p->next();
@@ -251,7 +251,7 @@ void ZonedFreelistManager::get_meta(
     uint64_t target_size,
     std::vector<std::pair<string, string>>* res) const {
   // We do not support expanding devices for now.
-  ceph_assert(target_size == 0);
+  stone_assert(target_size == 0);
   res->emplace_back("zfm_size", stringify(size));
   res->emplace_back("zfm_bytes_per_block", stringify(bytes_per_block));
   res->emplace_back("zfm_zone_size", stringify(zone_size));

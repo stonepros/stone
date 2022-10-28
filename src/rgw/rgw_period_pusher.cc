@@ -16,7 +16,7 @@
 
 #include <boost/asio/yield.hpp>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #undef dout_prefix
 #define dout_prefix (*_dout << "rgw period pusher: ")
@@ -36,7 +36,7 @@ class PushAndRetryCR : public RGWCoroutine {
   uint32_t counter; //< number of failures since backoff increased
 
  public:
-  PushAndRetryCR(CephContext* cct, const std::string& zone, RGWRESTConn* conn,
+  PushAndRetryCR(StoneContext* cct, const std::string& zone, RGWRESTConn* conn,
                  RGWHTTPManager* http, RGWPeriod& period)
     : RGWCoroutine(cct), zone(zone), conn(conn), http(http), period(period),
       epoch(std::to_string(period.get_epoch())),
@@ -103,7 +103,7 @@ class PushAllCR : public RGWCoroutine {
   std::map<std::string, RGWRESTConn> conns; //< zones that need the period
 
  public:
-  PushAllCR(CephContext* cct, RGWHTTPManager* http, RGWPeriod&& period,
+  PushAllCR(StoneContext* cct, RGWHTTPManager* http, RGWPeriod&& period,
             std::map<std::string, RGWRESTConn>&& conns)
     : RGWCoroutine(cct), http(http),
       period(std::move(period)),
@@ -131,14 +131,14 @@ int PushAllCR::operate(const DoutPrefixProvider *dpp)
 
 /// A background thread to run the PushAllCR coroutine and exit.
 class RGWPeriodPusher::CRThread : public DoutPrefixProvider {
-  CephContext* cct;
+  StoneContext* cct;
   RGWCoroutinesManager coroutines;
   RGWHTTPManager http;
   boost::intrusive_ptr<PushAllCR> push_all;
   std::thread thread;
 
  public:
-  CRThread(CephContext* cct, RGWPeriod&& period,
+  CRThread(StoneContext* cct, RGWPeriod&& period,
            std::map<std::string, RGWRESTConn>&& conns)
     : cct(cct), coroutines(cct, NULL),
       http(cct, coroutines.get_completion_mgr()),
@@ -157,7 +157,7 @@ class RGWPeriodPusher::CRThread : public DoutPrefixProvider {
       thread.join();
   }
 
-  CephContext *get_cct() const override { return cct; }
+  StoneContext *get_cct() const override { return cct; }
   unsigned get_subsys() const override { return dout_subsys; }
   std::ostream& gen_prefix(std::ostream& out) const override { return out << "rgw period pusher CR thread: "; }
 };

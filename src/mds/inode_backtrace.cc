@@ -7,7 +7,7 @@
 
 /* inode_backpointer_t */
 
-void inode_backpointer_t::encode(ceph::buffer::list& bl) const
+void inode_backpointer_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(2, 2, bl);
   encode(dirino, bl);
@@ -16,7 +16,7 @@ void inode_backpointer_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void inode_backpointer_t::decode(ceph::buffer::list::const_iterator& bl)
+void inode_backpointer_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(2, 2, 2, bl);
   decode(dirino, bl);
@@ -25,15 +25,15 @@ void inode_backpointer_t::decode(ceph::buffer::list::const_iterator& bl)
   DECODE_FINISH(bl);
 }
 
-void inode_backpointer_t::decode_old(ceph::buffer::list::const_iterator& bl)
+void inode_backpointer_t::decode_old(stone::buffer::list::const_iterator& bl)
 {
-  using ceph::decode;
+  using stone::decode;
   decode(dirino, bl);
   decode(dname, bl);
   decode(version, bl);
 }
 
-void inode_backpointer_t::dump(ceph::Formatter *f) const
+void inode_backpointer_t::dump(stone::Formatter *f) const
 {
   f->dump_unsigned("dirino", dirino);
   f->dump_string("dname", dname);
@@ -54,7 +54,7 @@ void inode_backpointer_t::generate_test_instances(std::list<inode_backpointer_t*
  * inode_backtrace_t
  */
 
-void inode_backtrace_t::encode(ceph::buffer::list& bl) const
+void inode_backtrace_t::encode(stone::buffer::list& bl) const
 {
   ENCODE_START(5, 4, bl);
   encode(ino, bl);
@@ -64,7 +64,7 @@ void inode_backtrace_t::encode(ceph::buffer::list& bl) const
   ENCODE_FINISH(bl);
 }
 
-void inode_backtrace_t::decode(ceph::buffer::list::const_iterator& bl)
+void inode_backtrace_t::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(5, 4, 4, bl);
   if (struct_v < 3)
@@ -87,7 +87,7 @@ void inode_backtrace_t::decode(ceph::buffer::list::const_iterator& bl)
   DECODE_FINISH(bl);
 }
 
-void inode_backtrace_t::dump(ceph::Formatter *f) const
+void inode_backtrace_t::dump(stone::Formatter *f) const
 {
   f->dump_unsigned("ino", ino);
   f->open_array_section("ancestors");

@@ -1,7 +1,7 @@
 #
 # Test the expected behavior of the
 #
-#    CEPH_FEATURE_ERASURE_CODE_PLUGINS_V2 
+#    STONE_FEATURE_ERASURE_CODE_PLUGINS_V2 
 #
 # feature.
 #
@@ -19,19 +19,19 @@ tasks:
 #
 - install:
     branch: firefly
-- ceph:
+- stone:
     fs: xfs
 #
 # We don't need mon.c for now: it will be used later to make sure an old
 # mon cannot join the quorum once the feature has been activated
 #
-- ceph.stop:
+- stone.stop:
     daemons: [mon.c]
 - exec:
     mon.a: 
       - |-
-        ceph osd erasure-code-profile set WRONG plugin=WRONG
-        ceph osd pool create poolWRONG 12 12 erasure WRONG 2>&1 | grep "failed to load plugin using profile WRONG"
+        stone osd erasure-code-profile set WRONG plugin=WRONG
+        stone osd pool create poolWRONG 12 12 erasure WRONG 2>&1 | grep "failed to load plugin using profile WRONG"
 #
 # Partial upgrade, osd.2 is not upgraded
 #
@@ -40,14 +40,14 @@ tasks:
 #
 # a is the leader
 #
-- ceph.restart:
+- stone.restart:
     daemons: [mon.a]
     wait-for-healthy: false
 - exec:
     mon.a:
       - |-
-        ceph osd erasure-code-profile set profile-lrc plugin=lrc 2>&1 | grep "unsupported by: the monitor cluster"
-- ceph.restart:
+        stone osd erasure-code-profile set profile-lrc plugin=lrc 2>&1 | grep "unsupported by: the monitor cluster"
+- stone.restart:
     daemons: [mon.b, osd.1, osd.0]
     wait-for-healthy: false
     wait-for-osds-up: true
@@ -58,11 +58,11 @@ tasks:
 - exec:
     mon.a: 
       - |-
-        ceph osd erasure-code-profile set profile-lrc plugin=lrc 2>&1 | grep "unsupported by: osd.2"
+        stone osd erasure-code-profile set profile-lrc plugin=lrc 2>&1 | grep "unsupported by: osd.2"
 #
 # Taking osd.2 out, the rest of the cluster is upgraded
 #
-- ceph.stop:
+- stone.stop:
     daemons: [osd.2]
 - sleep:
     duration: 60
@@ -71,11 +71,11 @@ tasks:
 #
 - exec:
     mon.a: 
-      - "ceph osd erasure-code-profile set profile-lrc plugin=lrc"
+      - "stone osd erasure-code-profile set profile-lrc plugin=lrc"
 #
 # osd.2 won't be able to join the because is does not support the feature
 #
-- ceph.restart:
+- stone.restart:
     daemons: [osd.2]
     wait-for-healthy: false
 - sleep:
@@ -83,11 +83,11 @@ tasks:
 - exec:
     osd.2: 
       - |-
-        grep "protocol feature.*missing 100000000000" /var/log/ceph/ceph-osd.2.log
+        grep "protocol feature.*missing 100000000000" /var/log/stone/stone-osd.2.log
 #
 # mon.c won't be able to join the because it does not support the feature
 #
-- ceph.restart:
+- stone.restart:
     daemons: [mon.c]
     wait-for-healthy: false
 - sleep:
@@ -95,4 +95,4 @@ tasks:
 - exec:
     mon.c: 
       - |-
-        grep "missing.*feature" /var/log/ceph/ceph-mon.c.log
+        grep "missing.*feature" /var/log/stone/stone-mon.c.log

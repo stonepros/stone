@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -119,7 +119,7 @@ struct PGLog : DoutPrefixProvider {
   unsigned get_subsys() const override {
     return static_cast<unsigned>(ceph_subsys_osd);
   }
-  CephContext *get_cct() const override {
+  StoneeContext *get_cct() const override {
     return cct;
   }
 
@@ -631,7 +631,7 @@ public:
     } // add
 
     void trim(
-      CephContext* cct,
+      StoneeContext* cct,
       eversion_t s,
       std::set<eversion_t> *trimmed,
       std::set<std::string>* trimmed_dups,
@@ -655,7 +655,7 @@ protected:
   eversion_t dirty_from_dups;  ///< must clear/writeout all dups >= dirty_from_dups
   eversion_t write_from_dups;  ///< must write keys >= write_from_dups
   std::set<std::string> trimmed_dups;    ///< must clear keys in trimmed_dups
-  CephContext *cct;
+  StoneeContext *cct;
   bool pg_log_debug;
   /// Log is clean on [dirty_to, dirty_from)
   bool touched_log;
@@ -749,7 +749,7 @@ protected:
 public:
 
   // cppcheck-suppress noExplicitConstructor
-  PGLog(CephContext *cct) :
+  PGLog(StoneeContext *cct) :
     dirty_from(eversion_t::max()),
     writeout_from(eversion_t::max()),
     dirty_from_dups(eversion_t::max()),

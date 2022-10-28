@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat Inc.
  *
@@ -61,7 +61,7 @@ std::ostream &operator<<(std::ostream &lhs, const OpScheduler &);
 using OpSchedulerRef = std::unique_ptr<OpScheduler>;
 
 OpSchedulerRef make_scheduler(
-  CephContext *cct, uint32_t num_shards, bool is_rotational);
+  StoneeContext *cct, uint32_t num_shards, bool is_rotational);
 
 /**
  * Implements OpScheduler in terms of OpQueue
@@ -76,20 +76,20 @@ class ClassedOpQueueScheduler final : public OpScheduler {
   unsigned cutoff;
   T queue;
 
-  static unsigned int get_io_prio_cut(CephContext *cct) {
+  static unsigned int get_io_prio_cut(StoneeContext *cct) {
     if (cct->_conf->osd_op_queue_cut_off == "debug_random") {
       srand(time(NULL));
-      return (rand() % 2 < 1) ? CEPH_MSG_PRIO_HIGH : CEPH_MSG_PRIO_LOW;
+      return (rand() % 2 < 1) ? STONE_MSG_PRIO_HIGH : STONE_MSG_PRIO_LOW;
     } else if (cct->_conf->osd_op_queue_cut_off == "high") {
-      return CEPH_MSG_PRIO_HIGH;
+      return STONE_MSG_PRIO_HIGH;
     } else {
       // default / catch-all is 'low'
-      return CEPH_MSG_PRIO_LOW;
+      return STONE_MSG_PRIO_LOW;
     }
   }
 public:
   template <typename... Args>
-  ClassedOpQueueScheduler(CephContext *cct, Args&&... args) :
+  ClassedOpQueueScheduler(StoneeContext *cct, Args&&... args) :
     cutoff(get_io_prio_cut(cct)),
     queue(std::forward<Args>(args)...)
   {}

@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef CEPH_MMONPING_H
-#define CEPH_MMONPING_H
+#ifndef STONE_MMONPING_H
+#define STONE_MMONPING_H
 
 #include "common/Clock.h"
 

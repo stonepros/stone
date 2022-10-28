@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat Ltd
  *
@@ -18,7 +18,7 @@
 #include "FSCommands.h"
 #include "MDSMonitor.h"
 #include "MgrStatMonitor.h"
-#include "mds/cephfs_features.h"
+#include "mds/stonefs_features.h"
 
 using TOPNSPC::common::cmd_getval;
 
@@ -33,16 +33,16 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::ErasureCodeInterfaceRef;
-using ceph::ErasureCodeProfile;
-using ceph::Formatter;
-using ceph::JSONFormatter;
-using ceph::make_message;
-using ceph::mono_clock;
-using ceph::mono_time;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::ErasureCodeInterfaceRef;
+using stone::ErasureCodeProfile;
+using stone::Formatter;
+using stone::JSONFormatter;
+using stone::make_message;
+using stone::mono_clock;
+using stone::mono_time;
 
 class FlagSetHandler : public FileSystemCommandHandler
 {
@@ -115,7 +115,7 @@ class FailHandler : public FileSystemCommandHandler
     auto fs = fsmap.get_filesystem(fs_name);
 
     auto f = [](auto fs) {
-      fs->mds_map.set_flag(CEPH_MDSMAP_NOT_JOINABLE);
+      fs->mds_map.set_flag(STONE_MDSMAP_NOT_JOINABLE);
     };
     fsmap.modify_filesystem(fs->fscid, std::move(f));
 
@@ -157,7 +157,7 @@ class FsNewHandler : public FileSystemCommandHandler
       const cmdmap_t& cmdmap,
       std::ostream &ss) override
   {
-    ceph_assert(m_paxos->is_plugged());
+    stone_assert(m_paxos->is_plugged());
 
     string metadata_name;
     cmd_getval(cmdmap, "metadata", metadata_name);
@@ -175,7 +175,7 @@ class FsNewHandler : public FileSystemCommandHandler
       return -ENOENT;
     }
     if (data == 0) {
-      ss << "pool '" << data_name << "' has id 0, which CephFS does not allow. Use another pool or recreate it to get a non-zero pool id.";
+      ss << "pool '" << data_name << "' has id 0, which StoneFS does not allow. Use another pool or recreate it to get a non-zero pool id.";
       return -EINVAL;
     }
 
@@ -217,7 +217,7 @@ class FsNewHandler : public FileSystemCommandHandler
     if (fsmap.filesystem_count() > 0
         && !fsmap.get_enable_multiple()) {
       ss << "Creation of multiple filesystems is disabled.  To enable "
-            "this experimental feature, use 'ceph fs flag set enable_multiple "
+            "this experimental feature, use 'stone fs flag set enable_multiple "
             "true'";
       return -EINVAL;
     }
@@ -251,9 +251,9 @@ class FsNewHandler : public FileSystemCommandHandler
     }
 
     pg_pool_t const *data_pool = mon->osdmon()->osdmap.get_pg_pool(data);
-    ceph_assert(data_pool != NULL);  // Checked it existed above
+    stone_assert(data_pool != NULL);  // Checked it existed above
     pg_pool_t const *metadata_pool = mon->osdmon()->osdmap.get_pg_pool(metadata);
-    ceph_assert(metadata_pool != NULL);  // Checked it existed above
+    stone_assert(metadata_pool != NULL);  // Checked it existed above
 
     int r = _check_pool(mon->osdmon()->osdmap, data, POOL_DATA_DEFAULT, force, &ss);
     if (r < 0) {
@@ -271,10 +271,10 @@ class FsNewHandler : public FileSystemCommandHandler
       return -EAGAIN;
     }
     mon->osdmon()->do_application_enable(data,
-					 pg_pool_t::APPLICATION_NAME_CEPHFS,
+					 pg_pool_t::APPLICATION_NAME_STONEFS,
 					 "data", fs_name, true);
     mon->osdmon()->do_application_enable(metadata,
-					 pg_pool_t::APPLICATION_NAME_CEPHFS,
+					 pg_pool_t::APPLICATION_NAME_STONEFS,
 					 "metadata", fs_name, true);
     mon->osdmon()->do_set_pool_opt(metadata,
 				   pool_opts_t::RECOVERY_PRIORITY,
@@ -378,7 +378,7 @@ public:
           fs->fscid,
           [n](std::shared_ptr<Filesystem> fs)
       {
-	fs->mds_map.clear_flag(CEPH_MDSMAP_NOT_JOINABLE);
+	fs->mds_map.clear_flag(STONE_MDSMAP_NOT_JOINABLE);
         fs->mds_map.set_max_mds(n);
       });
     } else if (var == "inline_data") {
@@ -431,8 +431,8 @@ public:
 	ss << var << " requires an integer value";
 	return -EINVAL;
       }
-      if (n < CEPH_MIN_STRIPE_UNIT) {
-	ss << var << " must at least " << CEPH_MIN_STRIPE_UNIT;
+      if (n < STONE_MIN_STRIPE_UNIT) {
+	ss << var << " must at least " << STONE_MIN_STRIPE_UNIT;
 	return -ERANGE;
       }
       fsmap.modify_filesystem(
@@ -550,9 +550,9 @@ public:
           [joinable](std::shared_ptr<Filesystem> fs)
       {
 	if (joinable) {
-	  fs->mds_map.clear_flag(CEPH_MDSMAP_NOT_JOINABLE);
+	  fs->mds_map.clear_flag(STONE_MDSMAP_NOT_JOINABLE);
 	} else {
-	  fs->mds_map.set_flag(CEPH_MDSMAP_NOT_JOINABLE);
+	  fs->mds_map.set_flag(STONE_MDSMAP_NOT_JOINABLE);
 	}
       });
 
@@ -648,7 +648,7 @@ public:
       };
       fsmap.modify_filesystem(fs->fscid, std::move(f));
     } else if (var == "min_compat_client") {
-      auto vno = ceph_release_from_name(val.c_str());
+      auto vno = stone_release_from_name(val.c_str());
       if (!vno) {
 	ss << "version " << val << " is not recognized";
 	return -EINVAL;
@@ -656,7 +656,7 @@ public:
       ss << "WARNING: setting min_compat_client is deprecated"
             " and may not do what you want.\n"
             "The oldest release to set is octopus.\n"
-            "Please migrate to `ceph fs required_client_features ...`.";
+            "Please migrate to `stone fs required_client_features ...`.";
       auto f = [vno](auto&& fs) {
         fs->mds_map.set_min_compat_client(vno);
       };
@@ -711,7 +711,7 @@ class CompatSetHandler : public FileSystemCommandHandler
       }
 
       if (fs->mds_map.get_num_up_mds() > 0) {
-        ss << "file system must be failed or down; use `ceph fs fail` to bring down";
+        ss << "file system must be failed or down; use `stone fs fail` to bring down";
         return -EBUSY;
       }
 
@@ -763,8 +763,8 @@ class CompatSetHandler : public FileSystemCommandHandler
             cs.incompat.insert(f);
             ss << "added incompat feature " << f;
           }
-        } else ceph_assert(0);
-      } else ceph_assert(0);
+        } else stone_assert(0);
+      } else stone_assert(0);
 
       auto modifyf = [cs = std::move(cs)](auto&& fs) {
         fs->mds_map.compat = cs;
@@ -812,7 +812,7 @@ class RequiredClientFeaturesHandler : public FileSystemCommandHandler
 	return -EINVAL;
       }
 
-      int feature = cephfs_feature_from_name(val);
+      int feature = stonefs_feature_from_name(val);
       if (feature < 0) {
 	string err;
 	feature = strict_strtol(val.c_str(), 10, &err);
@@ -820,7 +820,7 @@ class RequiredClientFeaturesHandler : public FileSystemCommandHandler
 	  ss << "Invalid feature name: " << val;
 	  return -EINVAL;
 	}
-	if (feature < 0 || feature > CEPHFS_FEATURE_MAX) {
+	if (feature < 0 || feature > STONEFS_FEATURE_MAX) {
 	  ss << "Invalid feature id: " << feature;
 	  return -EINVAL;
 	}
@@ -838,9 +838,9 @@ class RequiredClientFeaturesHandler : public FileSystemCommandHandler
 	  ret = true;
 	});
 	if (ret) {
-	  ss << "added feature '" << cephfs_feature_name(feature) << "' to required_client_features";
+	  ss << "added feature '" << stonefs_feature_name(feature) << "' to required_client_features";
 	} else {
-	  ss << "feature '" << cephfs_feature_name(feature) << "' is already set";
+	  ss << "feature '" << stonefs_feature_name(feature) << "' is already set";
 	}
       } else {
 	bool ret = false;
@@ -854,9 +854,9 @@ class RequiredClientFeaturesHandler : public FileSystemCommandHandler
           ret = true;
 	});
 	if (ret) {
-	  ss << "removed feature '" << cephfs_feature_name(feature) << "' from required_client_features";
+	  ss << "removed feature '" << stonefs_feature_name(feature) << "' from required_client_features";
 	} else {
-	  ss << "feature '" << cephfs_feature_name(feature) << "' is already unset";
+	  ss << "feature '" << stonefs_feature_name(feature) << "' is already unset";
 	}
       }
       return 0;
@@ -882,7 +882,7 @@ class AddDataPoolHandler : public FileSystemCommandHandler
       const cmdmap_t& cmdmap,
       std::ostream &ss) override
   {
-    ceph_assert(m_paxos->is_plugged());
+    stone_assert(m_paxos->is_plugged());
 
     string poolname;
     cmd_getval(cmdmap, "pool", poolname);
@@ -922,7 +922,7 @@ class AddDataPoolHandler : public FileSystemCommandHandler
       return -EAGAIN;
     }
     mon->osdmon()->do_application_enable(poolid,
-					 pg_pool_t::APPLICATION_NAME_CEPHFS,
+					 pg_pool_t::APPLICATION_NAME_STONEFS,
 					 "data", fs_name, true);
     mon->osdmon()->propose_pending();
 
@@ -1004,7 +1004,7 @@ class RemoveFilesystemHandler : public FileSystemCommandHandler
 
     // Check that no MDS daemons are active
     if (fs->mds_map.get_num_up_mds() > 0) {
-      ss << "all MDS daemons must be inactive/failed before removing filesystem. See `ceph fs fail`.";
+      ss << "all MDS daemons must be inactive/failed before removing filesystem. See `stone fs fail`.";
       return -EINVAL;
     }
 
@@ -1024,7 +1024,7 @@ class RemoveFilesystemHandler : public FileSystemCommandHandler
     std::vector<mds_gid_t> to_fail;
     // There may be standby_replay daemons left here
     for (const auto &i : fs->mds_map.get_mds_info()) {
-      ceph_assert(i.second.state == MDSMap::STATE_STANDBY_REPLAY);
+      stone_assert(i.second.state == MDSMap::STATE_STANDBY_REPLAY);
       to_fail.push_back(i.first);
     }
 
@@ -1069,7 +1069,7 @@ class ResetFilesystemHandler : public FileSystemCommandHandler
     // Check that no MDS daemons are active
     if (fs->mds_map.get_num_up_mds() > 0) {
       ss << "all MDS daemons must be inactive before resetting filesystem: set the cluster_down flag"
-            " and use `ceph mds fail` to make this so";
+            " and use `stone mds fail` to make this so";
       return -EINVAL;
     }
 
@@ -1125,7 +1125,7 @@ class RemoveDataPoolHandler : public FileSystemCommandHandler
       }
     }
 
-    ceph_assert(poolid >= 0);  // Checked by parsing code above
+    stone_assert(poolid >= 0);  // Checked by parsing code above
 
     auto fs = fsmap.get_filesystem(fs_name);
     if (fs->mds_map.get_first_data_pool() == poolid) {
@@ -1421,7 +1421,7 @@ int FileSystemCommandHandler::_check_pool(
     bool force,
     std::ostream *ss) const
 {
-  ceph_assert(ss != NULL);
+  stone_assert(ss != NULL);
 
   const pg_pool_t *pool = osd_map.get_pg_pool(pool_id);
   if (!pool) {
@@ -1435,13 +1435,13 @@ int FileSystemCommandHandler::_check_pool(
     if (type == POOL_METADATA) {
       *ss << "pool '" << pool_name << "' (id '" << pool_id << "')"
          << " is an erasure-coded pool.  Use of erasure-coded pools"
-         << " for CephFS metadata is not permitted";
+         << " for StoneFS metadata is not permitted";
       return -EINVAL;
     } else if (type == POOL_DATA_DEFAULT && !force) {
       *ss << "pool '" << pool_name << "' (id '" << pool_id << "')"
              " is an erasure-coded pool."
              " Use of an EC pool for the default data pool is discouraged;"
-             " see the online CephFS documentation for more information."
+             " see the online StoneFS documentation for more information."
              " Use --force to override.";
       return -EINVAL;
     } else if (!pool->allows_ecoverwrites()) {
@@ -1456,14 +1456,14 @@ int FileSystemCommandHandler::_check_pool(
       // write operations like modify+truncate we care about support for)
       const pg_pool_t *write_tier = osd_map.get_pg_pool(
           pool->write_tier);
-      ceph_assert(write_tier != NULL);  // OSDMonitor shouldn't allow DNE tier
+      stone_assert(write_tier != NULL);  // OSDMonitor shouldn't allow DNE tier
       if (write_tier->cache_mode == pg_pool_t::CACHEMODE_FORWARD
           || write_tier->cache_mode == pg_pool_t::CACHEMODE_READONLY) {
         *ss << "EC pool '" << pool_name << "' has a write tier ("
             << osd_map.get_pool_name(pool->write_tier)
             << ") that is configured "
                "to forward writes.  Use a cache mode such as 'writeback' for "
-               "CephFS";
+               "StoneFS";
         return -EINVAL;
       }
     }
@@ -1477,9 +1477,9 @@ int FileSystemCommandHandler::_check_pool(
 
   if (!force && !pool->application_metadata.empty() &&
       pool->application_metadata.count(
-        pg_pool_t::APPLICATION_NAME_CEPHFS) == 0) {
+        pg_pool_t::APPLICATION_NAME_STONEFS) == 0) {
     *ss << " pool '" << pool_name << "' (id '" << pool_id
-        << "') has a non-CephFS application enabled.";
+        << "') has a non-StoneFS application enabled.";
     return -EINVAL;
   }
 

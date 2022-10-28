@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_THROTTLE_H
-#define CEPH_THROTTLE_H
+#ifndef STONE_THROTTLE_H
+#define STONE_THROTTLE_H
 
 #include <atomic>
 #include <chrono>
@@ -26,7 +26,7 @@
  * back, so @p get_current() drops below the limit after fulfills the requests.
  */
 class Throttle final : public ThrottleInterface {
-  CephContext *cct;
+  StoneeContext *cct;
   const std::string name;
   PerfCountersRef logger;
   std::atomic<int64_t> count = { 0 }, max = { 0 };
@@ -35,7 +35,7 @@ class Throttle final : public ThrottleInterface {
   const bool use_perf;
 
 public:
-  Throttle(CephContext *cct, const std::string& n, int64_t m = 0, bool _use_perf = true);
+  Throttle(StoneeContext *cct, const std::string& n, int64_t m = 0, bool _use_perf = true);
   ~Throttle() override;
 
 private:
@@ -150,7 +150,7 @@ public:
  * delay = e + (r - h)((m - e)/(1 - h))
  */
 class BackoffThrottle {
-  CephContext *cct;
+  StoneeContext *cct;
   const std::string name;
   PerfCountersRef logger;
 
@@ -223,7 +223,7 @@ public:
   uint64_t get_current();
   uint64_t get_max();
 
-  BackoffThrottle(CephContext *cct, const std::string& n,
+  BackoffThrottle(StoneeContext *cct, const std::string& n,
     unsigned expected_concurrency, ///< [in] determines size of conds
     bool _use_perf = true);
   ~BackoffThrottle();
@@ -331,7 +331,7 @@ private:
 
 class TokenBucketThrottle {
   struct Bucket {
-    CephContext *cct;
+    StoneeContext *cct;
     const std::string name;
 
     uint64_t remain;
@@ -339,7 +339,7 @@ class TokenBucketThrottle {
     uint64_t capacity;
     uint64_t available;
 
-    Bucket(CephContext *cct, const std::string &name, uint64_t m)
+    Bucket(StoneeContext *cct, const std::string &name, uint64_t m)
       : cct(cct), name(name), remain(m), max(m), capacity(m), available(m) {}
 
     uint64_t get(uint64_t c);
@@ -355,7 +355,7 @@ class TokenBucketThrottle {
       : tokens_requested(_tokens_requested), ctx(_ctx) {}
   };
 
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   const std::string m_name;
   Bucket m_throttle;
   uint64_t m_burst = 0;
@@ -406,7 +406,7 @@ class TokenBucketThrottle {
   double m_schedule_tick = 1.0;
 
 public:
-  TokenBucketThrottle(CephContext *cct, const std::string &name,
+  TokenBucketThrottle(StoneeContext *cct, const std::string &name,
                       uint64_t burst, uint64_t avg,
                       SafeTimer *timer, ceph::mutex *timer_lock);
 

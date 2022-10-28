@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Adam C. Emerson <aemerson@redhat.com>
  *
@@ -22,15 +22,15 @@
 using std::optional;
 using std::bad_any_cast;
 
-using ceph::immobile_any;
-using ceph::unique_any;
-using ceph::shared_any;
+using stone::immobile_any;
+using stone::unique_any;
+using stone::shared_any;
 
-using ceph::make_immobile_any;
-using ceph::make_unique_any;
-using ceph::make_shared_any;
+using stone::make_immobile_any;
+using stone::make_unique_any;
+using stone::make_shared_any;
 
-using ceph::any_cast;
+using stone::any_cast;
 using std::swap;
 
 template<typename A>

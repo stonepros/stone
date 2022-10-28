@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 Dreamhost
  *
@@ -25,12 +25,12 @@ TEST(RoundTrip, SimpleRoundTrip) {
   const char * const correctly_encoded = "YWJyYWNhZGFicmE=";
   char out[OUT_LEN];
   memset(out, 0, sizeof(out));
-  int alen = ceph_armor(out, out + OUT_LEN, original, original + strlen(original));
+  int alen = stone_armor(out, out + OUT_LEN, original, original + strlen(original));
   ASSERT_STREQ(correctly_encoded, out);
 
   char out2[OUT_LEN];
   memset(out2, 0, sizeof(out2));
-  ceph_unarmor(out2, out2 + OUT_LEN, out, out + alen);
+  stone_unarmor(out2, out2 + OUT_LEN, out, out + alen);
   ASSERT_STREQ(original, out2);
 }
 
@@ -49,12 +49,12 @@ TEST(RoundTrip, RandomRoundTrips) {
     }
     char out[OUT_MAX];
     memset(out, 0, sizeof(out));
-    int alen = ceph_armor(out, out + OUT_MAX, in, in + in_len);
+    int alen = stone_armor(out, out + OUT_MAX, in, in + in_len);
     ASSERT_GE(alen, 0);
 
     char decoded[IN_MAX];
     memset(decoded, 0, sizeof(decoded));
-    int blen = ceph_unarmor(decoded, decoded + IN_MAX, out, out + alen);
+    int blen = stone_unarmor(decoded, decoded + IN_MAX, out, out + alen);
     ASSERT_GE(blen, 0);
 
     ASSERT_EQ(memcmp(in, decoded, in_len), 0);
@@ -69,7 +69,7 @@ TEST(EdgeCase, EndsInNewline) {
 
     char decoded[OUT_MAX];
     memset(decoded, 0, sizeof(decoded));
-    int blen = ceph_unarmor(decoded, decoded + OUT_MAX, b64, b64 + sizeof(b64)-1);
+    int blen = stone_unarmor(decoded, decoded + OUT_MAX, b64, b64 + sizeof(b64)-1);
     ASSERT_GE(blen, 0);
 }
 
@@ -78,7 +78,7 @@ TEST(FuzzEncoding, BadDecode1) {
   const char * const bad_encoded = "FAKEBASE64 foo";
   char out[OUT_LEN];
   memset(out, 0, sizeof(out));
-  int alen = ceph_unarmor(out, out + OUT_LEN, bad_encoded, bad_encoded + strlen(bad_encoded));
+  int alen = stone_unarmor(out, out + OUT_LEN, bad_encoded, bad_encoded + strlen(bad_encoded));
   ASSERT_LT(alen, 0);
 }
 

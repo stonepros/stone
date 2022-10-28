@@ -4,9 +4,9 @@
 #include <errno.h>
 
 #include "librbd/cache/ObjectCacherWriteback.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/dout.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "osdc/Striper.h"
 #include "include/Context.h"
 #include "include/neorados/RADOS.hpp"
@@ -26,9 +26,9 @@
 #include "librbd/io/ReadResult.h"
 #include "librbd/io/Utils.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::ObjectCacherWriteback: "
 
@@ -44,7 +44,7 @@ namespace cache {
  */
 class C_ReadRequest : public Context {
 public:
-  C_ReadRequest(CephContext *cct, Context *c, ceph::mutex *cache_lock)
+  C_ReadRequest(StoneContext *cct, Context *c, stone::mutex *cache_lock)
     : m_cct(cct), m_ctx(c), m_cache_lock(cache_lock) {
   }
   void finish(int r) override {
@@ -56,14 +56,14 @@ public:
     ldout(m_cct, 20) << "aio_cb finished" << dendl;
   }
 private:
-  CephContext *m_cct;
+  StoneContext *m_cct;
   Context *m_ctx;
-  ceph::mutex *m_cache_lock;
+  stone::mutex *m_cache_lock;
 };
 
 class C_OrderedWrite : public Context {
 public:
-  C_OrderedWrite(CephContext *cct,
+  C_OrderedWrite(StoneContext *cct,
                  ObjectCacherWriteback::write_result_d *result,
                  const ZTracer::Trace &trace, ObjectCacherWriteback *wb)
     : m_cct(cct), m_result(result), m_trace(trace), m_wb_handler(wb) {}
@@ -72,7 +72,7 @@ public:
     ldout(m_cct, 20) << "C_OrderedWrite completing " << m_result << dendl;
     {
       std::lock_guard l{m_wb_handler->m_lock};
-      ceph_assert(!m_result->done);
+      stone_assert(!m_result->done);
       m_result->done = true;
       m_result->ret = r;
       m_wb_handler->complete_writes(m_result->oid);
@@ -81,7 +81,7 @@ public:
     m_trace.event("finish");
   }
 private:
-  CephContext *m_cct;
+  StoneContext *m_cct;
   ObjectCacherWriteback::write_result_d *m_result;
   ZTracer::Trace m_trace;
   ObjectCacherWriteback *m_wb_handler;
@@ -101,13 +101,13 @@ struct C_CommitIOEventExtent : public Context {
 
   void finish(int r) override {
     // all IO operations are flushed prior to closing the journal
-    ceph_assert(image_ctx->journal != nullptr);
+    stone_assert(image_ctx->journal != nullptr);
 
     image_ctx->journal->commit_io_event_extent(journal_tid, offset, length, r);
   }
 };
 
-ObjectCacherWriteback::ObjectCacherWriteback(ImageCtx *ictx, ceph::mutex& lock)
+ObjectCacherWriteback::ObjectCacherWriteback(ImageCtx *ictx, stone::mutex& lock)
   : m_tid(0), m_lock(lock), m_ictx(ictx) {
 }
 
@@ -139,7 +139,7 @@ void ObjectCacherWriteback::read(const object_t& oid, uint64_t object_no,
     aio_comp, {{off, len, {{0, len}}}});
 
   auto io_context = m_ictx->duplicate_data_io_context();
-  if (snapid != CEPH_NOSNAP) {
+  if (snapid != STONE_NOSNAP) {
     io_context->read_snap(snapid);
   }
 
@@ -177,14 +177,14 @@ bool ObjectCacherWriteback::may_copy_on_write(const object_t& oid,
   return may;
 }
 
-ceph_tid_t ObjectCacherWriteback::write(const object_t& oid,
+stone_tid_t ObjectCacherWriteback::write(const object_t& oid,
                                         const object_locator_t& oloc,
                                         uint64_t off, uint64_t len,
                                         const SnapContext& snapc,
                                         const bufferlist &bl,
-                                        ceph::real_time mtime,
+                                        stone::real_time mtime,
                                         uint64_t trunc_size,
-                                        __u32 trunc_seq, ceph_tid_t journal_tid,
+                                        __u32 trunc_seq, stone_tid_t journal_tid,
                                         const ZTracer::Trace &parent_trace,
                                         Context *oncommit)
 {
@@ -226,8 +226,8 @@ ceph_tid_t ObjectCacherWriteback::write(const object_t& oid,
 
 void ObjectCacherWriteback::overwrite_extent(const object_t& oid, uint64_t off,
                                              uint64_t len,
-                                             ceph_tid_t original_journal_tid,
-                                             ceph_tid_t new_journal_tid) {
+                                             stone_tid_t original_journal_tid,
+                                             stone_tid_t new_journal_tid) {
   typedef std::vector<std::pair<uint64_t,uint64_t> > Extents;
 
   ldout(m_ictx->cct, 20) << __func__ << ": " << oid << " "
@@ -238,7 +238,7 @@ void ObjectCacherWriteback::overwrite_extent(const object_t& oid, uint64_t off,
   uint64_t object_no = oid_to_object_no(oid.name, m_ictx->object_prefix);
 
   // all IO operations are flushed prior to closing the journal
-  ceph_assert(original_journal_tid != 0 && m_ictx->journal != NULL);
+  stone_assert(original_journal_tid != 0 && m_ictx->journal != NULL);
 
   Extents file_extents;
   io::util::extent_to_file(m_ictx, object_no, off, len, file_extents);
@@ -260,7 +260,7 @@ void ObjectCacherWriteback::overwrite_extent(const object_t& oid, uint64_t off,
 
 void ObjectCacherWriteback::complete_writes(const std::string& oid)
 {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   std::queue<write_result_d*>& results = m_writes[oid];
   ldout(m_ictx->cct, 20) << "complete_writes() oid " << oid << dendl;
   std::list<write_result_d*> finished;

@@ -1,11 +1,11 @@
-# see http://tracker.ceph.com/issues/20360 and http://tracker.ceph.com/issues/18126
+# see http://tracker.stone.com/issues/20360 and http://tracker.stone.com/issues/18126
 os_type: centos
 
 overrides:
   install:
-    ceph:
+    stone:
       debuginfo: true
-  ceph:
+  stone:
     conf:
       global:
         osd heartbeat grace: 80
@@ -27,5 +27,5 @@ overrides:
       mon: [--tool=memcheck, --leak-check=full, --show-reachable=yes]
       osd: [--tool=memcheck]
       mds: [--tool=memcheck]
-# https://tracker.ceph.com/issues/38621
+# https://tracker.stone.com/issues/38621
 #      mgr: [--tool=memcheck]

@@ -4,11 +4,11 @@
 #include "Types.h"
 #include "SocketCommon.h"
 
-#define dout_subsys ceph_subsys_immutable_obj_cache
+#define dout_subsys stone_subsys_immutable_obj_cache
 #undef dout_prefix
-#define dout_prefix *_dout << "ceph::cache::Types: " << __func__ << ": "
+#define dout_prefix *_dout << "stone::cache::Types: " << __func__ << ": "
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 ObjectCacheRequest::ObjectCacheRequest() {}
@@ -18,8 +18,8 @@ ObjectCacheRequest::~ObjectCacheRequest() {}
 
 void ObjectCacheRequest::encode() {
   ENCODE_START(2, 1, payload);
-  ceph::encode(type, payload);
-  ceph::encode(seq, payload);
+  stone::encode(type, payload);
+  stone::encode(seq, payload);
   if (!payload_empty()) {
     encode_payload();
   }
@@ -29,8 +29,8 @@ void ObjectCacheRequest::encode() {
 void ObjectCacheRequest::decode(bufferlist& bl) {
   auto i = bl.cbegin();
   DECODE_START(2, i);
-  ceph::decode(type, i);
-  ceph::decode(seq, i);
+  stone::decode(type, i);
+  stone::decode(seq, i);
   if (!payload_empty()) {
     decode_payload(i, struct_v);
   }
@@ -49,7 +49,7 @@ ObjectCacheRegData::ObjectCacheRegData(uint16_t t, uint64_t s,
 ObjectCacheRegData::~ObjectCacheRegData() {}
 
 void ObjectCacheRegData::encode_payload() {
-  ceph::encode(version, payload);
+  stone::encode(version, payload);
 }
 
 void ObjectCacheRegData::decode_payload(bufferlist::const_iterator i,
@@ -57,7 +57,7 @@ void ObjectCacheRegData::decode_payload(bufferlist::const_iterator i,
   if (i.end()) {
     return;
   }
-  ceph::decode(version, i);
+  stone::decode(version, i);
 }
 
 ObjectCacheRegReplyData::ObjectCacheRegReplyData() {}
@@ -89,25 +89,25 @@ ObjectCacheReadData::ObjectCacheReadData(uint16_t t, uint64_t s)
 ObjectCacheReadData::~ObjectCacheReadData() {}
 
 void ObjectCacheReadData::encode_payload() {
-  ceph::encode(read_offset, payload);
-  ceph::encode(read_len, payload);
-  ceph::encode(pool_id, payload);
-  ceph::encode(snap_id, payload);
-  ceph::encode(oid, payload);
-  ceph::encode(pool_namespace, payload);
-  ceph::encode(object_size, payload);
+  stone::encode(read_offset, payload);
+  stone::encode(read_len, payload);
+  stone::encode(pool_id, payload);
+  stone::encode(snap_id, payload);
+  stone::encode(oid, payload);
+  stone::encode(pool_namespace, payload);
+  stone::encode(object_size, payload);
 }
 
 void ObjectCacheReadData::decode_payload(bufferlist::const_iterator i,
                                         __u8 encode_version) {
-  ceph::decode(read_offset, i);
-  ceph::decode(read_len, i);
-  ceph::decode(pool_id, i);
-  ceph::decode(snap_id, i);
-  ceph::decode(oid, i);
-  ceph::decode(pool_namespace, i);
+  stone::decode(read_offset, i);
+  stone::decode(read_len, i);
+  stone::decode(pool_id, i);
+  stone::decode(snap_id, i);
+  stone::decode(oid, i);
+  stone::decode(pool_namespace, i);
   if (encode_version >= 2) {
-    ceph::decode(object_size, i);
+    stone::decode(object_size, i);
   }
 }
 
@@ -120,12 +120,12 @@ ObjectCacheReadReplyData::ObjectCacheReadReplyData(uint16_t t, uint64_t s)
 ObjectCacheReadReplyData::~ObjectCacheReadReplyData() {}
 
 void ObjectCacheReadReplyData::encode_payload() {
-  ceph::encode(cache_path, payload);
+  stone::encode(cache_path, payload);
 }
 
 void ObjectCacheReadReplyData::decode_payload(bufferlist::const_iterator i,
                                               __u8 encode_version) {
-  ceph::decode(cache_path, i);
+  stone::decode(cache_path, i);
 }
 
 ObjectCacheReadRadosData::ObjectCacheReadRadosData() {}
@@ -146,8 +146,8 @@ ObjectCacheRequest* decode_object_cache_request(bufferlist payload_buffer) {
   uint64_t seq;
   auto i = payload_buffer.cbegin();
   DECODE_START(1, i);
-  ceph::decode(type, i);
-  ceph::decode(seq, i);
+  stone::decode(type, i);
+  stone::decode(seq, i);
   DECODE_FINISH(i);
 
   switch (type) {
@@ -172,7 +172,7 @@ ObjectCacheRequest* decode_object_cache_request(bufferlist payload_buffer) {
       break;
     }
     default:
-      ceph_assert(0);
+      stone_assert(0);
   }
 
   req->decode(payload_buffer);
@@ -181,4 +181,4 @@ ObjectCacheRequest* decode_object_cache_request(bufferlist payload_buffer) {
 }
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone

@@ -8,7 +8,7 @@
 #include "librbd/ImageCtx.h"
 #include "librbd/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::AttachParentRequest: " << this \
                            << " " << __func__ << ": "
@@ -40,7 +40,7 @@ void AttachParentRequest<I>::attach_parent() {
     AttachParentRequest<I>,
     &AttachParentRequest<I>::handle_attach_parent>(this);
   int r = m_image_ctx.md_ctx.aio_operate(m_image_ctx.header_oid, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

@@ -1,16 +1,16 @@
-if(${WITH_CEPHFS})
-  add_executable(ceph_test_client
+if(${WITH_STONEFS})
+  add_executable(stone_test_client
     main.cc
     alternate_name.cc
     )
-  target_link_libraries(ceph_test_client
+  target_link_libraries(stone_test_client
     client
     global
-    ceph-common
+    stone-common
     ${UNITTEST_LIBS}
     ${EXTRALIBS}
     ${CMAKE_DL_LIBS}
     )
-  install(TARGETS ceph_test_client
+  install(TARGETS stone_test_client
     DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif(${WITH_CEPHFS})
+endif(${WITH_STONEFS})

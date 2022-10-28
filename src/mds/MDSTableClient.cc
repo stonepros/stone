@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -26,8 +26,8 @@
 
 #include "common/config.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << mds->get_nodeid() << ".tableclient(" << get_mdstable_name(table) << ") "
 
@@ -47,10 +47,10 @@ public:
 void MDSTableClient::handle_request(const cref_t<MMDSTableRequest> &m)
 {
   dout(10) << "handle_request " << *m << dendl;
-  ceph_assert(m->table == table);
+  stone_assert(m->table == table);
 
   if (mds->get_state() < MDSMap::STATE_RESOLVE) {
-    if (mds->get_want_state() == CEPH_MDS_STATE_RESOLVE) {
+    if (mds->get_want_state() == STONE_MDS_STATE_RESOLVE) {
       mds->wait_for_resolve(new C_MDS_RetryMessage(mds, m));
     }
     return;
@@ -65,7 +65,7 @@ void MDSTableClient::handle_request(const cref_t<MMDSTableRequest> &m)
     break;
 
   case TABLESERVER_OP_NOTIFY_PREP:
-    ceph_assert(g_conf()->mds_kill_mdstable_at != 9);
+    stone_assert(g_conf()->mds_kill_mdstable_at != 9);
     handle_notify_prep(m);
     break;
     
@@ -73,7 +73,7 @@ void MDSTableClient::handle_request(const cref_t<MMDSTableRequest> &m)
     if (pending_prepare.count(reqid)) {
       dout(10) << "got agree on " << reqid << " atid " << tid << dendl;
 
-      ceph_assert(g_conf()->mds_kill_mdstable_at != 3);
+      stone_assert(g_conf()->mds_kill_mdstable_at != 3);
 
       MDSContext *onfinish = pending_prepare[reqid].onfinish;
       *pending_prepare[reqid].ptid = tid;
@@ -87,19 +87,19 @@ void MDSTableClient::handle_request(const cref_t<MMDSTableRequest> &m)
     }
     else if (prepared_update.count(tid)) {
       dout(10) << "got duplicated agree on " << reqid << " atid " << tid << dendl;
-      ceph_assert(prepared_update[tid] == reqid);
-      ceph_assert(!server_ready);
+      stone_assert(prepared_update[tid] == reqid);
+      stone_assert(!server_ready);
     }
     else if (pending_commit.count(tid)) {
       dout(10) << "stray agree on " << reqid << " tid " << tid
 	       << ", already committing, will resend COMMIT" << dendl;
-      ceph_assert(!server_ready);
+      stone_assert(!server_ready);
       // will re-send commit when receiving the server ready message
     }
     else {
       dout(10) << "stray agree on " << reqid << " tid " << tid
 	       << ", sending ROLLBACK" << dendl;
-      ceph_assert(!server_ready);
+      stone_assert(!server_ready);
       auto req = make_message<MMDSTableRequest>(table, TABLESERVER_OP_ROLLBACK, 0, tid);
       mds->send_message_mds(req, mds->get_mds_map()->get_tableserver());
     }
@@ -110,7 +110,7 @@ void MDSTableClient::handle_request(const cref_t<MMDSTableRequest> &m)
 	pending_commit[tid]->pending_commit_tids[table].count(tid)) {
       dout(10) << "got ack on tid " << tid << ", logging" << dendl;
       
-      ceph_assert(g_conf()->mds_kill_mdstable_at != 7);
+      stone_assert(g_conf()->mds_kill_mdstable_at != 7);
       
       // remove from committing list
       pending_commit[tid]->pending_commit_tids[table].erase(tid);
@@ -125,7 +125,7 @@ void MDSTableClient::handle_request(const cref_t<MMDSTableRequest> &m)
     break;
 
   case TABLESERVER_OP_SERVER_READY:
-    ceph_assert(!server_ready);
+    stone_assert(!server_ready);
     server_ready = true;
 
     if (last_reqid == ~0ULL)
@@ -137,7 +137,7 @@ void MDSTableClient::handle_request(const cref_t<MMDSTableRequest> &m)
     break;
 
   default:
-    ceph_abort_msg("unrecognized mds_table_client request op");
+    stone_abort_msg("unrecognized mds_table_client request op");
   }
 }
 
@@ -183,16 +183,16 @@ void MDSTableClient::commit(version_t tid, LogSegment *ls)
 {
   dout(10) << "commit " << tid << dendl;
 
-  ceph_assert(prepared_update.count(tid));
+  stone_assert(prepared_update.count(tid));
   prepared_update.erase(tid);
 
-  ceph_assert(pending_commit.count(tid) == 0);
+  stone_assert(pending_commit.count(tid) == 0);
   pending_commit[tid] = ls;
   ls->pending_commit_tids[table].insert(tid);
 
   notify_commit(tid);
 
-  ceph_assert(g_conf()->mds_kill_mdstable_at != 4);
+  stone_assert(g_conf()->mds_kill_mdstable_at != 4);
 
   if (server_ready) {
     // send message

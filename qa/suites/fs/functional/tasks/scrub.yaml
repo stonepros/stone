@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - Replacing daemon mds
       - Scrub error on inode
@@ -13,7 +13,7 @@ overrides:
         mds log max segments: 1
         mds cache max size: 1000
 tasks:
-- cephfs_test_runner:
+- stonefs_test_runner:
     modules:
-      - tasks.cephfs.test_scrub_checks
-      - tasks.cephfs.test_scrub
+      - tasks.stonefs.test_scrub_checks
+      - tasks.stonefs.test_scrub

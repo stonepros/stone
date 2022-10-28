@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -39,7 +39,7 @@ auto capture(std::optional<error_code>& opt_ec,
 
 TEST(Queue, SyncRequest)
 {
-  ClientCounters counters(g_ceph_context);
+  ClientCounters counters(g_stone_context);
   auto client_info_f = [] (client_id client) -> ClientInfo* {
                          static ClientInfo clients[] = {
                                                         {1, 1, 1}, //admin: satisfy by reservation
@@ -50,7 +50,7 @@ TEST(Queue, SyncRequest)
   std::atomic <bool> ready = false;
   auto server_ready_f = [&ready]() -> bool { return ready.load();};
 
-  SyncScheduler queue(g_ceph_context, std::ref(counters),
+  SyncScheduler queue(g_stone_context, std::ref(counters),
 		      client_info_f, server_ready_f,
 		      std::ref(SyncScheduler::handle_request_cb)
 		      );
@@ -79,8 +79,8 @@ TEST(Queue, SyncRequest)
 TEST(Queue, RateLimit)
 {
   boost::asio::io_context context;
-  ClientCounters counters(g_ceph_context);
-  AsyncScheduler queue(g_ceph_context, context, std::ref(counters), nullptr,
+  ClientCounters counters(g_stone_context);
+  AsyncScheduler queue(g_stone_context, context, std::ref(counters), nullptr,
                   [] (client_id client) -> ClientInfo* {
       static ClientInfo clients[] = {
         {1, 1, 1}, // admin
@@ -140,8 +140,8 @@ TEST(Queue, RateLimit)
 TEST(Queue, AsyncRequest)
 {
   boost::asio::io_context context;
-  ClientCounters counters(g_ceph_context);
-  AsyncScheduler queue(g_ceph_context, context, std::ref(counters), nullptr,
+  ClientCounters counters(g_stone_context);
+  AsyncScheduler queue(g_stone_context, context, std::ref(counters), nullptr,
                   [] (client_id client) -> ClientInfo* {
       static ClientInfo clients[] = {
         {1, 1, 1}, // admin: satisfy by reservation
@@ -193,8 +193,8 @@ TEST(Queue, AsyncRequest)
 TEST(Queue, Cancel)
 {
   boost::asio::io_context context;
-  ClientCounters counters(g_ceph_context);
-  AsyncScheduler queue(g_ceph_context, context, std::ref(counters), nullptr,
+  ClientCounters counters(g_stone_context);
+  AsyncScheduler queue(g_stone_context, context, std::ref(counters), nullptr,
                   [] (client_id client) -> ClientInfo* {
       static ClientInfo info{0, 1, 1};
       return &info;
@@ -241,8 +241,8 @@ TEST(Queue, Cancel)
 TEST(Queue, CancelClient)
 {
   boost::asio::io_context context;
-  ClientCounters counters(g_ceph_context);
-  AsyncScheduler queue(g_ceph_context, context, std::ref(counters), nullptr,
+  ClientCounters counters(g_stone_context);
+  AsyncScheduler queue(g_stone_context, context, std::ref(counters), nullptr,
                   [] (client_id client) -> ClientInfo* {
       static ClientInfo info{0, 1, 1};
       return &info;
@@ -296,9 +296,9 @@ TEST(Queue, CancelOnDestructor)
   std::optional<error_code> ec1, ec2;
   std::optional<PhaseType> p1, p2;
 
-  ClientCounters counters(g_ceph_context);
+  ClientCounters counters(g_stone_context);
   {
-    AsyncScheduler queue(g_ceph_context, context, std::ref(counters), nullptr,
+    AsyncScheduler queue(g_stone_context, context, std::ref(counters), nullptr,
                     [] (client_id client) -> ClientInfo* {
         static ClientInfo info{0, 1, 1};
         return &info;
@@ -347,8 +347,8 @@ auto capture(const Executor& ex, std::optional<error_code>& opt_ec,
 TEST(Queue, CrossExecutorRequest)
 {
   boost::asio::io_context queue_context;
-  ClientCounters counters(g_ceph_context);
-  AsyncScheduler queue(g_ceph_context, queue_context, std::ref(counters), nullptr,
+  ClientCounters counters(g_stone_context);
+  AsyncScheduler queue(g_stone_context, queue_context, std::ref(counters), nullptr,
                   [] (client_id client) -> ClientInfo* {
       static ClientInfo info{0, 1, 1};
       return &info;
@@ -401,8 +401,8 @@ TEST(Queue, SpawnAsyncRequest)
   boost::asio::io_context context;
 
   spawn::spawn(context, [&] (yield_context yield) {
-    ClientCounters counters(g_ceph_context);
-    AsyncScheduler queue(g_ceph_context, context, std::ref(counters), nullptr,
+    ClientCounters counters(g_stone_context);
+    AsyncScheduler queue(g_stone_context, context, std::ref(counters), nullptr,
                     [] (client_id client) -> ClientInfo* {
         static ClientInfo clients[] = {
           {1, 1, 1}, // admin: satisfy by reservation

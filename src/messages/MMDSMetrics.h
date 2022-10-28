@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_MDS_METRICS_H
-#define CEPH_MDS_METRICS_H
+#ifndef STONE_MDS_METRICS_H
+#define STONE_MDS_METRICS_H
 
 #include "messages/MMDSOp.h"
 #include "mds/MDSPerfMetricTypes.h"
@@ -50,4 +50,4 @@ private:
   friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
 };
 
-#endif // CEPH_MDS_METRICS_H
+#endif // STONE_MDS_METRICS_H

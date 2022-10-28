@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 SUSE LINUX GmbH
  *
@@ -11,7 +11,7 @@
  */
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_
+#define dout_subsys stone_subsys_
 
 #include "common/debug.h"
 #include "common/errno.h"
@@ -20,7 +20,7 @@
 // Initialize the singleton service instance.
 ServiceBase *ServiceBase::s_service = NULL;
 
-ServiceBase::ServiceBase(CephContext *cct_): cct(cct_)
+ServiceBase::ServiceBase(StoneContext *cct_): cct(cct_)
 {
   status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
   status.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN;

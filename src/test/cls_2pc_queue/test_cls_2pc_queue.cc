@@ -548,7 +548,7 @@ TEST_F(TestCls2PCQueue, ManualCleanup)
   ASSERT_EQ(0, ioctx.operate(queue_name, &op));
 
   // anything older than 100ms is cosidered stale
-  ceph::coarse_real_time stale_time = ceph::coarse_real_clock::now() + std::chrono::milliseconds(100);
+  stone::coarse_real_time stale_time = stone::coarse_real_clock::now() + std::chrono::milliseconds(100);
 
   std::vector<std::thread> reservers(max_workers);
   for (auto& r : reservers) {
@@ -622,7 +622,7 @@ TEST_F(TestCls2PCQueue, Cleanup)
   ASSERT_EQ(0, ioctx.operate(queue_name, &op));
 
   // anything older than 100ms is cosidered stale
-  ceph::coarse_real_time stale_time = ceph::coarse_real_clock::now() + std::chrono::milliseconds(100);
+  stone::coarse_real_time stale_time = stone::coarse_real_clock::now() + std::chrono::milliseconds(100);
 
   std::vector<std::thread> reservers(max_workers);
   for (auto& r : reservers) {

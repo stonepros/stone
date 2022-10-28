@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -19,7 +19,7 @@
 #include "include/rbd/librbd.hpp"
 #include "include/event_type.h"
 #include "include/err.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "json_spirit/json_spirit.h"
 
 #include "gtest/gtest.h"
@@ -2166,7 +2166,7 @@ static void remove_full_try(rados_ioctx_t ioctx, const std::string& image_name,
 
 TEST_F(TestLibRBD, RemoveFullTry)
 {
-  REQUIRE(!is_rbd_pwl_enabled((CephContext *)_rados.cct()));
+  REQUIRE(!is_rbd_pwl_enabled((StoneContext *)_rados.cct()));
   REQUIRE(!is_librados_test_stub(_rados));
 
   rados_ioctx_t ioctx;
@@ -2191,7 +2191,7 @@ TEST_F(TestLibRBD, RemoveFullTry)
 TEST_F(TestLibRBD, RemoveFullTryDataPool)
 {
   REQUIRE_FORMAT_V2();
-  REQUIRE(!is_rbd_pwl_enabled((CephContext *)_rados.cct()));
+  REQUIRE(!is_rbd_pwl_enabled((StoneContext *)_rados.cct()));
   REQUIRE(!is_librados_test_stub(_rados));
 
   rados_ioctx_t ioctx;
@@ -2733,7 +2733,7 @@ void simple_read_cb_pp(librbd::completion_t cb, void *arg)
 void aio_write_test_data(librbd::Image& image, const char *test_data,
 			 off_t off, uint32_t iohint, bool *passed)
 {
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   bl.append(test_data, strlen(test_data));
   librbd::RBD::AioCompletion *comp = new librbd::RBD::AioCompletion(NULL, (librbd::callback_t) simple_write_cb_pp);
   printf("created completion\n");
@@ -2766,7 +2766,7 @@ void write_test_data(librbd::Image& image, const char *test_data, off_t off, uin
 {
   size_t written;
   size_t len = strlen(test_data);
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   bl.append(test_data, len);
   if (iohint)
     written = image.write2(off, len, bl, iohint);
@@ -2789,7 +2789,7 @@ void discard_test_data(librbd::Image& image, off_t off, size_t len, bool *passed
 void aio_read_test_data(librbd::Image& image, const char *expected, off_t off, size_t expected_len, uint32_t iohint, bool *passed)
 {
   librbd::RBD::AioCompletion *comp = new librbd::RBD::AioCompletion(NULL, (librbd::callback_t) simple_read_cb_pp);
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   printf("created completion\n");
   if (iohint)
     image.aio_read2(off, expected_len, bl, comp, iohint);
@@ -2810,7 +2810,7 @@ void read_test_data(librbd::Image& image, const char *expected, off_t off, size_
 {
   int read;
   size_t len = expected_len;
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   if (iohint)
     read = image.read2(off, len, bl, iohint);
   else
@@ -2830,7 +2830,7 @@ void read_test_data(librbd::Image& image, const char *expected, off_t off, size_
 void aio_writesame_test_data(librbd::Image& image, const char *test_data, off_t off,
                              size_t len, size_t data_len, uint32_t iohint, bool *passed)
 {
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   bl.append(test_data, data_len);
   librbd::RBD::AioCompletion *comp = new librbd::RBD::AioCompletion(NULL, (librbd::callback_t) simple_write_cb_pp);
   printf("created completion\n");
@@ -2857,7 +2857,7 @@ void aio_writesame_test_data(librbd::Image& image, const char *test_data, off_t 
   int read;
   uint64_t left = len;
   while (left > 0) {
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     read = image.read(off, data_len, bl);
     ASSERT_EQ(data_len, static_cast<size_t>(read));
     std::string bl_str(bl.c_str(), read);
@@ -2881,7 +2881,7 @@ void writesame_test_data(librbd::Image& image, const char *test_data, off_t off,
                          bool *passed)
 {
   ssize_t written;
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   bl.append(test_data, data_len);
   written = image.writesame(off, len, bl, iohint);
   if (len % data_len) {
@@ -2899,7 +2899,7 @@ void writesame_test_data(librbd::Image& image, const char *test_data, off_t off,
   int read;
   uint64_t left = len;
   while (left > 0) {
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     read = image.read(off, data_len, bl);
     ASSERT_EQ(data_len, static_cast<size_t>(read));
     std::string bl_str(bl.c_str(), read);
@@ -2922,9 +2922,9 @@ void aio_compare_and_write_test_data(librbd::Image& image, const char *cmp_data,
                                      const char *test_data, off_t off, ssize_t len,
                                      uint32_t iohint, bool *passed)
 {
-  ceph::bufferlist cmp_bl;
+  stone::bufferlist cmp_bl;
   cmp_bl.append(cmp_data, strlen(cmp_data));
-  ceph::bufferlist test_bl;
+  stone::bufferlist test_bl;
   test_bl.append(test_data, strlen(test_data));
   librbd::RBD::AioCompletion *comp = new librbd::RBD::AioCompletion(NULL, (librbd::callback_t) simple_write_cb_pp);
   printf("created completion\n");
@@ -2945,9 +2945,9 @@ void compare_and_write_test_data(librbd::Image& image, const char *cmp_data, con
                                  off_t off, ssize_t len, uint64_t *mismatch_off, uint32_t iohint, bool *passed)
 {
   size_t written;
-  ceph::bufferlist cmp_bl;
+  stone::bufferlist cmp_bl;
   cmp_bl.append(cmp_data, strlen(cmp_data));
-  ceph::bufferlist test_bl;
+  stone::bufferlist test_bl;
   test_bl.append(test_data, strlen(test_data));
   printf("start compare and write\n");
   written = image.compare_and_write(off, len, cmp_bl, test_bl, mismatch_off, iohint);
@@ -4129,7 +4129,7 @@ TEST_F(TestLibRBD, FlushAioPP)
     test_data[TEST_IO_SIZE] = '\0';
 
     librbd::RBD::AioCompletion *write_comps[num_aios];
-    ceph::bufferlist bls[num_aios];
+    stone::bufferlist bls[num_aios];
     for (i = 0; i < num_aios; ++i) {
       bls[i].append(test_data, strlen(test_data));
       write_comps[i] = new librbd::RBD::AioCompletion(NULL, NULL);
@@ -4403,7 +4403,7 @@ TYPED_TEST(DiffIterateTest, DiffIterateDiscard)
     object_size = 1 << order;
   }
   vector<diff_extent> extents;
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
 
   ASSERT_EQ(0, image.diff_iterate2(NULL, 0, size, true, this->whole_object,
       			           vector_iterate_cb, (void *) &extents));
@@ -4458,7 +4458,7 @@ TYPED_TEST(DiffIterateTest, DiffIterateDiscard)
 
 TYPED_TEST(DiffIterateTest, DiffIterateStress)
 {
-  REQUIRE(!is_rbd_pwl_enabled((CephContext *)this->_rados.cct()));
+  REQUIRE(!is_rbd_pwl_enabled((StoneContext *)this->_rados.cct()));
   librados::IoCtx ioctx;
   ASSERT_EQ(0, this->_rados.ioctx_create(this->m_pool_name.c_str(), ioctx));
 
@@ -4551,7 +4551,7 @@ TYPED_TEST(DiffIterateTest, DiffIterateRegression6926)
     object_size = 1 << order;
   }
   vector<diff_extent> extents;
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
 
   ASSERT_EQ(0, image.diff_iterate2(NULL, 0, size, true, this->whole_object,
       			           vector_iterate_cb, (void *) &extents));
@@ -4600,7 +4600,7 @@ TYPED_TEST(DiffIterateTest, DiffIterateParent)
       object_size = 1 << order;
     }
 
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     bl.append(std::string(size, '1'));
     ASSERT_EQ(size, image.write(0, size, bl));
     ASSERT_EQ(0, image.snap_create("snap"));
@@ -4794,7 +4794,7 @@ TYPED_TEST(DiffIterateTest, DiffIterateUnalignedSmall)
     ASSERT_EQ(0, create_image_pp(rbd, ioctx, name.c_str(), size, &order));
     ASSERT_EQ(0, rbd.open(ioctx, image, name.c_str(), NULL));
 
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     bl.append(std::string(size, '1'));
     ASSERT_EQ(size, image.write(0, size, bl));
 
@@ -4826,7 +4826,7 @@ TYPED_TEST(DiffIterateTest, DiffIterateUnaligned)
     ASSERT_EQ(0, create_image_pp(rbd, ioctx, name.c_str(), size, &order));
     ASSERT_EQ(0, rbd.open(ioctx, image, name.c_str(), NULL));
 
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     bl.append(std::string(size, '1'));
     ASSERT_EQ(size, image.write(0, size, bl));
 
@@ -4868,7 +4868,7 @@ TYPED_TEST(DiffIterateTest, DiffIterateStriping)
                              1 << 20, 3));
     ASSERT_EQ(0, rbd.open(ioctx, image, name.c_str(), NULL));
 
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     bl.append(std::string(size, '1'));
     ASSERT_EQ(size, image.write(0, size, bl));
 
@@ -5941,12 +5941,12 @@ TEST_F(TestLibRBD, ObjectMapConsistentSnap)
   thread writer([&image1](){
       librbd::image_info_t info;
       int r = image1.stat(info, sizeof(info));
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       bufferlist bl;
       bl.append("foo");
       for (unsigned i = 0; i < info.num_objs; ++i) {
 	r = image1.write((1 << info.order) * i, bl.length(), bl);
-	ceph_assert(r == (int) bl.length());
+	stone_assert(r == (int) bl.length());
       }
     });
   writer.join();
@@ -6604,7 +6604,7 @@ TEST_F(TestLibRBD, ExclusiveLockTransition)
   ASSERT_EQ(0, rbd.open(ioctx, image2, name.c_str(), NULL));
 
   std::list<librbd::RBD::AioCompletion *> comps;
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   bl.append(std::string(1 << order, '1'));
   for (size_t object_no = 0; object_no < (size >> 12); ++object_no) {
     librbd::RBD::AioCompletion *comp = new librbd::RBD::AioCompletion(NULL,
@@ -7402,7 +7402,7 @@ TEST_F(TestLibRBD, ExclusiveLock)
 TEST_F(TestLibRBD, BreakLock)
 {
   REQUIRE_FEATURE(RBD_FEATURE_EXCLUSIVE_LOCK);
-  REQUIRE(!is_rbd_pwl_enabled((CephContext *)_rados.cct()));
+  REQUIRE(!is_rbd_pwl_enabled((StoneContext *)_rados.cct()));
 
   static char buf[10];
 
@@ -7625,7 +7625,7 @@ TEST_F(TestLibRBD, TestTrashPurge) {
 
   librbd::Image image2;
   ASSERT_EQ(0, rbd.open(ioctx, image2, name2.c_str(), nullptr));
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
   bl.append(std::string(1024, '0'));
   ASSERT_EQ(1024, image2.write(0, 1024, bl));
 
@@ -7750,7 +7750,7 @@ TEST_F(TestLibRBD, TestSetSnapById) {
   ASSERT_EQ(1U, snaps.size());
 
   ASSERT_EQ(0, image.snap_set_by_id(snaps[0].id));
-  ASSERT_EQ(0, image.snap_set_by_id(CEPH_NOSNAP));
+  ASSERT_EQ(0, image.snap_set_by_id(STONE_NOSNAP));
 }
 
 TEST_F(TestLibRBD, Namespaces) {
@@ -8641,7 +8641,7 @@ TEST_F(TestLibRBD, DISABLED_TestSeqWriteAIOPP)
     std::list<librbd::RBD::AioCompletion *> comps;
     for (uint64_t i = 0; i < size / TEST_IO_SIZE; ++i) {
       char *p = test_data + (TEST_IO_SIZE + 1) * (i % 10);
-      ceph::bufferlist bl;
+      stone::bufferlist bl;
       bl.append(p, strlen(p));
       auto comp = new librbd::RBD::AioCompletion(
           NULL, (librbd::callback_t) super_simple_write_cb_pp);
@@ -8808,8 +8808,8 @@ TEST_F(TestLibRBD, QuiesceWatch)
     size_t quiesce_count = 0;
     size_t unquiesce_count = 0;
 
-    ceph::mutex lock = ceph::make_mutex("lock");
-    ceph::condition_variable cv;
+    stone::mutex lock = stone::make_mutex("lock");
+    stone::condition_variable cv;
 
     Watcher(rbd_image_t &image) : image(image) {
     }
@@ -8891,8 +8891,8 @@ TEST_F(TestLibRBD, QuiesceWatchPP)
       size_t quiesce_count = 0;
       size_t unquiesce_count = 0;
 
-      ceph::mutex lock = ceph::make_mutex("lock");
-      ceph::condition_variable cv;
+      stone::mutex lock = stone::make_mutex("lock");
+      stone::condition_variable cv;
 
       Watcher(librbd::Image &image) : image(image) {
       }
@@ -8971,8 +8971,8 @@ TEST_F(TestLibRBD, QuiesceWatchError)
       size_t quiesce_count = 0;
       size_t unquiesce_count = 0;
 
-      ceph::mutex lock = ceph::make_mutex("lock");
-      ceph::condition_variable cv;
+      stone::mutex lock = stone::make_mutex("lock");
+      stone::condition_variable cv;
 
       Watcher(librbd::Image &image, int r) : image(image), r(r) {
       }
@@ -9344,7 +9344,7 @@ TEST_F(TestLibRBD, ConcurentOperations)
     std::string snap_name = "snap" + stringify(i++);
     threads.emplace_back([&image, snap_name]() {
       int r = image.snap_create(snap_name.c_str());
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
     });
   }
 
@@ -9358,7 +9358,7 @@ TEST_F(TestLibRBD, ConcurentOperations)
     std::string snap_name = "snap" + stringify(i++);
     threads.emplace_back([&image, snap_name](){
       int r = image.snap_remove(snap_name.c_str());
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
     });
   }
 
@@ -9393,8 +9393,8 @@ TEST_F(TestLibRBD, ConcurentOperations)
     struct Watcher : public librbd::QuiesceWatchCtx {
       size_t count = 0;
 
-      ceph::mutex lock = ceph::make_mutex("lock");
-      ceph::condition_variable cv;
+      stone::mutex lock = stone::make_mutex("lock");
+      stone::condition_variable cv;
 
       void handle_quiesce() override {
         std::unique_lock locker(lock);
@@ -9418,21 +9418,21 @@ TEST_F(TestLibRBD, ConcurentOperations)
 
     std::thread create_snap1([&image1, close1_comp]() {
       int r = image1.snap_create("snap1");
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       r = image1.aio_close(close1_comp);
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
     });
 
     ASSERT_TRUE(watcher.wait_for_quiesce(1));
 
     std::thread create_snap2([&image2]() {
       int r = image2.snap_create("snap2");
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
     });
 
     std::thread create_snap3([&image3]() {
       int r = image3.snap_create("snap3");
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
     });
 
     image2.quiesce_complete(handle, 0);
@@ -9463,11 +9463,11 @@ TEST_F(TestLibRBD, ConcurentOperations)
 }
 
 
-// poorman's ceph_assert()
-namespace ceph {
-  void __ceph_assert_fail(const char *assertion, const char *file, int line,
+// poorman's stone_assert()
+namespace stone {
+  void __stone_assert_fail(const char *assertion, const char *file, int line,
 			  const char *func) {
-    ceph_abort();
+    stone_abort();
   }
 }
 

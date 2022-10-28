@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_COMMON_CMDPARSE_H
-#define CEPH_COMMON_CMDPARSE_H
+#ifndef STONE_COMMON_CMDPARSE_H
+#define STONE_COMMON_CMDPARSE_H
 
 #include <vector>
 #include <stdexcept>
@@ -42,7 +42,7 @@ void dump_cmddesc_to_json(ceph::Formatter *jf,
 bool cmdmap_from_json(const std::vector<std::string>& cmd, cmdmap_t *mapp,
 		      std::ostream& ss);
 void cmdmap_dump(const cmdmap_t &cmdmap, ceph::Formatter *f);
-void handle_bad_get(CephContext *cct, const std::string& k, const char *name);
+void handle_bad_get(StoneeContext *cct, const std::string& k, const char *name);
 
 std::string cmd_vartype_stringify(const cmd_vartype& v);
 
@@ -96,12 +96,12 @@ bool cmd_getval(
 
 template <typename T>
 void
-cmd_putval(CephContext *cct, cmdmap_t& cmdmap, const std::string& k, const T& val)
+cmd_putval(StoneeContext *cct, cmdmap_t& cmdmap, const std::string& k, const T& val)
 {
   cmdmap[k] = val;
 }
 
-bool validate_cmd(CephContext* cct,
+bool validate_cmd(StoneeContext* cct,
 		  const std::string& desc,
 		  const cmdmap_t& cmdmap,
 		  std::ostream& os);

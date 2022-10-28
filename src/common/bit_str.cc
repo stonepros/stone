@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -13,12 +13,12 @@
  */
 #include "common/bit_str.h"
 #include "common/Formatter.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 static void _dump_bit_str(
     uint64_t bits,
     std::ostream *out,
-    ceph::Formatter *f,
+    stone::Formatter *f,
     std::function<const char*(uint64_t)> func,
     bool dump_bit_val)
 {
@@ -37,7 +37,7 @@ static void _dump_bit_str(
           *out << "(" << r << ")";
         }
       } else {
-        ceph_assert(f != NULL);
+        stone_assert(f != NULL);
         if (dump_bit_val) {
           f->dump_stream("bit_flag") << func(r)
                                      << "(" << r << ")";
@@ -64,7 +64,7 @@ void print_bit_str(
 
 void dump_bit_str(
     uint64_t bits,
-    ceph::Formatter *f,
+    stone::Formatter *f,
     const std::function<const char*(uint64_t)> &func,
     bool dump_bit_val)
 {

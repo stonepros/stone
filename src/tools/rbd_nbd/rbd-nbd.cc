@@ -60,7 +60,7 @@ namespace fs = std::experimental::filesystem;
 #include "common/Preforker.h"
 #include "common/SubProcess.h"
 #include "common/TextTable.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/config.h"
 #include "common/dout.h"
 #include "common/errno.h"
@@ -79,8 +79,8 @@ namespace fs = std::experimental::filesystem;
 
 #include "mon/MonClient.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd-nbd: "
 
@@ -181,9 +181,9 @@ static EventSocket terminate_event_sock;
 #define HELP_INFO 1
 #define VERSION_INFO 2
 
-#ifdef CEPH_BIG_ENDIAN
+#ifdef STONE_BIG_ENDIAN
 #define ntohll(a) (a)
-#elif defined(CEPH_LITTLE_ENDIAN)
+#elif defined(STONE_LITTLE_ENDIAN)
 #define ntohll(a) swab(a)
 #else
 #error "Could not determine endianess"
@@ -238,9 +238,9 @@ public:
 
 private:
   int terminate_event_fd = -1;
-  ceph::mutex disconnect_lock =
-    ceph::make_mutex("NBDServer::DisconnectLocker");
-  ceph::condition_variable disconnect_cond;
+  stone::mutex disconnect_lock =
+    stone::make_mutex("NBDServer::DisconnectLocker");
+  stone::condition_variable disconnect_cond;
   std::atomic<bool> terminated = { false };
   std::atomic<bool> allow_internal_flush = { false };
 
@@ -260,8 +260,8 @@ private:
 
   friend std::ostream &operator<<(std::ostream &os, const IOContext &ctx);
 
-  ceph::mutex lock = ceph::make_mutex("NBDServer::Locker");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("NBDServer::Locker");
+  stone::condition_variable cond;
   xlist<IOContext*> io_pending;
   xlist<IOContext*> io_finished;
 
@@ -274,7 +274,7 @@ private:
   void io_finish(IOContext *ctx)
   {
     std::lock_guard l{lock};
-    ceph_assert(ctx->item.is_on_list());
+    stone_assert(ctx->item.is_on_list());
     ctx->item.remove_myself();
     io_finished.push_back(&ctx->item);
     cond.notify_all();
@@ -312,10 +312,10 @@ private:
   {
     std::unique_lock l{lock};
 
-    ceph_assert(!reader_thread.is_started());
-    ceph_assert(!writer_thread.is_started());
-    ceph_assert(io_pending.empty());
-    ceph_assert(io_finished.empty());
+    stone_assert(!reader_thread.is_started());
+    stone_assert(!writer_thread.is_started());
+    stone_assert(io_pending.empty());
+    stone_assert(io_finished.empty());
   }
 
   static void aio_callback(librbd::completion_t cb, void *arg)
@@ -521,7 +521,7 @@ signal:
     return true;
   }
 
-  void wait_unquiesce(std::unique_lock<ceph::mutex> &locker) {
+  void wait_unquiesce(std::unique_lock<stone::mutex> &locker) {
     dout(20) << __func__ << dendl;
 
     cond.wait(locker, [this] { return !quiesce || terminated; });
@@ -554,7 +554,7 @@ signal:
 
   void quiesce_entry()
   {
-    ceph_assert(cfg->quiesce);
+    stone_assert(cfg->quiesce);
 
     while (wait_quiesce()) {
 
@@ -564,7 +564,7 @@ signal:
 
       {
         std::unique_lock locker{lock};
-        ceph_assert(quiesce == true);
+        stone_assert(quiesce == true);
 
         image.quiesce_complete(quiesce_watch_handle, r);
 
@@ -614,10 +614,10 @@ public:
       started = true;
 
       terminate_event_fd = eventfd(0, EFD_NONBLOCK);
-      ceph_assert(terminate_event_fd > 0);
+      stone_assert(terminate_event_fd > 0);
       int r = terminate_event_sock.init(terminate_event_fd,
                                         EVENT_SOCKET_TYPE_EVENTFD);
-      ceph_assert(r >= 0);
+      stone_assert(r >= 0);
 
       reader_thread.create("rbd_reader");
       writer_thread.create("rbd_writer");
@@ -639,10 +639,10 @@ public:
   void notify_quiesce() {
     dout(10) << __func__ << dendl;
 
-    ceph_assert(cfg->quiesce);
+    stone_assert(cfg->quiesce);
 
     std::unique_lock locker{lock};
-    ceph_assert(quiesce == false);
+    stone_assert(quiesce == false);
     quiesce = true;
     cond.notify_all();
   }
@@ -650,10 +650,10 @@ public:
   void notify_unquiesce() {
     dout(10) << __func__ << dendl;
 
-    ceph_assert(cfg->quiesce);
+    stone_assert(cfg->quiesce);
 
     std::unique_lock locker{lock};
-    ceph_assert(quiesce == true);
+    stone_assert(quiesce == true);
     quiesce = false;
     cond.notify_all();
   }
@@ -837,7 +837,7 @@ private:
   std::map<int, Config> m_mapped_info_cache;
 
   int get_mapped_info(int pid, Config *cfg) {
-    ceph_assert(!cfg->devpath.empty());
+    stone_assert(!cfg->devpath.empty());
 
     auto it = m_mapped_info_cache.find(pid);
     if (it != m_mapped_info_cache.end()) {
@@ -1449,12 +1449,12 @@ static int run_quiesce_hook(const std::string &quiesce_hook,
 
 static void handle_signal(int signum)
 {
-  ceph_assert(signum == SIGINT || signum == SIGTERM);
+  stone_assert(signum == SIGINT || signum == SIGTERM);
   derr << "*** Got signal " << sig_str(signum) << " ***" << dendl;
 
   dout(20) << __func__ << ": " << "notifying terminate" << dendl;
 
-  ceph_assert(terminate_event_sock.is_valid());
+  stone_assert(terminate_event_sock.is_valid());
   terminate_event_sock.notify();
 }
 
@@ -1476,7 +1476,7 @@ static NBDServer *start_server(int fd, librbd::Image& image, Config *cfg)
 static void run_server(Preforker& forker, NBDServer *server, bool netlink_used)
 {
   if (g_conf()->daemonize) {
-    global_init_postfork_finish(g_ceph_context);
+    global_init_postfork_finish(g_stone_context);
     forker.daemonize();
   }
 
@@ -1601,17 +1601,17 @@ static int do_map(int argc, const char *argv[], Config *cfg, bool reconnect)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_DAEMON,
                          CINIT_FLAG_UNPRIVILEGED_DAEMON_DEFAULTS);
-  g_ceph_context->_conf.set_val_or_die("pid_file", "");
+  g_stone_context->_conf.set_val_or_die("pid_file", "");
 
-  if (global_init_prefork(g_ceph_context) >= 0) {
+  if (global_init_prefork(g_stone_context) >= 0) {
     std::string err;
     r = forker.prefork(err);
     if (r < 0) {
@@ -1624,18 +1624,18 @@ static int do_map(int argc, const char *argv[], Config *cfg, bool reconnect)
       }
       return 0;
     }
-    global_init_postfork_start(g_ceph_context);
+    global_init_postfork_start(g_stone_context);
   }
 
-  common_init_finish(g_ceph_context);
-  global_init_chdir(g_ceph_context);
+  common_init_finish(g_stone_context);
+  global_init_chdir(g_stone_context);
 
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fd) == -1) {
     r = -errno;
     goto close_ret;
   }
 
-  r = rados.init_with_context(g_ceph_context);
+  r = rados.init_with_context(g_stone_context);
   if (r < 0)
     goto close_fd;
 
@@ -1684,7 +1684,7 @@ static int do_map(int argc, const char *argv[], Config *cfg, bool reconnect)
     std::string passphrase((std::istreambuf_iterator<char>(file)),
                            (std::istreambuf_iterator<char>()));
     auto sg = make_scope_guard([&] {
-      ceph_memzero_s(&passphrase[0], passphrase.size(), passphrase.size()); });
+      stone_memzero_s(&passphrase[0], passphrase.size(), passphrase.size()); });
     file.close();
     if (!passphrase.empty() && passphrase[passphrase.length() - 1] == '\n') {
       passphrase.erase(passphrase.length() - 1);
@@ -1797,7 +1797,7 @@ static int do_map(int argc, const char *argv[], Config *cfg, bool reconnect)
     std::string cookie;
     if (use_netlink) {
       cookie = get_cookie(cfg->devpath);
-      ceph_assert(cookie == cfg->cookie || cookie.empty());
+      stone_assert(cookie == cfg->cookie || cookie.empty());
     }
     if (cfg->show_cookie && !cookie.empty()) {
       cout << cfg->devpath << " " << cookie << std::endl;
@@ -1809,11 +1809,11 @@ static int do_map(int argc, const char *argv[], Config *cfg, bool reconnect)
 
     if (cfg->quiesce) {
       r = image.quiesce_unwatch(server->quiesce_watch_handle);
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
     }
 
     r = image.update_unwatch(handle);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
 
 close_nbd:
@@ -1920,7 +1920,7 @@ static int parse_imgpath(const std::string &imgpath, Config *cfg,
 static int do_list_mapped_devices(const std::string &format, bool pretty_format)
 {
   bool should_print = false;
-  std::unique_ptr<ceph::Formatter> f;
+  std::unique_ptr<stone::Formatter> f;
   TextTable tbl;
 
   if (format == "json") {
@@ -2008,8 +2008,8 @@ static int parse_args(vector<const char*>& args, std::ostream *err_msg,
                       Config *cfg) {
   std::string conf_file_list;
   std::string cluster;
-  CephInitParameters iparams = ceph_argparse_early_args(
-          args, CEPH_ENTITY_TYPE_CLIENT, &cluster, &conf_file_list);
+  StoneInitParameters iparams = stone_argparse_early_args(
+          args, STONE_ENTITY_TYPE_CLIENT, &cluster, &conf_file_list);
 
   ConfigProxy config{false};
   config->name = iparams.name;
@@ -2020,7 +2020,7 @@ static int parse_args(vector<const char*>& args, std::ostream *err_msg,
   } else {
     config.parse_config_files(nullptr, nullptr, 0);
   }
-  config.parse_env(CEPH_ENTITY_TYPE_CLIENT);
+  config.parse_env(STONE_ENTITY_TYPE_CLIENT);
   config.parse_argv(args);
   cfg->poolname = config.get_val<std::string>("rbd_default_pool");
 
@@ -2029,12 +2029,12 @@ static int parse_args(vector<const char*>& args, std::ostream *err_msg,
   std::string arg_value;
 
   for (i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_flag(args, i, "-h", "--help", (char*)NULL)) {
+    if (stone_argparse_flag(args, i, "-h", "--help", (char*)NULL)) {
       return HELP_INFO;
-    } else if (ceph_argparse_flag(args, i, "-v", "--version", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "-v", "--version", (char*)NULL)) {
       return VERSION_INFO;
-    } else if (ceph_argparse_witharg(args, i, &cfg->devpath, "--device", (char *)NULL)) {
-    } else if (ceph_argparse_witharg(args, i, &cfg->io_timeout, err,
+    } else if (stone_argparse_witharg(args, i, &cfg->devpath, "--device", (char *)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &cfg->io_timeout, err,
                                      "--io-timeout", (char *)NULL)) {
       if (!err.str().empty()) {
         *err_msg << "rbd-nbd: " << err.str();
@@ -2044,7 +2044,7 @@ static int parse_args(vector<const char*>& args, std::ostream *err_msg,
         *err_msg << "rbd-nbd: Invalid argument for io-timeout!";
         return -EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, &cfg->nbds_max, err, "--nbds_max", (char *)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &cfg->nbds_max, err, "--nbds_max", (char *)NULL)) {
       if (!err.str().empty()) {
         *err_msg << "rbd-nbd: " << err.str();
         return -EINVAL;
@@ -2053,7 +2053,7 @@ static int parse_args(vector<const char*>& args, std::ostream *err_msg,
         *err_msg << "rbd-nbd: Invalid argument for nbds_max!";
         return -EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, &cfg->max_part, err, "--max_part", (char *)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &cfg->max_part, err, "--max_part", (char *)NULL)) {
       if (!err.str().empty()) {
         *err_msg << "rbd-nbd: " << err.str();
         return -EINVAL;
@@ -2063,13 +2063,13 @@ static int parse_args(vector<const char*>& args, std::ostream *err_msg,
         return -EINVAL;
       }
       cfg->set_max_part = true;
-    } else if (ceph_argparse_flag(args, i, "--quiesce", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--quiesce", (char *)NULL)) {
       cfg->quiesce = true;
-    } else if (ceph_argparse_witharg(args, i, &cfg->quiesce_hook,
+    } else if (stone_argparse_witharg(args, i, &cfg->quiesce_hook,
                                      "--quiesce-hook", (char *)NULL)) {
-    } else if (ceph_argparse_flag(args, i, "--read-only", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--read-only", (char *)NULL)) {
       cfg->readonly = true;
-    } else if (ceph_argparse_witharg(args, i, &cfg->reattach_timeout, err,
+    } else if (stone_argparse_witharg(args, i, &cfg->reattach_timeout, err,
                                      "--reattach-timeout", (char *)NULL)) {
       if (!err.str().empty()) {
         *err_msg << "rbd-nbd: " << err.str();
@@ -2079,9 +2079,9 @@ static int parse_args(vector<const char*>& args, std::ostream *err_msg,
         *err_msg << "rbd-nbd: Invalid argument for reattach-timeout!";
         return -EINVAL;
       }
-    } else if (ceph_argparse_flag(args, i, "--exclusive", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--exclusive", (char *)NULL)) {
       cfg->exclusive = true;
-    } else if (ceph_argparse_witharg(args, i, &cfg->io_timeout, err,
+    } else if (stone_argparse_witharg(args, i, &cfg->io_timeout, err,
                                      "--timeout", (char *)NULL)) {
       if (!err.str().empty()) {
         *err_msg << "rbd-nbd: " << err.str();
@@ -2092,16 +2092,16 @@ static int parse_args(vector<const char*>& args, std::ostream *err_msg,
         return -EINVAL;
       }
       *err_msg << "rbd-nbd: --timeout is deprecated (use --io-timeout)";
-    } else if (ceph_argparse_witharg(args, i, &cfg->format, err, "--format",
+    } else if (stone_argparse_witharg(args, i, &cfg->format, err, "--format",
                                      (char *)NULL)) {
-    } else if (ceph_argparse_flag(args, i, "--pretty-format", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--pretty-format", (char *)NULL)) {
       cfg->pretty_format = true;
-    } else if (ceph_argparse_flag(args, i, "--try-netlink", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--try-netlink", (char *)NULL)) {
       cfg->try_netlink = true;
-    } else if (ceph_argparse_flag(args, i, "--show-cookie", (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--show-cookie", (char *)NULL)) {
       cfg->show_cookie = true;
-    } else if (ceph_argparse_witharg(args, i, &cfg->cookie, "--cookie", (char *)NULL)) {
-    } else if (ceph_argparse_witharg(args, i, &arg_value,
+    } else if (stone_argparse_witharg(args, i, &cfg->cookie, "--cookie", (char *)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &arg_value,
                                      "--encryption-format", (char *)NULL)) {
       if (arg_value == "luks1") {
         cfg->encryption_format =
@@ -2113,7 +2113,7 @@ static int parse_args(vector<const char*>& args, std::ostream *err_msg,
         *err_msg << "rbd-nbd: Invalid encryption format";
         return -EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, &arg_value,
+    } else if (stone_argparse_witharg(args, i, &arg_value,
                                      "--encryption-passphrase-file",
                                      (char *)NULL)) {
       cfg->encryption_passphrase_file = std::make_optional(arg_value);
@@ -2234,7 +2234,7 @@ static int rbd_nbd(int argc, const char *argv[])
 
   switch (cfg.command) {
     case Attach:
-      ceph_assert(!cfg.devpath.empty());
+      stone_assert(!cfg.devpath.empty());
       if (find_mapped_dev_by_spec(&cfg, getpid())) {
         cerr << "rbd-nbd: " << cfg.devpath << " has process " << cfg.pid
              << " connected" << std::endl;

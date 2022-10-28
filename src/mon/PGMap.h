@@ -18,8 +18,8 @@
  * where & is a bit-wise AND and m=2^k-1
  */
 
-#ifndef CEPH_PGMAP_H
-#define CEPH_PGMAP_H
+#ifndef STONE_PGMAP_H
+#define STONE_PGMAP_H
 
 #include "include/health.h"
 #include "common/debug.h"

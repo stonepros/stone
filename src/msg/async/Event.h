@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_MSG_EVENT_H
-#define CEPH_MSG_EVENT_H
+#ifndef STONE_MSG_EVENT_H
+#define STONE_MSG_EVENT_H
 
 #ifdef __APPLE__
 #include <AvailabilityMacros.h>
@@ -152,7 +152,7 @@ class EventCenter {
   };
 
  private:
-  CephContext *cct;
+  StoneeContext *cct;
   std::string type;
   int nevent;
   // Used only to external event
@@ -183,7 +183,7 @@ class EventCenter {
   }
 
  public:
-  explicit EventCenter(CephContext *c):
+  explicit EventCenter(StoneeContext *c):
     cct(c), nevent(0),
     external_num_events(0),
     driver(NULL), time_event_next_id(1),

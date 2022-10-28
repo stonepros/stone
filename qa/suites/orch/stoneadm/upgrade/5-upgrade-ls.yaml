@@ -1,0 +1,6 @@
+tasks:
+- stoneadm.shell:
+    mon.a:
+      - stone orch upgrade ls
+      - stone orch upgrade ls --image quay.io/stone/stone | grep 16.2.0
+      - stone orch upgrade ls --image quay.io/stone/stone --tags | grep v16.2.2

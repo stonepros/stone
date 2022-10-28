@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -132,11 +132,11 @@ for (unsigned i = 0; i < 4; ++i) {
   epoch_t epoch = 40;
   std::shared_ptr<OSDMap> osdmap(new OSDMap());
   osdmap->set_max_osd(10);
-  osdmap->set_state(osd_id, CEPH_OSD_EXISTS);
+  osdmap->set_state(osd_id, STONE_OSD_EXISTS);
   osdmap->set_epoch(epoch);
   std::shared_ptr<OSDMap> lastmap(new OSDMap());
   lastmap->set_max_osd(10);
-  lastmap->set_state(osd_id, CEPH_OSD_EXISTS);
+  lastmap->set_state(osd_id, STONE_OSD_EXISTS);
   lastmap->set_epoch(epoch);
   epoch_t same_interval_since = epoch;
   epoch_t last_epoch_clean = same_interval_since;
@@ -284,7 +284,7 @@ for (unsigned i = 0; i < 4; ++i) {
   {
     std::shared_ptr<OSDMap> osdmap(new OSDMap());
     osdmap->set_max_osd(10);
-    osdmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    osdmap->set_state(osd_id, STONE_OSD_EXISTS);
     osdmap->set_epoch(epoch);
     int new_pg_num = pg_num ^ 2;
     OSDMap::Incremental inc(epoch + 1);
@@ -318,7 +318,7 @@ for (unsigned i = 0; i < 4; ++i) {
   {
     std::shared_ptr<OSDMap> osdmap(new OSDMap());
     osdmap->set_max_osd(10);
-    osdmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    osdmap->set_state(osd_id, STONE_OSD_EXISTS);
     osdmap->set_epoch(epoch);
     OSDMap::Incremental inc(epoch + 1);
     inc.new_pools[pool_id].min_size = min_size;
@@ -352,7 +352,7 @@ for (unsigned i = 0; i < 4; ++i) {
   {
     std::shared_ptr<OSDMap> osdmap(new OSDMap());
     osdmap->set_max_osd(10);
-    osdmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    osdmap->set_state(osd_id, STONE_OSD_EXISTS);
     osdmap->set_epoch(epoch);
     OSDMap::Incremental inc(epoch + 1);
     inc.new_pools[pool_id].min_size = min_size;
@@ -387,7 +387,7 @@ for (unsigned i = 0; i < 4; ++i) {
   {
     std::shared_ptr<OSDMap> osdmap(new OSDMap());
     osdmap->set_max_osd(10);
-    osdmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    osdmap->set_state(osd_id, STONE_OSD_EXISTS);
     osdmap->set_epoch(epoch);
     OSDMap::Incremental inc(epoch + 1);
     inc.new_pools[pool_id].min_size = min_size;
@@ -420,7 +420,7 @@ for (unsigned i = 0; i < 4; ++i) {
   {
     std::shared_ptr<OSDMap> osdmap(new OSDMap());
     osdmap->set_max_osd(10);
-    osdmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    osdmap->set_state(osd_id, STONE_OSD_EXISTS);
     osdmap->set_epoch(epoch);
     OSDMap::Incremental inc(epoch + 1);
     inc.new_pools[pool_id].min_size = min_size;
@@ -453,7 +453,7 @@ for (unsigned i = 0; i < 4; ++i) {
   {
     std::shared_ptr<OSDMap> osdmap(new OSDMap());
     osdmap->set_max_osd(10);
-    osdmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    osdmap->set_state(osd_id, STONE_OSD_EXISTS);
     osdmap->set_epoch(epoch);
     OSDMap::Incremental inc(epoch + 1);
     inc.new_pools[pool_id].min_size = min_size;
@@ -486,7 +486,7 @@ for (unsigned i = 0; i < 4; ++i) {
   {
     std::shared_ptr<OSDMap> osdmap(new OSDMap());
     osdmap->set_max_osd(10);
-    osdmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    osdmap->set_state(osd_id, STONE_OSD_EXISTS);
     osdmap->set_epoch(epoch);
     OSDMap::Incremental inc(epoch + 1);
     inc.new_pools[pool_id].min_size = min_size;
@@ -519,7 +519,7 @@ for (unsigned i = 0; i < 4; ++i) {
   {
     std::shared_ptr<OSDMap> osdmap(new OSDMap());
     osdmap->set_max_osd(10);
-    osdmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    osdmap->set_state(osd_id, STONE_OSD_EXISTS);
     osdmap->set_epoch(epoch);
     OSDMap::Incremental inc(epoch + 1);
     __u8 new_min_size = min_size + 1;
@@ -587,7 +587,7 @@ for (unsigned i = 0; i < 4; ++i) {
     old_acting.push_back(osd_id);
 
     //
-    // see http://tracker.ceph.com/issues/5780
+    // see http://tracker.stone.com/issues/5780
     // the size of the old acting set should be compared
     // with the min_size of the old osdmap
     //
@@ -596,7 +596,7 @@ for (unsigned i = 0; i < 4; ++i) {
     //
     std::shared_ptr<OSDMap> osdmap(new OSDMap());
     osdmap->set_max_osd(10);
-    osdmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    osdmap->set_state(osd_id, STONE_OSD_EXISTS);
     osdmap->set_epoch(epoch);
     OSDMap::Incremental inc(epoch + 1);
     __u8 new_min_size = old_acting.size();
@@ -672,7 +672,7 @@ for (unsigned i = 0; i < 4; ++i) {
 
     std::shared_ptr<OSDMap> lastmap(new OSDMap());
     lastmap->set_max_osd(10);
-    lastmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    lastmap->set_state(osd_id, STONE_OSD_EXISTS);
     lastmap->set_epoch(epoch);
     OSDMap::Incremental inc(epoch + 1);
     inc.new_pools[pool_id].min_size = min_size;
@@ -719,7 +719,7 @@ for (unsigned i = 0; i < 4; ++i) {
 
     std::shared_ptr<OSDMap> lastmap(new OSDMap());
     lastmap->set_max_osd(10);
-    lastmap->set_state(osd_id, CEPH_OSD_EXISTS);
+    lastmap->set_state(osd_id, STONE_OSD_EXISTS);
     lastmap->set_epoch(epoch);
     OSDMap::Incremental inc(epoch + 1);
     inc.new_pools[pool_id].min_size = min_size;
@@ -1501,7 +1501,7 @@ TEST(ghobject_t, cmp) {
 
   sep.set_shard(shard_id_t::NO_SHARD);
   cout << "sep shard " << sep.shard_id << std::endl;
-  ghobject_t o(hobject_t(object_t(), string(), CEPH_NOSNAP, 0x42,
+  ghobject_t o(hobject_t(object_t(), string(), STONE_NOSNAP, 0x42,
 			 1, string()));
   cout << "o " << o << std::endl;
   ASSERT_TRUE(o > sep);
@@ -1959,7 +1959,7 @@ hobject_t mk_hobject(string name)
   return hobject_t(
     std::move(name),
     string(),
-    CEPH_NOSNAP,
+    STONE_NOSNAP,
     0x42,
     1,
     string());

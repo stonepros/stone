@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "librbd/image/RefreshRequest.h"
 #include "common/dout.h"
@@ -22,7 +22,7 @@
 #include "librbd/io/ImageDispatcherInterface.h"
 #include "librbd/journal/Policy.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::RefreshRequest: "
 
@@ -48,11 +48,11 @@ RefreshRequest<I>::RefreshRequest(I &image_ctx, bool acquiring_lock,
 template <typename I>
 RefreshRequest<I>::~RefreshRequest() {
   // these require state machine to close
-  ceph_assert(m_exclusive_lock == nullptr);
-  ceph_assert(m_object_map == nullptr);
-  ceph_assert(m_journal == nullptr);
-  ceph_assert(m_refresh_parent == nullptr);
-  ceph_assert(!m_blocked_writes);
+  stone_assert(m_exclusive_lock == nullptr);
+  stone_assert(m_object_map == nullptr);
+  stone_assert(m_journal == nullptr);
+  stone_assert(m_refresh_parent == nullptr);
+  stone_assert(!m_blocked_writes);
 }
 
 template <typename I>
@@ -75,7 +75,7 @@ void RefreshRequest<I>::send_get_migration_header() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -92,7 +92,7 @@ void RefreshRequest<I>::send_get_migration_header() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_get_migration_header(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result == 0) {
@@ -166,7 +166,7 @@ Context *RefreshRequest<I>::handle_get_migration_header(int *result) {
 
 template <typename I>
 void RefreshRequest<I>::send_v1_read_header() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -178,13 +178,13 @@ void RefreshRequest<I>::send_v1_read_header() {
   m_out_bl.clear();
   int r = m_image_ctx.md_ctx.aio_operate(m_image_ctx.header_oid, comp, &op,
                                          &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v1_read_header(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": " << "r=" << *result << dendl;
 
   rbd_obj_header_ondisk v1_header;
@@ -229,7 +229,7 @@ Context *RefreshRequest<I>::handle_v1_read_header(int *result) {
 
 template <typename I>
 void RefreshRequest<I>::send_v1_get_snapshots() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -241,13 +241,13 @@ void RefreshRequest<I>::send_v1_get_snapshots() {
   m_out_bl.clear();
   int r = m_image_ctx.md_ctx.aio_operate(m_image_ctx.header_oid, comp, &op,
                                          &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v1_get_snapshots(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": " << "r=" << *result << dendl;
 
   std::vector<std::string> snap_names;
@@ -283,7 +283,7 @@ Context *RefreshRequest<I>::handle_v1_get_snapshots(int *result) {
 
 template <typename I>
 void RefreshRequest<I>::send_v1_get_locks() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -295,13 +295,13 @@ void RefreshRequest<I>::send_v1_get_locks() {
   m_out_bl.clear();
   int r = m_image_ctx.md_ctx.aio_operate(m_image_ctx.header_oid, comp, &op,
                                          &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v1_get_locks(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": "
                  << "r=" << *result << dendl;
 
@@ -326,7 +326,7 @@ Context *RefreshRequest<I>::handle_v1_get_locks(int *result) {
 
 template <typename I>
 void RefreshRequest<I>::send_v1_apply() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   // ensure we are not in a rados callback when applying updates
@@ -338,7 +338,7 @@ void RefreshRequest<I>::send_v1_apply() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v1_apply(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   apply();
@@ -347,7 +347,7 @@ Context *RefreshRequest<I>::handle_v1_apply(int *result) {
 
 template <typename I>
 void RefreshRequest<I>::send_v2_get_mutable_metadata() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   uint64_t snap_id;
@@ -361,11 +361,11 @@ void RefreshRequest<I>::send_v2_get_mutable_metadata() {
   // mask out the non-primary read-only flag since its state can change
   bool read_only = (
     ((m_read_only_flags & ~IMAGE_READ_ONLY_FLAG_NON_PRIMARY) != 0) ||
-    (snap_id != CEPH_NOSNAP));
+    (snap_id != STONE_NOSNAP));
   librados::ObjectReadOperation op;
-  cls_client::get_size_start(&op, CEPH_NOSNAP);
+  cls_client::get_size_start(&op, STONE_NOSNAP);
   cls_client::get_features_start(&op, read_only);
-  cls_client::get_flags_start(&op, CEPH_NOSNAP);
+  cls_client::get_flags_start(&op, STONE_NOSNAP);
   cls_client::get_snapcontext_start(&op);
   rados::cls::lock::get_lock_info_start(&op, RBD_LOCK_NAME);
 
@@ -375,13 +375,13 @@ void RefreshRequest<I>::send_v2_get_mutable_metadata() {
   m_out_bl.clear();
   int r = m_image_ctx.md_ctx.aio_operate(m_image_ctx.header_oid, comp, &op,
                                          &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_get_mutable_metadata(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": "
                  << "r=" << *result << dendl;
 
@@ -460,16 +460,16 @@ Context *RefreshRequest<I>::handle_v2_get_mutable_metadata(int *result) {
 template <typename I>
 void RefreshRequest<I>::send_v2_get_parent() {
   // NOTE: remove support when Mimic is EOLed
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": legacy=" << m_legacy_parent
                  << dendl;
 
   librados::ObjectReadOperation op;
   if (!m_legacy_parent) {
     cls_client::parent_get_start(&op);
-    cls_client::parent_overlap_get_start(&op, CEPH_NOSNAP);
+    cls_client::parent_overlap_get_start(&op, STONE_NOSNAP);
   } else {
-    cls_client::get_parent_start(&op, CEPH_NOSNAP);
+    cls_client::get_parent_start(&op, STONE_NOSNAP);
   }
 
   auto aio_comp = create_rados_callback<
@@ -483,7 +483,7 @@ void RefreshRequest<I>::send_v2_get_parent() {
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_get_parent(int *result) {
   // NOTE: remove support when Mimic is EOLed
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   auto it = m_out_bl.cbegin();
@@ -530,7 +530,7 @@ Context *RefreshRequest<I>::handle_v2_get_parent(int *result) {
 
 template <typename I>
 void RefreshRequest<I>::send_v2_get_metadata() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   auto ctx = create_context_callback<
@@ -544,7 +544,7 @@ void RefreshRequest<I>::send_v2_get_metadata() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_get_metadata(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -559,7 +559,7 @@ Context *RefreshRequest<I>::handle_v2_get_metadata(int *result) {
 
 template <typename I>
 void RefreshRequest<I>::send_v2_get_pool_metadata() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   auto ctx = create_context_callback<
@@ -572,7 +572,7 @@ void RefreshRequest<I>::send_v2_get_pool_metadata() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_get_pool_metadata(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -595,7 +595,7 @@ void RefreshRequest<I>::send_v2_get_op_features() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -606,13 +606,13 @@ void RefreshRequest<I>::send_v2_get_op_features() {
   m_out_bl.clear();
   int r = m_image_ctx.md_ctx.aio_operate(m_image_ctx.header_oid, comp, &op,
                                          &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_get_op_features(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": "
                  << "r=" << *result << dendl;
 
@@ -633,7 +633,7 @@ Context *RefreshRequest<I>::handle_v2_get_op_features(int *result) {
 
 template <typename I>
 void RefreshRequest<I>::send_v2_get_group() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -645,13 +645,13 @@ void RefreshRequest<I>::send_v2_get_group() {
   m_out_bl.clear();
   int r = m_image_ctx.md_ctx.aio_operate(m_image_ctx.header_oid, comp, &op,
                                          &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_get_group(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": "
                  << "r=" << *result << dendl;
 
@@ -681,7 +681,7 @@ void RefreshRequest<I>::send_v2_get_snapshots() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   librados::ObjectReadOperation op;
@@ -713,13 +713,13 @@ void RefreshRequest<I>::send_v2_get_snapshots() {
   m_out_bl.clear();
   int r = m_image_ctx.md_ctx.aio_operate(m_image_ctx.header_oid, comp, &op,
                                          &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_get_snapshots(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": " << "r=" << *result << dendl;
 
   auto it = m_out_bl.cbegin();
@@ -819,7 +819,7 @@ void RefreshRequest<I>::send_v2_refresh_parent() {
     if (!m_skip_open_parent_image && (r < 0 ||
         RefreshParentRequest<I>::is_refresh_required(m_image_ctx, parent_md,
                                                      migration_info))) {
-      CephContext *cct = m_image_ctx.cct;
+      StoneContext *cct = m_image_ctx.cct;
       ldout(cct, 10) << this << " " << __func__ << dendl;
 
       using klass = RefreshRequest<I>;
@@ -839,7 +839,7 @@ void RefreshRequest<I>::send_v2_refresh_parent() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_refresh_parent(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -864,7 +864,7 @@ void RefreshRequest<I>::send_v2_init_exclusive_lock() {
   }
 
   // implies exclusive lock dynamically enabled or image open in-progress
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   // TODO need safe shut down
@@ -880,7 +880,7 @@ void RefreshRequest<I>::send_v2_init_exclusive_lock() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_init_exclusive_lock(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -932,7 +932,7 @@ void RefreshRequest<I>::send_v2_open_journal() {
 
   // implies journal dynamically enabled since ExclusiveLock will init
   // the journal upon acquiring the lock
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   using klass = RefreshRequest<I>;
@@ -946,7 +946,7 @@ void RefreshRequest<I>::send_v2_open_journal() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_open_journal(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -974,7 +974,7 @@ void RefreshRequest<I>::send_v2_block_writes() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   // we need to block writes temporarily to avoid in-flight journal
@@ -989,7 +989,7 @@ void RefreshRequest<I>::send_v2_block_writes() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_block_writes(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -1016,11 +1016,11 @@ void RefreshRequest<I>::send_v2_open_object_map() {
   // implies object map dynamically enabled or image open in-progress
   // since SetSnapRequest loads the object map for a snapshot and
   // ExclusiveLock loads the object map for HEAD
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   if (m_image_ctx.snap_name.empty()) {
-    m_object_map = m_image_ctx.create_object_map(CEPH_NOSNAP);
+    m_object_map = m_image_ctx.create_object_map(STONE_NOSNAP);
   } else {
     for (size_t snap_idx = 0; snap_idx < m_snap_infos.size(); ++snap_idx) {
       if (m_snap_infos[snap_idx].name == m_image_ctx.snap_name) {
@@ -1046,7 +1046,7 @@ void RefreshRequest<I>::send_v2_open_object_map() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_open_object_map(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -1066,7 +1066,7 @@ Context *RefreshRequest<I>::handle_v2_open_object_map(int *result) {
 
 template <typename I>
 void RefreshRequest<I>::send_v2_apply() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   // ensure we are not in a rados callback when applying updates
@@ -1078,7 +1078,7 @@ void RefreshRequest<I>::send_v2_apply() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_apply(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   apply();
@@ -1092,7 +1092,7 @@ Context *RefreshRequest<I>::send_v2_finalize_refresh_parent() {
     return send_v2_shut_down_exclusive_lock();
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   using klass = RefreshRequest<I>;
@@ -1104,10 +1104,10 @@ Context *RefreshRequest<I>::send_v2_finalize_refresh_parent() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_finalize_refresh_parent(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
-  ceph_assert(m_refresh_parent != nullptr);
+  stone_assert(m_refresh_parent != nullptr);
   delete m_refresh_parent;
   m_refresh_parent = nullptr;
 
@@ -1120,7 +1120,7 @@ Context *RefreshRequest<I>::send_v2_shut_down_exclusive_lock() {
     return send_v2_close_journal();
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   // exclusive lock feature was dynamically disabled. in-flight IO will be
@@ -1134,7 +1134,7 @@ Context *RefreshRequest<I>::send_v2_shut_down_exclusive_lock() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_shut_down_exclusive_lock(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -1145,10 +1145,10 @@ Context *RefreshRequest<I>::handle_v2_shut_down_exclusive_lock(int *result) {
 
   {
     std::unique_lock owner_locker{m_image_ctx.owner_lock};
-    ceph_assert(m_image_ctx.exclusive_lock == nullptr);
+    stone_assert(m_image_ctx.exclusive_lock == nullptr);
   }
 
-  ceph_assert(m_exclusive_lock != nullptr);
+  stone_assert(m_exclusive_lock != nullptr);
   m_exclusive_lock->put();
   m_exclusive_lock = nullptr;
 
@@ -1161,7 +1161,7 @@ Context *RefreshRequest<I>::send_v2_close_journal() {
     return send_v2_close_object_map();
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   // journal feature was dynamically disabled
@@ -1174,7 +1174,7 @@ Context *RefreshRequest<I>::send_v2_close_journal() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_close_journal(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -1183,11 +1183,11 @@ Context *RefreshRequest<I>::handle_v2_close_journal(int *result) {
                << dendl;
   }
 
-  ceph_assert(m_journal != nullptr);
+  stone_assert(m_journal != nullptr);
   m_journal->put();
   m_journal = nullptr;
 
-  ceph_assert(m_blocked_writes);
+  stone_assert(m_blocked_writes);
   m_blocked_writes = false;
 
   m_image_ctx.io_image_dispatcher->unblock_writes();
@@ -1200,7 +1200,7 @@ Context *RefreshRequest<I>::send_v2_close_object_map() {
     return send_flush_aio();
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   // object map was dynamically disabled
@@ -1213,7 +1213,7 @@ Context *RefreshRequest<I>::send_v2_close_object_map() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_v2_close_object_map(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -1221,7 +1221,7 @@ Context *RefreshRequest<I>::handle_v2_close_object_map(int *result) {
                << dendl;
   }
 
-  ceph_assert(m_object_map != nullptr);
+  stone_assert(m_object_map != nullptr);
 
   m_object_map->put();
   m_object_map = nullptr;
@@ -1237,7 +1237,7 @@ Context *RefreshRequest<I>::send_flush_aio() {
   }
 
   if (m_flush_aio) {
-    CephContext *cct = m_image_ctx.cct;
+    StoneContext *cct = m_image_ctx.cct;
     ldout(cct, 10) << this << " " << __func__ << dendl;
 
     std::shared_lock owner_locker{m_image_ctx.owner_lock};
@@ -1263,7 +1263,7 @@ Context *RefreshRequest<I>::send_flush_aio() {
 
 template <typename I>
 Context *RefreshRequest<I>::handle_flush_aio(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -1279,7 +1279,7 @@ Context *RefreshRequest<I>::handle_error(int *result) {
   if (m_error_result < 0) {
     *result = m_error_result;
 
-    CephContext *cct = m_image_ctx.cct;
+    StoneContext *cct = m_image_ctx.cct;
     ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
   }
   return m_on_finish;
@@ -1287,7 +1287,7 @@ Context *RefreshRequest<I>::handle_error(int *result) {
 
 template <typename I>
 void RefreshRequest<I>::apply() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << this << " " << __func__ << dendl;
 
   std::scoped_lock locker{m_image_ctx.owner_lock, m_image_ctx.image_lock};
@@ -1327,7 +1327,7 @@ void RefreshRequest<I>::apply() {
     int r = get_migration_info(&m_image_ctx.parent_md,
                                &m_image_ctx.migration_info,
                                &migration_info_valid);
-    ceph_assert(r == 0); // validated in refresh parent step
+    stone_assert(r == 0); // validated in refresh parent step
 
     if (migration_info_valid) {
       for (auto it : m_image_ctx.migration_info.snap_map) {
@@ -1341,7 +1341,7 @@ void RefreshRequest<I>::apply() {
     librados::Rados rados(m_image_ctx.md_ctx);
     int8_t require_osd_release;
     r = rados.get_min_compatible_osd(&require_osd_release);
-    if (r == 0 && require_osd_release >= CEPH_RELEASE_OCTOPUS) {
+    if (r == 0 && require_osd_release >= STONE_RELEASE_OCTOPUS) {
       m_image_ctx.enable_sparse_copyup = true;
     }
   }
@@ -1393,7 +1393,7 @@ void RefreshRequest<I>::apply() {
   m_image_ctx.parent_md.overlap = std::min(overlap, m_image_ctx.size);
   m_image_ctx.snapc = m_snapc;
 
-  if (m_image_ctx.snap_id != CEPH_NOSNAP &&
+  if (m_image_ctx.snap_id != STONE_NOSNAP &&
       m_image_ctx.get_snap_id(m_image_ctx.snap_namespace,
                               m_image_ctx.snap_name) != m_image_ctx.snap_id) {
     lderr(cct) << "tried to read from a snapshot that no longer exists: "
@@ -1416,11 +1416,11 @@ void RefreshRequest<I>::apply() {
                                  m_image_ctx.image_lock)) {
     // disabling exclusive lock will automatically handle closing
     // object map and journaling
-    ceph_assert(m_exclusive_lock == nullptr);
+    stone_assert(m_exclusive_lock == nullptr);
     m_exclusive_lock = m_image_ctx.exclusive_lock;
   } else {
     if (m_exclusive_lock != nullptr) {
-      ceph_assert(m_image_ctx.exclusive_lock == nullptr);
+      stone_assert(m_image_ctx.exclusive_lock == nullptr);
       std::swap(m_exclusive_lock, m_image_ctx.exclusive_lock);
     }
     if (!m_image_ctx.test_features(RBD_FEATURE_JOURNALING,
@@ -1452,7 +1452,7 @@ int RefreshRequest<I>::get_parent_info(uint64_t snap_id,
 
   if (migration_info_valid) {
     return 0;
-  } else if (snap_id == CEPH_NOSNAP) {
+  } else if (snap_id == STONE_NOSNAP) {
     *parent_md = m_parent_md;
     *migration_info = {};
     return 0;
@@ -1472,7 +1472,7 @@ template <typename I>
 int RefreshRequest<I>::get_migration_info(ParentImageInfo *parent_md,
                                           MigrationInfo *migration_info,
                                           bool* migration_info_valid) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   if (m_migration_spec.header_type != cls::rbd::MIGRATION_HEADER_TYPE_DST ||
       (m_migration_spec.state != cls::rbd::MIGRATION_STATE_PREPARED &&
        m_migration_spec.state != cls::rbd::MIGRATION_STATE_EXECUTING &&
@@ -1500,27 +1500,27 @@ int RefreshRequest<I>::get_migration_info(ParentImageInfo *parent_md,
     parent_md->spec.pool_namespace = m_migration_spec.pool_namespace;
     parent_md->spec.image_id = m_migration_spec.image_id;
   }
-  parent_md->spec.snap_id = CEPH_NOSNAP;
+  parent_md->spec.snap_id = STONE_NOSNAP;
   parent_md->overlap = std::min(m_size, m_migration_spec.overlap);
 
   auto snap_seqs = m_migration_spec.snap_seqs;
   // If new snapshots have been created on destination image after
-  // migration stared, map the source CEPH_NOSNAP to the earliest of
+  // migration stared, map the source STONE_NOSNAP to the earliest of
   // these snapshots.
   snapid_t snap_id = snap_seqs.empty() ? 0 : snap_seqs.rbegin()->second;
   auto it = std::upper_bound(m_snapc.snaps.rbegin(), m_snapc.snaps.rend(),
                              snap_id);
   if (it != m_snapc.snaps.rend()) {
-    snap_seqs[CEPH_NOSNAP] = *it;
+    snap_seqs[STONE_NOSNAP] = *it;
   } else {
-    snap_seqs[CEPH_NOSNAP] = CEPH_NOSNAP;
+    snap_seqs[STONE_NOSNAP] = STONE_NOSNAP;
   }
 
   std::set<uint64_t> snap_ids;
   for (auto& it : snap_seqs) {
     snap_ids.insert(it.second);
   }
-  uint64_t overlap = snap_ids.find(CEPH_NOSNAP) != snap_ids.end() ?
+  uint64_t overlap = snap_ids.find(STONE_NOSNAP) != snap_ids.end() ?
     parent_md->overlap : 0;
   for (size_t i = 0; i < m_snapc.snaps.size(); ++i) {
     if (snap_ids.find(m_snapc.snaps[i].val) != snap_ids.end()) {
@@ -1534,7 +1534,7 @@ int RefreshRequest<I>::get_migration_info(ParentImageInfo *parent_md,
                      m_migration_spec.flatten};
   *migration_info_valid = true;
 
-  deep_copy::util::compute_snap_map(m_image_ctx.cct, 0, CEPH_NOSNAP, {},
+  deep_copy::util::compute_snap_map(m_image_ctx.cct, 0, STONE_NOSNAP, {},
                                     snap_seqs, &migration_info->snap_map);
   return 0;
 }

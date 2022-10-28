@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  * 
  */
-#ifndef CEPH_MONCLIENT_H
-#define CEPH_MONCLIENT_H
+#ifndef STONE_MONCLIENT_H
+#define STONE_MONCLIENT_H
 
 #include <functional>
 #include <list>
@@ -173,7 +173,7 @@ struct MonClientPinger : public Dispatcher,
   bool ms_dispatch(Message *m) override {
     using ceph::decode;
     std::lock_guard l(lock);
-    if (m->get_type() != CEPH_MSG_PING)
+    if (m->get_type() != STONE_MSG_PING)
       return false;
 
     ceph::buffer::list &payload = m->get_payload();

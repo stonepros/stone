@@ -1,5 +1,5 @@
-#ifndef CEPH_MCLIENTQUOTA_H
-#define CEPH_MCLIENTQUOTA_H
+#ifndef STONE_MCLIENTQUOTA_H
+#define STONE_MCLIENTQUOTA_H
 
 #include "msg/Message.h"
 
@@ -11,7 +11,7 @@ public:
 
 protected:
   MClientQuota() :
-    SafeMessage{CEPH_MSG_CLIENT_QUOTA},
+    SafeMessage{STONE_MSG_CLIENT_QUOTA},
     ino(0)
   {}
   ~MClientQuota() final {}

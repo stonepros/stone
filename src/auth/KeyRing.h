@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_KEYRING_H
-#define CEPH_KEYRING_H
+#ifndef STONE_KEYRING_H
+#define STONE_KEYRING_H
 
 #include "auth/Auth.h"
 #include "include/common_fwd.h"
@@ -24,13 +24,13 @@ class KeyRing : public KeyStore {
   int set_modifier(const char *type, const char *val, EntityName& name, std::map<std::string, ceph::buffer::list>& caps);
 public:
   void decode_plaintext(ceph::buffer::list::const_iterator& bl);
-  /* Create a KeyRing from a Ceph context.
+  /* Create a KeyRing from a Stone context.
    * We will use the configuration stored inside the context. */
-  int from_ceph_context(CephContext *cct);
+  int from_ceph_context(StoneContext *cct);
 
   std::map<EntityName, EntityAuth>& get_keys() { return keys; }  // yuck
 
-  int load(CephContext *cct, const std::string &filename);
+  int load(StoneContext *cct, const std::string &filename);
   void print(std::ostream& out);
 
   // accessors
@@ -89,7 +89,7 @@ public:
   void set_key(EntityName& ename, CryptoKey& key) {
     keys[ename].key = key;
   }
-  void import(CephContext *cct, KeyRing& other);
+  void import(StoneContext *cct, KeyRing& other);
 
   // encoders
   void decode(ceph::buffer::list::const_iterator& bl);

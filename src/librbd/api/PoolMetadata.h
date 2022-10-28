@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_API_POOL_METADATA_H
-#define CEPH_LIBRBD_API_POOL_METADATA_H
+#ifndef STONE_LIBRBD_API_POOL_METADATA_H
+#define STONE_LIBRBD_API_POOL_METADATA_H
 
 #include "include/buffer_fwd.h"
 #include "include/rados/librados_fwd.hpp"
@@ -33,4 +33,4 @@ public:
 
 extern template class librbd::api::PoolMetadata<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_API_POOL_METADATA_H
+#endif // STONE_LIBRBD_API_POOL_METADATA_H

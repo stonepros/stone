@@ -187,7 +187,7 @@ TEST_F(TestMockImageReplayerJournalEventPreprocessor, PreprocessSnapRenameMissin
 
   librbd::journal::SnapRenameEvent *event =
     boost::get<librbd::journal::SnapRenameEvent>(&event_entry.event);
-  ASSERT_EQ(CEPH_NOSNAP, event->snap_id);
+  ASSERT_EQ(STONE_NOSNAP, event->snap_id);
 }
 
 TEST_F(TestMockImageReplayerJournalEventPreprocessor, PreprocessSnapRenameKnown) {

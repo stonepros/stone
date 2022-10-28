@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat <contact@redhat.com>
  *
@@ -12,18 +12,18 @@
 
 #include <gtest/gtest.h>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "common/iso_8601.h"
 
 using std::chrono::minutes;
 using std::chrono::seconds;
 using std::chrono::time_point_cast;
 
-using ceph::from_iso_8601;
-using ceph::iso_8601_format;
-using ceph::real_clock;
-using ceph::real_time;
-using ceph::to_iso_8601;
+using stone::from_iso_8601;
+using stone::iso_8601_format;
+using stone::real_clock;
+using stone::real_time;
+using stone::to_iso_8601;
 
 TEST(iso_8601, epoch) {
   const auto epoch = real_clock::from_time_t(0);

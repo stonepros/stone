@@ -75,11 +75,11 @@ class ProtocolV1 final : public Protocol {
 
   struct Keepalive {
     struct {
-      const char tag = CEPH_MSGR_TAG_KEEPALIVE2;
+      const char tag = STONE_MSGR_TAG_KEEPALIVE2;
       ceph_timespec stamp;
     } __attribute__((packed)) req;
     struct {
-      const char tag = CEPH_MSGR_TAG_KEEPALIVE2_ACK;
+      const char tag = STONE_MSGR_TAG_KEEPALIVE2_ACK;
       ceph_timespec stamp;
     } __attribute__((packed)) ack;
     ceph_timespec ack_stamp;

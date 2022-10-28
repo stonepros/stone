@@ -1,5 +1,5 @@
-#ifndef CEPH_UNORDERED_MAP_H
-#define CEPH_UNORDERED_MAP_H
+#ifndef STONE_UNORDERED_MAP_H
+#define STONE_UNORDERED_MAP_H
 
 #include <unordered_map>
 

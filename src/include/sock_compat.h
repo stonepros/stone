@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -9,8 +9,8 @@
  * Foundation.  See file COPYING.
  */
 
-#ifndef CEPH_SOCK_COMPAT_H
-#define CEPH_SOCK_COMPAT_H
+#ifndef STONE_SOCK_COMPAT_H
+#define STONE_SOCK_COMPAT_H
 
 #include "include/compat.h"
 #include <sys/socket.h>
@@ -29,9 +29,9 @@
 #ifndef MSG_NOSIGNAL
 # define MSG_NOSIGNAL 0
 # ifdef SO_NOSIGPIPE
-#  define CEPH_USE_SO_NOSIGPIPE
+#  define STONE_USE_SO_NOSIGPIPE
 # else
-#  define CEPH_USE_SIGPIPE_BLOCKER
+#  define STONE_USE_SIGPIPE_BLOCKER
 #  warning "Using SIGPIPE blocking instead of suppression; this is not well-tested upstream!"
 # endif
 #endif

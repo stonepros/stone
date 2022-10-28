@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "Types.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/stringify.h"
 #include "common/Formatter.h"
 #include <iostream>
@@ -31,7 +31,7 @@ public:
 
   template <typename T>
   inline void operator()(const T& t) const {
-    using ceph::encode;
+    using stone::encode;
     encode(static_cast<uint32_t>(T::TYPE), m_bl);
     t.encode(m_bl);
   }
@@ -66,7 +66,7 @@ public:
     t.dump(m_formatter);
   }
 private:
-  ceph::Formatter *m_formatter;
+  stone::Formatter *m_formatter;
   std::string m_key;
 };
 

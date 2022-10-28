@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -21,7 +21,7 @@ namespace fs = std::experimental::filesystem;
 #endif
 
 #include "common/async/context_pool.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/code_environment.h"
 #include "common/config.h"
 #include "common/debug.h"
@@ -47,19 +47,19 @@ namespace fs = std::experimental::filesystem;
 #include <sys/prctl.h>
 #endif
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_
 
 using std::cerr;
 using std::string;
 
-static void global_init_set_globals(CephContext *cct)
+static void global_init_set_globals(StoneContext *cct)
 {
-  g_ceph_context = cct;
+  g_stone_context = cct;
   get_process_name(g_process_name, sizeof(g_process_name));
 }
 
-static void output_ceph_version()
+static void output_stone_version()
 {
   char buf[1024];
   snprintf(buf, sizeof(buf), "%s, process %s, pid %d",
@@ -112,11 +112,11 @@ void global_pre_init(
   // ensure environment arguments are included in early processing
   env_to_vec(args);
 
-  CephInitParameters iparams = ceph_argparse_early_args(
+  StoneInitParameters iparams = stone_argparse_early_args(
     args, module_type,
     &cluster, &conf_file_list);
 
-  CephContext *cct = common_preinit(iparams, code_env, flags);
+  StoneContext *cct = common_preinit(iparams, code_env, flags);
   cct->_conf->cluster = cluster;
   global_init_set_globals(cct);
   auto& conf = cct->_conf;
@@ -164,7 +164,7 @@ void global_pre_init(
     _exit(1);
   }
 
-  // environment variables override (CEPH_ARGS, CEPH_KEYRING)
+  // environment variables override (STONE_ARGS, STONE_KEYRING)
   conf.parse_env(cct->get_module_type());
 
   // command line (as passed by caller)
@@ -178,10 +178,10 @@ void global_pre_init(
   conf.do_argv_commands();
 
   // Now we're ready to complain about config file parse errors
-  g_conf().complain_about_parse_error(g_ceph_context);
+  g_conf().complain_about_parse_error(g_stone_context);
 }
 
-boost::intrusive_ptr<CephContext>
+boost::intrusive_ptr<StoneContext>
 global_init(const std::map<std::string,std::string> *defaults,
 	    std::vector < const char* >& args,
 	    uint32_t module_type, code_environment_t code_env,
@@ -191,18 +191,18 @@ global_init(const std::map<std::string,std::string> *defaults,
   static bool first_run = true;
   if (run_pre_init) {
     // We will run pre_init from here (default).
-    ceph_assert(!g_ceph_context && first_run);
+    stone_assert(!g_stone_context && first_run);
     global_pre_init(defaults, args, module_type, code_env, flags);
   } else {
     // Caller should have invoked pre_init manually.
-    ceph_assert(g_ceph_context && first_run);
+    stone_assert(g_stone_context && first_run);
   }
   first_run = false;
 
   // Verify flags have not changed if global_pre_init() has been called
   // manually. If they have, update them.
-  if (g_ceph_context->get_init_flags() != flags) {
-    g_ceph_context->set_init_flags(flags);
+  if (g_stone_context->get_init_flags() != flags) {
+    g_stone_context->set_init_flags(flags);
   }
 
   #ifndef _WIN32
@@ -214,10 +214,10 @@ global_init(const std::map<std::string,std::string> *defaults,
   if (g_conf()->fatal_signal_handlers) {
     install_standard_sighandlers();
   }
-  ceph::register_assert_context(g_ceph_context);
+  stone::register_assert_context(g_stone_context);
 
   if (g_conf()->log_flush_on_exit)
-    g_ceph_context->_log->set_flush_on_exit();
+    g_stone_context->_log->set_flush_on_exit();
 
   // drop privileges?
   ostringstream priv_ss;
@@ -310,8 +310,8 @@ global_init(const std::map<std::string,std::string> *defaults,
 		<< st.st_uid << ":" << st.st_gid << ". ";
       }
     }
-    g_ceph_context->set_uid_gid(uid, gid);
-    g_ceph_context->set_uid_gid_strings(uid_string, gid_string);
+    g_stone_context->set_uid_gid(uid, gid);
+    g_stone_context->set_uid_gid_strings(uid_string, gid_string);
     if ((flags & CINIT_FLAG_DEFER_DROP_PRIVILEGES) == 0) {
       if (setgid(gid) != 0) {
 	cerr << "unable to setgid " << gid << ": " << cpp_strerror(errno)
@@ -358,11 +358,11 @@ global_init(const std::map<std::string,std::string> *defaults,
     // make sure our mini-session gets legacy values
     g_conf().apply_changes(nullptr);
 
-    ceph::async::io_context_pool cp(1);
-    MonClient mc_bootstrap(g_ceph_context, cp);
+    stone::async::io_context_pool cp(1);
+    MonClient mc_bootstrap(g_stone_context, cp);
     if (mc_bootstrap.get_monmap_and_config() < 0) {
       cp.stop();
-      g_ceph_context->_log->flush();
+      g_stone_context->_log->flush();
       cerr << "failed to fetch mon config (--no-mon-config to skip)"
 	   << std::endl;
       _exit(1);
@@ -400,22 +400,22 @@ global_init(const std::map<std::string,std::string> *defaults,
   }
 
   if ((flags & CINIT_FLAG_DEFER_DROP_PRIVILEGES) &&
-      (g_ceph_context->get_set_uid() || g_ceph_context->get_set_gid())) {
+      (g_stone_context->get_set_uid() || g_stone_context->get_set_gid())) {
     // Fix ownership on log files and run directories if needed.
     // Admin socket files are chown()'d during the common init path _after_
     // the service thread has been started. This is sadly a bit of a hack :(
     chown_path(g_conf()->run_dir,
-	       g_ceph_context->get_set_uid(),
-	       g_ceph_context->get_set_gid(),
-	       g_ceph_context->get_set_uid_string(),
-	       g_ceph_context->get_set_gid_string());
-    g_ceph_context->_log->chown_log_file(
-      g_ceph_context->get_set_uid(),
-      g_ceph_context->get_set_gid());
+	       g_stone_context->get_set_uid(),
+	       g_stone_context->get_set_gid(),
+	       g_stone_context->get_set_uid_string(),
+	       g_stone_context->get_set_gid_string());
+    g_stone_context->_log->chown_log_file(
+      g_stone_context->get_set_uid(),
+      g_stone_context->get_set_gid());
   }
 
   // Now we're ready to complain about config file parse errors
-  g_conf().complain_about_parse_error(g_ceph_context);
+  g_conf().complain_about_parse_error(g_stone_context);
 
   // test leak checking
   if (g_conf()->debug_deliberately_leak_memory) {
@@ -426,22 +426,22 @@ global_init(const std::map<std::string,std::string> *defaults,
   }
 
   if (code_env == CODE_ENVIRONMENT_DAEMON && !(flags & CINIT_FLAG_NO_DAEMON_ACTIONS))
-    output_ceph_version();
+    output_stone_version();
 
-  if (g_ceph_context->crush_location.init_on_startup()) {
+  if (g_stone_context->crush_location.init_on_startup()) {
     cerr << " failed to init_on_startup : " << cpp_strerror(errno) << std::endl;
     exit(1);
   }
 
-  return boost::intrusive_ptr<CephContext>{g_ceph_context, false};
+  return boost::intrusive_ptr<StoneContext>{g_stone_context, false};
 }
 
 void global_print_banner(void)
 {
-  output_ceph_version();
+  output_stone_version();
 }
 
-int global_init_prefork(CephContext *cct)
+int global_init_prefork(StoneContext *cct)
 {
   if (g_code_env != CODE_ENVIRONMENT_DAEMON)
     return -1;
@@ -468,7 +468,7 @@ int global_init_prefork(CephContext *cct)
   return 0;
 }
 
-void global_init_daemonize(CephContext *cct)
+void global_init_daemonize(StoneContext *cct)
 {
   if (global_init_prefork(cct) < 0)
     return;
@@ -489,7 +489,7 @@ void global_init_daemonize(CephContext *cct)
 #endif
 }
 
-int reopen_as_null(CephContext *cct, int fd)
+int reopen_as_null(StoneContext *cct, int fd)
 {
   int newfd = open(DEV_NULL, O_RDONLY | O_CLOEXEC);
   if (newfd < 0) {
@@ -513,7 +513,7 @@ int reopen_as_null(CephContext *cct, int fd)
   return 0;
 }
 
-void global_init_postfork_start(CephContext *cct)
+void global_init_postfork_start(StoneContext *cct)
 {
   // reexpand the meta in child process
   cct->_conf.finalize_reexpand_meta();
@@ -543,7 +543,7 @@ void global_init_postfork_start(CephContext *cct)
   }
 }
 
-void global_init_postfork_finish(CephContext *cct)
+void global_init_postfork_finish(StoneContext *cct)
 {
   /* We only close stdout+stderr once the caller decides the daemonization
    * process is finished.  This way we can allow error or other messages to be
@@ -564,7 +564,7 @@ void global_init_postfork_finish(CephContext *cct)
 }
 
 
-void global_init_chdir(const CephContext *cct)
+void global_init_chdir(const StoneContext *cct)
 {
   const auto& conf = cct->_conf;
   if (conf->chdir.empty())
@@ -580,7 +580,7 @@ void global_init_chdir(const CephContext *cct)
  * behavior that the file descriptor that gets assigned is the lowest
  * available one.
  */
-int global_init_shutdown_stderr(CephContext *cct)
+int global_init_shutdown_stderr(StoneContext *cct)
 {
   reopen_as_null(cct, STDERR_FILENO);
   int l = cct->_conf->err_to_stderr ? -1 : -2;
@@ -588,7 +588,7 @@ int global_init_shutdown_stderr(CephContext *cct)
   return 0;
 }
 
-int global_init_preload_erasure_code(const CephContext *cct)
+int global_init_preload_erasure_code(const StoneContext *cct)
 {
   const auto& conf = cct->_conf;
   string plugins = conf->osd_erasure_code_plugins;
@@ -621,7 +621,7 @@ int global_init_preload_erasure_code(const CephContext *cct)
   }
 
   std::stringstream ss;
-  int r = ceph::ErasureCodePluginRegistry::instance().preload(
+  int r = stone::ErasureCodePluginRegistry::instance().preload(
     plugins,
     conf.get_val<std::string>("erasure_code_dir"),
     &ss);

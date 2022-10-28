@@ -5,7 +5,7 @@
 
 #include <ostream>
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 std::ostream& operator<<(std::ostream& os,
                          const OSDPerfMetricSubKeyDescriptor &d) {
@@ -42,7 +42,7 @@ std::ostream& operator<<(std::ostream& os,
 
 void PerformanceCounterDescriptor::pack_counter(const PerformanceCounter &c,
                                                 bufferlist *bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(c.first, *bl);
   switch(type) {
   case PerformanceCounterType::OPS:
@@ -58,13 +58,13 @@ void PerformanceCounterDescriptor::pack_counter(const PerformanceCounter &c,
     encode(c.second, *bl);
     break;
   default:
-    ceph_abort_msg("unknown counter type");
+    stone_abort_msg("unknown counter type");
   }
 }
 
 void PerformanceCounterDescriptor::unpack_counter(
     bufferlist::const_iterator& bl, PerformanceCounter *c) const {
-  using ceph::decode;
+  using stone::decode;
   decode(c->first, bl);
   switch(type) {
   case PerformanceCounterType::OPS:
@@ -80,7 +80,7 @@ void PerformanceCounterDescriptor::unpack_counter(
     decode(c->second, bl);
     break;
   default:
-    ceph_abort_msg("unknown counter type");
+    stone_abort_msg("unknown counter type");
   }
 }
 

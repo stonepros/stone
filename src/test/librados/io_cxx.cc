@@ -218,7 +218,7 @@ TEST_F(LibRadosIoPP, RoundTripPP) {
 TEST_F(LibRadosIoPP, RoundTripPP2)
 {
   bufferlist bl;
-  bl.append("ceph");
+  bl.append("stone");
   ObjectWriteOperation write;
   write.write(0, bl);
   write.set_op_flags2(LIBRADOS_OP_FLAG_FADVISE_DONTNEED);
@@ -228,7 +228,7 @@ TEST_F(LibRadosIoPP, RoundTripPP2)
   read.read(0, bl.length(), NULL, NULL);
   read.set_op_flags2(LIBRADOS_OP_FLAG_FADVISE_NOCACHE|LIBRADOS_OP_FLAG_FADVISE_RANDOM);
   ASSERT_EQ(0, ioctx.operate("foo", &read, &bl));
-  ASSERT_EQ(0, memcmp(bl.c_str(), "ceph", 4));
+  ASSERT_EQ(0, memcmp(bl.c_str(), "stone", 4));
 }
 
 TEST_F(LibRadosIoPP, Checksum) {
@@ -308,7 +308,7 @@ TEST_F(LibRadosIoPP, WriteFullRoundTripPP) {
 TEST_F(LibRadosIoPP, WriteFullRoundTripPP2)
 {
   bufferlist bl;
-  bl.append("ceph");
+  bl.append("stone");
   ObjectWriteOperation write;
   write.write_full(bl);
   write.set_op_flags2(LIBRADOS_OP_FLAG_FADVISE_NOCACHE);
@@ -318,7 +318,7 @@ TEST_F(LibRadosIoPP, WriteFullRoundTripPP2)
   read.read(0, bl.length(), NULL, NULL);
   read.set_op_flags2(LIBRADOS_OP_FLAG_FADVISE_DONTNEED|LIBRADOS_OP_FLAG_FADVISE_RANDOM);
   ASSERT_EQ(0, ioctx.operate("foo", &read, &bl));
-  ASSERT_EQ(0, memcmp(bl.c_str(), "ceph", 4));
+  ASSERT_EQ(0, memcmp(bl.c_str(), "stone", 4));
 }
 
 TEST_F(LibRadosIoPP, AppendRoundTripPP) {
@@ -637,7 +637,7 @@ TEST_F(LibRadosIoECPP, RoundTripPP) {
 TEST_F(LibRadosIoECPP, RoundTripPP2)
 {
   bufferlist bl;
-  bl.append("ceph");
+  bl.append("stone");
   ObjectWriteOperation write;
   write.write(0, bl);
   write.set_op_flags2(LIBRADOS_OP_FLAG_FADVISE_DONTNEED);
@@ -647,7 +647,7 @@ TEST_F(LibRadosIoECPP, RoundTripPP2)
   read.read(0, bl.length(), NULL, NULL);
   read.set_op_flags2(LIBRADOS_OP_FLAG_FADVISE_DONTNEED|LIBRADOS_OP_FLAG_FADVISE_RANDOM);
   ASSERT_EQ(0, ioctx.operate("foo", &read, &bl));
-  ASSERT_EQ(0, memcmp(bl.c_str(), "ceph", 4));
+  ASSERT_EQ(0, memcmp(bl.c_str(), "stone", 4));
 }
 
 TEST_F(LibRadosIoECPP, OverlappingWriteRoundTripPP) {
@@ -693,7 +693,7 @@ TEST_F(LibRadosIoECPP, WriteFullRoundTripPP) {
 TEST_F(LibRadosIoECPP, WriteFullRoundTripPP2)
 {
   bufferlist bl;
-  bl.append("ceph");
+  bl.append("stone");
   ObjectWriteOperation write;
   write.write_full(bl);
   write.set_op_flags2(LIBRADOS_OP_FLAG_FADVISE_DONTNEED);
@@ -703,7 +703,7 @@ TEST_F(LibRadosIoECPP, WriteFullRoundTripPP2)
   read.read(0, bl.length(), NULL, NULL);
   read.set_op_flags2(LIBRADOS_OP_FLAG_FADVISE_DONTNEED|LIBRADOS_OP_FLAG_FADVISE_RANDOM);
   ASSERT_EQ(0, ioctx.operate("foo", &read, &bl));
-  ASSERT_EQ(0, memcmp(bl.c_str(), "ceph", 4));
+  ASSERT_EQ(0, memcmp(bl.c_str(), "stone", 4));
 }
 
 TEST_F(LibRadosIoECPP, AppendRoundTripPP) {
@@ -841,13 +841,13 @@ TEST_F(LibRadosIoECPP, XattrListPP) {
 
 TEST_F(LibRadosIoPP, CmpExtPP) {
   bufferlist bl;
-  bl.append("ceph");
+  bl.append("stone");
   ObjectWriteOperation write1;
   write1.write(0, bl);
   ASSERT_EQ(0, ioctx.operate("foo", &write1));
 
   bufferlist new_bl;
-  new_bl.append("CEPH");
+  new_bl.append("STONE");
   ObjectWriteOperation write2;
   write2.cmpext(0, bl, nullptr);
   write2.write(0, new_bl);
@@ -856,7 +856,7 @@ TEST_F(LibRadosIoPP, CmpExtPP) {
   ObjectReadOperation read;
   read.read(0, bl.length(), NULL, NULL);
   ASSERT_EQ(0, ioctx.operate("foo", &read, &bl));
-  ASSERT_EQ(0, memcmp(bl.c_str(), "CEPH", 4));
+  ASSERT_EQ(0, memcmp(bl.c_str(), "STONE", 4));
 }
 
 TEST_F(LibRadosIoPP, CmpExtDNEPP) {
@@ -864,7 +864,7 @@ TEST_F(LibRadosIoPP, CmpExtDNEPP) {
   bl.append(std::string(4, '\0'));
 
   bufferlist new_bl;
-  new_bl.append("CEPH");
+  new_bl.append("STONE");
   ObjectWriteOperation write;
   write.cmpext(0, bl, nullptr);
   write.write(0, new_bl);
@@ -873,18 +873,18 @@ TEST_F(LibRadosIoPP, CmpExtDNEPP) {
   ObjectReadOperation read;
   read.read(0, bl.length(), NULL, NULL);
   ASSERT_EQ(0, ioctx.operate("foo", &read, &bl));
-  ASSERT_EQ(0, memcmp(bl.c_str(), "CEPH", 4));
+  ASSERT_EQ(0, memcmp(bl.c_str(), "STONE", 4));
 }
 
 TEST_F(LibRadosIoPP, CmpExtMismatchPP) {
   bufferlist bl;
-  bl.append("ceph");
+  bl.append("stone");
   ObjectWriteOperation write1;
   write1.write(0, bl);
   ASSERT_EQ(0, ioctx.operate("foo", &write1));
 
   bufferlist new_bl;
-  new_bl.append("CEPH");
+  new_bl.append("STONE");
   ObjectWriteOperation write2;
   write2.cmpext(0, new_bl, nullptr);
   write2.write(0, new_bl);
@@ -893,18 +893,18 @@ TEST_F(LibRadosIoPP, CmpExtMismatchPP) {
   ObjectReadOperation read;
   read.read(0, bl.length(), NULL, NULL);
   ASSERT_EQ(0, ioctx.operate("foo", &read, &bl));
-  ASSERT_EQ(0, memcmp(bl.c_str(), "ceph", 4));
+  ASSERT_EQ(0, memcmp(bl.c_str(), "stone", 4));
 }
 
 TEST_F(LibRadosIoECPP, CmpExtPP) {
   bufferlist bl;
-  bl.append("ceph");
+  bl.append("stone");
   ObjectWriteOperation write1;
   write1.write(0, bl);
   ASSERT_EQ(0, ioctx.operate("foo", &write1));
 
   bufferlist new_bl;
-  new_bl.append("CEPH");
+  new_bl.append("STONE");
   ObjectWriteOperation write2;
   write2.cmpext(0, bl, nullptr);
   write2.write_full(new_bl);
@@ -913,7 +913,7 @@ TEST_F(LibRadosIoECPP, CmpExtPP) {
   ObjectReadOperation read;
   read.read(0, bl.length(), NULL, NULL);
   ASSERT_EQ(0, ioctx.operate("foo", &read, &bl));
-  ASSERT_EQ(0, memcmp(bl.c_str(), "CEPH", 4));
+  ASSERT_EQ(0, memcmp(bl.c_str(), "STONE", 4));
 }
 
 TEST_F(LibRadosIoECPP, CmpExtDNEPP) {
@@ -921,7 +921,7 @@ TEST_F(LibRadosIoECPP, CmpExtDNEPP) {
   bl.append(std::string(4, '\0'));
 
   bufferlist new_bl;
-  new_bl.append("CEPH");
+  new_bl.append("STONE");
   ObjectWriteOperation write;
   write.cmpext(0, bl, nullptr);
   write.write_full(new_bl);
@@ -930,18 +930,18 @@ TEST_F(LibRadosIoECPP, CmpExtDNEPP) {
   ObjectReadOperation read;
   read.read(0, bl.length(), NULL, NULL);
   ASSERT_EQ(0, ioctx.operate("foo", &read, &bl));
-  ASSERT_EQ(0, memcmp(bl.c_str(), "CEPH", 4));
+  ASSERT_EQ(0, memcmp(bl.c_str(), "STONE", 4));
 }
 
 TEST_F(LibRadosIoECPP, CmpExtMismatchPP) {
   bufferlist bl;
-  bl.append("ceph");
+  bl.append("stone");
   ObjectWriteOperation write1;
   write1.write(0, bl);
   ASSERT_EQ(0, ioctx.operate("foo", &write1));
 
   bufferlist new_bl;
-  new_bl.append("CEPH");
+  new_bl.append("STONE");
   ObjectWriteOperation write2;
   write2.cmpext(0, new_bl, nullptr);
   write2.write_full(new_bl);
@@ -950,5 +950,5 @@ TEST_F(LibRadosIoECPP, CmpExtMismatchPP) {
   ObjectReadOperation read;
   read.read(0, bl.length(), NULL, NULL);
   ASSERT_EQ(0, ioctx.operate("foo", &read, &bl));
-  ASSERT_EQ(0, memcmp(bl.c_str(), "ceph", 4));
+  ASSERT_EQ(0, memcmp(bl.c_str(), "stone", 4));
 }

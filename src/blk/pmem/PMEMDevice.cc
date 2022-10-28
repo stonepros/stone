@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Intel <jianpeng.ma@intel.com>
  *
@@ -29,11 +29,11 @@
 #include "common/blkdev.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_bdev
+#define dout_subsys stone_subsys_bdev
 #undef dout_prefix
 #define dout_prefix *_dout << "bdev-PMEM("  << path << ") "
 
-PMEMDevice::PMEMDevice(CephContext *cct, aio_callback_t cb, void *cbpriv)
+PMEMDevice::PMEMDevice(StoneContext *cct, aio_callback_t cb, void *cbpriv)
   : BlockDevice(cct, cb, cbpriv),
     fd(-1), addr(0),
     injecting_crash(0)
@@ -119,9 +119,9 @@ void PMEMDevice::close()
 {
   dout(1) << __func__ << dendl;
 
-  ceph_assert(addr != NULL);
+  stone_assert(addr != NULL);
   pmem_unmap(addr, size);
-  ceph_assert(fd >= 0);
+  stone_assert(fd >= 0);
   VOID_TEMP_FAILURE_RETRY(::close(fd));
   fd = -1;
 
@@ -188,7 +188,7 @@ int PMEMDevice::flush()
 void PMEMDevice::aio_submit(IOContext *ioc)
 {
   if (ioc->priv) {
-    ceph_assert(ioc->num_running == 0);
+    stone_assert(ioc->num_running == 0);
     aio_callback(aio_callback_priv, ioc->priv);
   } else {
     ioc->try_aio_wake();
@@ -200,7 +200,7 @@ int PMEMDevice::write(uint64_t off, bufferlist& bl, bool buffered, int write_hin
 {
   uint64_t len = bl.length();
   dout(20) << __func__ << " " << off << "~" << len  << dendl;
-  ceph_assert(is_valid_io(off, len));
+  stone_assert(is_valid_io(off, len));
 
   dout(40) << "data: ";
   bl.hexdump(*_dout);
@@ -242,7 +242,7 @@ int PMEMDevice::read(uint64_t off, uint64_t len, bufferlist *pbl,
 		      bool buffered)
 {
   dout(5) << __func__ << " " << off << "~" << len  << dendl;
-  ceph_assert(is_valid_io(off, len));
+  stone_assert(is_valid_io(off, len));
 
   bufferptr p = buffer::create_small_page_aligned(len);
   memcpy(p.c_str(), addr + off, len);
@@ -266,7 +266,7 @@ int PMEMDevice::aio_read(uint64_t off, uint64_t len, bufferlist *pbl,
 int PMEMDevice::read_random(uint64_t off, uint64_t len, char *buf, bool buffered)
 {
   dout(5) << __func__ << " " << off << "~" << len << dendl;
-  ceph_assert(is_valid_io(off, len));
+  stone_assert(is_valid_io(off, len));
 
   memcpy(buf, addr + off, len);
   return 0;

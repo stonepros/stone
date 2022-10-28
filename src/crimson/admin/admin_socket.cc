@@ -24,7 +24,7 @@ using namespace crimson::common;
 namespace {
 seastar::logger& logger()
 {
-  return crimson::get_logger(ceph_subsys_osd);
+  return crimson::get_logger(stone_subsys_osd);
 }
 }  // namespace
 
@@ -34,7 +34,7 @@ tell_result_t::tell_result_t(int ret, std::string&& err)
   : ret{ret}, err(std::move(err))
 {}
 
-tell_result_t::tell_result_t(int ret, std::string&& err, ceph::bufferlist&& out)
+tell_result_t::tell_result_t(int ret, std::string&& err, stone::bufferlist&& out)
   : ret{ret}, err(std::move(err)), out(std::move(out))
 {}
 
@@ -70,7 +70,7 @@ auto AdminSocket::parse_cmd(const std::vector<std::string>& cmd)
   //   - locate the "op-code" string (the 'prefix' segment)
   //   - prepare for command parameters extraction via cmdmap_t
   cmdmap_t cmdmap;
-  ceph::bufferlist out;
+  stone::bufferlist out;
 
   try {
     stringstream errss;
@@ -109,7 +109,7 @@ auto AdminSocket::parse_cmd(const std::vector<std::string>& cmd)
 }
 
 seastar::future<> AdminSocket::finalize_response(
-  seastar::output_stream<char>& out, ceph::bufferlist&& msgs)
+  seastar::output_stream<char>& out, stone::bufferlist&& msgs)
 {
   string outbuf_cont = msgs.to_str();
   if (outbuf_cont.empty()) {
@@ -150,7 +150,7 @@ seastar::future<> AdminSocket::execute_line(std::string cmdline,
 }
 
 auto AdminSocket::execute_command(const std::vector<std::string>& cmd,
-				  ceph::bufferlist&& buf)
+				  stone::bufferlist&& buf)
   -> seastar::future<tell_result_t>
 {
   return seastar::with_shared(servers_tbl_rwlock,
@@ -162,7 +162,7 @@ auto AdminSocket::execute_command(const std::vector<std::string>& cmd,
       if (!validate_cmd(nullptr, desc, parsed->params, os)) {
 	logger().error("AdminSocket::execute_command: "
 		       "failed to validate '{}': {}", cmd, os.str());
-	ceph::bufferlist out;
+	stone::bufferlist out;
 	out.append(os);
 	return seastar::make_ready_future<tell_result_t>(
           tell_result_t{-EINVAL, "invalid command json", std::move(out)});
@@ -290,17 +290,17 @@ seastar::future<> AdminSocket::stop()
 class VersionHook final : public AdminSocketHook {
  public:
   VersionHook()
-    : AdminSocketHook{"version", "", "get ceph version"}
+    : AdminSocketHook{"version", "", "get stone version"}
   {}
   seastar::future<tell_result_t> call(const cmdmap_t&,
 				      std::string_view format,
-				      ceph::bufferlist&&) const final
+				      stone::bufferlist&&) const final
   {
     unique_ptr<Formatter> f{Formatter::create(format, "json-pretty", "json-pretty")};
     f->open_object_section("version");
-    f->dump_string("version", ceph_version_to_str());
-    f->dump_string("release", ceph_release_to_str());
-    f->dump_string("release_type", ceph_release_type());
+    f->dump_string("version", stone_version_to_str());
+    f->dump_string("release", stone_release_to_str());
+    f->dump_string("release_type", stone_release_type());
     f->close_section();
     return seastar::make_ready_future<tell_result_t>(std::move(f));
   }
@@ -317,7 +317,7 @@ class GitVersionHook final : public AdminSocketHook {
   {}
   seastar::future<tell_result_t> call(const cmdmap_t&,
 				      std::string_view format,
-				      ceph::bufferlist&&) const final
+				      stone::bufferlist&&) const final
   {
     unique_ptr<Formatter> f{Formatter::create(format, "json-pretty", "json-pretty")};
     f->open_object_section("version");
@@ -338,7 +338,7 @@ class HelpHook final : public AdminSocketHook {
 
   seastar::future<tell_result_t> call(const cmdmap_t&,
 				      std::string_view format,
-				      ceph::bufferlist&&) const final
+				      stone::bufferlist&&) const final
   {
     return seastar::with_shared(m_as.servers_tbl_rwlock,
 				[format, this] {
@@ -367,7 +367,7 @@ class GetdescsHook final : public AdminSocketHook {
 
   seastar::future<tell_result_t> call(const cmdmap_t& cmdmap,
 				      std::string_view format,
-				      ceph::bufferlist&&) const final
+				      stone::bufferlist&&) const final
   {
     return seastar::with_shared(m_as.servers_tbl_rwlock, [format, this] {
       unique_ptr<Formatter> f{Formatter::create(format, "json-pretty", "json-pretty")};
@@ -376,7 +376,7 @@ class GetdescsHook final : public AdminSocketHook {
       for (const auto& [prefix, hook] : m_as) {
 	auto secname = fmt::format("cmd {:>03}", cmdnum);
         auto cmd = fmt::format("{} {}", hook->prefix, hook->desc);
-        dump_cmd_and_help_to_json(f.get(), CEPH_FEATURES_ALL, secname,
+        dump_cmd_and_help_to_json(f.get(), STONE_FEATURES_ALL, secname,
                                   cmd, std::string{hook->help});
         cmdnum++;
       }
@@ -390,12 +390,12 @@ class InjectArgsHook final : public AdminSocketHook {
 public:
   InjectArgsHook()
     : AdminSocketHook{"injectargs",
-                      "name=injected_args,type=CephString,n=N",
+                      "name=injected_args,type=StoneString,n=N",
                       "inject configuration arguments into running daemon"}
   {}
   seastar::future<tell_result_t> call(const cmdmap_t& cmdmap,
 				      std::string_view format,
-				      ceph::bufferlist&&) const final
+				      stone::bufferlist&&) const final
   {
     std::vector<std::string> argv;
     if (!cmd_getval(cmdmap, "injected_args", argv)) {
@@ -423,7 +423,7 @@ public:
   {}
   seastar::future<tell_result_t> call(const cmdmap_t&,
                                       std::string_view format,
-                                      ceph::bufferlist&& input) const final
+                                      stone::bufferlist&& input) const final
   {
     unique_ptr<Formatter> f{Formatter::create(format, "json-pretty", "json-pretty")};
     f->open_object_section("config_show");
@@ -440,12 +440,12 @@ class ConfigGetHook : public AdminSocketHook {
 public:
   ConfigGetHook() :
     AdminSocketHook("config get",
-                    "name=var,type=CephString",
+                    "name=var,type=StoneString",
                     "config get <field>: get the config value")
   {}
   seastar::future<tell_result_t> call(const cmdmap_t& cmdmap,
                                       std::string_view format,
-                                      ceph::bufferlist&& input) const final
+                                      stone::bufferlist&& input) const final
   {
     std::string var;
     [[maybe_unused]] bool found = cmd_getval(cmdmap, "var", var);
@@ -474,13 +474,13 @@ class ConfigSetHook : public AdminSocketHook {
 public:
   ConfigSetHook()
     : AdminSocketHook("config set",
-                      "name=var,type=CephString "
-                      "name=val,type=CephString,n=N",
+                      "name=var,type=StoneString "
+                      "name=val,type=StoneString,n=N",
                       "config set <field> <val> [<val> ...]: set a config variable")
   {}
   seastar::future<tell_result_t> call(const cmdmap_t& cmdmap,
                                       std::string_view format,
-                                      ceph::bufferlist&&) const final
+                                      stone::bufferlist&&) const final
   {
     std::string var;
     std::vector<std::string> new_val;

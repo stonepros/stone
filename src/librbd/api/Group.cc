@@ -14,7 +14,7 @@
 #include "librbd/internal.h"
 #include "librbd/io/AioCompletion.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::api::Group: " << __func__ << ": "
 
@@ -25,7 +25,7 @@ using std::string;
 using std::vector;
 // list binds to list() here, so std::list is explicitly used below
 
-using ceph::bufferlist;
+using stone::bufferlist;
 using librados::snap_t;
 using librados::IoCtx;
 using librados::Rados;
@@ -39,7 +39,7 @@ namespace {
 template <typename I>
 snap_t get_group_snap_id(I* ictx,
                          const cls::rbd::SnapshotNamespace& in_snap_namespace) {
-  ceph_assert(ceph_mutex_is_locked(ictx->image_lock));
+  stone_assert(stone_mutex_is_locked(ictx->image_lock));
   auto it = ictx->snap_ids.lower_bound({cls::rbd::GroupSnapshotNamespace{},
                                         ""});
   for (; it != ictx->snap_ids.end(); ++it) {
@@ -50,7 +50,7 @@ snap_t get_group_snap_id(I* ictx,
       break;
     }
   }
-  return CEPH_NOSNAP;
+  return STONE_NOSNAP;
 }
 
 string generate_uuid(librados::IoCtx& io_ctx)
@@ -67,7 +67,7 @@ string generate_uuid(librados::IoCtx& io_ctx)
 int group_snap_list(librados::IoCtx& group_ioctx, const char *group_name,
 		    std::vector<cls::rbd::GroupSnapshot> *cls_snaps)
 {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
 
   string group_id;
   vector<string> ind_snap_names;
@@ -119,7 +119,7 @@ std::string calc_ind_image_snap_name(uint64_t pool_id,
 int group_image_list(librados::IoCtx& group_ioctx, const char *group_name,
 		     std::vector<cls::rbd::GroupImageStatus> *image_ids)
 {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
 
   string group_id;
 
@@ -165,7 +165,7 @@ int group_image_list(librados::IoCtx& group_ioctx, const char *group_name,
 int group_image_remove(librados::IoCtx& group_ioctx, string group_id,
 		       librados::IoCtx& image_ioctx, string image_id)
 {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
 
   string group_header_oid = util::group_header_name(group_id);
 
@@ -215,7 +215,7 @@ int group_snap_remove_by_record(librados::IoCtx& group_ioctx,
 				const std::string& group_id,
 				const std::string& group_header_oid) {
 
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
   std::vector<C_SaferCond*> on_finishes;
   int r, ret_code;
 
@@ -322,7 +322,7 @@ int group_snap_rollback_by_record(librados::IoCtx& group_ioctx,
                                   const std::string& group_id,
                                   const std::string& group_header_oid,
                                   ProgressContext& pctx) {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
   std::vector<C_SaferCond*> on_finishes;
   int r, ret_code;
 
@@ -444,7 +444,7 @@ void notify_unquiesce(std::vector<I*> &ictxs,
     return;
   }
 
-  ceph_assert(requests.size() == ictxs.size());
+  stone_assert(requests.size() == ictxs.size());
   int image_count = ictxs.size();
   std::vector<C_SaferCond> on_finishes(image_count);
 
@@ -496,7 +496,7 @@ int Group<I>::image_remove_by_id(librados::IoCtx& group_ioctx,
                                  librados::IoCtx& image_ioctx,
                                  const char *image_id)
 {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
   ldout(cct, 20) << "io_ctx=" << &group_ioctx
     << " group name " << group_name << " image "
     << &image_ioctx << " id " << image_id << dendl;
@@ -521,7 +521,7 @@ int Group<I>::image_remove_by_id(librados::IoCtx& group_ioctx,
 template <typename I>
 int Group<I>::create(librados::IoCtx& io_ctx, const char *group_name)
 {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
 
   string id = generate_uuid(io_ctx);
 
@@ -560,7 +560,7 @@ err_remove_from_dir:
 template <typename I>
 int Group<I>::remove(librados::IoCtx& io_ctx, const char *group_name)
 {
-  CephContext *cct((CephContext *)io_ctx.cct());
+  StoneContext *cct((StoneContext *)io_ctx.cct());
   ldout(cct, 20) << "group_remove " << &io_ctx << " " << group_name << dendl;
 
   std::string group_id;
@@ -629,7 +629,7 @@ int Group<I>::remove(librados::IoCtx& io_ctx, const char *group_name)
 template <typename I>
 int Group<I>::list(IoCtx& io_ctx, vector<string> *names)
 {
-  CephContext *cct = (CephContext *)io_ctx.cct();
+  StoneContext *cct = (StoneContext *)io_ctx.cct();
   ldout(cct, 20) << "io_ctx=" << &io_ctx << dendl;
 
   int max_read = 1024;
@@ -667,7 +667,7 @@ template <typename I>
 int Group<I>::image_add(librados::IoCtx& group_ioctx, const char *group_name,
 			librados::IoCtx& image_ioctx, const char *image_name)
 {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
   ldout(cct, 20) << "io_ctx=" << &group_ioctx
 		 << " group name " << group_name << " image "
 		 << &image_ioctx << " name " << image_name << dendl;
@@ -746,7 +746,7 @@ template <typename I>
 int Group<I>::image_remove(librados::IoCtx& group_ioctx, const char *group_name,
 		           librados::IoCtx& image_ioctx, const char *image_name)
 {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
   ldout(cct, 20) << "io_ctx=" << &group_ioctx
 		<< " group name " << group_name << " image "
 		<< &image_ioctx << " name " << image_name << dendl;
@@ -789,7 +789,7 @@ int Group<I>::image_list(librados::IoCtx& group_ioctx,
 			 const char *group_name,
 			 std::vector<group_image_info_t>* images)
 {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
   ldout(cct, 20) << "io_ctx=" << &group_ioctx
 		 << " group name " << group_name << dendl;
 
@@ -826,7 +826,7 @@ template <typename I>
 int Group<I>::rename(librados::IoCtx& io_ctx, const char *src_name,
                      const char *dest_name)
 {
-  CephContext *cct((CephContext *)io_ctx.cct());
+  StoneContext *cct((StoneContext *)io_ctx.cct());
   ldout(cct, 20) << "group_rename " << &io_ctx << " " << src_name
                  << " -> " << dest_name << dendl;
 
@@ -884,7 +884,7 @@ template <typename I>
 int Group<I>::snap_create(librados::IoCtx& group_ioctx,
                           const char *group_name, const char *snap_name,
                           uint32_t flags) {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
 
   string group_id;
   cls::rbd::GroupSnapshot group_snap;
@@ -1061,7 +1061,7 @@ int Group<I>::snap_create(librados::IoCtx& group_ioctx,
       ictx->image_lock.lock_shared();
       snap_t snap_id = get_group_snap_id(ictx, ne);
       ictx->image_lock.unlock_shared();
-      if (snap_id == CEPH_NOSNAP) {
+      if (snap_id == STONE_NOSNAP) {
 	ldout(cct, 20) << "Couldn't find created snapshot with namespace: "
                        << ne << dendl;
 	ret_code = -ENOENT;
@@ -1143,7 +1143,7 @@ template <typename I>
 int Group<I>::snap_remove(librados::IoCtx& group_ioctx, const char *group_name,
 			  const char *snap_name)
 {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
 
   string group_id;
   int r = cls_client::dir_get_id(&group_ioctx, RBD_GROUP_DIRECTORY,
@@ -1182,7 +1182,7 @@ template <typename I>
 int Group<I>::snap_rename(librados::IoCtx& group_ioctx, const char *group_name,
                           const char *old_snap_name,
                           const char *new_snap_name) {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
   if (0 == strcmp(old_snap_name, new_snap_name))
     return -EEXIST;
 
@@ -1250,7 +1250,7 @@ int Group<I>::snap_rollback(librados::IoCtx& group_ioctx,
                             const char *group_name, const char *snap_name,
                             ProgressContext& pctx)
 {
-  CephContext *cct = (CephContext *)group_ioctx.cct();
+  StoneContext *cct = (StoneContext *)group_ioctx.cct();
 
   string group_id;
   int r = cls_client::dir_get_id(&group_ioctx, RBD_GROUP_DIRECTORY,

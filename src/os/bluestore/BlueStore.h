@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OSD_BLUESTORE_H
-#define CEPH_OSD_BLUESTORE_H
+#ifndef STONE_OSD_BLUESTORE_H
+#define STONE_OSD_BLUESTORE_H
 
 #include "acconfig.h"
 

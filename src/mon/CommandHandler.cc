@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat Ltd
  *
@@ -15,7 +15,7 @@
 #include "CommandHandler.h"
 
 #include "common/strtol.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include <ostream>
 #include <string>
@@ -23,7 +23,7 @@
 
 int CommandHandler::parse_bool(std::string_view str, bool* result, std::ostream& ss)
 {
-  ceph_assert(result != nullptr);
+  stone_assert(result != nullptr);
 
   std::string interr;
   int64_t n = strict_strtoll(str.data(), 10, &interr);

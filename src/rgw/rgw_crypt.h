@@ -5,8 +5,8 @@
  * Crypto filters for Put/Post/Get operations.
  */
 
-#ifndef CEPH_RGW_CRYPT_H
-#define CEPH_RGW_CRYPT_H
+#ifndef STONE_RGW_CRYPT_H
+#define STONE_RGW_CRYPT_H
 
 #include <string_view>
 

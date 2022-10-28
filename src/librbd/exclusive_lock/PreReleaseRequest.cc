@@ -19,7 +19,7 @@
 #include "librbd/io/Types.h"
 #include "librbd/PluginRegistry.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::exclusive_lock::PreReleaseRequest: " \
                            << this << " " << __func__ << ": "
@@ -63,7 +63,7 @@ void PreReleaseRequest<I>::send() {
 
 template <typename I>
 void PreReleaseRequest<I>::send_cancel_op_requests() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PreReleaseRequest<I>;
@@ -74,10 +74,10 @@ void PreReleaseRequest<I>::send_cancel_op_requests() {
 
 template <typename I>
 void PreReleaseRequest<I>::handle_cancel_op_requests(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   send_set_require_lock();
 }
@@ -90,7 +90,7 @@ void PreReleaseRequest<I>::send_set_require_lock() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PreReleaseRequest<I>;
@@ -112,7 +112,7 @@ void PreReleaseRequest<I>::send_set_require_lock() {
 
 template <typename I>
 void PreReleaseRequest<I>::handle_set_require_lock(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -125,7 +125,7 @@ void PreReleaseRequest<I>::handle_set_require_lock(int r) {
 
 template <typename I>
 void PreReleaseRequest<I>::send_wait_for_ops() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   Context *ctx = create_context_callback<
@@ -135,7 +135,7 @@ void PreReleaseRequest<I>::send_wait_for_ops() {
 
 template <typename I>
 void PreReleaseRequest<I>::handle_wait_for_ops(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   send_prepare_lock();
@@ -148,7 +148,7 @@ void PreReleaseRequest<I>::send_prepare_lock() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   // release the lock if the image is not busy performing other actions
@@ -159,7 +159,7 @@ void PreReleaseRequest<I>::send_prepare_lock() {
 
 template <typename I>
 void PreReleaseRequest<I>::handle_prepare_lock(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   send_process_plugin_release_lock();
@@ -167,7 +167,7 @@ void PreReleaseRequest<I>::handle_prepare_lock(int r) {
 
 template <typename I>
 void PreReleaseRequest<I>::send_process_plugin_release_lock() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   std::shared_lock owner_lock{m_image_ctx.owner_lock};
@@ -179,7 +179,7 @@ void PreReleaseRequest<I>::send_process_plugin_release_lock() {
 
 template <typename I>
 void PreReleaseRequest<I>::handle_process_plugin_release_lock(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -196,7 +196,7 @@ void PreReleaseRequest<I>::handle_process_plugin_release_lock(int r) {
 
 template <typename I>
 void PreReleaseRequest<I>::send_invalidate_cache() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   Context *ctx = create_context_callback<
@@ -207,7 +207,7 @@ void PreReleaseRequest<I>::send_invalidate_cache() {
 
 template <typename I>
 void PreReleaseRequest<I>::handle_invalidate_cache(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0 && r != -EBLOCKLISTED && r != -EBUSY) {
@@ -224,7 +224,7 @@ void PreReleaseRequest<I>::handle_invalidate_cache(int r) {
 
 template <typename I>
 void PreReleaseRequest<I>::send_flush_io() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   // ensure that all in-flight IO is flushed -- skipping the refresh layer
@@ -242,7 +242,7 @@ void PreReleaseRequest<I>::send_flush_io() {
 
 template <typename I>
 void PreReleaseRequest<I>::handle_flush_io(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -254,7 +254,7 @@ void PreReleaseRequest<I>::handle_flush_io(int r) {
 
 template <typename I>
 void PreReleaseRequest<I>::send_flush_notifies() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PreReleaseRequest<I>;
@@ -265,10 +265,10 @@ void PreReleaseRequest<I>::send_flush_notifies() {
 
 template <typename I>
 void PreReleaseRequest<I>::handle_flush_notifies(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   send_close_journal();
 }
 
@@ -284,7 +284,7 @@ void PreReleaseRequest<I>::send_close_journal() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PreReleaseRequest<I>;
@@ -295,7 +295,7 @@ void PreReleaseRequest<I>::send_close_journal() {
 
 template <typename I>
 void PreReleaseRequest<I>::handle_close_journal(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -321,7 +321,7 @@ void PreReleaseRequest<I>::send_close_object_map() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   using klass = PreReleaseRequest<I>;
@@ -332,7 +332,7 @@ void PreReleaseRequest<I>::send_close_object_map() {
 
 template <typename I>
 void PreReleaseRequest<I>::handle_close_object_map(int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -345,7 +345,7 @@ void PreReleaseRequest<I>::handle_close_object_map(int r) {
 
 template <typename I>
 void PreReleaseRequest<I>::send_unlock() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << dendl;
 
   finish();

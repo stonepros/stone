@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_MIGRATION_HTTP_CLIENT_H
-#define CEPH_LIBRBD_MIGRATION_HTTP_CLIENT_H
+#ifndef STONE_LIBRBD_MIGRATION_HTTP_CLIENT_H
+#define STONE_LIBRBD_MIGRATION_HTTP_CLIENT_H
 
 #include "include/common_fwd.h"
 #include "include/int_types.h"
@@ -161,7 +161,7 @@ private:
   struct PlainHttpSession;
   struct SslHttpSession;
 
-  CephContext* m_cct;
+  StoneContext* m_cct;
   ImageCtxT* m_image_ctx;
   std::shared_ptr<AsioEngine> m_asio_engine;
   std::string m_url;
@@ -202,4 +202,4 @@ private:
 
 extern template class librbd::migration::HttpClient<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_MIGRATION_HTTP_CLIENT_H
+#endif // STONE_LIBRBD_MIGRATION_HTTP_CLIENT_H

@@ -9,11 +9,11 @@
 #include "global/global_context.h"
 #include "global/global_init.h"
 #include "common/common_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 
 using namespace std;
 
-#define dout_subsys ceph_subsys_test
+#define dout_subsys stone_subsys_test
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, prefix_name(), timestep_count())
 static ostream& _prefix(std::ostream *_dout, const char *prefix, int timesteps) {
@@ -29,11 +29,11 @@ int main(int argc, char **argv) {
   for (auto& arg : args) {
     if (strncmp("--debug_mon", arg, 11) == 0) user_set_debug = true;
   }
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  if (!user_set_debug) g_ceph_context->_conf.set_val("debug mon", "0/20");
+  common_init_finish(g_stone_context);
+  if (!user_set_debug) g_stone_context->_conf.set_val("debug mon", "0/20");
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
@@ -107,7 +107,7 @@ struct Owner : public ElectionOwner, RankProvider {
        Election *p) : parent(p), rank(r), persisted_epoch(0),
     ever_joined(false),
     peer_tracker(this, rank, tracker_halflife, 5),
-    logic(this, es, &peer_tracker, 0.0005, g_ceph_context),
+    logic(this, es, &peer_tracker, 0.0005, g_stone_context),
     victory_accepters(0),
     timer_steps(-1), timer_election(true) {
     std::stringstream str;
@@ -130,19 +130,19 @@ struct Owner : public ElectionOwner, RankProvider {
   }
   void notify_deleted() { rank_deleted = true; rank = -1; cancel_timer(); }
   // pass back to ElectionLogic; we don't need this redirect ourselves
-  void trigger_new_election() {     ceph_assert (!rank_deleted); logic.start(); }
+  void trigger_new_election() {     stone_assert (!rank_deleted); logic.start(); }
   int get_my_rank() const { return rank; }
   // we don't need to persist scores as we don't reset and lose memory state
   void persist_connectivity_scores() {}
   void propose_to_peers(epoch_t e, bufferlist& bl) {
-    ceph_assert (!rank_deleted);
+    stone_assert (!rank_deleted);
     for (int i = 0; i < parent->get_paxos_size(); ++i) {
       if (i == rank) continue;
       parent->propose_to(rank, i, e, bl);
     }
   }
   void reset_election() {
-    ceph_assert (!rank_deleted);
+    stone_assert (!rank_deleted);
     _start();
     logic.start();
   }
@@ -169,12 +169,12 @@ struct Owner : public ElectionOwner, RankProvider {
     quorum.clear();
   }
   void _defer_to(int who) {
-    ceph_assert (!rank_deleted);
+    stone_assert (!rank_deleted);
     parent->defer_to(rank, who, logic.get_epoch());
     reset_timer(0); // wtf does changing this 0->1 cause breakage?
   }
   void message_victory(const std::set<int>& members) {
-    ceph_assert (!rank_deleted);
+    stone_assert (!rank_deleted);
     for (auto i : members) {
       if (i == rank) continue;
       parent->claim_victory(rank, i, logic.get_epoch(), members);
@@ -218,38 +218,38 @@ struct Owner : public ElectionOwner, RankProvider {
   void receive_scores(bufferlist bl) {
     ConnectionTracker oct(bl);
     peer_tracker.receive_peer_report(oct);
-    ldout(g_ceph_context, 10) << "received scores " << oct << dendl;
+    ldout(g_stone_context, 10) << "received scores " << oct << dendl;
   }
   void receive_ping(int from_rank, bufferlist bl) {
-    ldout(g_ceph_context, 6) << "receive ping from " << from_rank << dendl;
+    ldout(g_stone_context, 6) << "receive ping from " << from_rank << dendl;
     peer_tracker.report_live_connection(from_rank, parent->ping_interval);
     receive_scores(bl);
   }
   void receive_ping_timeout(int from_rank) {
-    ldout(g_ceph_context, 6) << "timeout ping from " << from_rank << dendl;
+    ldout(g_stone_context, 6) << "timeout ping from " << from_rank << dendl;
     peer_tracker.report_dead_connection(from_rank, parent->ping_interval);
   }
   void election_timeout() {
-    ldout(g_ceph_context, 2) << "election epoch " << logic.get_epoch()
+    ldout(g_stone_context, 2) << "election epoch " << logic.get_epoch()
 	 << " timed out for " << rank
 	 << ", electing me:" << logic.electing_me
 	 << ", acked_me:" << logic.acked_me << dendl;
-    ceph_assert (!rank_deleted);
+    stone_assert (!rank_deleted);
     logic.end_election_period();
   }
   void victory_timeout() {
-    ldout(g_ceph_context, 2) << "victory epoch " << logic.get_epoch()
+    ldout(g_stone_context, 2) << "victory epoch " << logic.get_epoch()
 	 << " timed out for " << rank
 	 << ", electing me:" << logic.electing_me
 	 << ", acked_me:" << logic.acked_me << dendl;
-    ceph_assert (!rank_deleted);
+    stone_assert (!rank_deleted);
     reset_election();
   }
   void encode_scores(bufferlist& bl) {
     encode(peer_tracker, bl);
   }
   void send_pings() {
-    ceph_assert (!rank_deleted);
+    stone_assert (!rank_deleted);
     if (!parent->ping_interval ||
 	parent->timesteps_run % parent->ping_interval != 0) {
       return;
@@ -268,7 +268,7 @@ struct Owner : public ElectionOwner, RankProvider {
     }
   }
   void notify_timestep() {
-    ceph_assert (!rank_deleted);
+    stone_assert (!rank_deleted);
     assert(timer_steps != 0);
     if (timer_steps > 0) {
       --timer_steps;
@@ -335,7 +335,7 @@ void Election::queue_election_message(int from, int to, function<void()> m)
 
 void Election::queue_timeout_message(int from, int to, function<void()> m)
 {
-  ceph_assert(blocked_messages[from].count(to));
+  stone_assert(blocked_messages[from].count(to));
   messages.push_back(m);
 }
 
@@ -434,7 +434,7 @@ bool Election::election_stable() const
   // see if anybody has a timer running
   for (auto i : electors) {
     if (i.second->timer_steps != -1) {
-      ldout(g_ceph_context, 30) << "rank " << i.first << " has timer value " << i.second->timer_steps << dendl;
+      ldout(g_stone_context, 30) << "rank " << i.first << " has timer value " << i.second->timer_steps << dendl;
       return false;
     }
   }
@@ -443,7 +443,7 @@ bool Election::election_stable() const
 
 bool Election::quorum_stable(int timesteps_stable) const
 {
-  ldout(g_ceph_context, 1) << "quorum_stable? last formed:" << last_quorum_formed
+  ldout(g_stone_context, 1) << "quorum_stable? last formed:" << last_quorum_formed
 			    << ", last changed " << last_quorum_change
 			    << ", last reported members " << last_quorum_reported << dendl;
   if (last_quorum_reported.empty()) {
@@ -465,16 +465,16 @@ bool Election::quorum_stable(int timesteps_stable) const
 bool Election::all_agree_on_leader() const
 {
   int leader = electors.find(0)->second->logic.get_election_winner();
-  ldout(g_ceph_context, 10) << "all_agree_on_leader on " << leader << dendl;
+  ldout(g_stone_context, 10) << "all_agree_on_leader on " << leader << dendl;
   for (auto& i: electors) {
     if (leader != i.second->logic.get_election_winner()) {
-      ldout(g_ceph_context, 10) << "rank " << i.first << " has different leader "
+      ldout(g_stone_context, 10) << "rank " << i.first << " has different leader "
 				<< i.second->logic.get_election_winner() << dendl;
       return false;
     }
   }
   if (disallowed_leaders.count(leader)) {
-    ldout(g_ceph_context, 10) << "that leader is disallowed! member of "
+    ldout(g_stone_context, 10) << "that leader is disallowed! member of "
 			      << disallowed_leaders << dendl;
     return false;
   }
@@ -551,7 +551,7 @@ void single_startup_election_completes(ElectionLogic::election_strategy strategy
     // This test is not actually legit since you should start
     // all the ElectionLogics, but it seems to work
     int steps = election.run_timesteps(0);
-    ldout(g_ceph_context, 1) << "ran in " << steps << " timesteps" << dendl;
+    ldout(g_stone_context, 1) << "ran in " << steps << " timesteps" << dendl;
     ASSERT_TRUE(election.election_stable());
     ASSERT_TRUE(election.quorum_stable(6)); // double the timer_steps we use
     ASSERT_TRUE(election.all_agree_on_leader());
@@ -564,7 +564,7 @@ void everybody_starts_completes(ElectionLogic::election_strategy strategy)
   Election election(5, strategy);
   election.start_all();
   int steps = election.run_timesteps(0);
-  ldout(g_ceph_context, 1) << "ran in " << steps << " timesteps" << dendl;
+  ldout(g_stone_context, 1) << "ran in " << steps << " timesteps" << dendl;
   ASSERT_TRUE(election.election_stable());
   ASSERT_TRUE(election.quorum_stable(6)); // double the timer_steps we use
   ASSERT_TRUE(election.all_agree_on_leader());
@@ -577,13 +577,13 @@ void blocked_connection_continues_election(ElectionLogic::election_strategy stra
   election.block_bidirectional_messages(0, 1);
   election.start_all();
   int steps = election.run_timesteps(100);
-  ldout(g_ceph_context, 1) << "ran in " << steps << " timesteps" << dendl;
+  ldout(g_stone_context, 1) << "ran in " << steps << " timesteps" << dendl;
   // This is a failure mode!
   ASSERT_FALSE(election.election_stable());
   ASSERT_FALSE(election.quorum_stable(6)); // double the timer_steps we use
   election.unblock_bidirectional_messages(0, 1);
   steps = election.run_timesteps(100);
-  ldout(g_ceph_context, 1) << "ran in " << steps << " timesteps" << dendl;
+  ldout(g_stone_context, 1) << "ran in " << steps << " timesteps" << dendl;
   ASSERT_TRUE(election.election_stable());
   ASSERT_TRUE(election.quorum_stable(6)); // double the timer_steps we use
   ASSERT_TRUE(election.all_agree_on_leader());
@@ -596,13 +596,13 @@ void blocked_connection_converges_election(ElectionLogic::election_strategy stra
   election.block_bidirectional_messages(0, 1);
   election.start_all();
   int steps = election.run_timesteps(100);
-  ldout(g_ceph_context, 1) << "ran in " << steps << " timesteps" << dendl;
+  ldout(g_stone_context, 1) << "ran in " << steps << " timesteps" << dendl;
   ASSERT_TRUE(election.election_stable());
   ASSERT_TRUE(election.all_agree_on_leader());
   ASSERT_TRUE(election.check_epoch_agreement());
   election.unblock_bidirectional_messages(0, 1);
   steps = election.run_timesteps(100);
-  ldout(g_ceph_context, 1) << "ran in " << steps << " timesteps" << dendl;
+  ldout(g_stone_context, 1) << "ran in " << steps << " timesteps" << dendl;
   ASSERT_TRUE(election.election_stable());
   ASSERT_TRUE(election.all_agree_on_leader());
   ASSERT_TRUE(election.check_epoch_agreement());
@@ -618,7 +618,7 @@ void disallowed_doesnt_win(ElectionLogic::election_strategy strategy)
     }
     election.start_all();
     int steps = election.run_timesteps(0);
-    ldout(g_ceph_context, 1) << "ran in " << steps << " timesteps" << dendl;
+    ldout(g_stone_context, 1) << "ran in " << steps << " timesteps" << dendl;
     ASSERT_TRUE(election.election_stable());
     ASSERT_TRUE(election.quorum_stable(6)); // double the timer_steps we use
     ASSERT_TRUE(election.all_agree_on_leader());
@@ -635,7 +635,7 @@ void disallowed_doesnt_win(ElectionLogic::election_strategy strategy)
     }
     election.start_all();
     int steps = election.run_timesteps(0);
-    ldout(g_ceph_context, 1) << "ran in " << steps << " timesteps" << dendl;
+    ldout(g_stone_context, 1) << "ran in " << steps << " timesteps" << dendl;
     ASSERT_TRUE(election.election_stable());
     ASSERT_TRUE(election.quorum_stable(6)); // double the timer_steps we use
     ASSERT_TRUE(election.all_agree_on_leader());
@@ -870,7 +870,7 @@ void handles_outdated_scoring(ElectionLogic::election_strategy strategy)
   cp2[1].history[2] = 0;
   ct2.increase_version();
   election.ping_interval = 0; // disable pinging to update the scores
-  ldout(g_ceph_context, 5) << "mangled the scores to be different" << dendl;
+  ldout(g_stone_context, 5) << "mangled the scores to be different" << dendl;
 
   election.start_all();
   election.run_timesteps(50);
@@ -922,18 +922,18 @@ void handles_disagreeing_connectivity(ElectionLogic::election_strategy strategy)
 
 void handles_removing_ranks(ElectionLogic::election_strategy strategy)
 {
-  ceph_assert(strategy == ElectionLogic::CONNECTIVITY);
+  stone_assert(strategy == ElectionLogic::CONNECTIVITY);
   for (int deletee = 0; deletee < 5; ++deletee) {
     Election election(5, strategy);
     election.start_all();
     int steps = election.run_timesteps(0);
-    ldout(g_ceph_context, 10) << "ran in " << steps << " timesteps" << dendl;
+    ldout(g_stone_context, 10) << "ran in " << steps << " timesteps" << dendl;
     ASSERT_TRUE(election.election_stable());
     ASSERT_TRUE(election.quorum_stable(6)); // double the timer_steps we use
     ASSERT_TRUE(election.all_agree_on_leader());
     ASSERT_TRUE(election.check_epoch_agreement());
     election.remove_elector(deletee);
-    ldout(g_ceph_context, 1) << "removed rank " << deletee << " from set" << dendl;
+    ldout(g_stone_context, 1) << "removed rank " << deletee << " from set" << dendl;
     election.start_all();
     steps = election.run_timesteps(0);
     ASSERT_TRUE(election.election_stable());
@@ -947,7 +947,7 @@ void handles_removing_ranks(ElectionLogic::election_strategy strategy)
       election.start_all();
       election.remove_elector(0);
       int steps = election.run_timesteps(0);
-      ldout(g_ceph_context, 1) << "ran in " << steps << " timesteps" << dendl;
+      ldout(g_stone_context, 1) << "ran in " << steps << " timesteps" << dendl;
       ASSERT_TRUE(election.election_stable());
       ASSERT_TRUE(election.quorum_stable(6)); // double the timer_steps we use
       ASSERT_TRUE(election.all_agree_on_leader());
@@ -963,7 +963,7 @@ void handles_removing_ranks(ElectionLogic::election_strategy strategy)
 
 // TODO: figure out how to test for bumping election epochs with changing scores,
 // a la what happened in run
-// http://pulpito.ceph.com/gregf-2019-11-26_10:50:50-rados:monthrash-wip-elector-distro-basic-mira/
+// http://pulpito.stone.com/gregf-2019-11-26_10:50:50-rados:monthrash-wip-elector-distro-basic-mira/
 
 #define test_classic(utest) TEST(classic, utest) { utest(ElectionLogic::CLASSIC); }
 

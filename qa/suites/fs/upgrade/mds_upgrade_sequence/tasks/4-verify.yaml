@@ -1,5 +1,5 @@
 tasks:
-- cephadm.shell:
+- stoneadm.shell:
     host.a:
-      - ceph fs dump
+      - stone fs dump
 - fs.post_upgrade_checks:

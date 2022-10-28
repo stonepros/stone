@@ -14,8 +14,8 @@
 #include "tools/rbd_mirror/image_replayer/CreateImageRequest.h"
 #include "tools/rbd_mirror/image_replayer/snapshot/StateBuilder.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::snapshot::" \
                            << "CreateLocalImageRequest: " << this << " " \
@@ -57,7 +57,7 @@ void CreateLocalImageRequest<I>::disable_mirror_image() {
     CreateLocalImageRequest<I>,
     &CreateLocalImageRequest<I>::handle_disable_mirror_image>(this);
   int r = m_local_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -87,7 +87,7 @@ void CreateLocalImageRequest<I>::remove_mirror_image() {
     CreateLocalImageRequest<I>,
     &CreateLocalImageRequest<I>::handle_remove_mirror_image>(this);
   int r = m_local_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -108,7 +108,7 @@ void CreateLocalImageRequest<I>::handle_remove_mirror_image(int r) {
 
 template <typename I>
 void CreateLocalImageRequest<I>::add_mirror_image() {
-  ceph_assert(m_state_builder->local_image_id.empty());
+  stone_assert(m_state_builder->local_image_id.empty());
   m_state_builder->local_image_id =
     librbd::util::generate_image_id<I>(m_local_io_ctx);
 
@@ -128,7 +128,7 @@ void CreateLocalImageRequest<I>::add_mirror_image() {
     CreateLocalImageRequest<I>,
     &CreateLocalImageRequest<I>::handle_add_mirror_image>(this);
   int r = m_local_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

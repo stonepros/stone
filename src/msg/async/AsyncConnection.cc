@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -32,7 +32,7 @@
 // Constant to limit starting sequence number to 2^31.  Nothing special about it, just a big number.  PLR
 #define SEQ_MASK  0x7fffffff
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #undef dout_prefix
 #define dout_prefix _conn_prefix(_dout)
 std::ostream& AsyncConnection::_conn_prefix(std::ostream *_dout) {
@@ -40,7 +40,7 @@ std::ostream& AsyncConnection::_conn_prefix(std::ostream *_dout) {
 		<< *peer_addrs << " conn(" << this
 		<< (msgr2 ? " msgr2=" : " legacy=")
 		<< protocol.get()
-		<< " " << ceph_con_mode_name(protocol->auth_meta->con_mode)
+		<< " " << stone_con_mode_name(protocol->auth_meta->con_mode)
                 << " :" << port
                 << " s=" << get_state_name(state)
                 << " l=" << policy.lossy
@@ -111,7 +111,7 @@ class C_tick_wakeup : public EventCallback {
 };
 
 
-AsyncConnection::AsyncConnection(CephContext *cct, AsyncMessenger *m, DispatchQueue *q,
+AsyncConnection::AsyncConnection(StoneContext *cct, AsyncMessenger *m, DispatchQueue *q,
                                  Worker *w, bool m2, bool local)
   : Connection(cct, m),
     delay_state(NULL), async_msgr(m), conn_id(q->get_id()),
@@ -120,7 +120,7 @@ AsyncConnection::AsyncConnection(CephContext *cct, AsyncMessenger *m, DispatchQu
     dispatch_queue(q), recv_buf(NULL),
     recv_max_prefetch(std::max<int64_t>(msgr->cct->_conf->ms_tcp_prefetch_max_size, TCP_PREFETCH_MIN_SIZE)),
     recv_start(0), recv_end(0),
-    last_active(ceph::coarse_mono_clock::now()),
+    last_active(stone::coarse_mono_clock::now()),
     connect_timeout_us(cct->_conf->ms_connection_ready_timeout*1000*1000),
     inactive_timeout_us(cct->_conf->ms_connection_idle_timeout*1000*1000),
     msgr2(m2), state_offset(0),
@@ -150,7 +150,7 @@ AsyncConnection::~AsyncConnection()
 {
   if (recv_buf)
     delete[] recv_buf;
-  ceph_assert(!delay_state);
+  stone_assert(!delay_state);
 }
 
 int AsyncConnection::get_con_mode() const
@@ -169,7 +169,7 @@ void AsyncConnection::maybe_start_delay_thread()
     async_msgr->cct->_conf.with_val<std::string>(
       "ms_inject_delay_type",
       [this](const std::string& s) {
-	if (s.find(ceph_entity_type_name(peer_type)) != std::string::npos) {
+	if (s.find(stone_entity_type_name(peer_type)) != std::string::npos) {
 	  ldout(msgr->cct, 1) << __func__ << " setting up a delay queue"
 			      << dendl;
 	  delay_state = new DelayedDelivery(async_msgr, center, dispatch_queue,
@@ -300,7 +300,7 @@ ssize_t AsyncConnection::read_bulk(char *buf, unsigned len)
   return nread;
 }
 
-ssize_t AsyncConnection::write(ceph::buffer::list &bl,
+ssize_t AsyncConnection::write(stone::buffer::list &bl,
                                std::function<void(ssize_t)> callback,
                                bool more) {
 
@@ -324,7 +324,7 @@ ssize_t AsyncConnection::_try_send(bool more)
     }
   }
 
-  ceph_assert(center->in_thread());
+  stone_assert(center->in_thread());
   ldout(async_msgr->cct, 25) << __func__ << " cs.send " << outgoing_bl.length()
                              << " bytes" << dendl;
   ssize_t r = cs.send(outgoing_bl, more);
@@ -364,8 +364,8 @@ void AsyncConnection::inject_delay() {
 
 void AsyncConnection::process() {
   std::lock_guard<std::mutex> l(lock);
-  last_active = ceph::coarse_mono_clock::now();
-  recv_start_time = ceph::mono_clock::now();
+  last_active = stone::coarse_mono_clock::now();
+  recv_start_time = stone::mono_clock::now();
 
   ldout(async_msgr->cct, 20) << __func__ << dendl;
 
@@ -379,13 +379,13 @@ void AsyncConnection::process() {
       return;
     }
     case STATE_CONNECTING: {
-      ceph_assert(!policy.server);
+      stone_assert(!policy.server);
 
       // clear timer (if any) since we are connecting/re-connecting
       if (last_tick_id) {
         center->delete_time_event(last_tick_id);
       }
-      last_connect_started = ceph::coarse_mono_clock::now();
+      last_connect_started = stone::coarse_mono_clock::now();
       last_tick_id = center->create_time_event(
           connect_timeout_us, tick_handler);
 
@@ -426,7 +426,7 @@ void AsyncConnection::process() {
                                     read_handler);
         }
         logger->tinc(l_msgr_running_recv_time,
-               ceph::mono_clock::now() - recv_start_time);
+               stone::mono_clock::now() - recv_start_time);
         return;
       }
 
@@ -454,7 +454,7 @@ void AsyncConnection::process() {
           readCallback(buf_tmp, r);
         }
 	logger->tinc(l_msgr_running_recv_time,
-	    ceph::mono_clock::now() - recv_start_time);
+	    stone::mono_clock::now() - recv_start_time);
         return;
       }
       break;
@@ -464,7 +464,7 @@ void AsyncConnection::process() {
   protocol->read_event();
 
   logger->tinc(l_msgr_running_recv_time,
-               ceph::mono_clock::now() - recv_start_time);
+               stone::mono_clock::now() - recv_start_time);
 }
 
 bool AsyncConnection::is_connected() {
@@ -500,7 +500,7 @@ void AsyncConnection::accept(ConnectedSocket socket,
   ldout(async_msgr->cct, 10) << __func__ << " sd=" << socket.fd()
 			     << " listen_addr " << listen_addr
 			     << " peer_addr " << peer_addr << dendl;
-  ceph_assert(socket.fd() >= 0);
+  stone_assert(socket.fd() >= 0);
 
   std::lock_guard<std::mutex> l(lock);
   cs = std::move(socket);
@@ -523,7 +523,7 @@ int AsyncConnection::send_message(Message *m)
 		      << dendl;
 
   if (is_blackhole()) {
-    lgeneric_subdout(async_msgr->cct, ms, 0) << __func__ << ceph_entity_type_name(peer_type)
+    lgeneric_subdout(async_msgr->cct, ms, 0) << __func__ << stone_entity_type_name(peer_type)
       << " blackhole " << *m << dendl;
     m->put();
     return 0;
@@ -537,9 +537,9 @@ int AsyncConnection::send_message(Message *m)
   m->set_connection(this);
 
 #if defined(WITH_EVENTTRACE)
-  if (m->get_type() == CEPH_MSG_OSD_OP)
+  if (m->get_type() == STONE_MSG_OSD_OP)
     OID_EVENT_TRACE_WITH_MSG(m, "SEND_MSG_OSD_OP_BEGIN", true);
-  else if (m->get_type() == CEPH_MSG_OSD_OPREPLY)
+  else if (m->get_type() == STONE_MSG_OSD_OPREPLY)
     OID_EVENT_TRACE_WITH_MSG(m, "SEND_MSG_OSD_OPREPLY_BEGIN", true);
 #endif
 
@@ -709,8 +709,8 @@ void AsyncConnection::handle_write()
 
 void AsyncConnection::handle_write_callback() {
   std::lock_guard<std::mutex> l(lock);
-  last_active = ceph::coarse_mono_clock::now();
-  recv_start_time = ceph::mono_clock::now();
+  last_active = stone::coarse_mono_clock::now();
+  recv_start_time = stone::mono_clock::now();
   write_lock.lock();
   if (writeCallback) {
     auto callback = *writeCallback;
@@ -753,7 +753,7 @@ void AsyncConnection::wakeup_from(uint64_t id)
 
 void AsyncConnection::tick(uint64_t id)
 {
-  auto now = ceph::coarse_mono_clock::now();
+  auto now = stone::coarse_mono_clock::now();
   ldout(async_msgr->cct, 20) << __func__ << " last_id=" << last_tick_id
                              << " last_active=" << last_active << dendl;
   std::lock_guard<std::mutex> l(lock);

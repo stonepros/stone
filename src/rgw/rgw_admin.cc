@@ -16,9 +16,9 @@ extern "C" {
 #include "compressor/Compressor.h"
 
 #include "common/armor.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/config.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/Formatter.h"
 #include "common/errno.h"
 #include "common/safe_io.h"
@@ -68,8 +68,8 @@ extern "C" {
 #include "services/svc_meta_be_otp.h"
 #include "services/svc_zone.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 #define SECRET_KEY_LEN 40
 #define PUBLIC_ID_LEN 20
@@ -78,7 +78,7 @@ static rgw::sal::RGWRadosStore *store = NULL;
 
 static const DoutPrefixProvider* dpp() {
   struct GlobalPrefix : public DoutPrefixProvider {
-    CephContext *get_cct() const override { return dout_context; }
+    StoneContext *get_cct() const override { return dout_context; }
     unsigned get_subsys() const override { return dout_subsys; }
     std::ostream& gen_prefix(std::ostream& out) const override { return out; }
   };
@@ -1054,7 +1054,7 @@ void dump_bi_entry(bufferlist& bl, BIIndexType index_type, Formatter *formatter)
       }
       break;
     default:
-      ceph_abort();
+      stone_abort();
       break;
   }
 }
@@ -1608,7 +1608,7 @@ static int send_to_remote_gateway(RGWRESTConn* conn, req_info& info,
     return -EINVAL;
   }
 
-  ceph::bufferlist response;
+  stone::bufferlist response;
   rgw_user user;
   int ret = conn->forward(dpp(), user, info, nullptr, MAX_REST_RESPONSE, &in_data, &response, null_yield);
 
@@ -1633,7 +1633,7 @@ static int send_to_url(const string& url, const string& access,
   key.key = secret;
 
   param_vec_t params;
-  RGWRESTSimpleRequest req(g_ceph_context, info.method, url, NULL, &params);
+  RGWRESTSimpleRequest req(g_stone_context, info.method, url, NULL, &params);
 
   bufferlist response;
   int ret = req.forward_request(dpp(), key, info, MAX_REST_RESPONSE, &in_data, &response, null_yield);
@@ -1671,7 +1671,7 @@ static int commit_period(RGWRealm& realm, RGWPeriod& period,
   if (store->svc()->zone->zone_id() == master_zone) {
     // read the current period
     RGWPeriod current_period;
-    int ret = current_period.init(dpp(), g_ceph_context,
+    int ret = current_period.init(dpp(), g_stone_context,
 				  store->svc()->sysobj, realm.get_id(),
 				  null_yield);
     if (ret < 0) {
@@ -1708,7 +1708,7 @@ static int commit_period(RGWRealm& realm, RGWPeriod& period,
   period.set_id(string());
 
   RGWEnv env;
-  req_info info(g_ceph_context, &env);
+  req_info info(g_stone_context, &env);
   info.method = "POST";
   info.request_uri = "/admin/realm/period";
 
@@ -1771,7 +1771,7 @@ static int update_period(const string& realm_id, const string& realm_name,
                          Formatter *formatter, bool force)
 {
   RGWRealm realm(realm_id, realm_name);
-  int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+  int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
   if (ret < 0 ) {
     cerr << "Error initializing realm " << cpp_strerror(-ret) << std::endl;
     return ret;
@@ -1781,7 +1781,7 @@ static int update_period(const string& realm_id, const string& realm_name,
     epoch = atoi(period_epoch.c_str());
   }
   RGWPeriod period(period_id, epoch);
-  ret = period.init(dpp(), g_ceph_context, store->svc()->sysobj, realm.get_id(), null_yield);
+  ret = period.init(dpp(), g_stone_context, store->svc()->sysobj, realm.get_id(), null_yield);
   if (ret < 0) {
     cerr << "period init failed: " << cpp_strerror(-ret) << std::endl;
     return ret;
@@ -1831,7 +1831,7 @@ static int do_period_pull(RGWRESTConn *remote_conn, const string& url,
                           RGWPeriod *period)
 {
   RGWEnv env;
-  req_info info(g_ceph_context, &env);
+  req_info info(g_stone_context, &env);
   info.method = "GET";
   info.request_uri = "/admin/realm/period";
 
@@ -1853,7 +1853,7 @@ static int do_period_pull(RGWRESTConn *remote_conn, const string& url,
     cerr << "request failed: " << cpp_strerror(-ret) << std::endl;
     return ret;
   }
-  ret = period->init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield, false);
+  ret = period->init(dpp(), g_stone_context, store->svc()->sysobj, null_yield, false);
   if (ret < 0) {
     cerr << "faile to init period " << cpp_strerror(-ret) << std::endl;
     return ret;
@@ -1878,7 +1878,7 @@ static int read_current_period_id(rgw::sal::RGWRadosStore* store, const std::str
                                   std::string* period_id)
 {
   RGWRealm realm(realm_id, realm_name);
-  int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+  int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
   if (ret < 0) {
     std::cerr << "failed to read realm: " << cpp_strerror(-ret) << std::endl;
     return ret;
@@ -2004,7 +2004,7 @@ static void get_md_sync_status(list<string>& status)
   }
 
   // fetch remote log entries to determine the oldest change
-  std::optional<std::pair<int, ceph::real_time>> oldest;
+  std::optional<std::pair<int, stone::real_time>> oldest;
   if (!shards_behind.empty()) {
     map<int, rgw_mdlog_shard_data> master_pos;
     ret = sync.read_master_log_shards_next(dpp(), sync_status.sync_info.period, shards_behind, &master_pos);
@@ -2022,7 +2022,7 @@ static void get_md_sync_status(list<string>& status)
           rgw_mdlog_entry& entry = shard_data.entries.front();
           if (!oldest) {
             oldest.emplace(iter.first, entry.timestamp);
-          } else if (!ceph::real_clock::is_zero(entry.timestamp) && entry.timestamp < oldest->second) {
+          } else if (!stone::real_clock::is_zero(entry.timestamp) && entry.timestamp < oldest->second) {
             oldest.emplace(iter.first, entry.timestamp);
           }
         }
@@ -2175,7 +2175,7 @@ static void get_data_sync_status(const rgw_zone_id& source_zone, list<string>& s
     if (ret < 0) {
       derr << "ERROR: failed to fetch next positions (" << cpp_strerror(-ret) << ")" << dendl;
     } else {
-      std::optional<std::pair<int, ceph::real_time>> oldest;
+      std::optional<std::pair<int, stone::real_time>> oldest;
 
       for (auto iter : master_pos) {
         rgw_datalog_shard_data& shard_data = iter.second;
@@ -2184,7 +2184,7 @@ static void get_data_sync_status(const rgw_zone_id& source_zone, list<string>& s
           rgw_datalog_entry& entry = shard_data.entries.front();
           if (!oldest) {
             oldest.emplace(iter.first, entry.timestamp);
-          } else if (!ceph::real_clock::is_zero(entry.timestamp) && entry.timestamp < oldest->second) {
+          } else if (!stone::real_clock::is_zero(entry.timestamp) && entry.timestamp < oldest->second) {
             oldest.emplace(iter.first, entry.timestamp);
           }
         }
@@ -2753,11 +2753,11 @@ int check_reshard_bucket_params(rgw::sal::RGWRadosStore *store,
   return 0;
 }
 
-static int scan_totp(CephContext *cct, ceph::real_time& now, rados::cls::otp::otp_info_t& totp, vector<string>& pins,
+static int scan_totp(StoneContext *cct, stone::real_time& now, rados::cls::otp::otp_info_t& totp, vector<string>& pins,
                      time_t *pofs)
 {
 #define MAX_TOTP_SKEW_HOURS (24 * 7)
-  time_t start_time = ceph::real_clock::to_time_t(now);
+  time_t start_time = stone::real_clock::to_time_t(now);
   time_t time_ofs = 0, time_ofs_abs = 0;
   time_t step_size = totp.step_size;
   if (step_size == 0) {
@@ -2899,7 +2899,7 @@ public:
                                                          bucket(_bucket) {}
 
   int init() {
-    int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+    int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
     if (ret < 0) {
       cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
       return ret;
@@ -2996,7 +2996,7 @@ static vector<rgw_zone_id> zone_ids_from_str(const string& val)
 
 class JSONFormatter_PrettyZone : public JSONFormatter {
   class Handler : public JSONEncodeFilter::Handler<rgw_zone_id> {
-    void encode_json(const char *name, const void *pval, ceph::Formatter *f) const override {
+    void encode_json(const char *name, const void *pval, stone::Formatter *f) const override {
       auto zone_id = *(static_cast<const rgw_zone_id *>(pval));
       string zone_name;
       RGWZone *zone;
@@ -3033,12 +3033,12 @@ int main(int argc, const char **argv)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY, 0);
 
   // for region -> zonegroup conversion (must happen before common_init_finish())
@@ -3046,7 +3046,7 @@ int main(int argc, const char **argv)
     g_conf().set_val_or_die("rgw_zonegroup", g_conf()->rgw_region.c_str());
   }
 
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   rgw_user user_id;
   string tenant;
@@ -3244,57 +3244,57 @@ int main(int argc, const char **argv)
   std::optional<int> opt_priority;
   std::optional<string> opt_mode;
   std::optional<rgw_user> opt_dest_owner;
-  ceph::timespan opt_retry_delay_ms = std::chrono::milliseconds(2000);
-  ceph::timespan opt_timeout_sec = std::chrono::seconds(60);
+  stone::timespan opt_retry_delay_ms = std::chrono::milliseconds(2000);
+  stone::timespan opt_timeout_sec = std::chrono::seconds(60);
 
   SimpleCmd cmd(all_cmds, cmd_aliases);
 
   std::optional<std::string> rgw_obj_fs; // radoslist field separator
 
   for (std::vector<const char*>::iterator i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_double_dash(args, i)) {
+    if (stone_argparse_double_dash(args, i)) {
       break;
-    } else if (ceph_argparse_witharg(args, i, &val, "-i", "--uid", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-i", "--uid", (char*)NULL)) {
       user_id.from_str(val);
       if (user_id.empty()) {
         cerr << "no value for uid" << std::endl;
         exit(1);
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "-i", "--new-uid", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-i", "--new-uid", (char*)NULL)) {
       new_user_id.from_str(val);
-    } else if (ceph_argparse_witharg(args, i, &val, "--tenant", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--tenant", (char*)NULL)) {
       tenant = val;
       opt_tenant = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--user_ns", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--user_ns", (char*)NULL)) {
       user_ns = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--access-key", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--access-key", (char*)NULL)) {
       access_key = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--subuser", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--subuser", (char*)NULL)) {
       subuser = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--secret", "--secret-key", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--secret", "--secret-key", (char*)NULL)) {
       secret_key = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-e", "--email", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-e", "--email", (char*)NULL)) {
       user_email = val;
       user_op.user_email_specified=true;
-    } else if (ceph_argparse_witharg(args, i, &val, "-n", "--display-name", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-n", "--display-name", (char*)NULL)) {
       display_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-b", "--bucket", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-b", "--bucket", (char*)NULL)) {
       bucket_name = val;
       opt_bucket_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-p", "--pool", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-p", "--pool", (char*)NULL)) {
       pool_name = val;
       pool = rgw_pool(pool_name);
-    } else if (ceph_argparse_witharg(args, i, &val, "-o", "--object", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-o", "--object", (char*)NULL)) {
       object = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--object-version", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--object-version", (char*)NULL)) {
       object_version = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--client-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--client-id", (char*)NULL)) {
       client_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--op-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--op-id", (char*)NULL)) {
       op_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--op-mask", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--op-mask", (char*)NULL)) {
       op_mask_str = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--key-type", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--key-type", (char*)NULL)) {
       key_type_str = val;
       if (key_type_str.compare("swift") == 0) {
         key_type = KEY_TYPE_SWIFT;
@@ -3304,124 +3304,124 @@ int main(int argc, const char **argv)
         cerr << "bad key type: " << key_type_str << std::endl;
         exit(1);
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--job-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--job-id", (char*)NULL)) {
       job_id = val;
-    } else if (ceph_argparse_binary_flag(args, i, &gen_access_key, NULL, "--gen-access-key", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &gen_access_key, NULL, "--gen-access-key", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &gen_secret_key, NULL, "--gen-secret", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &gen_secret_key, NULL, "--gen-secret", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &show_log_entries, NULL, "--show-log-entries", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &show_log_entries, NULL, "--show-log-entries", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &show_log_sum, NULL, "--show-log-sum", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &show_log_sum, NULL, "--show-log-sum", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &skip_zero_entries, NULL, "--skip-zero-entries", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &skip_zero_entries, NULL, "--skip-zero-entries", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &admin, NULL, "--admin", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &admin, NULL, "--admin", (char*)NULL)) {
       admin_specified = true;
-    } else if (ceph_argparse_binary_flag(args, i, &system, NULL, "--system", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &system, NULL, "--system", (char*)NULL)) {
       system_specified = true;
-    } else if (ceph_argparse_binary_flag(args, i, &verbose, NULL, "--verbose", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &verbose, NULL, "--verbose", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &staging, NULL, "--staging", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &staging, NULL, "--staging", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &commit, NULL, "--commit", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &commit, NULL, "--commit", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_witharg(args, i, &val, "--min-rewrite-size", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--min-rewrite-size", (char*)NULL)) {
       min_rewrite_size = (uint64_t)atoll(val.c_str());
-    } else if (ceph_argparse_witharg(args, i, &val, "--max-rewrite-size", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--max-rewrite-size", (char*)NULL)) {
       max_rewrite_size = (uint64_t)atoll(val.c_str());
-    } else if (ceph_argparse_witharg(args, i, &val, "--min-rewrite-stripe-size", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--min-rewrite-stripe-size", (char*)NULL)) {
       min_rewrite_stripe_size = (uint64_t)atoll(val.c_str());
-    } else if (ceph_argparse_witharg(args, i, &val, "--max-buckets", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--max-buckets", (char*)NULL)) {
       max_buckets = (int)strict_strtol(val.c_str(), 10, &err);
       if (!err.empty()) {
         cerr << "ERROR: failed to parse max buckets: " << err << std::endl;
         return EINVAL;
       }
       max_buckets_specified = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--max-entries", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--max-entries", (char*)NULL)) {
       max_entries = (int)strict_strtol(val.c_str(), 10, &err);
       max_entries_specified = true;
       if (!err.empty()) {
         cerr << "ERROR: failed to parse max entries: " << err << std::endl;
         return EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--max-size", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--max-size", (char*)NULL)) {
       max_size = strict_iec_cast<long long>(val.c_str(), &err);
       if (!err.empty()) {
         cerr << "ERROR: failed to parse max size: " << err << std::endl;
         return EINVAL;
       }
       have_max_size = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--max-objects", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--max-objects", (char*)NULL)) {
       max_objects = (int64_t)strict_strtoll(val.c_str(), 10, &err);
       if (!err.empty()) {
         cerr << "ERROR: failed to parse max objects: " << err << std::endl;
         return EINVAL;
       }
       have_max_objects = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--date", "--time", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--date", "--time", (char*)NULL)) {
       date = val;
       if (end_date.empty())
         end_date = date;
-    } else if (ceph_argparse_witharg(args, i, &val, "--start-date", "--start-time", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--start-date", "--start-time", (char*)NULL)) {
       start_date = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--end-date", "--end-time", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--end-date", "--end-time", (char*)NULL)) {
       end_date = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--num-shards", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--num-shards", (char*)NULL)) {
       num_shards = (int)strict_strtol(val.c_str(), 10, &err);
       if (!err.empty()) {
         cerr << "ERROR: failed to parse num shards: " << err << std::endl;
         return EINVAL;
       }
       num_shards_specified = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--bucket-index-max-shards", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--bucket-index-max-shards", (char*)NULL)) {
       bucket_index_max_shards = (int)strict_strtol(val.c_str(), 10, &err);
       if (!err.empty()) {
         cerr << "ERROR: failed to parse bucket-index-max-shards: " << err << std::endl;
         return EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--max-concurrent-ios", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--max-concurrent-ios", (char*)NULL)) {
       max_concurrent_ios = (int)strict_strtol(val.c_str(), 10, &err);
       if (!err.empty()) {
         cerr << "ERROR: failed to parse max concurrent ios: " << err << std::endl;
         return EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--orphan-stale-secs", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--orphan-stale-secs", (char*)NULL)) {
       orphan_stale_secs = (uint64_t)strict_strtoll(val.c_str(), 10, &err);
       if (!err.empty()) {
         cerr << "ERROR: failed to parse orphan stale secs: " << err << std::endl;
         return EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--shard-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--shard-id", (char*)NULL)) {
       shard_id = (int)strict_strtol(val.c_str(), 10, &err);
       if (!err.empty()) {
         cerr << "ERROR: failed to parse shard id: " << err << std::endl;
         return EINVAL;
       }
       specified_shard_id = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--access", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--access", (char*)NULL)) {
       access = val;
       perm_mask = rgw_str_to_perm(access.c_str());
       set_perm = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--temp-url-key", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--temp-url-key", (char*)NULL)) {
       temp_url_keys[0] = val;
       set_temp_url_key = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--temp-url-key2", "--temp-url-key-2", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--temp-url-key2", "--temp-url-key-2", (char*)NULL)) {
       temp_url_keys[1] = val;
       set_temp_url_key = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--bucket-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--bucket-id", (char*)NULL)) {
       bucket_id = val;
       opt_bucket_id = val;
       if (bucket_id.empty()) {
         cerr << "no value for bucket-id" << std::endl;
         exit(1);
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--bucket-new-name", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--bucket-new-name", (char*)NULL)) {
       new_bucket_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--format", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--format", (char*)NULL)) {
       format = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--categories", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--categories", (char*)NULL)) {
       string cat_str = val;
       list<string> cat_list;
       list<string>::iterator iter;
@@ -3429,62 +3429,62 @@ int main(int argc, const char **argv)
       for (iter = cat_list.begin(); iter != cat_list.end(); ++iter) {
 	categories[*iter] = true;
       }
-    } else if (ceph_argparse_binary_flag(args, i, &delete_child_objects, NULL, "--purge-objects", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &delete_child_objects, NULL, "--purge-objects", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &pretty_format, NULL, "--pretty-format", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &pretty_format, NULL, "--pretty-format", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &purge_data, NULL, "--purge-data", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &purge_data, NULL, "--purge-data", (char*)NULL)) {
       delete_child_objects = purge_data;
-    } else if (ceph_argparse_binary_flag(args, i, &purge_keys, NULL, "--purge-keys", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &purge_keys, NULL, "--purge-keys", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &yes_i_really_mean_it, NULL, "--yes-i-really-mean-it", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &yes_i_really_mean_it, NULL, "--yes-i-really-mean-it", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &fix, NULL, "--fix", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &fix, NULL, "--fix", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &remove_bad, NULL, "--remove-bad", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &remove_bad, NULL, "--remove-bad", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &check_head_obj_locator, NULL, "--check-head-obj-locator", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &check_head_obj_locator, NULL, "--check-head-obj-locator", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &check_objects, NULL, "--check-objects", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &check_objects, NULL, "--check-objects", (char*)NULL)) {
      // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &sync_stats, NULL, "--sync-stats", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &sync_stats, NULL, "--sync-stats", (char*)NULL)) {
      // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &reset_stats, NULL, "--reset-stats", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &reset_stats, NULL, "--reset-stats", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &include_all, NULL, "--include-all", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &include_all, NULL, "--include-all", (char*)NULL)) {
      // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &allow_unordered, NULL, "--allow-unordered", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &allow_unordered, NULL, "--allow-unordered", (char*)NULL)) {
      // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &extra_info, NULL, "--extra-info", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &extra_info, NULL, "--extra-info", (char*)NULL)) {
      // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &bypass_gc, NULL, "--bypass-gc", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &bypass_gc, NULL, "--bypass-gc", (char*)NULL)) {
      // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &warnings_only, NULL, "--warnings-only", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &warnings_only, NULL, "--warnings-only", (char*)NULL)) {
      // do nothing
-    } else if (ceph_argparse_binary_flag(args, i, &inconsistent_index, NULL, "--inconsistent-index", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &inconsistent_index, NULL, "--inconsistent-index", (char*)NULL)) {
      // do nothing
-    } else if (ceph_argparse_witharg(args, i, &val, "--caps", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--caps", (char*)NULL)) {
       caps = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-i", "--infile", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-i", "--infile", (char*)NULL)) {
       infile = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--metadata-key", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--metadata-key", (char*)NULL)) {
       metadata_key = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--marker", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--marker", (char*)NULL)) {
       marker = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--start-marker", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--start-marker", (char*)NULL)) {
       start_marker = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--end-marker", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--end-marker", (char*)NULL)) {
       end_marker = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--quota-scope", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--quota-scope", (char*)NULL)) {
       quota_scope = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--index-type", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--index-type", (char*)NULL)) {
       string index_type_str = val;
       bi_index_type = get_bi_index_type(index_type_str);
       if (bi_index_type == BIIndexType::Invalid) {
         cerr << "ERROR: invalid bucket index entry type" << std::endl;
         return EINVAL;
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--log-type", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--log-type", (char*)NULL)) {
       string log_type_str = val;
       auto l = get_log_type(log_type_str);
       if (l == static_cast<log_type>(0xff)) {
@@ -3492,83 +3492,83 @@ int main(int argc, const char **argv)
         return EINVAL;
       }
       opt_log_type = l;
-    } else if (ceph_argparse_binary_flag(args, i, &is_master_int, NULL, "--master", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &is_master_int, NULL, "--master", (char*)NULL)) {
       is_master = (bool)is_master_int;
       is_master_set = true;
-    } else if (ceph_argparse_binary_flag(args, i, &set_default, NULL, "--default", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &set_default, NULL, "--default", (char*)NULL)) {
       /* do nothing */
-    } else if (ceph_argparse_witharg(args, i, &val, "--redirect-zone", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--redirect-zone", (char*)NULL)) {
       redirect_zone = val;
       redirect_zone_set = true;
-    } else if (ceph_argparse_binary_flag(args, i, &read_only_int, NULL, "--read-only", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &read_only_int, NULL, "--read-only", (char*)NULL)) {
       read_only = (bool)read_only_int;
       is_read_only_set = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--master-zone", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--master-zone", (char*)NULL)) {
       master_zone = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--period", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--period", (char*)NULL)) {
       period_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--epoch", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--epoch", (char*)NULL)) {
       period_epoch = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--remote", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--remote", (char*)NULL)) {
       remote = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--url", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--url", (char*)NULL)) {
       url = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--realm-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--realm-id", (char*)NULL)) {
       realm_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--realm-new-name", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--realm-new-name", (char*)NULL)) {
       realm_new_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--zonegroup-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--zonegroup-id", (char*)NULL)) {
       zonegroup_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--zonegroup-new-name", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--zonegroup-new-name", (char*)NULL)) {
       zonegroup_new_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--placement-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--placement-id", (char*)NULL)) {
       placement_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--storage-class", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--storage-class", (char*)NULL)) {
       opt_storage_class = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--tags", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--tags", (char*)NULL)) {
       get_str_list(val, ",", tags);
-    } else if (ceph_argparse_witharg(args, i, &val, "--tags-add", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--tags-add", (char*)NULL)) {
       get_str_list(val, ",", tags_add);
-    } else if (ceph_argparse_witharg(args, i, &val, "--tags-rm", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--tags-rm", (char*)NULL)) {
       get_str_list(val, ",", tags_rm);
-    } else if (ceph_argparse_witharg(args, i, &val, "--api-name", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--api-name", (char*)NULL)) {
       api_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--zone-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--zone-id", (char*)NULL)) {
       zone_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--zone-new-name", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--zone-new-name", (char*)NULL)) {
       zone_new_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--endpoints", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--endpoints", (char*)NULL)) {
       get_str_list(val, endpoints);
-    } else if (ceph_argparse_witharg(args, i, &val, "--sync-from", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--sync-from", (char*)NULL)) {
       get_str_list(val, sync_from);
-    } else if (ceph_argparse_witharg(args, i, &val, "--sync-from-rm", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--sync-from-rm", (char*)NULL)) {
       get_str_list(val, sync_from_rm);
-    } else if (ceph_argparse_binary_flag(args, i, &tmp_int, NULL, "--sync-from-all", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &tmp_int, NULL, "--sync-from-all", (char*)NULL)) {
       sync_from_all = (bool)tmp_int;
       sync_from_all_specified = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--source-zone", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--source-zone", (char*)NULL)) {
       source_zone_name = val;
       opt_source_zone_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--source-zone-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--source-zone-id", (char*)NULL)) {
       opt_source_zone_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--dest-zone", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--dest-zone", (char*)NULL)) {
       opt_dest_zone_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--dest-zone-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--dest-zone-id", (char*)NULL)) {
       opt_dest_zone_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--tier-type", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--tier-type", (char*)NULL)) {
       tier_type = val;
       tier_type_specified = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--tier-config", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--tier-config", (char*)NULL)) {
       parse_tier_config_param(val, tier_config_add);
-    } else if (ceph_argparse_witharg(args, i, &val, "--tier-config-rm", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--tier-config-rm", (char*)NULL)) {
       parse_tier_config_param(val, tier_config_rm);
-    } else if (ceph_argparse_witharg(args, i, &val, "--index-pool", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--index-pool", (char*)NULL)) {
       index_pool = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--data-pool", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--data-pool", (char*)NULL)) {
       data_pool = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--data-extra-pool", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--data-extra-pool", (char*)NULL)) {
       data_extra_pool = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--placement-index-type", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--placement-index-type", (char*)NULL)) {
       if (val == "normal") {
         placement_index_type = rgw::BucketIndexType::Normal;
       } else if (val == "indexless") {
@@ -3581,108 +3581,108 @@ int main(int argc, const char **argv)
         }
       }
       index_type_specified = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--compression", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--compression", (char*)NULL)) {
       compression_type = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--role-name", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--role-name", (char*)NULL)) {
       role_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--path", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--path", (char*)NULL)) {
       path = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--assume-role-policy-doc", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--assume-role-policy-doc", (char*)NULL)) {
       assume_role_doc = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--policy-name", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--policy-name", (char*)NULL)) {
       policy_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--policy-doc", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--policy-doc", (char*)NULL)) {
       perm_policy_doc = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--path-prefix", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--path-prefix", (char*)NULL)) {
       path_prefix = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--totp-serial", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--totp-serial", (char*)NULL)) {
       totp_serial = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--totp-pin", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--totp-pin", (char*)NULL)) {
       totp_pin.push_back(val);
-    } else if (ceph_argparse_witharg(args, i, &val, "--totp-seed", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--totp-seed", (char*)NULL)) {
       totp_seed = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--totp-seed-type", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--totp-seed-type", (char*)NULL)) {
       totp_seed_type = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--totp-seconds", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--totp-seconds", (char*)NULL)) {
       totp_seconds = atoi(val.c_str());
-    } else if (ceph_argparse_witharg(args, i, &val, "--totp-window", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--totp-window", (char*)NULL)) {
       totp_window = atoi(val.c_str());
-    } else if (ceph_argparse_witharg(args, i, &val, "--trim-delay-ms", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--trim-delay-ms", (char*)NULL)) {
       trim_delay_ms = atoi(val.c_str());
-    } else if (ceph_argparse_witharg(args, i, &val, "--topic", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--topic", (char*)NULL)) {
       topic_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--subscription", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--subscription", (char*)NULL)) {
       sub_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--event-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--event-id", (char*)NULL)) {
       event_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--group-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--group-id", (char*)NULL)) {
       opt_group_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--status", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--status", (char*)NULL)) {
       opt_status = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--flow-type", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--flow-type", (char*)NULL)) {
       opt_flow_type = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--zones", "--zone-names", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--zones", "--zone-names", (char*)NULL)) {
       vector<string> v;
       get_str_vec(val, v);
       opt_zone_names = std::move(v);
-    } else if (ceph_argparse_witharg(args, i, &val, "--zone-ids", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--zone-ids", (char*)NULL)) {
       opt_zone_ids = zone_ids_from_str(val);
-    } else if (ceph_argparse_witharg(args, i, &val, "--source-zones", "--source-zone-names", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--source-zones", "--source-zone-names", (char*)NULL)) {
       vector<string> v;
       get_str_vec(val, v);
       opt_source_zone_names = std::move(v);
-    } else if (ceph_argparse_witharg(args, i, &val, "--source-zone-ids", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--source-zone-ids", (char*)NULL)) {
       opt_source_zone_ids = zone_ids_from_str(val);
-    } else if (ceph_argparse_witharg(args, i, &val, "--dest-zones", "--dest-zone-names", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--dest-zones", "--dest-zone-names", (char*)NULL)) {
       vector<string> v;
       get_str_vec(val, v);
       opt_dest_zone_names = std::move(v);
-    } else if (ceph_argparse_witharg(args, i, &val, "--dest-zone-ids", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--dest-zone-ids", (char*)NULL)) {
       opt_dest_zone_ids = zone_ids_from_str(val);
-    } else if (ceph_argparse_witharg(args, i, &val, "--flow-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--flow-id", (char*)NULL)) {
       opt_flow_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--pipe-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--pipe-id", (char*)NULL)) {
       opt_pipe_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--source-tenant", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--source-tenant", (char*)NULL)) {
       opt_source_tenant = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--source-bucket", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--source-bucket", (char*)NULL)) {
       opt_source_bucket_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--source-bucket-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--source-bucket-id", (char*)NULL)) {
       opt_source_bucket_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--dest-tenant", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--dest-tenant", (char*)NULL)) {
       opt_dest_tenant = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--dest-bucket", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--dest-bucket", (char*)NULL)) {
       opt_dest_bucket_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--dest-bucket-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--dest-bucket-id", (char*)NULL)) {
       opt_dest_bucket_id = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--effective-zone-name", "--effective-zone", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--effective-zone-name", "--effective-zone", (char*)NULL)) {
       opt_effective_zone_name = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--effective-zone-id", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--effective-zone-id", (char*)NULL)) {
       opt_effective_zone_id = rgw_zone_id(val);
-    } else if (ceph_argparse_witharg(args, i, &val, "--prefix", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--prefix", (char*)NULL)) {
       opt_prefix = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--prefix-rm", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--prefix-rm", (char*)NULL)) {
       opt_prefix_rm = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--priority", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--priority", (char*)NULL)) {
       opt_priority = atoi(val.c_str());
-    } else if (ceph_argparse_witharg(args, i, &val, "--mode", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--mode", (char*)NULL)) {
       opt_mode = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--dest-owner", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--dest-owner", (char*)NULL)) {
       opt_dest_owner.emplace(val);
       opt_dest_owner = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--retry-delay-ms", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--retry-delay-ms", (char*)NULL)) {
       opt_retry_delay_ms = std::chrono::milliseconds(atoi(val.c_str()));
-    } else if (ceph_argparse_witharg(args, i, &val, "--timeout-sec", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--timeout-sec", (char*)NULL)) {
       opt_timeout_sec = std::chrono::seconds(atoi(val.c_str()));
-    } else if (ceph_argparse_binary_flag(args, i, &detail, NULL, "--detail", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &detail, NULL, "--detail", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_witharg(args, i, &val, "--context", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--context", (char*)NULL)) {
       str_script_ctx = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--package", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--package", (char*)NULL)) {
       script_package = val;
-    } else if (ceph_argparse_binary_flag(args, i, &allow_compilation, NULL, "--allow-compilation", (char*)NULL)) {
+    } else if (stone_argparse_binary_flag(args, i, &allow_compilation, NULL, "--allow-compilation", (char*)NULL)) {
       // do nothing
-    } else if (ceph_argparse_witharg(args, i, &val, "--rgw-obj-fs", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--rgw-obj-fs", (char*)NULL)) {
       rgw_obj_fs = val;
     } else if (strncmp(*i, "-", 1) == 0) {
       cerr << "ERROR: invalid flag " << *i << std::endl;
@@ -3924,9 +3924,9 @@ int main(int argc, const char **argv)
   bool need_gc = (gc_ops_list.find(opt_cmd) != gc_ops_list.end()) && !bypass_gc;
 
     if (raw_storage_op) {
-    store = RGWStoreManager::get_raw_storage(dpp(), g_ceph_context);
+    store = RGWStoreManager::get_raw_storage(dpp(), g_stone_context);
   } else {
-    store = RGWStoreManager::get_storage(dpp(), g_ceph_context, false, false, false, false, false,
+    store = RGWStoreManager::get_storage(dpp(), g_stone_context, false, false, false, false, false,
       need_cache && g_conf()->rgw_cache_enabled, need_gc);
   }
   if (!store) {
@@ -3941,7 +3941,7 @@ int main(int argc, const char **argv)
     }
   }
 
-  rgw_http_client_init(g_ceph_context);
+  rgw_http_client_init(g_stone_context);
 
   struct rgw_curl_setup {
     rgw_curl_setup() {
@@ -3965,7 +3965,7 @@ int main(int argc, const char **argv)
 	  return EINVAL;
 	}
 	RGWPeriod period(period_id);
-	int ret = period.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = period.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "period.init failed: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -3986,7 +3986,7 @@ int main(int argc, const char **argv)
 	}
         if (staging) {
           RGWRealm realm(realm_id, realm_name);
-          int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+          int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
           if (ret < 0 ) {
             cerr << "Error initializing realm " << cpp_strerror(-ret) << std::endl;
             return -ret;
@@ -3997,7 +3997,7 @@ int main(int argc, const char **argv)
           epoch = 1;
         }
 	RGWPeriod period(period_id, epoch);
-	int ret = period.init(dpp(), g_ceph_context, store->svc()->sysobj, realm_id,
+	int ret = period.init(dpp(), g_stone_context, store->svc()->sysobj, realm_id,
 			      null_yield, realm_name);
 	if (ret < 0) {
 	  cerr << "period init failed: " << cpp_strerror(-ret) << std::endl;
@@ -4050,13 +4050,13 @@ int main(int argc, const char **argv)
         if (url.empty()) {
           // load current period for endpoints
           RGWRealm realm(realm_id, realm_name);
-          int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+          int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
           if (ret < 0) {
             cerr << "failed to init realm: " << cpp_strerror(-ret) << std::endl;
             return -ret;
           }
           RGWPeriod current_period(realm.get_current_period());
-          ret = current_period.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+          ret = current_period.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
           if (ret < 0) {
             cerr << "failed to init current period: " << cpp_strerror(-ret) << std::endl;
             return -ret;
@@ -4093,7 +4093,7 @@ int main(int argc, const char **argv)
     case OPT::GLOBAL_QUOTA_DISABLE:
       {
         if (realm_id.empty()) {
-          RGWRealm realm(g_ceph_context, store->svc()->sysobj);
+          RGWRealm realm(g_stone_context, store->svc()->sysobj);
           if (!realm_name.empty()) {
             // look up realm_id for the given realm_name
             int ret = realm.read_id(dpp(), realm_name, realm_id, null_yield);
@@ -4171,7 +4171,7 @@ int main(int argc, const char **argv)
 	  return EINVAL;
 	}
 
-	RGWRealm realm(realm_name, g_ceph_context, store->svc()->sysobj);
+	RGWRealm realm(realm_name, g_stone_context, store->svc()->sysobj);
 	int ret = realm.create(dpp(), null_yield);
 	if (ret < 0) {
 	  cerr << "ERROR: couldn't create realm " << realm_name << ": " << cpp_strerror(-ret) << std::endl;
@@ -4196,7 +4196,7 @@ int main(int argc, const char **argv)
 	  cerr << "missing realm name or id" << std::endl;
 	  return EINVAL;
 	}
-	int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "realm.init failed: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4212,7 +4212,7 @@ int main(int argc, const char **argv)
     case OPT::REALM_GET:
       {
 	RGWRealm realm(realm_id, realm_name);
-	int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  if (ret == -ENOENT && realm_name.empty() && realm_id.empty()) {
 	    cerr << "missing realm name or id, or default realm not found" << std::endl;
@@ -4227,7 +4227,7 @@ int main(int argc, const char **argv)
       break;
     case OPT::REALM_GET_DEFAULT:
       {
-	RGWRealm realm(g_ceph_context, store->svc()->sysobj);
+	RGWRealm realm(g_stone_context, store->svc()->sysobj);
 	string default_id;
 	int ret = realm.read_default_id(dpp(), default_id, null_yield);
 	if (ret == -ENOENT) {
@@ -4242,7 +4242,7 @@ int main(int argc, const char **argv)
       break;
     case OPT::REALM_LIST:
       {
-	RGWRealm realm(g_ceph_context, store->svc()->sysobj);
+	RGWRealm realm(g_stone_context, store->svc()->sysobj);
 	string default_id;
 	int ret = realm.read_default_id(dpp(), default_id, null_yield);
 	if (ret < 0 && ret != -ENOENT) {
@@ -4292,7 +4292,7 @@ int main(int argc, const char **argv)
 	  cerr << "missing realm name or id" << std::endl;
 	  return EINVAL;
 	}
-	int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "realm.init failed: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4315,7 +4315,7 @@ int main(int argc, const char **argv)
 	}
 	RGWRealm realm(realm_id, realm_name);
 	bool new_realm = false;
-	int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0 && ret != -ENOENT) {
 	  cerr << "failed to init realm: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4362,7 +4362,7 @@ int main(int argc, const char **argv)
     case OPT::REALM_DEFAULT:
       {
 	RGWRealm realm(realm_id, realm_name);
-	int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "failed to init realm: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4381,7 +4381,7 @@ int main(int argc, const char **argv)
           return EINVAL;
         }
         RGWEnv env;
-        req_info info(g_ceph_context, &env);
+        req_info info(g_stone_context, &env);
         info.method = "GET";
         info.request_uri = "/admin/realm";
 
@@ -4404,7 +4404,7 @@ int main(int argc, const char **argv)
           return -ret;
         }
         RGWRealm realm;
-        realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield, false);
+        realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield, false);
         try {
           decode_json_obj(realm, &p);
         } catch (const JSONDecoder::err& e) {
@@ -4456,14 +4456,14 @@ int main(int argc, const char **argv)
 	}
 
 	RGWZoneGroup zonegroup(zonegroup_id,zonegroup_name);
-	int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "failed to initialize zonegroup " << zonegroup_name << " id " << zonegroup_id << " :"
 	       << cpp_strerror(-ret) << std::endl;
 	  return -ret;
 	}
 	RGWZoneParams zone(zone_id, zone_name);
-	ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "unable to initialize zone: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4515,13 +4515,13 @@ int main(int argc, const char **argv)
 	  return EINVAL;
 	}
 	RGWRealm realm(realm_id, realm_name);
-	int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "failed to init realm: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
 	}
 
-	RGWZoneGroup zonegroup(zonegroup_name, is_master, g_ceph_context, store->svc()->sysobj, realm.get_id(), endpoints);
+	RGWZoneGroup zonegroup(zonegroup_name, is_master, g_stone_context, store->svc()->sysobj, realm.get_id(), endpoints);
         zonegroup.api_name = (api_name.empty() ? zonegroup_name : api_name);
 	ret = zonegroup.create(dpp(), null_yield);
 	if (ret < 0) {
@@ -4548,7 +4548,7 @@ int main(int argc, const char **argv)
 	}
 
 	RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-	int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4568,7 +4568,7 @@ int main(int argc, const char **argv)
 	  return EINVAL;
 	}
 	RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-	int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj,
+	int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj,
 				 null_yield);
 	if (ret < 0) {
 	  cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
@@ -4584,7 +4584,7 @@ int main(int argc, const char **argv)
     case OPT::ZONEGROUP_GET:
       {
 	RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-	int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4597,7 +4597,7 @@ int main(int argc, const char **argv)
     case OPT::ZONEGROUP_LIST:
       {
 	RGWZoneGroup zonegroup;
-	int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj,
+	int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj,
 				 null_yield, false);
 	if (ret < 0) {
 	  cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
@@ -4625,7 +4625,7 @@ int main(int argc, const char **argv)
     case OPT::ZONEGROUP_MODIFY:
       {
 	RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-	int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4658,7 +4658,7 @@ int main(int argc, const char **argv)
           need_update = true;
         } else if (!realm_name.empty()) {
           // get realm id from name
-          RGWRealm realm{g_ceph_context, store->svc()->sysobj};
+          RGWRealm realm{g_stone_context, store->svc()->sysobj};
           ret = realm.read_id(dpp(), realm_name, zonegroup.realm_id, null_yield);
           if (ret < 0) {
             cerr << "failed to find realm by name " << realm_name << std::endl;
@@ -4696,7 +4696,7 @@ int main(int argc, const char **argv)
     case OPT::ZONEGROUP_SET:
       {
 	RGWRealm realm(realm_id, realm_name);
-	int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	bool default_realm_not_exist = (ret == -ENOENT && realm_id.empty() && realm_name.empty());
 
 	if (ret < 0 && !default_realm_not_exist ) {
@@ -4705,7 +4705,7 @@ int main(int argc, const char **argv)
 	}
 
 	RGWZoneGroup zonegroup;
-	ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj,
+	ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj,
 			     null_yield, false);
 	if (ret < 0) {
 	  cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
@@ -4744,7 +4744,7 @@ int main(int argc, const char **argv)
     case OPT::ZONEGROUP_REMOVE:
       {
         RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-        int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+        int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
         if (ret < 0) {
           cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
           return -ret;
@@ -4790,7 +4790,7 @@ int main(int argc, const char **argv)
 	  return EINVAL;
 	}
 	RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-	int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4805,7 +4805,7 @@ int main(int argc, const char **argv)
     case OPT::ZONEGROUP_PLACEMENT_LIST:
       {
 	RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-	int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj,
+	int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj,
 				 null_yield);
 	if (ret < 0) {
 	  cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
@@ -4824,7 +4824,7 @@ int main(int argc, const char **argv)
 	}
 
 	RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-	int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4861,7 +4861,7 @@ int main(int argc, const char **argv)
         }
 
 	RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-	int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4925,7 +4925,7 @@ int main(int argc, const char **argv)
 	RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
 	/* if the user didn't provide zonegroup info , create stand alone zone */
 	if (!zonegroup_id.empty() || !zonegroup_name.empty()) {
-	  ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	  ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	  if (ret < 0) {
 	    cerr << "unable to initialize zonegroup " << zonegroup_name << ": " << cpp_strerror(-ret) << std::endl;
 	    return -ret;
@@ -4936,7 +4936,7 @@ int main(int argc, const char **argv)
 	}
 
 	RGWZoneParams zone(zone_id, zone_name);
-	ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield, false);
+	ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield, false);
 	if (ret < 0) {
 	  cerr << "unable to initialize zone: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -4994,7 +4994,7 @@ int main(int argc, const char **argv)
     case OPT::ZONE_DEFAULT:
       {
 	RGWZoneGroup zonegroup(zonegroup_id,zonegroup_name);
-	int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "WARNING: failed to initialize zonegroup " << zonegroup_name << std::endl;
 	}
@@ -5003,7 +5003,7 @@ int main(int argc, const char **argv)
 	  return EINVAL;
 	}
 	RGWZoneParams zone(zone_id, zone_name);
-	ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "unable to initialize zone: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -5022,7 +5022,7 @@ int main(int argc, const char **argv)
 	  return EINVAL;
 	}
 	RGWZoneParams zone(zone_id, zone_name);
-	int ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "unable to initialize zone: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -5037,7 +5037,7 @@ int main(int argc, const char **argv)
 
         for (list<string>::iterator iter = zonegroups.begin(); iter != zonegroups.end(); ++iter) {
           RGWZoneGroup zonegroup(string(), *iter);
-          int ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+          int ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
           if (ret < 0) {
             cerr << "WARNING: failed to initialize zonegroup " << zonegroup_name << std::endl;
             continue;
@@ -5059,7 +5059,7 @@ int main(int argc, const char **argv)
     case OPT::ZONE_GET:
       {
 	RGWZoneParams zone(zone_id, zone_name);
-	int ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "unable to initialize zone: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -5071,7 +5071,7 @@ int main(int argc, const char **argv)
     case OPT::ZONE_SET:
       {
 	RGWZoneParams zone(zone_name);
-	int ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield,
+	int ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield,
 			    false);
 	if (ret < 0) {
 	  return -ret;
@@ -5092,7 +5092,7 @@ int main(int argc, const char **argv)
 
 	if(zone.realm_id.empty()) {
 	  RGWRealm realm(realm_id, realm_name);
-	  int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	  int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	  if (ret < 0 && ret != -ENOENT) {
 	    cerr << "failed to init realm: " << cpp_strerror(-ret) << std::endl;
 	    return -ret;
@@ -5162,7 +5162,7 @@ int main(int argc, const char **argv)
 	}
 
 	RGWZoneParams zone;
-	ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield, false);
+	ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield, false);
 	if (ret < 0) {
 	  cerr << "failed to init zone: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -5182,7 +5182,7 @@ int main(int argc, const char **argv)
     case OPT::ZONE_MODIFY:
       {
 	RGWZoneParams zone(zone_id, zone_name);
-	int ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
         if (ret < 0) {
 	  cerr << "failed to init zone: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -5204,7 +5204,7 @@ int main(int argc, const char **argv)
           need_zone_update = true;
         } else if (!realm_name.empty()) {
           // get realm id from name
-          RGWRealm realm{g_ceph_context, store->svc()->sysobj};
+          RGWRealm realm{g_stone_context, store->svc()->sysobj};
           ret = realm.read_id(dpp(), realm_name, zone.realm_id, null_yield);
           if (ret < 0) {
             cerr << "failed to find realm by name " << realm_name << std::endl;
@@ -5240,7 +5240,7 @@ int main(int argc, const char **argv)
         }
 
 	RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-	ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -5291,7 +5291,7 @@ int main(int argc, const char **argv)
 	  return EINVAL;
 	}
 	RGWZoneParams zone(zone_id,zone_name);
-	int ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "unable to initialize zone: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -5303,7 +5303,7 @@ int main(int argc, const char **argv)
 	  return -ret;
 	}
 	RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-	ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "WARNING: failed to initialize zonegroup " << zonegroup_name << std::endl;
 	} else {
@@ -5331,7 +5331,7 @@ int main(int argc, const char **argv)
         }
 
 	RGWZoneParams zone(zone_id, zone_name);
-	int ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
         if (ret < 0) {
 	  cerr << "failed to init zone: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -5340,7 +5340,7 @@ int main(int argc, const char **argv)
         if (opt_cmd == OPT::ZONE_PLACEMENT_ADD ||
 	    opt_cmd == OPT::ZONE_PLACEMENT_MODIFY) {
 	  RGWZoneGroup zonegroup(zonegroup_id, zonegroup_name);
-	  ret = zonegroup.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	  ret = zonegroup.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	  if (ret < 0) {
 	    cerr << "failed to init zonegroup: " << cpp_strerror(-ret) << std::endl;
 	    return -ret;
@@ -5427,7 +5427,7 @@ int main(int argc, const char **argv)
     case OPT::ZONE_PLACEMENT_LIST:
       {
 	RGWZoneParams zone(zone_id, zone_name);
-	int ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "unable to initialize zone: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -5444,7 +5444,7 @@ int main(int argc, const char **argv)
 	}
 
 	RGWZoneParams zone(zone_id, zone_name);
-	int ret = zone.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+	int ret = zone.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
 	if (ret < 0) {
 	  cerr << "unable to initialize zone: " << cpp_strerror(-ret) << std::endl;
 	  return -ret;
@@ -5727,7 +5727,7 @@ int main(int argc, const char **argv)
   case OPT::PERIOD_PUSH:
     {
       RGWEnv env;
-      req_info info(g_ceph_context, &env);
+      req_info info(g_stone_context, &env);
       info.method = "POST";
       info.request_uri = "/admin/realm/period";
 
@@ -5743,7 +5743,7 @@ int main(int argc, const char **argv)
 
       // load the period
       RGWPeriod period(period_id);
-      int ret = period.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+      int ret = period.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
       if (ret < 0) {
         cerr << "period init failed: " << cpp_strerror(-ret) << std::endl;
         return -ret;
@@ -5777,13 +5777,13 @@ int main(int argc, const char **argv)
     {
       // read realm and staging period
       RGWRealm realm(realm_id, realm_name);
-      int ret = realm.init(dpp(), g_ceph_context, store->svc()->sysobj, null_yield);
+      int ret = realm.init(dpp(), g_stone_context, store->svc()->sysobj, null_yield);
       if (ret < 0) {
         cerr << "Error initializing realm: " << cpp_strerror(-ret) << std::endl;
         return -ret;
       }
       RGWPeriod period(RGWPeriod::get_staging_id(realm.get_id()), 1);
-      ret = period.init(dpp(), g_ceph_context, store->svc()->sysobj, realm.get_id(), null_yield);
+      ret = period.init(dpp(), g_stone_context, store->svc()->sysobj, realm.get_id(), null_yield);
       if (ret < 0) {
         cerr << "period init failed: " << cpp_strerror(-ret) << std::endl;
         return -ret;
@@ -5812,12 +5812,12 @@ int main(int argc, const char **argv)
       }
       bufferlist bl = bufferlist::static_from_string(assume_role_doc);
       try {
-        const rgw::IAM::Policy p(g_ceph_context, tenant, bl);
+        const rgw::IAM::Policy p(g_stone_context, tenant, bl);
       } catch (rgw::IAM::PolicyParseException& e) {
         cerr << "failed to parse policy: " << e.what() << std::endl;
         return -EINVAL;
       }
-      RGWRole role(g_ceph_context, store->getRados()->pctl, role_name, path, assume_role_doc, tenant);
+      RGWRole role(g_stone_context, store->getRados()->pctl, role_name, path, assume_role_doc, tenant);
       ret = role.create(dpp(), true, null_yield);
       if (ret < 0) {
         return -ret;
@@ -5831,7 +5831,7 @@ int main(int argc, const char **argv)
         cerr << "ERROR: empty role name" << std::endl;
         return -EINVAL;
       }
-      RGWRole role(g_ceph_context, store->getRados()->pctl, role_name, tenant);
+      RGWRole role(g_stone_context, store->getRados()->pctl, role_name, tenant);
       ret = role.delete_obj(dpp(), null_yield);
       if (ret < 0) {
         return -ret;
@@ -5845,7 +5845,7 @@ int main(int argc, const char **argv)
         cerr << "ERROR: empty role name" << std::endl;
         return -EINVAL;
       }
-      RGWRole role(g_ceph_context, store->getRados()->pctl, role_name, tenant);
+      RGWRole role(g_stone_context, store->getRados()->pctl, role_name, tenant);
       ret = role.get(dpp(), null_yield);
       if (ret < 0) {
         return -ret;
@@ -5867,13 +5867,13 @@ int main(int argc, const char **argv)
 
       bufferlist bl = bufferlist::static_from_string(assume_role_doc);
       try {
-        const rgw::IAM::Policy p(g_ceph_context, tenant, bl);
+        const rgw::IAM::Policy p(g_stone_context, tenant, bl);
       } catch (rgw::IAM::PolicyParseException& e) {
         cerr << "failed to parse policy: " << e.what() << std::endl;
         return -EINVAL;
       }
 
-      RGWRole role(g_ceph_context, store->getRados()->pctl, role_name, tenant);
+      RGWRole role(g_stone_context, store->getRados()->pctl, role_name, tenant);
       ret = role.get(dpp(), null_yield);
       if (ret < 0) {
         return -ret;
@@ -5889,7 +5889,7 @@ int main(int argc, const char **argv)
   case OPT::ROLE_LIST:
     {
       vector<RGWRole> result;
-      ret = RGWRole::get_roles_by_path_prefix(dpp(), store->getRados(), g_ceph_context, path_prefix, tenant, result, null_yield);
+      ret = RGWRole::get_roles_by_path_prefix(dpp(), store->getRados(), g_stone_context, path_prefix, tenant, result, null_yield);
       if (ret < 0) {
         return -ret;
       }
@@ -5915,13 +5915,13 @@ int main(int argc, const char **argv)
 
       bufferlist bl = bufferlist::static_from_string(perm_policy_doc);
       try {
-        const rgw::IAM::Policy p(g_ceph_context, tenant, bl);
+        const rgw::IAM::Policy p(g_stone_context, tenant, bl);
       } catch (rgw::IAM::PolicyParseException& e) {
         cerr << "failed to parse perm policy: " << e.what() << std::endl;
         return -EINVAL;
       }
 
-      RGWRole role(g_ceph_context, store->getRados()->pctl, role_name, tenant);
+      RGWRole role(g_stone_context, store->getRados()->pctl, role_name, tenant);
       ret = role.get(dpp(), null_yield);
       if (ret < 0) {
         return -ret;
@@ -5940,7 +5940,7 @@ int main(int argc, const char **argv)
         cerr << "ERROR: Role name is empty" << std::endl;
         return -EINVAL;
       }
-      RGWRole role(g_ceph_context, store->getRados()->pctl, role_name, tenant);
+      RGWRole role(g_stone_context, store->getRados()->pctl, role_name, tenant);
       ret = role.get(dpp(), null_yield);
       if (ret < 0) {
         return -ret;
@@ -5960,7 +5960,7 @@ int main(int argc, const char **argv)
         cerr << "ERROR: policy name is empty" << std::endl;
         return -EINVAL;
       }
-      RGWRole role(g_ceph_context, store->getRados()->pctl, role_name, tenant);
+      RGWRole role(g_stone_context, store->getRados()->pctl, role_name, tenant);
       int ret = role.get(dpp(), null_yield);
       if (ret < 0) {
         return -ret;
@@ -5984,7 +5984,7 @@ int main(int argc, const char **argv)
         cerr << "ERROR: policy name is empty" << std::endl;
         return -EINVAL;
       }
-      RGWRole role(g_ceph_context, store->getRados()->pctl, role_name, tenant);
+      RGWRole role(g_stone_context, store->getRados()->pctl, role_name, tenant);
       ret = role.get(dpp(), null_yield);
       if (ret < 0) {
         return -ret;
@@ -7546,8 +7546,8 @@ next:
 
     constexpr bool omit_utilized_stats = false;
     RGWStorageStats stats(omit_utilized_stats);
-    ceph::real_time last_stats_sync;
-    ceph::real_time last_stats_update;
+    stone::real_time last_stats_sync;
+    stone::real_time last_stats_update;
     int ret = store->ctl()->user->read_stats(dpp(), user_id, &stats, null_yield,
 					     &last_stats_sync,
 					     &last_stats_update);
@@ -7691,7 +7691,7 @@ next:
     RGWMetadataLog *meta_log = store->svc()->mdlog->get_log(period_id);
 
     formatter->open_array_section("entries");
-    for (; i < g_ceph_context->_conf->rgw_md_log_max_shards; i++) {
+    for (; i < g_stone_context->_conf->rgw_md_log_max_shards; i++) {
       void *handle;
       list<cls_log_entry> entries;
 
@@ -7737,7 +7737,7 @@ next:
 
     formatter->open_array_section("entries");
 
-    for (; i < g_ceph_context->_conf->rgw_md_log_max_shards; i++) {
+    for (; i < g_stone_context->_conf->rgw_md_log_max_shards; i++) {
       RGWMetadataLogInfo info;
       meta_log->get_info(dpp(), i, &info);
 
@@ -7992,7 +7992,7 @@ next:
     }
 
     RGWSyncModuleInstanceRef sync_module;
-    int ret = store->svc()->sync_modules->get_manager()->create_instance(g_ceph_context, store->svc()->zone->get_zone().tier_type,
+    int ret = store->svc()->sync_modules->get_manager()->create_instance(g_stone_context, store->svc()->zone->get_zone().tier_type,
         store->svc()->zone->get_zone_params().tier_config, &sync_module);
     if (ret < 0) {
       ldpp_dout(dpp(), -1) << "ERROR: failed to init sync module instance, ret=" << ret << dendl;
@@ -8082,7 +8082,7 @@ next:
       return -ret;
     }
 
-    auto timeout_at = ceph::coarse_mono_clock::now() + opt_timeout_sec;
+    auto timeout_at = stone::coarse_mono_clock::now() + opt_timeout_sec;
     ret = rgw_bucket_sync_checkpoint(dpp(), store, *handler, bucket_info,
                                      opt_source_zone, opt_source_bucket,
                                      opt_retry_delay_ms, timeout_at);
@@ -8824,7 +8824,7 @@ next:
     int i = (specified_shard_id ? shard_id : 0);
 
     formatter->open_array_section("entries");
-    for (; i < g_ceph_context->_conf->rgw_data_log_num_shards; i++) {
+    for (; i < g_stone_context->_conf->rgw_data_log_num_shards; i++) {
       list<cls_log_entry> entries;
 
       RGWDataChangesLogInfo info;
@@ -9157,7 +9157,7 @@ next:
       return -ret;
     }
 
-    ceph::real_time now;
+    stone::real_time now;
 
     ret = store->svc()->cls->mfa.otp_get_current_time(dpp(), user_id, &now, null_yield);
     if (ret < 0) {

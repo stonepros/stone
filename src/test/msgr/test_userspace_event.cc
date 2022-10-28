@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 XSky <haomai@xsky.com>
  *
@@ -27,7 +27,7 @@ class UserspaceManagerTest : public ::testing::Test {
 
   UserspaceManagerTest() {}
   virtual void SetUp() {
-    manager = new UserspaceEventManager(g_ceph_context);
+    manager = new UserspaceEventManager(g_stone_context);
   }
   virtual void TearDown() {
     delete manager;
@@ -167,8 +167,8 @@ TEST_F(UserspaceManagerTest, StressTest) {
 
 /*
  * Local Variables:
- * compile-command: "cd ../.. ; make ceph_test_userspace_event &&
- *    ./ceph_test_userspace_event.cc
+ * compile-command: "cd ../.. ; make stone_test_userspace_event &&
+ *    ./stone_test_userspace_event.cc
  *
  * End:
  */

@@ -28,8 +28,8 @@
 #include "tools/rbd_mirror/image_replayer/journal/StateBuilder.h"
 #include "tools/rbd_mirror/image_replayer/journal/SyncPointHandler.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::" \
                            << "BootstrapRequest: " << this << " " \
@@ -58,7 +58,7 @@ BootstrapRequest<I>::BootstrapRequest(
     bool* do_resync,
     Context* on_finish)
   : CancelableRequest("rbd::mirror::image_replayer::BootstrapRequest",
-		      reinterpret_cast<CephContext*>(local_io_ctx.cct()),
+		      reinterpret_cast<StoneContext*>(local_io_ctx.cct()),
                       on_finish),
     m_threads(threads),
     m_local_io_ctx(local_io_ctx),
@@ -72,7 +72,7 @@ BootstrapRequest<I>::BootstrapRequest(
     m_progress_ctx(progress_ctx),
     m_state_builder(state_builder),
     m_do_resync(do_resync),
-    m_lock(ceph::make_mutex(unique_lock_name("BootstrapRequest::m_lock",
+    m_lock(stone::make_mutex(unique_lock_name("BootstrapRequest::m_lock",
                                              this))) {
   dout(10) << dendl;
 }
@@ -118,7 +118,7 @@ void BootstrapRequest<I>::prepare_local_image() {
     m_local_image_name = m_global_image_id;
   }
 
-  ceph_assert(*m_state_builder == nullptr);
+  stone_assert(*m_state_builder == nullptr);
   auto ctx = create_context_callback<
     BootstrapRequest, &BootstrapRequest<I>::handle_prepare_local_image>(this);
   auto req = image_replayer::PrepareLocalImageRequest<I>::create(
@@ -131,7 +131,7 @@ template <typename I>
 void BootstrapRequest<I>::handle_prepare_local_image(int r) {
   dout(10) << "r=" << r << dendl;
 
-  ceph_assert(r < 0 || *m_state_builder != nullptr);
+  stone_assert(r < 0 || *m_state_builder != nullptr);
   if (r == -ENOENT) {
     dout(10) << "local image does not exist" << dendl;
   } else if (r < 0) {
@@ -170,7 +170,7 @@ void BootstrapRequest<I>::handle_prepare_remote_image(int r) {
   dout(10) << "r=" << r << dendl;
 
   auto state_builder = *m_state_builder;
-  ceph_assert(state_builder == nullptr ||
+  stone_assert(state_builder == nullptr ||
               !state_builder->remote_mirror_uuid.empty());
 
   if (state_builder != nullptr && state_builder->is_local_primary()) {
@@ -214,7 +214,7 @@ void BootstrapRequest<I>::handle_prepare_remote_image(int r) {
 
 template <typename I>
 void BootstrapRequest<I>::open_remote_image() {
-  ceph_assert(*m_state_builder != nullptr);
+  stone_assert(*m_state_builder != nullptr);
   auto remote_image_id = (*m_state_builder)->remote_image_id;
   dout(15) << "remote_image_id=" << remote_image_id << dendl;
 
@@ -223,7 +223,7 @@ void BootstrapRequest<I>::open_remote_image() {
   auto ctx = create_context_callback<
     BootstrapRequest<I>,
     &BootstrapRequest<I>::handle_open_remote_image>(this);
-  ceph_assert(*m_state_builder != nullptr);
+  stone_assert(*m_state_builder != nullptr);
   OpenImageRequest<I> *request = OpenImageRequest<I>::create(
     m_remote_io_ctx, &(*m_state_builder)->remote_image_ctx, remote_image_id,
     false, ctx);
@@ -234,10 +234,10 @@ template <typename I>
 void BootstrapRequest<I>::handle_open_remote_image(int r) {
   dout(15) << "r=" << r << dendl;
 
-  ceph_assert(*m_state_builder != nullptr);
+  stone_assert(*m_state_builder != nullptr);
   if (r < 0) {
     derr << "failed to open remote image: " << cpp_strerror(r) << dendl;
-    ceph_assert((*m_state_builder)->remote_image_ctx == nullptr);
+    stone_assert((*m_state_builder)->remote_image_ctx == nullptr);
     finish(r);
     return;
   }
@@ -252,7 +252,7 @@ void BootstrapRequest<I>::handle_open_remote_image(int r) {
 
 template <typename I>
 void BootstrapRequest<I>::open_local_image() {
-  ceph_assert(*m_state_builder != nullptr);
+  stone_assert(*m_state_builder != nullptr);
   auto local_image_id = (*m_state_builder)->local_image_id;
 
   dout(15) << "local_image_id=" << local_image_id << dendl;
@@ -272,9 +272,9 @@ template <typename I>
 void BootstrapRequest<I>::handle_open_local_image(int r) {
   dout(15) << "r=" << r << dendl;
 
-  ceph_assert(*m_state_builder != nullptr);
+  stone_assert(*m_state_builder != nullptr);
   auto local_image_ctx = (*m_state_builder)->local_image_ctx;
-  ceph_assert((r >= 0 && local_image_ctx != nullptr) ||
+  stone_assert((r >= 0 && local_image_ctx != nullptr) ||
               (r < 0 && local_image_ctx == nullptr));
 
   if (r == -ENOENT) {
@@ -301,7 +301,7 @@ void BootstrapRequest<I>::prepare_replay() {
   dout(10) << dendl;
   update_progress("PREPARE_REPLAY");
 
-  ceph_assert(*m_state_builder != nullptr);
+  stone_assert(*m_state_builder != nullptr);
   auto ctx = create_context_callback<
     BootstrapRequest<I>, &BootstrapRequest<I>::handle_prepare_replay>(this);
   auto request = (*m_state_builder)->create_prepare_replay_request(
@@ -344,7 +344,7 @@ void BootstrapRequest<I>::create_local_image() {
   dout(10) << dendl;
   update_progress("CREATE_LOCAL_IMAGE");
 
-  ceph_assert(*m_state_builder != nullptr);
+  stone_assert(*m_state_builder != nullptr);
   auto ctx = create_context_callback<
     BootstrapRequest<I>,
     &BootstrapRequest<I>::handle_create_local_image>(this);
@@ -385,7 +385,7 @@ void BootstrapRequest<I>::image_sync() {
   }
 
   dout(15) << dendl;
-  ceph_assert(m_image_sync == nullptr);
+  stone_assert(m_image_sync == nullptr);
 
   auto state_builder = *m_state_builder;
   auto sync_point_handler = state_builder->create_sync_point_handler();
@@ -441,7 +441,7 @@ void BootstrapRequest<I>::close_remote_image() {
   auto ctx = create_context_callback<
     BootstrapRequest<I>,
     &BootstrapRequest<I>::handle_close_remote_image>(this);
-  ceph_assert(*m_state_builder != nullptr);
+  stone_assert(*m_state_builder != nullptr);
   (*m_state_builder)->close_remote_image(ctx);
 }
 

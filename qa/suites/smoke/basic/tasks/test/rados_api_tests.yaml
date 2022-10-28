@@ -1,5 +1,5 @@
 tasks:
-- ceph:
+- stone:
     fs: ext4
     log-ignorelist:
       - overall HEALTH_

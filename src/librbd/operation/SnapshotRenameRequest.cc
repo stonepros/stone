@@ -6,7 +6,7 @@
 #include "common/errno.h"
 #include "librbd/ImageCtx.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::SnapshotRenameRequest: "
 
@@ -40,7 +40,7 @@ SnapshotRenameRequest<I>::SnapshotRenameRequest(I &image_ctx,
 template <typename I>
 journal::Event SnapshotRenameRequest<I>::create_event(uint64_t op_tid) const {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.image_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.image_lock));
 
   std::string src_snap_name;
   auto snap_info_it = image_ctx.snap_info.find(m_snap_id);
@@ -60,7 +60,7 @@ void SnapshotRenameRequest<I>::send_op() {
 template <typename I>
 bool SnapshotRenameRequest<I>::should_complete(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": state=" << m_state << ", "
                 << "r=" << r << dendl;
   if (r < 0) {
@@ -76,10 +76,10 @@ bool SnapshotRenameRequest<I>::should_complete(int r) {
 template <typename I>
 void SnapshotRenameRequest<I>::send_rename_snap() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
   std::shared_lock image_locker{image_ctx.image_lock};
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   librados::ObjectWriteOperation op;
@@ -92,7 +92,7 @@ void SnapshotRenameRequest<I>::send_rename_snap() {
   librados::AioCompletion *rados_completion = this->create_callback_completion();
   int r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid,
                                        rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 

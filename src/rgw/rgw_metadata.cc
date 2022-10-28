@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 #include <boost/intrusive_ptr.hpp>
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/errno.h"
 #include "rgw_metadata.h"
 #include "rgw_coroutine.h"
@@ -21,11 +21,11 @@
 #include "services/svc_meta_be_sobj.h"
 #include "services/svc_cls.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include <boost/asio/yield.hpp>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 const std::string RGWMetadataLogHistory::oid = "meta.history";
 
@@ -302,7 +302,7 @@ public:
 
   string get_type() override { return string(); }
 
-  RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const ceph::real_time& mtime) {
+  RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const stone::real_time& mtime) {
     return new RGWMetadataObject;
   }
 
@@ -320,7 +320,7 @@ public:
   }
 
   int mutate(const string& entry,
-             const ceph::real_time& mtime,
+             const stone::real_time& mtime,
              RGWObjVersionTracker *objv_tracker,
              optional_yield y,
              const DoutPrefixProvider *dpp,
@@ -419,7 +419,7 @@ int RGWMetadataHandlerPut_SObj::put_pre(const DoutPrefixProvider *dpp)
   oo.reset(old_obj);
 
   auto old_ver = (!old_obj ? obj_version() : old_obj->get_version());
-  auto old_mtime = (!old_obj ? ceph::real_time() : old_obj->get_mtime());
+  auto old_mtime = (!old_obj ? stone::real_time() : old_obj->get_mtime());
 
   // are we actually going to perform this put, or is it too old?
   if (!handler->check_versions(exists, old_ver, old_mtime,
@@ -500,7 +500,7 @@ int RGWMetadataHandler_GenericMetaBE::remove(string& entry, RGWObjVersionTracker
 }
 
 int RGWMetadataHandler_GenericMetaBE::mutate(const string& entry,
-                                             const ceph::real_time& mtime,
+                                             const stone::real_time& mtime,
                                              RGWObjVersionTracker *objv_tracker,
                                              optional_yield y,
                                              const DoutPrefixProvider *dpp,
@@ -738,7 +738,7 @@ int RGWMetadataManager::remove(string& metadata_key, optional_yield y, const Dou
 }
 
 int RGWMetadataManager::mutate(const string& metadata_key,
-                               const ceph::real_time& mtime,
+                               const stone::real_time& mtime,
                                RGWObjVersionTracker *objv_tracker,
 			       optional_yield y,
                                const DoutPrefixProvider *dpp,

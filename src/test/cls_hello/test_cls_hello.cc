@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank
  *
@@ -85,7 +85,7 @@ static std::string _get_required_osd_release(Rados& cluster)
   std::string cmd = std::string("{\"prefix\": \"osd dump\",\"format\":\"json\"}");
   bufferlist outbl;
   int r = cluster.mon_command(cmd, inbl, &outbl, NULL);
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
   std::string outstr(outbl.c_str(), outbl.length());
   json_spirit::Value v;
   if (!json_spirit::read(outstr, v)) {

@@ -1,6 +1,6 @@
 meta:
 - desc: |
-   Run ceph on two nodes,
+   Run stone on two nodes,
    with a separate client 0,1,2 third node.
    Use xfs beneath the osds.
    CephFS tests running on client 2,3
@@ -27,7 +27,7 @@ roles:
   - client.2
   - client.3
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
     - scrub mismatch
     - ScrubResult

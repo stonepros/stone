@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "include/compat.h"
-#include "include/ceph_fuse.h"
+#include "include/stone_fuse.h"
 #include "FuseStore.h"
 #include "os/ObjectStore.h"
 #include "include/stringify.h"
@@ -22,7 +22,7 @@
 #endif
 
 #define dout_context store->cct
-#define dout_subsys ceph_subsys_fuse
+#define dout_subsys stone_subsys_fuse
 #include "common/debug.h"
 #undef dout_prefix
 #define dout_prefix *_dout << "fuse "
@@ -33,8 +33,8 @@ using std::set;
 using std::string;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
+using stone::bufferlist;
+using stone::bufferptr;
 
 // some fuse-y bits of state
 struct fs_info {
@@ -118,7 +118,7 @@ enum {
   FN_HASH_VAL,
 };
 
-static int parse_fn(CephContext* cct, const char *path, coll_t *cid,
+static int parse_fn(StoneContext* cct, const char *path, coll_t *cid,
 		    ghobject_t *oid, string *key,
 		    uint32_t *hash, uint32_t *hash_bits)
 {

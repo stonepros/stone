@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 #include <boost/intrusive/list.hpp>
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "global/signal_handler.h"
 #include "common/config.h"
@@ -62,7 +62,7 @@
 #include <sys/prctl.h>
 #endif
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace {
 TracepointProvider::Traits rgw_op_tracepoint_traits("librgw_op_tp.so",
@@ -121,7 +121,7 @@ static void handle_sigterm(int signum)
     signal_shutdown();
 
     // safety net in case we get stuck doing an orderly shutdown.
-    uint64_t secs = g_ceph_context->_conf->rgw_exit_timeout_secs;
+    uint64_t secs = g_stone_context->_conf->rgw_exit_timeout_secs;
     if (secs)
       alarm(secs);
     dout(1) << __func__ << " set alarm for " << secs << dendl;
@@ -198,7 +198,7 @@ int radosgw_Main(int argc, const char **argv)
     { "objecter_inflight_ops", "24576" },
     // require a secure mon connection by default
     { "ms_mon_client_mode", "secure" },
-    { "auth_client_required", "cephx" }
+    { "auth_client_required", "stonex" }
   };
 
   vector<const char*> args;
@@ -207,7 +207,7 @@ int radosgw_Main(int argc, const char **argv)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
@@ -217,7 +217,7 @@ int radosgw_Main(int argc, const char **argv)
   // privileged ports
   flags |= CINIT_FLAG_DEFER_DROP_PRIVILEGES;
 
-  auto cct = global_init(&defaults, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(&defaults, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_DAEMON, flags);
 
   // First, let's determine which frontends are configured.
@@ -300,26 +300,26 @@ int radosgw_Main(int argc, const char **argv)
   }
 
   if (g_conf()->daemonize) {
-    global_init_daemonize(g_ceph_context);
+    global_init_daemonize(g_stone_context);
   }
-  ceph::mutex mutex = ceph::make_mutex("main");
-  SafeTimer init_timer(g_ceph_context, mutex);
+  stone::mutex mutex = stone::make_mutex("main");
+  SafeTimer init_timer(g_stone_context, mutex);
   init_timer.init();
   mutex.lock();
   init_timer.add_event_after(g_conf()->rgw_init_timeout, new C_InitTimeout);
   mutex.unlock();
 
-  ceph::crypto::init_openssl_engine_once();
+  stone::crypto::init_openssl_engine_once();
 
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   init_async_signal_handler();
   register_async_signal_handler(SIGHUP, sighup_handler);
 
-  TracepointProvider::initialize<rgw_rados_tracepoint_traits>(g_ceph_context);
-  TracepointProvider::initialize<rgw_op_tracepoint_traits>(g_ceph_context);
+  TracepointProvider::initialize<rgw_rados_tracepoint_traits>(g_stone_context);
+  TracepointProvider::initialize<rgw_op_tracepoint_traits>(g_stone_context);
 
-  int r = rgw_tools_init(g_ceph_context);
+  int r = rgw_tools_init(g_stone_context);
   if (r < 0) {
     derr << "ERROR: unable to initialize rgw tools" << dendl;
     return -r;
@@ -327,8 +327,8 @@ int radosgw_Main(int argc, const char **argv)
 
   rgw_init_resolver();
   rgw::curl::setup_curl(fe_map);
-  rgw_http_client_init(g_ceph_context);
-  rgw_kmip_client_init(*new RGWKMIPManagerImpl(g_ceph_context));
+  rgw_http_client_init(g_stone_context);
+  rgw_kmip_client_init(*new RGWKMIPManagerImpl(g_stone_context));
   
 #if defined(WITH_RADOSGW_FCGI_FRONTEND)
   FCGX_Init();
@@ -336,7 +336,7 @@ int radosgw_Main(int argc, const char **argv)
 
   const DoutPrefix dp(cct.get(), dout_subsys, "rgw main: ");
   rgw::sal::RGWRadosStore *store =
-    RGWStoreManager::get_storage(&dp, g_ceph_context,
+    RGWStoreManager::get_storage(&dp, g_stone_context,
 				 g_conf()->rgw_enable_gc_threads,
 				 g_conf()->rgw_enable_lc_threads,
 				 g_conf()->rgw_enable_quota_threads,
@@ -352,20 +352,20 @@ int radosgw_Main(int argc, const char **argv)
     derr << "Couldn't init storage provider (RADOS)" << dendl;
     return EIO;
   }
-  r = rgw_perf_start(g_ceph_context);
+  r = rgw_perf_start(g_stone_context);
   if (r < 0) {
     derr << "ERROR: failed starting rgw perf" << dendl;
     return -r;
   }
 
-  rgw_rest_init(g_ceph_context, store->svc()->zone->get_zonegroup());
+  rgw_rest_init(g_stone_context, store->svc()->zone->get_zonegroup());
 
   mutex.lock();
   init_timer.cancel_all_events();
   init_timer.shutdown();
   mutex.unlock();
 
-  rgw_log_usage_init(g_ceph_context, store->getRados());
+  rgw_log_usage_init(g_stone_context, store->getRados());
 
   RGWREST rest;
 
@@ -379,8 +379,8 @@ int radosgw_Main(int argc, const char **argv)
   }
 
   /* warn about insecure keystone secret config options */
-  if (!(g_ceph_context->_conf->rgw_keystone_admin_token.empty() ||
-	g_ceph_context->_conf->rgw_keystone_admin_password.empty())) {
+  if (!(g_stone_context->_conf->rgw_keystone_admin_token.empty() ||
+	g_stone_context->_conf->rgw_keystone_admin_password.empty())) {
     dout(0) << "WARNING: rgw_keystone_admin_token and rgw_keystone_admin_password should be avoided as they can expose secrets.  Prefer the new rgw_keystone_admin_token_path and rgw_keystone_admin_password_path options, which read their secrets from files." << dendl;
   }
 
@@ -489,7 +489,7 @@ int radosgw_Main(int argc, const char **argv)
   rgw::auth::ImplicitTenants implicit_tenant_context{g_conf()};
   g_conf().add_observer(&implicit_tenant_context);
   auto auth_registry = \
-    rgw::auth::StrategyRegistry::create(g_ceph_context, implicit_tenant_context, store->getRados()->pctl);
+    rgw::auth::StrategyRegistry::create(g_stone_context, implicit_tenant_context, store->getRados()->pctl);
 
   /* Header custom behavior */
   rest.register_x_headers(g_conf()->rgw_log_http_headers);
@@ -506,13 +506,13 @@ int radosgw_Main(int argc, const char **argv)
 
   OpsLogManifold *olog = new OpsLogManifold();
   if (!g_conf()->rgw_ops_log_socket_path.empty()) {
-    OpsLogSocket* olog_socket = new OpsLogSocket(g_ceph_context, g_conf()->rgw_ops_log_data_backlog);
+    OpsLogSocket* olog_socket = new OpsLogSocket(g_stone_context, g_conf()->rgw_ops_log_data_backlog);
     olog_socket->init(g_conf()->rgw_ops_log_socket_path);
     olog->add_sink(olog_socket);
   }
   OpsLogFile* ops_log_file;
   if (!g_conf()->rgw_ops_log_file_path.empty()) {
-    ops_log_file = new OpsLogFile(g_ceph_context, g_conf()->rgw_ops_log_file_path, g_conf()->rgw_ops_log_data_backlog);
+    ops_log_file = new OpsLogFile(g_stone_context, g_conf()->rgw_ops_log_file_path, g_conf()->rgw_ops_log_data_backlog);
     ops_log_file->start();
     olog->add_sink(ops_log_file);
   }
@@ -646,7 +646,7 @@ int radosgw_Main(int argc, const char **argv)
   auto reloader = std::make_unique<RGWRealmReloader>(store,
 						     service_map_meta, &pauser);
 
-  RGWRealmWatcher realm_watcher(&dp, g_ceph_context, store->svc()->zone->get_realm());
+  RGWRealmWatcher realm_watcher(&dp, g_stone_context, store->svc()->zone->get_realm());
   realm_watcher.add_watcher(RGWRealmNotify::Reload, *reloader);
   realm_watcher.add_watcher(RGWRealmNotify::ZonesNeedPeriod, pusher);
 
@@ -705,7 +705,7 @@ int radosgw_Main(int argc, const char **argv)
   rgw::kafka::shutdown();
 #endif
 
-  rgw_perf_stop(g_ceph_context);
+  rgw_perf_stop(g_stone_context);
 
   dout(1) << "final shutdown" << dendl;
 

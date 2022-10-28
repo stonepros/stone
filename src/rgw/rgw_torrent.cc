@@ -14,12 +14,12 @@
 
 #include "services/svc_sys_obj.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
-using ceph::crypto::MD5;
+using stone::crypto::MD5;
 using namespace librados;
 using namespace boost;
-using ceph::crypto::SHA1;
+using stone::crypto::SHA1;
 
 seed::seed()
 {
@@ -45,7 +45,7 @@ void seed::init(struct req_state *p_req, rgw::sal::RGWRadosStore *p_store)
 
 int seed::get_torrent_file(rgw::sal::RGWObject* object,
                            uint64_t &total_len,
-                           ceph::bufferlist &bl_data,
+                           stone::bufferlist &bl_data,
                            rgw_obj &obj)
 {
   /* add other field if config is set */
@@ -106,7 +106,7 @@ int seed::complete(optional_yield y)
 {
   uint64_t remain = info.len%info.piece_length;
   uint8_t  remain_len = ((remain > 0)? 1 : 0);
-  sha_len = (info.len/info.piece_length + remain_len)*CEPH_CRYPTO_SHA1_DIGESTSIZE;
+  sha_len = (info.len/info.piece_length + remain_len)*STONE_CRYPTO_SHA1_DIGESTSIZE;
 
   int ret = 0;
    /* produce torrent data */
@@ -128,15 +128,15 @@ off_t seed::get_data_len()
   return info.len;
 }
 
-void seed::set_create_date(ceph::real_time& value)
+void seed::set_create_date(stone::real_time& value)
 {
-  utime_t date = ceph::real_clock::to_timespec(value);
+  utime_t date = stone::real_clock::to_timespec(value);
   create_date = date.sec();
 }
 
 void seed::set_info_pieces(char *buff)
 {
-  info.sha1_bl.append(buff, CEPH_CRYPTO_SHA1_DIGESTSIZE);
+  info.sha1_bl.append(buff, STONE_CRYPTO_SHA1_DIGESTSIZE);
 }
 
 void seed::set_info_name(const string& value)
@@ -175,7 +175,7 @@ void seed::sha1(SHA1 *h, bufferlist &bl, off_t bl_len)
     h->Final((unsigned char *)sha);
     set_info_pieces(sha);
   }
-  ::ceph::crypto::zeroize_for_security(sha, sizeof(sha));
+  ::stone::crypto::zeroize_for_security(sha, sizeof(sha));
 }
 
 int seed::get_params()

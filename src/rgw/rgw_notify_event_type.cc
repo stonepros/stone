@@ -30,7 +30,7 @@ namespace rgw::notify {
     return "s3:UnknownEvent";
   }
 
-  std::string to_ceph_string(EventType t) {
+  std::string to_stone_string(EventType t) {
     switch (t) {
       case ObjectCreated:
       case ObjectCreatedPut:
@@ -79,7 +79,7 @@ bool operator==(EventType lhs, EventType rhs) {
 
 void from_string_list(const std::string& string_list, EventTypeList& event_list) {
   event_list.clear();
-  ceph::for_each_substr(string_list, ",", [&event_list] (auto token) {
+  stone::for_each_substr(string_list, ",", [&event_list] (auto token) {
     event_list.push_back(rgw::notify::from_string(std::string(token.begin(), token.end())));
   });
 }

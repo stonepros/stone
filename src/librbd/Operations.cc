@@ -41,7 +41,7 @@
 #include <boost/bind/bind.hpp>
 #include <boost/scope_exit.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::Operations: "
 
@@ -99,7 +99,7 @@ std::ostream &operator<<(std::ostream &out, const Operation &op) {
     out << "update features";
     break;
   default:
-    ceph_abort();
+    stone_abort();
     break;
   }
   return out;
@@ -116,7 +116,7 @@ struct C_NotifyUpdate : public Context {
   }
 
   void complete(int r) override {
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     if (notified) {
       if (r == -ETIMEDOUT) {
         // don't fail the op if a peer fails to get the update notification
@@ -210,7 +210,7 @@ struct C_InvokeAsyncRequest : public Context {
       return;
     }
 
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 20) << __func__ << dendl;
 
     Context *ctx = util::create_context_callback<
@@ -220,7 +220,7 @@ struct C_InvokeAsyncRequest : public Context {
   }
 
   void handle_refresh_image(int r) {
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 20) << __func__ << ": r=" << r << dendl;
 
     if (r < 0) {
@@ -234,11 +234,11 @@ struct C_InvokeAsyncRequest : public Context {
 
   void send_acquire_exclusive_lock() {
     // context can complete before owner_lock is unlocked
-    ceph::shared_mutex &owner_lock(image_ctx.owner_lock);
+    stone::shared_mutex &owner_lock(image_ctx.owner_lock);
     owner_lock.lock_shared();
     image_ctx.image_lock.lock_shared();
     if (image_ctx.read_only ||
-        (!permit_snapshot && image_ctx.snap_id != CEPH_NOSNAP)) {
+        (!permit_snapshot && image_ctx.snap_id != STONE_NOSNAP)) {
       image_ctx.image_lock.unlock_shared();
       owner_lock.unlock_shared();
       complete(-EROFS);
@@ -263,7 +263,7 @@ struct C_InvokeAsyncRequest : public Context {
       return;
     }
 
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 20) << __func__ << dendl;
 
     Context *ctx = util::create_async_context_callback(
@@ -284,7 +284,7 @@ struct C_InvokeAsyncRequest : public Context {
   }
 
   void handle_acquire_exclusive_lock(int r) {
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 20) << __func__ << ": r=" << r << dendl;
 
     if (r < 0) {
@@ -293,7 +293,7 @@ struct C_InvokeAsyncRequest : public Context {
     }
 
     // context can complete before owner_lock is unlocked
-    ceph::shared_mutex &owner_lock(image_ctx.owner_lock);
+    stone::shared_mutex &owner_lock(image_ctx.owner_lock);
     owner_lock.lock_shared();
     if (image_ctx.exclusive_lock == nullptr ||
         image_ctx.exclusive_lock->is_lock_owner()) {
@@ -307,9 +307,9 @@ struct C_InvokeAsyncRequest : public Context {
   }
 
   void send_remote_request() {
-    ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+    stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 20) << __func__ << dendl;
 
     Context *ctx = util::create_async_context_callback(
@@ -320,7 +320,7 @@ struct C_InvokeAsyncRequest : public Context {
   }
 
   void handle_remote_request(int r) {
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 20) << __func__ << ": r=" << r << dendl;
 
     if (r == -EOPNOTSUPP) {
@@ -357,7 +357,7 @@ struct C_InvokeAsyncRequest : public Context {
   void execute_local_request() {
     std::shared_lock owner_locker{image_ctx.owner_lock};
 
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 20) << __func__ << dendl;
 
     Context *ctx = util::create_async_context_callback(
@@ -368,7 +368,7 @@ struct C_InvokeAsyncRequest : public Context {
   }
 
   void handle_local_request(int r) {
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     ldout(cct, 20) << __func__ << ": r=" << r << dendl;
 
     image_ctx.operations->finish_op(operation, r);
@@ -405,17 +405,17 @@ bool needs_invalidate(I& image_ctx, uint64_t object_no,
 template <typename I>
 Operations<I>::Operations(I &image_ctx)
   : m_image_ctx(image_ctx),
-    m_queue_lock(ceph::make_mutex(
+    m_queue_lock(stone::make_mutex(
                    util::unique_lock_name("librbd::Operations::m_queue_lock",
                                           this))) {
 }
 
 template <typename I>
 void Operations<I>::start_op(Operation op, Context *ctx) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << __func__ << ": " << op << " " << ctx << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
   bool requires_lock = m_image_ctx.exclusive_lock != nullptr;
 
   ctx = util::create_async_context_callback(
@@ -454,7 +454,7 @@ void Operations<I>::start_op(Operation op, Context *ctx) {
 
 template <typename I>
 void Operations<I>::finish_op(Operation op, int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << __func__ << ": " << op << " r=" << r << dendl;
 
   std::unique_lock locker{m_queue_lock};
@@ -472,7 +472,7 @@ void Operations<I>::finish_op(Operation op, int r) {
 
 template <typename I>
 int Operations<I>::flatten(ProgressContext &prog_ctx) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "flatten" << dendl;
 
   int r = m_image_ctx.state->refresh_if_required();
@@ -512,11 +512,11 @@ int Operations<I>::flatten(ProgressContext &prog_ctx) {
 template <typename I>
 void Operations<I>::execute_flatten(ProgressContext &prog_ctx,
                                     Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "flatten" << dendl;
 
   if (m_image_ctx.read_only || m_image_ctx.operations_disabled) {
@@ -533,7 +533,7 @@ void Operations<I>::execute_flatten(ProgressContext &prog_ctx,
     on_finish->complete(-EINVAL);
     return;
   }
-  if (m_image_ctx.snap_id != CEPH_NOSNAP) {
+  if (m_image_ctx.snap_id != STONE_NOSNAP) {
     lderr(cct) << "snapshots cannot be flattened" << dendl;
     m_image_ctx.image_lock.unlock_shared();
     on_finish->complete(-EROFS);
@@ -541,9 +541,9 @@ void Operations<I>::execute_flatten(ProgressContext &prog_ctx,
   }
 
   uint64_t overlap;
-  int r = m_image_ctx.get_parent_overlap(CEPH_NOSNAP, &overlap);
-  ceph_assert(r == 0);
-  ceph_assert(overlap <= m_image_ctx.size);
+  int r = m_image_ctx.get_parent_overlap(STONE_NOSNAP, &overlap);
+  stone_assert(r == 0);
+  stone_assert(overlap <= m_image_ctx.size);
 
   uint64_t overlap_objects = Striper::get_num_objects(m_image_ctx.layout,
                                                       overlap);
@@ -558,7 +558,7 @@ void Operations<I>::execute_flatten(ProgressContext &prog_ctx,
 
 template <typename I>
 int Operations<I>::rebuild_object_map(ProgressContext &prog_ctx) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << "rebuild_object_map" << dendl;
 
   int r = m_image_ctx.state->refresh_if_required();
@@ -585,11 +585,11 @@ int Operations<I>::rebuild_object_map(ProgressContext &prog_ctx) {
 template <typename I>
 void Operations<I>::execute_rebuild_object_map(ProgressContext &prog_ctx,
                                                Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   if (m_image_ctx.read_only || m_image_ctx.operations_disabled) {
@@ -611,7 +611,7 @@ void Operations<I>::execute_rebuild_object_map(ProgressContext &prog_ctx,
 
 template <typename I>
 int Operations<I>::check_object_map(ProgressContext &prog_ctx) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
   int r = m_image_ctx.state->refresh_if_required();
   if (r < 0) {
@@ -633,8 +633,8 @@ template <typename I>
 void Operations<I>::object_map_iterate(ProgressContext &prog_ctx,
 				       operation::ObjectIterateWork<I> handle_mismatch,
 				       Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
 
   if (!m_image_ctx.test_features(RBD_FEATURE_OBJECT_MAP)) {
@@ -656,7 +656,7 @@ void Operations<I>::check_object_map(ProgressContext &prog_ctx,
 
 template <typename I>
 int Operations<I>::rename(const char *dstname) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": dest_name=" << dstname
                 << dendl;
 
@@ -691,9 +691,9 @@ int Operations<I>::rename(const char *dstname) {
 template <typename I>
 void Operations<I>::execute_rename(const std::string &dest_name,
                                    Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
   if (m_image_ctx.test_features(RBD_FEATURE_JOURNALING)) {
-    ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+    stone_assert(m_image_ctx.exclusive_lock == nullptr ||
                 m_image_ctx.exclusive_lock->is_lock_owner());
   }
 
@@ -702,7 +702,7 @@ void Operations<I>::execute_rename(const std::string &dest_name,
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": dest_name=" << dest_name
                 << dendl;
 
@@ -739,7 +739,7 @@ void Operations<I>::execute_rename(const std::string &dest_name,
 
 template <typename I>
 int Operations<I>::resize(uint64_t size, bool allow_shrink, ProgressContext& prog_ctx) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   m_image_ctx.image_lock.lock_shared();
   ldout(cct, 5) << this << " " << __func__ << ": "
@@ -777,17 +777,17 @@ template <typename I>
 void Operations<I>::execute_resize(uint64_t size, bool allow_shrink, ProgressContext &prog_ctx,
                                    Context *on_finish,
                                    uint64_t journal_op_tid) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   m_image_ctx.image_lock.lock_shared();
   ldout(cct, 5) << this << " " << __func__ << ": "
                 << "size=" << m_image_ctx.size << ", "
                 << "new_size=" << size << dendl;
 
-  if (m_image_ctx.snap_id != CEPH_NOSNAP || m_image_ctx.read_only ||
+  if (m_image_ctx.snap_id != STONE_NOSNAP || m_image_ctx.read_only ||
       m_image_ctx.operations_disabled) {
     m_image_ctx.image_lock.unlock_shared();
     on_finish->complete(-EROFS);
@@ -836,7 +836,7 @@ template <typename I>
 void Operations<I>::snap_create(const cls::rbd::SnapshotNamespace &snap_namespace,
 				const std::string& snap_name, uint64_t flags,
                                 ProgressContext &prog_ctx, Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": snap_name=" << snap_name
                 << dendl;
 
@@ -846,7 +846,7 @@ void Operations<I>::snap_create(const cls::rbd::SnapshotNamespace &snap_namespac
   }
 
   m_image_ctx.image_lock.lock_shared();
-  if (m_image_ctx.get_snap_id(snap_namespace, snap_name) != CEPH_NOSNAP) {
+  if (m_image_ctx.get_snap_id(snap_namespace, snap_name) != STONE_NOSNAP) {
     m_image_ctx.image_lock.unlock_shared();
     on_finish->complete(-EEXIST);
     return;
@@ -873,11 +873,11 @@ void Operations<I>::execute_snap_create(const cls::rbd::SnapshotNamespace &snap_
                                         uint64_t journal_op_tid,
                                         uint64_t flags,
                                         ProgressContext &prog_ctx) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": snap_name=" << snap_name
                 << dendl;
 
@@ -887,7 +887,7 @@ void Operations<I>::execute_snap_create(const cls::rbd::SnapshotNamespace &snap_
   }
 
   m_image_ctx.image_lock.lock_shared();
-  if (m_image_ctx.get_snap_id(snap_namespace, snap_name) != CEPH_NOSNAP) {
+  if (m_image_ctx.get_snap_id(snap_namespace, snap_name) != STONE_NOSNAP) {
     m_image_ctx.image_lock.unlock_shared();
     on_finish->complete(-EEXIST);
     return;
@@ -905,7 +905,7 @@ template <typename I>
 int Operations<I>::snap_rollback(const cls::rbd::SnapshotNamespace& snap_namespace,
 				 const std::string& snap_name,
                                  ProgressContext& prog_ctx) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": snap_name=" << snap_name
                 << dendl;
 
@@ -923,12 +923,12 @@ int Operations<I>::snap_rollback(const cls::rbd::SnapshotNamespace& snap_namespa
         return -ENOENT;
       }
 
-      if (m_image_ctx.snap_id != CEPH_NOSNAP || m_image_ctx.read_only) {
+      if (m_image_ctx.snap_id != STONE_NOSNAP || m_image_ctx.read_only) {
         return -EROFS;
       }
 
       uint64_t snap_id = m_image_ctx.get_snap_id(snap_namespace, snap_name);
-      if (snap_id == CEPH_NOSNAP) {
+      if (snap_id == STONE_NOSNAP) {
         lderr(cct) << "No such snapshot found." << dendl;
         return -ENOENT;
       }
@@ -972,8 +972,8 @@ void Operations<I>::execute_snap_rollback(const cls::rbd::SnapshotNamespace& sna
 					  const std::string &snap_name,
                                           ProgressContext& prog_ctx,
                                           Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  CephContext *cct = m_image_ctx.cct;
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": snap_name=" << snap_name
                 << dendl;
 
@@ -984,7 +984,7 @@ void Operations<I>::execute_snap_rollback(const cls::rbd::SnapshotNamespace& sna
 
   m_image_ctx.image_lock.lock_shared();
   uint64_t snap_id = m_image_ctx.get_snap_id(snap_namespace, snap_name);
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     lderr(cct) << "No such snapshot found." << dendl;
     m_image_ctx.image_lock.unlock_shared();
     on_finish->complete(-ENOENT);
@@ -1030,7 +1030,7 @@ template <typename I>
 void Operations<I>::snap_remove(const cls::rbd::SnapshotNamespace& snap_namespace,
 				const std::string& snap_name,
 				Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": snap_name=" << snap_name
                 << dendl;
 
@@ -1041,7 +1041,7 @@ void Operations<I>::snap_remove(const cls::rbd::SnapshotNamespace& snap_namespac
 
   // quickly filter out duplicate ops
   m_image_ctx.image_lock.lock_shared();
-  if (m_image_ctx.get_snap_id(snap_namespace, snap_name) == CEPH_NOSNAP) {
+  if (m_image_ctx.get_snap_id(snap_namespace, snap_name) == STONE_NOSNAP) {
     m_image_ctx.image_lock.unlock_shared();
     on_finish->complete(-ENOENT);
     return;
@@ -1077,15 +1077,15 @@ template <typename I>
 void Operations<I>::execute_snap_remove(const cls::rbd::SnapshotNamespace& snap_namespace,
 					const std::string &snap_name,
                                         Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
   {
     if ((m_image_ctx.features & RBD_FEATURE_FAST_DIFF) != 0) {
-      ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+      stone_assert(m_image_ctx.exclusive_lock == nullptr ||
                   m_image_ctx.exclusive_lock->is_lock_owner());
     }
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": snap_name=" << snap_name
                 << dendl;
 
@@ -1096,7 +1096,7 @@ void Operations<I>::execute_snap_remove(const cls::rbd::SnapshotNamespace& snap_
 
   m_image_ctx.image_lock.lock_shared();
   uint64_t snap_id = m_image_ctx.get_snap_id(snap_namespace, snap_name);
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     lderr(m_image_ctx.cct) << "No such snapshot found." << dendl;
     m_image_ctx.image_lock.unlock_shared();
     on_finish->complete(-ENOENT);
@@ -1126,7 +1126,7 @@ void Operations<I>::execute_snap_remove(const cls::rbd::SnapshotNamespace& snap_
 
 template <typename I>
 int Operations<I>::snap_rename(const char *srcname, const char *dstname) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": "
                 << "snap_name=" << srcname << ", "
                 << "new_snap_name=" << dstname << dendl;
@@ -1143,10 +1143,10 @@ int Operations<I>::snap_rename(const char *srcname, const char *dstname) {
   {
     std::shared_lock l{m_image_ctx.image_lock};
     snap_id = m_image_ctx.get_snap_id(cls::rbd::UserSnapshotNamespace(), srcname);
-    if (snap_id == CEPH_NOSNAP) {
+    if (snap_id == STONE_NOSNAP) {
       return -ENOENT;
     }
-    if (m_image_ctx.get_snap_id(cls::rbd::UserSnapshotNamespace(), dstname) != CEPH_NOSNAP) {
+    if (m_image_ctx.get_snap_id(cls::rbd::UserSnapshotNamespace(), dstname) != STONE_NOSNAP) {
       return -EEXIST;
     }
   }
@@ -1185,9 +1185,9 @@ template <typename I>
 void Operations<I>::execute_snap_rename(const uint64_t src_snap_id,
                                         const std::string &dest_snap_name,
                                         Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
   if ((m_image_ctx.features & RBD_FEATURE_JOURNALING) != 0) {
-    ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+    stone_assert(m_image_ctx.exclusive_lock == nullptr ||
                 m_image_ctx.exclusive_lock->is_lock_owner());
   }
 
@@ -1198,7 +1198,7 @@ void Operations<I>::execute_snap_rename(const uint64_t src_snap_id,
 
   m_image_ctx.image_lock.lock_shared();
   if (m_image_ctx.get_snap_id(cls::rbd::UserSnapshotNamespace(),
-			      dest_snap_name) != CEPH_NOSNAP) {
+			      dest_snap_name) != STONE_NOSNAP) {
     // Renaming is supported for snapshots from user namespace only.
     m_image_ctx.image_lock.unlock_shared();
     on_finish->complete(-EEXIST);
@@ -1206,7 +1206,7 @@ void Operations<I>::execute_snap_rename(const uint64_t src_snap_id,
   }
   m_image_ctx.image_lock.unlock_shared();
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": "
                 << "snap_id=" << src_snap_id << ", "
                 << "new_snap_name=" << dest_snap_name << dendl;
@@ -1221,7 +1221,7 @@ void Operations<I>::execute_snap_rename(const uint64_t src_snap_id,
 template <typename I>
 int Operations<I>::snap_protect(const cls::rbd::SnapshotNamespace& snap_namespace,
 				const std::string& snap_name) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": snap_name=" << snap_name
                 << dendl;
 
@@ -1285,9 +1285,9 @@ template <typename I>
 void Operations<I>::execute_snap_protect(const cls::rbd::SnapshotNamespace& snap_namespace,
 					 const std::string &snap_name,
                                          Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
   if (m_image_ctx.test_features(RBD_FEATURE_JOURNALING)) {
-    ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+    stone_assert(m_image_ctx.exclusive_lock == nullptr ||
                 m_image_ctx.exclusive_lock->is_lock_owner());
   }
 
@@ -1311,7 +1311,7 @@ void Operations<I>::execute_snap_protect(const cls::rbd::SnapshotNamespace& snap
   }
   m_image_ctx.image_lock.unlock_shared();
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": snap_name=" << snap_name
                 << dendl;
 
@@ -1324,7 +1324,7 @@ void Operations<I>::execute_snap_protect(const cls::rbd::SnapshotNamespace& snap
 template <typename I>
 int Operations<I>::snap_unprotect(const cls::rbd::SnapshotNamespace& snap_namespace,
 				  const std::string& snap_name) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": snap_name=" << snap_name
                 << dendl;
 
@@ -1383,9 +1383,9 @@ template <typename I>
 void Operations<I>::execute_snap_unprotect(const cls::rbd::SnapshotNamespace& snap_namespace,
 					   const std::string &snap_name,
                                            Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
   if (m_image_ctx.test_features(RBD_FEATURE_JOURNALING)) {
-    ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+    stone_assert(m_image_ctx.exclusive_lock == nullptr ||
                 m_image_ctx.exclusive_lock->is_lock_owner());
   }
 
@@ -1409,7 +1409,7 @@ void Operations<I>::execute_snap_unprotect(const cls::rbd::SnapshotNamespace& sn
   }
   m_image_ctx.image_lock.unlock_shared();
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": snap_name=" << snap_name
                 << dendl;
 
@@ -1421,7 +1421,7 @@ void Operations<I>::execute_snap_unprotect(const cls::rbd::SnapshotNamespace& sn
 
 template <typename I>
 int Operations<I>::snap_set_limit(uint64_t limit) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": limit=" << limit << dendl;
 
   if (m_image_ctx.read_only) {
@@ -1452,9 +1452,9 @@ int Operations<I>::snap_set_limit(uint64_t limit) {
 template <typename I>
 void Operations<I>::execute_snap_set_limit(const uint64_t limit,
 					   Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": limit=" << limit
                 << dendl;
 
@@ -1465,7 +1465,7 @@ void Operations<I>::execute_snap_set_limit(const uint64_t limit,
 
 template <typename I>
 int Operations<I>::update_features(uint64_t features, bool enabled) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": features=" << features
                 << ", enabled=" << enabled << dendl;
 
@@ -1571,11 +1571,11 @@ template <typename I>
 void Operations<I>::execute_update_features(uint64_t features, bool enabled,
                                             Context *on_finish,
                                             uint64_t journal_op_tid) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": features=" << features
                 << ", enabled=" << enabled << dendl;
 
@@ -1600,7 +1600,7 @@ void Operations<I>::execute_update_features(uint64_t features, bool enabled,
 template <typename I>
 int Operations<I>::metadata_set(const std::string &key,
                                 const std::string &value) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": key=" << key << ", value="
                 << value << dendl;
 
@@ -1651,9 +1651,9 @@ template <typename I>
 void Operations<I>::execute_metadata_set(const std::string &key,
 					const std::string &value,
 					Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": key=" << key << ", value="
                 << value << dendl;
 
@@ -1671,7 +1671,7 @@ void Operations<I>::execute_metadata_set(const std::string &key,
 
 template <typename I>
 int Operations<I>::metadata_remove(const std::string &key) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": key=" << key << dendl;
 
   int r = m_image_ctx.state->refresh_if_required();
@@ -1714,9 +1714,9 @@ int Operations<I>::metadata_remove(const std::string &key) {
 template <typename I>
 void Operations<I>::execute_metadata_remove(const std::string &key,
                                            Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": key=" << key << dendl;
 
   if (m_image_ctx.operations_disabled) {
@@ -1733,7 +1733,7 @@ void Operations<I>::execute_metadata_remove(const std::string &key,
 
 template <typename I>
 int Operations<I>::migrate(ProgressContext &prog_ctx) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "migrate" << dendl;
 
   int r = m_image_ctx.state->refresh_if_required();
@@ -1773,11 +1773,11 @@ int Operations<I>::migrate(ProgressContext &prog_ctx) {
 template <typename I>
 void Operations<I>::execute_migrate(ProgressContext &prog_ctx,
                                     Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "migrate" << dendl;
 
   if (m_image_ctx.read_only || m_image_ctx.operations_disabled) {
@@ -1793,7 +1793,7 @@ void Operations<I>::execute_migrate(ProgressContext &prog_ctx,
     on_finish->complete(-EINVAL);
     return;
   }
-  if (m_image_ctx.snap_id != CEPH_NOSNAP) {
+  if (m_image_ctx.snap_id != STONE_NOSNAP) {
     lderr(cct) << "snapshots cannot be migrated" << dendl;
     m_image_ctx.image_lock.unlock_shared();
     on_finish->complete(-EROFS);
@@ -1809,7 +1809,7 @@ void Operations<I>::execute_migrate(ProgressContext &prog_ctx,
 
 template <typename I>
 int Operations<I>::sparsify(size_t sparse_size, ProgressContext &prog_ctx) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "sparsify" << dendl;
 
   if (sparse_size < 4096 || sparse_size > m_image_ctx.get_object_size() ||
@@ -1841,11 +1841,11 @@ template <typename I>
 void Operations<I>::execute_sparsify(size_t sparse_size,
                                      ProgressContext &prog_ctx,
                                      Context *on_finish) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx.owner_lock));
-  ceph_assert(m_image_ctx.exclusive_lock == nullptr ||
+  stone_assert(stone_mutex_is_locked(m_image_ctx.owner_lock));
+  stone_assert(m_image_ctx.exclusive_lock == nullptr ||
               m_image_ctx.exclusive_lock->is_lock_owner());
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << "sparsify" << dendl;
 
   if (m_image_ctx.operations_disabled) {
@@ -1862,7 +1862,7 @@ void Operations<I>::execute_sparsify(size_t sparse_size,
 template <typename I>
 int Operations<I>::prepare_image_update(
     exclusive_lock::OperationRequestType request_type, bool request_lock) {
-  ceph_assert(ceph_mutex_is_rlocked(m_image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_rlocked(m_image_ctx.owner_lock));
   if (m_image_ctx.image_watcher == nullptr) {
     return -EROFS;
   }

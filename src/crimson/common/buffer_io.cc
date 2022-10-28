@@ -11,7 +11,7 @@
 
 namespace crimson {
 
-seastar::future<> write_file(ceph::buffer::list&& bl,
+seastar::future<> write_file(stone::buffer::list&& bl,
                              seastar::sstring fn,
                              seastar::file_permissions permissions)
 {
@@ -29,7 +29,7 @@ seastar::future<> write_file(ceph::buffer::list&& bl,
                               std::move(bl),
                               [](seastar::output_stream<char>& out,
                                  seastar::file& f,
-                                 ceph::buffer::list& bl) {
+                                 stone::buffer::list& bl) {
         return seastar::do_for_each(bl.buffers(), [&out](auto& buf) {
           return out.write(buf.c_str(), buf.length());
         }).then([&out] {

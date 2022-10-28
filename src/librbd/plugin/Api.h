@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_PLUGIN_API_H
-#define CEPH_LIBRBD_PLUGIN_API_H
+#ifndef STONE_LIBRBD_PLUGIN_API_H
+#define STONE_LIBRBD_PLUGIN_API_H
 
 #include "common/Timer.h"
 #include "common/ceph_mutex.h"
@@ -49,7 +49,7 @@ struct Api {
       Context *on_finish);
 
   virtual void get_image_timer_instance(
-      CephContext *cct, SafeTimer **timer,
+      StoneContext *cct, SafeTimer **timer,
       ceph::mutex **timer_lock);
 
   virtual bool test_image_features(
@@ -81,4 +81,4 @@ private:
 
 extern template class librbd::plugin::Api<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_PLUGIN_API_H
+#endif // STONE_LIBRBD_PLUGIN_API_H

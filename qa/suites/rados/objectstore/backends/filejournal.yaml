@@ -6,8 +6,8 @@ openstack:
     size: 10 # GB
 tasks:
 - install:
-- ceph:
+- stone:
     fs: xfs
 - exec:
     client.0:
-      - ceph_test_filejournal
+      - stone_test_filejournal

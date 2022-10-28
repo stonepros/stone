@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc.
  *
@@ -40,7 +40,7 @@
 namespace ba = boost::asio;
 namespace bs = boost::system;
 namespace bpo = boost::program_options;
-namespace cb = ceph::buffer;
+namespace cb = stone::buffer;
 namespace R = neorados;
 namespace RCf = neorados::cls::fifo;
 namespace fifo = rados::cls::fifo;

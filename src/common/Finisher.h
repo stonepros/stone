@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_FINISHER_H
-#define CEPH_FINISHER_H
+#ifndef STONE_FINISHER_H
+#define STONE_FINISHER_H
 
 #include "include/Context.h"
 #include "include/common_fwd.h"
@@ -37,7 +37,7 @@ enum {
  * contexts to complete is thread-safe.
  */
 class Finisher {
-  CephContext *cct;
+  StoneeContext *cct;
   ceph::mutex finisher_lock; ///< Protects access to queues and finisher_running.
   ceph::condition_variable finisher_cond; ///< Signaled when there is something to process.
   ceph::condition_variable finisher_empty_cond; ///< Signaled when the finisher has nothing more to process.
@@ -137,14 +137,14 @@ class Finisher {
 
   /// Construct an anonymous Finisher.
   /// Anonymous finishers do not log their queue length.
-  explicit Finisher(CephContext *cct_) :
+  explicit Finisher(StoneeContext *cct_) :
     cct(cct_), finisher_lock(ceph::make_mutex("Finisher::finisher_lock")),
     finisher_stop(false), finisher_running(false), finisher_empty_wait(false),
     thread_name("fn_anonymous"), logger(0),
     finisher_thread(this) {}
 
   /// Construct a named Finisher that logs its queue length.
-  Finisher(CephContext *cct_, std::string name, std::string tn) :
+  Finisher(StoneeContext *cct_, std::string name, std::string tn) :
     cct(cct_), finisher_lock(ceph::make_mutex("Finisher::" + name)),
     finisher_stop(false), finisher_running(false), finisher_empty_wait(false),
     thread_name(tn), logger(0),

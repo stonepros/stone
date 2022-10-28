@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_ELECTIONLOGIC_H
-#define CEPH_ELECTIONLOGIC_H
+#ifndef STONE_ELECTIONLOGIC_H
+#define STONE_ELECTIONLOGIC_H
 
 #include <map>
 #include "include/types.h"

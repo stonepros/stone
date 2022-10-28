@@ -8,8 +8,8 @@
 #include "global/global_context.h"
 #include "global/global_init.h"
 #include "common/common_init.h"
-#include "common/ceph_argparse.h"
-#include "common/ceph_json.h"
+#include "common/stone_argparse.h"
+#include "common/stone_json.h"
 
 #include <iostream>
 
@@ -23,10 +23,10 @@ int main(int argc, char **argv) {
     { "osd_crush_chooseleaf_type", "0" },
   };
   std::vector<const char*> args(argv, argv+argc);
-  auto cct = global_init(&defaults, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(&defaults, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
@@ -46,7 +46,7 @@ public:
   void set_up_map(int new_num_osds = 6, bool no_default_pools = false) {
     num_osds = new_num_osds;
     uuid_d fsid;
-    osdmap.build_simple(g_ceph_context, 0, fsid, num_osds);
+    osdmap.build_simple(g_stone_context, 0, fsid, num_osds);
     OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
     pending_inc.fsid = osdmap.get_fsid();
     entity_addrvec_t sample_addrs;
@@ -55,12 +55,12 @@ public:
     for (int i = 0; i < num_osds; ++i) {
       sample_uuid.generate_random();
       sample_addrs.v[0].nonce = i;
-      pending_inc.new_state[i] = CEPH_OSD_EXISTS | CEPH_OSD_NEW;
+      pending_inc.new_state[i] = STONE_OSD_EXISTS | STONE_OSD_NEW;
       pending_inc.new_up_client[i] = sample_addrs;
       pending_inc.new_up_cluster[i] = sample_addrs;
       pending_inc.new_hb_back_up[i] = sample_addrs;
       pending_inc.new_hb_front_up[i] = sample_addrs;
-      pending_inc.new_weight[i] = CEPH_OSD_IN;
+      pending_inc.new_weight[i] = STONE_OSD_IN;
       pending_inc.new_uuid[i] = sample_uuid;
     }
     osdmap.apply_incremental(pending_inc);
@@ -79,7 +79,7 @@ public:
     pg_pool_t empty;
     // make an ec pool
     uint64_t pool_id = ++new_pool_inc.new_pool_max;
-    ceph_assert(pool_id == my_ec_pool);
+    stone_assert(pool_id == my_ec_pool);
     pg_pool_t *p = new_pool_inc.get_new_pool(pool_id, &empty);
     p->size = 3;
     p->set_pg_num(64);
@@ -89,7 +89,7 @@ public:
     new_pool_inc.new_pool_names[pool_id] = "ec";
     // and a replicated pool
     pool_id = ++new_pool_inc.new_pool_max;
-    ceph_assert(pool_id == my_rep_pool);
+    stone_assert(pool_id == my_rep_pool);
     p = new_pool_inc.get_new_pool(pool_id, &empty);
     p->size = 3;
     p->set_pg_num(64);
@@ -103,7 +103,7 @@ public:
   unsigned int get_num_osds() { return num_osds; }
   void get_crush(const OSDMap& tmap, CrushWrapper& newcrush) {
     bufferlist bl;
-    tmap.crush->encode(bl, CEPH_FEATURES_SUPPORTED_DEFAULT);
+    tmap.crush->encode(bl, STONE_FEATURES_SUPPORTED_DEFAULT);
     auto p = bl.cbegin();
     newcrush.decode(p);
   }
@@ -117,16 +117,16 @@ public:
     }
     int id = newcrush.get_item_id(name);
     int err;
-    if (!newcrush.check_item_loc(g_ceph_context, id, loc, (int *)NULL)) {
+    if (!newcrush.check_item_loc(g_stone_context, id, loc, (int *)NULL)) {
       if (id >= 0) {
-        err = newcrush.create_or_move_item(g_ceph_context, id, 0, name, loc);
+        err = newcrush.create_or_move_item(g_stone_context, id, 0, name, loc);
       } else {
-        err = newcrush.move_bucket(g_ceph_context, id, loc);
+        err = newcrush.move_bucket(g_stone_context, id, loc);
       }
       if (err >= 0) {
         OSDMap::Incremental pending_inc(tmap.get_epoch() + 1);
         pending_inc.crush.clear();
-        newcrush.encode(pending_inc.crush, CEPH_FEATURES_SUPPORTED_DEFAULT);
+        newcrush.encode(pending_inc.crush, STONE_FEATURES_SUPPORTED_DEFAULT);
         tmap.apply_incremental(pending_inc);
         err = 0;
       }
@@ -152,7 +152,7 @@ public:
     if (ruleno >= 0) {
       OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
       pending_inc.crush.clear();
-      newcrush.encode(pending_inc.crush, CEPH_FEATURES_SUPPORTED_DEFAULT);
+      newcrush.encode(pending_inc.crush, STONE_FEATURES_SUPPORTED_DEFAULT);
       osdmap.apply_incremental(pending_inc);
     }
     return ruleno;
@@ -190,7 +190,7 @@ public:
     cout << "first: " << *first << std::endl;;
     cout << "primary: " << *primary << std::endl;;
   }
-  void clean_pg_upmaps(CephContext *cct,
+  void clean_pg_upmaps(StoneContext *cct,
                        const OSDMap& om,
                        OSDMap::Incremental& pending_inc) {
     int cpu_num = 8;
@@ -216,22 +216,22 @@ TEST_F(OSDMapTest, Create) {
 TEST_F(OSDMapTest, Features) {
   // with EC pool
   set_up_map();
-  uint64_t features = osdmap.get_features(CEPH_ENTITY_TYPE_OSD, NULL);
-  ASSERT_TRUE(features & CEPH_FEATURE_CRUSH_TUNABLES);
-  ASSERT_TRUE(features & CEPH_FEATURE_CRUSH_TUNABLES2);
-  ASSERT_TRUE(features & CEPH_FEATURE_CRUSH_TUNABLES3);
-  ASSERT_TRUE(features & CEPH_FEATURE_CRUSH_V2);
-  ASSERT_TRUE(features & CEPH_FEATURE_OSDHASHPSPOOL);
-  ASSERT_TRUE(features & CEPH_FEATURE_OSD_PRIMARY_AFFINITY);
+  uint64_t features = osdmap.get_features(STONE_ENTITY_TYPE_OSD, NULL);
+  ASSERT_TRUE(features & STONE_FEATURE_CRUSH_TUNABLES);
+  ASSERT_TRUE(features & STONE_FEATURE_CRUSH_TUNABLES2);
+  ASSERT_TRUE(features & STONE_FEATURE_CRUSH_TUNABLES3);
+  ASSERT_TRUE(features & STONE_FEATURE_CRUSH_V2);
+  ASSERT_TRUE(features & STONE_FEATURE_OSDHASHPSPOOL);
+  ASSERT_TRUE(features & STONE_FEATURE_OSD_PRIMARY_AFFINITY);
 
   // clients have a slightly different view
-  features = osdmap.get_features(CEPH_ENTITY_TYPE_CLIENT, NULL);
-  ASSERT_TRUE(features & CEPH_FEATURE_CRUSH_TUNABLES);
-  ASSERT_TRUE(features & CEPH_FEATURE_CRUSH_TUNABLES2);
-  ASSERT_TRUE(features & CEPH_FEATURE_CRUSH_TUNABLES3);
-  ASSERT_TRUE(features & CEPH_FEATURE_CRUSH_V2);
-  ASSERT_TRUE(features & CEPH_FEATURE_OSDHASHPSPOOL);
-  ASSERT_TRUE(features & CEPH_FEATURE_OSD_PRIMARY_AFFINITY);
+  features = osdmap.get_features(STONE_ENTITY_TYPE_CLIENT, NULL);
+  ASSERT_TRUE(features & STONE_FEATURE_CRUSH_TUNABLES);
+  ASSERT_TRUE(features & STONE_FEATURE_CRUSH_TUNABLES2);
+  ASSERT_TRUE(features & STONE_FEATURE_CRUSH_TUNABLES3);
+  ASSERT_TRUE(features & STONE_FEATURE_CRUSH_V2);
+  ASSERT_TRUE(features & STONE_FEATURE_OSDHASHPSPOOL);
+  ASSERT_TRUE(features & STONE_FEATURE_OSD_PRIMARY_AFFINITY);
 
   // remove teh EC pool, but leave the rule.  add primary affinity.
   {
@@ -241,13 +241,13 @@ TEST_F(OSDMapTest, Features) {
     osdmap.apply_incremental(new_pool_inc);
   }
 
-  features = osdmap.get_features(CEPH_ENTITY_TYPE_MON, NULL);
-  ASSERT_TRUE(features & CEPH_FEATURE_CRUSH_TUNABLES);
-  ASSERT_TRUE(features & CEPH_FEATURE_CRUSH_TUNABLES2);
-  ASSERT_TRUE(features & CEPH_FEATURE_CRUSH_TUNABLES3); // shared bit with primary affinity
-  ASSERT_FALSE(features & CEPH_FEATURE_CRUSH_V2);
-  ASSERT_TRUE(features & CEPH_FEATURE_OSDHASHPSPOOL);
-  ASSERT_TRUE(features & CEPH_FEATURE_OSD_PRIMARY_AFFINITY);
+  features = osdmap.get_features(STONE_ENTITY_TYPE_MON, NULL);
+  ASSERT_TRUE(features & STONE_FEATURE_CRUSH_TUNABLES);
+  ASSERT_TRUE(features & STONE_FEATURE_CRUSH_TUNABLES2);
+  ASSERT_TRUE(features & STONE_FEATURE_CRUSH_TUNABLES3); // shared bit with primary affinity
+  ASSERT_FALSE(features & STONE_FEATURE_CRUSH_V2);
+  ASSERT_TRUE(features & STONE_FEATURE_OSDHASHPSPOOL);
+  ASSERT_TRUE(features & STONE_FEATURE_OSD_PRIMARY_AFFINITY);
 
   // FIXME: test tiering feature bits
 }
@@ -395,7 +395,7 @@ TEST_F(OSDMapTest, CleanTemps) {
   OSDMap tmpmap;
   tmpmap.deepish_copy_from(osdmap);
   tmpmap.apply_incremental(pending_inc);
-  OSDMap::clean_temps(g_ceph_context, osdmap, tmpmap, &pending_inc);
+  OSDMap::clean_temps(g_stone_context, osdmap, tmpmap, &pending_inc);
 
   EXPECT_TRUE(pending_inc.new_pg_temp.count(pga) &&
 	      pending_inc.new_pg_temp[pga].size() == 0);
@@ -448,7 +448,7 @@ TEST_F(OSDMapTest, KeepsNecessaryTemps) {
   OSDMap tmpmap;
   tmpmap.deepish_copy_from(osdmap);
   tmpmap.apply_incremental(pending_inc);
-  OSDMap::clean_temps(g_ceph_context, osdmap, tmpmap, &pending_inc);
+  OSDMap::clean_temps(g_stone_context, osdmap, tmpmap, &pending_inc);
   EXPECT_FALSE(pending_inc.new_pg_temp.count(pgid));
   EXPECT_FALSE(pending_inc.new_primary_temp.count(pgid));
 }
@@ -686,13 +686,13 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
     nextmap.apply_incremental(pending_inc);
     ASSERT_TRUE(nextmap.have_pg_upmaps(pgid));
     OSDMap::Incremental new_pending_inc(nextmap.get_epoch() + 1);
-    clean_pg_upmaps(g_ceph_context, nextmap, new_pending_inc);
+    clean_pg_upmaps(g_stone_context, nextmap, new_pending_inc);
     nextmap.apply_incremental(new_pending_inc);
     ASSERT_TRUE(!nextmap.have_pg_upmaps(pgid));
   }
 
   {
-    // https://tracker.ceph.com/issues/37493
+    // https://tracker.stone.com/issues/37493
     pg_t ec_pg(0, my_ec_pool);
     pg_t ec_pgid = osdmap.raw_pg_to_pg(ec_pg);
     OSDMap tmpmap; // use a tmpmap here, so we do not dirty origin map..
@@ -727,7 +727,7 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
     {
       // mark one of the target OSDs of the above pg_upmap_item as down
       OSDMap::Incremental pending_inc(tmpmap.get_epoch() + 1);
-      pending_inc.new_state[to] = CEPH_OSD_UP;
+      pending_inc.new_state[to] = STONE_OSD_UP;
       tmpmap.apply_incremental(pending_inc);
       ASSERT_TRUE(!tmpmap.is_up(to));
       ASSERT_TRUE(tmpmap.have_pg_upmaps(ec_pgid));
@@ -735,14 +735,14 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
     {
       // confirm *clean_pg_upmaps* won't do anything bad
       OSDMap::Incremental pending_inc(tmpmap.get_epoch() + 1);
-      clean_pg_upmaps(g_ceph_context, tmpmap, pending_inc);
+      clean_pg_upmaps(g_stone_context, tmpmap, pending_inc);
       tmpmap.apply_incremental(pending_inc);
       ASSERT_TRUE(tmpmap.have_pg_upmaps(ec_pgid));
     }
   }
 
   {
-    // http://tracker.ceph.com/issues/37501
+    // http://tracker.stone.com/issues/37501
     pg_t ec_pg(0, my_ec_pool);
     pg_t ec_pgid = osdmap.raw_pg_to_pg(ec_pg);
     OSDMap tmpmap; // use a tmpmap here, so we do not dirty origin map..
@@ -777,7 +777,7 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
     {
       // mark one of the target OSDs of the above pg_upmap_item as out
       OSDMap::Incremental pending_inc(tmpmap.get_epoch() + 1);
-      pending_inc.new_weight[to] = CEPH_OSD_OUT;
+      pending_inc.new_weight[to] = STONE_OSD_OUT;
       tmpmap.apply_incremental(pending_inc);
       ASSERT_TRUE(tmpmap.is_out(to));
       ASSERT_TRUE(tmpmap.have_pg_upmaps(ec_pgid));
@@ -785,14 +785,14 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
     {
       // *clean_pg_upmaps* should be able to remove the above *bad* mapping
       OSDMap::Incremental pending_inc(tmpmap.get_epoch() + 1);
-      clean_pg_upmaps(g_ceph_context, tmpmap, pending_inc);
+      clean_pg_upmaps(g_stone_context, tmpmap, pending_inc);
       tmpmap.apply_incremental(pending_inc);
       ASSERT_TRUE(!tmpmap.have_pg_upmaps(ec_pgid));
     }
   }
 
   {
-    // http://tracker.ceph.com/issues/37968
+    // http://tracker.stone.com/issues/37968
     
     // build a temporary crush topology of 2 hosts, 3 osds per host
     OSDMap tmp; // use a tmpmap here, so we do not dirty origin map..
@@ -848,7 +848,7 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
     {
       OSDMap::Incremental pending_inc(tmp.get_epoch() + 1);
       pending_inc.crush.clear();
-      crush.encode(pending_inc.crush, CEPH_FEATURES_SUPPORTED_DEFAULT);
+      crush.encode(pending_inc.crush, STONE_FEATURES_SUPPORTED_DEFAULT);
       tmp.apply_incremental(pending_inc);
     }
 
@@ -909,7 +909,7 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
     {
       // *clean_pg_upmaps* should not remove the above upmap_item
       OSDMap::Incremental pending_inc(tmp.get_epoch() + 1);
-      clean_pg_upmaps(g_ceph_context, tmp, pending_inc);
+      clean_pg_upmaps(g_stone_context, tmp, pending_inc);
       tmp.apply_incremental(pending_inc);
       ASSERT_TRUE(tmp.have_pg_upmaps(ec_pgid));
     }
@@ -974,7 +974,7 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
     {
       // STEP-2: apply cure
       OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
-      clean_pg_upmaps(g_ceph_context, osdmap, pending_inc);
+      clean_pg_upmaps(g_stone_context, osdmap, pending_inc);
       osdmap.apply_incremental(pending_inc);
       {
         // validate pg_upmap is gone (reverted)
@@ -1009,7 +1009,7 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
         &children);
       OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
       for (auto c: children) {
-        pending_inc.new_weight[c] = CEPH_OSD_OUT;
+        pending_inc.new_weight[c] = STONE_OSD_OUT;
       }
       OSDMap tmpmap;
       tmpmap.deepish_copy_from(osdmap);
@@ -1089,7 +1089,7 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
         &children);
       OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
       for (auto c: children) {
-        pending_inc.new_weight[c] = CEPH_OSD_OUT;
+        pending_inc.new_weight[c] = STONE_OSD_OUT;
       }
       osdmap.apply_incremental(pending_inc);
       {
@@ -1108,7 +1108,7 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
     {
       // STEP-4: apply cure
       OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
-      clean_pg_upmaps(g_ceph_context, osdmap, pending_inc);
+      clean_pg_upmaps(g_stone_context, osdmap, pending_inc);
       osdmap.apply_incremental(pending_inc);
       {
         // validate pg_upmap_items is gone (reverted)
@@ -1122,7 +1122,7 @@ TEST_F(OSDMapTest, CleanPGUpmaps) {
 }
 
 TEST_F(OSDMapTest, BUG_38897) {
-  // http://tracker.ceph.com/issues/38897
+  // http://tracker.stone.com/issues/38897
   // build a fresh map with 12 OSDs, without any default pools
   set_up_map(12, true);
   const string pool_1("pool1");
@@ -1176,7 +1176,7 @@ TEST_F(OSDMapTest, BUG_38897) {
     {
       OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
       pending_inc.crush.clear();
-      crush.encode(pending_inc.crush, CEPH_FEATURES_SUPPORTED_DEFAULT);
+      crush.encode(pending_inc.crush, STONE_FEATURES_SUPPORTED_DEFAULT);
       osdmap.apply_incremental(pending_inc);
     }
 
@@ -1275,7 +1275,7 @@ TEST_F(OSDMapTest, BUG_38897) {
     {
       OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
       pending_inc.crush.clear();
-      crush.encode(pending_inc.crush, CEPH_FEATURES_SUPPORTED_DEFAULT);
+      crush.encode(pending_inc.crush, STONE_FEATURES_SUPPORTED_DEFAULT);
       osdmap.apply_incremental(pending_inc);
     }
 
@@ -1331,7 +1331,7 @@ TEST_F(OSDMapTest, BUG_38897) {
     only_pools.insert(pool_1_id);
     OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
     // require perfect distribution! (max deviation 0)
-    osdmap.calc_pg_upmaps(g_ceph_context,
+    osdmap.calc_pg_upmaps(g_stone_context,
                           0, // so we can force optimizing
                           100,
                           only_pools,
@@ -1341,7 +1341,7 @@ TEST_F(OSDMapTest, BUG_38897) {
 }
 
 TEST_F(OSDMapTest, BUG_40104) {
-  // http://tracker.ceph.com/issues/40104
+  // http://tracker.stone.com/issues/40104
   int big_osd_num = 5000;
   int big_pg_num = 10000;
   set_up_map(big_osd_num, true);
@@ -1388,7 +1388,7 @@ TEST_F(OSDMapTest, BUG_40104) {
   {
     OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
     auto start = mono_clock::now();
-    clean_pg_upmaps(g_ceph_context, osdmap, pending_inc);
+    clean_pg_upmaps(g_stone_context, osdmap, pending_inc);
     auto latency = mono_clock::now() - start;
     std::cout << "clean_pg_upmaps (~" << big_pg_num
               << " pg_upmap_items) latency:" << timespan_str(latency)
@@ -1397,7 +1397,7 @@ TEST_F(OSDMapTest, BUG_40104) {
 }
 
 TEST_F(OSDMapTest, BUG_42052) {
-  // https://tracker.ceph.com/issues/42052
+  // https://tracker.stone.com/issues/42052
   set_up_map(6, true);
   const string pool_name("pool");
   // build customized crush rule for "pool"
@@ -1432,7 +1432,7 @@ TEST_F(OSDMapTest, BUG_42052) {
   {
     OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
     pending_inc.crush.clear();
-    crush.encode(pending_inc.crush, CEPH_FEATURES_SUPPORTED_DEFAULT);
+    crush.encode(pending_inc.crush, STONE_FEATURES_SUPPORTED_DEFAULT);
     osdmap.apply_incremental(pending_inc);
   }
 
@@ -1476,7 +1476,7 @@ TEST_F(OSDMapTest, BUG_42052) {
   }
   {
     OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
-    clean_pg_upmaps(g_ceph_context, osdmap, pending_inc);
+    clean_pg_upmaps(g_stone_context, osdmap, pending_inc);
     osdmap.apply_incremental(pending_inc);
     ASSERT_FALSE(osdmap.have_pg_upmaps(pgid));
   }
@@ -1558,7 +1558,7 @@ TEST_F(OSDMapTest, BUG_42485) {
     {
       OSDMap::Incremental pending_inc(tmp.get_epoch() + 1);
       pending_inc.crush.clear();
-      crush.encode(pending_inc.crush, CEPH_FEATURES_SUPPORTED_DEFAULT);
+      crush.encode(pending_inc.crush, STONE_FEATURES_SUPPORTED_DEFAULT);
       tmp.apply_incremental(pending_inc);
     }
     // create a repliacted pool referencing the above rule
@@ -1692,7 +1692,7 @@ TEST_F(OSDMapTest, BUG_42485) {
     {
       // *maybe_remove_pg_upmaps* should remove the above upmap_item
       OSDMap::Incremental pending_inc(tmp.get_epoch() + 1);
-      clean_pg_upmaps(g_ceph_context, tmp, pending_inc);
+      clean_pg_upmaps(g_stone_context, tmp, pending_inc);
       tmp.apply_incremental(pending_inc);
       ASSERT_FALSE(tmp.have_pg_upmaps(rep_pgid));
       ASSERT_FALSE(tmp.have_pg_upmaps(rep_pgid2));
@@ -1719,7 +1719,7 @@ TEST(PGTempMap, basic)
 TEST_F(OSDMapTest, BUG_43124) {
   set_up_map(200);
   {
-    // https://tracker.ceph.com/issues/43124
+    // https://tracker.stone.com/issues/43124
 
     // build a temporary crush topology of 5racks,
     // 4 hosts per rack, 10osds per host
@@ -1785,7 +1785,7 @@ TEST_F(OSDMapTest, BUG_43124) {
     {
       OSDMap::Incremental pending_inc(tmp.get_epoch() + 1);
       pending_inc.crush.clear();
-      crush.encode(pending_inc.crush, CEPH_FEATURES_SUPPORTED_DEFAULT);
+      crush.encode(pending_inc.crush, STONE_FEATURES_SUPPORTED_DEFAULT);
       tmp.apply_incremental(pending_inc);
     }
     {
@@ -1861,7 +1861,7 @@ TEST_F(OSDMapTest, BUG_43124) {
     {
       // *maybe_remove_pg_upmaps* should not remove the above upmap_item
       OSDMap::Incremental pending_inc(tmp.get_epoch() + 1);
-      clean_pg_upmaps(g_ceph_context, tmp, pending_inc);
+      clean_pg_upmaps(g_stone_context, tmp, pending_inc);
       tmp.apply_incremental(pending_inc);
       ASSERT_TRUE(tmp.have_pg_upmaps(rep_pgid));
     }
@@ -1896,10 +1896,10 @@ TEST_F(OSDMapTest, BUG_48884)
   CrushWrapper crush;
   get_crush(osdmap, crush);
   auto host_id = crush.get_item_id("localhost");
-  crush.remove_item(g_ceph_context, host_id, false);
+  crush.remove_item(g_stone_context, host_id, false);
   OSDMap::Incremental pending_inc(osdmap.get_epoch() + 1);
   pending_inc.crush.clear();
-  crush.encode(pending_inc.crush, CEPH_FEATURES_SUPPORTED_DEFAULT);
+  crush.encode(pending_inc.crush, STONE_FEATURES_SUPPORTED_DEFAULT);
   osdmap.apply_incremental(pending_inc);
 
   PGMap pgmap;
@@ -1995,7 +1995,7 @@ TEST_P(OSDMapTest, BUG_51842) {
     {
       OSDMap::Incremental pending_inc(tmp.get_epoch() + 1);
       pending_inc.crush.clear();
-      crush.encode(pending_inc.crush, CEPH_FEATURES_SUPPORTED_DEFAULT);
+      crush.encode(pending_inc.crush, STONE_FEATURES_SUPPORTED_DEFAULT);
       tmp.apply_incremental(pending_inc);
     }
     {
@@ -2059,7 +2059,7 @@ TEST_P(OSDMapTest, BUG_51842) {
       tmpmap.apply_incremental(new_pool_inc);
 
       OSDMap::Incremental new_pending_inc(tmpmap.get_epoch() + 1);
-      clean_pg_upmaps(g_ceph_context, tmpmap, new_pending_inc);
+      clean_pg_upmaps(g_stone_context, tmpmap, new_pending_inc);
       tmpmap.apply_incremental(new_pending_inc);
       // check pg upmaps
       ASSERT_TRUE(!tmpmap.have_pg_upmaps(rep_pgid));
@@ -2078,7 +2078,7 @@ TEST_P(OSDMapTest, BUG_51842) {
       tmpmap.apply_incremental(new_pool_inc);
 
       OSDMap::Incremental new_pending_inc(tmpmap.get_epoch() + 1);
-      clean_pg_upmaps(g_ceph_context, tmpmap, new_pending_inc);
+      clean_pg_upmaps(g_stone_context, tmpmap, new_pending_inc);
       tmpmap.apply_incremental(new_pending_inc);
       // check pg upmaps
       ASSERT_TRUE(!tmpmap.have_pg_upmaps(rep_pgid));

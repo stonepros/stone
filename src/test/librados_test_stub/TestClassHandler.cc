@@ -8,11 +8,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "common/debug.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/dlfcn_compat.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rados
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rados
 
 namespace librados {
 
@@ -53,13 +53,13 @@ void TestClassHandler::open_class(const std::string& name,
 }
 
 void TestClassHandler::open_all_classes() {
-  ceph_assert(m_class_handles.empty());
+  stone_assert(m_class_handles.empty());
 
-  const char* env = getenv("CEPH_LIB");
-  std::string CEPH_LIB(env ? env : "lib");
-  DIR *dir = ::opendir(CEPH_LIB.c_str());
+  const char* env = getenv("STONE_LIB");
+  std::string STONE_LIB(env ? env : "lib");
+  DIR *dir = ::opendir(STONE_LIB.c_str());
   if (dir == NULL) {
-    ceph_abort();;
+    stone_abort();;
   }
 
   std::set<std::string> names;
@@ -75,7 +75,7 @@ void TestClassHandler::open_all_classes() {
 
   for (auto& name : names) {
     std::string class_name = name.substr(7, name.size() - 10);
-    open_class(class_name, CEPH_LIB + "/" + name);
+    open_class(class_name, STONE_LIB + "/" + name);
   }
   closedir(dir);
 }

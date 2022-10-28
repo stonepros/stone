@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -36,9 +36,9 @@ using std::set;
 using std::string;
 using std::vector;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
-namespace ceph {
+namespace stone {
 const unsigned ErasureCode::SIMD_ALIGN = 32;
 
 int ErasureCode::init(
@@ -161,7 +161,7 @@ int ErasureCode::encode_prepare(const bufferlist &raw,
     bufferlist &chunk = encoded[chunk_index(i)];
     chunk.substr_of(prepared, i * blocksize, blocksize);
     chunk.rebuild_aligned_size_and_memory(blocksize, SIMD_ALIGN);
-    ceph_assert(chunk.is_contiguous());
+    stone_assert(chunk.is_contiguous());
   }
   if (padded_chunks) {
     unsigned remainder = raw.length() - (k - padded_chunks) * blocksize;

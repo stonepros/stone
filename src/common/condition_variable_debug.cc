@@ -1,7 +1,7 @@
 #include "condition_variable_debug.h"
 #include "common/mutex_debug.h"
 
-namespace ceph {
+namespace stone {
 
 condition_variable_debug::condition_variable_debug()
   : waiter_mutex{nullptr}
@@ -20,10 +20,10 @@ condition_variable_debug::~condition_variable_debug()
 void condition_variable_debug::wait(std::unique_lock<mutex_debug>& lock)
 {
   // make sure this cond is used with one mutex only
-  ceph_assert(waiter_mutex == nullptr ||
+  stone_assert(waiter_mutex == nullptr ||
          waiter_mutex == lock.mutex());
   waiter_mutex = lock.mutex();
-  ceph_assert(waiter_mutex->is_locked());
+  stone_assert(waiter_mutex->is_locked());
   waiter_mutex->_pre_unlock();
   if (int r = pthread_cond_wait(&cond, waiter_mutex->native_handle());
       r != 0) {
@@ -35,7 +35,7 @@ void condition_variable_debug::wait(std::unique_lock<mutex_debug>& lock)
 void condition_variable_debug::notify_one()
 {
   // make sure signaler is holding the waiter's lock.
-  ceph_assert(waiter_mutex == nullptr ||
+  stone_assert(waiter_mutex == nullptr ||
          waiter_mutex->is_locked());
   if (int r = pthread_cond_signal(&cond); r != 0) {
     throw std::system_error(r, std::generic_category());
@@ -46,7 +46,7 @@ void condition_variable_debug::notify_all(bool sloppy)
 {
   if (!sloppy) {
     // make sure signaler is holding the waiter's lock.
-    ceph_assert(waiter_mutex == NULL ||
+    stone_assert(waiter_mutex == NULL ||
                 waiter_mutex->is_locked());
   }
   if (int r = pthread_cond_broadcast(&cond); r != 0 && !sloppy) {
@@ -58,10 +58,10 @@ std::cv_status condition_variable_debug::_wait_until(mutex_debug* mutex,
                                                      timespec* ts)
 {
   // make sure this cond is used with one mutex only
-  ceph_assert(waiter_mutex == nullptr ||
+  stone_assert(waiter_mutex == nullptr ||
          waiter_mutex == mutex);
   waiter_mutex = mutex;
-  ceph_assert(waiter_mutex->is_locked());
+  stone_assert(waiter_mutex->is_locked());
 
   waiter_mutex->_pre_unlock();
   int r = pthread_cond_timedwait(&cond, waiter_mutex->native_handle(), ts);
@@ -76,4 +76,4 @@ std::cv_status condition_variable_debug::_wait_until(mutex_debug* mutex,
   }
 }
 
-} // namespace ceph
+} // namespace stone

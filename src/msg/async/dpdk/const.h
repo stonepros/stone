@@ -20,8 +20,8 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
-#ifndef CEPH_MSG_CONST_H_
-#define CEPH_MSG_CONST_H_
+#ifndef STONE_MSG_CONST_H_
+#define STONE_MSG_CONST_H_
 
 #include <stdint.h>
 

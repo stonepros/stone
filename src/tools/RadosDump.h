@@ -131,7 +131,7 @@ struct pg_begin {
   pg_begin() { }
 
   void encode(bufferlist& bl) const {
-    // If superblock doesn't include CEPH_FS_FEATURE_INCOMPAT_SHARDS then
+    // If superblock doesn't include STONE_FS_FEATURE_INCOMPAT_SHARDS then
     // shard will be NO_SHARD for a replicated pool.  This means
     // that we allow the decode by struct_v 2.
     ENCODE_START(3, 2, bl);
@@ -166,7 +166,7 @@ struct object_begin {
   explicit object_begin(const ghobject_t &hoid): hoid(hoid) { }
   object_begin() { }
 
-  // If superblock doesn't include CEPH_FS_FEATURE_INCOMPAT_SHARDS then
+  // If superblock doesn't include STONE_FS_FEATURE_INCOMPAT_SHARDS then
   // generation will be NO_GEN, shard_id will be NO_SHARD for a replicated
   // pool.  This means we will allow the decode by struct_v 1.
   void encode(bufferlist& bl) const {

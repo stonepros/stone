@@ -30,9 +30,9 @@ using std::list;
 using std::string;
 using std::set;
 
-using ceph::bufferlist;
-using ceph::encode;
-using ceph::real_clock;
+using stone::bufferlist;
+using stone::encode;
+using stone::real_clock;
 
 using namespace rados::cls::otp;
 
@@ -86,18 +86,18 @@ struct otp_instance {
     DECODE_FINISH(bl);
   }
 
-  void trim_expired(const ceph::real_time& now);
+  void trim_expired(const stone::real_time& now);
   void check(const string& token, const string& val, bool *update);
-  bool verify(const ceph::real_time& timestamp, const string& val);
+  bool verify(const stone::real_time& timestamp, const string& val);
 
   void find(const string& token, otp_check_t *result);
 };
 WRITE_CLASS_ENCODER(otp_instance)
 
 
-void otp_instance::trim_expired(const ceph::real_time& now)
+void otp_instance::trim_expired(const stone::real_time& now)
 {
-  ceph::real_time window_start = now - std::chrono::seconds(otp.step_size);
+  stone::real_time window_start = now - std::chrono::seconds(otp.step_size);
 
   while (!last_checks.empty() &&
          last_checks.front().timestamp < window_start) {
@@ -107,7 +107,7 @@ void otp_instance::trim_expired(const ceph::real_time& now)
 
 void otp_instance::check(const string& token, const string& val, bool *update)
 {
-  ceph::real_time now = ceph::real_clock::now();
+  stone::real_time now = stone::real_clock::now();
   trim_expired(now);
 
   if (last_checks.size() >= ATTEMPTS_PER_WINDOW) {
@@ -126,10 +126,10 @@ void otp_instance::check(const string& token, const string& val, bool *update)
   *update = true;
 }
 
-bool otp_instance::verify(const ceph::real_time& timestamp, const string& val)
+bool otp_instance::verify(const stone::real_time& timestamp, const string& val)
 {
   uint64_t index;
-  uint32_t secs = (uint32_t)ceph::real_clock::to_time_t(timestamp);
+  uint32_t secs = (uint32_t)stone::real_clock::to_time_t(timestamp);
   int result = oath_totp_validate2(otp.seed_bin.c_str(), otp.seed_bin.length(),
                                    secs, otp.step_size, otp.time_ofs, otp.window,
                                    nullptr /* otp pos */,
@@ -184,7 +184,7 @@ static int get_otp_instance(cls_method_context_t hctx, const string& id, otp_ins
   try {
     auto it = bl.cbegin();
     decode(*instance, it);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("ERROR: failed to decode %s", key.c_str());
     return -EIO;
   }
@@ -243,7 +243,7 @@ static int read_header(cls_method_context_t hctx, otp_header *h)
   auto iter = bl.cbegin();
   try {
     decode(*h, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_ERR("failed to decode otp_header");
     return -EIO;
   }
@@ -306,7 +306,7 @@ static int otp_set_op(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("ERROR: %s(): failed to decode request", __func__);
     return -EINVAL;
   }
@@ -355,7 +355,7 @@ static int otp_remove_op(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("ERROR: %s(): failed to decode request", __func__);
     return -EINVAL;
   }
@@ -401,7 +401,7 @@ static int otp_get_op(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("ERROR: %s(): failed to decode request", __func__);
     return -EINVAL;
   }
@@ -452,7 +452,7 @@ static int otp_check_op(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("ERROR: %s(): failed to decode request", __func__);
     return -EINVAL;
   }
@@ -488,7 +488,7 @@ static int otp_get_result(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("ERROR: %s(): failed to decode request", __func__);
     return -EINVAL;
   }
@@ -518,7 +518,7 @@ static int otp_get_current_time_op(cls_method_context_t hctx,
   try {
     auto iter = in->cbegin();
     decode(op, iter);
-  } catch (const ceph::buffer::error &err) {
+  } catch (const stone::buffer::error &err) {
     CLS_ERR("ERROR: %s(): failed to decode request", __func__);
     return -EINVAL;
   }

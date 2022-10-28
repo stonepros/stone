@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_ZFSFILESTOREBACKEND_H
-#define CEPH_ZFSFILESTOREBACKEND_H
+#ifndef STONE_ZFSFILESTOREBACKEND_H
+#define STONE_ZFSFILESTOREBACKEND_H
 
 #ifdef HAVE_LIBZFS
 #include "GenericFileStoreBackend.h"

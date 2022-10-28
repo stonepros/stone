@@ -7,8 +7,8 @@
 
 #include "common/errno.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
-#include "common/ceph_time.h"
+#include "common/stone_json.h"
+#include "common/stone_time.h"
 #include "rgw_rados.h"
 #include "rgw_zone.h"
 
@@ -22,7 +22,7 @@
 #include "services/svc_zone.h"
 #include "services/svc_sys_obj.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 const string RGWRole::role_name_oid_prefix = "role_names.";
@@ -32,7 +32,7 @@ const string RGWRole::role_arn_prefix = "arn:aws:iam::";
 
 int RGWRole::store_info(const DoutPrefixProvider *dpp, bool exclusive, optional_yield y)
 {
-  using ceph::encode;
+  using stone::encode;
   string oid = get_info_oid_prefix() + id;
 
   bufferlist bl;
@@ -53,7 +53,7 @@ int RGWRole::store_name(const DoutPrefixProvider *dpp, bool exclusive, optional_
   string oid = tenant + get_names_oid_prefix() + name;
 
   bufferlist bl;
-  using ceph::encode;
+  using stone::encode;
   encode(nameToId, bl);
 
   auto svc = ctl->svc;
@@ -328,7 +328,7 @@ int RGWRole::read_id(const DoutPrefixProvider *dpp, const string& role_name, con
   RGWNameToId nameToId;
   try {
     auto iter = bl.cbegin();
-    using ceph::decode;
+    using stone::decode;
     decode(nameToId, iter);
   } catch (buffer::error& err) {
     ldpp_dout(dpp, 0) << "ERROR: failed to decode role from pool: " << pool.name << ": "
@@ -355,7 +355,7 @@ int RGWRole::read_info(const DoutPrefixProvider *dpp, optional_yield y)
   }
 
   try {
-    using ceph::decode;
+    using stone::decode;
     auto iter = bl.cbegin();
     decode(*this, iter);
   } catch (buffer::error& err) {
@@ -384,7 +384,7 @@ int RGWRole::read_name(const DoutPrefixProvider *dpp, optional_yield y)
 
   RGWNameToId nameToId;
   try {
-    using ceph::decode;
+    using stone::decode;
     auto iter = bl.cbegin();
     decode(nameToId, iter);
   } catch (buffer::error& err) {
@@ -444,7 +444,7 @@ void RGWRole::update_trust_policy(string& trust_policy)
 
 int RGWRole::get_roles_by_path_prefix(const DoutPrefixProvider *dpp, 
                                       RGWRados *store,
-                                      CephContext *cct,
+                                      StoneContext *cct,
                                       const string& path_prefix,
                                       const string& tenant,
                                       vector<RGWRole>& roles,

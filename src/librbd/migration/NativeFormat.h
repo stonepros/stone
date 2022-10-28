@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_MIGRATION_NATIVE_FORMAT_H
-#define CEPH_LIBRBD_MIGRATION_NATIVE_FORMAT_H
+#ifndef STONE_LIBRBD_MIGRATION_NATIVE_FORMAT_H
+#define STONE_LIBRBD_MIGRATION_NATIVE_FORMAT_H
 
 #include "include/int_types.h"
 #include "librbd/Types.h"
@@ -67,7 +67,7 @@ private:
   std::string m_image_name;
   std::string m_image_id;
   std::string m_snap_name;
-  uint64_t m_snap_id = CEPH_NOSNAP;
+  uint64_t m_snap_id = STONE_NOSNAP;
 
   void handle_open(int r, Context* on_finish);
   void handle_snap_set(int r, Context* on_finish);
@@ -79,4 +79,4 @@ private:
 
 extern template class librbd::migration::NativeFormat<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_MIGRATION_NATIVE_FORMAT_H
+#endif // STONE_LIBRBD_MIGRATION_NATIVE_FORMAT_H

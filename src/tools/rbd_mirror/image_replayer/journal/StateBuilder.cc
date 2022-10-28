@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "StateBuilder.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/Context.h"
 #include "common/debug.h"
 #include "common/errno.h"
@@ -14,8 +14,8 @@
 #include "tools/rbd_mirror/image_replayer/journal/Replayer.h"
 #include "tools/rbd_mirror/image_replayer/journal/SyncPointHandler.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::journal::" \
                            << "StateBuilder: " << this << " " \
@@ -33,7 +33,7 @@ StateBuilder<I>::StateBuilder(const std::string& global_image_id)
 
 template <typename I>
 StateBuilder<I>::~StateBuilder() {
-  ceph_assert(remote_journaler == nullptr);
+  stone_assert(remote_journaler == nullptr);
 }
 
 template <typename I>
@@ -59,7 +59,7 @@ bool StateBuilder<I>::is_disconnected() const {
 
 template <typename I>
 bool StateBuilder<I>::is_linked_impl() const {
-  ceph_assert(!this->remote_mirror_uuid.empty());
+  stone_assert(!this->remote_mirror_uuid.empty());
   return (local_primary_mirror_uuid == this->remote_mirror_uuid);
 }
 

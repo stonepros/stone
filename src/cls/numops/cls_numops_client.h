@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 CERN
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_LIBRBD_CLS_NUMOPS_CLIENT_H
-#define CEPH_LIBRBD_CLS_NUMOPS_CLIENT_H
+#ifndef STONE_LIBRBD_CLS_NUMOPS_CLIENT_H
+#define STONE_LIBRBD_CLS_NUMOPS_CLIENT_H
 
 #include "include/rados/librados_fwd.hpp"
 #include <string>
@@ -46,5 +46,5 @@ namespace rados {
   } // namespace cls
 } // namespace rados
 
-#endif // CEPH_LIBRBD_CLS_NUMOPS_CLIENT_H
+#endif // STONE_LIBRBD_CLS_NUMOPS_CLIENT_H
 

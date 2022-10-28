@@ -69,11 +69,11 @@ test_loop(Rados &cluster, std::string pool_name, std::string obj_name)
     uint64_t handle;
     WatchNotifyTestCtx ctx{lock};
     ret = ioctx.watch(obj_name, 0, &handle, &ctx);
-    ceph_assert(!ret);
+    stone_assert(!ret);
     bufferlist bl2;
     ret = ioctx.notify(obj_name, 0, bl2);
-    ceph_assert(!ret);
-    ceph_assert_always(ctx.wait());
+    stone_assert(!ret);
+    stone_assert_always(ctx.wait());
     ioctx.unwatch(obj_name, handle);
   }
   ioctx.close();

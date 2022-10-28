@@ -1,12 +1,12 @@
 tasks:
 - install:
-- ceph:
+- stone:
 - openssl_keys:
 - rgw:
     client.0:
 
 overrides:
-  ceph:
+  stone:
     conf:
       global:
         osd_min_pg_log_entries: 10

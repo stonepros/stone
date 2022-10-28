@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2011 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_HEARTBEATMAP_H
-#define CEPH_HEARTBEATMAP_H
+#ifndef STONE_HEARTBEATMAP_H
+#define STONE_HEARTBEATMAP_H
 
 #include <list>
 #include <atomic>
@@ -78,12 +78,12 @@ class HeartbeatMap {
   // get the number of total workers
   int get_total_workers() const;
 
-  explicit HeartbeatMap(CephContext *cct);
+  explicit HeartbeatMap(StoneeContext *cct);
   ~HeartbeatMap();
 
  private:
   using clock = ceph::coarse_mono_clock;
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   ceph::shared_mutex m_rwlock =
     ceph::make_shared_mutex("HeartbeatMap::m_rwlock");
   clock::time_point m_inject_unhealthy_until;

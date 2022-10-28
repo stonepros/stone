@@ -1,0 +1,4 @@
+overrides:
+   stone-deploy:
+      use-stone-volume: True
+      filestore: True

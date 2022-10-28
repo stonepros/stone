@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IMAGE_STATE_H
-#define CEPH_LIBRBD_IMAGE_STATE_H
+#ifndef STONE_LIBRBD_IMAGE_STATE_H
+#define STONE_LIBRBD_IMAGE_STATE_H
 
 #include "include/int_types.h"
 #include "common/ceph_mutex.h"
@@ -82,7 +82,7 @@ private:
   struct Action {
     ActionType action_type;
     uint64_t refresh_seq = 0;
-    uint64_t snap_id = CEPH_NOSNAP;
+    uint64_t snap_id = STONE_NOSNAP;
     Context *on_ready = nullptr;
 
     Action(ActionType action_type) : action_type(action_type) {
@@ -152,4 +152,4 @@ private:
 
 extern template class librbd::ImageState<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_IMAGE_STATE_H
+#endif // STONE_LIBRBD_IMAGE_STATE_H

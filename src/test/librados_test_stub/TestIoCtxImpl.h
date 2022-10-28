@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_TEST_IO_CTX_IMPL_H
-#define CEPH_TEST_IO_CTX_IMPL_H
+#ifndef STONE_TEST_IO_CTX_IMPL_H
+#define STONE_TEST_IO_CTX_IMPL_H
 
 #include <list>
 #include <atomic>
@@ -218,4 +218,4 @@ private:
 
 } // namespace librados
 
-#endif // CEPH_TEST_IO_CTX_IMPL_H
+#endif // STONE_TEST_IO_CTX_IMPL_H

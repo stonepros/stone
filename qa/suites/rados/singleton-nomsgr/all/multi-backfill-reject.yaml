@@ -14,9 +14,9 @@ roles:
   - osd.5
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     log-ignorelist:
       - overall HEALTH_
       - \(PG_
@@ -31,20 +31,20 @@ tasks:
         osd max object namespace len: 64
 - exec:
     client.0:
-      - sudo ceph osd pool create foo 64
-      - sudo ceph osd pool application enable foo rados
+      - sudo stone osd pool create foo 64
+      - sudo stone osd pool application enable foo rados
       - rados -p foo bench 60 write -b 1024 --no-cleanup
-      - sudo ceph osd pool set foo size 3
-      - sudo ceph osd out 0 1
+      - sudo stone osd pool set foo size 3
+      - sudo stone osd out 0 1
 - sleep:
     duration: 60
 - exec:
     client.0:
-      - sudo ceph osd in 0 1
+      - sudo stone osd in 0 1
 - sleep:
     duration: 60
 - exec:
     client.0:
-      - sudo ceph osd pool set foo size 2
+      - sudo stone osd pool set foo size 2
 - sleep:
     duration: 300

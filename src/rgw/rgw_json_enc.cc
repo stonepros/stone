@@ -18,11 +18,11 @@
 #include "rgw_bucket_sync.h"
 #include "rgw_tools.h"
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/Formatter.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 void encode_json(const char *name, const obj_version& v, Formatter *f)
 {

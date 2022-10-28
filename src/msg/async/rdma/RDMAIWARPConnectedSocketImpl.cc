@@ -1,13 +1,13 @@
 #include "RDMAStack.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #undef dout_prefix
 #define dout_prefix *_dout << " RDMAIWARPConnectedSocketImpl "
 
 #define TIMEOUT_MS 3000
 #define RETRY_COUNT 7
 
-RDMAIWARPConnectedSocketImpl::RDMAIWARPConnectedSocketImpl(CephContext *cct, std::shared_ptr<Infiniband>& ib,
+RDMAIWARPConnectedSocketImpl::RDMAIWARPConnectedSocketImpl(StoneContext *cct, std::shared_ptr<Infiniband>& ib,
                                                            std::shared_ptr<RDMADispatcher>& rdma_dispatcher,
                                                            RDMAWorker *w, RDMACMInfo *info)
   : RDMAConnectedSocketImpl(cct, ib, rdma_dispatcher, w), cm_con_handler(new C_handle_cm_connection(this))
@@ -144,7 +144,7 @@ void RDMAIWARPConnectedSocketImpl::handle_cm_connection() {
       break;
 
     default:
-      ceph_abort_msg("unhandled event");
+      stone_abort_msg("unhandled event");
       break;
   }
   rdma_ack_cm_event(event);

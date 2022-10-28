@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_INCLUDE_DEMANGLE
-#define CEPH_INCLUDE_DEMANGLE
+#ifndef STONE_INCLUDE_DEMANGLE
+#define STONE_INCLUDE_DEMANGLE
 
 //// Stole this code from http://stackoverflow.com/questions/281818/unmangling-the-result-of-stdtype-infoname
 #ifdef __GNUG__

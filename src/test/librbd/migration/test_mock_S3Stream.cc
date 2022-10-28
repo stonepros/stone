@@ -4,7 +4,7 @@
 #include "test/librbd/test_mock_fixture.h"
 #include "test/librbd/test_support.h"
 #include "include/rbd_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/migration/HttpClient.h"
 #include "librbd/migration/S3Stream.h"
 #include "gtest/gtest.h"
@@ -29,7 +29,7 @@ template <>
 struct HttpClient<MockTestImageCtx> {
   static HttpClient* s_instance;
   static HttpClient* create(MockTestImageCtx*, const std::string&) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 

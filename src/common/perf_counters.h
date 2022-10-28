@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  * Copyright (C) 2017 OVH
@@ -14,8 +14,8 @@
  */
 
 
-#ifndef CEPH_COMMON_PERF_COUNTERS_H
-#define CEPH_COMMON_PERF_COUNTERS_H
+#ifndef STONE_COMMON_PERF_COUNTERS_H
+#define STONE_COMMON_PERF_COUNTERS_H
 
 #include <string>
 #include <vector>
@@ -30,7 +30,7 @@
 #include "common/ceph_time.h"
 
 namespace TOPNSPC::common {
-  class CephContext;
+  class StoneeContext;
   class PerfCountersBuilder;
   class PerfCounters;
 }
@@ -63,7 +63,7 @@ namespace TOPNSPC::common {
 class PerfCountersBuilder
 {
 public:
-  PerfCountersBuilder(CephContext *cct, const std::string &name,
+  PerfCountersBuilder(StoneeContext *cct, const std::string &name,
 		    int first, int last);
   ~PerfCountersBuilder();
 
@@ -273,7 +273,7 @@ public:
   }
 
 private:
-  PerfCounters(CephContext *cct, const std::string &name,
+  PerfCounters(StoneeContext *cct, const std::string &name,
 	     int lower_bound, int upper_bound);
   PerfCounters(const PerfCounters &rhs);
   PerfCounters& operator=(const PerfCounters &rhs);
@@ -282,7 +282,7 @@ private:
 
   typedef std::vector<perf_counter_data_any_d> perf_counter_data_vec_t;
 
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   int m_lower_bound;
   int m_upper_bound;
   std::string m_name;
@@ -311,7 +311,7 @@ public:
 typedef std::set <PerfCounters*, SortPerfCountersByName> perf_counters_set_t;
 
 /*
- * PerfCountersCollectionImp manages PerfCounters objects for a Ceph process.
+ * PerfCountersCollectionImp manages PerfCounters objects for a Stonee process.
  */
 class PerfCountersCollectionImpl
 {

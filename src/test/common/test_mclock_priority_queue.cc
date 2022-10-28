@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat Inc.
  *
@@ -57,13 +57,13 @@ const crimson::dmclock::ClientInfo* client_info_func(const Client& c) {
 
 TEST(mClockPriorityQueue, Create)
 {
-  ceph::mClockQueue<Request,Client> q(&client_info_func);
+  stone::mClockQueue<Request,Client> q(&client_info_func);
 }
 
 
 TEST(mClockPriorityQueue, Sizes)
 {
-  ceph::mClockQueue<Request,Client> q(&client_info_func);
+  stone::mClockQueue<Request,Client> q(&client_info_func);
 
   ASSERT_TRUE(q.empty());
   ASSERT_EQ(0u, q.get_size_slow());
@@ -93,7 +93,7 @@ TEST(mClockPriorityQueue, Sizes)
 
 TEST(mClockPriorityQueue, JustStrict)
 {
-  ceph::mClockQueue<Request,Client> q(&client_info_func);
+  stone::mClockQueue<Request,Client> q(&client_info_func);
 
   Client c1(1);
   Client c2(2);
@@ -118,7 +118,7 @@ TEST(mClockPriorityQueue, JustStrict)
 
 TEST(mClockPriorityQueue, StrictPriorities)
 {
-  ceph::mClockQueue<Request,Client> q(&client_info_func);
+  stone::mClockQueue<Request,Client> q(&client_info_func);
 
   Client c1(1);
   Client c2(2);
@@ -143,7 +143,7 @@ TEST(mClockPriorityQueue, StrictPriorities)
 
 TEST(mClockPriorityQueue, JustNotStrict)
 {
-  ceph::mClockQueue<Request,Client> q(&client_info_func);
+  stone::mClockQueue<Request,Client> q(&client_info_func);
 
   Client c1(1);
   Client c2(2);
@@ -177,7 +177,7 @@ TEST(mClockPriorityQueue, JustNotStrict)
 
 TEST(mClockPriorityQueue, EnqueuFront)
 {
-  ceph::mClockQueue<Request,Client> q(&client_info_func);
+  stone::mClockQueue<Request,Client> q(&client_info_func);
 
   Client c1(1);
   Client c2(2);
@@ -231,7 +231,7 @@ TEST(mClockPriorityQueue, EnqueuFront)
 
 TEST(mClockPriorityQueue, RemoveByClass)
 {
-  ceph::mClockQueue<Request,Client> q(&client_info_func);
+  stone::mClockQueue<Request,Client> q(&client_info_func);
 
   Client c1(1);
   Client c2(2);
@@ -275,7 +275,7 @@ TEST(mClockPriorityQueue, RemoveByClass)
 
 TEST(mClockPriorityQueue, RemoveByFilter)
 {
-  ceph::mClockQueue<Request,Client> q(&client_info_func);
+  stone::mClockQueue<Request,Client> q(&client_info_func);
 
   Client c1(1);
   Client c2(2);

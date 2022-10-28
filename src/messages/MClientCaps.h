@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MCLIENTCAPS_H
-#define CEPH_MCLIENTCAPS_H
+#ifndef STONE_MCLIENTCAPS_H
+#define STONE_MCLIENTCAPS_H
 
 #include "msg/Message.h"
 #include "mds/mdstypes.h"
@@ -129,7 +129,7 @@ private:
 
 protected:
   MClientCaps()
-    : SafeMessage{CEPH_MSG_CLIENT_CAPS, HEAD_VERSION, COMPAT_VERSION} {}
+    : SafeMessage{STONE_MSG_CLIENT_CAPS, HEAD_VERSION, COMPAT_VERSION} {}
   MClientCaps(int op,
 	      inodeno_t ino,
 	      inodeno_t realm,
@@ -140,7 +140,7 @@ protected:
 	      int dirty,
 	      int mseq,
               epoch_t oeb)
-    : SafeMessage{CEPH_MSG_CLIENT_CAPS, HEAD_VERSION, COMPAT_VERSION},
+    : SafeMessage{STONE_MSG_CLIENT_CAPS, HEAD_VERSION, COMPAT_VERSION},
       osd_epoch_barrier(oeb) {
     memset(&head, 0, sizeof(head));
     head.op = op;
@@ -157,7 +157,7 @@ protected:
   MClientCaps(int op,
 	      inodeno_t ino, inodeno_t realm,
 	      uint64_t id, int mseq, epoch_t oeb)
-    : SafeMessage{CEPH_MSG_CLIENT_CAPS, HEAD_VERSION, COMPAT_VERSION},
+    : SafeMessage{STONE_MSG_CLIENT_CAPS, HEAD_VERSION, COMPAT_VERSION},
       osd_epoch_barrier(oeb) {
     memset(&head, 0, sizeof(head));
     head.op = op;
@@ -205,7 +205,7 @@ public:
     using ceph::decode;
     auto p = payload.cbegin();
     decode(head, p);
-    if (head.op == CEPH_CAP_OP_EXPORT) {
+    if (head.op == STONE_CAP_OP_EXPORT) {
       ceph_mds_caps_export_body body;
       decode(body, p);
       peer = body.peer;
@@ -235,7 +235,7 @@ public:
       decode(flockbl, p);
 
     if (header.version >= 3) {
-      if (head.op == CEPH_CAP_OP_IMPORT)
+      if (head.op == STONE_CAP_OP_IMPORT)
 	decode(peer, p);
     }
 
@@ -243,7 +243,7 @@ public:
       decode(inline_version, p);
       decode(inline_data, p);
     } else {
-      inline_version = CEPH_INLINE_NONE;
+      inline_version = STONE_INLINE_NONE;
     }
 
     if (header.version >= 5) {
@@ -280,7 +280,7 @@ public:
     encode(head, payload);
     static_assert(sizeof(ceph_mds_caps_non_export_body) >
 		  sizeof(ceph_mds_caps_export_body));
-    if (head.op == CEPH_CAP_OP_EXPORT) {
+    if (head.op == STONE_CAP_OP_EXPORT) {
       ceph_mds_caps_export_body body;
       body.peer = peer;
       encode(body, payload);
@@ -304,22 +304,22 @@ public:
     middle = xattrbl;
 
     // conditionally include flock metadata
-    if (features & CEPH_FEATURE_FLOCK) {
+    if (features & STONE_FEATURE_FLOCK) {
       encode(flockbl, payload);
     } else {
       header.version = 1;
       return;
     }
 
-    if (features & CEPH_FEATURE_EXPORT_PEER) {
-      if (head.op == CEPH_CAP_OP_IMPORT)
+    if (features & STONE_FEATURE_EXPORT_PEER) {
+      if (head.op == STONE_CAP_OP_IMPORT)
 	encode(peer, payload);
     } else {
       header.version = 2;
       return;
     }
 
-    if (features & CEPH_FEATURE_MDS_INLINE_DATA) {
+    if (features & STONE_FEATURE_MDS_INLINE_DATA) {
       encode(inline_version, payload);
       encode(inline_data, payload);
     } else {

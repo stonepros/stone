@@ -95,12 +95,12 @@ int execute(const po::variables_map &vm, bool enabled) {
 }
 
 int execute_disable(const po::variables_map &vm,
-                    const std::vector<std::string> &ceph_global_init_args) {
+                    const std::vector<std::string> &stone_global_init_args) {
   return execute(vm, false);
 }
 
 int execute_enable(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   return execute(vm, true);
 }
 

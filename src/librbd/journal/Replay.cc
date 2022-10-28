@@ -14,7 +14,7 @@
 #include "librbd/io/AioCompletion.h"
 #include "librbd/io/ImageRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::journal::Replay: " << this << " "
 
@@ -112,7 +112,7 @@ struct ExecuteOp : public Context {
   }
 
   void finish(int r) override {
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     if (r < 0) {
       lderr(cct) << ": ExecuteOp::" << __func__ << ": r=" << r << dendl;
       on_op_complete->complete(r);
@@ -146,7 +146,7 @@ struct C_RefreshIfRequired : public Context {
   }
 
   void finish(int r) override {
-    CephContext *cct = image_ctx.cct;
+    StoneContext *cct = image_ctx.cct;
     Context *ctx = on_finish;
     on_finish = nullptr;
 
@@ -181,18 +181,18 @@ Replay<I>::Replay(I &image_ctx)
 template <typename I>
 Replay<I>::~Replay() {
   std::lock_guard locker{m_lock};
-  ceph_assert(m_in_flight_aio_flush == 0);
-  ceph_assert(m_in_flight_aio_modify == 0);
-  ceph_assert(m_aio_modify_unsafe_contexts.empty());
-  ceph_assert(m_aio_modify_safe_contexts.empty());
-  ceph_assert(m_op_events.empty());
-  ceph_assert(m_in_flight_op_events == 0);
+  stone_assert(m_in_flight_aio_flush == 0);
+  stone_assert(m_in_flight_aio_modify == 0);
+  stone_assert(m_aio_modify_unsafe_contexts.empty());
+  stone_assert(m_aio_modify_safe_contexts.empty());
+  stone_assert(m_op_events.empty());
+  stone_assert(m_in_flight_op_events == 0);
 }
 
 template <typename I>
 int Replay<I>::decode(bufferlist::const_iterator *it, EventEntry *event_entry) {
   try {
-    using ceph::decode;
+    using stone::decode;
     decode(*event_entry, *it);
   } catch (const buffer::error &err) {
     return -EBADMSG;
@@ -203,7 +203,7 @@ int Replay<I>::decode(bufferlist::const_iterator *it, EventEntry *event_entry) {
 template <typename I>
 void Replay<I>::process(const EventEntry &event_entry,
                         Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": on_ready=" << on_ready << ", on_safe=" << on_safe
                  << dendl;
 
@@ -224,7 +224,7 @@ void Replay<I>::process(const EventEntry &event_entry,
 
 template <typename I>
 void Replay<I>::shut_down(bool cancel_ops, Context *on_finish) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << dendl;
 
   io::AioCompletion *flush_comp = nullptr;
@@ -237,7 +237,7 @@ void Replay<I>::shut_down(bool cancel_ops, Context *on_finish) {
     // safely commit any remaining AIO modify operations
     if ((m_in_flight_aio_flush + m_in_flight_aio_modify) != 0) {
       flush_comp = create_aio_flush_completion(nullptr);
-      ceph_assert(flush_comp != nullptr);
+      stone_assert(flush_comp != nullptr);
     }
 
     for (auto &op_event_pair : m_op_events) {
@@ -262,10 +262,10 @@ void Replay<I>::shut_down(bool cancel_ops, Context *on_finish) {
       }
     }
 
-    ceph_assert(!m_shut_down);
+    stone_assert(!m_shut_down);
     m_shut_down = true;
 
-    ceph_assert(m_flush_ctx == nullptr);
+    stone_assert(m_flush_ctx == nullptr);
     if (m_in_flight_op_events > 0 || flush_comp != nullptr) {
       std::swap(m_flush_ctx, on_finish);
     }
@@ -301,15 +301,15 @@ void Replay<I>::flush(Context *on_finish) {
 
 template <typename I>
 void Replay<I>::replay_op_ready(uint64_t op_tid, Context *on_resume) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": op_tid=" << op_tid << dendl;
 
   std::lock_guard locker{m_lock};
   auto op_it = m_op_events.find(op_tid);
-  ceph_assert(op_it != m_op_events.end());
+  stone_assert(op_it != m_op_events.end());
 
   OpEvent &op_event = op_it->second;
-  ceph_assert(op_event.op_in_progress &&
+  stone_assert(op_event.op_in_progress &&
               op_event.on_op_finish_event == nullptr &&
               op_event.on_finish_ready == nullptr &&
               op_event.on_finish_safe == nullptr);
@@ -341,7 +341,7 @@ void Replay<I>::replay_op_ready(uint64_t op_tid, Context *on_resume) {
 template <typename I>
 void Replay<I>::handle_event(const journal::AioDiscardEvent &event,
                              Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": AIO discard event" << dendl;
 
   bool flush_required;
@@ -375,7 +375,7 @@ void Replay<I>::handle_event(const journal::AioDiscardEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::AioWriteEvent &event,
                              Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": AIO write event" << dendl;
 
   bufferlist data = event.data;
@@ -410,7 +410,7 @@ void Replay<I>::handle_event(const journal::AioWriteEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::AioFlushEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": AIO flush event" << dendl;
 
   io::AioCompletion *aio_comp;
@@ -429,7 +429,7 @@ void Replay<I>::handle_event(const journal::AioFlushEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::AioWriteSameEvent &event,
                              Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": AIO writesame event" << dendl;
 
   bufferlist data = event.data;
@@ -465,7 +465,7 @@ void Replay<I>::handle_event(const journal::AioWriteSameEvent &event,
  template <typename I>
  void Replay<I>::handle_event(const journal::AioCompareAndWriteEvent &event,
                               Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": AIO CompareAndWrite event" << dendl;
 
   bufferlist cmp_data = event.cmp_data;
@@ -499,7 +499,7 @@ void Replay<I>::handle_event(const journal::AioWriteSameEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::OpFinishEvent &event,
                              Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Op finish event: "
                  << "op_tid=" << event.op_tid << dendl;
 
@@ -519,7 +519,7 @@ void Replay<I>::handle_event(const journal::OpFinishEvent &event,
     }
 
     OpEvent &op_event = op_it->second;
-    ceph_assert(op_event.on_finish_safe == nullptr);
+    stone_assert(op_event.on_finish_safe == nullptr);
     op_event.on_finish_ready = on_ready;
     op_event.on_finish_safe = on_safe;
     op_in_progress = op_event.op_in_progress;
@@ -554,7 +554,7 @@ void Replay<I>::handle_event(const journal::OpFinishEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::SnapCreateEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Snap create event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -583,7 +583,7 @@ void Replay<I>::handle_event(const journal::SnapCreateEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::SnapRemoveEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Snap remove event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -607,7 +607,7 @@ void Replay<I>::handle_event(const journal::SnapRemoveEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::SnapRenameEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Snap rename event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -631,7 +631,7 @@ void Replay<I>::handle_event(const journal::SnapRenameEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::SnapProtectEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Snap protect event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -655,7 +655,7 @@ void Replay<I>::handle_event(const journal::SnapProtectEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::SnapUnprotectEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Snap unprotect event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -683,7 +683,7 @@ void Replay<I>::handle_event(const journal::SnapUnprotectEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::SnapRollbackEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Snap rollback start event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -705,7 +705,7 @@ void Replay<I>::handle_event(const journal::SnapRollbackEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::RenameEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Rename event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -729,7 +729,7 @@ void Replay<I>::handle_event(const journal::RenameEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::ResizeEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Resize start event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -754,7 +754,7 @@ void Replay<I>::handle_event(const journal::ResizeEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::FlattenEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Flatten start event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -778,7 +778,7 @@ void Replay<I>::handle_event(const journal::FlattenEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::DemotePromoteEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Demote/Promote event" << dendl;
   on_ready->complete(0);
   on_safe->complete(0);
@@ -787,7 +787,7 @@ void Replay<I>::handle_event(const journal::DemotePromoteEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::SnapLimitEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Snap limit event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -811,7 +811,7 @@ void Replay<I>::handle_event(const journal::SnapLimitEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::UpdateFeaturesEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Update features event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -836,7 +836,7 @@ void Replay<I>::handle_event(const journal::UpdateFeaturesEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::MetadataSetEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Metadata set event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -858,7 +858,7 @@ void Replay<I>::handle_event(const journal::MetadataSetEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::MetadataRemoveEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": Metadata remove event" << dendl;
 
   std::lock_guard locker{m_lock};
@@ -883,7 +883,7 @@ void Replay<I>::handle_event(const journal::MetadataRemoveEvent &event,
 template <typename I>
 void Replay<I>::handle_event(const journal::UnknownEvent &event,
 			     Context *on_ready, Context *on_safe) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": unknown event" << dendl;
   on_ready->complete(0);
   on_safe->complete(0);
@@ -893,7 +893,7 @@ template <typename I>
 void Replay<I>::handle_aio_modify_complete(Context *on_ready, Context *on_safe,
                                            int r, std::set<int> &filters) {
   std::lock_guard locker{m_lock};
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": on_ready=" << on_ready << ", "
                  << "on_safe=" << on_safe << ", r=" << r << dendl;
 
@@ -917,7 +917,7 @@ void Replay<I>::handle_aio_modify_complete(Context *on_ready, Context *on_safe,
 template <typename I>
 void Replay<I>::handle_aio_flush_complete(Context *on_flush_safe,
                                           Contexts &on_safe_ctxs, int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": r=" << r << dendl;
 
   if (r < 0) {
@@ -928,8 +928,8 @@ void Replay<I>::handle_aio_flush_complete(Context *on_flush_safe,
   Context *on_flush = nullptr;
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_in_flight_aio_flush > 0);
-    ceph_assert(m_in_flight_aio_modify >= on_safe_ctxs.size());
+    stone_assert(m_in_flight_aio_flush > 0);
+    stone_assert(m_in_flight_aio_modify >= on_safe_ctxs.size());
     --m_in_flight_aio_flush;
     m_in_flight_aio_modify -= on_safe_ctxs.size();
 
@@ -973,7 +973,7 @@ Context *Replay<I>::create_op_context_callback(uint64_t op_tid,
                                                Context *on_ready,
                                                Context *on_safe,
                                                OpEvent **op_event) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   if (m_shut_down) {
     ldout(cct, 5) << ": ignoring event after shut down" << dendl;
     on_ready->complete(0);
@@ -981,7 +981,7 @@ Context *Replay<I>::create_op_context_callback(uint64_t op_tid,
     return nullptr;
   }
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   if (m_op_events.count(op_tid) != 0) {
     lderr(cct) << ": duplicate op tid detected: " << op_tid << dendl;
 
@@ -1003,7 +1003,7 @@ Context *Replay<I>::create_op_context_callback(uint64_t op_tid,
 
 template <typename I>
 void Replay<I>::handle_op_complete(uint64_t op_tid, int r) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 20) << ": op_tid=" << op_tid << ", "
                  << "r=" << r << dendl;
 
@@ -1012,27 +1012,27 @@ void Replay<I>::handle_op_complete(uint64_t op_tid, int r) {
   {
     std::lock_guard locker{m_lock};
     auto op_it = m_op_events.find(op_tid);
-    ceph_assert(op_it != m_op_events.end());
+    stone_assert(op_it != m_op_events.end());
 
     op_event = std::move(op_it->second);
     m_op_events.erase(op_it);
 
     if (m_shut_down) {
-      ceph_assert(m_flush_ctx != nullptr);
+      stone_assert(m_flush_ctx != nullptr);
       shutting_down = true;
     }
   }
 
-  ceph_assert(op_event.on_start_ready == nullptr || (r < 0 && r != -ERESTART));
+  stone_assert(op_event.on_start_ready == nullptr || (r < 0 && r != -ERESTART));
   if (op_event.on_start_ready != nullptr) {
     // blocking op event failed before it became ready
-    ceph_assert(op_event.on_finish_ready == nullptr &&
+    stone_assert(op_event.on_finish_ready == nullptr &&
                 op_event.on_finish_safe == nullptr);
 
     op_event.on_start_ready->complete(0);
   } else {
     // event kicked off by OpFinishEvent
-    ceph_assert((op_event.on_finish_ready != nullptr &&
+    stone_assert((op_event.on_finish_ready != nullptr &&
                  op_event.on_finish_safe != nullptr) || shutting_down);
   }
 
@@ -1059,7 +1059,7 @@ void Replay<I>::handle_op_complete(uint64_t op_tid, int r) {
   Context *on_flush = nullptr;
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_in_flight_op_events > 0);
+    stone_assert(m_in_flight_op_events > 0);
     --m_in_flight_op_events;
     if (m_in_flight_op_events == 0 &&
         (m_in_flight_aio_flush + m_in_flight_aio_modify) == 0) {
@@ -1079,8 +1079,8 @@ Replay<I>::create_aio_modify_completion(Context *on_ready,
                                         bool *flush_required,
                                         std::set<int> &&filters) {
   std::lock_guard locker{m_lock};
-  CephContext *cct = m_image_ctx.cct;
-  ceph_assert(m_on_aio_ready == nullptr);
+  StoneContext *cct = m_image_ctx.cct;
+  stone_assert(m_on_aio_ready == nullptr);
 
   if (m_shut_down) {
     ldout(cct, 5) << ": ignoring event after shut down" << dendl;
@@ -1111,7 +1111,7 @@ Replay<I>::create_aio_modify_completion(Context *on_ready,
   if (m_in_flight_aio_modify == IN_FLIGHT_IO_HIGH_WATER_MARK) {
     ldout(cct, 10) << ": hit AIO replay high-water mark: pausing replay"
                    << dendl;
-    ceph_assert(m_on_aio_ready == nullptr);
+    stone_assert(m_on_aio_ready == nullptr);
     std::swap(m_on_aio_ready, on_ready);
   }
 
@@ -1126,9 +1126,9 @@ Replay<I>::create_aio_modify_completion(Context *on_ready,
 
 template <typename I>
 io::AioCompletion *Replay<I>::create_aio_flush_completion(Context *on_safe) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   if (m_shut_down) {
     ldout(cct, 5) << ": ignoring event after shut down" << dendl;
     if (on_safe != nullptr) {
@@ -1150,7 +1150,7 @@ io::AioCompletion *Replay<I>::create_aio_flush_completion(Context *on_safe) {
 
 template <typename I>
 bool Replay<I>::clipped_io(uint64_t image_offset, io::AioCompletion *aio_comp) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   m_image_ctx.image_lock.lock_shared();
   size_t image_size = m_image_ctx.size;

@@ -1,5 +1,5 @@
 #include <seastar/core/app-template.hh>
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "crimson/common/auth_handler.h"
 #include "crimson/common/config_proxy.h"
 #include "crimson/mon/MonClient.h"
@@ -24,12 +24,12 @@ DummyAuthHandler dummy_handler;
 
 static seastar::future<> test_monc()
 {
-  return crimson::common::sharded_conf().start(EntityName{}, string_view{"ceph"}).then([] {
+  return crimson::common::sharded_conf().start(EntityName{}, string_view{"stone"}).then([] {
     std::vector<const char*> args;
     std::string cluster;
     std::string conf_file_list;
-    auto init_params = ceph_argparse_early_args(args,
-                                                CEPH_ENTITY_TYPE_CLIENT,
+    auto init_params = stone_argparse_early_args(args,
+                                                STONE_ENTITY_TYPE_CLIENT,
                                                 &cluster,
                                                 &conf_file_list);
     auto& conf = crimson::common::local_conf();

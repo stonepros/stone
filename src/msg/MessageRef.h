@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc. <contact@redhat.com>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MESSAGEREF_H
-#define CEPH_MESSAGEREF_H
+#ifndef STONE_MESSAGEREF_H
+#define STONE_MESSAGEREF_H
  
 #include <boost/intrusive_ptr.hpp>
 

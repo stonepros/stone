@@ -19,8 +19,8 @@
 
 #include <boost/asio/yield.hpp>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 bool RGWAsyncRadosProcessor::RGWWQ::_enqueue(RGWAsyncRadosRequest *req) {
   if (processor->is_going_down()) {
@@ -53,7 +53,7 @@ void RGWAsyncRadosProcessor::RGWWQ::_process(RGWAsyncRadosRequest *req, ThreadPo
 }
 
 void RGWAsyncRadosProcessor::RGWWQ::_dump_queue() {
-  if (!g_conf()->subsys.should_gather<ceph_subsys_rgw, 20>()) {
+  if (!g_conf()->subsys.should_gather<stone_subsys_rgw, 20>()) {
     return;
   }
   deque<RGWAsyncRadosRequest *>::iterator iter;
@@ -67,12 +67,12 @@ void RGWAsyncRadosProcessor::RGWWQ::_dump_queue() {
   }
 }
 
-RGWAsyncRadosProcessor::RGWAsyncRadosProcessor(CephContext *_cct, int num_threads)
+RGWAsyncRadosProcessor::RGWAsyncRadosProcessor(StoneContext *_cct, int num_threads)
   : cct(_cct), m_tp(cct, "RGWAsyncRadosProcessor::m_tp", "rados_async", num_threads),
     req_throttle(_cct, "rgw_async_rados_ops", num_threads * 2),
     req_wq(this,
-	   ceph::make_timespan(g_conf()->rgw_op_thread_timeout),
-	   ceph::make_timespan(g_conf()->rgw_op_thread_suicide_timeout),
+	   stone::make_timespan(g_conf()->rgw_op_thread_timeout),
+	   stone::make_timespan(g_conf()->rgw_op_thread_suicide_timeout),
 	   &m_tp) {
 }
 
@@ -301,7 +301,7 @@ RGWRadosGetOmapKeysCR::RGWRadosGetOmapKeysCR(rgw::sal::RGWRadosStore *_store,
     marker(_marker), max_entries(_max_entries),
     result(std::move(_result))
 {
-  ceph_assert(result); // must be allocated
+  stone_assert(result); // must be allocated
   set_description() << "get omap keys dest=" << obj << " marker=" << marker;
 }
 
@@ -339,7 +339,7 @@ RGWRadosGetOmapValsCR::RGWRadosGetOmapValsCR(rgw::sal::RGWRadosStore *_store,
     marker(_marker), max_entries(_max_entries),
     result(std::move(_result))
 {
-  ceph_assert(result); // must be allocated
+  stone_assert(result); // must be allocated
   set_description() << "get omap keys dest=" << obj << " marker=" << marker;
 }
 

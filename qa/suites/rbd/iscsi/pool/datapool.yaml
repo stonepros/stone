@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - overall HEALTH_
       - \(CACHE_POOL_NEAR_FULL\)
@@ -7,6 +7,6 @@ overrides:
 tasks:
 - exec:
     a_gateway.0:
-      - sudo ceph osd pool create rbd 4
-      - sudo ceph osd pool create datapool 4
-      - sudo ceph osd pool application enable datapool rbd
+      - sudo stone osd pool create rbd 4
+      - sudo stone osd pool create datapool 4
+      - sudo stone osd pool application enable datapool rbd

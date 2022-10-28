@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -15,7 +15,7 @@
 #include <string>
 #include <sys/stat.h>
 
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/errno.h"
 #include "common/safe_io.h"
 #include "include/random.h"
@@ -73,20 +73,20 @@ void print_inc_upmaps(const OSDMap::Incremental& pending_inc, int fd)
 {
   ostringstream ss;
   for (auto& i : pending_inc.old_pg_upmap) {
-    ss << "ceph osd rm-pg-upmap " << i << std::endl;
+    ss << "stone osd rm-pg-upmap " << i << std::endl;
   }
   for (auto& i : pending_inc.new_pg_upmap) {
-    ss << "ceph osd pg-upmap " << i.first;
+    ss << "stone osd pg-upmap " << i.first;
     for (auto osd : i.second) {
       ss << " " << osd;
     }
     ss << std::endl;
   }
   for (auto& i : pending_inc.old_pg_upmap_items) {
-    ss << "ceph osd rm-pg-upmap-items " << i << std::endl;
+    ss << "stone osd rm-pg-upmap-items " << i << std::endl;
   }
   for (auto& i : pending_inc.new_pg_upmap_items) {
-    ss << "ceph osd pg-upmap-items " << i.first;
+    ss << "stone osd pg-upmap-items " << i.first;
     for (auto p : i.second) {
       ss << " " << p.first << " " << p.second;
     }
@@ -108,15 +108,15 @@ int main(int argc, const char **argv)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   const char *me = argv[0];
 
@@ -162,104 +162,104 @@ int main(int argc, const char **argv)
   std::string val;
   std::ostringstream err;
   for (std::vector<const char*>::iterator i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_double_dash(args, i)) {
+    if (stone_argparse_double_dash(args, i)) {
       break;
-    } else if (ceph_argparse_flag(args, i, "-p", "--print", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "-p", "--print", (char*)NULL)) {
       print = true;
-    } else if (ceph_argparse_witharg(args, i, &val, err, "--dump", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, err, "--dump", (char*)NULL)) {
       print = true;
       if (!val.empty() && val != "plain") {
 	print_formatter.reset(Formatter::create(val, "", "json"));
       }
-    } else if (ceph_argparse_witharg(args, i, &val, err, "--tree", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, err, "--tree", (char*)NULL)) {
       tree = true;
       if (!val.empty() && val != "plain") {
 	tree_formatter.reset(Formatter::create(val, "", "json"));
       }
-    } else if (ceph_argparse_witharg(args, i, &pg_bits, err, "--osd-pg-bits", (char*)NULL)) {
-    } else if (ceph_argparse_witharg(args, i, &pgp_bits, err, "--osd-pgp-bits", (char*)NULL)) {
-    } else if (ceph_argparse_witharg(args, i, &upmap_file, "--upmap-cleanup", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &pg_bits, err, "--osd-pg-bits", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &pgp_bits, err, "--osd-pgp-bits", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &upmap_file, "--upmap-cleanup", (char*)NULL)) {
       upmap_cleanup = true;
-    } else if (ceph_argparse_witharg(args, i, &upmap_file, "--upmap", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &upmap_file, "--upmap", (char*)NULL)) {
       upmap_cleanup = true;
       upmap = true;
-    } else if (ceph_argparse_witharg(args, i, &upmap_max, err, "--upmap-max", (char*)NULL)) {
-    } else if (ceph_argparse_witharg(args, i, &upmap_deviation, err, "--upmap-deviation", (char*)NULL)) {
-    } else if (ceph_argparse_witharg(args, i, &val, "--upmap-pool", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &upmap_max, err, "--upmap-max", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &upmap_deviation, err, "--upmap-deviation", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--upmap-pool", (char*)NULL)) {
       upmap_pools.insert(val);
-    } else if (ceph_argparse_witharg(args, i, &num_osd, err, "--createsimple", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &num_osd, err, "--createsimple", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	exit(EXIT_FAILURE);
       }
       createsimple = true;
-    } else if (ceph_argparse_flag(args, i, "--upmap-active", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--upmap-active", (char*)NULL)) {
       upmap_active = true;
-    } else if (ceph_argparse_flag(args, i, "--health", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--health", (char*)NULL)) {
       health = true;
-    } else if (ceph_argparse_flag(args, i, "--with-default-pool", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--with-default-pool", (char*)NULL)) {
       createpool = true;
-    } else if (ceph_argparse_flag(args, i, "--create-from-conf", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--create-from-conf", (char*)NULL)) {
       create_from_conf = true;
-    } else if (ceph_argparse_flag(args, i, "--mark-up-in", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--mark-up-in", (char*)NULL)) {
       mark_up_in = true;
-    } else if (ceph_argparse_witharg(args, i, &val, "--mark-out", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--mark-out", (char*)NULL)) {
       marked_out = std::stoi(val);
-    } else if (ceph_argparse_witharg(args, i, &val, "--mark-up", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--mark-up", (char*)NULL)) {
       marked_up  = std::stod(val);
-    } else if (ceph_argparse_witharg(args, i, &val, "--mark-in", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--mark-in", (char*)NULL)) {
       marked_in  = std::stod(val);
-    } else if (ceph_argparse_flag(args, i, "--clear-temp", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--clear-temp", (char*)NULL)) {
       clear_temp = true;
-    } else if (ceph_argparse_flag(args, i, "--clean-temps", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--clean-temps", (char*)NULL)) {
       clean_temps = true;
-    } else if (ceph_argparse_flag(args, i, "--test-map-pgs", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--test-map-pgs", (char*)NULL)) {
       test_map_pgs = true;
-    } else if (ceph_argparse_flag(args, i, "--test-map-pgs-dump", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--test-map-pgs-dump", (char*)NULL)) {
       test_map_pgs_dump = true;
-    } else if (ceph_argparse_flag(args, i, "--test-map-pgs-dump-all", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--test-map-pgs-dump-all", (char*)NULL)) {
       test_map_pgs_dump_all = true;
-    } else if (ceph_argparse_flag(args, i, "--test-random", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--test-random", (char*)NULL)) {
       test_random = true;
-    } else if (ceph_argparse_flag(args, i, "--clobber", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--clobber", (char*)NULL)) {
       clobber = true;
-    } else if (ceph_argparse_witharg(args, i, &pg_bits, err, "--pg_bits", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &pg_bits, err, "--pg_bits", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	exit(EXIT_FAILURE);
       }
-    } else if (ceph_argparse_witharg(args, i, &pgp_bits, err, "--pgp_bits", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &pgp_bits, err, "--pgp_bits", (char*)NULL)) {
       if (!err.str().empty()) {
 	cerr << err.str() << std::endl;
 	exit(EXIT_FAILURE);
       }
-    } else if (ceph_argparse_witharg(args, i, &val, "--export_crush", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--export_crush", (char*)NULL)) {
       export_crush = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--import_crush", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--import_crush", (char*)NULL)) {
       import_crush = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--test_map_pg", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--test_map_pg", (char*)NULL)) {
       test_map_pg = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--test_map_object", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--test_map_object", (char*)NULL)) {
       test_map_object = val;
-    } else if (ceph_argparse_flag(args, i, "--test_crush", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--test_crush", (char*)NULL)) {
       test_crush = true;
-    } else if (ceph_argparse_witharg(args, i, &val, err, "--pg_num", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, err, "--pg_num", (char*)NULL)) {
       string interr;
       pg_num = strict_strtoll(val.c_str(), 10, &interr);
       if (interr.length() > 0) {
         cerr << "error parsing integer value " << interr << std::endl;
         exit(EXIT_FAILURE);
       }
-    } else if (ceph_argparse_witharg(args, i, &range_first, err, "--range_first", (char*)NULL)) {
-    } else if (ceph_argparse_witharg(args, i, &range_last, err, "--range_last", (char*)NULL)) {
-    } else if (ceph_argparse_witharg(args, i, &pool, err, "--pool", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &range_first, err, "--range_first", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &range_last, err, "--range_last", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &pool, err, "--pool", (char*)NULL)) {
       if (!err.str().empty()) {
         cerr << err.str() << std::endl;
         exit(EXIT_FAILURE);
       }
-    } else if (ceph_argparse_witharg(args, i, &val, err, "--adjust-crush-weight", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, err, "--adjust-crush-weight", (char*)NULL)) {
       adjust_crush_weight = val;
-    } else if (ceph_argparse_flag(args, i, "--save", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--save", (char*)NULL)) {
       save = true;
     } else {
       ++i;
@@ -344,9 +344,9 @@ int main(int argc, const char **argv)
     uuid_d fsid;
     if (createpool) {
       osdmap.build_simple_with_pool(
-	g_ceph_context, 0, fsid, num_osd, pg_bits, pgp_bits);
+	g_stone_context, 0, fsid, num_osd, pg_bits, pgp_bits);
     } else {
-      osdmap.build_simple(g_ceph_context, 0, fsid, num_osd);
+      osdmap.build_simple(g_stone_context, 0, fsid, num_osd);
     }
     modified = true;
   }
@@ -355,10 +355,10 @@ int main(int argc, const char **argv)
     cout << "marking all OSDs up and in" << std::endl;
     int n = osdmap.get_max_osd();
     for (int i=0; i<n; i++) {
-      osdmap.set_state(i, osdmap.get_state(i) | CEPH_OSD_UP);
-      osdmap.set_weight(i, CEPH_OSD_IN);
+      osdmap.set_state(i, osdmap.get_state(i) | STONE_OSD_UP);
+      osdmap.set_weight(i, STONE_OSD_IN);
       if (osdmap.crush->get_item_weight(i) == 0 ) {
-        osdmap.crush->adjust_item_weightf(g_ceph_context, i, 1.0);
+        osdmap.crush->adjust_item_weightf(g_stone_context, i, 1.0);
       }
     }
   }
@@ -366,20 +366,20 @@ int main(int argc, const char **argv)
   if (marked_out >=0 && marked_out < osdmap.get_max_osd()) {
     cout << "marking OSD@" << marked_out << " as out" << std::endl;
     int id = marked_out;
-    osdmap.set_state(id, osdmap.get_state(id) | CEPH_OSD_UP);
-    osdmap.set_weight(id, CEPH_OSD_OUT);
+    osdmap.set_state(id, osdmap.get_state(id) | STONE_OSD_UP);
+    osdmap.set_weight(id, STONE_OSD_OUT);
   }
 
   if (marked_up >=0 && marked_up < osdmap.get_max_osd()) {
     cout << "marking OSD@" << marked_up << " as up" << std::endl;
     int id = marked_up;
-    osdmap.set_state(id, osdmap.get_state(id) | CEPH_OSD_UP);
+    osdmap.set_state(id, osdmap.get_state(id) | STONE_OSD_UP);
   }
 
   if (marked_in >=0 && marked_in < osdmap.get_max_osd()) {
     cout << "marking OSD@" << marked_up << " as up" << std::endl;
     int id = marked_up;
-    osdmap.set_weight(id, CEPH_OSD_IN);
+    osdmap.set_weight(id, STONE_OSD_IN);
   }
 
   for_each_substr(adjust_crush_weight, ",", [&](auto osd_to_adjust) {
@@ -392,7 +392,7 @@ int main(int argc, const char **argv)
     }
     int osd_id = std::stoi(string(osd_to_adjust.substr(0, pos)));
     float new_weight = std::stof(string(osd_to_adjust.substr(pos + 1)));
-    osdmap.crush->adjust_item_weightf(g_ceph_context, osd_id, new_weight);
+    osdmap.crush->adjust_item_weightf(g_stone_context, osd_id, new_weight);
     std::cout << "Adjusted osd." << osd_id << " CRUSH weight to " << new_weight
 	      << std::endl;
     if (save) {
@@ -414,7 +414,7 @@ int main(int argc, const char **argv)
     OSDMap tmpmap;
     tmpmap.deepish_copy_from(osdmap);
     tmpmap.apply_incremental(pending_inc);
-    OSDMap::clean_temps(g_ceph_context, osdmap, tmpmap, &pending_inc);
+    OSDMap::clean_temps(g_stone_context, osdmap, tmpmap, &pending_inc);
   }
   int upmap_fd = STDOUT_FILENO;
   if (upmap || upmap_cleanup) {
@@ -432,11 +432,11 @@ int main(int argc, const char **argv)
     cout << "checking for upmap cleanups" << std::endl;
     OSDMap::Incremental pending_inc(osdmap.get_epoch()+1);
     pending_inc.fsid = osdmap.get_fsid();
-    int r = osdmap.clean_pg_upmaps(g_ceph_context, &pending_inc);
+    int r = osdmap.clean_pg_upmaps(g_stone_context, &pending_inc);
     if (r > 0) {
       print_inc_upmaps(pending_inc, upmap_fd);
       r = osdmap.apply_incremental(pending_inc);
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
     }
   }
   if (upmap) {
@@ -489,7 +489,7 @@ int main(int argc, const char **argv)
         set<int64_t> one_pool;
         one_pool.insert(i);
         int did = osdmap.calc_pg_upmaps(
-          g_ceph_context, upmap_deviation,
+          g_stone_context, upmap_deviation,
           left, one_pool,
           &pending_inc);
         total_did += did;
@@ -507,7 +507,7 @@ int main(int argc, const char **argv)
         print_inc_upmaps(pending_inc, upmap_fd);
         if (save || upmap_active) {
 	  int r = osdmap.apply_incremental(pending_inc);
-	  ceph_assert(r == 0);
+	  stone_assert(r == 0);
 	  if (save)
 	    modified = true;
         }
@@ -579,7 +579,7 @@ skip_upmap:
 
   if (!export_crush.empty()) {
     bufferlist cbl;
-    osdmap.crush->encode(cbl, CEPH_FEATURES_SUPPORTED_DEFAULT);
+    osdmap.crush->encode(cbl, STONE_FEATURES_SUPPORTED_DEFAULT);
     r = cbl.write_file(export_crush.c_str());
     if (r < 0) {
       cerr << me << ": error writing crush map to " << import_crush << std::endl;
@@ -758,7 +758,7 @@ skip_upmap:
     while (1) {
       cout << "pass " << ++pass << std::endl;
 
-      ceph::unordered_map<pg_t,vector<int> > m;
+      stone::unordered_map<pg_t,vector<int> > m;
       for (map<int64_t,pg_pool_t>::const_iterator p = osdmap.get_pools().begin();
 	   p != osdmap.get_pools().end();
 	   ++p) {
@@ -774,7 +774,7 @@ skip_upmap:
 	    if (m.count(pgid)) {
 	      if (m[pgid] != r) {
 		cout << pgid << " had " << m[pgid] << " now " << r << std::endl;
-		ceph_abort();
+		stone_abort();
 	      }
 	    } else
 	      m[pgid] = r;
@@ -827,7 +827,7 @@ skip_upmap:
   }
   if (modified) {
     bl.clear();
-    osdmap.encode(bl, CEPH_FEATURES_SUPPORTED_DEFAULT | CEPH_FEATURE_RESERVED);
+    osdmap.encode(bl, STONE_FEATURES_SUPPORTED_DEFAULT | STONE_FEATURE_RESERVED);
 
     // write it out
     cout << me << ": writing epoch " << osdmap.get_epoch()

@@ -1,7 +1,7 @@
 // -*- mode:C; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Inktank <info@inktank.com>
  *
@@ -31,8 +31,8 @@ namespace {
       }
     }
     const string& get(unsigned r, unsigned c) const {
-      ceph_assert(r < row.size());
-      ceph_assert(c < row[r].size());
+      stone_assert(r < row.size());
+      stone_assert(c < row[r].size());
       return row[r][c];
     }
   };
@@ -48,7 +48,7 @@ namespace {
   }
 }
 
-// dump_object_stat_sum() is called by "ceph df" command
+// dump_object_stat_sum() is called by "stone df" command
 // with table, without formatter, verbose = true, not empty, avail > 0
 TEST(pgmap, dump_object_stat_sum_0)
 {

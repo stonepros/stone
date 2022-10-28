@@ -7,8 +7,8 @@
 #include "services/svc_tier_rados.h"
 #include "rgw_rados.h" // RGW_OBJ_NS_SHADOW and RGW_OBJ_NS_MULTIPART
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 int RGWObjManifest::generator::create_next(uint64_t ofs)
 {
@@ -292,7 +292,7 @@ void RGWObjManifest::obj_iterator::operator++()
   update_location();
 }
 
-int RGWObjManifest::generator::create_begin(CephContext *cct, RGWObjManifest *_m,
+int RGWObjManifest::generator::create_begin(StoneContext *cct, RGWObjManifest *_m,
                                             const rgw_placement_rule& head_placement_rule,
                                             const rgw_placement_rule *tail_placement_rule,
                                             const rgw_bucket& _b, const rgw_obj& _obj)

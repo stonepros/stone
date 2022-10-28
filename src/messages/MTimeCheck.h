@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2012 Inktank, Inc.
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MTIMECHECK_H
-#define CEPH_MTIMECHECK_H
+#ifndef STONE_MTIMECHECK_H
+#define STONE_MTIMECHECK_H
 
 class MTimeCheck final : public Message {
 public:
@@ -89,4 +89,4 @@ private:
   friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
 };
 
-#endif /* CEPH_MTIMECHECK_H */
+#endif /* STONE_MTIMECHECK_H */

@@ -15,7 +15,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/construct.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 namespace librbd {
 namespace operation {
@@ -46,7 +46,7 @@ bool may_be_trimmed(const std::map<uint64_t,uint64_t> &extent_map,
       sub_len = sparse_size;
     }
     while (extent_left > 0) {
-      ceph_assert(bl_off >= sub_len);
+      stone_assert(bl_off >= sub_len);
       bl_off -= sub_len;
       bufferlist sub_bl;
       sub_bl.substr_of(bl, bl_off, sub_len);
@@ -120,7 +120,7 @@ public:
 
   int send() override {
     I &image_ctx = this->m_image_ctx;
-    ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+    stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
     ldout(m_cct, 20) << dendl;
 
@@ -145,7 +145,7 @@ public:
 
       uint64_t overlap_objects = 0;
       uint64_t overlap;
-      int r = image_ctx.get_parent_overlap(CEPH_NOSNAP, &overlap);
+      int r = image_ctx.get_parent_overlap(STONE_NOSNAP, &overlap);
       if (r == 0 && overlap > 0) {
         overlap_objects = Striper::get_num_objects(image_ctx.layout, overlap);
       }
@@ -165,7 +165,7 @@ public:
     auto comp = create_rados_callback<
       C_SparsifyObject, &C_SparsifyObject::handle_sparsify>(this);
     int r = image_ctx.data_ctx.aio_operate(m_oid, comp, &op);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -236,7 +236,7 @@ public:
       &C_SparsifyObject<I>::handle_pre_update_object_map>(this);
 
     bool sent = image_ctx.object_map->template aio_update<
-      Context, &Context::complete>(CEPH_NOSNAP, m_object_no, OBJECT_PENDING,
+      Context, &Context::complete>(STONE_NOSNAP, m_object_no, OBJECT_PENDING,
                                    OBJECT_EXISTS, {}, false, ctx);
 
     // NOTE: state machine might complete before we reach here
@@ -275,7 +275,7 @@ public:
     auto comp = create_rados_callback<
       C_SparsifyObject, &C_SparsifyObject::handle_check_exists>(this);
     int r = image_ctx.data_ctx.aio_operate(m_oid, comp, &op, &m_bl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -308,7 +308,7 @@ public:
       assert(image_ctx.object_map != nullptr);
 
       sent = image_ctx.object_map->template aio_update<
-        Context, &Context::complete>(CEPH_NOSNAP, m_object_no,
+        Context, &Context::complete>(STONE_NOSNAP, m_object_no,
                                      exists ? OBJECT_EXISTS : OBJECT_NONEXISTENT,
                                      OBJECT_PENDING, {}, false, ctx);
     }
@@ -342,7 +342,7 @@ public:
     auto comp = create_rados_callback<
       C_SparsifyObject, &C_SparsifyObject::handle_read>(this);
     int r = image_ctx.data_ctx.aio_operate(m_oid, comp, &op, &m_bl);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -372,7 +372,7 @@ public:
 
     ldout(m_cct, 20) << dendl;
 
-    ceph_assert(m_new_end < image_ctx.layout.object_size);
+    stone_assert(m_new_end < image_ctx.layout.object_size);
 
     librados::ObjectWriteOperation op;
     m_bl.clear();
@@ -387,7 +387,7 @@ public:
     auto comp = create_rados_callback<
       C_SparsifyObject, &C_SparsifyObject::handle_trim>(this);
     int r = image_ctx.data_ctx.aio_operate(m_oid, comp, &op);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 
@@ -428,7 +428,7 @@ public:
   }
 
 private:
-  CephContext *m_cct;
+  StoneContext *m_cct;
   uint64_t m_object_no;
   size_t m_sparse_size;
   std::string m_oid;
@@ -448,7 +448,7 @@ private:
 template <typename I>
 bool SparsifyRequest<I>::should_complete(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
   if (r < 0) {
     lderr(cct) << "encountered error: " << cpp_strerror(r) << dendl;
@@ -464,17 +464,17 @@ void SparsifyRequest<I>::send_op() {
 template <typename I>
 void SparsifyRequest<I>::sparsify_objects() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << dendl;
 
-  assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
   uint64_t objects = 0;
   {
     std::shared_lock image_locker{image_ctx.image_lock};
-    objects = image_ctx.get_object_count(CEPH_NOSNAP);
+    objects = image_ctx.get_object_count(STONE_NOSNAP);
   }
 
   auto ctx = create_context_callback<
@@ -492,7 +492,7 @@ void SparsifyRequest<I>::sparsify_objects() {
 template <typename I>
 void SparsifyRequest<I>::handle_sparsify_objects(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r == -ERESTART) {

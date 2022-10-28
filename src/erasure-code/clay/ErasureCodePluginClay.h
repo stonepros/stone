@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stonee distributed storage system
  *
  * Copyright (C) 2018 Indian Institute of Science <office.ece@iisc.ac.in>
  *
@@ -14,8 +14,8 @@
  * 
  */
 
-#ifndef CEPH_ERASURE_CODE_PLUGIN_CLAY_H
-#define CEPH_ERASURE_CODE_PLUGIN_CLAY_H
+#ifndef STONE_ERASURE_CODE_PLUGIN_CLAY_H
+#define STONE_ERASURE_CODE_PLUGIN_CLAY_H
 
 #include "erasure-code/ErasureCodePlugin.h"
 

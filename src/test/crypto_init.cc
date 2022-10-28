@@ -11,7 +11,7 @@
 #include "include/msgr.h"
 #include "gtest/gtest.h"
 #include "auth/Crypto.h"
-#include "common/ceph_crypto.h"
+#include "common/stone_crypto.h"
 
 // TODO: ensure OpenSSL init
 

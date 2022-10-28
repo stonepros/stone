@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MMDSMAP_H
-#define CEPH_MMDSMAP_H
+#ifndef STONE_MMDSMAP_H
+#define STONE_MMDSMAP_H
 
 #include "msg/Message.h"
 #include "mds/MDSMap.h"
@@ -35,11 +35,11 @@ public:
 
 protected:
   MMDSMap() : 
-    SafeMessage{CEPH_MSG_MDS_MAP, HEAD_VERSION, COMPAT_VERSION} {}
+    SafeMessage{STONE_MSG_MDS_MAP, HEAD_VERSION, COMPAT_VERSION} {}
 
   MMDSMap(const uuid_d &f, const MDSMap &mm,
           const std::string mf = std::string()) :
-    SafeMessage{CEPH_MSG_MDS_MAP, HEAD_VERSION, COMPAT_VERSION},
+    SafeMessage{STONE_MSG_MDS_MAP, HEAD_VERSION, COMPAT_VERSION},
     fsid(f), map_fs_name(mf) {
     epoch = mm.get_epoch();
     mm.encode(encoded, -1);  // we will reencode with fewer features as necessary
@@ -68,9 +68,9 @@ public:
     using ceph::encode;
     encode(fsid, payload);
     encode(epoch, payload);
-    if ((features & CEPH_FEATURE_PGID64) == 0 ||
-	(features & CEPH_FEATURE_MDSENC) == 0 ||
-	(features & CEPH_FEATURE_MSG_ADDR2) == 0 ||
+    if ((features & STONE_FEATURE_PGID64) == 0 ||
+	(features & STONE_FEATURE_MDSENC) == 0 ||
+	(features & STONE_FEATURE_MSG_ADDR2) == 0 ||
 	!HAVE_FEATURE(features, SERVER_NAUTILUS)) {
       // reencode for old clients.
       MDSMap m;

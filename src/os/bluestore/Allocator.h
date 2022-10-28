@@ -9,8 +9,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_OS_BLUESTORE_ALLOCATOR_H
-#define CEPH_OS_BLUESTORE_ALLOCATOR_H
+#ifndef STONE_OS_BLUESTORE_ALLOCATOR_H
+#define STONE_OS_BLUESTORE_ALLOCATOR_H
 
 #include <functional>
 #include <ostream>

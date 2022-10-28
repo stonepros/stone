@@ -13,7 +13,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 }
 
@@ -27,7 +27,7 @@ Cache::~Cache()
   for (auto &i: extents) {
     logger().error("~Cache: extent {} still alive", i);
   }
-  ceph_assert(extents.empty());
+  stone_assert(extents.empty());
 }
 
 Cache::retire_extent_ret Cache::retire_extent_if_cached(
@@ -57,7 +57,7 @@ void Cache::add_extent(CachedExtentRef ref)
   if (ref->is_dirty()) {
     add_to_dirty(ref);
   } else {
-    ceph_assert(!ref->primary_ref_list_hook.is_linked());
+    stone_assert(!ref->primary_ref_list_hook.is_linked());
   }
   logger().debug("add_extent: {}", *ref);
 }
@@ -90,11 +90,11 @@ void Cache::remove_extent(CachedExtentRef ref)
   extents.erase(*ref);
 
   if (ref->is_dirty()) {
-    ceph_assert(ref->primary_ref_list_hook.is_linked());
+    stone_assert(ref->primary_ref_list_hook.is_linked());
     dirty.erase(dirty.s_iterator_to(*ref));
     intrusive_ptr_release(&*ref);
   } else {
-    ceph_assert(!ref->primary_ref_list_hook.is_linked());
+    stone_assert(!ref->primary_ref_list_hook.is_linked());
   }
 }
 
@@ -105,7 +105,7 @@ void Cache::replace_extent(CachedExtentRef next, CachedExtentRef prev)
   extents.replace(*next, *prev);
 
   if (prev->is_dirty()) {
-    ceph_assert(prev->primary_ref_list_hook.is_linked());
+    stone_assert(prev->primary_ref_list_hook.is_linked());
     auto prev_it = dirty.iterator_to(*prev);
     dirty.insert(prev_it, *next);
     dirty.erase(prev_it);
@@ -141,11 +141,11 @@ CachedExtentRef Cache::alloc_new_extent_by_type(
   case extent_types_t::TEST_BLOCK_PHYSICAL:
     return alloc_new_extent<TestBlockPhysical>(t, length);
   case extent_types_t::NONE: {
-    ceph_assert(0 == "NONE is an invalid extent type");
+    stone_assert(0 == "NONE is an invalid extent type");
     return CachedExtentRef();
   }
   default:
-    ceph_assert(0 == "impossible");
+    stone_assert(0 == "impossible");
     return CachedExtentRef();
   }
 }
@@ -240,7 +240,7 @@ std::optional<record_t> Cache::try_construct_record(Transaction &t)
   // invalidate now invalid blocks
   for (auto &i: t.retired_set) {
     logger().debug("try_construct_record: retiring {}", *i);
-    ceph_assert(i->is_valid());
+    stone_assert(i->is_valid());
     remove_extent(i);
     i->state = CachedExtent::extent_state_t::INVALID;
   }
@@ -522,11 +522,11 @@ Cache::get_extent_ertr::future<CachedExtentRef> Cache::get_extent_by_type(
 	return CachedExtentRef(extent.detach(), false /* add_ref */);
       });
     case extent_types_t::NONE: {
-      ceph_assert(0 == "NONE is an invalid extent type");
+      stone_assert(0 == "NONE is an invalid extent type");
       return get_extent_ertr::make_ready_future<CachedExtentRef>();
     }
     default:
-      ceph_assert(0 == "impossible");
+      stone_assert(0 == "impossible");
       return get_extent_ertr::make_ready_future<CachedExtentRef>();
     }
   }().safe_then([laddr](CachedExtentRef e) {

@@ -1,5 +1,5 @@
-#ifndef CEPH_CRC32C_H
-#define CEPH_CRC32C_H
+#ifndef STONE_CRC32C_H
+#define STONE_CRC32C_H
 
 #include <stdint.h>
 

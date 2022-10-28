@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_ASYNCMESSENGER_H
-#define CEPH_ASYNCMESSENGER_H
+#ifndef STONE_ASYNCMESSENGER_H
+#define STONE_ASYNCMESSENGER_H
 
 #include <map>
 
@@ -52,7 +52,7 @@ class Processor {
   class C_processor_accept;
 
  public:
-  Processor(AsyncMessenger *r, Worker *w, CephContext *c);
+  Processor(AsyncMessenger *r, Worker *w, StoneeContext *c);
   ~Processor() { delete listen_handler; };
 
   void stop();
@@ -76,12 +76,12 @@ public:
   /**
    * Initialize the AsyncMessenger!
    *
-   * @param cct The CephContext to use
+   * @param cct The StoneeContext to use
    * @param name The name to assign ourselves
    * _nonce A unique ID to use for this AsyncMessenger. It should not
    * be a value that will be repeated if the daemon restarts.
    */
-  AsyncMessenger(CephContext *cct, entity_name_t name, const std::string &type,
+  AsyncMessenger(StoneeContext *cct, entity_name_t name, const std::string &type,
                  std::string mname, uint64_t _nonce);
 
   /**
@@ -322,7 +322,7 @@ private:
     ceph_assert(ceph_mutex_is_locked(lock));
     local_connection->peer_addrs = *my_addrs;
     local_connection->peer_type = my_name.type();
-    local_connection->set_features(CEPH_FEATURES_ALL);
+    local_connection->set_features(STONE_FEATURES_ALL);
     ms_deliver_handle_fast_connect(local_connection.get());
   }
 
@@ -420,4 +420,4 @@ public:
    */
 } ;
 
-#endif /* CEPH_ASYNCMESSENGER_H */
+#endif /* STONE_ASYNCMESSENGER_H */

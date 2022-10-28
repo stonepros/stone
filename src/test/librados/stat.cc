@@ -2,7 +2,7 @@
 #include "test/librados/test.h"
 #include "test/librados/TestCase.h"
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 #include <algorithm>
 #include <errno.h>

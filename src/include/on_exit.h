@@ -1,5 +1,5 @@
-#ifndef CEPH_ON_EXIT_H
-#define CEPH_ON_EXIT_H
+#ifndef STONE_ON_EXIT_H
+#define STONE_ON_EXIT_H
 
 #include <pthread.h>
 #include <vector>

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -55,7 +55,7 @@ static std::string asok_connect(const std::string &path, int *fd)
 {
   int socket_fd = socket_cloexec(PF_UNIX, SOCK_STREAM, 0);
   if(socket_fd < 0) {
-    int err = ceph_sock_errno();
+    int err = stone_sock_errno();
     ostringstream oss;
     oss << "socket(PF_UNIX, SOCK_STREAM, 0) failed: " << cpp_strerror(err);
     return oss.str();
@@ -69,7 +69,7 @@ static std::string asok_connect(const std::string &path, int *fd)
 
   if (::connect(socket_fd, (struct sockaddr *) &address, 
 	sizeof(struct sockaddr_un)) != 0) {
-    int err = ceph_sock_errno();
+    int err = stone_sock_errno();
     ostringstream oss;
     oss << "connect(" << socket_fd << ") failed: " << cpp_strerror(err);
     compat_closesocket(socket_fd);
@@ -80,7 +80,7 @@ static std::string asok_connect(const std::string &path, int *fd)
   timer.tv_sec = 10;
   timer.tv_usec = 0;
   if (::setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, (SOCKOPT_VAL_TYPE)&timer, sizeof(timer))) {
-    int err = ceph_sock_errno();
+    int err = stone_sock_errno();
     ostringstream oss;
     oss << "setsockopt(" << socket_fd << ", SO_RCVTIMEO) failed: "
 	<< cpp_strerror(err);
@@ -90,7 +90,7 @@ static std::string asok_connect(const std::string &path, int *fd)
   timer.tv_sec = 10;
   timer.tv_usec = 0;
   if (::setsockopt(socket_fd, SOL_SOCKET, SO_SNDTIMEO, (SOCKOPT_VAL_TYPE)&timer, sizeof(timer))) {
-    int err = ceph_sock_errno();
+    int err = stone_sock_errno();
     ostringstream oss;
     oss << "setsockopt(" << socket_fd << ", SO_SNDTIMEO) failed: "
 	<< cpp_strerror(err);

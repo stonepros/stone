@@ -6,7 +6,7 @@
 #include "common/Cond.h"
 #include "common/dout.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::asio::ContextWQ: " \
                            << this << " " << __func__ << ": "
@@ -14,7 +14,7 @@
 namespace librbd {
 namespace asio {
 
-ContextWQ::ContextWQ(CephContext* cct, boost::asio::io_context& io_context)
+ContextWQ::ContextWQ(StoneContext* cct, boost::asio::io_context& io_context)
   : m_cct(cct), m_io_context(io_context),
     m_strand(std::make_unique<boost::asio::io_context::strand>(io_context)),
     m_queued_ops(0) {

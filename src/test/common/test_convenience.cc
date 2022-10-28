@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc.
  *
@@ -30,40 +30,40 @@ TEST(Convenience, MaybeDo)
 {
   boost::optional<std::string> s("qwerty");
   boost::optional<std::string> t;
-  auto r = ceph::maybe_do(s, l);
+  auto r = stone::maybe_do(s, l);
   EXPECT_TRUE(r);
   EXPECT_EQ(*r, s->size());
 
-  EXPECT_FALSE(ceph::maybe_do(t, l));
+  EXPECT_FALSE(stone::maybe_do(t, l));
 }
 
 TEST(Convenience, MaybeDoOr)
 {
   const boost::optional<std::string> s("qwerty");
   const boost::optional<std::string> t;
-  auto r = ceph::maybe_do_or(s, l, 0);
+  auto r = stone::maybe_do_or(s, l, 0);
   EXPECT_EQ(r, s->size());
 
-  EXPECT_EQ(ceph::maybe_do_or(t, l, 0u), 0u);
+  EXPECT_EQ(stone::maybe_do_or(t, l, 0u), 0u);
 }
 
 TEST(Convenience, StdMaybeDo)
 {
   std::optional<std::string> s("qwerty");
   std::optional<std::string> t;
-  auto r = ceph::maybe_do(s, l);
+  auto r = stone::maybe_do(s, l);
   EXPECT_TRUE(r);
   EXPECT_EQ(*r, s->size());
 
-  EXPECT_FALSE(ceph::maybe_do(t, l));
+  EXPECT_FALSE(stone::maybe_do(t, l));
 }
 
 TEST(Convenience, StdMaybeDoOr)
 {
   const std::optional<std::string> s("qwerty");
   const std::optional<std::string> t;
-  auto r = ceph::maybe_do_or(s, l, 0);
+  auto r = stone::maybe_do_or(s, l, 0);
   EXPECT_EQ(r, s->size());
 
-  EXPECT_EQ(ceph::maybe_do_or(t, l, 0u), 0u);
+  EXPECT_EQ(stone::maybe_do_or(t, l, 0u), 0u);
 }

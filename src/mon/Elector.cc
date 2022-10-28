@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -21,9 +21,9 @@
 #include "messages/MMonPing.h"
 
 #include "common/config.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_mon
+#define dout_subsys stone_subsys_mon
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, mon, get_epoch())
 using std::cerr;
@@ -44,14 +44,14 @@ using std::to_string;
 using std::vector;
 using std::unique_ptr;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::Formatter;
-using ceph::JSONFormatter;
-using ceph::mono_clock;
-using ceph::mono_time;
-using ceph::timespan_str;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::Formatter;
+using stone::JSONFormatter;
+using stone::mono_clock;
+using stone::mono_time;
+using stone::timespan_str;
 static ostream& _prefix(std::ostream *_dout, Monitor *mon, epoch_t epoch) {
   return *_dout << "mon." << mon->name << "@" << mon->rank
 		<< "(" << mon->get_state_name()
@@ -102,7 +102,7 @@ void Elector::validate_store()
   auto t(std::make_shared<MonitorDBStore::Transaction>());
   t->put(Monitor::MONITOR_NAME, "election_writeable_test", rand());
   int r = mon->store->apply_transaction(t);
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
 }
 
 bool Elector::is_current_member(int rank) const
@@ -155,8 +155,8 @@ void Elector::propose_to_peers(epoch_t e, bufferlist& logic_bl)
 		       peer_tracker.get_encoded_bl(),
 		       logic.strategy, mon->monmap);
     m->sharing_bl = logic_bl;
-    m->mon_features = ceph::features::mon::get_supported();
-    m->mon_release = ceph_release();
+    m->mon_features = stone::features::mon::get_supported();
+    m->mon_release = stone_release();
     mon->send_mon_message(m, i);
   }  
 }
@@ -164,9 +164,9 @@ void Elector::propose_to_peers(epoch_t e, bufferlist& logic_bl)
 void Elector::_start()
 {
   peer_info.clear();
-  peer_info[mon->rank].cluster_features = CEPH_FEATURES_ALL;
-  peer_info[mon->rank].mon_release = ceph_release();
-  peer_info[mon->rank].mon_features = ceph::features::mon::get_supported();
+  peer_info[mon->rank].cluster_features = STONE_FEATURES_ALL;
+  peer_info[mon->rank].mon_release = stone_release();
+  peer_info[mon->rank].mon_features = stone::features::mon::get_supported();
   mon->collect_metadata(&peer_info[mon->rank].metadata);
   reset_timer();
 }
@@ -176,8 +176,8 @@ void Elector::_defer_to(int who)
   MMonElection *m = new MMonElection(MMonElection::OP_ACK, get_epoch(),
 				     peer_tracker.get_encoded_bl(),
 				     logic.strategy, mon->monmap);
-  m->mon_features = ceph::features::mon::get_supported();
-  m->mon_release = ceph_release();
+  m->mon_features = stone::features::mon::get_supported();
+  m->mon_release = stone_release();
   mon->collect_metadata(&m->metadata);
 
   mon->send_mon_message(m, who);
@@ -228,18 +228,18 @@ void Elector::assimilate_connection_reports(const bufferlist& tbl)
 
 void Elector::message_victory(const std::set<int>& quorum)
 {
-  uint64_t cluster_features = CEPH_FEATURES_ALL;
-  mon_feature_t mon_features = ceph::features::mon::get_supported();
+  uint64_t cluster_features = STONE_FEATURES_ALL;
+  mon_feature_t mon_features = stone::features::mon::get_supported();
   map<int,Metadata> metadata;
-  ceph_release_t min_mon_release{ceph_release_t::unknown};
+  stone_release_t min_mon_release{stone_release_t::unknown};
   for (auto id : quorum) {
     auto i = peer_info.find(id);
-    ceph_assert(i != peer_info.end());
+    stone_assert(i != peer_info.end());
     auto& info = i->second;
     cluster_features &= info.cluster_features;
     mon_features &= info.mon_features;
     metadata[id] = info.metadata;
-    if (min_mon_release == ceph_release_t::unknown ||
+    if (min_mon_release == stone_release_t::unknown ||
 	info.mon_release < min_mon_release) {
       min_mon_release = info.mon_release;
     }
@@ -278,7 +278,7 @@ void Elector::handle_propose(MonOpRequestRef op)
   dout(5) << "handle_propose from " << m->get_source() << dendl;
   int from = m->get_source().num();
 
-  ceph_assert(m->epoch % 2 == 1); // election
+  stone_assert(m->epoch % 2 == 1); // election
   uint64_t required_features = mon->get_required_features();
   mon_feature_t required_mon_features = mon->get_required_mon_features();
 
@@ -324,7 +324,7 @@ void Elector::handle_ack(MonOpRequestRef op)
   dout(5) << "handle_ack from " << m->get_source() << dendl;
   int from = m->get_source().num();
 
-  ceph_assert(m->epoch == get_epoch());
+  stone_assert(m->epoch == get_epoch());
   uint64_t required_features = mon->get_required_features();
   if ((required_features ^ m->get_connection()->get_features()) &
       required_features) {
@@ -353,7 +353,7 @@ void Elector::handle_ack(MonOpRequestRef op)
          q != logic.acked_me.end();
          ++q) {
       auto p = peer_info.find(*q);
-      ceph_assert(p != peer_info.end());
+      stone_assert(p != peer_info.end());
       if (q != logic.acked_me.begin())
         *_dout << ",";
       *_dout << " mon." << p->first << ":"
@@ -389,7 +389,7 @@ void Elector::handle_victory(MonOpRequestRef op)
   cancel_timer();
 
   // stash leader's commands
-  ceph_assert(m->sharing_bl.length());
+  stone_assert(m->sharing_bl.length());
   vector<MonCommand> new_cmds;
   auto bi = m->sharing_bl.cbegin();
   MonCommand::decode_vector(new_cmds, bi);
@@ -429,8 +429,8 @@ void Elector::handle_nak(MonOpRequestRef op)
 	  << " min_mon_release " << (int)m->mon_release
           << dendl;
 
-  if (m->mon_release > ceph_release()) {
-    derr << "Shutting down because I am release " << (int)ceph_release()
+  if (m->mon_release > stone_release()) {
+    derr << "Shutting down because I am release " << (int)stone_release()
 	 << " < min_mon_release " << (int)m->mon_release << dendl;
   } else {
     CompatSet other;
@@ -438,7 +438,7 @@ void Elector::handle_nak(MonOpRequestRef op)
     other.decode(bi);
     CompatSet diff = Monitor::get_supported_features().unsupported(other);
 
-    mon_feature_t mon_supported = ceph::features::mon::get_supported();
+    mon_feature_t mon_supported = stone::features::mon::get_supported();
     // all features in 'm->mon_features' not in 'mon_supported'
     mon_feature_t mon_diff = m->mon_features.diff(mon_supported);
 
@@ -456,7 +456,7 @@ void Elector::begin_peer_ping(int peer)
   }
 
   if (!mon->get_quorum_mon_features().contains_all(
-				      ceph::features::mon::FEATURE_PINGING)) {
+				      stone::features::mon::FEATURE_PINGING)) {
     return;
   }
 
@@ -465,7 +465,7 @@ void Elector::begin_peer_ping(int peer)
   peer_tracker.report_live_connection(peer, 0); // init this peer as existing
   live_pinging.insert(peer);
   dead_pinging.erase(peer);
-  peer_acked_ping[peer] = ceph_clock_now();
+  peer_acked_ping[peer] = stone_clock_now();
   send_peer_ping(peer);
   mon->timer.add_event_after(ping_timeout / PING_DIVISOR,
 			     new C_MonContext{mon, [this, peer](int) {
@@ -481,7 +481,7 @@ void Elector::send_peer_ping(int peer, const utime_t *n)
   if (n != NULL) {
     now = *n;
   } else {
-    now = ceph_clock_now();
+    now = stone_clock_now();
   }
   MMonPing *ping = new MMonPing(MMonPing::PING, now, peer_tracker.get_encoded_bl());
   mon->messenger->send_to_mon(ping, mon->monmap->get_addrs(peer));
@@ -496,7 +496,7 @@ void Elector::ping_check(int peer)
     dout(20) << __func__ << peer << " is no longer marked for pinging" << dendl;
     return;
   }
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   utime_t& acked_ping = peer_acked_ping[peer];
   utime_t& newest_ping = peer_sent_ping[peer];
   if (!acked_ping.is_zero() && acked_ping < now - ping_timeout) {
@@ -537,9 +537,9 @@ void Elector::dead_ping(int peer)
     dout(20) << __func__ << peer << " is no longer marked for dead pinging" << dendl;
     return;
   }
-  ceph_assert(!live_pinging.count(peer));
+  stone_assert(!live_pinging.count(peer));
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   utime_t& acked_ping = peer_acked_ping[peer];
 
   peer_tracker.report_dead_connection(peer, now - acked_ping);
@@ -578,7 +578,7 @@ void Elector::handle_ping(MonOpRequestRef op)
       peer_tracker.report_live_connection(prank, m->stamp - previous_acked);
       peer_acked_ping[prank] = m->stamp;
     }
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     if (now - m->stamp > ping_timeout / PING_DIVISOR) {
       send_peer_ping(prank, &now);
     }
@@ -589,7 +589,7 @@ void Elector::handle_ping(MonOpRequestRef op)
 void Elector::dispatch(MonOpRequestRef op)
 {
   op->mark_event("elector:dispatch");
-  ceph_assert(op->is_type_election_or_ping());
+  stone_assert(op->is_type_election_or_ping());
 
   switch (op->get_req()->get_type()) {
     
@@ -677,7 +677,7 @@ void Elector::dispatch(MonOpRequestRef op)
 	handle_nak(op);
 	return;
       default:
-	ceph_abort();
+	stone_abort();
       }
     }
     break;
@@ -687,7 +687,7 @@ void Elector::dispatch(MonOpRequestRef op)
     break;
     
   default: 
-    ceph_abort();
+    stone_abort();
   }
 }
 

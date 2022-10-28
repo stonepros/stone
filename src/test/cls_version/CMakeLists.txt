@@ -1,8 +1,8 @@
-# ceph_test_cls_version
-add_executable(ceph_test_cls_version
+# stone_test_cls_version
+add_executable(stone_test_cls_version
   test_cls_version.cc
   )
-target_link_libraries(ceph_test_cls_version
+target_link_libraries(stone_test_cls_version
   librados
   cls_version_client
   global

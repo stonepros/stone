@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_OS_BLUESTORE_BLUEFS_H
-#define CEPH_OS_BLUESTORE_BLUEFS_H
+#ifndef STONE_OS_BLUESTORE_BLUEFS_H
+#define STONE_OS_BLUESTORE_BLUEFS_H
 
 #include <atomic>
 #include <mutex>
@@ -192,7 +192,7 @@ public:
     FileWriter(FileRef f)
       : file(std::move(f)),
        buffer_appender(buffer.get_page_aligned_appender(
-                         g_conf()->bluefs_alloc_size / CEPH_PAGE_SIZE)) {
+                         g_conf()->bluefs_alloc_size / STONE_PAGE_SIZE)) {
       ++file->num_writers;
       iocv.fill(nullptr);
       dirty_devs.fill(false);

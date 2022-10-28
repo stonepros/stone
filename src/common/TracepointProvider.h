@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_TRACEPOINT_PROVIDER_H
-#define CEPH_TRACEPOINT_PROVIDER_H
+#ifndef STONE_TRACEPOINT_PROVIDER_H
+#define STONE_TRACEPOINT_PROVIDER_H
 
 #include "common/ceph_context.h"
 #include "common/config_obs.h"
@@ -22,7 +22,7 @@ public:
 
   class Singleton {
   public:
-    Singleton(CephContext *cct, const char *library, const char *config_key)
+    Singleton(StoneeContext *cct, const char *library, const char *config_key)
       : tracepoint_provider(new TracepointProvider(cct, library, config_key)) {
     }
     ~Singleton() {
@@ -39,12 +39,12 @@ public:
   template <const Traits &traits>
   class TypedSingleton : public Singleton {
   public:
-    explicit TypedSingleton(CephContext *cct)
+    explicit TypedSingleton(StoneeContext *cct)
       : Singleton(cct, traits.library, traits.config_key) {
     }
   };
 
-  TracepointProvider(CephContext *cct, const char *library,
+  TracepointProvider(StoneeContext *cct, const char *library,
                      const char *config_key);
   ~TracepointProvider() override;
 
@@ -54,7 +54,7 @@ public:
   TracepointProvider operator =(TracepointProvider&&) = delete;
 
   template <const Traits &traits>
-  static void initialize(CephContext *cct) {
+  static void initialize(StoneeContext *cct) {
 #ifdef WITH_LTTNG
      cct->lookup_or_create_singleton_object<TypedSingleton<traits>>(
        traits.library, false, cct);
@@ -69,7 +69,7 @@ protected:
 			  const std::set <std::string> &changed) override;
 
 private:
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   std::string m_library;
   mutable const char* m_config_keys[2];
 
@@ -79,4 +79,4 @@ private:
   void verify_config(const ConfigProxy& conf);
 };
 
-#endif // CEPH_TRACEPOINT_PROVIDER_H
+#endif // STONE_TRACEPOINT_PROVIDER_H

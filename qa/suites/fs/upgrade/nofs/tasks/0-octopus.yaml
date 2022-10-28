@@ -1,19 +1,19 @@
 meta:
 - desc: |
-   install ceph/octopus latest
+   install stone/octopus latest
 tasks:
 - install:
     branch: octopus
     exclude_packages:
       - librados3
-      - ceph-mgr-dashboard
-      - ceph-mgr-diskprediction-local
-      - ceph-mgr-rook
-      - ceph-mgr-cephadm
-      - cephadm
+      - stone-mgr-dashboard
+      - stone-mgr-diskprediction-local
+      - stone-mgr-rook
+      - stone-mgr-stoneadm
+      - stoneadm
     extra_packages: ['librados2']
 - print: "**** done installing octopus"
-- ceph:
+- stone:
     log-ignorelist:
       - overall HEALTH_
       - \(FS_
@@ -34,5 +34,5 @@ tasks:
         ms bind msgr2: false
 - exec:
     osd.0:
-      - ceph osd set-require-min-compat-client octopus
-- print: "**** done ceph"
+      - stone osd set-require-min-compat-client octopus
+- print: "**** done stone"

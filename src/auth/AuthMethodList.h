@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_AUTHMETHODLIST_H
-#define CEPH_AUTHMETHODLIST_H
+#ifndef STONE_AUTHMETHODLIST_H
+#define STONE_AUTHMETHODLIST_H
 
 #include "include/common_fwd.h"
 #include "include/int_types.h"
@@ -25,7 +25,7 @@
 class AuthMethodList {
   std::list<__u32> auth_supported;
 public:
-  AuthMethodList(CephContext *cct, std::string str);
+  AuthMethodList(StoneContext *cct, std::string str);
 
   bool is_supported_auth(int auth_type);
   int pick(const std::set<__u32>& supported);

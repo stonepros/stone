@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2021 Red Hat
  *
@@ -42,7 +42,7 @@ public:
         throw std::runtime_error("build monmap");
       }
       mc->set_messenger(messenger);
-      mc->set_want_keys(CEPH_ENTITY_TYPE_MDS | CEPH_ENTITY_TYPE_OSD);
+      mc->set_want_keys(STONE_ENTITY_TYPE_MDS | STONE_ENTITY_TYPE_OSD);
       if (mc->init() < 0) {
         throw std::runtime_error("init monclient");
       }

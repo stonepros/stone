@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -31,9 +31,9 @@
 #include "msg/Messenger.h"
 #include "osdc/Objecter.h"
 
-#define dout_subsys ceph_subsys_mds
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 #define dout_prefix _prefix(_dout, mds)
 static ostream& _prefix(std::ostream *_dout, MDSRank *mds) {
   return *_dout << "mds." << mds->get_nodeid() << ".locker ";
@@ -50,7 +50,7 @@ protected:
 
 public:
   explicit LockerContext(Locker *locker_) : locker(locker_) {
-    ceph_assert(locker != NULL);
+    stone_assert(locker != NULL);
   }
 };
 
@@ -64,7 +64,7 @@ protected:
 
 public:
   explicit LockerLogContext(Locker *locker_) : locker(locker_) {
-    ceph_assert(locker != NULL);
+    stone_assert(locker != NULL);
   }
 };
 
@@ -85,18 +85,18 @@ void Locker::dispatch(const cref_t<Message> &m)
     handle_inode_file_caps(ref_cast<MInodeFileCaps>(m));
     break;
     // client sync
-  case CEPH_MSG_CLIENT_CAPS:
+  case STONE_MSG_CLIENT_CAPS:
     handle_client_caps(ref_cast<MClientCaps>(m));
     break;
-  case CEPH_MSG_CLIENT_CAPRELEASE:
+  case STONE_MSG_CLIENT_CAPRELEASE:
     handle_client_cap_release(ref_cast<MClientCapRelease>(m));
     break;
-  case CEPH_MSG_CLIENT_LEASE:
+  case STONE_MSG_CLIENT_LEASE:
     handle_client_lease(ref_cast<MClientLease>(m));
     break;
   default:
     derr << "locker unknown message " << m->get_type() << dendl;
-    ceph_abort_msg("locker unknown message");
+    stone_abort_msg("locker unknown message");
   }
 }
 
@@ -147,7 +147,7 @@ bool Locker::try_rdlock_snap_layout(CInode *in, MDRequestRef& mdr,
   bool found_layout = false;
 
   if (want_layout)
-    ceph_assert(n == 0);
+    stone_assert(n == 0);
 
   client_t client = mdr->get_client();
 
@@ -239,8 +239,8 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
     MDSCacheObject *object = lock->get_parent();
 
     if (p.is_xlock()) {
-      if ((lock->get_type() == CEPH_LOCK_ISNAP ||
-	   lock->get_type() == CEPH_LOCK_IPOLICY) &&
+      if ((lock->get_type() == STONE_LOCK_ISNAP ||
+	   lock->get_type() == STONE_LOCK_IPOLICY) &&
 	  mds->is_cluster_degraded() &&
 	  mdr->is_leader() &&
 	  !mdr->is_queued_for_replay()) {
@@ -279,7 +279,7 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
       mustpin.insert(object);
 
       // augment xlock with a versionlock?
-      if (lock->get_type() == CEPH_LOCK_DN) {
+      if (lock->get_type() == STONE_LOCK_DN) {
 	CDentry *dn = static_cast<CDentry*>(object);
 	if (!dn->is_auth())
 	  continue;
@@ -292,7 +292,7 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
 	  lov.add_xlock(&dn->versionlock, i + 1);
 	}
       }
-      if (lock->get_type() >= CEPH_LOCK_IFIRST && lock->get_type() != CEPH_LOCK_IVERSION) {
+      if (lock->get_type() >= STONE_LOCK_IFIRST && lock->get_type() != STONE_LOCK_IVERSION) {
 	// inode version lock?
 	CInode *in = static_cast<CInode*>(object);
 	if (!in->is_auth())
@@ -334,7 +334,7 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
 	mustpin.insert(object);
       }
     } else {
-      ceph_assert(0 == "locker unknown lock operation");
+      stone_assert(0 == "locker unknown lock operation");
     }
   }
 
@@ -363,9 +363,9 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
     
     if (!object->is_auth()) {
       if (mdr->lock_cache) { // debug
-	ceph_assert(mdr->lock_cache->opcode == CEPH_MDS_OP_UNLINK);
+	stone_assert(mdr->lock_cache->opcode == STONE_MDS_OP_UNLINK);
 	CDentry *dn = mdr->dn[0].back();
-	ceph_assert(dn->get_projected_linkage()->is_remote());
+	stone_assert(dn->get_projected_linkage()->is_remote());
       }
 
       if (object->is_ambiguous_auth()) {
@@ -386,12 +386,12 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
       if (mdr->lock_cache) {
 	CDir *dir;
 	if (CInode *in = dynamic_cast<CInode*>(object)) {
-	  ceph_assert(!in->is_frozen_inode() && !in->is_frozen_auth_pin());
+	  stone_assert(!in->is_frozen_inode() && !in->is_frozen_auth_pin());
 	  dir = in->get_projected_parent_dir();
 	} else if (CDentry *dn = dynamic_cast<CDentry*>(object)) {
 	  dir = dn->get_dir();
 	} else {
-	  ceph_assert(0 == "unknown type of lock parent");
+	  stone_assert(0 == "unknown type of lock parent");
 	}
 	if (dir->get_inode() == mdr->lock_cache->get_dir_inode()) {
 	  // forcibly auth pin if there is lock cache on parent dir
@@ -399,9 +399,9 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
 	}
 
 	{ // debug
-	  ceph_assert(mdr->lock_cache->opcode == CEPH_MDS_OP_UNLINK);
+	  stone_assert(mdr->lock_cache->opcode == STONE_MDS_OP_UNLINK);
 	  CDentry *dn = mdr->dn[0].back();
-	  ceph_assert(dn->get_projected_linkage()->is_remote());
+	  stone_assert(dn->get_projected_linkage()->is_remote());
 	}
       }
 
@@ -448,7 +448,7 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
     for (const auto& p : mdr->object_states) {
       if (p.second.remote_auth_pinned == MDS_RANK_NONE)
 	continue;
-      ceph_assert(p.second.remote_auth_pinned == p.first->authority().first);
+      stone_assert(p.second.remote_auth_pinned == p.first->authority().first);
       auto q = mustpin_remote.find(p.second.remote_auth_pinned);
       if (q != mustpin_remote.end())
 	q->second.insert(p.first);
@@ -486,7 +486,7 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
 
       // put in waiting list
       auto ret = mdr->more()->waiting_on_peer.insert(p.first);
-      ceph_assert(ret.second);
+      stone_assert(ret.second);
     }
     return false;
   }
@@ -536,14 +536,14 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
 	    marker.message = "failed to wrlock, dropping remote wrlock and waiting";
 	    // can't take the wrlock because the scatter lock is gathering. need to
 	    // release the remote wrlock, so that the gathering process can finish.
-	    ceph_assert(it != mdr->locks.end());
+	    stone_assert(it != mdr->locks.end());
 	    remote_wrlock_finish(it, mdr.get());
 	    remote_wrlock_start(lock, p.wrlock_target, mdr);
 	    goto out;
 	  }
 	} else {
 	  if (!wrlock_start(p, mdr)) {
-	    ceph_assert(!p.is_remote_wrlock());
+	    stone_assert(!p.is_remote_wrlock());
 	    marker.message = "failed to wrlock, waiting";
 	    goto out;
 	  }
@@ -556,7 +556,7 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
 	continue;
       }
 
-      ceph_assert(mdr->is_leader());
+      stone_assert(mdr->is_leader());
       if (lock->needs_recover()) {
 	if (mds->is_cluster_degraded()) {
 	  if (!mdr->is_queued_for_replay()) {
@@ -582,7 +582,7 @@ bool Locker::acquire_locks(MDRequestRef& mdr,
     }
   }
 
-  mdr->set_mds_stamp(ceph_clock_now());
+  mdr->set_mds_stamp(stone_clock_now());
   result = true;
   marker.message = "acquired locks";
 
@@ -601,7 +601,7 @@ void Locker::notify_freeze_waiter(MDSCacheObject *o)
     dir = dn->get_dir();
   } else {
     dir = dynamic_cast<CDir*>(o);
-    ceph_assert(dir);
+    stone_assert(dir);
   }
   if (dir) {
     if (dir->is_freezing_dir())
@@ -620,9 +620,9 @@ void Locker::set_xlocks_done(MutationImpl *mut, bool skip_dentry)
     if (!p.is_xlock())
       continue;
     MDSCacheObject *obj = p.lock->get_parent();
-    ceph_assert(obj->is_auth());
+    stone_assert(obj->is_auth());
     if (skip_dentry &&
-	(p.lock->get_type() == CEPH_LOCK_DN || p.lock->get_type() == CEPH_LOCK_DVERSION))
+	(p.lock->get_type() == STONE_LOCK_DN || p.lock->get_type() == STONE_LOCK_DVERSION))
       continue;
     dout(10) << "set_xlocks_done on " << *p.lock << " " << *obj << dendl;
     p.lock->set_xlock_done();
@@ -645,7 +645,7 @@ void Locker::_drop_locks(MutationImpl *mut, set<CInode*> *pneed_issue,
 	if (ni)
 	  pneed_issue->insert(static_cast<CInode*>(obj));
       } else {
-	ceph_assert(lock->get_sm()->can_remote_xlock);
+	stone_assert(lock->get_sm()->can_remote_xlock);
 	peers.insert(obj->authority().first);
 	lock->put_xlock();
 	mut->locks.erase(it++);
@@ -694,7 +694,7 @@ void Locker::_drop_locks(MutationImpl *mut, set<CInode*> *pneed_issue,
 void Locker::cancel_locking(MutationImpl *mut, set<CInode*> *pneed_issue)
 {
   SimpleLock *lock = mut->locking;
-  ceph_assert(lock);
+  stone_assert(lock);
   dout(10) << "cancel_locking " << *lock << " on " << *mut << dendl;
 
   if (lock->get_parent()->is_auth()) {
@@ -750,8 +750,8 @@ void Locker::drop_rdlocks_for_early_reply(MutationImpl *mut)
     }
     SimpleLock *lock = it->lock;
     // make later mksnap/setlayout (at other mds) wait for this unsafe request
-    if (lock->get_type() == CEPH_LOCK_ISNAP ||
-	lock->get_type() == CEPH_LOCK_IPOLICY) {
+    if (lock->get_type() == STONE_LOCK_ISNAP ||
+	lock->get_type() == STONE_LOCK_IPOLICY) {
       ++it;
       continue;
     }
@@ -770,7 +770,7 @@ void Locker::drop_locks_for_fragment_unfreeze(MutationImpl *mut)
 
   for (auto it = mut->locks.begin(); it != mut->locks.end(); ) {
     SimpleLock *lock = it->lock;
-    if (lock->get_type() == CEPH_LOCK_IDFT) {
+    if (lock->get_type() == STONE_LOCK_IDFT) {
       ++it;
       continue;
     }
@@ -796,11 +796,11 @@ public:
 
 void Locker::put_lock_cache(MDLockCache* lock_cache)
 {
-  ceph_assert(lock_cache->ref > 0);
+  stone_assert(lock_cache->ref > 0);
   if (--lock_cache->ref > 0)
     return;
 
-  ceph_assert(lock_cache->invalidating);
+  stone_assert(lock_cache->invalidating);
 
   lock_cache->detach_locks();
 
@@ -817,21 +817,21 @@ void Locker::put_lock_cache(MDLockCache* lock_cache)
 int Locker::get_cap_bit_for_lock_cache(int op)
 {
   switch(op) {
-    case CEPH_MDS_OP_CREATE:
-      return CEPH_CAP_DIR_CREATE;
-    case CEPH_MDS_OP_UNLINK:
-      return CEPH_CAP_DIR_UNLINK;
+    case STONE_MDS_OP_CREATE:
+      return STONE_CAP_DIR_CREATE;
+    case STONE_MDS_OP_UNLINK:
+      return STONE_CAP_DIR_UNLINK;
     default:
-      ceph_assert(0 == "unsupported operation");
+      stone_assert(0 == "unsupported operation");
       return 0;
   }
 }
 
 void Locker::invalidate_lock_cache(MDLockCache *lock_cache)
 {
-  ceph_assert(lock_cache->item_cap_lock_cache.is_on_list());
+  stone_assert(lock_cache->item_cap_lock_cache.is_on_list());
   if (lock_cache->invalidating) {
-    ceph_assert(!lock_cache->client_cap);
+    stone_assert(!lock_cache->client_cap);
   } else {
     lock_cache->invalidating = true;
     lock_cache->detach_dirfrags();
@@ -896,7 +896,7 @@ void Locker::create_lock_cache(MDRequestRef& mdr, CInode *diri, file_layout_t *d
 
   client_t client = mdr->get_client();
   int opcode = mdr->client_request->get_op();
-  dout(10) << "create_lock_cache for client." << client << "/" << ceph_mds_op_name(opcode)<< " on " << *diri << dendl;
+  dout(10) << "create_lock_cache for client." << client << "/" << stone_mds_op_name(opcode)<< " on " << *diri << dendl;
 
   if (!diri->is_auth()) {
     dout(10) << " dir inode is not auth, noop" << dendl;
@@ -916,7 +916,7 @@ void Locker::create_lock_cache(MDRequestRef& mdr, CInode *diri, file_layout_t *d
 
   for (auto p = cap->lock_caches.begin(); !p.end(); ++p) {
     if ((*p)->opcode == opcode) {
-      dout(10) << " lock cache already exists for " << ceph_mds_op_name(opcode) << ", noop" << dendl;
+      dout(10) << " lock cache already exists for " << stone_mds_op_name(opcode) << ", noop" << dendl;
       return;
     }
   }
@@ -1003,7 +1003,7 @@ void Locker::create_lock_cache(MDRequestRef& mdr, CInode *diri, file_layout_t *d
     } else if (CDentry *dn = dynamic_cast<CDentry*>(p.first)) {
 	dfv.push_back(dn->get_dir());
     } else {
-      ceph_assert(0 == "unknown type of lock parent");
+      stone_assert(0 == "unknown type of lock parent");
     }
   }
   lock_cache->attach_dirfrags(std::move(dfv));
@@ -1020,7 +1020,7 @@ void Locker::create_lock_cache(MDRequestRef& mdr, CInode *diri, file_layout_t *d
       if (obj == diri)
 	lock_flag = MutationImpl::LockOp::WRLOCK;
     } else {
-      ceph_assert(it->is_rdlock());
+      stone_assert(it->is_rdlock());
       lock_flag = MutationImpl::LockOp::RDLOCK;
     }
     if (lock_flag) {
@@ -1049,7 +1049,7 @@ bool Locker::find_and_attach_lock_cache(MDRequestRef& mdr, CInode *diri)
   for (auto p = cap->lock_caches.begin(); !p.end(); ++p) {
     MDLockCache *lock_cache = *p;
     if (lock_cache->opcode == opcode) {
-      dout(10) << "found lock cache for " << ceph_mds_op_name(opcode) << " on " << *diri << dendl;
+      dout(10) << "found lock cache for " << stone_mds_op_name(opcode) << " on " << *diri << dendl;
       mdr->lock_cache = lock_cache;
       mdr->lock_cache->ref++;
       return true;
@@ -1063,19 +1063,19 @@ bool Locker::find_and_attach_lock_cache(MDRequestRef& mdr, CInode *diri)
 void Locker::eval_gather(SimpleLock *lock, bool first, bool *pneed_issue, MDSContext::vec *pfinishers)
 {
   dout(10) << "eval_gather " << *lock << " on " << *lock->get_parent() << dendl;
-  ceph_assert(!lock->is_stable());
+  stone_assert(!lock->is_stable());
 
   int next = lock->get_next_state();
 
   CInode *in = 0;
   bool caps = lock->get_cap_shift();
-  if (lock->get_type() != CEPH_LOCK_DN)
+  if (lock->get_type() != STONE_LOCK_DN)
     in = static_cast<CInode *>(lock->get_parent());
 
   bool need_issue = false;
 
   int loner_issued = 0, other_issued = 0, xlocker_issued = 0;
-  ceph_assert(!caps || in != NULL);
+  stone_assert(!caps || in != NULL);
   if (caps && in->is_head()) {
     in->get_caps_issued(&loner_issued, &other_issued, &xlocker_issued,
 			lock->get_cap_shift(), lock->get_cap_mask());
@@ -1112,7 +1112,7 @@ void Locker::eval_gather(SimpleLock *lock, bool first, bool *pneed_issue, MDSCon
 	    << " on " << *lock->get_parent() << dendl;
 
     if (lock->get_sm() == &sm_filelock) {
-      ceph_assert(in);
+      stone_assert(in);
       if (in->state_test(CInode::STATE_RECOVERING)) {
 	dout(7) << "eval_gather finished gather, but still recovering" << dendl;
 	return;
@@ -1179,7 +1179,7 @@ void Locker::eval_gather(SimpleLock *lock, bool first, bool *pneed_issue, MDSCon
 	  break;
 
 	default:
-	  ceph_abort();
+	  stone_abort();
 	}
       }
     } else {
@@ -1301,19 +1301,19 @@ bool Locker::eval(CInode *in, int mask, bool caps_imported)
   }
 
  retry:
-  if (mask & CEPH_LOCK_IFILE)
+  if (mask & STONE_LOCK_IFILE)
     eval_any(&in->filelock, &need_issue, &finishers, caps_imported);
-  if (mask & CEPH_LOCK_IAUTH)
+  if (mask & STONE_LOCK_IAUTH)
     eval_any(&in->authlock, &need_issue, &finishers, caps_imported);
-  if (mask & CEPH_LOCK_ILINK)
+  if (mask & STONE_LOCK_ILINK)
     eval_any(&in->linklock, &need_issue, &finishers, caps_imported);
-  if (mask & CEPH_LOCK_IXATTR)
+  if (mask & STONE_LOCK_IXATTR)
     eval_any(&in->xattrlock, &need_issue, &finishers, caps_imported);
-  if (mask & CEPH_LOCK_INEST)
+  if (mask & STONE_LOCK_INEST)
     eval_any(&in->nestlock, &need_issue, &finishers, caps_imported);
-  if (mask & CEPH_LOCK_IFLOCK)
+  if (mask & STONE_LOCK_IFLOCK)
     eval_any(&in->flocklock, &need_issue, &finishers, caps_imported);
-  if (mask & CEPH_LOCK_IPOLICY)
+  if (mask & STONE_LOCK_IPOLICY)
     eval_any(&in->policylock, &need_issue, &finishers, caps_imported);
 
   // drop loner?
@@ -1323,14 +1323,14 @@ bool Locker::eval(CInode *in, int mask, bool caps_imported)
       if (in->get_wanted_loner() >= 0) {
 	dout(10) << "eval end set loner to client." << in->get_loner() << dendl;
 	bool ok = in->try_set_loner();
-	ceph_assert(ok);
+	stone_assert(ok);
 	mask = -1;
 	goto retry;
       }
     }
   }
 
-  finish_contexts(g_ceph_context, finishers);
+  finish_contexts(g_stone_context, finishers);
 
   if (need_issue && in->is_head())
     issue_caps(in);
@@ -1346,7 +1346,7 @@ public:
   C_Locker_Eval(Locker *l, MDSCacheObject *pp, int m) : LockerContext(l), p(pp), mask(m) {
     // We are used as an MDSCacheObject waiter, so should
     // only be invoked by someone already holding the big lock.
-    ceph_assert(ceph_mutex_is_locked_by_me(locker->mds->mds_lock));
+    stone_assert(stone_mutex_is_locked_by_me(locker->mds->mds_lock));
     p->get(MDSCacheObject::PIN_PTRWAITER);    
   }
   void finish(int r) override {
@@ -1370,8 +1370,8 @@ void Locker::try_eval(MDSCacheObject *p, int mask)
     return;
   }
 
-  if (mask & CEPH_LOCK_DN) {
-    ceph_assert(mask == CEPH_LOCK_DN);
+  if (mask & STONE_LOCK_DN) {
+    stone_assert(mask == STONE_LOCK_DN);
     bool need_issue = false;  // ignore this, no caps on dentries
     CDentry *dn = static_cast<CDentry *>(p);
     eval_any(&dn->lock, &need_issue);
@@ -1432,9 +1432,9 @@ void Locker::try_eval(SimpleLock *lock, bool *pneed_issue)
     }
   }
 
-  if (lock->get_type() != CEPH_LOCK_DN &&
-      lock->get_type() != CEPH_LOCK_ISNAP &&
-      lock->get_type() != CEPH_LOCK_IPOLICY &&
+  if (lock->get_type() != STONE_LOCK_DN &&
+      lock->get_type() != STONE_LOCK_ISNAP &&
+      lock->get_type() != STONE_LOCK_IPOLICY &&
       p->is_freezing()) {
     dout(7) << "try_eval " << *lock << " freezing, waiting on " << *p << dendl;
     p->add_waiter(MDSCacheObject::WAIT_UNFREEZE, new C_Locker_Eval(this, p, lock->get_type()));
@@ -1466,7 +1466,7 @@ void Locker::eval_cap_gather(CInode *in, set<CInode*> *issue_set)
       issue_caps(in);
   }
 
-  finish_contexts(g_ceph_context, finishers);
+  finish_contexts(g_stone_context, finishers);
 }
 
 void Locker::eval_scatter_gathers(CInode *in)
@@ -1487,16 +1487,16 @@ void Locker::eval_scatter_gathers(CInode *in)
   if (need_issue && in->is_head())
     issue_caps(in);
   
-  finish_contexts(g_ceph_context, finishers);
+  finish_contexts(g_stone_context, finishers);
 }
 
 void Locker::eval(SimpleLock *lock, bool *need_issue)
 {
   switch (lock->get_type()) {
-  case CEPH_LOCK_IFILE:
+  case STONE_LOCK_IFILE:
     return file_eval(static_cast<ScatterLock*>(lock), need_issue);
-  case CEPH_LOCK_IDFT:
-  case CEPH_LOCK_INEST:
+  case STONE_LOCK_IDFT:
+  case STONE_LOCK_INEST:
     return scatter_eval(static_cast<ScatterLock*>(lock), need_issue);
   default:
     return simple_eval(lock, need_issue);
@@ -1541,7 +1541,7 @@ bool Locker::_rdlock_kick(SimpleLock *lock, bool as_anon)
       return false;
     }
   }
-  if (lock->get_type() == CEPH_LOCK_IFILE) {
+  if (lock->get_type() == STONE_LOCK_IFILE) {
     CInode *in = static_cast<CInode *>(lock->get_parent());
     if (in->state_test(CInode::STATE_RECOVERING)) {
       mds->mdcache->recovery_queue.prioritize(in);
@@ -1573,12 +1573,12 @@ bool Locker::rdlock_start(SimpleLock *lock, MDRequestRef& mut, bool as_anon)
 
   // client may be allowed to rdlock the same item it has xlocked.
   //  UNLESS someone passes in as_anon, or we're reading snapped version here.
-  if (mut->snapid != CEPH_NOSNAP)
+  if (mut->snapid != STONE_NOSNAP)
     as_anon = true;
   client_t client = as_anon ? -1 : mut->get_client();
 
   CInode *in = 0;
-  if (lock->get_type() != CEPH_LOCK_DN)
+  if (lock->get_type() != STONE_LOCK_DN)
     in = static_cast<CInode *>(lock->get_parent());
 
   /*
@@ -1602,8 +1602,8 @@ bool Locker::rdlock_start(SimpleLock *lock, MDRequestRef& mut, bool as_anon)
 	lock->get_state() == LOCK_SNAP_SYNC) {
       // okay, we actually need to kick the head's lock to get ourselves synced up.
       CInode *head = mdcache->get_inode(in->ino());
-      ceph_assert(head);
-      SimpleLock *hlock = head->get_lock(CEPH_LOCK_IFILE);
+      stone_assert(head);
+      SimpleLock *hlock = head->get_lock(STONE_LOCK_IFILE);
       if (hlock->get_state() == LOCK_SYNC)
 	hlock = head->get_lock(lock->get_type());
 
@@ -1640,7 +1640,7 @@ void Locker::nudge_log(SimpleLock *lock)
 
 void Locker::rdlock_finish(const MutationImpl::lock_iterator& it, MutationImpl *mut, bool *pneed_issue)
 {
-  ceph_assert(it->is_rdlock());
+  stone_assert(it->is_rdlock());
   SimpleLock *lock = it->lock;
   // drop ref
   lock->put_rdlock();
@@ -1663,7 +1663,7 @@ bool Locker::rdlock_try_set(MutationImpl::LockOpVec& lov, MDRequestRef& mdr)
   dout(10) << __func__  << dendl;
   for (const auto& p : lov) {
     auto lock = p.lock;
-    ceph_assert(p.is_rdlock());
+    stone_assert(p.is_rdlock());
     if (!mdr->is_rdlocked(lock) && !rdlock_try(lock, mdr->get_client())) {
       lock->add_waiter(SimpleLock::WAIT_STABLE|SimpleLock::WAIT_RD,
                        new C_MDS_RetryRequest(mdcache, mdr));
@@ -1687,7 +1687,7 @@ bool Locker::rdlock_try_set(MutationImpl::LockOpVec& lov, MutationRef& mut)
   dout(10) << __func__  << dendl;
   for (const auto& p : lov) {
     auto lock = p.lock;
-    ceph_assert(p.is_rdlock());
+    stone_assert(p.is_rdlock());
     if (!lock->can_rdlock(mut->get_client()))
       return false;
     p.lock->get_rdlock();
@@ -1701,8 +1701,8 @@ bool Locker::rdlock_try_set(MutationImpl::LockOpVec& lov, MutationRef& mut)
 
 void Locker::wrlock_force(SimpleLock *lock, MutationRef& mut)
 {
-  if (lock->get_type() == CEPH_LOCK_IVERSION ||
-      lock->get_type() == CEPH_LOCK_DVERSION)
+  if (lock->get_type() == STONE_LOCK_IVERSION ||
+      lock->get_type() == STONE_LOCK_DVERSION)
     return local_wrlock_grab(static_cast<LocalLockC*>(lock), mut);
 
   dout(7) << "wrlock_force  on " << *lock
@@ -1748,8 +1748,8 @@ bool Locker::wrlock_try(SimpleLock *lock, const MutationRef& mut, client_t clien
 bool Locker::wrlock_start(const MutationImpl::LockOp &op, MDRequestRef& mut)
 {
   SimpleLock *lock = op.lock;
-  if (lock->get_type() == CEPH_LOCK_IVERSION ||
-      lock->get_type() == CEPH_LOCK_DVERSION)
+  if (lock->get_type() == STONE_LOCK_IVERSION ||
+      lock->get_type() == STONE_LOCK_DVERSION)
     return local_wrlock_start(static_cast<LocalLockC*>(lock), mut);
 
   dout(10) << "wrlock_start " << *lock << " on " << *lock->get_parent() << dendl;
@@ -1770,7 +1770,7 @@ bool Locker::wrlock_start(const MutationImpl::LockOp &op, MDRequestRef& mut)
       return true;
     }
 
-    if (lock->get_type() == CEPH_LOCK_IFILE &&
+    if (lock->get_type() == STONE_LOCK_IFILE &&
 	in->state_test(CInode::STATE_RECOVERING)) {
       mds->mdcache->recovery_queue.prioritize(in);
     }
@@ -1806,11 +1806,11 @@ bool Locker::wrlock_start(const MutationImpl::LockOp &op, MDRequestRef& mut)
 
 void Locker::wrlock_finish(const MutationImpl::lock_iterator& it, MutationImpl *mut, bool *pneed_issue)
 {
-  ceph_assert(it->is_wrlock());
+  stone_assert(it->is_wrlock());
   SimpleLock* lock = it->lock;
 
-  if (lock->get_type() == CEPH_LOCK_IVERSION ||
-      lock->get_type() == CEPH_LOCK_DVERSION)
+  if (lock->get_type() == STONE_LOCK_IVERSION ||
+      lock->get_type() == STONE_LOCK_DVERSION)
     return local_wrlock_finish(it, mut);
 
   dout(7) << "wrlock_finish on " << *lock << " on " << *lock->get_parent() << dendl;
@@ -1859,13 +1859,13 @@ void Locker::remote_wrlock_start(SimpleLock *lock, mds_rank_t target, MDRequestR
   lock->get_parent()->set_object_info(r->get_object_info());
   mds->send_message_mds(r, target);
 
-  ceph_assert(mut->more()->waiting_on_peer.count(target) == 0);
+  stone_assert(mut->more()->waiting_on_peer.count(target) == 0);
   mut->more()->waiting_on_peer.insert(target);
 }
 
 void Locker::remote_wrlock_finish(const MutationImpl::lock_iterator& it, MutationImpl *mut)
 {
-  ceph_assert(it->is_remote_wrlock());
+  stone_assert(it->is_remote_wrlock());
   SimpleLock *lock = it->lock;
   mds_rank_t target = it->wrlock_target;
 
@@ -1891,8 +1891,8 @@ void Locker::remote_wrlock_finish(const MutationImpl::lock_iterator& it, Mutatio
 
 bool Locker::xlock_start(SimpleLock *lock, MDRequestRef& mut)
 {
-  if (lock->get_type() == CEPH_LOCK_IVERSION ||
-      lock->get_type() == CEPH_LOCK_DVERSION)
+  if (lock->get_type() == STONE_LOCK_IVERSION ||
+      lock->get_type() == STONE_LOCK_DVERSION)
     return local_xlock_start(static_cast<LocalLockC*>(lock), mut);
 
   dout(7) << "xlock_start on " << *lock << " on " << *lock->get_parent() << dendl;
@@ -1917,7 +1917,7 @@ bool Locker::xlock_start(SimpleLock *lock, MDRequestRef& mut)
 	return true;
       }
       
-      if (lock->get_type() == CEPH_LOCK_IFILE &&
+      if (lock->get_type() == STONE_LOCK_IFILE &&
 	  in->state_test(CInode::STATE_RECOVERING)) {
 	mds->mdcache->recovery_queue.prioritize(in);
       }
@@ -1940,8 +1940,8 @@ bool Locker::xlock_start(SimpleLock *lock, MDRequestRef& mut)
     return false;
   } else {
     // replica
-    ceph_assert(lock->get_sm()->can_remote_xlock);
-    ceph_assert(!mut->peer_request);
+    stone_assert(lock->get_sm()->can_remote_xlock);
+    stone_assert(!mut->peer_request);
     
     // wait for single auth
     if (lock->get_parent()->is_ambiguous_auth()) {
@@ -1968,7 +1968,7 @@ bool Locker::xlock_start(SimpleLock *lock, MDRequestRef& mut)
     lock->get_parent()->set_object_info(r->get_object_info());
     mds->send_message_mds(r, auth);
 
-    ceph_assert(mut->more()->waiting_on_peer.count(auth) == 0);
+    stone_assert(mut->more()->waiting_on_peer.count(auth) == 0);
     mut->more()->waiting_on_peer.insert(auth);
 
     return false;
@@ -1977,10 +1977,10 @@ bool Locker::xlock_start(SimpleLock *lock, MDRequestRef& mut)
 
 void Locker::_finish_xlock(SimpleLock *lock, client_t xlocker, bool *pneed_issue)
 {
-  ceph_assert(!lock->is_stable());
-  if (lock->get_type() != CEPH_LOCK_DN &&
-      lock->get_type() != CEPH_LOCK_ISNAP &&
-      lock->get_type() != CEPH_LOCK_IPOLICY &&
+  stone_assert(!lock->is_stable());
+  if (lock->get_type() != STONE_LOCK_DN &&
+      lock->get_type() != STONE_LOCK_ISNAP &&
+      lock->get_type() != STONE_LOCK_IPOLICY &&
       lock->get_num_rdlocks() == 0 &&
       lock->get_num_wrlocks() == 0 &&
       !lock->is_leased() &&
@@ -1999,17 +1999,17 @@ void Locker::_finish_xlock(SimpleLock *lock, client_t xlocker, bool *pneed_issue
       return;
     }
   }
-  // the xlocker may have CEPH_CAP_GSHARED, need to revoke it if next state is LOCK_LOCK
+  // the xlocker may have STONE_CAP_GSHARED, need to revoke it if next state is LOCK_LOCK
   eval_gather(lock, lock->get_state() != LOCK_XLOCKSNAP, pneed_issue);
 }
 
 void Locker::xlock_finish(const MutationImpl::lock_iterator& it, MutationImpl *mut, bool *pneed_issue)
 {
-  ceph_assert(it->is_xlock());
+  stone_assert(it->is_xlock());
   SimpleLock *lock = it->lock;
 
-  if (lock->get_type() == CEPH_LOCK_IVERSION ||
-      lock->get_type() == CEPH_LOCK_DVERSION)
+  if (lock->get_type() == STONE_LOCK_IVERSION ||
+      lock->get_type() == STONE_LOCK_DVERSION)
     return local_xlock_finish(it, mut);
 
   dout(10) << "xlock_finish on " << *lock << " " << *lock->get_parent() << dendl;
@@ -2018,14 +2018,14 @@ void Locker::xlock_finish(const MutationImpl::lock_iterator& it, MutationImpl *m
 
   // drop ref
   lock->put_xlock();
-  ceph_assert(mut);
+  stone_assert(mut);
   mut->locks.erase(it);
   
   bool do_issue = false;
 
   // remote xlock?
   if (!lock->get_parent()->is_auth()) {
-    ceph_assert(lock->get_sm()->can_remote_xlock);
+    stone_assert(lock->get_sm()->can_remote_xlock);
 
     // tell auth
     dout(7) << "xlock_finish releasing remote xlock on " << *lock->get_parent()  << dendl;
@@ -2061,7 +2061,7 @@ void Locker::xlock_finish(const MutationImpl::lock_iterator& it, MutationImpl *m
 
 void Locker::xlock_export(const MutationImpl::lock_iterator& it, MutationImpl *mut)
 {
-  ceph_assert(it->is_xlock());
+  stone_assert(it->is_xlock());
   SimpleLock *lock = it->lock;
   dout(10) << "xlock_export on " << *lock << " " << *lock->get_parent() << dendl;
 
@@ -2069,7 +2069,7 @@ void Locker::xlock_export(const MutationImpl::lock_iterator& it, MutationImpl *m
   mut->locks.erase(it);
 
   MDSCacheObject *p = lock->get_parent();
-  ceph_assert(p->state_test(CInode::STATE_AMBIGUOUSAUTH));  // we are exporting this (inode)
+  stone_assert(p->state_test(CInode::STATE_AMBIGUOUSAUTH));  // we are exporting this (inode)
 
   if (!lock->is_stable())
     lock->get_parent()->auth_unpin(lock);
@@ -2090,9 +2090,9 @@ void Locker::xlock_downgrade(SimpleLock *lock, MutationImpl *mut)
   if (it->is_rdlock())
     return; // already downgraded
 
-  ceph_assert(lock->get_parent()->is_auth());
-  ceph_assert(it != mut->locks.end());
-  ceph_assert(it->is_xlock());
+  stone_assert(lock->get_parent()->is_auth());
+  stone_assert(it != mut->locks.end());
+  stone_assert(it->is_xlock());
 
   lock->set_xlock_done();
   lock->get_rdlock();
@@ -2163,7 +2163,7 @@ void Locker::file_update_finish(CInode *in, MutationRef& mut, unsigned flags,
     }
 
     if ((flags & UPDATE_SHAREMAX) && in->is_auth() &&
-	(in->filelock.gcaps_allowed(CAP_LONER) & (CEPH_CAP_GWR|CEPH_CAP_GBUFFER)))
+	(in->filelock.gcaps_allowed(CAP_LONER) & (STONE_CAP_GWR|STONE_CAP_GBUFFER)))
       share_inode_max_size(in);
 
   } else if ((flags & UPDATE_SNAPFLUSH) && !in->client_snap_caps.empty()) {
@@ -2173,7 +2173,7 @@ void Locker::file_update_finish(CInode *in, MutationRef& mut, unsigned flags,
     if (in->client_snap_caps.empty()) {
       for (int i = 0; i < num_cinode_locks; i++) {
 	SimpleLock *lock = in->get_lock(cinode_lock_info[i].lock);
-	ceph_assert(lock);
+	stone_assert(lock);
 	lock->put_wrlock();
       }
       in->item_open_file.remove_myself();
@@ -2203,9 +2203,9 @@ Capability* Locker::issue_new_caps(CInode *in,
     return mds->mdcache->try_reconnect_cap(in, session);
 
   // my needs
-  ceph_assert(session->info.inst.name.is_client());
+  stone_assert(session->info.inst.name.is_client());
   client_t my_client = session->get_client();
-  int my_want = ceph_caps_for_mode(mode);
+  int my_want = stone_caps_for_mode(mode);
 
   // register a capability
   Capability *cap = in->get_client_cap(my_client);
@@ -2225,7 +2225,7 @@ Capability* Locker::issue_new_caps(CInode *in,
 
   if (in->is_auth()) {
     // [auth] twiddle mode?
-    eval(in, CEPH_CAP_LOCKS);
+    eval(in, STONE_CAP_LOCKS);
 
     if (_need_flush_mdlog(in, my_want))
       mds->mdlog->flush();
@@ -2286,7 +2286,7 @@ int Locker::issue_caps(CInode *in, Capability *only_cap)
 	    << " on " << *in << dendl;
   }
 
-  ceph_assert(in->is_head());
+  stone_assert(in->is_head());
 
   // count conflicts with
   int nissued = 0;        
@@ -2310,16 +2310,16 @@ int Locker::issue_caps(CInode *in, Capability *only_cap)
     // add in any xlocker-only caps (for locks this client is the xlocker for)
     allowed |= xlocker_allowed & in->get_xlocker_mask(it->first);
     if (in->is_dir()) {
-      allowed &= ~CEPH_CAP_ANY_DIR_OPS;
-      if (allowed & CEPH_CAP_FILE_EXCL)
+      allowed &= ~STONE_CAP_ANY_DIR_OPS;
+      if (allowed & STONE_CAP_FILE_EXCL)
 	allowed |= cap->get_lock_cache_allowed();
     }
 
-    if ((in->get_inode()->inline_data.version != CEPH_INLINE_NONE &&
+    if ((in->get_inode()->inline_data.version != STONE_INLINE_NONE &&
 	 cap->is_noinline()) ||
 	(!in->get_inode()->layout.pool_ns.empty() &&
 	 cap->is_nopoolns()))
-      allowed &= ~(CEPH_CAP_FILE_RD | CEPH_CAP_FILE_WR);
+      allowed &= ~(STONE_CAP_FILE_RD | STONE_CAP_FILE_WR);
 
     int pending = cap->pending();
     int wanted = cap->wanted();
@@ -2337,26 +2337,26 @@ int Locker::issue_caps(CInode *in, Capability *only_cap)
 	continue;
       }
     } else {
-      ceph_assert(!cap->is_new());
+      stone_assert(!cap->is_new());
       if (cap->is_stale()) {
 	dout(20) << "  revoke stale cap from client." << it->first << dendl;
-	ceph_assert(!cap->is_valid());
+	stone_assert(!cap->is_valid());
 	cap->issue(allowed & pending, false);
 	mds->queue_waiter_front(new C_Locker_RevokeStaleCap(this, in, it->first));
 	continue;
       }
 
-      if (!cap->is_valid() && (pending & ~CEPH_CAP_PIN)) {
-	// After stale->resume circle, client thinks it only has CEPH_CAP_PIN.
+      if (!cap->is_valid() && (pending & ~STONE_CAP_PIN)) {
+	// After stale->resume circle, client thinks it only has STONE_CAP_PIN.
 	// mds needs to re-issue caps, then do revocation.
 	long seq = cap->issue(pending, true);
 
 	dout(7) << "   sending MClientCaps to client." << it->first
 		<< " seq " << seq << " re-issue " << ccap_string(pending) << dendl;
 
-        if (mds->logger) mds->logger->inc(l_mdss_ceph_cap_op_grant);
+        if (mds->logger) mds->logger->inc(l_mdss_stone_cap_op_grant);
 
-	auto m = make_message<MClientCaps>(CEPH_CAP_OP_GRANT, in->ino(),
+	auto m = make_message<MClientCaps>(STONE_CAP_OP_GRANT, in->ino(),
 					   in->find_snaprealm()->inode->ino(),
 					   cap->get_cap_id(), cap->get_last_seq(),
 					   pending, wanted, 0, cap->get_mseq(),
@@ -2369,7 +2369,7 @@ int Locker::issue_caps(CInode *in, Capability *only_cap)
 
     // notify clients about deleted inode, to make sure they release caps ASAP.
     if (in->get_inode()->nlink == 0)
-      wanted |= CEPH_CAP_LINK_SHARED;
+      wanted |= STONE_CAP_LINK_SHARED;
 
     // are there caps that the client _wants_ and can have, but aren't pending?
     // or do we need to revoke?
@@ -2393,15 +2393,15 @@ int Locker::issue_caps(CInode *in, Capability *only_cap)
 	      << " seq " << seq << " new pending " << ccap_string(after)
 	      << " was " << ccap_string(before) << dendl;
 
-      int op = (before & ~after) ? CEPH_CAP_OP_REVOKE : CEPH_CAP_OP_GRANT;
-      if (op == CEPH_CAP_OP_REVOKE) {
-        if (mds->logger) mds->logger->inc(l_mdss_ceph_cap_op_revoke);
+      int op = (before & ~after) ? STONE_CAP_OP_REVOKE : STONE_CAP_OP_GRANT;
+      if (op == STONE_CAP_OP_REVOKE) {
+        if (mds->logger) mds->logger->inc(l_mdss_stone_cap_op_revoke);
 	revoking_caps.push_back(&cap->item_revoking_caps);
 	revoking_caps_by_client[cap->get_client()].push_back(&cap->item_client_revoking_caps);
-	cap->set_last_revoke_stamp(ceph_clock_now());
+	cap->set_last_revoke_stamp(stone_clock_now());
 	cap->reset_num_revoke_warnings();
       } else {
-        if (mds->logger) mds->logger->inc(l_mdss_ceph_cap_op_grant);
+        if (mds->logger) mds->logger->inc(l_mdss_stone_cap_op_grant);
       }
 
       auto m = make_message<MClientCaps>(op, in->ino(),
@@ -2426,9 +2426,9 @@ void Locker::issue_truncate(CInode *in)
   dout(7) << "issue_truncate on " << *in << dendl;
   
   for (auto &p : in->client_caps) {
-    if (mds->logger) mds->logger->inc(l_mdss_ceph_cap_op_trunc);
+    if (mds->logger) mds->logger->inc(l_mdss_stone_cap_op_trunc);
     Capability *cap = &p.second;
-    auto m = make_message<MClientCaps>(CEPH_CAP_OP_TRUNC,
+    auto m = make_message<MClientCaps>(STONE_CAP_OP_TRUNC,
                                        in->ino(),
                                        in->find_snaprealm()->inode->ino(),
                                        cap->get_cap_id(), cap->get_last_seq(),
@@ -2452,7 +2452,7 @@ void Locker::revoke_stale_cap(CInode *in, client_t client)
   if (!cap)
     return;
 
-  if (cap->revoking() & CEPH_CAP_ANY_WR) {
+  if (cap->revoking() & STONE_CAP_ANY_WR) {
     CachedStackStringStream css;
     mds->evict_client(client.v, false, g_conf()->mds_session_blocklist_on_timeout, *css, nullptr);
     return;
@@ -2476,7 +2476,7 @@ void Locker::revoke_stale_cap(CInode *in, client_t client)
     eval_gather(&in->xattrlock);
 
   if (in->is_auth())
-    try_eval(in, CEPH_CAP_LOCKS);
+    try_eval(in, STONE_CAP_LOCKS);
   else
     request_inode_file_caps(in);
 }
@@ -2505,7 +2505,7 @@ bool Locker::revoke_stale_caps(Session *session)
     if (!revoking)
       continue;
 
-    if (revoking & CEPH_CAP_ANY_WR) {
+    if (revoking & STONE_CAP_ANY_WR) {
       ret = false;
       break;
     }
@@ -2514,7 +2514,7 @@ bool Locker::revoke_stale_caps(Session *session)
     CInode *in = cap->get_inode();
     dout(10) << " revoking " << ccap_string(issued) << " on " << *in << dendl;
     int revoked = cap->revoke();
-    if (revoked & CEPH_CAP_ANY_DIR_OPS)
+    if (revoked & STONE_CAP_ANY_DIR_OPS)
       eval_lock_caches(cap);
 
     if (in->is_auth() &&
@@ -2540,7 +2540,7 @@ bool Locker::revoke_stale_caps(Session *session)
       eval_gather(&in->xattrlock);
 
     if (in->is_auth())
-      try_eval(in, CEPH_CAP_LOCKS);
+      try_eval(in, STONE_CAP_LOCKS);
     else
       request_inode_file_caps(in);
   }
@@ -2552,7 +2552,7 @@ void Locker::resume_stale_caps(Session *session)
 {
   dout(10) << "resume_stale_caps for " << session->info.inst.name << dendl;
 
-  bool lazy = session->info.has_feature(CEPHFS_FEATURE_LAZY_CAP_WANTED);
+  bool lazy = session->info.has_feature(STONEFS_FEATURE_LAZY_CAP_WANTED);
   for (xlist<Capability*>::iterator p = session->caps.begin(); !p.end(); ) {
     Capability *cap = *p;
     ++p;
@@ -2560,7 +2560,7 @@ void Locker::resume_stale_caps(Session *session)
       break; // see revoke_stale_caps()
 
     CInode *in = cap->get_inode();
-    ceph_assert(in->is_head());
+    stone_assert(in->is_head());
     dout(10) << " clearing stale flag on " << *in << dendl;
 
     if (in->state_test(CInode::STATE_EXPORTINGCAPS)) {
@@ -2570,7 +2570,7 @@ void Locker::resume_stale_caps(Session *session)
       continue;
     }
 
-    if (!in->is_auth() || !eval(in, CEPH_CAP_LOCKS))
+    if (!in->is_auth() || !eval(in, STONE_CAP_LOCKS))
       issue_caps(in, cap);
   }
 }
@@ -2604,9 +2604,9 @@ public:
 
 void Locker::request_inode_file_caps(CInode *in)
 {
-  ceph_assert(!in->is_auth());
+  stone_assert(!in->is_auth());
 
-  int wanted = in->get_caps_wanted() & in->get_caps_allowed_ever() & ~CEPH_CAP_PIN;
+  int wanted = in->get_caps_wanted() & in->get_caps_allowed_ever() & ~STONE_CAP_PIN;
   if (wanted != in->replica_caps_wanted) {
     // wait for single auth
     if (in->is_ambiguous_auth()) {
@@ -2642,15 +2642,15 @@ void Locker::handle_inode_file_caps(const cref_t<MInodeFileCaps> &m)
       mds->wait_for_replay(new C_MDS_RetryMessage(mds, m));
       return;
     }
-    ceph_abort_msg("got unexpected message during recovery");
+    stone_abort_msg("got unexpected message during recovery");
   }
 
   // ok
   CInode *in = mdcache->get_inode(m->get_ino());
   mds_rank_t from = mds_rank_t(m->get_source().num());
 
-  ceph_assert(in);
-  ceph_assert(in->is_auth());
+  stone_assert(in);
+  stone_assert(in->is_auth());
 
   dout(7) << "handle_inode_file_caps replica mds." << from << " wants caps " << ccap_string(m->get_caps()) << " on " << *in << dendl;
 
@@ -2658,7 +2658,7 @@ void Locker::handle_inode_file_caps(const cref_t<MInodeFileCaps> &m)
 
   in->set_mds_caps_wanted(from, m->get_caps());
 
-  try_eval(in, CEPH_CAP_LOCKS);
+  try_eval(in, STONE_CAP_LOCKS);
 }
 
 
@@ -2707,7 +2707,7 @@ bool Locker::check_client_ranges(CInode *in, uint64_t size)
 
   auto it = latest->client_ranges.begin();
   for (auto &p : in->client_caps) {
-    if ((p.second.issued() | p.second.wanted()) & CEPH_CAP_ANY_FILE_WR) {
+    if ((p.second.issued() | p.second.wanted()) & STONE_CAP_ANY_FILE_WR) {
       if (it == latest->client_ranges.end())
 	return true;
       if (it->first != p.first)
@@ -2738,7 +2738,7 @@ bool Locker::calc_new_client_ranges(CInode *in, uint64_t size, bool *max_increas
   // shrink to 0 if no WR|BUFFER caps issued.
   auto it = pi->client_ranges.begin();
   for (auto &p : in->client_caps) {
-    if ((p.second.issued() | p.second.wanted()) & CEPH_CAP_ANY_FILE_WR) {
+    if ((p.second.issued() | p.second.wanted()) & STONE_CAP_ANY_FILE_WR) {
       while (it != pi->client_ranges.end() && it->first < p.first) {
 	it = pi->client_ranges.erase(it);
 	updated = true;
@@ -2784,8 +2784,8 @@ bool Locker::check_inode_max_size(CInode *in, bool force_wrlock,
 				  uint64_t new_max_size, uint64_t new_size,
 				  utime_t new_mtime)
 {
-  ceph_assert(in->is_auth());
-  ceph_assert(in->is_file());
+  stone_assert(in->is_auth());
+  stone_assert(in->is_file());
 
   const auto& latest = in->get_projected_inode();
   uint64_t size = latest->size;
@@ -2861,7 +2861,7 @@ bool Locker::check_inode_max_size(CInode *in, bool force_wrlock,
   // newer log segments.
   LogEvent *le;
   EMetaBlob *metablob;
-  if (in->is_any_caps_wanted() && in->last == CEPH_NOSNAP) {   
+  if (in->is_any_caps_wanted() && in->last == STONE_NOSNAP) {   
     EOpen *eo = new EOpen(mds->mdlog);
     eo->add_ino(in->ino());
     metablob = &eo->metablob;
@@ -2910,11 +2910,11 @@ void Locker::share_inode_max_size(CInode *in, Capability *only_cap)
     Capability *cap = &it->second;
     if (cap->is_suppress())
       continue;
-    if (cap->pending() & (CEPH_CAP_FILE_WR|CEPH_CAP_FILE_BUFFER)) {
+    if (cap->pending() & (STONE_CAP_FILE_WR|STONE_CAP_FILE_BUFFER)) {
       dout(10) << "share_inode_max_size with client." << client << dendl;
-      if (mds->logger) mds->logger->inc(l_mdss_ceph_cap_op_grant);
+      if (mds->logger) mds->logger->inc(l_mdss_stone_cap_op_grant);
       cap->inc_last_seq();
-      auto m = make_message<MClientCaps>(CEPH_CAP_OP_GRANT,
+      auto m = make_message<MClientCaps>(STONE_CAP_OP_GRANT,
                                          in->ino(),
                                          in->find_snaprealm()->inode->ino(),
                                          cap->get_cap_id(),
@@ -2935,13 +2935,13 @@ bool Locker::_need_flush_mdlog(CInode *in, int wanted)
 {
   /* flush log if caps are wanted by client but corresponding lock is unstable and locked by
    * pending mutations. */
-  if (((wanted & (CEPH_CAP_FILE_RD|CEPH_CAP_FILE_WR|CEPH_CAP_FILE_SHARED|CEPH_CAP_FILE_EXCL)) &&
+  if (((wanted & (STONE_CAP_FILE_RD|STONE_CAP_FILE_WR|STONE_CAP_FILE_SHARED|STONE_CAP_FILE_EXCL)) &&
        in->filelock.is_unstable_and_locked()) ||
-      ((wanted & (CEPH_CAP_AUTH_SHARED|CEPH_CAP_AUTH_EXCL)) &&
+      ((wanted & (STONE_CAP_AUTH_SHARED|STONE_CAP_AUTH_EXCL)) &&
        in->authlock.is_unstable_and_locked()) ||
-      ((wanted & (CEPH_CAP_LINK_SHARED|CEPH_CAP_LINK_EXCL)) &&
+      ((wanted & (STONE_CAP_LINK_SHARED|STONE_CAP_LINK_EXCL)) &&
        in->linklock.is_unstable_and_locked()) ||
-      ((wanted & (CEPH_CAP_XATTR_SHARED|CEPH_CAP_XATTR_EXCL)) &&
+      ((wanted & (STONE_CAP_XATTR_SHARED|STONE_CAP_XATTR_EXCL)) &&
        in->xattrlock.is_unstable_and_locked()))
     return true;
   return false;
@@ -2949,7 +2949,7 @@ bool Locker::_need_flush_mdlog(CInode *in, int wanted)
 
 void Locker::adjust_cap_wanted(Capability *cap, int wanted, int issue_seq)
 {
-  if (ceph_seq_cmp(issue_seq, cap->get_last_issue()) == 0) {
+  if (stone_seq_cmp(issue_seq, cap->get_last_issue()) == 0) {
     dout(10) << " wanted " << ccap_string(cap->wanted())
 	     << " -> " << ccap_string(wanted) << dendl;
     cap->set_wanted(wanted);
@@ -2974,13 +2974,13 @@ void Locker::adjust_cap_wanted(Capability *cap, int wanted, int issue_seq)
 
   if (cap->wanted()) {
     if (cur->state_test(CInode::STATE_RECOVERING) &&
-	(cap->wanted() & (CEPH_CAP_FILE_RD |
-			  CEPH_CAP_FILE_WR))) {
+	(cap->wanted() & (STONE_CAP_FILE_RD |
+			  STONE_CAP_FILE_WR))) {
       mds->mdcache->recovery_queue.prioritize(cur);
     }
 
     if (mdcache->open_file_table.should_log_open(cur)) {
-      ceph_assert(cur->last == CEPH_NOSNAP);
+      stone_assert(cur->last == STONE_NOSNAP);
       EOpen *le = new EOpen(mds->mdlog);
       mds->mdlog->start_entry(le);
       le->add_clean_inode(cur);
@@ -2991,7 +2991,7 @@ void Locker::adjust_cap_wanted(Capability *cap, int wanted, int issue_seq)
 
 void Locker::snapflush_nudge(CInode *in)
 {
-  ceph_assert(in->last != CEPH_NOSNAP);
+  stone_assert(in->last != STONE_NOSNAP);
   if (in->client_snap_caps.empty())
     return;
 
@@ -3001,11 +3001,11 @@ void Locker::snapflush_nudge(CInode *in)
   if (!head)
     return;
 
-  ceph_assert(head->is_auth());
+  stone_assert(head->is_auth());
   if (head->client_need_snapflush.empty())
     return;
 
-  SimpleLock *hlock = head->get_lock(CEPH_LOCK_IFILE);
+  SimpleLock *hlock = head->get_lock(STONE_LOCK_IFILE);
   if (hlock->get_state() == LOCK_SYNC || !hlock->is_stable()) {
     hlock = NULL;
     for (int i = 0; i < num_cinode_locks; i++) {
@@ -3026,10 +3026,10 @@ void Locker::snapflush_nudge(CInode *in)
 
 void Locker::mark_need_snapflush_inode(CInode *in)
 {
-  ceph_assert(in->last != CEPH_NOSNAP);
+  stone_assert(in->last != STONE_NOSNAP);
   if (!in->item_caps.is_on_list()) {
     need_snapflush_inodes.push_back(&in->item_caps);
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     in->last_dirstat_prop = now;
     dout(10) << "mark_need_snapflush_inode " << *in << " - added at " << now << dendl;
   }
@@ -3055,8 +3055,8 @@ void Locker::_do_null_snapflush(CInode *head_in, client_t client, snapid_t last)
     if (clients.count(client)) {
       dout(10) << " doing async NULL snapflush on " << snapid << " from client." << client << dendl;
       CInode *sin = mdcache->pick_inode_snap(head_in, snapid - 1);
-      ceph_assert(sin);
-      ceph_assert(sin->first <= snapid);
+      stone_assert(sin);
+      stone_assert(sin->first <= snapid);
       _do_snap_update(sin, snapid, 0, sin->first - 1, client, ref_t<MClientCaps>(), ref_t<MClientCaps>());
       head_in->remove_need_snapflush(sin, snapid, client);
     }
@@ -3096,7 +3096,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
   dout(7) << "handle_client_caps "
 	  << " on " << m->get_ino()
 	  << " tid " << m->get_client_tid() << " follows " << follows
-	  << " op " << ceph_cap_op_name(op)
+	  << " op " << stone_cap_op_name(op)
 	  << " flags 0x" << std::hex << m->flags << std::dec << dendl;
 
   Session *session = mds->get_session(m);
@@ -3115,7 +3115,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
 	dirty && m->get_client_tid() > 0 &&
 	!session->have_completed_flush(m->get_client_tid())) {
       mdcache->set_reconnected_dirty_caps(client, m->get_ino(), dirty,
-					  op == CEPH_CAP_OP_FLUSHSNAP);
+					  op == STONE_CAP_OP_FLUSHSNAP);
     }
     mds->wait_for_replay(new C_MDS_RetryMessage(mds, m));
     return;
@@ -3131,22 +3131,22 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
     dout(7) << "handle_client_caps already flushed tid " << m->get_client_tid()
 	    << " for client." << client << dendl;
     ref_t<MClientCaps> ack;
-    if (op == CEPH_CAP_OP_FLUSHSNAP) {
-      if (mds->logger) mds->logger->inc(l_mdss_ceph_cap_op_flushsnap_ack);
-      ack = make_message<MClientCaps>(CEPH_CAP_OP_FLUSHSNAP_ACK, m->get_ino(), 0, 0, 0, 0, 0, dirty, 0, mds->get_osd_epoch_barrier());
+    if (op == STONE_CAP_OP_FLUSHSNAP) {
+      if (mds->logger) mds->logger->inc(l_mdss_stone_cap_op_flushsnap_ack);
+      ack = make_message<MClientCaps>(STONE_CAP_OP_FLUSHSNAP_ACK, m->get_ino(), 0, 0, 0, 0, 0, dirty, 0, mds->get_osd_epoch_barrier());
     } else {
-      if (mds->logger) mds->logger->inc(l_mdss_ceph_cap_op_flush_ack);
-      ack = make_message<MClientCaps>(CEPH_CAP_OP_FLUSH_ACK, m->get_ino(), 0, m->get_cap_id(), m->get_seq(), m->get_caps(), 0, dirty, 0, mds->get_osd_epoch_barrier());
+      if (mds->logger) mds->logger->inc(l_mdss_stone_cap_op_flush_ack);
+      ack = make_message<MClientCaps>(STONE_CAP_OP_FLUSH_ACK, m->get_ino(), 0, m->get_cap_id(), m->get_seq(), m->get_caps(), 0, dirty, 0, mds->get_osd_epoch_barrier());
     }
     ack->set_snap_follows(follows);
     ack->set_client_tid(m->get_client_tid());
     mds->send_message_client_counted(ack, m->get_connection());
-    if (op == CEPH_CAP_OP_FLUSHSNAP) {
+    if (op == STONE_CAP_OP_FLUSHSNAP) {
       return;
     } else {
       // fall-thru because the message may release some caps
       dirty = false;
-      op = CEPH_CAP_OP_UPDATE;
+      op = STONE_CAP_OP_UPDATE;
     }
   }
 
@@ -3212,7 +3212,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
     dout(7) << "handle_client_caps no cap for client." << client << " on " << *head_in << dendl;
     return;
   }  
-  ceph_assert(cap);
+  stone_assert(cap);
 
   // freezing|frozen?
   if (should_defer_client_cap_frozen(head_in)) {
@@ -3220,7 +3220,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
     head_in->add_waiter(CInode::WAIT_UNFREEZE, new C_MDS_RetryMessage(mds, m));
     return;
   }
-  if (ceph_seq_cmp(m->get_mseq(), cap->get_mseq()) < 0) {
+  if (stone_seq_cmp(m->get_mseq(), cap->get_mseq()) < 0) {
     dout(7) << "handle_client_caps mseq " << m->get_mseq() << " < " << cap->get_mseq()
 	    << ", dropping" << dendl;
     return;
@@ -3229,7 +3229,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
   bool need_unpin = false;
 
   // flushsnap?
-  if (op == CEPH_CAP_OP_FLUSHSNAP) {
+  if (op == STONE_CAP_OP_FLUSHSNAP) {
     if (!head_in->is_auth()) {
       dout(7) << " not auth, ignoring flushsnap on " << *head_in << dendl;
       goto out;
@@ -3247,7 +3247,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
     }
 
     CInode *in = head_in;
-    if (snap != CEPH_NOSNAP) {
+    if (snap != STONE_NOSNAP) {
       in = mdcache->pick_inode_snap(head_in, snap - 1);
       if (in != head_in)
 	dout(10) << " snapped inode " << *in << dendl;
@@ -3258,7 +3258,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
     // case we get a dup response, so whatever.)
     ref_t<MClientCaps> ack;
     if (dirty) {
-      ack = make_message<MClientCaps>(CEPH_CAP_OP_FLUSHSNAP_ACK, in->ino(), 0, 0, 0, 0, 0, dirty, 0, mds->get_osd_epoch_barrier());
+      ack = make_message<MClientCaps>(STONE_CAP_OP_FLUSHSNAP_ACK, in->ino(), 0, 0, 0, 0, 0, dirty, 0, mds->get_osd_epoch_barrier());
       ack->set_snap_follows(follows);
       ack->set_client_tid(m->get_client_tid());
       ack->set_oldest_flush_tid(m->get_oldest_flush_tid());
@@ -3272,7 +3272,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
 
       // this cap now follows a later snap (i.e. the one initiating this flush, or later)
       if (in == head_in)
-	cap->client_follows = snap < CEPH_NOSNAP ? snap : realm->get_newest_seq();
+	cap->client_follows = snap < STONE_NOSNAP ? snap : realm->get_newest_seq();
    
       _do_snap_update(in, snap, dirty, follows, client, m, ack);
 
@@ -3281,7 +3281,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
     } else {
       dout(7) << " not expecting flushsnap " << snap << " from client." << client << " on " << *in << dendl;
       if (ack) {
-        if (mds->logger) mds->logger->inc(l_mdss_ceph_cap_op_flushsnap_ack);
+        if (mds->logger) mds->logger->inc(l_mdss_stone_cap_op_flushsnap_ack);
 	mds->send_message_client_counted(ack, m->get_connection());
       }
     }
@@ -3296,7 +3296,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
       in = mdcache->pick_inode_snap(head_in, follows);
       // intermediate snap inodes
       while (in != head_in) {
-	ceph_assert(in->last != CEPH_NOSNAP);
+	stone_assert(in->last != STONE_NOSNAP);
 	if (in->is_auth() && dirty) {
 	  dout(10) << " updating intermediate snapped inode " << *in << dendl;
 	  _do_cap_update(in, NULL, dirty, follows, m, ref_t<MClientCaps>());
@@ -3320,7 +3320,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
 	     << " dirty " << ccap_string(dirty)
 	     << " on " << *in << dendl;
 
-    if (revoked & CEPH_CAP_ANY_DIR_OPS)
+    if (revoked & STONE_CAP_ANY_DIR_OPS)
       eval_lock_caches(cap);
 
     // missing/skipped snapflush?
@@ -3331,7 +3331,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
     //  released all WR/EXCL caps (the FLUSHSNAP always comes before the cap
     //  update/release).
     if (!head_in->client_need_snapflush.empty()) {
-      if (!(cap->issued() & CEPH_CAP_ANY_FILE_WR) &&
+      if (!(cap->issued() & STONE_CAP_ANY_FILE_WR) &&
 	  !(m->flags & MClientCaps::FLAG_PENDING_CAPSNAP)) {
 	head_in->auth_pin(this); // prevent subtree frozen
 	need_unpin = true;
@@ -3346,7 +3346,7 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
     if (dirty && in->is_auth()) {
       dout(7) << " flush client." << client << " dirty " << ccap_string(dirty)
 	      << " seq " << m->get_seq() << " on " << *in << dendl;
-      ack = make_message<MClientCaps>(CEPH_CAP_OP_FLUSH_ACK, in->ino(), 0, cap->get_cap_id(), m->get_seq(),
+      ack = make_message<MClientCaps>(STONE_CAP_OP_FLUSH_ACK, in->ino(), 0, cap->get_cap_id(), m->get_seq(),
           m->get_caps(), 0, dirty, 0, mds->get_osd_epoch_barrier());
       ack->set_client_tid(m->get_client_tid());
       ack->set_oldest_flush_tid(m->get_oldest_flush_tid());
@@ -3367,23 +3367,23 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
     if (in->is_auth() &&
 	_do_cap_update(in, cap, dirty, follows, m, ack, &need_flush)) {
       // updated
-      eval(in, CEPH_CAP_LOCKS);
+      eval(in, STONE_CAP_LOCKS);
 
       if (!need_flush && (cap->wanted() & ~cap->pending()))
 	need_flush = _need_flush_mdlog(in, cap->wanted() & ~cap->pending());
     } else {
       // no update, ack now.
       if (ack) {
-        if (mds->logger) mds->logger->inc(l_mdss_ceph_cap_op_flush_ack);
+        if (mds->logger) mds->logger->inc(l_mdss_stone_cap_op_flush_ack);
 	mds->send_message_client_counted(ack, m->get_connection());
       }
       
-      bool did_issue = eval(in, CEPH_CAP_LOCKS);
+      bool did_issue = eval(in, STONE_CAP_LOCKS);
       if (!did_issue && (cap->wanted() & ~cap->pending()))
 	issue_caps(in, cap);
 
       if (cap->get_last_seq() == 0 &&
-	  (cap->pending() & (CEPH_CAP_FILE_WR|CEPH_CAP_FILE_BUFFER))) {
+	  (cap->pending() & (STONE_CAP_FILE_WR|STONE_CAP_FILE_BUFFER))) {
 	share_inode_max_size(in, cap);
       }
     }
@@ -3400,9 +3400,9 @@ void Locker::handle_client_caps(const cref_t<MClientCaps> &m)
 
 class C_Locker_RetryRequestCapRelease : public LockerContext {
   client_t client;
-  ceph_mds_request_release item;
+  stone_mds_request_release item;
 public:
-  C_Locker_RetryRequestCapRelease(Locker *l, client_t c, const ceph_mds_request_release& it) :
+  C_Locker_RetryRequestCapRelease(Locker *l, client_t c, const stone_mds_request_release& it) :
     LockerContext(l), client(c), item(it) { }
   void finish(int r) override {
     string dname;
@@ -3411,7 +3411,7 @@ public:
   }
 };
 
-void Locker::process_request_cap_release(MDRequestRef& mdr, client_t client, const ceph_mds_request_release& item,
+void Locker::process_request_cap_release(MDRequestRef& mdr, client_t client, const stone_mds_request_release& item,
 					 std::string_view dname)
 {
   inodeno_t ino = (uint64_t)item.ino;
@@ -3455,7 +3455,7 @@ void Locker::process_request_cap_release(MDRequestRef& mdr, client_t client, con
 	   << (mdr ? "" : " (DEFERRED, no mdr)")
 	   << dendl;
     
-  if (ceph_seq_cmp(mseq, cap->get_mseq()) < 0) {
+  if (stone_seq_cmp(mseq, cap->get_mseq()) < 0) {
     dout(7) << " mseq " << mseq << " < " << cap->get_mseq() << ", dropping" << dendl;
     return;
   }
@@ -3478,11 +3478,11 @@ void Locker::process_request_cap_release(MDRequestRef& mdr, client_t client, con
     caps &= cap->issued();
   }
   int revoked = cap->confirm_receipt(seq, caps);
-  if (revoked & CEPH_CAP_ANY_DIR_OPS)
+  if (revoked & STONE_CAP_ANY_DIR_OPS)
     eval_lock_caches(cap);
 
   if (!in->client_need_snapflush.empty() &&
-      (cap->issued() & CEPH_CAP_ANY_FILE_WR) == 0) {
+      (cap->issued() & STONE_CAP_ANY_FILE_WR) == 0) {
     _do_null_snapflush(in, client);
   }
 
@@ -3490,7 +3490,7 @@ void Locker::process_request_cap_release(MDRequestRef& mdr, client_t client, con
   
   if (mdr)
     cap->inc_suppress();
-  eval(in, CEPH_CAP_LOCKS);
+  eval(in, STONE_CAP_LOCKS);
   if (mdr)
     cap->dec_suppress();
   
@@ -3502,9 +3502,9 @@ void Locker::process_request_cap_release(MDRequestRef& mdr, client_t client, con
 class C_Locker_RetryKickIssueCaps : public LockerContext {
   CInode *in;
   client_t client;
-  ceph_seq_t seq;
+  stone_seq_t seq;
 public:
-  C_Locker_RetryKickIssueCaps(Locker *l, CInode *i, client_t c, ceph_seq_t s) :
+  C_Locker_RetryKickIssueCaps(Locker *l, CInode *i, client_t c, stone_seq_t s) :
     LockerContext(l), in(i), client(c), seq(s) {
     in->get(CInode::PIN_PTRWAITER);
   }
@@ -3514,7 +3514,7 @@ public:
   }
 };
 
-void Locker::kick_issue_caps(CInode *in, client_t client, ceph_seq_t seq)
+void Locker::kick_issue_caps(CInode *in, client_t client, stone_seq_t seq)
 {
   Capability *cap = in->get_client_cap(client);
   if (!cap || cap->get_last_seq() != seq)
@@ -3533,7 +3533,7 @@ void Locker::kick_issue_caps(CInode *in, client_t client, ceph_seq_t seq)
 void Locker::kick_cap_releases(MDRequestRef& mdr)
 {
   client_t client = mdr->get_client();
-  for (map<vinodeno_t,ceph_seq_t>::iterator p = mdr->cap_releases.begin();
+  for (map<vinodeno_t,stone_seq_t>::iterator p = mdr->cap_releases.begin();
        p != mdr->cap_releases.end();
        ++p) {
     CInode *in = mdcache->get_inode(p->first);
@@ -3552,13 +3552,13 @@ void Locker::_do_snap_update(CInode *in, snapid_t snap, int dirty, snapid_t foll
 	   << " follows " << follows << " snap " << snap
 	   << " on " << *in << dendl;
 
-  if (snap == CEPH_NOSNAP) {
+  if (snap == STONE_NOSNAP) {
     // hmm, i guess snap was already deleted?  just ack!
     dout(10) << " wow, the snap following " << follows
 	     << " was already deleted.  nothing to record, just ack." << dendl;
     if (ack) {
-      if (ack->get_op() == CEPH_CAP_OP_FLUSHSNAP_ACK) {
-          if (mds->logger) mds->logger->inc(l_mdss_ceph_cap_op_flushsnap_ack);
+      if (ack->get_op() == STONE_CAP_OP_FLUSHSNAP_ACK) {
+          if (mds->logger) mds->logger->inc(l_mdss_stone_cap_op_flushsnap_ack);
       }
       mds->send_message_client_counted(ack, m->get_connection());
     }
@@ -3574,7 +3574,7 @@ void Locker::_do_snap_update(CInode *in, snapid_t snap, int dirty, snapid_t foll
 
   // update xattrs?
   CInode::mempool_xattr_map *px = nullptr;
-  bool xattrs = (dirty & CEPH_CAP_XATTR_EXCL) &&
+  bool xattrs = (dirty & STONE_CAP_XATTR_EXCL) &&
                 m->xattrbl.length() &&
                 m->head.xattr_version > in->get_projected_inode()->xattr_version;
 
@@ -3654,7 +3654,7 @@ void Locker::_update_cap_fields(CInode *in, int dirty, const cref_t<MClientCaps>
     return;
 
   /* m must be valid if there are dirty caps */
-  ceph_assert(m);
+  stone_assert(m);
   uint64_t features = m->get_connection()->get_features();
 
   if (m->get_ctime() > pi->ctime) {
@@ -3665,7 +3665,7 @@ void Locker::_update_cap_fields(CInode *in, int dirty, const cref_t<MClientCaps>
       pi->rstat.rctime = m->get_ctime();
   }
 
-  if ((features & CEPH_FEATURE_FS_CHANGE_ATTR) &&
+  if ((features & STONE_FEATURE_FS_CHANGE_ATTR) &&
       m->get_change_attr() > pi->change_attr) {
     dout(7) << "  change_attr " << pi->change_attr << " -> " << m->get_change_attr()
 	    << " for " << *in << dendl;
@@ -3673,14 +3673,14 @@ void Locker::_update_cap_fields(CInode *in, int dirty, const cref_t<MClientCaps>
   }
 
   // file
-  if (dirty & (CEPH_CAP_FILE_EXCL|CEPH_CAP_FILE_WR)) {
+  if (dirty & (STONE_CAP_FILE_EXCL|STONE_CAP_FILE_WR)) {
     utime_t atime = m->get_atime();
     utime_t mtime = m->get_mtime();
     uint64_t size = m->get_size();
     version_t inline_version = m->inline_version;
     
-    if (((dirty & CEPH_CAP_FILE_WR) && mtime > pi->mtime) ||
-	((dirty & CEPH_CAP_FILE_EXCL) && mtime != pi->mtime)) {
+    if (((dirty & STONE_CAP_FILE_WR) && mtime > pi->mtime) ||
+	((dirty & STONE_CAP_FILE_EXCL) && mtime != pi->mtime)) {
       dout(7) << "  mtime " << pi->mtime << " -> " << mtime
 	      << " for " << *in << dendl;
       pi->mtime = mtime;
@@ -3695,28 +3695,28 @@ void Locker::_update_cap_fields(CInode *in, int dirty, const cref_t<MClientCaps>
       pi->rstat.rbytes = size;
     }
     if (in->is_file() &&
-        (dirty & CEPH_CAP_FILE_WR) &&
+        (dirty & STONE_CAP_FILE_WR) &&
         inline_version > pi->inline_data.version) {
       pi->inline_data.version = inline_version;
-      if (inline_version != CEPH_INLINE_NONE && m->inline_data.length() > 0)
+      if (inline_version != STONE_INLINE_NONE && m->inline_data.length() > 0)
 	pi->inline_data.set_data(m->inline_data);
       else
 	pi->inline_data.free_data();
     }
-    if ((dirty & CEPH_CAP_FILE_EXCL) && atime != pi->atime) {
+    if ((dirty & STONE_CAP_FILE_EXCL) && atime != pi->atime) {
       dout(7) << "  atime " << pi->atime << " -> " << atime
 	      << " for " << *in << dendl;
       pi->atime = atime;
     }
-    if ((dirty & CEPH_CAP_FILE_EXCL) &&
-	ceph_seq_cmp(pi->time_warp_seq, m->get_time_warp_seq()) < 0) {
+    if ((dirty & STONE_CAP_FILE_EXCL) &&
+	stone_seq_cmp(pi->time_warp_seq, m->get_time_warp_seq()) < 0) {
       dout(7) << "  time_warp_seq " << pi->time_warp_seq << " -> " << m->get_time_warp_seq()
 	      << " for " << *in << dendl;
       pi->time_warp_seq = m->get_time_warp_seq();
     }
   }
   // auth
-  if (dirty & CEPH_CAP_AUTH_EXCL) {
+  if (dirty & STONE_CAP_AUTH_EXCL) {
     if (m->head.uid != pi->uid) {
       dout(7) << "  uid " << pi->uid
 	      << " -> " << m->head.uid
@@ -3735,7 +3735,7 @@ void Locker::_update_cap_fields(CInode *in, int dirty, const cref_t<MClientCaps>
 	      << " for " << *in << dendl;
       pi->mode = m->head.mode;
     }
-    if ((features & CEPH_FEATURE_FS_BTIME) && m->get_btime() != pi->btime) {
+    if ((features & STONE_FEATURE_FS_BTIME) && m->get_btime() != pi->btime) {
       dout(7) << "  btime " << oct << pi->btime
 	      << " -> " << m->get_btime() << dec
 	      << " for " << *in << dendl;
@@ -3758,7 +3758,7 @@ bool Locker::_do_cap_update(CInode *in, Capability *cap,
 	   << " issued " << ccap_string(cap ? cap->issued() : 0)
 	   << " wanted " << ccap_string(cap ? cap->wanted() : 0)
 	   << " on " << *in << dendl;
-  ceph_assert(in->is_auth());
+  stone_assert(in->is_auth());
   client_t client = m->get_source().num();
   const auto& latest = in->get_projected_inode();
 
@@ -3771,7 +3771,7 @@ bool Locker::_do_cap_update(CInode *in, Capability *cap,
   if (in->is_file()) {
     bool forced_change_max = false;
     dout(20) << "inode is file" << dendl;
-    if (cap && ((cap->issued() | cap->wanted()) & CEPH_CAP_ANY_FILE_WR)) {
+    if (cap && ((cap->issued() | cap->wanted()) & STONE_CAP_ANY_FILE_WR)) {
       dout(20) << "client has write caps; m->get_max_size="
                << m->get_max_size() << "; old_max=" << old_max << dendl;
       if (m->get_max_size() > new_max) {
@@ -3795,7 +3795,7 @@ bool Locker::_do_cap_update(CInode *in, Capability *cap,
       }
     }
 
-    if (in->last == CEPH_NOSNAP &&
+    if (in->last == STONE_NOSNAP &&
 	change_max &&
 	!in->filelock.can_wrlock(client) &&
 	!in->filelock.can_force_wrlock(client)) {
@@ -3832,18 +3832,18 @@ bool Locker::_do_cap_update(CInode *in, Capability *cap,
     auto bli = m->flockbl.cbegin();
     decode(num_locks, bli);
     for ( int i=0; i < num_locks; ++i) {
-      ceph_filelock decoded_lock;
+      stone_filelock decoded_lock;
       decode(decoded_lock, bli);
       in->get_fcntl_lock_state()->held_locks.
-	insert(pair<uint64_t, ceph_filelock>(decoded_lock.start, decoded_lock));
+	insert(pair<uint64_t, stone_filelock>(decoded_lock.start, decoded_lock));
       ++in->get_fcntl_lock_state()->client_held_lock_counts[(client_t)(decoded_lock.client)];
     }
     decode(num_locks, bli);
     for ( int i=0; i < num_locks; ++i) {
-      ceph_filelock decoded_lock;
+      stone_filelock decoded_lock;
       decode(decoded_lock, bli);
       in->get_flock_lock_state()->held_locks.
-	insert(pair<uint64_t, ceph_filelock>(decoded_lock.start, decoded_lock));
+	insert(pair<uint64_t, stone_filelock>(decoded_lock.start, decoded_lock));
       ++in->get_flock_lock_state()->client_held_lock_counts[(client_t)(decoded_lock.client)];
     }
   }
@@ -3862,7 +3862,7 @@ bool Locker::_do_cap_update(CInode *in, Capability *cap,
   EUpdate *le = new EUpdate(mds->mdlog, "cap update");
   mds->mdlog->start_entry(le);
 
-  bool xattr = (dirty & CEPH_CAP_XATTR_EXCL) &&
+  bool xattr = (dirty & STONE_CAP_XATTR_EXCL) &&
                m->xattrbl.length() &&
                m->head.xattr_version > in->get_projected_inode()->xattr_version;
 
@@ -3894,11 +3894,11 @@ bool Locker::_do_cap_update(CInode *in, Capability *cap,
     }
   }
     
-  if (change_max || (dirty & (CEPH_CAP_FILE_EXCL|CEPH_CAP_FILE_WR))) 
+  if (change_max || (dirty & (STONE_CAP_FILE_EXCL|STONE_CAP_FILE_WR))) 
     wrlock_force(&in->filelock, mut);  // wrlock for duration of journal
 
   // auth
-  if (dirty & CEPH_CAP_AUTH_EXCL)
+  if (dirty & STONE_CAP_AUTH_EXCL)
     wrlock_force(&in->authlock, mut);
 
   // xattrs update?
@@ -3971,11 +3971,11 @@ class C_Locker_RetryCapRelease : public LockerContext {
   client_t client;
   inodeno_t ino;
   uint64_t cap_id;
-  ceph_seq_t migrate_seq;
-  ceph_seq_t issue_seq;
+  stone_seq_t migrate_seq;
+  stone_seq_t issue_seq;
 public:
   C_Locker_RetryCapRelease(Locker *l, client_t c, inodeno_t i, uint64_t id,
-			   ceph_seq_t mseq, ceph_seq_t seq) :
+			   stone_seq_t mseq, stone_seq_t seq) :
     LockerContext(l), client(c), ino(i), cap_id(id), migrate_seq(mseq), issue_seq(seq) {}
   void finish(int r) override {
     locker->_do_cap_release(client, ino, cap_id, migrate_seq, issue_seq);
@@ -3983,7 +3983,7 @@ public:
 };
 
 void Locker::_do_cap_release(client_t client, inodeno_t ino, uint64_t cap_id,
-			     ceph_seq_t mseq, ceph_seq_t seq)
+			     stone_seq_t mseq, stone_seq_t seq)
 {
   CInode *in = mdcache->get_inode(ino);
   if (!in) {
@@ -4001,7 +4001,7 @@ void Locker::_do_cap_release(client_t client, inodeno_t ino, uint64_t cap_id,
     dout(7) << " capid " << cap_id << " != " << cap->get_cap_id() << ", ignore" << dendl;
     return;
   }
-  if (ceph_seq_cmp(mseq, cap->get_mseq()) < 0) {
+  if (stone_seq_cmp(mseq, cap->get_mseq()) < 0) {
     dout(7) << " mseq " << mseq << " < " << cap->get_mseq() << ", ignore" << dendl;
     return;
   }
@@ -4052,7 +4052,7 @@ void Locker::remove_client_cap(CInode *in, Capability *cap, bool kill)
     request_inode_file_caps(in);
   }
   
-  try_eval(in, CEPH_CAP_LOCKS);
+  try_eval(in, STONE_CAP_LOCKS);
 }
 
 
@@ -4068,7 +4068,7 @@ bool Locker::any_late_revoking_caps(xlist<Capability*> const &revoking,
       // No revoking caps at the moment
       return false;
     } else {
-      utime_t now = ceph_clock_now();
+      utime_t now = stone_clock_now();
       utime_t age = now - (*p)->get_last_revoke_stamp();
       if (age <= timeout) {
           return false;
@@ -4102,7 +4102,7 @@ std::set<client_t> Locker::get_late_revoking_clients(double timeout) const
 
 void Locker::caps_tick()
 {
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
 
   if (!need_snapflush_inodes.empty()) {
     // snap inodes that needs flush are auth pinned, they affect
@@ -4124,7 +4124,7 @@ void Locker::caps_tick()
 
   dout(20) << __func__ << " " << revoking_caps.size() << " revoking caps" << dendl;
 
-  now = ceph_clock_now();
+  now = stone_clock_now();
   int n = 0;
   for (xlist<Capability*>::iterator p = revoking_caps.begin(); !p.end(); ++p) {
     Capability *cap = *p;
@@ -4162,7 +4162,7 @@ void Locker::handle_client_lease(const cref_t<MClientLease> &m)
 {
   dout(10) << "handle_client_lease " << *m << dendl;
 
-  ceph_assert(m->get_source().is_client());
+  stone_assert(m->get_source().is_client());
   client_t client = m->get_source().num();
 
   CInode *in = mdcache->get_inode(m->get_ino(), m->get_last());
@@ -4190,8 +4190,8 @@ void Locker::handle_client_lease(const cref_t<MClientLease> &m)
   } 
 
   switch (m->get_action()) {
-  case CEPH_MDS_LEASE_REVOKE_ACK:
-  case CEPH_MDS_LEASE_RELEASE:
+  case STONE_MDS_LEASE_REVOKE_ACK:
+  case STONE_MDS_LEASE_RELEASE:
     if (l->seq != m->get_seq()) {
       dout(7) << "handle_client_lease release - seq " << l->seq << " != provided " << m->get_seq() << dendl;
     } else {
@@ -4201,7 +4201,7 @@ void Locker::handle_client_lease(const cref_t<MClientLease> &m)
     }
     break;
 
-  case CEPH_MDS_LEASE_RENEW:
+  case STONE_MDS_LEASE_RENEW:
     {
       dout(7) << "handle_client_lease client." << client << " renew on " << *dn
 	      << (!dn->lock.can_lease(client)?", revoking lease":"") << dendl;
@@ -4212,7 +4212,7 @@ void Locker::handle_client_lease(const cref_t<MClientLease> &m)
 	reply->h.seq = ++l->seq;
 	reply->clear_payload();
 
-	utime_t now = ceph_clock_now();
+	utime_t now = stone_clock_now();
 	now += mdcache->client_lease_durations[pool];
 	mdcache->touch_client_lease(l, pool, now);
 
@@ -4222,7 +4222,7 @@ void Locker::handle_client_lease(const cref_t<MClientLease> &m)
     break;
 
   default:
-    ceph_abort(); // implement me
+    stone_abort(); // implement me
     break;
   }
 }
@@ -4235,11 +4235,11 @@ void Locker::issue_client_lease(CDentry *dn, MDRequestRef &mdr, int mask,
   Session *session = mdr->session;
 
   CInode *diri = dn->get_dir()->get_inode();
-  if (mdr->snapid == CEPH_NOSNAP &&
+  if (mdr->snapid == STONE_NOSNAP &&
       dn->lock.can_lease(client) &&
       !diri->is_stray() &&  // do not issue dn leases in stray dir!
       !diri->filelock.can_lease(client) &&
-      !(diri->get_client_cap_pending(client) & (CEPH_CAP_FILE_SHARED | CEPH_CAP_FILE_EXCL))) {
+      !(diri->get_client_cap_pending(client) & (STONE_CAP_FILE_SHARED | STONE_CAP_FILE_EXCL))) {
     // issue a dentry lease
     ClientLease *l = dn->add_client_lease(client, session);
     session->touch_lease(l);
@@ -4249,7 +4249,7 @@ void Locker::issue_client_lease(CDentry *dn, MDRequestRef &mdr, int mask,
     mdcache->touch_client_lease(l, pool, now);
 
     LeaseStat lstat;
-    lstat.mask = CEPH_LEASE_VALID | mask;
+    lstat.mask = STONE_LEASE_VALID | mask;
     lstat.duration_ms = (uint32_t)(1000 * mdcache->client_lease_durations[pool]);
     lstat.seq = ++l->seq;
     lstat.alternate_name = std::string(dn->alternate_name);
@@ -4277,14 +4277,14 @@ void Locker::revoke_client_leases(SimpleLock *lock)
     ClientLease *l = p->second;
     
     n++;
-    ceph_assert(lock->get_type() == CEPH_LOCK_DN);
+    stone_assert(lock->get_type() == STONE_LOCK_DN);
 
     CDentry *dn = static_cast<CDentry*>(lock->get_parent());
-    int mask = 1 | CEPH_LOCK_DN; // old and new bits
+    int mask = 1 | STONE_LOCK_DN; // old and new bits
     
     // i should also revoke the dir ICONTENT lease, if they have it!
     CInode *diri = dn->get_dir()->get_inode();
-    auto lease = make_message<MClientLease>(CEPH_MDS_LEASE_REVOKE, l->seq, mask, diri->ino(), diri->first, CEPH_NOSNAP, dn->get_name());
+    auto lease = make_message<MClientLease>(STONE_MDS_LEASE_REVOKE, l->seq, mask, diri->ino(), diri->first, STONE_NOSNAP, dn->get_name());
     mds->send_message_client_counted(lease, l->client);
   }
 }
@@ -4292,7 +4292,7 @@ void Locker::revoke_client_leases(SimpleLock *lock)
 void Locker::encode_lease(bufferlist& bl, const session_info_t& info,
 			  const LeaseStat& ls)
 {
-  if (info.has_feature(CEPHFS_FEATURE_REPLY_ENCODING)) {
+  if (info.has_feature(STONEFS_FEATURE_REPLY_ENCODING)) {
     ENCODE_START(2, 1, bl);
     encode(ls.mask, bl);
     encode(ls.duration_ms, bl);
@@ -4312,7 +4312,7 @@ void Locker::encode_lease(bufferlist& bl, const session_info_t& info,
 SimpleLock *Locker::get_lock(int lock_type, const MDSCacheObjectInfo &info) 
 {
   switch (lock_type) {
-  case CEPH_LOCK_DN:
+  case STONE_LOCK_DN:
     {
       // be careful; info.dirfrag may have incorrect frag; recalculate based on dname.
       CInode *diri = mdcache->get_inode(info.dirfrag.ino);
@@ -4332,15 +4332,15 @@ SimpleLock *Locker::get_lock(int lock_type, const MDSCacheObjectInfo &info)
       return &dn->lock;
     }
 
-  case CEPH_LOCK_IAUTH:
-  case CEPH_LOCK_ILINK:
-  case CEPH_LOCK_IDFT:
-  case CEPH_LOCK_IFILE:
-  case CEPH_LOCK_INEST:
-  case CEPH_LOCK_IXATTR:
-  case CEPH_LOCK_ISNAP:
-  case CEPH_LOCK_IFLOCK:
-  case CEPH_LOCK_IPOLICY:
+  case STONE_LOCK_IAUTH:
+  case STONE_LOCK_ILINK:
+  case STONE_LOCK_IDFT:
+  case STONE_LOCK_IFILE:
+  case STONE_LOCK_INEST:
+  case STONE_LOCK_IXATTR:
+  case STONE_LOCK_ISNAP:
+  case STONE_LOCK_IFLOCK:
+  case STONE_LOCK_IPOLICY:
     {
       CInode *in = mdcache->get_inode(info.ino, info.snapid);
       if (!in) {
@@ -4348,21 +4348,21 @@ SimpleLock *Locker::get_lock(int lock_type, const MDSCacheObjectInfo &info)
 	return 0;
       }
       switch (lock_type) {
-      case CEPH_LOCK_IAUTH: return &in->authlock;
-      case CEPH_LOCK_ILINK: return &in->linklock;
-      case CEPH_LOCK_IDFT: return &in->dirfragtreelock;
-      case CEPH_LOCK_IFILE: return &in->filelock;
-      case CEPH_LOCK_INEST: return &in->nestlock;
-      case CEPH_LOCK_IXATTR: return &in->xattrlock;
-      case CEPH_LOCK_ISNAP: return &in->snaplock;
-      case CEPH_LOCK_IFLOCK: return &in->flocklock;
-      case CEPH_LOCK_IPOLICY: return &in->policylock;
+      case STONE_LOCK_IAUTH: return &in->authlock;
+      case STONE_LOCK_ILINK: return &in->linklock;
+      case STONE_LOCK_IDFT: return &in->dirfragtreelock;
+      case STONE_LOCK_IFILE: return &in->filelock;
+      case STONE_LOCK_INEST: return &in->nestlock;
+      case STONE_LOCK_IXATTR: return &in->xattrlock;
+      case STONE_LOCK_ISNAP: return &in->snaplock;
+      case STONE_LOCK_IFLOCK: return &in->flocklock;
+      case STONE_LOCK_IPOLICY: return &in->policylock;
       }
     }
 
   default:
     dout(7) << "get_lock don't know lock_type " << lock_type << dendl;
-    ceph_abort();
+    stone_abort();
     break;
   }
 
@@ -4372,7 +4372,7 @@ SimpleLock *Locker::get_lock(int lock_type, const MDSCacheObjectInfo &info)
 void Locker::handle_lock(const cref_t<MLock> &m)
 {
   // nobody should be talking to us during recovery.
-  ceph_assert(mds->is_rejoin() || mds->is_clientreplay() || mds->is_active() || mds->is_stopping());
+  stone_assert(mds->is_rejoin() || mds->is_clientreplay() || mds->is_active() || mds->is_stopping());
 
   SimpleLock *lock = get_lock(m->get_lock_type(), m->get_object_info());
   if (!lock) {
@@ -4381,28 +4381,28 @@ void Locker::handle_lock(const cref_t<MLock> &m)
   }
 
   switch (lock->get_type()) {
-  case CEPH_LOCK_DN:
-  case CEPH_LOCK_IAUTH:
-  case CEPH_LOCK_ILINK:
-  case CEPH_LOCK_ISNAP:
-  case CEPH_LOCK_IXATTR:
-  case CEPH_LOCK_IFLOCK:
-  case CEPH_LOCK_IPOLICY:
+  case STONE_LOCK_DN:
+  case STONE_LOCK_IAUTH:
+  case STONE_LOCK_ILINK:
+  case STONE_LOCK_ISNAP:
+  case STONE_LOCK_IXATTR:
+  case STONE_LOCK_IFLOCK:
+  case STONE_LOCK_IPOLICY:
     handle_simple_lock(lock, m);
     break;
     
-  case CEPH_LOCK_IDFT:
-  case CEPH_LOCK_INEST:
+  case STONE_LOCK_IDFT:
+  case STONE_LOCK_INEST:
     //handle_scatter_lock((ScatterLock*)lock, m);
     //break;
 
-  case CEPH_LOCK_IFILE:
+  case STONE_LOCK_IFILE:
     handle_file_lock(static_cast<ScatterLock*>(lock), m);
     break;
     
   default:
     dout(7) << "handle_lock got otype " << m->get_lock_type() << dendl;
-    ceph_abort();
+    stone_abort();
     break;
   }
 }
@@ -4424,7 +4424,7 @@ void Locker::handle_reqrdlock(SimpleLock *lock, const cref_t<MLock> &m)
       !parent->is_frozen()) {
     dout(7) << "handle_reqrdlock got rdlock request on " << *lock
 	    << " on " << *parent << dendl;
-    ceph_assert(parent->is_auth()); // replica auth pinned if they're doing this!
+    stone_assert(parent->is_auth()); // replica auth pinned if they're doing this!
     if (lock->is_stable()) {
       simple_sync(lock);
     } else {
@@ -4457,14 +4457,14 @@ void Locker::handle_simple_lock(SimpleLock *lock, const cref_t<MLock> &m)
   switch (m->get_action()) {
     // -- replica --
   case LOCK_AC_SYNC:
-    ceph_assert(lock->get_state() == LOCK_LOCK);
+    stone_assert(lock->get_state() == LOCK_LOCK);
     lock->decode_locked_state(m->get_data());
     lock->set_state(LOCK_SYNC);
     lock->finish_waiters(SimpleLock::WAIT_RD|SimpleLock::WAIT_STABLE);
     break;
     
   case LOCK_AC_LOCK:
-    ceph_assert(lock->get_state() == LOCK_SYNC);
+    stone_assert(lock->get_state() == LOCK_SYNC);
     lock->set_state(LOCK_SYNC_LOCK);
     if (lock->is_leased())
       revoke_client_leases(lock);
@@ -4479,9 +4479,9 @@ void Locker::handle_simple_lock(SimpleLock *lock, const cref_t<MLock> &m)
 
     // -- auth --
   case LOCK_AC_LOCKACK:
-    ceph_assert(lock->get_state() == LOCK_SYNC_LOCK ||
+    stone_assert(lock->get_state() == LOCK_SYNC_LOCK ||
 	   lock->get_state() == LOCK_SYNC_EXCL);
-    ceph_assert(lock->is_gathering(from));
+    stone_assert(lock->is_gathering(from));
     lock->remove_gather(from);
     
     if (lock->is_gathering()) {
@@ -4546,14 +4546,14 @@ void Locker::simple_eval(SimpleLock *lock, bool *need_issue)
 {
   dout(10) << "simple_eval " << *lock << " on " << *lock->get_parent() << dendl;
 
-  ceph_assert(lock->get_parent()->is_auth());
-  ceph_assert(lock->is_stable());
+  stone_assert(lock->get_parent()->is_auth());
+  stone_assert(lock->is_stable());
 
   if (lock->get_parent()->is_freezing_or_frozen()) {
     // dentry/snap lock in unreadable state can block path traverse
-    if ((lock->get_type() != CEPH_LOCK_DN &&
-	 lock->get_type() != CEPH_LOCK_ISNAP &&
-	 lock->get_type() != CEPH_LOCK_IPOLICY) ||
+    if ((lock->get_type() != STONE_LOCK_DN &&
+	 lock->get_type() != STONE_LOCK_ISNAP &&
+	 lock->get_type() != STONE_LOCK_IPOLICY) ||
 	 lock->get_state() == LOCK_SYNC ||
 	 lock->get_parent()->is_frozen())
       return;
@@ -4577,7 +4577,7 @@ void Locker::simple_eval(SimpleLock *lock, bool *need_issue)
   // -> excl?
   if (lock->get_state() != LOCK_EXCL &&
       in && in->get_target_loner() >= 0 &&
-      (wanted & CEPH_CAP_GEXCL)) {
+      (wanted & STONE_CAP_GEXCL)) {
     dout(7) << "simple_eval stable, going to excl " << *lock 
 	    << " on " << *lock->get_parent() << dendl;
     simple_excl(lock, need_issue);
@@ -4586,7 +4586,7 @@ void Locker::simple_eval(SimpleLock *lock, bool *need_issue)
   // stable -> sync?
   else if (lock->get_state() != LOCK_SYNC &&
 	   !lock->is_wrlocked() &&
-	   ((!(wanted & CEPH_CAP_GEXCL) && !lock->is_waiter_for(SimpleLock::WAIT_WR)) ||
+	   ((!(wanted & STONE_CAP_GEXCL) && !lock->is_waiter_for(SimpleLock::WAIT_WR)) ||
 	    (lock->get_state() == LOCK_EXCL && in && in->get_target_loner() < 0))) {
     dout(7) << "simple_eval stable, syncing " << *lock 
 	    << " on " << *lock->get_parent() << dendl;
@@ -4600,8 +4600,8 @@ void Locker::simple_eval(SimpleLock *lock, bool *need_issue)
 bool Locker::simple_sync(SimpleLock *lock, bool *need_issue)
 {
   dout(7) << "simple_sync on " << *lock << " on " << *lock->get_parent() << dendl;
-  ceph_assert(lock->get_parent()->is_auth());
-  ceph_assert(lock->is_stable());
+  stone_assert(lock->get_parent()->is_auth());
+  stone_assert(lock->is_stable());
 
   CInode *in = 0;
   if (lock->get_cap_shift())
@@ -4616,7 +4616,7 @@ bool Locker::simple_sync(SimpleLock *lock, bool *need_issue)
     case LOCK_LOCK: lock->set_state(LOCK_LOCK_SYNC); break;
     case LOCK_XSYN: lock->set_state(LOCK_XSYN_SYNC); break;
     case LOCK_EXCL: lock->set_state(LOCK_EXCL_SYNC); break;
-    default: ceph_abort();
+    default: stone_abort();
     }
 
     int gather = 0;
@@ -4654,8 +4654,8 @@ bool Locker::simple_sync(SimpleLock *lock, bool *need_issue)
     }
     
     bool need_recover = false;
-    if (lock->get_type() == CEPH_LOCK_IFILE) {
-      ceph_assert(in);
+    if (lock->get_type() == STONE_LOCK_IFILE) {
+      stone_assert(in);
       if (in->state_test(CInode::STATE_NEEDSRECOVER)) {
         mds->mdcache->queue_file_recover(in);
 	need_recover = true;
@@ -4697,8 +4697,8 @@ bool Locker::simple_sync(SimpleLock *lock, bool *need_issue)
 void Locker::simple_excl(SimpleLock *lock, bool *need_issue)
 {
   dout(7) << "simple_excl on " << *lock << " on " << *lock->get_parent() << dendl;
-  ceph_assert(lock->get_parent()->is_auth());
-  ceph_assert(lock->is_stable());
+  stone_assert(lock->get_parent()->is_auth());
+  stone_assert(lock->is_stable());
 
   CInode *in = 0;
   if (lock->get_cap_shift())
@@ -4708,7 +4708,7 @@ void Locker::simple_excl(SimpleLock *lock, bool *need_issue)
   case LOCK_LOCK: lock->set_state(LOCK_LOCK_EXCL); break;
   case LOCK_SYNC: lock->set_state(LOCK_SYNC_EXCL); break;
   case LOCK_XSYN: lock->set_state(LOCK_XSYN_EXCL); break;
-  default: ceph_abort();
+  default: stone_abort();
   }
   
   int gather = 0;
@@ -4754,9 +4754,9 @@ void Locker::simple_excl(SimpleLock *lock, bool *need_issue)
 void Locker::simple_lock(SimpleLock *lock, bool *need_issue)
 {
   dout(7) << "simple_lock on " << *lock << " on " << *lock->get_parent() << dendl;
-  ceph_assert(lock->get_parent()->is_auth());
-  ceph_assert(lock->is_stable());
-  ceph_assert(lock->get_state() != LOCK_LOCK);
+  stone_assert(lock->get_parent()->is_auth());
+  stone_assert(lock->is_stable());
+  stone_assert(lock->get_state() != LOCK_LOCK);
   
   CInode *in = 0;
   if (lock->get_cap_shift())
@@ -4772,7 +4772,7 @@ void Locker::simple_lock(SimpleLock *lock, bool *need_issue)
     (static_cast<ScatterLock *>(lock))->clear_unscatter_wanted();
     break;
   case LOCK_TSYN: lock->set_state(LOCK_TSYN_LOCK); break;
-  default: ceph_abort();
+  default: stone_abort();
   }
 
   int gather = 0;
@@ -4796,8 +4796,8 @@ void Locker::simple_lock(SimpleLock *lock, bool *need_issue)
   }
 
   bool need_recover = false;
-  if (lock->get_type() == CEPH_LOCK_IFILE) {
-    ceph_assert(in);
+  if (lock->get_type() == STONE_LOCK_IFILE) {
+    stone_assert(in);
     if(in->state_test(CInode::STATE_NEEDSRECOVER)) {
       mds->mdcache->queue_file_recover(in);
       need_recover = true;
@@ -4843,9 +4843,9 @@ void Locker::simple_lock(SimpleLock *lock, bool *need_issue)
 void Locker::simple_xlock(SimpleLock *lock)
 {
   dout(7) << "simple_xlock on " << *lock << " on " << *lock->get_parent() << dendl;
-  ceph_assert(lock->get_parent()->is_auth());
+  stone_assert(lock->get_parent()->is_auth());
   //assert(lock->is_stable());
-  ceph_assert(lock->get_state() != LOCK_XLOCK);
+  stone_assert(lock->get_state() != LOCK_XLOCK);
   
   CInode *in = 0;
   if (lock->get_cap_shift())
@@ -4857,7 +4857,7 @@ void Locker::simple_xlock(SimpleLock *lock)
   switch (lock->get_state()) {
   case LOCK_LOCK: 
   case LOCK_XLOCKDONE: lock->set_state(LOCK_LOCK_XLOCK); break;
-  default: ceph_abort();
+  default: stone_abort();
   }
 
   int gather = 0;
@@ -5003,8 +5003,8 @@ void Locker::scatter_eval(ScatterLock *lock, bool *need_issue)
 {
   dout(10) << "scatter_eval " << *lock << " on " << *lock->get_parent() << dendl;
 
-  ceph_assert(lock->get_parent()->is_auth());
-  ceph_assert(lock->is_stable());
+  stone_assert(lock->get_parent()->is_auth());
+  stone_assert(lock->is_stable());
 
   if (lock->get_parent()->is_freezing_or_frozen()) {
     dout(20) << "  freezing|frozen" << dendl;
@@ -5028,7 +5028,7 @@ void Locker::scatter_eval(ScatterLock *lock, bool *need_issue)
     return;
   }
 
-  if (lock->get_type() == CEPH_LOCK_INEST) {
+  if (lock->get_type() == STONE_LOCK_INEST) {
     // in general, we want to keep INEST writable at all times.
     if (!lock->is_rdlocked()) {
       if (lock->get_parent()->is_replicated()) {
@@ -5065,7 +5065,7 @@ void Locker::mark_updated_scatterlock(ScatterLock *lock)
 	     << " - already on list since " << lock->get_update_stamp() << dendl;
   } else {
     updated_scatterlocks.push_back(lock->get_updated_item());
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     lock->set_update_stamp(now);
     dout(10) << "mark_updated_scatterlock " << *lock
 	     << " - added at " << now << dendl;
@@ -5136,7 +5136,7 @@ void Locker::scatter_nudge(ScatterLock *lock, MDSContext *c, bool forcelockchang
 	// adjust lock state
 	dout(10) << "scatter_nudge auth, scatter/unscattering " << *lock << " on " << *p << dendl;
 	switch (lock->get_type()) {
-	case CEPH_LOCK_IFILE:
+	case STONE_LOCK_IFILE:
 	  if (p->is_replicated() && lock->get_state() != LOCK_MIX)
 	    scatter_mix(static_cast<ScatterLock*>(lock));
 	  else if (lock->get_state() != LOCK_LOCK)
@@ -5145,8 +5145,8 @@ void Locker::scatter_nudge(ScatterLock *lock, MDSContext *c, bool forcelockchang
 	    simple_sync(static_cast<ScatterLock*>(lock));
 	  break;
 	  
-	case CEPH_LOCK_IDFT:
-	case CEPH_LOCK_INEST:
+	case STONE_LOCK_IDFT:
+	case STONE_LOCK_INEST:
 	  if (p->is_replicated() && lock->get_state() != LOCK_MIX)
 	    scatter_mix(lock);
 	  else if (lock->get_state() != LOCK_LOCK)
@@ -5155,7 +5155,7 @@ void Locker::scatter_nudge(ScatterLock *lock, MDSContext *c, bool forcelockchang
 	    simple_sync(lock);
 	  break;
 	default:
-	  ceph_abort();
+	  stone_abort();
 	}
 	++count;
 	if (lock->is_stable() && count == 2) {
@@ -5164,7 +5164,7 @@ void Locker::scatter_nudge(ScatterLock *lock, MDSContext *c, bool forcelockchang
 	  // handle_file_lock due to AC_NUDGE, because the rest of the
 	  // time we are replicated or have dirty data and won't get
 	  // called.  bailing here avoids an infinite loop.
-	  ceph_assert(!c); 
+	  stone_assert(!c); 
 	  break;
 	}
       } else {
@@ -5198,7 +5198,7 @@ void Locker::scatter_tick()
   dout(10) << "scatter_tick" << dendl;
   
   // updated
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   int n = updated_scatterlocks.size();
   while (!updated_scatterlocks.empty()) {
     ScatterLock *lock = updated_scatterlocks.front();
@@ -5224,18 +5224,18 @@ void Locker::scatter_tempsync(ScatterLock *lock, bool *need_issue)
 {
   dout(10) << "scatter_tempsync " << *lock
 	   << " on " << *lock->get_parent() << dendl;
-  ceph_assert(lock->get_parent()->is_auth());
-  ceph_assert(lock->is_stable());
+  stone_assert(lock->get_parent()->is_auth());
+  stone_assert(lock->is_stable());
 
-  ceph_abort_msg("not fully implemented, at least not for filelock");
+  stone_abort_msg("not fully implemented, at least not for filelock");
 
   CInode *in = static_cast<CInode *>(lock->get_parent());
 
   switch (lock->get_state()) {
-  case LOCK_SYNC: ceph_abort();   // this shouldn't happen
+  case LOCK_SYNC: stone_abort();   // this shouldn't happen
   case LOCK_LOCK: lock->set_state(LOCK_LOCK_TSYN); break;
   case LOCK_MIX: lock->set_state(LOCK_MIX_TSYN); break;
-  default: ceph_abort();
+  default: stone_abort();
   }
 
   int gather = 0;
@@ -5287,12 +5287,12 @@ void Locker::local_wrlock_grab(LocalLockC *lock, MutationRef& mut)
   dout(7) << "local_wrlock_grab  on " << *lock
 	  << " on " << *lock->get_parent() << dendl;  
   
-  ceph_assert(lock->get_parent()->is_auth());
-  ceph_assert(lock->can_wrlock());
+  stone_assert(lock->get_parent()->is_auth());
+  stone_assert(lock->can_wrlock());
   lock->get_wrlock(mut->get_client());
 
   auto it = mut->emplace_lock(lock, MutationImpl::LockOp::WRLOCK);
-  ceph_assert(it->is_wrlock());
+  stone_assert(it->is_wrlock());
 }
 
 bool Locker::local_wrlock_start(LocalLockC *lock, MDRequestRef& mut)
@@ -5300,11 +5300,11 @@ bool Locker::local_wrlock_start(LocalLockC *lock, MDRequestRef& mut)
   dout(7) << "local_wrlock_start  on " << *lock
 	  << " on " << *lock->get_parent() << dendl;  
   
-  ceph_assert(lock->get_parent()->is_auth());
+  stone_assert(lock->get_parent()->is_auth());
   if (lock->can_wrlock()) {
     lock->get_wrlock(mut->get_client());
     auto it = mut->emplace_lock(lock, MutationImpl::LockOp::WRLOCK);
-    ceph_assert(it->is_wrlock());
+    stone_assert(it->is_wrlock());
     return true;
   } else {
     lock->add_waiter(SimpleLock::WAIT_WR|SimpleLock::WAIT_STABLE, new C_MDS_RetryRequest(mdcache, mut));
@@ -5314,7 +5314,7 @@ bool Locker::local_wrlock_start(LocalLockC *lock, MDRequestRef& mut)
 
 void Locker::local_wrlock_finish(const MutationImpl::lock_iterator& it, MutationImpl *mut)
 {
-  ceph_assert(it->is_wrlock());
+  stone_assert(it->is_wrlock());
   LocalLockC *lock = static_cast<LocalLockC*>(it->lock);
   dout(7) << "local_wrlock_finish  on " << *lock
 	  << " on " << *lock->get_parent() << dendl;  
@@ -5332,7 +5332,7 @@ bool Locker::local_xlock_start(LocalLockC *lock, MDRequestRef& mut)
   dout(7) << "local_xlock_start  on " << *lock
 	  << " on " << *lock->get_parent() << dendl;  
   
-  ceph_assert(lock->get_parent()->is_auth());
+  stone_assert(lock->get_parent()->is_auth());
   if (!lock->can_xlock_local()) {
     lock->add_waiter(SimpleLock::WAIT_WR|SimpleLock::WAIT_STABLE, new C_MDS_RetryRequest(mdcache, mut));
     return false;
@@ -5345,7 +5345,7 @@ bool Locker::local_xlock_start(LocalLockC *lock, MDRequestRef& mut)
 
 void Locker::local_xlock_finish(const MutationImpl::lock_iterator& it, MutationImpl *mut)
 {
-  ceph_assert(it->is_xlock());
+  stone_assert(it->is_xlock());
   LocalLockC *lock = static_cast<LocalLockC*>(it->lock);
   dout(7) << "local_xlock_finish  on " << *lock
 	  << " on " << *lock->get_parent() << dendl;  
@@ -5367,15 +5367,15 @@ void Locker::file_eval(ScatterLock *lock, bool *need_issue)
 {
   CInode *in = static_cast<CInode*>(lock->get_parent());
   int loner_wanted, other_wanted;
-  int wanted = in->get_caps_wanted(&loner_wanted, &other_wanted, CEPH_CAP_SFILE);
+  int wanted = in->get_caps_wanted(&loner_wanted, &other_wanted, STONE_CAP_SFILE);
   dout(7) << "file_eval wanted=" << gcap_string(wanted)
 	  << " loner_wanted=" << gcap_string(loner_wanted)
 	  << " other_wanted=" << gcap_string(other_wanted)
 	  << "  filelock=" << *lock << " on " << *lock->get_parent()
 	  << dendl;
 
-  ceph_assert(lock->get_parent()->is_auth());
-  ceph_assert(lock->is_stable());
+  stone_assert(lock->get_parent()->is_auth());
+  stone_assert(lock->is_stable());
 
   if (lock->get_parent()->is_freezing_or_frozen())
     return;
@@ -5392,13 +5392,13 @@ void Locker::file_eval(ScatterLock *lock, bool *need_issue)
   if (lock->get_state() == LOCK_EXCL) {
     dout(20) << " is excl" << dendl;
     int loner_issued, other_issued, xlocker_issued;
-    in->get_caps_issued(&loner_issued, &other_issued, &xlocker_issued, CEPH_CAP_SFILE);
+    in->get_caps_issued(&loner_issued, &other_issued, &xlocker_issued, STONE_CAP_SFILE);
     dout(7) << "file_eval loner_issued=" << gcap_string(loner_issued)
             << " other_issued=" << gcap_string(other_issued)
 	    << " xlocker_issued=" << gcap_string(xlocker_issued)
 	    << dendl;
-    if (!((loner_wanted|loner_issued) & (CEPH_CAP_GEXCL|CEPH_CAP_GWR|CEPH_CAP_GBUFFER)) ||
-	(other_wanted & (CEPH_CAP_GEXCL|CEPH_CAP_GWR|CEPH_CAP_GRD)) ||
+    if (!((loner_wanted|loner_issued) & (STONE_CAP_GEXCL|STONE_CAP_GWR|STONE_CAP_GBUFFER)) ||
+	(other_wanted & (STONE_CAP_GEXCL|STONE_CAP_GWR|STONE_CAP_GRD)) ||
 	(in->is_dir() && in->multiple_nonstale_caps())) {  // FIXME.. :/
       dout(20) << " should lose it" << dendl;
       // we should lose it.
@@ -5413,7 +5413,7 @@ void Locker::file_eval(ScatterLock *lock, bool *need_issue)
       //  W      R|W     MIX
       //  W      W       MIX
       // -> any writer means MIX; RD doesn't matter.
-      if (((other_wanted|loner_wanted) & CEPH_CAP_GWR) ||
+      if (((other_wanted|loner_wanted) & STONE_CAP_GWR) ||
 	  lock->is_waiter_for(SimpleLock::WAIT_WR))
 	scatter_mix(lock, need_issue);
       else if (!lock->is_wrlocked())   // let excl wrlocks drain first
@@ -5430,7 +5430,7 @@ void Locker::file_eval(ScatterLock *lock, bool *need_issue)
 	   in->get_target_loner() >= 0 &&
 	   (in->is_dir() ?
 	    !in->has_subtree_or_exporting_dirfrag() :
-	    (wanted & (CEPH_CAP_GEXCL|CEPH_CAP_GWR|CEPH_CAP_GBUFFER)))) {
+	    (wanted & (STONE_CAP_GEXCL|STONE_CAP_GWR|STONE_CAP_GBUFFER)))) {
     dout(7) << "file_eval stable, bump to loner " << *lock
 	    << " on " << *lock->get_parent() << dendl;
     file_excl(lock, need_issue);
@@ -5441,7 +5441,7 @@ void Locker::file_eval(ScatterLock *lock, bool *need_issue)
 	   !lock->is_rdlocked() &&
 	   //!lock->is_waiter_for(SimpleLock::WAIT_WR) &&
 	   (lock->get_scatter_wanted() ||
-	    (in->get_target_loner() < 0 && (wanted & CEPH_CAP_GWR)))) {
+	    (in->get_target_loner() < 0 && (wanted & STONE_CAP_GWR)))) {
     dout(7) << "file_eval stable, bump to mixed " << *lock
 	    << " on " << *lock->get_parent() << dendl;
     scatter_mix(lock, need_issue);
@@ -5451,10 +5451,10 @@ void Locker::file_eval(ScatterLock *lock, bool *need_issue)
   else if (lock->get_state() != LOCK_SYNC &&
 	   !lock->is_wrlocked() &&   // drain wrlocks first!
 	   !lock->is_waiter_for(SimpleLock::WAIT_WR) &&
-	   !(wanted & CEPH_CAP_GWR) &&
+	   !(wanted & STONE_CAP_GWR) &&
 	   !((lock->get_state() == LOCK_MIX) &&
 	     in->is_dir() && in->has_subtree_or_exporting_dirfrag())  // if we are a delegation point, stay where we are
-	   //((wanted & CEPH_CAP_RD) || 
+	   //((wanted & STONE_CAP_RD) || 
 	   //in->is_replicated() || 
 	   //lock->is_leased() ||
 	   //(!loner && lock->get_state() == LOCK_EXCL)) &&
@@ -5476,8 +5476,8 @@ void Locker::scatter_mix(ScatterLock *lock, bool *need_issue)
   dout(7) << "scatter_mix " << *lock << " on " << *lock->get_parent() << dendl;
 
   CInode *in = static_cast<CInode*>(lock->get_parent());
-  ceph_assert(in->is_auth());
-  ceph_assert(lock->is_stable());
+  stone_assert(in->is_auth());
+  stone_assert(lock->is_stable());
 
   if (lock->get_state() == LOCK_LOCK) {
     in->start_scatter(lock);
@@ -5506,7 +5506,7 @@ void Locker::scatter_mix(ScatterLock *lock, bool *need_issue)
     case LOCK_EXCL: lock->set_state(LOCK_EXCL_MIX); break;
     case LOCK_XSYN: lock->set_state(LOCK_XSYN_MIX); break;
     case LOCK_TSYN: lock->set_state(LOCK_TSYN_MIX); break;
-    default: ceph_abort();
+    default: stone_abort();
     }
 
     int gather = 0;
@@ -5571,10 +5571,10 @@ void Locker::file_excl(ScatterLock *lock, bool *need_issue)
   CInode *in = static_cast<CInode*>(lock->get_parent());
   dout(7) << "file_excl " << *lock << " on " << *lock->get_parent() << dendl;  
 
-  ceph_assert(in->is_auth());
-  ceph_assert(lock->is_stable());
+  stone_assert(in->is_auth());
+  stone_assert(lock->is_stable());
 
-  ceph_assert((in->get_loner() >= 0 && in->get_mds_caps_wanted().empty()) ||
+  stone_assert((in->get_loner() >= 0 && in->get_mds_caps_wanted().empty()) ||
 	 (lock->get_state() == LOCK_XSYN));  // must do xsyn -> excl -> <anything else>
   
   switch (lock->get_state()) {
@@ -5582,7 +5582,7 @@ void Locker::file_excl(ScatterLock *lock, bool *need_issue)
   case LOCK_MIX: lock->set_state(LOCK_MIX_EXCL); break;
   case LOCK_LOCK: lock->set_state(LOCK_LOCK_EXCL); break;
   case LOCK_XSYN: lock->set_state(LOCK_XSYN_EXCL); break;
-  default: ceph_abort();
+  default: stone_abort();
   }
   int gather = 0;
   
@@ -5636,12 +5636,12 @@ void Locker::file_xsyn(SimpleLock *lock, bool *need_issue)
 {
   dout(7) << "file_xsyn on " << *lock << " on " << *lock->get_parent() << dendl;
   CInode *in = static_cast<CInode *>(lock->get_parent());
-  ceph_assert(in->is_auth());
-  ceph_assert(in->get_loner() >= 0 && in->get_mds_caps_wanted().empty());
+  stone_assert(in->is_auth());
+  stone_assert(in->get_loner() >= 0 && in->get_mds_caps_wanted().empty());
 
   switch (lock->get_state()) {
   case LOCK_EXCL: lock->set_state(LOCK_EXCL_XSYN); break;
-  default: ceph_abort();
+  default: stone_abort();
   }
   
   int gather = 0;
@@ -5677,9 +5677,9 @@ void Locker::file_recover(ScatterLock *lock)
   CInode *in = static_cast<CInode *>(lock->get_parent());
   dout(7) << "file_recover " << *lock << " on " << *in << dendl;
 
-  ceph_assert(in->is_auth());
+  stone_assert(in->is_auth());
   //assert(lock->is_stable());
-  ceph_assert(lock->get_state() == LOCK_PRE_SCAN); // only called from MDCache::start_files_to_recover()
+  stone_assert(lock->get_state() == LOCK_PRE_SCAN); // only called from MDCache::start_files_to_recover()
 
   int gather = 0;
   
@@ -5729,7 +5729,7 @@ void Locker::handle_file_lock(ScatterLock *lock, const cref_t<MLock> &m)
   switch (m->get_action()) {
     // -- replica --
   case LOCK_AC_SYNC:
-    ceph_assert(lock->get_state() == LOCK_LOCK ||
+    stone_assert(lock->get_state() == LOCK_LOCK ||
 	   lock->get_state() == LOCK_MIX ||
 	   lock->get_state() == LOCK_MIX_SYNC2);
     
@@ -5762,7 +5762,7 @@ void Locker::handle_file_lock(ScatterLock *lock, const cref_t<MLock> &m)
     switch (lock->get_state()) {
     case LOCK_SYNC: lock->set_state(LOCK_SYNC_LOCK); break;
     case LOCK_MIX: lock->set_state(LOCK_MIX_LOCK); break;
-    default: ceph_abort();
+    default: stone_abort();
     }
 
     eval_gather(lock, true);
@@ -5783,7 +5783,7 @@ void Locker::handle_file_lock(ScatterLock *lock, const cref_t<MLock> &m)
     break;
     
   case LOCK_AC_MIX:
-    ceph_assert(lock->get_state() == LOCK_SYNC ||
+    stone_assert(lock->get_state() == LOCK_SYNC ||
            lock->get_state() == LOCK_LOCK ||
 	   lock->get_state() == LOCK_SYNC_MIX2);
     
@@ -5812,14 +5812,14 @@ void Locker::handle_file_lock(ScatterLock *lock, const cref_t<MLock> &m)
 
     // -- auth --
   case LOCK_AC_LOCKACK:
-    ceph_assert(lock->get_state() == LOCK_SYNC_LOCK ||
+    stone_assert(lock->get_state() == LOCK_SYNC_LOCK ||
            lock->get_state() == LOCK_MIX_LOCK ||
            lock->get_state() == LOCK_MIX_LOCK2 ||
            lock->get_state() == LOCK_MIX_EXCL ||
            lock->get_state() == LOCK_SYNC_EXCL ||
            lock->get_state() == LOCK_SYNC_MIX ||
 	   lock->get_state() == LOCK_MIX_TSYN);
-    ceph_assert(lock->is_gathering(from));
+    stone_assert(lock->is_gathering(from));
     lock->remove_gather(from);
     
     if (lock->get_state() == LOCK_MIX_LOCK ||
@@ -5843,8 +5843,8 @@ void Locker::handle_file_lock(ScatterLock *lock, const cref_t<MLock> &m)
     break;
     
   case LOCK_AC_SYNCACK:
-    ceph_assert(lock->get_state() == LOCK_MIX_SYNC);
-    ceph_assert(lock->is_gathering(from));
+    stone_assert(lock->get_state() == LOCK_MIX_SYNC);
+    stone_assert(lock->is_gathering(from));
     lock->remove_gather(from);
     
     lock->decode_locked_state(m->get_data());
@@ -5860,8 +5860,8 @@ void Locker::handle_file_lock(ScatterLock *lock, const cref_t<MLock> &m)
     break;
 
   case LOCK_AC_MIXACK:
-    ceph_assert(lock->get_state() == LOCK_SYNC_MIX);
-    ceph_assert(lock->is_gathering(from));
+    stone_assert(lock->get_state() == LOCK_SYNC_MIX);
+    stone_assert(lock->is_gathering(from));
     lock->remove_gather(from);
     
     if (lock->is_gathering()) {
@@ -5932,6 +5932,6 @@ void Locker::handle_file_lock(ScatterLock *lock, const cref_t<MLock> &m)
     break;
 
   default:
-    ceph_abort();
+    stone_abort();
   }  
 }

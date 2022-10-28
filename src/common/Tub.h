@@ -13,8 +13,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef CEPH_COMMON_TUB_H
-#define CEPH_COMMON_TUB_H
+#ifndef STONE_COMMON_TUB_H
+#define STONE_COMMON_TUB_H
 
 /**
  * A Tub holds an object that may be uninitialized; it allows the allocation of
@@ -284,4 +284,4 @@ class Tub {
   bool occupied;
 };
 
-#endif  // CEPH_COMMON_TUB_H
+#endif  // STONE_COMMON_TUB_H

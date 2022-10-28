@@ -2,7 +2,7 @@
 #include <iostream>
 #include <numeric>
 #include <seastar/core/app-template.hh>
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "crimson/common/config_proxy.h"
 #include "crimson/os/alienstore/thread_pool.h"
 #include "include/msgr.h"
@@ -42,8 +42,8 @@ int main(int argc, char** argv)
     std::vector<const char*> args;
     std::string cluster;
     std::string conf_file_list;
-    auto init_params = ceph_argparse_early_args(args,
-                                                CEPH_ENTITY_TYPE_CLIENT,
+    auto init_params = stone_argparse_early_args(args,
+                                                STONE_ENTITY_TYPE_CLIENT,
                                                 &cluster,
                                                 &conf_file_list);
     return crimson::common::sharded_conf().start(init_params.name, cluster)

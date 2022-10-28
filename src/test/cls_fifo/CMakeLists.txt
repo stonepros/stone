@@ -1,7 +1,7 @@
-add_executable(ceph_test_cls_fifo
+add_executable(stone_test_cls_fifo
   test_cls_fifo.cc
   )
-target_link_libraries(ceph_test_cls_fifo
+target_link_libraries(stone_test_cls_fifo
   neorados_cls_fifo
   libneorados
   spawn
@@ -13,13 +13,13 @@ target_link_libraries(ceph_test_cls_fifo
   neoradostest-support
   )
 install(TARGETS
-  ceph_test_cls_fifo
+  stone_test_cls_fifo
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-add_executable(ceph_bench_cls_fifo
+add_executable(stone_bench_cls_fifo
   bench_cls_fifo.cc
   )
-target_link_libraries(ceph_bench_cls_fifo
+target_link_libraries(stone_bench_cls_fifo
   neorados_cls_fifo
   libneorados
   spawn
@@ -30,5 +30,5 @@ target_link_libraries(ceph_bench_cls_fifo
   ${EXTRALIBS}
   )
 install(TARGETS
-  ceph_test_cls_fifo
+  stone_test_cls_fifo
   DESTINATION ${CMAKE_INSTALL_BINDIR})

@@ -8,7 +8,7 @@
 #include "librbd/Utils.h"
 #include "librbd/image/GetMetadataRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::deep_copy::MetadataCopyRequest: " \
                            << this << " " << __func__ << ": "

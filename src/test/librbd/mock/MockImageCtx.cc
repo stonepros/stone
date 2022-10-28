@@ -7,20 +7,20 @@
 #include "librbd/io/AsyncOperation.h"
 
 static MockSafeTimer *s_timer;
-static ceph::mutex *s_timer_lock;
+static stone::mutex *s_timer_lock;
 
 namespace librbd {
 
 MockImageCtx* MockImageCtx::s_instance = nullptr;
 
 void MockImageCtx::set_timer_instance(MockSafeTimer *timer,
-                                      ceph::mutex *timer_lock) {
+                                      stone::mutex *timer_lock) {
   s_timer = timer;
   s_timer_lock = timer_lock;
 }
 
-void MockImageCtx::get_timer_instance(CephContext *cct, MockSafeTimer **timer,
-                                      ceph::mutex **timer_lock) {
+void MockImageCtx::get_timer_instance(StoneContext *cct, MockSafeTimer **timer,
+                                      stone::mutex **timer_lock) {
   *timer = s_timer;
   *timer_lock = s_timer_lock;
 }
@@ -39,7 +39,7 @@ void MockImageCtx::wait_for_async_ops() {
 IOContext MockImageCtx::get_data_io_context() {
   auto ctx = std::make_shared<neorados::IOContext>(
     data_ctx.get_id(), data_ctx.get_namespace());
-  if (snap_id != CEPH_NOSNAP) {
+  if (snap_id != STONE_NOSNAP) {
     ctx->read_snap(snap_id);
   }
   if (!snapc.snaps.empty()) {

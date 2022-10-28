@@ -1,2 +1,2 @@
 tasks:
-  - ceph-fuse: [client.0, client.1]
+  - stone-fuse: [client.0, client.1]

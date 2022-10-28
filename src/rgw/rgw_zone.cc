@@ -11,7 +11,7 @@
 #include "services/svc_zone.h"
 #include "services/svc_sys_obj.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace rgw_zone_defaults {
 
@@ -58,7 +58,7 @@ void RGWDefaultZoneGroupInfo::decode_json(JSONObj *obj) {
   }
 }
 
-rgw_pool RGWZoneGroup::get_pool(CephContext *cct_) const
+rgw_pool RGWZoneGroup::get_pool(StoneContext *cct_) const
 {
   if (cct_->_conf->rgw_zonegroup_root_pool.empty()) {
     return rgw_pool(RGW_DEFAULT_ZONEGROUP_ROOT_POOL);
@@ -164,7 +164,7 @@ const string& RGWZoneGroup::get_names_oid_prefix() const
   return zonegroup_names_oid_prefix;
 }
 
-const string& RGWZoneGroup::get_predefined_name(CephContext *cct) const {
+const string& RGWZoneGroup::get_predefined_name(StoneContext *cct) const {
   return cct->_conf->rgw_zonegroup;
 }
 
@@ -351,14 +351,14 @@ int RGWZoneGroup::set_as_default(const DoutPrefixProvider *dpp, optional_yield y
   return RGWSystemMetaObj::set_as_default(dpp, y, exclusive);
 }
 
-void RGWSystemMetaObj::reinit_instance(CephContext *_cct, RGWSI_SysObj *_sysobj_svc)
+void RGWSystemMetaObj::reinit_instance(StoneContext *_cct, RGWSI_SysObj *_sysobj_svc)
 {
   cct = _cct;
   sysobj_svc = _sysobj_svc;
   zone_svc = _sysobj_svc->get_zone_svc();
 }
 
-int RGWSystemMetaObj::init(const DoutPrefixProvider *dpp, CephContext *_cct, RGWSI_SysObj *_sysobj_svc,
+int RGWSystemMetaObj::init(const DoutPrefixProvider *dpp, StoneContext *_cct, RGWSI_SysObj *_sysobj_svc,
 			   optional_yield y,
 			   bool setup_obj, bool old_format)
 {
@@ -399,7 +399,7 @@ int RGWSystemMetaObj::read_default(const DoutPrefixProvider *dpp,
                                    RGWDefaultSystemMetaObjInfo& default_info,
 				   const string& oid, optional_yield y)
 {
-  using ceph::decode;
+  using stone::decode;
   auto pool = get_pool(cct);
   bufferlist bl;
 
@@ -442,7 +442,7 @@ int RGWSystemMetaObj::use_default(const DoutPrefixProvider *dpp, optional_yield 
 
 int RGWSystemMetaObj::set_as_default(const DoutPrefixProvider *dpp, optional_yield y, bool exclusive)
 {
-  using ceph::encode;
+  using stone::encode;
   string oid  = get_default_oid();
 
   rgw_pool pool(get_pool(cct));
@@ -467,7 +467,7 @@ int RGWSystemMetaObj::set_as_default(const DoutPrefixProvider *dpp, optional_yie
 int RGWSystemMetaObj::read_id(const DoutPrefixProvider *dpp, const string& obj_name, string& object_id,
 			      optional_yield y)
 {
-  using ceph::decode;
+  using stone::decode;
   rgw_pool pool(get_pool(cct));
   bufferlist bl;
 
@@ -550,7 +550,7 @@ int RGWSystemMetaObj::store_name(const DoutPrefixProvider *dpp, bool exclusive, 
   nameToId.obj_id = id;
 
   bufferlist bl;
-  using ceph::encode;
+  using stone::encode;
   encode(nameToId, bl);
   auto obj_ctx = sysobj_svc->init_obj_ctx();
   auto sysobj = sysobj_svc->get_obj(obj_ctx, rgw_raw_obj(pool, oid));
@@ -613,7 +613,7 @@ int RGWSystemMetaObj::read_info(const DoutPrefixProvider *dpp, const string& obj
     ldpp_dout(dpp, 0) << "failed reading obj info from " << pool << ":" << oid << ": " << cpp_strerror(-ret) << dendl;
     return ret;
   }
-  using ceph::decode;
+  using stone::decode;
 
   try {
     auto iter = bl.cbegin();
@@ -675,7 +675,7 @@ int RGWSystemMetaObj::store_info(const DoutPrefixProvider *dpp, bool exclusive, 
   string oid = get_info_oid_prefix() + id;
 
   bufferlist bl;
-  using ceph::encode;
+  using stone::encode;
   encode(*this, bl);
   auto obj_ctx = sysobj_svc->init_obj_ctx();
   auto sysobj = sysobj_svc->get_obj(obj_ctx, rgw_raw_obj{pool, oid});
@@ -700,7 +700,7 @@ int RGWSystemMetaObj::write(const DoutPrefixProvider *dpp, bool exclusive, optio
 }
 
 
-const string& RGWRealm::get_predefined_name(CephContext *cct) const {
+const string& RGWRealm::get_predefined_name(StoneContext *cct) const {
   return cct->_conf->rgw_realm;
 }
 
@@ -782,7 +782,7 @@ int RGWRealm::delete_control(const DoutPrefixProvider *dpp, optional_yield y)
   return sysobj.wop().remove(dpp, y);
 }
 
-rgw_pool RGWRealm::get_pool(CephContext *cct) const
+rgw_pool RGWRealm::get_pool(StoneContext *cct) const
 {
   if (cct->_conf->rgw_realm_root_pool.empty()) {
     return rgw_pool(RGW_DEFAULT_REALM_ROOT_POOL);
@@ -861,7 +861,7 @@ int RGWRealm::notify_zone(const DoutPrefixProvider *dpp, bufferlist& bl, optiona
 int RGWRealm::notify_new_period(const DoutPrefixProvider *dpp, const RGWPeriod& period, optional_yield y)
 {
   bufferlist bl;
-  using ceph::encode;
+  using stone::encode;
   // push the period to dependent zonegroups/zones
   encode(RGWRealmNotify::ZonesNeedPeriod, bl);
   encode(period, bl);
@@ -879,7 +879,7 @@ std::string RGWPeriodConfig::get_oid(const std::string& realm_id)
   return "period_config." + realm_id;
 }
 
-rgw_pool RGWPeriodConfig::get_pool(CephContext *cct)
+rgw_pool RGWPeriodConfig::get_pool(StoneContext *cct)
 {
   const auto& pool_name = cct->_conf->rgw_period_root_pool;
   if (pool_name.empty()) {
@@ -901,7 +901,7 @@ int RGWPeriodConfig::read(const DoutPrefixProvider *dpp, RGWSI_SysObj *sysobj_sv
   if (ret < 0) {
     return ret;
   }
-  using ceph::decode;
+  using stone::decode;
   try {
     auto iter = bl.cbegin();
     decode(*this, iter);
@@ -918,7 +918,7 @@ int RGWPeriodConfig::write(const DoutPrefixProvider *dpp,
   const auto& pool = get_pool(sysobj_svc->ctx());
   const auto& oid = get_oid(realm_id);
   bufferlist bl;
-  using ceph::encode;
+  using stone::encode;
   encode(*this, bl);
   auto obj_ctx = sysobj_svc->init_obj_ctx();
   auto sysobj = sysobj_svc->get_obj(obj_ctx, rgw_raw_obj{pool, oid});
@@ -927,7 +927,7 @@ int RGWPeriodConfig::write(const DoutPrefixProvider *dpp,
                .write(dpp, bl, y);
 }
 
-int RGWPeriod::init(const DoutPrefixProvider *dpp, CephContext *_cct, RGWSI_SysObj *_sysobj_svc,
+int RGWPeriod::init(const DoutPrefixProvider *dpp, StoneContext *_cct, RGWSI_SysObj *_sysobj_svc,
 		    const string& period_realm_id, optional_yield y,
 		    const string& period_realm_name, bool setup_obj)
 {
@@ -945,7 +945,7 @@ int RGWPeriod::init(const DoutPrefixProvider *dpp, CephContext *_cct, RGWSI_SysO
 
 
 int RGWPeriod::init(const DoutPrefixProvider *dpp, 
-                    CephContext *_cct, RGWSI_SysObj *_sysobj_svc,
+                    StoneContext *_cct, RGWSI_SysObj *_sysobj_svc,
 		    optional_yield y, bool setup_obj)
 {
   cct = _cct;
@@ -1042,7 +1042,7 @@ int RGWPeriod::read_latest_epoch(const DoutPrefixProvider *dpp,
   }
   try {
     auto iter = bl.cbegin();
-    using ceph::decode;
+    using stone::decode;
     decode(info, iter);
   } catch (buffer::error& err) {
     ldpp_dout(dpp, 0) << "error decoding data from " << pool << ":" << oid << dendl;
@@ -1092,7 +1092,7 @@ int RGWPeriod::set_latest_epoch(const DoutPrefixProvider *dpp,
   RGWPeriodLatestEpochInfo info;
   info.epoch = epoch;
 
-  using ceph::encode;
+  using stone::encode;
   encode(info, bl);
 
   auto obj_ctx = sysobj_svc->init_obj_ctx();
@@ -1191,7 +1191,7 @@ int RGWPeriod::read_info(const DoutPrefixProvider *dpp, optional_yield y)
   }
 
   try {
-    using ceph::decode;
+    using stone::decode;
     auto iter = bl.cbegin();
     decode(*this, iter);
   } catch (buffer::error& err) {
@@ -1237,7 +1237,7 @@ int RGWPeriod::store_info(const DoutPrefixProvider *dpp, bool exclusive, optiona
 
   string oid = get_period_oid();
   bufferlist bl;
-  using ceph::encode;
+  using stone::encode;
   encode(*this, bl);
 
   auto obj_ctx = sysobj_svc->init_obj_ctx();
@@ -1247,7 +1247,7 @@ int RGWPeriod::store_info(const DoutPrefixProvider *dpp, bool exclusive, optiona
                .write(dpp, bl, y);
 }
 
-rgw_pool RGWPeriod::get_pool(CephContext *cct) const
+rgw_pool RGWPeriod::get_pool(StoneContext *cct) const
 {
   if (cct->_conf->rgw_period_root_pool.empty()) {
     return rgw_pool(RGW_DEFAULT_PERIOD_ROOT_POOL);
@@ -1398,7 +1398,7 @@ int RGWPeriod::update_sync_status(const DoutPrefixProvider *dpp,
   const auto current_epoch = current_period.get_realm_epoch();
   if (current_epoch != status.sync_info.realm_epoch) {
     // no sync status markers for the current period
-    ceph_assert(current_epoch > status.sync_info.realm_epoch);
+    stone_assert(current_epoch > status.sync_info.realm_epoch);
     const int behind = current_epoch - status.sync_info.realm_epoch;
     if (!force_if_stale && current_epoch > 1) {
       error_stream << "ERROR: This zone is " << behind << " period(s) behind "
@@ -1548,7 +1548,7 @@ int RGWZoneParams::create_default(const DoutPrefixProvider *dpp, optional_yield 
 
 namespace {
 int get_zones_pool_set(const DoutPrefixProvider *dpp, 
-                       CephContext* cct,
+                       StoneContext* cct,
                        RGWSI_SysObj* sysobj_svc,
                        const list<string>& zones,
                        const string& my_zone_id,
@@ -1711,7 +1711,7 @@ int RGWZoneParams::create(const DoutPrefixProvider *dpp, optional_yield y, bool 
   return 0;
 }
 
-rgw_pool RGWZoneParams::get_pool(CephContext *cct) const
+rgw_pool RGWZoneParams::get_pool(StoneContext *cct) const
 {
   if (cct->_conf->rgw_zone_root_pool.empty()) {
     return rgw_pool(RGW_DEFAULT_ZONE_ROOT_POOL);
@@ -1739,12 +1739,12 @@ const string& RGWZoneParams::get_info_oid_prefix(bool old_format) const
   return zone_info_oid_prefix;
 }
 
-const string& RGWZoneParams::get_predefined_name(CephContext *cct) const {
+const string& RGWZoneParams::get_predefined_name(StoneContext *cct) const {
   return cct->_conf->rgw_zone;
 }
 
 int RGWZoneParams::init(const DoutPrefixProvider *dpp, 
-                        CephContext *cct, RGWSI_SysObj *sysobj_svc,
+                        StoneContext *cct, RGWSI_SysObj *sysobj_svc,
 			optional_yield y, bool setup_obj, bool old_format)
 {
   if (name.empty()) {
@@ -1832,7 +1832,7 @@ void RGWPeriodMap::decode(bufferlist::const_iterator& bl) {
 // run an MD5 hash on the zone_id and return the first 32 bits
 static uint32_t gen_short_zone_id(const std::string zone_id)
 {
-  unsigned char md5[CEPH_CRYPTO_MD5_DIGESTSIZE];
+  unsigned char md5[STONE_CRYPTO_MD5_DIGESTSIZE];
   MD5 hash;
   // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
   hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
@@ -1844,7 +1844,7 @@ static uint32_t gen_short_zone_id(const std::string zone_id)
   return std::max(short_id, 1u);
 }
 
-int RGWPeriodMap::update(const RGWZoneGroup& zonegroup, CephContext *cct)
+int RGWPeriodMap::update(const RGWZoneGroup& zonegroup, StoneContext *cct)
 {
   if (zonegroup.is_master_zonegroup() && (!master_zonegroup.empty() && zonegroup.get_id() != master_zonegroup)) {
     ldout(cct,0) << "Error updating periodmap, multiple master zonegroups configured "<< dendl;
@@ -1903,7 +1903,7 @@ uint32_t RGWPeriodMap::get_zone_short_id(const string& zone_id) const
   return i->second;
 }
 
-int RGWZoneGroupMap::read(const DoutPrefixProvider *dpp, CephContext *cct, RGWSI_SysObj *sysobj_svc, optional_yield y)
+int RGWZoneGroupMap::read(const DoutPrefixProvider *dpp, StoneContext *cct, RGWSI_SysObj *sysobj_svc, optional_yield y)
 {
 
   RGWPeriod period;

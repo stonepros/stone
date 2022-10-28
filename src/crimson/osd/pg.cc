@@ -39,7 +39,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -141,7 +141,7 @@ bool PG::try_flush_or_schedule_async() {
   return false;
 }
 
-void PG::queue_check_readable(epoch_t last_peering_reset, ceph::timespan delay)
+void PG::queue_check_readable(epoch_t last_peering_reset, stone::timespan delay)
 {
   // handle the peering event in the background
   check_readable_timer.cancel();
@@ -277,7 +277,7 @@ void PG::prepare_write(pg_info_t &info,
 		       bool dirty_info,
 		       bool dirty_big_info,
 		       bool need_write_epoch,
-		       ceph::os::Transaction &t)
+		       stone::os::Transaction &t)
 {
   std::map<string,bufferlist> km;
   std::string key_to_remove;
@@ -295,7 +295,7 @@ void PG::prepare_write(pg_info_t &info,
       true,
       nullptr,
       this);
-    ceph_assert(ret == 0);
+    stone_assert(ret == 0);
   }
   pglog.write_log_and_missing(
     t, &km, coll_ref->get_cid(), pgmeta_oid,
@@ -309,7 +309,7 @@ void PG::prepare_write(pg_info_t &info,
 }
 
 std::pair<ghobject_t, bool>
-PG::do_delete_work(ceph::os::Transaction &t, ghobject_t _next)
+PG::do_delete_work(stone::os::Transaction &t, ghobject_t _next)
 {
   // TODO
   shard_services.dec_pg_num();
@@ -320,7 +320,7 @@ void PG::scrub_requested(scrub_level_t scrub_level, scrub_type_t scrub_type)
 {
   // TODO: should update the stats upon finishing the scrub
   peering_state.update_stats([scrub_level, this](auto& history, auto& stats) {
-    const utime_t now = ceph_clock_now();
+    const utime_t now = stone_clock_now();
     history.last_scrub = peering_state.get_info().last_update;
     history.last_scrub_stamp = now;
     history.last_clean_scrub_stamp = now;
@@ -348,7 +348,7 @@ void PG::log_state_exit(
     events);
 }
 
-ceph::signedspan PG::get_mnow()
+stone::signedspan PG::get_mnow()
 {
   return shard_services.get_mnow();
 }
@@ -358,7 +358,7 @@ HeartbeatStampsRef PG::get_hb_stamps(int peer)
   return shard_services.get_hb_stamps(peer);
 }
 
-void PG::schedule_renew_lease(epoch_t last_peering_reset, ceph::timespan delay)
+void PG::schedule_renew_lease(epoch_t last_peering_reset, stone::timespan delay)
 {
   // handle the peering event in the background
   renew_lease_timer.cancel();
@@ -547,7 +547,7 @@ seastar::future<> PG::WaitForActiveBlocker::stop()
 seastar::future<> PG::submit_transaction(const OpInfo& op_info,
 					 const std::vector<OSDOp>& ops,
 					 ObjectContextRef&& obc,
-					 ceph::os::Transaction&& txn,
+					 stone::os::Transaction&& txn,
 					 const osd_op_params_t& osd_op_p)
 {
   if (__builtin_expect(stopping, false)) {
@@ -634,8 +634,8 @@ seastar::future<Ref<MOSDOpReply>> PG::handle_failed_op(
   // a concern -- simplicity wins.
   //
   // The conditional's purpose is to efficiently handle hot errors
-  // which may appear as a result of e.g. CEPH_OSD_OP_CMPXATTR or
-  // CEPH_OSD_OP_OMAP_CMP. These are read-like ops and clients
+  // which may appear as a result of e.g. STONE_OSD_OP_CMPXATTR or
+  // STONE_OSD_OP_OMAP_CMP. These are read-like ops and clients
   // typically append them before any write. If OpsExecuter hasn't
   // seen any modifying operation, `obc` is supposed to be kept
   // unchanged.
@@ -671,7 +671,7 @@ seastar::future<Ref<MOSDOpReply>> PG::do_osd_ops(
   }
 
   using osd_op_errorator = OpsExecuter::osd_op_errorator;
-  const auto oid = m->get_snapid() == CEPH_SNAPDIR ? m->get_hobj().get_head()
+  const auto oid = m->get_snapid() == STONE_SNAPDIR ? m->get_hobj().get_head()
                                                    : m->get_hobj();
   auto ox = std::make_unique<OpsExecuter>(
     obc, op_info, get_pool().info, get_backend(), *m);
@@ -681,7 +681,7 @@ seastar::future<Ref<MOSDOpReply>> PG::do_osd_ops(
       "do_osd_ops: {} - object {} - handling op {}",
       *m,
       obc->obs.oi.soid,
-      ceph_osd_op_name(osd_op.op.op));
+      stone_osd_op_name(osd_op.op.op));
     return ox->execute_op(osd_op);
   }).safe_then([this, obc, m, ox = ox.get(), &op_info] {
     logger().debug(
@@ -730,7 +730,7 @@ seastar::future<Ref<MOSDOpReply>> PG::do_osd_ops(
                                            get_osdmap_epoch(),
                                            0,
                                            false);
-    reply->add_flags(CEPH_OSD_FLAG_ACK | CEPH_OSD_FLAG_ONDISK);
+    reply->add_flags(STONE_OSD_FLAG_ACK | STONE_OSD_FLAG_ONDISK);
     logger().debug(
       "do_osd_ops: {} - object {} sending reply",
       *m,
@@ -760,11 +760,11 @@ seastar::future<Ref<MOSDOpReply>> PG::do_pg_ops(Ref<MOSDOp> m)
   auto ox = std::make_unique<PgOpsExecuter>(std::as_const(*this),
                                             std::as_const(*m));
   return seastar::do_for_each(m->ops, [ox = ox.get()](OSDOp& osd_op) {
-    logger().debug("will be handling pg op {}", ceph_osd_op_name(osd_op.op.op));
+    logger().debug("will be handling pg op {}", stone_osd_op_name(osd_op.op.op));
     return ox->execute_op(osd_op);
   }).then([m, this, ox = std::move(ox)] {
     auto reply = make_message<MOSDOpReply>(m.get(), 0, get_osdmap_epoch(),
-                                           CEPH_OSD_FLAG_ACK | CEPH_OSD_FLAG_ONDISK,
+                                           STONE_OSD_FLAG_ACK | STONE_OSD_FLAG_ONDISK,
                                            false);
     return seastar::make_ready_future<Ref<MOSDOpReply>>(std::move(reply));
   }).handle_exception_type([=](const crimson::osd::error& e) {
@@ -778,7 +778,7 @@ seastar::future<Ref<MOSDOpReply>> PG::do_pg_ops(Ref<MOSDOp> m)
 
 hobject_t PG::get_oid(const MOSDOp &m)
 {
-  return (m.get_snapid() == CEPH_SNAPDIR ?
+  return (m.get_snapid() == STONE_SNAPDIR ?
           m.get_hobj().get_head() :
           m.get_hobj());
 }
@@ -791,7 +791,7 @@ RWState::State PG::get_lock_type(const OpInfo &op_info)
   } else if (op_info.rwordered()) {
     return RWState::RWWRITE;
   } else {
-    ceph_assert(op_info.may_read());
+    stone_assert(op_info.may_read());
     return RWState::RWREAD;
   }
 }
@@ -813,7 +813,7 @@ std::optional<hobject_t> PG::resolve_oid(
     }
     auto citer = ss.clone_snaps.find(*clone);
     // TODO: how do we want to handle this kind of logic error?
-    ceph_assert(citer != ss.clone_snaps.end());
+    stone_assert(citer != ss.clone_snaps.end());
 
     if (std::find(
 	  citer->second.begin(),
@@ -969,7 +969,7 @@ PG::with_locked_obc(Ref<MOSDOp> &m, const OpInfo &op_info,
       return with_clone_obc<RWState::RWWRITE>(oid, std::move(f));
     }
   default:
-    ceph_abort();
+    stone_abort();
   };
 }
 
@@ -984,7 +984,7 @@ seastar::future<> PG::handle_rep_op(Ref<MOSDRepOp> req)
     return seastar::now();
   }
 
-  ceph::os::Transaction txn;
+  stone::os::Transaction txn;
   auto encoded_txn = req->get_data().cbegin();
   decode(txn, encoded_txn);
   auto p = req->logbl.cbegin();
@@ -998,7 +998,7 @@ seastar::future<> PG::handle_rep_op(Ref<MOSDRepOp> req)
       const auto map_epoch = get_osdmap_epoch();
       auto reply = make_message<MOSDRepOpReply>(
         req.get(), pg_whoami, 0,
-	map_epoch, req->get_min_epoch(), CEPH_OSD_FLAG_ONDISK);
+	map_epoch, req->get_min_epoch(), STONE_OSD_FLAG_ONDISK);
       reply->set_last_complete_ondisk(lcod);
       return shard_services.send_to_osd(req->from.osd, reply, map_epoch);
     });
@@ -1060,7 +1060,7 @@ seastar::future<> PG::stop()
   });
 }
 
-void PG::on_change(ceph::os::Transaction &t) {
+void PG::on_change(stone::os::Transaction &t) {
   recovery_backend->on_peering_interval_change(t);
   backend->on_actingset_changed({ is_primary() });
 }
@@ -1077,7 +1077,7 @@ bool PG::is_degraded_or_backfilling_object(const hobject_t& soid) const {
    */
   if (peering_state.get_pg_log().get_missing().get_items().count(soid))
     return true;
-  ceph_assert(!get_acting_recovery_backfill().empty());
+  stone_assert(!get_acting_recovery_backfill().empty());
   for (auto& peer : get_acting_recovery_backfill()) {
     if (peer == get_primary()) continue;
     auto peer_missing_entry = peering_state.get_peer_missing().find(peer);

@@ -40,7 +40,7 @@ struct GetMetadataRequest<MockTestImageCtx> {
                                     uint32_t max_results,
                                     std::map<std::string, bufferlist>* pairs,
                                     Context* on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->pairs = pairs;
     s_instance->on_finish = on_finish;
     return s_instance;

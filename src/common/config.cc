@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,7 +20,7 @@ namespace fs = std::filesystem;
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 #endif
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/common_init.h"
 #include "common/config.h"
 #include "common/config_obs.h"
@@ -31,7 +31,7 @@ namespace fs = std::experimental::filesystem;
 #include "common/hostname.h"
 #include "common/dout.h"
 
-/* Don't use standard Ceph logging in this file.
+/* Don't use standard Stone logging in this file.
  * We can't use logging until it's initialized, and a lot of the necessary
  * initialization happens here.
  */
@@ -41,7 +41,7 @@ namespace fs = std::experimental::filesystem;
 #undef generic_dout
 
 // set set_mon_vals()
-#define dout_subsys ceph_subsys_monc
+#define dout_subsys stone_subsys_monc
 
 using std::cerr;
 using std::cout;
@@ -55,29 +55,29 @@ using std::string;
 using std::string_view;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::Formatter;
 
-static const char *CEPH_CONF_FILE_DEFAULT = "$data_dir/config,/etc/ceph/$cluster.conf,$home/.ceph/$cluster.conf,$cluster.conf"
+static const char *STONE_CONF_FILE_DEFAULT = "$data_dir/config,/etc/stone/$cluster.conf,$home/.stone/$cluster.conf,$cluster.conf"
 #if defined(__FreeBSD__)
-    ",/usr/local/etc/ceph/$cluster.conf"
+    ",/usr/local/etc/stone/$cluster.conf"
 #elif defined(_WIN32)
-    ",$programdata/ceph/$cluster.conf"
+    ",$programdata/stone/$cluster.conf"
 #endif
     ;
 
 #define _STR(x) #x
 #define STRINGIFY(x) _STR(x)
 
-const char *ceph_conf_level_name(int level)
+const char *stone_conf_level_name(int level)
 {
   switch (level) {
   case CONF_DEFAULT: return "default";   // built-in default
   case CONF_MON: return "mon";           // monitor config database
-  case CONF_ENV: return "env";           // process environment (CEPH_ARGS)
-  case CONF_FILE: return "file";         // ceph.conf file
+  case CONF_ENV: return "env";           // process environment (STONE_ARGS)
+  case CONF_FILE: return "file";         // stone.conf file
   case CONF_CMDLINE: return "cmdline";   // process command line args
   case CONF_OVERRIDE: return "override"; // injectargs or 'config set' at runtime
   case CONF_FINAL: return "final";
@@ -85,7 +85,7 @@ const char *ceph_conf_level_name(int level)
   }
 }
 
-int ceph_resolve_file_search(const std::string& filename_list,
+int stone_resolve_file_search(const std::string& filename_list,
 			     std::string& result)
 {
   list<string> ls;
@@ -123,12 +123,12 @@ md_config_t::md_config_t(ConfigValues& values,
 {
   // Load the compile-time list of Option into
   // a map so that we can resolve keys quickly.
-  for (const auto &i : ceph_options) {
+  for (const auto &i : stone_options) {
     if (schema.count(i.name)) {
       // We may be instantiated pre-logging so send 
       std::cerr << "Duplicate config key in schema: '" << i.name << "'"
                 << std::endl;
-      ceph_abort();
+      stone_abort();
     }
     schema.emplace(i.name, i);
   }
@@ -215,7 +215,7 @@ md_config_t::md_config_t(ConfigValues& values,
         // This is the compiled-in default that is failing its own option's
         // validation, so this is super-invalid and should never make it
         // past a pull request: crash out.
-        ceph_abort();
+        stone_abort();
       }
       if (val != *def_str) {
 	// if the validator normalizes the string into a different form than
@@ -245,7 +245,7 @@ void md_config_t::validate_schema()
       if (schema.count(see_also_key) == 0) {
         std::cerr << "Non-existent see-also key '" << see_also_key
                   << "' on option '" << opt.name << "'" << std::endl;
-        ceph_abort();
+        stone_abort();
       }
     }
   }
@@ -254,7 +254,7 @@ void md_config_t::validate_schema()
     if (schema.count(i.first) == 0) {
       std::cerr << "Schema is missing legacy field '" << i.first << "'"
                 << std::endl;
-      ceph_abort();
+      stone_abort();
     }
   }
 }
@@ -273,13 +273,13 @@ void md_config_t::set_val_default(ConfigValues& values,
 				  const string_view name, const std::string& val)
 {
   const Option *o = find_option(name);
-  ceph_assert(o);
+  stone_assert(o);
   string err;
   int r = _set_val(values, tracker, val, *o, CONF_DEFAULT, &err);
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
 }
 
-int md_config_t::set_mon_vals(CephContext *cct,
+int md_config_t::set_mon_vals(StoneContext *cct,
     ConfigValues& values,
     const ConfigTracker& tracker,
     const map<string,string,less<>>& kv,
@@ -322,7 +322,7 @@ int md_config_t::set_mon_vals(CephContext *cct,
     } else if (r == ConfigValues::SET_HAVE_EFFECT) {
       ldout(cct,10) << __func__ << " " << i.first << " = " << i.second << dendl;
     } else {
-      ceph_abort();
+      stone_abort();
     }
   }
   values.for_each([&] (auto name, auto configs) {
@@ -430,13 +430,13 @@ md_config_t::get_conffile_paths(const ConfigValues& values,
 				int flags) const
 {
   if (!conf_files_str) {
-    const char *c = getenv("CEPH_CONF");
+    const char *c = getenv("STONE_CONF");
     if (c) {
       conf_files_str = c;
     } else {
       if (flags & CINIT_FLAG_NO_DEFAULT_CONFIG_FILE)
 	return {};
-      conf_files_str = CEPH_CONF_FILE_DEFAULT;
+      conf_files_str = STONE_CONF_FILE_DEFAULT;
     }
   }
 
@@ -466,12 +466,12 @@ std::string md_config_t::get_cluster_name(const char* conffile)
     } else {
       // If the configuration file does not follow $cluster.conf
       // convention, we do the last try and assign the cluster to
-      // 'ceph'.
-      return "ceph";
+      // 'stone'.
+      return "stone";
     }
   } else {
-    // set the cluster name to 'ceph' when configuration file is not specified.
-    return "ceph";
+    // set the cluster name to 'stone' when configuration file is not specified.
+    return "stone";
   }
 }
 
@@ -483,17 +483,17 @@ void md_config_t::parse_env(unsigned entity_type,
   if (safe_to_start_threads)
     return;
   if (!args_var) {
-    args_var = "CEPH_ARGS";
+    args_var = "STONE_ARGS";
   }
-  if (auto s = getenv("CEPH_KEYRING"); s) {
+  if (auto s = getenv("STONE_KEYRING"); s) {
     string err;
     _set_val(values, tracker, s, *find_option("keyring"), CONF_ENV, &err);
   }
-  if (auto dir = getenv("CEPH_LIB"); dir) {
+  if (auto dir = getenv("STONE_LIB"); dir) {
     for (auto name : { "erasure_code_dir", "plugin_dir", "osd_class_dir" }) {
     std::string err;
       const Option *o = find_option(name);
-      ceph_assert(o);
+      stone_assert(o);
       _set_val(values, tracker, dir, *o, CONF_ENV, &err);
     }
   }
@@ -526,7 +526,7 @@ void md_config_t::parse_env(unsigned entity_type,
   // Here are the documented best practices:
   //   https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/#motivation-for-cpu-requests-and-limits
   //
-  // When the operator creates the CephCluster CR, it will need to generate the
+  // When the operator creates the StoneCluster CR, it will need to generate the
   // desired requests and limits. As long as we are conservative in our choice
   // for requests and generous with the limits we should be in a good place to
   // get started.
@@ -535,9 +535,9 @@ void md_config_t::parse_env(unsigned entity_type,
   // these links.
   //
   // Rook docs on the resource requests and limits:
-  //   https://rook.io/docs/rook/v1.0/ceph-cluster-crd.html#cluster-wide-resources-configuration-settings
+  //   https://rook.io/docs/rook/v1.0/stone-cluster-crd.html#cluster-wide-resources-configuration-settings
   // Example CR settings:
-  //   https://github.com/rook/rook/blob/6d2ef936698593036185aabcb00d1d74f9c7bfc1/cluster/examples/kubernetes/ceph/cluster.yaml#L90
+  //   https://github.com/rook/rook/blob/6d2ef936698593036185aabcb00d1d74f9c7bfc1/cluster/examples/kubernetes/stone/cluster.yaml#L90
   //
   uint64_t pod_limit = 0, pod_request = 0;
   if (auto pod_lim = getenv("POD_MEMORY_LIMIT"); pod_lim) {
@@ -545,7 +545,7 @@ void md_config_t::parse_env(unsigned entity_type,
     uint64_t v = atoll(pod_lim);
     if (v) {
       switch (entity_type) {
-      case CEPH_ENTITY_TYPE_OSD:
+      case STONE_ENTITY_TYPE_OSD:
         {
 	  double cgroup_ratio = get_val<double>(
 	    values, "osd_memory_target_cgroup_limit_ratio");
@@ -576,7 +576,7 @@ void md_config_t::parse_env(unsigned entity_type,
   if (pod_request) {
     string err;
     switch (entity_type) {
-    case CEPH_ENTITY_TYPE_OSD:
+    case STONE_ENTITY_TYPE_OSD:
       _set_val(values, tracker, stringify(pod_request),
 	       *find_option("osd_memory_target"),
 	       CONF_ENV, &err);
@@ -650,31 +650,31 @@ int md_config_t::parse_argv(ConfigValues& values,
   std::string val;
   for (std::vector<const char*>::iterator i = args.begin(); i != args.end(); ) {
     if (strcmp(*i, "--") == 0) {
-      /* Normally we would use ceph_argparse_double_dash. However, in this
+      /* Normally we would use stone_argparse_double_dash. However, in this
        * function we *don't* want to remove the double dash, because later
        * argument parses will still need to see it. */
       break;
     }
-    else if (ceph_argparse_flag(args, i, "--show_conf", (char*)NULL)) {
+    else if (stone_argparse_flag(args, i, "--show_conf", (char*)NULL)) {
       cerr << cf << std::endl;
       _exit(0);
     }
-    else if (ceph_argparse_flag(args, i, "--show_config", (char*)NULL)) {
+    else if (stone_argparse_flag(args, i, "--show_config", (char*)NULL)) {
       do_show_config = true;
     }
-    else if (ceph_argparse_witharg(args, i, &val, "--show_config_value", (char*)NULL)) {
+    else if (stone_argparse_witharg(args, i, &val, "--show_config_value", (char*)NULL)) {
       do_show_config_value = val;
     }
-    else if (ceph_argparse_flag(args, i, "--no-mon-config", (char*)NULL)) {
+    else if (stone_argparse_flag(args, i, "--no-mon-config", (char*)NULL)) {
       values.no_mon_config = true;
     }
-    else if (ceph_argparse_flag(args, i, "--mon-config", (char*)NULL)) {
+    else if (stone_argparse_flag(args, i, "--mon-config", (char*)NULL)) {
       values.no_mon_config = false;
     }
-    else if (ceph_argparse_flag(args, i, "--foreground", "-f", (char*)NULL)) {
+    else if (stone_argparse_flag(args, i, "--foreground", "-f", (char*)NULL)) {
       set_val_or_die(values, tracker, "daemonize", "false");
     }
-    else if (ceph_argparse_flag(args, i, "-d", (char*)NULL)) {
+    else if (stone_argparse_flag(args, i, "-d", (char*)NULL)) {
       set_val_or_die(values, tracker, "fuse_debug", "true");
       set_val_or_die(values, tracker, "daemonize", "false");
       set_val_or_die(values, tracker, "log_file", "");
@@ -685,16 +685,16 @@ int md_config_t::parse_argv(ConfigValues& values,
     // Some stuff that we wanted to give universal single-character options for
     // Careful: you can burn through the alphabet pretty quickly by adding
     // to this list.
-    else if (ceph_argparse_witharg(args, i, &val, "--monmap", "-M", (char*)NULL)) {
+    else if (stone_argparse_witharg(args, i, &val, "--monmap", "-M", (char*)NULL)) {
       set_val_or_die(values, tracker, "monmap", val.c_str());
     }
-    else if (ceph_argparse_witharg(args, i, &val, "--mon_host", "-m", (char*)NULL)) {
+    else if (stone_argparse_witharg(args, i, &val, "--mon_host", "-m", (char*)NULL)) {
       set_val_or_die(values, tracker, "mon_host", val.c_str());
     }
-    else if (ceph_argparse_witharg(args, i, &val, "--bind", (char*)NULL)) {
+    else if (stone_argparse_witharg(args, i, &val, "--bind", (char*)NULL)) {
       set_val_or_die(values, tracker, "public_addr", val.c_str());
     }
-    else if (ceph_argparse_witharg(args, i, &val, "--keyfile", "-K", (char*)NULL)) {
+    else if (stone_argparse_witharg(args, i, &val, "--keyfile", "-K", (char*)NULL)) {
       bufferlist bl;
       string err;
       int r;
@@ -708,10 +708,10 @@ int md_config_t::parse_argv(ConfigValues& values,
 	set_val_or_die(values, tracker, "key", k.c_str());
       }
     }
-    else if (ceph_argparse_witharg(args, i, &val, "--keyring", "-k", (char*)NULL)) {
+    else if (stone_argparse_witharg(args, i, &val, "--keyring", "-k", (char*)NULL)) {
       set_val_or_die(values, tracker, "keyring", val.c_str());
     }
-    else if (ceph_argparse_witharg(args, i, &val, "--client_mountpoint", "-r", (char*)NULL)) {
+    else if (stone_argparse_witharg(args, i, &val, "--client_mountpoint", "-r", (char*)NULL)) {
       set_val_or_die(values, tracker, "client_mountpoint", val.c_str());
     }
     else {
@@ -773,7 +773,7 @@ int md_config_t::parse_option(ConfigValues& values,
     std::string as_option("--");
     as_option += opt.name;
     option_name = opt.name;
-    if (ceph_argparse_witharg(
+    if (stone_argparse_witharg(
 	  args, i, &val, err,
 	  string(string("--default-") + opt.name).c_str(), (char*)NULL)) {
       if (!err.str().empty()) {
@@ -785,7 +785,7 @@ int md_config_t::parse_option(ConfigValues& values,
       break;
     } else if (opt.type == Option::TYPE_BOOL) {
       int res;
-      if (ceph_argparse_binary_flag(args, i, &res, oss, as_option.c_str(),
+      if (stone_argparse_binary_flag(args, i, &res, oss, as_option.c_str(),
 				    (char*)NULL)) {
 	if (res == 0)
 	  ret = _set_val(values, tracker, "false", opt, level, &error_message);
@@ -797,12 +797,12 @@ int md_config_t::parse_option(ConfigValues& values,
       } else {
 	std::string no("--no-");
 	no += opt.name;
-	if (ceph_argparse_flag(args, i, no.c_str(), (char*)NULL)) {
+	if (stone_argparse_flag(args, i, no.c_str(), (char*)NULL)) {
 	  ret = _set_val(values, tracker, "false", opt, level, &error_message);
 	  break;
 	}
       }
-    } else if (ceph_argparse_witharg(args, i, &val, err,
+    } else if (stone_argparse_witharg(args, i, &val, err,
                                      as_option.c_str(), (char*)NULL)) {
       if (!err.str().empty()) {
         error_message = err.str();
@@ -816,7 +816,7 @@ int md_config_t::parse_option(ConfigValues& values,
   }
 
   if (ret < 0 || !error_message.empty()) {
-    ceph_assert(!option_name.empty());
+    stone_assert(!option_name.empty());
     if (oss) {
       *oss << "Parse error setting " << option_name << " to '"
            << val << "' using injectargs";
@@ -908,7 +908,7 @@ void md_config_t::set_val_or_die(ConfigValues& values,
   if (ret != 0) {
     std::cerr << "set_val_or_die(" << key << "): " << err.str();
   }
-  ceph_assert(ret == 0);
+  stone_assert(ret == 0);
 }
 
 int md_config_t::set_val(ConfigValues& values,
@@ -1140,7 +1140,7 @@ bool md_config_t::finalize_reexpand_meta(ConfigValues& values,
     // map, because the options may have already been expanded with old
     // meta.
     const auto &opt_iter = schema.find(name);
-    ceph_assert(opt_iter != schema.end());
+    stone_assert(opt_iter != schema.end());
     const Option &opt = opt_iter->second;
     _refresh(values, opt);
   }
@@ -1177,7 +1177,7 @@ Option::value_t md_config_t::_expand_meta(
   string out;
   decltype(pos) last_pos = 0;
   while (pos != std::string::npos) {
-    ceph_assert((*str)[pos] == '$');
+    stone_assert((*str)[pos] == '$');
     if (pos > last_pos) {
       out += str->substr(last_pos, pos - last_pos);
     }
@@ -1218,7 +1218,7 @@ Option::value_t md_config_t::_expand_meta(
 	out += values.name.to_cstr();
       } else if (var == "host") {
 	if (values.host == "") {
-	  out += ceph_get_short_hostname();
+	  out += stone_get_short_hostname();
 	} else {
 	  out += values.host;
 	}
@@ -1396,7 +1396,7 @@ int md_config_t::_set_val(
   std::string *error_message)
 {
   Option::value_t new_value;
-  ceph_assert(error_message);
+  stone_assert(error_message);
   int r = opt.parse_value(raw_val, &new_value, error_message);
   if (r < 0) {
     return r;
@@ -1541,15 +1541,15 @@ void md_config_t::update_legacy_val(ConfigValues& values,
 static void dump(Formatter *f, int level, Option::value_t in)
 {
   if (const bool *v = boost::get<const bool>(&in)) {
-    f->dump_bool(ceph_conf_level_name(level), *v);
+    f->dump_bool(stone_conf_level_name(level), *v);
   } else if (const int64_t *v = boost::get<const int64_t>(&in)) {
-    f->dump_int(ceph_conf_level_name(level), *v);
+    f->dump_int(stone_conf_level_name(level), *v);
   } else if (const uint64_t *v = boost::get<const uint64_t>(&in)) {
-    f->dump_unsigned(ceph_conf_level_name(level), *v);
+    f->dump_unsigned(stone_conf_level_name(level), *v);
   } else if (const double *v = boost::get<const double>(&in)) {
-    f->dump_float(ceph_conf_level_name(level), *v);
+    f->dump_float(stone_conf_level_name(level), *v);
   } else {
-    f->dump_stream(ceph_conf_level_name(level)) << Option::to_str(in);
+    f->dump_stream(stone_conf_level_name(level)) << Option::to_str(in);
   }
 }
 
@@ -1577,7 +1577,7 @@ void md_config_t::diff(
   });
 }
 
-void md_config_t::complain_about_parse_error(CephContext *cct)
+void md_config_t::complain_about_parse_error(StoneContext *cct)
 {
   ::complain_about_parse_error(cct, parse_error);
 }

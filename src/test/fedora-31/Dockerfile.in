@@ -20,7 +20,7 @@
 #
 FROM fedora:%%os_version%%
 COPY install-deps.sh /root/
-COPY ceph.spec.in /root/
+COPY stone.spec.in /root/
 # build dependencies
 RUN dnf install -y which gdb git sudo; cd /root ; ./install-deps.sh
 RUN if test %%USER%% != root ; then useradd -M --uid %%user_id%% %%USER%% && echo '%%USER%% ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers ; fi

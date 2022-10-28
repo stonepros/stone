@@ -9,11 +9,11 @@ namespace librbd {
 namespace deep_copy {
 namespace util {
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::deep_copy::util::" << __func__ << ": "
 
-void compute_snap_map(CephContext* cct,
+void compute_snap_map(StoneContext* cct,
                       librados::snap_t src_snap_id_start,
                       librados::snap_t src_snap_id_end,
                       const SnapIds& dst_snap_ids,
@@ -37,7 +37,7 @@ void compute_snap_map(CephContext* cct,
     }
 
     // we should only have the HEAD revision in the the last snap seq
-    ceph_assert(snap_ids.empty() || snap_ids[0] != CEPH_NOSNAP);
+    stone_assert(snap_ids.empty() || snap_ids[0] != STONE_NOSNAP);
     snap_ids.insert(snap_ids.begin(), it.second);
 
     if (it.first < src_snap_id_start) {

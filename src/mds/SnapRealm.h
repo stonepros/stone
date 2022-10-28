@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MDS_SNAPREALM_H
-#define CEPH_MDS_SNAPREALM_H
+#ifndef STONE_MDS_SNAPREALM_H
+#define STONE_MDS_SNAPREALM_H
 
 #include <string_view>
 
@@ -42,13 +42,13 @@ public:
   }
 
   void build_snap_set() const;
-  void get_snap_info(std::map<snapid_t, const SnapInfo*>& infomap, snapid_t first=0, snapid_t last=CEPH_NOSNAP);
+  void get_snap_info(std::map<snapid_t, const SnapInfo*>& infomap, snapid_t first=0, snapid_t last=STONE_NOSNAP);
 
   const ceph::buffer::list& get_snap_trace() const;
   void build_snap_trace() const;
 
   std::string_view get_snapname(snapid_t snapid, inodeno_t atino);
-  snapid_t resolve_snapname(std::string_view name, inodeno_t atino, snapid_t first=0, snapid_t last=CEPH_NOSNAP);
+  snapid_t resolve_snapname(std::string_view name, inodeno_t atino, snapid_t first=0, snapid_t last=STONE_NOSNAP);
 
   const std::set<snapid_t>& get_snaps() const;
   const SnapContext& get_snap_context() const;
@@ -81,7 +81,7 @@ public:
     auto p = s.upper_bound(follows);
     if (p != s.end())
       return *p;
-    return CEPH_NOSNAP;
+    return STONE_NOSNAP;
   }
 
   bool has_snaps_in_range(snapid_t first, snapid_t last) {

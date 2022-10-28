@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "librbd/journal/Types.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/stringify.h"
 #include "include/types.h"
 #include "common/Formatter.h"
@@ -10,8 +10,8 @@
 namespace librbd {
 namespace journal {
 
-using ceph::encode;
-using ceph::decode;
+using stone::encode;
+using stone::decode;
 
 namespace {
 
@@ -65,14 +65,14 @@ public:
     t.dump(m_formatter);
   }
 private:
-  ceph::Formatter *m_formatter;
+  stone::Formatter *m_formatter;
   std::string m_key;
 };
 
 } // anonymous namespace
 
 void AioDiscardEvent::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(offset, bl);
   encode(length, bl);
   bool skip_partial_discard = (discard_granularity_bytes > 0);
@@ -81,7 +81,7 @@ void AioDiscardEvent::encode(bufferlist& bl) const {
 }
 
 void AioDiscardEvent::decode(__u8 version, bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(offset, it);
   decode(length, it);
 
@@ -114,14 +114,14 @@ uint32_t AioWriteEvent::get_fixed_size() {
 }
 
 void AioWriteEvent::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(offset, bl);
   encode(length, bl);
   encode(data, bl);
 }
 
 void AioWriteEvent::decode(__u8 version, bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(offset, it);
   decode(length, it);
   decode(data, it);
@@ -133,14 +133,14 @@ void AioWriteEvent::dump(Formatter *f) const {
 }
 
 void AioWriteSameEvent::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(offset, bl);
   encode(length, bl);
   encode(data, bl);
 }
 
 void AioWriteSameEvent::decode(__u8 version, bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(offset, it);
   decode(length, it);
   decode(data, it);
@@ -156,7 +156,7 @@ uint32_t AioCompareAndWriteEvent::get_fixed_size() {
 }
 
 void AioCompareAndWriteEvent::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(offset, bl);
   encode(length, bl);
   encode(cmp_data, bl);
@@ -164,7 +164,7 @@ void AioCompareAndWriteEvent::encode(bufferlist& bl) const {
 }
 
 void AioCompareAndWriteEvent::decode(__u8 version, bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(offset, it);
   decode(length, it);
   decode(cmp_data, it);
@@ -186,12 +186,12 @@ void AioFlushEvent::dump(Formatter *f) const {
 }
 
 void OpEventBase::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(op_tid, bl);
 }
 
 void OpEventBase::decode(__u8 version, bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(op_tid, it);
 }
 
@@ -201,14 +201,14 @@ void OpEventBase::dump(Formatter *f) const {
 
 void OpFinishEvent::encode(bufferlist& bl) const {
   OpEventBase::encode(bl);
-  using ceph::encode;
+  using stone::encode;
   encode(op_tid, bl);
   encode(r, bl);
 }
 
 void OpFinishEvent::decode(__u8 version, bufferlist::const_iterator& it) {
   OpEventBase::decode(version, it);
-  using ceph::decode;
+  using stone::decode;
   decode(op_tid, it);
   decode(r, it);
 }
@@ -220,16 +220,16 @@ void OpFinishEvent::dump(Formatter *f) const {
 }
 
 void SnapEventBase::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   OpEventBase::encode(bl);
   encode(snap_name, bl);
   encode(snap_namespace, bl);
 }
 
 void SnapEventBase::decode(__u8 version, bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   OpEventBase::decode(version, it);
-  using ceph::decode;
+  using stone::decode;
   decode(snap_name, it);
   if (version >= 4) {
     decode(snap_namespace, it);
@@ -247,7 +247,7 @@ void SnapCreateEvent::encode(bufferlist &bl) const {
 }
 
 void SnapCreateEvent::decode(__u8 version, bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   SnapEventBase::decode(version, it);
   if (version == 3) {
     decode(snap_namespace, it);
@@ -260,13 +260,13 @@ void SnapCreateEvent::dump(Formatter *f) const {
 
 void SnapLimitEvent::encode(bufferlist &bl) const {
   OpEventBase::encode(bl);
-  using ceph::encode;
+  using stone::encode;
   encode(limit, bl);
 }
 
 void SnapLimitEvent::decode(__u8 version, bufferlist::const_iterator& it) {
   OpEventBase::decode(version, it);
-  using ceph::decode;
+  using stone::decode;
   decode(limit, it);
 }
 
@@ -277,14 +277,14 @@ void SnapLimitEvent::dump(Formatter *f) const {
 
 void SnapRenameEvent::encode(bufferlist& bl) const {
   OpEventBase::encode(bl);
-  using ceph::encode;
+  using stone::encode;
   encode(dst_snap_name, bl);
   encode(snap_id, bl);
   encode(src_snap_name, bl);
 }
 
 void SnapRenameEvent::decode(__u8 version, bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   OpEventBase::decode(version, it);
   decode(dst_snap_name, it);
   decode(snap_id, it);
@@ -302,13 +302,13 @@ void SnapRenameEvent::dump(Formatter *f) const {
 
 void RenameEvent::encode(bufferlist& bl) const {
   OpEventBase::encode(bl);
-  using ceph::encode;
+  using stone::encode;
   encode(image_name, bl);
 }
 
 void RenameEvent::decode(__u8 version, bufferlist::const_iterator& it) {
   OpEventBase::decode(version, it);
-  using ceph::decode;
+  using stone::decode;
   decode(image_name, it);
 }
 
@@ -319,13 +319,13 @@ void RenameEvent::dump(Formatter *f) const {
 
 void ResizeEvent::encode(bufferlist& bl) const {
   OpEventBase::encode(bl);
-  using ceph::encode;
+  using stone::encode;
   encode(size, bl);
 }
 
 void ResizeEvent::decode(__u8 version, bufferlist::const_iterator& it) {
   OpEventBase::decode(version, it);
-  using ceph::decode;
+  using stone::decode;
   decode(size, it);
 }
 
@@ -345,14 +345,14 @@ void DemotePromoteEvent::dump(Formatter *f) const {
 
 void UpdateFeaturesEvent::encode(bufferlist& bl) const {
   OpEventBase::encode(bl);
-  using ceph::encode;
+  using stone::encode;
   encode(features, bl);
   encode(enabled, bl);
 }
 
 void UpdateFeaturesEvent::decode(__u8 version, bufferlist::const_iterator& it) {
   OpEventBase::decode(version, it);
-  using ceph::decode;
+  using stone::decode;
   decode(features, it);
   decode(enabled, it);
 }
@@ -365,14 +365,14 @@ void UpdateFeaturesEvent::dump(Formatter *f) const {
 
 void MetadataSetEvent::encode(bufferlist& bl) const {
   OpEventBase::encode(bl);
-  using ceph::encode;
+  using stone::encode;
   encode(key, bl);
   encode(value, bl);
 }
 
 void MetadataSetEvent::decode(__u8 version, bufferlist::const_iterator& it) {
   OpEventBase::decode(version, it);
-  using ceph::decode;
+  using stone::decode;
   decode(key, it);
   decode(value, it);
 }
@@ -385,13 +385,13 @@ void MetadataSetEvent::dump(Formatter *f) const {
 
 void MetadataRemoveEvent::encode(bufferlist& bl) const {
   OpEventBase::encode(bl);
-  using ceph::encode;
+  using stone::encode;
   encode(key, bl);
 }
 
 void MetadataRemoveEvent::decode(__u8 version, bufferlist::const_iterator& it) {
   OpEventBase::decode(version, it);
-  using ceph::decode;
+  using stone::decode;
   decode(key, it);
 }
 
@@ -401,7 +401,7 @@ void MetadataRemoveEvent::dump(Formatter *f) const {
 }
 
 void UnknownEvent::encode(bufferlist& bl) const {
-  ceph_abort();
+  stone_abort();
 }
 
 void UnknownEvent::decode(__u8 version, bufferlist::const_iterator& it) {
@@ -573,13 +573,13 @@ void EventEntry::generate_test_instances(std::list<EventEntry *> &o) {
 // Journal Client
 
 void ImageClientMeta::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(tag_class, bl);
   encode(resync_requested, bl);
 }
 
 void ImageClientMeta::decode(__u8 version, bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(tag_class, it);
   decode(resync_requested, it);
 }
@@ -590,7 +590,7 @@ void ImageClientMeta::dump(Formatter *f) const {
 }
 
 void MirrorPeerSyncPoint::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(snap_name, bl);
   encode(from_snap_name, bl);
   encode(object_number, bl);
@@ -598,7 +598,7 @@ void MirrorPeerSyncPoint::encode(bufferlist& bl) const {
 }
 
 void MirrorPeerSyncPoint::decode(__u8 version, bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(snap_name, it);
   decode(from_snap_name, it);
   decode(object_number, it);
@@ -617,7 +617,7 @@ void MirrorPeerSyncPoint::dump(Formatter *f) const {
 }
 
 void MirrorPeerClientMeta::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(image_id, bl);
   encode(static_cast<uint32_t>(state), bl);
   encode(sync_object_count, bl);
@@ -629,7 +629,7 @@ void MirrorPeerClientMeta::encode(bufferlist& bl) const {
 }
 
 void MirrorPeerClientMeta::decode(__u8 version, bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(image_id, it);
 
   uint32_t decode_state;
@@ -679,7 +679,7 @@ void CliClientMeta::dump(Formatter *f) const {
 }
 
 void UnknownClientMeta::encode(bufferlist& bl) const {
-  ceph_abort();
+  stone_abort();
 }
 
 void UnknownClientMeta::decode(__u8 version, bufferlist::const_iterator& it) {
@@ -741,7 +741,7 @@ void ClientData::generate_test_instances(std::list<ClientData *> &o) {
 // Journal Tag
 
 void TagPredecessor::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(mirror_uuid, bl);
   encode(commit_valid, bl);
   encode(tag_tid, bl);
@@ -749,7 +749,7 @@ void TagPredecessor::encode(bufferlist& bl) const {
 }
 
 void TagPredecessor::decode(bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(mirror_uuid, it);
   decode(commit_valid, it);
   decode(tag_tid, it);
@@ -764,13 +764,13 @@ void TagPredecessor::dump(Formatter *f) const {
 }
 
 void TagData::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(mirror_uuid, bl);
   predecessor.encode(bl);
 }
 
 void TagData::decode(bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   decode(mirror_uuid, it);
   predecessor.decode(it);
 }

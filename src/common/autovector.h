@@ -3,8 +3,8 @@
 // Copyright (c) 2011-2018, Facebook, Inc.  All rights reserved.
 // This source code is licensed under both the GPLv2 and Apache 2.0 License
 
-#ifndef CEPH_AUTOVECTOR_H
-#define CEPH_AUTOVECTOR_H
+#ifndef STONE_AUTOVECTOR_H
+#define STONE_AUTOVECTOR_H
 
 #include <algorithm>
 #include <cassert>
@@ -333,4 +333,4 @@ autovector<T, kSize>& autovector<T, kSize>::assign(const autovector& other) {
   return *this;
 }
 }  // namespace ceph 
-#endif // CEPH_AUTOVECTOR_H
+#endif // STONE_AUTOVECTOR_H

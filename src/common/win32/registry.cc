@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 SUSE LINUX GmbH
  *
@@ -11,13 +11,13 @@
  */
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_
+#define dout_subsys stone_subsys_
 
 #include "common/debug.h"
 #include "common/errno.h"
 #include "common/win32/registry.h"
 
-RegistryKey::RegistryKey(CephContext *cct_, HKEY hRootKey, LPCTSTR strKey,
+RegistryKey::RegistryKey(StoneContext *cct_, HKEY hRootKey, LPCTSTR strKey,
                          bool create_value): cct(cct_)
 {
   DWORD status = RegOpenKeyEx(hRootKey, strKey, 0, KEY_ALL_ACCESS, &hKey);
@@ -54,7 +54,7 @@ RegistryKey::~RegistryKey() {
   }
 }
 
-int RegistryKey::remove(CephContext *cct_, HKEY hRootKey, LPCTSTR strKey)
+int RegistryKey::remove(StoneContext *cct_, HKEY hRootKey, LPCTSTR strKey)
 {
   DWORD status = RegDeleteKeyEx(hRootKey, strKey, KEY_WOW64_64KEY, 0);
 

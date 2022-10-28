@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 Mirantis, Inc.
  *
@@ -26,7 +26,7 @@ class CryptoPlugin : public ceph::Plugin {
 
 public:
   CryptoAccelRef cryptoaccel;
-  explicit CryptoPlugin(CephContext* cct) : Plugin(cct)
+  explicit CryptoPlugin(StoneeContext* cct) : Plugin(cct)
   {}
   ~CryptoPlugin()
   {}

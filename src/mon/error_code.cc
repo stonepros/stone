@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -26,7 +26,7 @@
 
 namespace bs = boost::system;
 
-class mon_error_category : public ceph::converting_category {
+class mon_error_category : public stone::converting_category {
 public:
   mon_error_category(){}
   const char* name() const noexcept override;
@@ -36,7 +36,7 @@ public:
     override;
   bool equivalent(int ev, const bs::error_condition& c) const
     noexcept override;
-  using ceph::converting_category::equivalent;
+  using stone::converting_category::equivalent;
   int from_code(int ev) const noexcept override;
 };
 

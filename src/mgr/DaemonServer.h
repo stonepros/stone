@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -118,7 +118,7 @@ struct offline_pg_report {
 
 
 /**
- * Server used in ceph-mgr to communicate with Ceph daemons like
+ * Server used in ceph-mgr to communicate with Stonee daemons like
  * MDSs and OSDs.
  */
 class DaemonServer : public Dispatcher, public md_config_obs_t

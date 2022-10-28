@@ -30,7 +30,7 @@
 
 #include <numeric>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 struct rgw_http_status_code {
   int code;
@@ -177,7 +177,7 @@ string uppercase_underscore_http_attr(const string& orig)
 static set<string> hostnames_set;
 static set<string> hostnames_s3website_set;
 
-void rgw_rest_init(CephContext *cct, const RGWZoneGroup& zone_group)
+void rgw_rest_init(StoneContext *cct, const RGWZoneGroup& zone_group)
 {
   for (const auto& rgw2http : base_rgw_to_http_attrs)  {
     rgw_to_http_attrs[rgw2http.rgw_attr] = rgw2http.http_attr;
@@ -344,7 +344,7 @@ void dump_header(struct req_state* const s,
 
 void dump_header(struct req_state* const s,
                  const std::string_view& name,
-                 ceph::buffer::list& bl)
+                 stone::buffer::list& bl)
 {
   return dump_header(s, name, rgw_sanitized_hdrval(bl));
 }
@@ -764,7 +764,7 @@ int dump_body(struct req_state* const s,
   }
 }
 
-int dump_body(struct req_state* const s, /* const */ ceph::buffer::list& bl)
+int dump_body(struct req_state* const s, /* const */ stone::buffer::list& bl)
 {
   return dump_body(s, bl.c_str(), bl.length());
 }
@@ -1131,7 +1131,7 @@ static bool is_crlf(const char *s)
  * find the index of the boundary, if exists, or optionally the next end of line
  * also returns how many bytes to skip
  */
-static int index_of(ceph::bufferlist& bl,
+static int index_of(stone::bufferlist& bl,
                     uint64_t max_len,
                     const std::string& str,
                     const bool check_crlf,
@@ -1180,7 +1180,7 @@ static int index_of(ceph::bufferlist& bl,
   return -1;
 }
 
-int RGWPostObj_ObjStore::read_with_boundary(ceph::bufferlist& bl,
+int RGWPostObj_ObjStore::read_with_boundary(stone::bufferlist& bl,
                                             uint64_t max,
                                             const bool check_crlf,
                                             bool& reached_boundary,
@@ -1214,7 +1214,7 @@ int RGWPostObj_ObjStore::read_with_boundary(ceph::bufferlist& bl,
 
   bl.substr_of(in_data, 0, max);
 
-  ceph::bufferlist new_read_data;
+  stone::bufferlist new_read_data;
 
   /*
    * now we need to skip boundary for next time, also skip any crlf, or
@@ -1252,7 +1252,7 @@ int RGWPostObj_ObjStore::read_with_boundary(ceph::bufferlist& bl,
   return 0;
 }
 
-int RGWPostObj_ObjStore::read_line(ceph::bufferlist& bl,
+int RGWPostObj_ObjStore::read_line(stone::bufferlist& bl,
                                    const uint64_t max,
                                    bool& reached_boundary,
                                    bool& done)
@@ -1260,7 +1260,7 @@ int RGWPostObj_ObjStore::read_line(ceph::bufferlist& bl,
   return read_with_boundary(bl, max, true, reached_boundary, done);
 }
 
-int RGWPostObj_ObjStore::read_data(ceph::bufferlist& bl,
+int RGWPostObj_ObjStore::read_data(stone::bufferlist& bl,
                                    const uint64_t max,
                                    bool& reached_boundary,
                                    bool& done)
@@ -1339,7 +1339,7 @@ bool RGWPostObj_ObjStore::part_str(parts_collection_t& parts,
     return false;
   }
 
-  ceph::bufferlist& data = iter->second.data;
+  stone::bufferlist& data = iter->second.data;
   std::string str = string(data.c_str(), data.length());
   *val = rgw_trim_whitespace(str);
   return true;
@@ -1360,7 +1360,7 @@ std::string RGWPostObj_ObjStore::get_part_str(parts_collection_t& parts,
 
 bool RGWPostObj_ObjStore::part_bl(parts_collection_t& parts,
                                   const std::string& name,
-                                  ceph::bufferlist* pbl)
+                                  stone::bufferlist* pbl)
 {
   const auto iter = parts.find(name);
   if (std::end(parts) == iter) {
@@ -1409,7 +1409,7 @@ int RGWPostObj_ObjStore::get_params(optional_yield y)
     return -EINVAL;
   }
 
-  if (s->cct->_conf->subsys.should_gather<ceph_subsys_rgw, 20>()) {
+  if (s->cct->_conf->subsys.should_gather<stone_subsys_rgw, 20>()) {
     ldpp_dout(s, 20) << "request content_type_str="
 		      << req_content_type_str << dendl;
     ldpp_dout(s, 20) << "request content_type params:" << dendl;
@@ -1730,7 +1730,7 @@ int RGWHandler_REST::reallocate_formatter(struct req_state *s, int type)
 {
   if (s->format == type) {
     // do nothing, just reset
-    ceph_assert(s->formatter);
+    stone_assert(s->formatter);
     s->formatter->reset();
     return 0;
   }
@@ -2120,7 +2120,7 @@ int RGWREST::preprocess(struct req_state *s, rgw::io::BasicClient* cio)
     }
 
     // Handle A/CNAME records that point to the RGW storage, but do match the
-    // CNAME test above, per issue http://tracker.ceph.com/issues/15975
+    // CNAME test above, per issue http://tracker.stone.com/issues/15975
     // If BOTH domain & subdomain variables are empty, then none of the above
     // cases matched anything, and we should fall back to using the Host header
     // directly as the bucket name.

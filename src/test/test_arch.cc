@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
  *
@@ -27,8 +27,8 @@
 
 TEST(Arch, all)
 {
-  ceph_arch_probe();
-  EXPECT_TRUE(ceph_arch_probed);
+  stone_arch_probe();
+  EXPECT_TRUE(stone_arch_probed);
   
 #if (__arm__ || __aarch64__ || __x86_64__) && __linux__
   char flags[FLAGS_SIZE];
@@ -49,34 +49,34 @@ TEST(Arch, all)
 #if (__arm__ || __aarch64__)
 
   expected = (strstr(flags, " neon ") || strstr(flags, " asimd ")) ? 1 : 0;
-  EXPECT_EQ(expected, ceph_arch_neon);
+  EXPECT_EQ(expected, stone_arch_neon);
 
 #endif
 #if (__aarch64__)
 
   expected = strstr(flags, " crc32 ") ? 1 : 0;
-  EXPECT_EQ(expected, ceph_arch_aarch64_crc32);
+  EXPECT_EQ(expected, stone_arch_aarch64_crc32);
 
 #endif
 #if (__x86_64__)
 
   expected = strstr(flags, " pclmulqdq ") ? 1 : 0;
-  EXPECT_EQ(expected, ceph_arch_intel_pclmul);
+  EXPECT_EQ(expected, stone_arch_intel_pclmul);
 
   expected = strstr(flags, " sse4_2 ") ? 1 : 0;
-  EXPECT_EQ(expected, ceph_arch_intel_sse42);
+  EXPECT_EQ(expected, stone_arch_intel_sse42);
 
   expected = strstr(flags, " sse4_1 ") ? 1 : 0;
-  EXPECT_EQ(expected, ceph_arch_intel_sse41);
+  EXPECT_EQ(expected, stone_arch_intel_sse41);
 
   expected = (strstr(flags, " sse3 ") || strstr(flags, " ssse3 ") || strstr(flags, " pni ")) ? 1 : 0;
-  EXPECT_EQ(expected, ceph_arch_intel_sse3);
+  EXPECT_EQ(expected, stone_arch_intel_sse3);
 
   expected = strstr(flags, " ssse3 ") ? 1 : 0;
-  EXPECT_EQ(expected, ceph_arch_intel_ssse3);
+  EXPECT_EQ(expected, stone_arch_intel_ssse3);
 
   expected = strstr(flags, " sse2 ") ? 1 : 0;
-  EXPECT_EQ(expected, ceph_arch_intel_sse2);
+  EXPECT_EQ(expected, stone_arch_intel_sse2);
 
 #endif
 

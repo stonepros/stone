@@ -6,7 +6,7 @@ stress-tasks:
      - sequential:
        - ragweed:
            client.0:
-             default-branch: ceph-octopus
+             default-branch: stone-octopus
              rgw_server: client.0
              stages: prepare
        - print: "**** done rgw ragweed prepare 4-workload"

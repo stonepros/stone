@@ -1,5 +1,5 @@
-#ifndef CEPH_STAT_H
-#define CEPH_STAT_H
+#ifndef STONE_STAT_H
+#define STONE_STAT_H
 
 #include <acconfig.h>
 

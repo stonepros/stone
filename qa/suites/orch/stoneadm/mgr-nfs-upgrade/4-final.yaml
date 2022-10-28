@@ -1,0 +1,10 @@
+tasks:
+- vip.exec:
+    host.a:
+      - umount /mnt/foo
+- stoneadm.shell:
+    host.a:
+      - stone nfs cluster ls | grep foo
+      - stone nfs export ls foo --detailed
+      - rados -p .nfs --all ls -
+      - stone config get mgr mgr/stoneadm/migration_current | grep 5

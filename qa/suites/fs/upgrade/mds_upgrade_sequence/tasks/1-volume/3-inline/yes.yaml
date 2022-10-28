@@ -1,4 +1,4 @@
 tasks:
-- cephadm.shell:
+- stoneadm.shell:
     host.a:
-      - ceph fs set cephfs inline_data true --yes-i-really-really-mean-it
+      - stone fs set stonefs inline_data true --yes-i-really-really-mean-it

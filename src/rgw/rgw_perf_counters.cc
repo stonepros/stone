@@ -3,16 +3,16 @@
 
 #include "rgw_perf_counters.h"
 #include "common/perf_counters.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 PerfCounters *perfcounter = NULL;
 
-int rgw_perf_start(CephContext *cct)
+int rgw_perf_start(StoneContext *cct)
 {
   PerfCountersBuilder plb(cct, "rgw", l_rgw_first, l_rgw_last);
 
   // RGW emits comparatively few metrics, so let's be generous
-  // and mark them all USEFUL to get transmission to ceph-mgr by default.
+  // and mark them all USEFUL to get transmission to stone-mgr by default.
   plb.set_prio_default(PerfCountersBuilder::PRIO_USEFUL);
 
   plb.add_u64_counter(l_rgw_req, "req", "Requests");
@@ -65,9 +65,9 @@ int rgw_perf_start(CephContext *cct)
   return 0;
 }
 
-void rgw_perf_stop(CephContext *cct)
+void rgw_perf_stop(StoneContext *cct)
 {
-  ceph_assert(perfcounter);
+  stone_assert(perfcounter);
   cct->get_perfcounters_collection()->remove(perfcounter);
   delete perfcounter;
 }

@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 XSky <haomai@xsky.com>
  *
@@ -16,9 +16,9 @@
 #include "UserspaceEvent.h"
 
 #include "common/dout.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_dpdk
+#define dout_subsys stone_subsys_dpdk
 #undef dout_prefix
 #define dout_prefix *_dout << "dpdk "
 
@@ -34,7 +34,7 @@ int UserspaceEventManager::get_eventfd()
   }
 
   Tub<UserspaceFDImpl> &impl = fds[fd];
-  ceph_assert(!impl);
+  stone_assert(!impl);
   impl.construct();
   ldout(cct, 20) << __func__ << " fd=" << fd << dendl;
   return fd;
@@ -88,7 +88,7 @@ void UserspaceEventManager::close(int fd)
 
   if (impl->activating_mask) {
     if (waiting_fds[max_wait_idx] == fd) {
-      ceph_assert(impl->waiting_idx == max_wait_idx);
+      stone_assert(impl->waiting_idx == max_wait_idx);
       --max_wait_idx;
     }
     waiting_fds[impl->waiting_idx] = -1;
@@ -101,7 +101,7 @@ int UserspaceEventManager::poll(int *events, int *masks, int num_events, struct 
   int fd;
   uint32_t i = 0;
   int count = 0;
-  ceph_assert(num_events);
+  stone_assert(num_events);
   // leave zero slot for waiting_fds
   while (i < max_wait_idx) {
     fd = waiting_fds[++i];
@@ -110,9 +110,9 @@ int UserspaceEventManager::poll(int *events, int *masks, int num_events, struct 
 
     events[count] = fd;
     Tub<UserspaceFDImpl> &impl = fds[fd];
-    ceph_assert(impl);
+    stone_assert(impl);
     masks[count] = impl->listening_mask & impl->activating_mask;
-    ceph_assert(masks[count]);
+    stone_assert(masks[count]);
     ldout(cct, 20) << __func__ << " fd=" << fd << " mask=" << masks[count] << dendl;
     impl->activating_mask &= (~masks[count]);
     impl->waiting_idx = 0;

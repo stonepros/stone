@@ -15,7 +15,7 @@
 #include "common/dout.h"
 #include <chrono>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace rgw::notify {
 
@@ -58,7 +58,7 @@ class Manager : public DoutPrefixProvider {
   const uint32_t queues_update_retry_ms;
   const uint32_t queue_idle_sleep_us;
   const utime_t failover_time;
-  CephContext* const cct;
+  StoneContext* const cct;
   librados::IoCtx& rados_ioctx;
   static constexpr auto COOKIE_LEN = 16;
   const std::string lock_cookie;
@@ -71,7 +71,7 @@ class Manager : public DoutPrefixProvider {
  
   const std::string Q_LIST_OBJECT_NAME = "queues_list_object";
 
-  CephContext *get_cct() const override { return cct; }
+  StoneContext *get_cct() const override { return cct; }
   unsigned get_subsys() const override { return dout_subsys; }
   std::ostream& gen_prefix(std::ostream& out) const override { return out << "rgw notify: "; }
 
@@ -113,7 +113,7 @@ class Manager : public DoutPrefixProvider {
     return 0;
   }
 
-  using Clock = ceph::coarse_mono_clock;
+  using Clock = stone::coarse_mono_clock;
   using Executor = boost::asio::io_context::executor_type;
   using Timer = boost::asio::basic_waitable_timer<Clock,
         boost::asio::wait_traits<Clock>, Executor>;
@@ -151,7 +151,7 @@ class Manager : public DoutPrefixProvider {
       timer.expires_from_now(infinite_duration);
       boost::system::error_code ec; 
       timer.async_wait(yield[ec]);
-      ceph_assert(ec == boost::system::errc::operation_canceled);
+      stone_assert(ec == boost::system::errc::operation_canceled);
     }   
  
     token make_token() {    
@@ -199,7 +199,7 @@ class Manager : public DoutPrefixProvider {
   void cleanup_queue(const std::string& queue_name, yield_context yield) {
     while (true) {
       ldpp_dout(this, 20) << "INFO: trying to perform stale reservation cleanup for queue: " << queue_name << dendl;
-      const auto now = ceph::coarse_real_time::clock::now();
+      const auto now = stone::coarse_real_time::clock::now();
       const auto stale_time = now - std::chrono::seconds(stale_reservations_period_s);
       librados::ObjectWriteOperation op;
       op.assert_exists();
@@ -391,7 +391,7 @@ class Manager : public DoutPrefixProvider {
         std::chrono::milliseconds(queues_update_retry_ms) : std::chrono::milliseconds(queues_update_period_ms)) + 
         std::chrono::milliseconds(duration_jitter(rnd_gen));
       timer.expires_from_now(duration);
-      const auto tp = ceph::coarse_real_time::clock::to_time_t(ceph::coarse_real_time::clock::now() + duration);
+      const auto tp = stone::coarse_real_time::clock::to_time_t(stone::coarse_real_time::clock::now() + duration);
       ldpp_dout(this, 20) << "INFO: next queues processing will happen at: " << std::ctime(&tp)  << dendl;
       boost::system::error_code ec;
       timer.async_wait(yield[ec]);
@@ -471,7 +471,7 @@ public:
   }
 
   // ctor: start all threads
-  Manager(CephContext* _cct, uint32_t _max_queue_size, uint32_t _queues_update_period_ms, 
+  Manager(StoneContext* _cct, uint32_t _max_queue_size, uint32_t _queues_update_period_ms, 
           uint32_t _queues_update_retry_ms, uint32_t _queue_idle_sleep_us, u_int32_t failover_time_ms, 
           uint32_t _stale_reservations_period_s, uint32_t _reservations_cleanup_period_s,
           uint32_t _worker_count, rgw::sal::RGWRadosStore* store) : 
@@ -503,9 +503,9 @@ public:
             throw(err);
           }
         });
-        const auto rc = ceph_pthread_setname(workers.back().native_handle(),
+        const auto rc = stone_pthread_setname(workers.back().native_handle(),
           (WORKER_THREAD_NAME+std::to_string(worker_id)).c_str());
-        ceph_assert(rc == 0);
+        stone_assert(rc == 0);
       }
       ldpp_dout(this, 10) << "Started notification manager with: " << worker_count << " workers" << dendl;
     }
@@ -583,11 +583,11 @@ constexpr uint32_t WORKER_COUNT = 1;                 // 1 worker thread
 constexpr uint32_t STALE_RESERVATIONS_PERIOD_S = 120;   // cleanup reservations that are more than 2 minutes old
 constexpr uint32_t RESERVATIONS_CLEANUP_PERIOD_S = 30; // reservation cleanup every 30 seconds
 
-bool init(CephContext* cct, rgw::sal::RGWRadosStore* store, const DoutPrefixProvider *dpp) {
+bool init(StoneContext* cct, rgw::sal::RGWRadosStore* store, const DoutPrefixProvider *dpp) {
   if (s_manager) {
     return false;
   }
-  // TODO: take conf from CephContext
+  // TODO: take conf from StoneContext
   s_manager = new Manager(cct, MAX_QUEUE_SIZE, 
       Q_LIST_UPDATE_MSEC, Q_LIST_RETRY_MSEC, 
       IDLE_TIMEOUT_USEC, FAILOVER_TIME_MSEC, 
@@ -670,7 +670,7 @@ void tags_from_attributes(const req_state* s, rgw::sal::RGWObject* obj, KeyValue
 void populate_event_from_request(const reservation_t& res,
         rgw::sal::RGWObject* obj,
         uint64_t size,
-        const ceph::real_time& mtime, 
+        const stone::real_time& mtime, 
         const std::string& etag, 
         EventType event_type,
         rgw_pubsub_s3_event& event) {
@@ -814,7 +814,7 @@ int publish_reserve(const DoutPrefixProvider *dpp, EventType event_type,
 
 int publish_commit(rgw::sal::RGWObject* obj,
         uint64_t size,
-        const ceph::real_time& mtime, 
+        const stone::real_time& mtime, 
         const std::string& etag, 
         EventType event_type,
         reservation_t& res,

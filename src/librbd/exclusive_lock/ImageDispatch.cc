@@ -13,7 +13,7 @@
 #include "librbd/io/ImageDispatchSpec.h"
 #include "librbd/io/ImageDispatcherInterface.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::exclusive_lock::ImageDispatch: " \
                            << this << " " << __func__ << ": "
@@ -26,7 +26,7 @@ using util::create_context_callback;
 template <typename I>
 ImageDispatch<I>::ImageDispatch(I* image_ctx)
   : m_image_ctx(image_ctx),
-    m_lock(ceph::make_shared_mutex(
+    m_lock(stone::make_shared_mutex(
       util::unique_lock_name("librbd::exclusve_lock::ImageDispatch::m_lock",
                              this))) {
 }
@@ -219,7 +219,7 @@ bool ImageDispatch<I>::flush(
 
 template <typename I>
 bool ImageDispatch<I>::is_lock_required(bool read_op) const {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   return ((read_op && m_require_lock_on_read) ||
           (!read_op && m_require_lock_on_write));
 }
@@ -266,7 +266,7 @@ bool ImageDispatch<I>::needs_exclusive_lock(bool read_op, uint64_t tid,
       return false;
     }
 
-    ceph_assert(m_on_dispatches.empty() || retesting_lock);
+    stone_assert(m_on_dispatches.empty() || retesting_lock);
     m_on_dispatches.push_back(on_dispatched);
     locker.unlock();
 
@@ -286,7 +286,7 @@ void ImageDispatch<I>::handle_acquire_lock(int r) {
   ldout(cct, 5) << "r=" << r << dendl;
 
   std::unique_lock locker{m_lock};
-  ceph_assert(!m_on_dispatches.empty());
+  stone_assert(!m_on_dispatches.empty());
 
   Context* failed_dispatch = nullptr;
   Contexts on_dispatches;

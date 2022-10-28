@@ -3,10 +3,10 @@
 
 #include "cls/version/cls_version_types.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 
-void obj_version::dump(ceph::Formatter *f) const
+void obj_version::dump(stone::Formatter *f) const
 {
   f->dump_int("ver", ver);
   f->dump_string("tag", tag);

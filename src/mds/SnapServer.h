@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_SNAPSERVER_H
-#define CEPH_SNAPSERVER_H
+#ifndef STONE_SNAPSERVER_H
+#define STONE_SNAPSERVER_H
 
 #include "MDSTableServer.h"
 #include "snap.h"
@@ -43,7 +43,7 @@ public:
       reset();
       upgraded = true;
     }
-    if (snaprealm_v2_since == CEPH_NOSNAP) {
+    if (snaprealm_v2_since == STONE_NOSNAP) {
       // new snapshots will have new format snaprealms
       snaprealm_v2_since = last_snap + 1;
       upgraded = true;
@@ -109,7 +109,7 @@ protected:
     if (struct_v >= 5)
       decode(snaprealm_v2_since, bl);
     else
-      snaprealm_v2_since = CEPH_NOSNAP;
+      snaprealm_v2_since = STONE_NOSNAP;
 
     DECODE_FINISH(bl);
   }

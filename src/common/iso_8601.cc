@@ -6,9 +6,9 @@
 
 #include "iso_8601.h"
 #include "include/timegm.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-namespace ceph {
+namespace stone {
 using std::chrono::duration_cast;
 using std::chrono::nanoseconds;
 using std::chrono::seconds;
@@ -22,8 +22,8 @@ using boost::none;
 using boost::optional;
 using std::string_view;
 
-using ceph::real_clock;
-using ceph::real_time;
+using stone::real_clock;
+using stone::real_time;
 
 using sriter = string_view::const_iterator;
 
@@ -37,7 +37,7 @@ uint16_t digit(char c) {
 }
 
 optional<real_time> calculate(const tm& t, uint32_t n = 0) {
-  ceph_assert(n < 1000000000);
+  stone_assert(n < 1000000000);
   time_t tt = internal_timegm(&t);
   if (tt == static_cast<time_t>(-1)) {
     return none;
@@ -152,7 +152,7 @@ optional<real_time> from_iso_8601(const string_view s,
 
 string to_iso_8601(const real_time t,
 		   const iso_8601_format f) noexcept {
-  ceph_assert(f >= iso_8601_format::Y &&
+  stone_assert(f >= iso_8601_format::Y &&
 	      f <= iso_8601_format::YMDhmsn);
   stringstream out(std::ios_base::out);
 

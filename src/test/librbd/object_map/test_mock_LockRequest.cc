@@ -28,7 +28,7 @@ public:
 
   void expect_lock(MockImageCtx &mock_image_ctx, int r) {
     std::string oid(ObjectMap<>::object_map_name(mock_image_ctx.id,
-                                                 CEPH_NOSNAP));
+                                                 STONE_NOSNAP));
     EXPECT_CALL(get_mock_io_ctx(mock_image_ctx.md_ctx),
                 exec(oid, _, StrEq("lock"), StrEq("lock"), _, _, _, _))
                   .WillOnce(Return(r));
@@ -36,7 +36,7 @@ public:
 
   void expect_get_lock_info(MockImageCtx &mock_image_ctx, int r) {
     std::string oid(ObjectMap<>::object_map_name(mock_image_ctx.id,
-                                                 CEPH_NOSNAP));
+                                                 STONE_NOSNAP));
     auto &expect = EXPECT_CALL(get_mock_io_ctx(mock_image_ctx.md_ctx),
                                exec(oid, _, StrEq("lock"), StrEq("get_info"), _,
                                     _, _, _));
@@ -54,7 +54,7 @@ public:
          rados::cls::lock::locker_info_t()}};
 
       bufferlist bl;
-      encode(reply, bl, CEPH_FEATURES_SUPPORTED_DEFAULT);
+      encode(reply, bl, STONE_FEATURES_SUPPORTED_DEFAULT);
 
       std::string str(bl.c_str(), bl.length());
       expect.WillOnce(DoAll(WithArg<5>(CopyInBufferlist(str)), Return(r)));
@@ -63,7 +63,7 @@ public:
 
   void expect_break_lock(MockImageCtx &mock_image_ctx, int r) {
     std::string oid(ObjectMap<>::object_map_name(mock_image_ctx.id,
-                                                 CEPH_NOSNAP));
+                                                 STONE_NOSNAP));
     auto &expect = EXPECT_CALL(get_mock_io_ctx(mock_image_ctx.md_ctx),
                                exec(oid, _, StrEq("lock"), StrEq("break_lock"),
                                     _, _, _, _));

@@ -25,62 +25,62 @@ if(NOT WIN32)
 endif()
 
 if(WITH_TESTS)
-add_executable(ceph_scratchtool scratchtool.c)
-target_link_libraries(ceph_scratchtool librados global)
-install(TARGETS ceph_scratchtool DESTINATION bin)
+add_executable(stone_scratchtool scratchtool.c)
+target_link_libraries(stone_scratchtool librados global)
+install(TARGETS stone_scratchtool DESTINATION bin)
 
-add_executable(ceph_scratchtoolpp scratchtoolpp.cc)
-target_link_libraries(ceph_scratchtoolpp librados global)
-install(TARGETS ceph_scratchtoolpp DESTINATION bin)
+add_executable(stone_scratchtoolpp scratchtoolpp.cc)
+target_link_libraries(stone_scratchtoolpp librados global)
+install(TARGETS stone_scratchtoolpp DESTINATION bin)
 
-add_executable(ceph_radosacl radosacl.cc)
-target_link_libraries(ceph_radosacl librados global)
-install(TARGETS ceph_radosacl DESTINATION bin)
+add_executable(stone_radosacl radosacl.cc)
+target_link_libraries(stone_radosacl librados global)
+install(TARGETS stone_radosacl DESTINATION bin)
 
 install(PROGRAMS
-  ceph-monstore-update-crush.sh
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/ceph)
+  stone-monstore-update-crush.sh
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/stone)
 endif(WITH_TESTS)
 
-add_executable(ceph-osdomap-tool ceph_osdomap_tool.cc)
-target_link_libraries(ceph-osdomap-tool os global Boost::program_options)
-install(TARGETS ceph-osdomap-tool DESTINATION bin)
+add_executable(stone-osdomap-tool stone_osdomap_tool.cc)
+target_link_libraries(stone-osdomap-tool os global Boost::program_options)
+install(TARGETS stone-osdomap-tool DESTINATION bin)
 
-add_executable(ceph-monstore-tool
-  ceph_monstore_tool.cc
-  ../auth/cephx/CephxKeyServer.cc
+add_executable(stone-monstore-tool
+  stone_monstore_tool.cc
+  ../auth/stonex/StonexKeyServer.cc
   ../mgr/mgr_commands.cc)
-target_link_libraries(ceph-monstore-tool os global Boost::program_options)
-install(TARGETS ceph-monstore-tool DESTINATION bin)
+target_link_libraries(stone-monstore-tool os global Boost::program_options)
+install(TARGETS stone-monstore-tool DESTINATION bin)
 
-add_executable(ceph-objectstore-tool
-  ceph_objectstore_tool.cc
+add_executable(stone-objectstore-tool
+  stone_objectstore_tool.cc
   rebuild_mondb.cc
   RadosDump.cc)
-target_link_libraries(ceph-objectstore-tool osd os global Boost::program_options ${CMAKE_DL_LIBS})
+target_link_libraries(stone-objectstore-tool osd os global Boost::program_options ${CMAKE_DL_LIBS})
 if(WITH_FUSE)
-  target_link_libraries(ceph-objectstore-tool FUSE::FUSE)
+  target_link_libraries(stone-objectstore-tool FUSE::FUSE)
 endif(WITH_FUSE)
-install(TARGETS ceph-objectstore-tool DESTINATION bin)
+install(TARGETS stone-objectstore-tool DESTINATION bin)
 
-if(WITH_LIBCEPHFS)
+if(WITH_LIBSTONEFS)
 if(WITH_TESTS)
-  add_executable(ceph-client-debug ceph-client-debug.cc)
-  target_link_libraries(ceph-client-debug cephfs global client)
-  install(TARGETS ceph-client-debug DESTINATION bin)
+  add_executable(stone-client-debug stone-client-debug.cc)
+  target_link_libraries(stone-client-debug stonefs global client)
+  install(TARGETS stone-client-debug DESTINATION bin)
 endif(WITH_TESTS)
-endif(WITH_LIBCEPHFS)
+endif(WITH_LIBSTONEFS)
 
-add_executable(ceph-kvstore-tool
+add_executable(stone-kvstore-tool
   kvstore_tool.cc
-  ceph_kvstore_tool.cc)
-target_link_libraries(ceph-kvstore-tool os global)
-install(TARGETS ceph-kvstore-tool DESTINATION bin)
+  stone_kvstore_tool.cc)
+target_link_libraries(stone-kvstore-tool os global)
+install(TARGETS stone-kvstore-tool DESTINATION bin)
 
-set(ceph_conf_srcs ceph_conf.cc)
-add_executable(ceph-conf ${ceph_conf_srcs})
-target_link_libraries(ceph-conf global)
-install(TARGETS ceph-conf DESTINATION bin)
+set(stone_conf_srcs stone_conf.cc)
+add_executable(stone-conf ${stone_conf_srcs})
+target_link_libraries(stone-conf global)
+install(TARGETS stone-conf DESTINATION bin)
 
 set(crushtool_srcs crushtool.cc)
 add_executable(crushtool ${crushtool_srcs})
@@ -97,40 +97,40 @@ add_executable(osdmaptool ${osdomaptool_srcs})
 target_link_libraries(osdmaptool global)
 install(TARGETS osdmaptool DESTINATION bin)
 
-set(ceph-diff-sorted_srcs ceph-diff-sorted.cc)
-add_executable(ceph-diff-sorted ${ceph-diff-sorted_srcs})
-set_target_properties(ceph-diff-sorted PROPERTIES
+set(stone-diff-sorted_srcs stone-diff-sorted.cc)
+add_executable(stone-diff-sorted ${stone-diff-sorted_srcs})
+set_target_properties(stone-diff-sorted PROPERTIES
   SKIP_RPATH TRUE
   INSTALL_RPATH "")
-install(TARGETS ceph-diff-sorted DESTINATION bin)
+install(TARGETS stone-diff-sorted DESTINATION bin)
 
 if(WITH_TESTS)
-set(ceph_psim_srcs psim.cc)
-add_executable(ceph_psim ${ceph_psim_srcs})
-target_link_libraries(ceph_psim global)
-install(TARGETS ceph_psim DESTINATION bin)
+set(stone_psim_srcs psim.cc)
+add_executable(stone_psim ${stone_psim_srcs})
+target_link_libraries(stone_psim global)
+install(TARGETS stone_psim DESTINATION bin)
 endif(WITH_TESTS)
 
-set(ceph_authtool_srcs ceph_authtool.cc)
-add_executable(ceph-authtool ${ceph_authtool_srcs})
-target_link_libraries(ceph-authtool global ${EXTRALIBS} ${CRYPTO_LIBS})
-install(TARGETS ceph-authtool DESTINATION bin)
+set(stone_authtool_srcs stone_authtool.cc)
+add_executable(stone-authtool ${stone_authtool_srcs})
+target_link_libraries(stone-authtool global ${EXTRALIBS} ${CRYPTO_LIBS})
+install(TARGETS stone-authtool DESTINATION bin)
 
 if(WITH_TESTS)
-set(ceph_dedup_tool_srcs ceph_dedup_tool.cc)
-add_executable(ceph-dedup-tool ${ceph_dedup_tool_srcs})
-target_link_libraries(ceph-dedup-tool
+set(stone_dedup_tool_srcs stone_dedup_tool.cc)
+add_executable(stone-dedup-tool ${stone_dedup_tool_srcs})
+target_link_libraries(stone-dedup-tool
   librados
   global
   cls_cas_client
   cls_cas_internal)
-install(TARGETS ceph-dedup-tool DESTINATION bin)
+install(TARGETS stone-dedup-tool DESTINATION bin)
 endif(WITH_TESTS)
 
-if(WITH_CEPHFS)
-  add_subdirectory(cephfs)
-  add_subdirectory(cephfs_mirror)
-endif(WITH_CEPHFS)
+if(WITH_STONEFS)
+  add_subdirectory(stonefs)
+  add_subdirectory(stonefs_mirror)
+endif(WITH_STONEFS)
 
 if(WITH_RBD)
   add_subdirectory(rbd)
@@ -151,5 +151,5 @@ if(WITH_SEASTAR)
 endif()
 
 add_subdirectory(immutable_object_cache)
-add_subdirectory(ceph-dencoder)
+add_subdirectory(stone-dencoder)
 add_subdirectory(erasure-code)

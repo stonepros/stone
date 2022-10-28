@@ -8,13 +8,13 @@ namespace librbd {
 namespace watcher {
 
 void ClientId::encode(bufferlist &bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(gid, bl);
   encode(handle, bl);
 }
 
 void ClientId::decode(bufferlist::const_iterator &iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(gid, iter);
   decode(handle, iter);
 }
@@ -25,13 +25,13 @@ void ClientId::dump(Formatter *f) const {
 }
 
 void NotifyResponse::encode(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   encode(acks, bl);
   encode(timeouts, bl);
 }
 
 void NotifyResponse::decode(bufferlist::const_iterator& iter) {
-  using ceph::decode;
+  using stone::decode;
   decode(acks, iter);
   decode(timeouts, iter);
 }

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -25,7 +25,7 @@
 #endif
 
 #include "common/config.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "common/Cond.h"
 #include "common/debug.h"
@@ -61,7 +61,7 @@
 #include "osd/ECUtil.h"
 
 using namespace librados;
-using ceph::util::generate_random_number;
+using stone::util::generate_random_number;
 
 // two steps seem to be necessary to do this right
 #define STR(x) _STR(x)
@@ -202,7 +202,7 @@ void usage(ostream& out)
 "        specify the namespace to use for the object\n"
 "   --all\n"
 "        Use with ls to list objects in all namespaces\n"
-"        Put in CEPH_ARGS environment variable to make this the default\n"
+"        Put in STONE_ARGS environment variable to make this the default\n"
 "   --default\n"
 "        Use with ls to list objects in default namespace\n"
 "        Takes precedence over --all in case --all is in environment\n"
@@ -766,7 +766,7 @@ public:
   }
 
   float time_passed() {
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     now -= start_time;
     uint64_t ns = now.nsec();
     float total = (float) ns / 1000000000.0;
@@ -774,8 +774,8 @@ public:
     return total;
   }
 
-  ceph::mutex lock = ceph::make_mutex("LoadGen");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("LoadGen");
+  stone::condition_variable cond;
 
   explicit LoadGen(Rados *_rados) : rados(_rados), going_down(false) {
     read_percent = 80;
@@ -962,7 +962,7 @@ uint64_t LoadGen::gen_next_op()
 
 int LoadGen::run()
 {
-  start_time = ceph_clock_now();
+  start_time = stone_clock_now();
   utime_t end_time = start_time;
   end_time += run_length;
   utime_t stamp_time = start_time;
@@ -973,7 +973,7 @@ int LoadGen::run()
       std::unique_lock l{lock};
       cond.wait_for(l, 1s);
     }
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
 
     if (now > end_time)
       break;
@@ -1162,7 +1162,7 @@ protected:
   }
 
 public:
-  RadosBencher(CephContext *cct_, librados::Rados& _r, librados::IoCtx& _i)
+  RadosBencher(StoneContext *cct_, librados::Rados& _r, librados::IoCtx& _i)
     : ObjBencher(cct_), completions(NULL), rados(_r), io_ctx(_i), iterator_valid(false), write_destination(OP_WRITE_DEST_OBJ) {}
   ~RadosBencher() override { }
 
@@ -1405,7 +1405,7 @@ static int do_cache_flush_evict_all(IoCtx& io_ctx, bool blocking)
       std::vector<clone_info_t>::iterator ci = ls.clones.begin();
       // no snapshots
       if (ci == ls.clones.end()) {
-        io_ctx.snap_set_read(CEPH_NOSNAP);
+        io_ctx.snap_set_read(STONE_NOSNAP);
         if (blocking)
           r = do_cache_flush(io_ctx, i->get_oid());
         else
@@ -1542,8 +1542,8 @@ static void dump_shard(const shard_info_t& shard,
      || inc.has_object_info_inconsistency()
      || shard.has_obj_size_info_mismatch()) &&
         !shard.has_info_missing()) {
-    map<std::string, ceph::bufferlist>::iterator k = (const_cast<shard_info_t&>(shard)).attrs.find(OI_ATTR);
-    ceph_assert(k != shard.attrs.end()); // Can't be missing
+    map<std::string, stone::bufferlist>::iterator k = (const_cast<shard_info_t&>(shard)).attrs.find(OI_ATTR);
+    stone_assert(k != shard.attrs.end()); // Can't be missing
     if (!shard.has_info_corrupted()) {
       object_info_t oi;
       bufferlist bl;
@@ -1561,8 +1561,8 @@ static void dump_shard(const shard_info_t& shard,
        || inc.union_shards.has_snapset_corrupted()
        || inc.has_snapset_inconsistency()) &&
        !shard.has_snapset_missing()) {
-    map<std::string, ceph::bufferlist>::iterator k = (const_cast<shard_info_t&>(shard)).attrs.find(SS_ATTR);
-    ceph_assert(k != shard.attrs.end()); // Can't be missing
+    map<std::string, stone::bufferlist>::iterator k = (const_cast<shard_info_t&>(shard)).attrs.find(SS_ATTR);
+    stone_assert(k != shard.attrs.end()); // Can't be missing
     if (!shard.has_snapset_corrupted()) {
       SnapSet ss;
       bufferlist bl;
@@ -1580,8 +1580,8 @@ static void dump_shard(const shard_info_t& shard,
        || inc.union_shards.has_hinfo_corrupted()
        || inc.has_hinfo_inconsistency()) &&
        !shard.has_hinfo_missing()) {
-    map<std::string, ceph::bufferlist>::iterator k = (const_cast<shard_info_t&>(shard)).attrs.find(ECUtil::get_hinfo_key());
-    ceph_assert(k != shard.attrs.end()); // Can't be missing
+    map<std::string, stone::bufferlist>::iterator k = (const_cast<shard_info_t&>(shard)).attrs.find(ECUtil::get_hinfo_key());
+    stone_assert(k != shard.attrs.end()); // Can't be missing
     if (!shard.has_hinfo_corrupted()) {
       ECUtil::HashInfo hi;
       bufferlist bl;
@@ -1644,10 +1644,10 @@ static void dump_object_id(const object_id_t& object,
   f.dump_string("nspace", object.nspace);
   f.dump_string("locator", object.locator);
   switch (object.snap) {
-  case CEPH_NOSNAP:
+  case STONE_NOSNAP:
     f.dump_string("snap", "head");
     break;
-  case CEPH_SNAPDIR:
+  case STONE_SNAPDIR:
     f.dump_string("snap", "snapdir");
     break;
   default:
@@ -1672,7 +1672,7 @@ static void dump_inconsistent(const inconsistent_obj_t& inc,
       object_info_t oi;
       bufferlist bl;
       auto k = shard.attrs.find(OI_ATTR);
-      ceph_assert(k != shard.attrs.end()); // Can't be missing
+      stone_assert(k != shard.attrs.end()); // Can't be missing
       auto bliter = k->second.cbegin();
       decode(oi, bliter);  // Can't be corrupted
       f.open_object_section("selected_object_info");
@@ -1808,7 +1808,7 @@ static int do_get_inconsistent_cmd(const std::vector<const char*> &nargs,
     }
     // It must be the same interval every time.  EAGAIN would
     // occur if interval changes.
-    ceph_assert(start.name.empty() || first_interval == interval);
+    stone_assert(start.name.empty() || first_interval == interval);
     if (start.name.empty()) {
       first_interval = interval;
       formatter.open_object_section("info");
@@ -1873,7 +1873,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
   bool use_striper = false;
   bool with_clones = false;
   const char *snapname = NULL;
-  snap_t snapid = CEPH_NOSNAP;
+  snap_t snapid = STONE_NOSNAP;
   std::map<std::string, std::string>::const_iterator i;
 
   uint64_t offset_align = 0;
@@ -2140,7 +2140,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
   }
 
   // open rados
-  ret = rados.init_with_context(g_ceph_context);
+  ret = rados.init_with_context(g_stone_context);
   if (ret < 0) {
      cerr << "couldn't initialize rados: " << cpp_strerror(ret) << std::endl;
      return 1;
@@ -2258,7 +2258,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
     // Only the ls should ever set namespace to special value
     wildcard = true;
   }
-  if (snapid != CEPH_NOSNAP) {
+  if (snapid != STONE_NOSNAP) {
     if (!pool_name) {
       cerr << "pool name must be specified with --snapid" << std::endl;
       return 1;
@@ -2274,7 +2274,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
     cout << "selected snap " << snapid << " '" << name << "'" << std::endl;
   }
 
-  ceph_assert(!nargs.empty());
+  stone_assert(!nargs.empty());
 
   // list pools?
   if (strcmp(nargs[0], "lspools") == 0) {
@@ -3060,8 +3060,8 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
     }
     for (const auto& oid : oids) {
       if (forcefull) {
-          ret = detail::remove(io_ctx, oid, (CEPH_OSD_FLAG_FULL_FORCE |
-                               CEPH_OSD_FLAG_FULL_TRY), use_striper);
+          ret = detail::remove(io_ctx, oid, (STONE_OSD_FLAG_FULL_FORCE |
+                               STONE_OSD_FLAG_FULL_TRY), use_striper);
       } else {
           ret = detail::remove(io_ctx, oid, use_striper);
       }
@@ -3144,7 +3144,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
     }
     io_ctx.set_namespace(all_nspaces);
     io_ctx.set_pool_full_try();
-    RadosBencher bencher(g_ceph_context, rados, io_ctx);
+    RadosBencher bencher(g_stone_context, rados, io_ctx);
     ret = bencher.clean_up_slow("", concurrent_ios);
     if (ret >= 0) {
       cout << "successfully purged pool " << nargs[1] << std::endl;
@@ -3286,7 +3286,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
            << std::endl;
       return 1;
     }
-    RadosBencher bencher(g_ceph_context, rados, io_ctx);
+    RadosBencher bencher(g_stone_context, rados, io_ctx);
     bencher.set_show_time(show_time);
     bencher.set_write_destination(static_cast<OpWriteDest>(bench_write_dest));
 
@@ -3319,7 +3319,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
     }
     if (wildcard)
       io_ctx.set_namespace(all_nspaces);
-    RadosBencher bencher(g_ceph_context, rados, io_ctx);
+    RadosBencher bencher(g_stone_context, rados, io_ctx);
     ret = bencher.clean_up(prefix, concurrent_ios, run_name);
     if (ret != 0)
       cerr << "error during cleanup: " << cpp_strerror(ret) << std::endl;
@@ -3658,7 +3658,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
       }
       for (std::vector<clone_info_t>::iterator ci = ls.clones.begin();
            ci != ls.clones.end(); ++ci) {
-        if (snapid != CEPH_NOSNAP && ci->cloneid > snapid)
+        if (snapid != STONE_NOSNAP && ci->cloneid > snapid)
           break;
         io_ctx.snap_set_read(ci->cloneid);
         ret = do_cache_flush(io_ctx, *obj_name);
@@ -3695,7 +3695,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
       }
       for (std::vector<clone_info_t>::iterator ci = ls.clones.begin();
            ci != ls.clones.end(); ++ci) {
-        if (snapid != CEPH_NOSNAP && ci->cloneid > snapid)
+        if (snapid != STONE_NOSNAP && ci->cloneid > snapid)
           break;
         io_ctx.snap_set_read(ci->cloneid);
         ret = do_cache_try_flush(io_ctx, *obj_name);
@@ -3732,7 +3732,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
       }
       for (std::vector<clone_info_t>::iterator ci = ls.clones.begin();
            ci != ls.clones.end(); ++ci) {
-        if (snapid != CEPH_NOSNAP && ci->cloneid > snapid)
+        if (snapid != STONE_NOSNAP && ci->cloneid > snapid)
           break;
         io_ctx.snap_set_read(ci->cloneid);
         ret = do_cache_evict(io_ctx, *obj_name);
@@ -3802,7 +3802,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
 
     ObjectWriteOperation op;
     if (with_reference) {
-      op.set_redirect(target_obj, target_ctx, 0, CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+      op.set_redirect(target_obj, target_ctx, 0, STONE_OSD_OP_FLAG_WITH_REFERENCE);
     } else {
       op.set_redirect(target_obj, target_ctx, 0);
     }
@@ -3851,7 +3851,7 @@ static int rados_tool_common(const std::map < std::string, std::string > &opts,
     IoCtx target_ctx;
     ret = rados.ioctx_create(target, target_ctx);
     ObjectReadOperation op;
-    op.set_chunk(offset, length, target_ctx, tgt_oid, tgt_offset, CEPH_OSD_OP_FLAG_WITH_REFERENCE);
+    op.set_chunk(offset, length, target_ctx, tgt_oid, tgt_offset, STONE_OSD_OP_FLAG_WITH_REFERENCE);
     ret = io_ctx.operate(nargs[1], &op, NULL);
     if (ret < 0) {
       cerr << "error set-chunk " << pool_name << "/" << nargs[1] << " " << " offset " << offset
@@ -4037,7 +4037,7 @@ int main(int argc, const char **argv)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage(cout);
     exit(0);
   }
@@ -4046,7 +4046,7 @@ int main(int argc, const char **argv)
   std::string val;
 
   // Necessary to support usage of -f for formatting,
-  // since global_init will remove the -f using ceph
+  // since global_init will remove the -f using stone
   // argparse procedures.
   for (auto j = args.begin(); j != args.end(); ++j) {
     if (strcmp(*j, "--") == 0) {
@@ -4068,130 +4068,130 @@ int main(int argc, const char **argv)
     }
   }
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			     CODE_ENVIRONMENT_UTILITY, 0);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   std::vector<const char*>::iterator i;
   for (i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_double_dash(args, i)) {
+    if (stone_argparse_double_dash(args, i)) {
       break;
-    } else if (ceph_argparse_flag(args, i, "--force-full", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--force-full", (char*)NULL)) {
       opts["force-full"] = "true";
-    } else if (ceph_argparse_flag(args, i, "-d", "--delete-after", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "-d", "--delete-after", (char*)NULL)) {
       opts["delete-after"] = "true";
-    } else if (ceph_argparse_flag(args, i, "-C", "--create", "--create-pool",
+    } else if (stone_argparse_flag(args, i, "-C", "--create", "--create-pool",
 				  (char*)NULL)) {
       opts["create"] = "true";
-    } else if (ceph_argparse_flag(args, i, "--pretty-format", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--pretty-format", (char*)NULL)) {
       opts["pretty-format"] = "true";
-    } else if (ceph_argparse_flag(args, i, "--show-time", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--show-time", (char*)NULL)) {
       opts["show-time"] = "true";
-    } else if (ceph_argparse_flag(args, i, "--no-cleanup", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--no-cleanup", (char*)NULL)) {
       opts["no-cleanup"] = "true";
-    } else if (ceph_argparse_flag(args, i, "--no-hints", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--no-hints", (char*)NULL)) {
       opts["no-hints"] = "true";
-    } else if (ceph_argparse_flag(args, i, "--reuse-bench", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--reuse-bench", (char*)NULL)) {
       opts["reuse-bench"] = "true";
-    } else if (ceph_argparse_flag(args, i, "--no-verify", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--no-verify", (char*)NULL)) {
       opts["no-verify"] = "true";
-    } else if (ceph_argparse_witharg(args, i, &val, "--run-name", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--run-name", (char*)NULL)) {
       opts["run-name"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--prefix", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--prefix", (char*)NULL)) {
       opts["prefix"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-p", "--pool", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-p", "--pool", (char*)NULL)) {
       opts["pool"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--target-pool", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--target-pool", (char*)NULL)) {
       opts["target_pool"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--object-locator" , (char *)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--object-locator" , (char *)NULL)) {
       opts["object_locator"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--target-locator" , (char *)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--target-locator" , (char *)NULL)) {
       opts["target_locator"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--target-nspace" , (char *)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--target-nspace" , (char *)NULL)) {
       opts["target_nspace"] = val;
 #ifdef WITH_LIBRADOSSTRIPER
-    } else if (ceph_argparse_flag(args, i, "--striper" , (char *)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--striper" , (char *)NULL)) {
       opts["striper"] = "true";
 #endif
-    } else if (ceph_argparse_witharg(args, i, &val, "-t", "--concurrent-ios", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-t", "--concurrent-ios", (char*)NULL)) {
       opts["concurrent-ios"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--block-size", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--block-size", (char*)NULL)) {
       opts["block-size"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-b", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-b", (char*)NULL)) {
       opts["block-size"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--object-size", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--object-size", (char*)NULL)) {
       opts["object-size"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--max-objects", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--max-objects", (char*)NULL)) {
       opts["max-objects"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--offset", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--offset", (char*)NULL)) {
       opts["offset"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-O", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-O", (char*)NULL)) {
       opts["object-size"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-s", "--snap", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-s", "--snap", (char*)NULL)) {
       opts["snap"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-S", "--snapid", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-S", "--snapid", (char*)NULL)) {
       opts["snapid"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--min-object-size", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--min-object-size", (char*)NULL)) {
       opts["min-object-size"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--max-object-size", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--max-object-size", (char*)NULL)) {
       opts["max-object-size"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--min-op-len", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--min-op-len", (char*)NULL)) {
       opts["min-op-len"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--max-op-len", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--max-op-len", (char*)NULL)) {
       opts["max-op-len"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--max-ops", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--max-ops", (char*)NULL)) {
       opts["max-ops"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--max-backlog", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--max-backlog", (char*)NULL)) {
       opts["max-backlog"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--target-throughput", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--target-throughput", (char*)NULL)) {
       opts["target-throughput"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--offset-align", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--offset-align", (char*)NULL)) {
       opts["offset_align"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--read-percent", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--read-percent", (char*)NULL)) {
       opts["read-percent"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--num-objects", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--num-objects", (char*)NULL)) {
       opts["num-objects"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--run-length", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--run-length", (char*)NULL)) {
       opts["run-length"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--workers", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--workers", (char*)NULL)) {
       opts["workers"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-f", "--format", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-f", "--format", (char*)NULL)) {
       opts["format"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--lock-tag", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--lock-tag", (char*)NULL)) {
       opts["lock-tag"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--lock-cookie", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--lock-cookie", (char*)NULL)) {
       opts["lock-cookie"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--lock-description", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--lock-description", (char*)NULL)) {
       opts["lock-description"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--lock-duration", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--lock-duration", (char*)NULL)) {
       opts["lock-duration"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--lock-type", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--lock-type", (char*)NULL)) {
       opts["lock-type"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "-N", "--namespace", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-N", "--namespace", (char*)NULL)) {
       opts["namespace"] = val;
-    } else if (ceph_argparse_flag(args, i, "--all", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--all", (char*)NULL)) {
       opts["all"] = "true";
-    } else if (ceph_argparse_flag(args, i, "--default", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--default", (char*)NULL)) {
       opts["default"] = "true";
-    } else if (ceph_argparse_witharg(args, i, &val, "-o", "--output", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "-o", "--output", (char*)NULL)) {
       opts["output"] = val;
-    } else if (ceph_argparse_flag(args, i, "--write-omap", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--write-omap", (char*)NULL)) {
       opts["write-dest-omap"] = "true";
-    } else if (ceph_argparse_flag(args, i, "--write-object", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--write-object", (char*)NULL)) {
       opts["write-dest-obj"] = "true";
-    } else if (ceph_argparse_flag(args, i, "--write-xattr", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--write-xattr", (char*)NULL)) {
       opts["write-dest-xattr"] = "true";
-    } else if (ceph_argparse_flag(args, i, "--with-clones", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--with-clones", (char*)NULL)) {
       opts["with-clones"] = "true";
-    } else if (ceph_argparse_witharg(args, i, &val, "--omap-key-file", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--omap-key-file", (char*)NULL)) {
       opts["omap-key-file"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--obj-name-file", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--obj-name-file", (char*)NULL)) {
       opts["obj-name-file"] = val;
-    } else if (ceph_argparse_flag(args, i, "--with-reference", (char*)NULL)) {
+    } else if (stone_argparse_flag(args, i, "--with-reference", (char*)NULL)) {
       opts["with-reference"] = "true";
-    } else if (ceph_argparse_witharg(args, i, &val, "--pgid", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--pgid", (char*)NULL)) {
       opts["pgid"] = val;
-    } else if (ceph_argparse_witharg(args, i, &val, "--input-file", (char*)NULL)) {
+    } else if (stone_argparse_witharg(args, i, &val, "--input-file", (char*)NULL)) {
       opts["input_file"] = val;
     } else {
       if (val[0] == '-')

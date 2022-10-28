@@ -9,11 +9,11 @@ add_library(libneorados STATIC
   $<TARGET_OBJECTS:neorados_api_obj>
   $<TARGET_OBJECTS:neorados_objs>)
 target_link_libraries(libneorados PRIVATE
-  osdc ceph-common cls_lock_client fmt::fmt
+  osdc stone-common cls_lock_client fmt::fmt
   ${BLKID_LIBRARIES} ${CRYPTO_LIBS} ${EXTRALIBS})
 
 # if(ENABLE_SHARED)
-#   add_library(libneorados ${CEPH_SHARED}
+#   add_library(libneorados ${STONE_SHARED}
 #     $<TARGET_OBJECTS:neorados_api_obj>
 #     $<TARGET_OBJECTS:neorados_objs>
 #     $<TARGET_OBJECTS:common_buffer_obj>)
@@ -33,10 +33,10 @@ target_link_libraries(libneorados PRIVATE
 #     $<TARGET_OBJECTS:neorados_objs>)
 # endif(ENABLE_SHARED)
 # target_link_libraries(libneorados PRIVATE
-#   osdc ceph-common cls_lock_client
+#   osdc stone-common cls_lock_client
 #   ${BLKID_LIBRARIES} ${CRYPTO_LIBS} ${EXTRALIBS})
 # target_link_libraries(libneorados ${rados_libs})
 # install(TARGETS libneorados DESTINATION ${CMAKE_INSTALL_LIBDIR})
 add_library(neorados_cls_fifo STATIC cls/fifo.cc)
 target_link_libraries(neorados_cls_fifo PRIVATE
-	libneorados ceph-common fmt::fmt)
+	libneorados stone-common fmt::fmt)

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -19,8 +19,8 @@ using std::make_pair;
 using std::map;
 using std::pair;
 using std::set;
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
 void ECSubWrite::encode(bufferlist &bl) const
 {
@@ -173,7 +173,7 @@ void ECSubWriteReply::generate_test_instances(list<ECSubWriteReply*>& o)
 
 void ECSubRead::encode(bufferlist &bl, uint64_t features) const
 {
-  if ((features & CEPH_FEATURE_OSD_FADVISE_FLAGS) == 0) {
+  if ((features & STONE_FEATURE_OSD_FADVISE_FLAGS) == 0) {
     ENCODE_START(2, 1, bl);
     encode(from, bl);
     encode(tid, bl);
@@ -273,7 +273,7 @@ void ECSubRead::dump(Formatter *f) const
 void ECSubRead::generate_test_instances(list<ECSubRead*>& o)
 {
   hobject_t hoid1(sobject_t("asdf", 1));
-  hobject_t hoid2(sobject_t("asdf2", CEPH_NOSNAP));
+  hobject_t hoid2(sobject_t("asdf2", STONE_NOSNAP));
   o.push_back(new ECSubRead());
   o.back()->from = pg_shard_t(2, shard_id_t(-1));
   o.back()->tid = 1;
@@ -370,7 +370,7 @@ void ECSubReadReply::dump(Formatter *f) const
 void ECSubReadReply::generate_test_instances(list<ECSubReadReply*>& o)
 {
   hobject_t hoid1(sobject_t("asdf", 1));
-  hobject_t hoid2(sobject_t("asdf2", CEPH_NOSNAP));
+  hobject_t hoid2(sobject_t("asdf2", STONE_NOSNAP));
   bufferlist bl;
   bl.append_zero(100);
   bufferlist bl2;

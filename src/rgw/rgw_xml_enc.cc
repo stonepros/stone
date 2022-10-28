@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Yehuda Sadeh <yehuda@redhat.com>
  * Copyright (C) 2015 Robin H. Johnson <robin.johnson@dreamhost.com>
@@ -19,7 +19,7 @@
 
 #include "common/Formatter.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 void RGWBWRedirectInfo::dump_xml(Formatter *f) const
 {
@@ -95,7 +95,7 @@ void RGWBWRoutingRule::decode_xml(XMLObj *obj) {
   RGWXMLDecoder::decode_xml("Redirect", redirect_info, obj);
 }
 
-static void encode_xml(const char *name, const std::list<RGWBWRoutingRule>& l, ceph::Formatter *f)
+static void encode_xml(const char *name, const std::list<RGWBWRoutingRule>& l, stone::Formatter *f)
 {
   do_encode_xml("RoutingRules", l, "RoutingRule", f);
 }

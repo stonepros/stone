@@ -75,7 +75,7 @@
 
 class LFNIndex : public CollectionIndex {
   /// Hash digest output size.
-  static const int FILENAME_LFN_DIGEST_SIZE = CEPH_CRYPTO_SHA1_DIGESTSIZE;
+  static const int FILENAME_LFN_DIGEST_SIZE = STONE_CRYPTO_SHA1_DIGESTSIZE;
   /// Length of filename hash.
   static const int FILENAME_HASH_LEN = FILENAME_LFN_DIGEST_SIZE;
   /// Max filename size.

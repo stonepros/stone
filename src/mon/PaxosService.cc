@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -16,15 +16,15 @@
 #include "common/Clock.h"
 #include "common/config.h"
 #include "include/stringify.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "mon/MonOpRequest.h"
 
 using std::ostream;
 using std::string;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
-#define dout_subsys ceph_subsys_paxos
+#define dout_subsys stone_subsys_paxos
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, mon, paxos, service_name, get_first_committed(), get_last_committed())
 static ostream& _prefix(std::ostream *_dout, Monitor &mon, Paxos &paxos, string service_name,
@@ -36,7 +36,7 @@ static ostream& _prefix(std::ostream *_dout, Monitor &mon, Paxos &paxos, string 
 
 bool PaxosService::dispatch(MonOpRequestRef op)
 {
-  ceph_assert(op->is_type_service() || op->is_type_command());
+  stone_assert(op->is_type_service() || op->is_type_command());
   auto m = op->get_req<PaxosServiceMessage>();
   op->mark_event("psvc:dispatch");
 
@@ -129,7 +129,7 @@ bool PaxosService::dispatch(MonOpRequestRef op)
         } else if (r == -ECANCELED || r == -EAGAIN) {
           return;
         } else {
-          ceph_abort_msg("bad return value for proposal_timer");
+          stone_abort_msg("bad return value for proposal_timer");
         }
     }};
     dout(10) << " setting proposal_timer " << do_propose
@@ -166,7 +166,7 @@ void PaxosService::post_refresh()
   post_paxos_update();
 
   if (mon.is_peon() && !waiting_for_finished_proposal.empty()) {
-    finish_contexts(g_ceph_context, waiting_for_finished_proposal, -EAGAIN);
+    finish_contexts(g_stone_context, waiting_for_finished_proposal, -EAGAIN);
   }
 }
 
@@ -176,7 +176,7 @@ bool PaxosService::should_propose(double& delay)
   if (get_last_committed() <= 1) {
     delay = 0.0;
   } else {
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     if ((now - paxos.last_commit_time) > g_conf()->paxos_propose_interval)
       delay = (double)g_conf()->paxos_min_wait;
     else
@@ -190,10 +190,10 @@ bool PaxosService::should_propose(double& delay)
 void PaxosService::propose_pending()
 {
   dout(10) << __func__ << dendl;
-  ceph_assert(have_pending);
-  ceph_assert(!proposing);
-  ceph_assert(mon.is_leader());
-  ceph_assert(is_active());
+  stone_assert(have_pending);
+  stone_assert(!proposing);
+  stone_assert(mon.is_leader());
+  stone_assert(is_active());
 
   if (proposal_timer) {
     dout(10) << " canceling proposal_timer " << proposal_timer << dendl;
@@ -245,7 +245,7 @@ void PaxosService::propose_pending()
       else if (r == -ECANCELED || r == -EAGAIN)
 	return;
       else
-	ceph_abort_msg("bad return value for C_Committed");
+	stone_abort_msg("bad return value for C_Committed");
     }
   };
   paxos.queue_pending_finisher(new C_Committed(this));
@@ -274,7 +274,7 @@ void PaxosService::restart()
     proposal_timer = 0;
   }
 
-  finish_contexts(g_ceph_context, waiting_for_finished_proposal, -EAGAIN);
+  finish_contexts(g_stone_context, waiting_for_finished_proposal, -EAGAIN);
 
   if (have_pending) {
     discard_pending();
@@ -289,7 +289,7 @@ void PaxosService::election_finished()
 {
   dout(10) << __func__ << dendl;
 
-  finish_contexts(g_ceph_context, waiting_for_finished_proposal, -EAGAIN);
+  finish_contexts(g_stone_context, waiting_for_finished_proposal, -EAGAIN);
 
   // make sure we update our state
   _active();
@@ -346,7 +346,7 @@ void PaxosService::_active()
   // wake up anyone who came in while we were proposing.  note that
   // anyone waiting for the previous proposal to commit is no longer
   // on this list; it is on Paxos's.
-  finish_contexts(g_ceph_context, waiting_for_finished_proposal, 0);
+  finish_contexts(g_stone_context, waiting_for_finished_proposal, 0);
 
   if (mon.is_leader())
     upgrade_format();
@@ -367,7 +367,7 @@ void PaxosService::shutdown()
     proposal_timer = 0;
   }
 
-  finish_contexts(g_ceph_context, waiting_for_finished_proposal, -EAGAIN);
+  finish_contexts(g_stone_context, waiting_for_finished_proposal, -EAGAIN);
 
   on_shutdown();
 }
@@ -433,7 +433,7 @@ void PaxosService::trim(MonitorDBStore::TransactionRef t,
 			version_t from, version_t to)
 {
   dout(10) << __func__ << " from " << from << " to " << to << dendl;
-  ceph_assert(from != to);
+  stone_assert(from != to);
 
   for (version_t v = from; v < to; ++v) {
     dout(20) << __func__ << " " << v << dendl;
@@ -460,7 +460,7 @@ void PaxosService::load_health()
   mon.store->get("health", service_name, bl);
   if (bl.length()) {
     auto p = bl.cbegin();
-    using ceph::decode;
+    using stone::decode;
     decode(health_checks, p);
   }
 }

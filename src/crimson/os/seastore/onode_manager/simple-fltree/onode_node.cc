@@ -436,8 +436,8 @@ void node_t<BlockSize, N, NodeType>::shift_left(unsigned from, unsigned to)
 }
 
 template<size_t BlockSize, int N, ntype_t NodeType>
-void node_t<BlockSize, N, NodeType>::insert_front(const ceph::bufferptr& keys_buf,
-                                                  const ceph::bufferptr& cells_buf)
+void node_t<BlockSize, N, NodeType>::insert_front(const stone::bufferptr& keys_buf,
+                                                  const stone::bufferptr& cells_buf)
 {
   unsigned n = keys_buf.length() / sizeof(key_prefix_t);
   shift_right(n, cells_buf.length());
@@ -450,8 +450,8 @@ void node_t<BlockSize, N, NodeType>::insert_front(const ceph::bufferptr& keys_bu
 }
 
 template<size_t BlockSize, int N, ntype_t NodeType>
-void node_t<BlockSize, N, NodeType>::insert_back(const ceph::bufferptr& keys_buf,
-                                                 const ceph::bufferptr& cells_buf)
+void node_t<BlockSize, N, NodeType>::insert_back(const stone::bufferptr& keys_buf,
+                                                 const stone::bufferptr& cells_buf)
 {
   keys_buf.copy_out(0, keys_buf.length(), reinterpret_cast<char*>(keys + count));
   count += keys_buf.length() / sizeof(key_prefix_t);
@@ -516,7 +516,7 @@ void node_t<BlockSize, N, NodeType>::play_delta(const delta_t& delta)
       auto [slot, found] = lower_bound(delta.oid);
       assert(!found);
       assert(delta.onode->size() <= std::numeric_limits<unsigned>::max());
-      ceph::bufferptr buf{static_cast<unsigned>(delta.onode->size())};
+      stone::bufferptr buf{static_cast<unsigned>(delta.onode->size())};
       delta.onode->encode(buf.c_str(), buf.length());
       auto onode = reinterpret_cast<const onode_t*>(buf.c_str());
       return insert_at(slot, delta.oid, *onode);

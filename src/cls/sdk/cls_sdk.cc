@@ -1,5 +1,5 @@
 /*
- * This is an example RADOS object class built using only the Ceph SDK interface.
+ * This is an example RADOS object class built using only the Stone SDK interface.
  */
 #include "include/rados/objclass.h"
 
@@ -16,7 +16,7 @@ cls_method_handle_t h_test_coverage_replay;
  * This method modifies the object by making multiple write calls (write,
  * setxattr and set_val).
  */
-static int test_coverage_write(cls_method_context_t hctx, ceph::buffer::list *in, ceph::buffer::list *out)
+static int test_coverage_write(cls_method_context_t hctx, stone::buffer::list *in, stone::buffer::list *out)
 {
   // create the object
   int ret = cls_cxx_create(hctx, false);
@@ -32,7 +32,7 @@ static int test_coverage_write(cls_method_context_t hctx, ceph::buffer::list *in
     return ret;
   
   std::string c = "test";
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   bl.append(c);
 
   // write to the object
@@ -66,7 +66,7 @@ static int test_coverage_write(cls_method_context_t hctx, ceph::buffer::list *in
  * and get_val). It also removes the object after reading.
  */
 
-static int test_coverage_replay(cls_method_context_t hctx, ceph::buffer::list *in, ceph::buffer::list *out)
+static int test_coverage_replay(cls_method_context_t hctx, stone::buffer::list *in, stone::buffer::list *out)
 {
   CLS_LOG(0, "reading already written object");
   uint64_t size;
@@ -75,7 +75,7 @@ static int test_coverage_replay(cls_method_context_t hctx, ceph::buffer::list *i
   if (ret < 0)
     return ret;
   
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   // read the object entry
   ret = cls_cxx_read(hctx, 0, size, &bl);
   if (ret < 0)

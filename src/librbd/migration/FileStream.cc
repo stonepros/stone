@@ -28,7 +28,7 @@ const std::string FILE_PATH {"file_path"};
 
 #ifdef BOOST_ASIO_HAS_POSIX_STREAM_DESCRIPTOR
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::migration::FileStream::ReadRequest " \
                            << this << " " << __func__ << ": "

@@ -9,7 +9,7 @@
 
 TEST(FairMutex, simple)
 {
-  ceph::fair_mutex mutex{"fair::simple"};
+  stone::fair_mutex mutex{"fair::simple"};
   {
     std::unique_lock lock{mutex};
     ASSERT_TRUE(mutex.is_locked());
@@ -31,7 +31,7 @@ TEST(FairMutex, fair)
   // - each team is represented by a thread.
   // - each team should have equal chance of being selected and scoring, assuming
   //   the runners in each team are distributed evenly in the waiting queue.
-  ceph::fair_mutex mutex{"fair::fair"};
+  stone::fair_mutex mutex{"fair::fair"};
   const int NR_TEAMS = 2;
   std::array<unsigned, NR_TEAMS> scoreboard{0, 0};
   const int NR_ROUNDS = 512;

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -24,7 +24,7 @@ namespace bs = boost::system;
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-class osdc_error_category : public ceph::converting_category {
+class osdc_error_category : public stone::converting_category {
 public:
   osdc_error_category(){}
   const char* name() const noexcept override;
@@ -34,7 +34,7 @@ public:
     override;
   bool equivalent(int ev, const bs::error_condition& c) const
     noexcept override;
-  using ceph::converting_category::equivalent;
+  using stone::converting_category::equivalent;
   int from_code(int ev) const noexcept override;
 };
 #pragma GCC diagnostic pop
@@ -83,17 +83,17 @@ bs::error_condition
 osdc_error_category::default_error_condition(int ev) const noexcept {
   switch (static_cast<osdc_errc>(ev)) {
   case osdc_errc::pool_dne:
-    return ceph::errc::does_not_exist;
+    return stone::errc::does_not_exist;
   case osdc_errc::pool_exists:
-    return ceph::errc::exists;
+    return stone::errc::exists;
   case osdc_errc::precondition_violated:
     return bs::errc::invalid_argument;
   case osdc_errc::not_supported:
     return bs::errc::operation_not_supported;
   case osdc_errc::snapshot_exists:
-    return ceph::errc::exists;
+    return stone::errc::exists;
   case osdc_errc::snapshot_dne:
-    return ceph::errc::does_not_exist;
+    return stone::errc::does_not_exist;
   case osdc_errc::timed_out:
     return bs::errc::timed_out;
   }
@@ -107,7 +107,7 @@ bool osdc_error_category::equivalent(int ev,
     if (c == bs::errc::no_such_file_or_directory) {
       return true;
     }
-    if (c == ceph::errc::not_in_map) {
+    if (c == stone::errc::not_in_map) {
       return true;
     }
   }
@@ -125,7 +125,7 @@ bool osdc_error_category::equivalent(int ev,
     if (c == bs::errc::no_such_file_or_directory) {
       return true;
     }
-    if (c == ceph::errc::not_in_map) {
+    if (c == stone::errc::not_in_map) {
       return true;
     }
   }

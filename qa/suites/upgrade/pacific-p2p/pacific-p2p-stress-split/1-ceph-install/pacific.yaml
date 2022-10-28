@@ -1,6 +1,6 @@
 meta:
 - desc: |
-   install ceph/pacific v16.2.7
+   install stone/pacific v16.2.7
    Overall upgrade path is - pacific-latest.point => pacific-latest
 tasks:
 - install:
@@ -8,14 +8,14 @@ tasks:
     exclude_packages: ['librados3']
     extra_packages: ['librados2']
 - print: "**** done install pacific v16.2.7"
-- ceph:
+- stone:
 - exec:
     osd.0:
-      - ceph osd require-osd-release pacific
-      - ceph osd set-require-min-compat-client pacific
-- print: "**** done ceph"
+      - stone osd require-osd-release pacific
+      - stone osd set-require-min-compat-client pacific
+- print: "**** done stone"
 overrides:
-  ceph:
+  stone:
     conf:
       mon:
         mon warn on osd down out interval zero: false

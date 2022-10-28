@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         rbd read from replica policy: balance
@@ -7,5 +7,5 @@ overrides:
 tasks:
 - exec:
     osd.0:
-      - ceph osd require-osd-release pacific
-      - ceph osd set-require-min-compat-client octopus
+      - stone osd require-osd-release pacific
+      - stone osd set-require-min-compat-client octopus

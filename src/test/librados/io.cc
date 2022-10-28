@@ -110,10 +110,10 @@ TEST_F(LibRadosIo, Checksum) {
   memset(buf, 0xcc, sizeof(buf));
   ASSERT_EQ(0, rados_write(ioctx, "foo", buf, sizeof(buf), 0));
 
-  uint32_t expected_crc = ceph_crc32c(-1, reinterpret_cast<const uint8_t*>(buf),
+  uint32_t expected_crc = stone_crc32c(-1, reinterpret_cast<const uint8_t*>(buf),
                                       sizeof(buf));
-  ceph_le32 init_value = init_le32(-1);
-  ceph_le32 crc[2];
+  stone_le32 init_value = init_le32(-1);
+  stone_le32 crc[2];
   ASSERT_EQ(0, rados_checksum(ioctx, "foo", LIBRADOS_CHECKSUM_TYPE_CRC32C,
 			      reinterpret_cast<char*>(&init_value),
 			      sizeof(init_value), sizeof(buf), 0, 0,

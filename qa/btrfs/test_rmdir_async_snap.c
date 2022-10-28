@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 	va.fd = open("current", O_RDONLY);
 	va.flags = BTRFS_SUBVOL_CREATE_ASYNC;
 	for (i=0; i<num; i++) {
-		system("/bin/cp /boot/vmlinuz-3.2.0-ceph-00142-g9e98323 current/foo");
+		system("/bin/cp /boot/vmlinuz-3.2.0-stone-00142-g9e98323 current/foo");
 		sprintf(buf, "current/dir.%d", i);
 		r = rmdir(buf);
 		printf("rmdir got %d\n", r ? errno:0);

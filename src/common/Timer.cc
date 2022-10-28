@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -16,13 +16,13 @@
 #include "Timer.h"
 
 
-#define dout_subsys ceph_subsys_timer
+#define dout_subsys stone_subsys_timer
 #undef dout_prefix
 #define dout_prefix *_dout << "timer(" << this << ")."
 
 using std::pair;
 
-using ceph::operator <<;
+using stone::operator <<;
 
 template <class Mutex>
 class CommonSafeTimerThread : public Thread {
@@ -36,7 +36,7 @@ public:
 };
 
 template <class Mutex>
-CommonSafeTimer<Mutex>::CommonSafeTimer(CephContext *cct_, Mutex &l, bool safe_callbacks)
+CommonSafeTimer<Mutex>::CommonSafeTimer(StoneContext *cct_, Mutex &l, bool safe_callbacks)
   : cct(cct_), lock(l),
     safe_callbacks(safe_callbacks),
     thread(NULL),
@@ -47,7 +47,7 @@ CommonSafeTimer<Mutex>::CommonSafeTimer(CephContext *cct_, Mutex &l, bool safe_c
 template <class Mutex>
 CommonSafeTimer<Mutex>::~CommonSafeTimer()
 {
-  ceph_assert(thread == NULL);
+  stone_assert(thread == NULL);
 }
 
 template <class Mutex>
@@ -63,7 +63,7 @@ void CommonSafeTimer<Mutex>::shutdown()
 {
   ldout(cct,10) << "shutdown" << dendl;
   if (thread) {
-    ceph_assert(ceph_mutex_is_locked(lock));
+    stone_assert(stone_mutex_is_locked(lock));
     cancel_all_events();
     stopping = true;
     cond.notify_all();
@@ -123,13 +123,13 @@ void CommonSafeTimer<Mutex>::timer_thread()
 template <class Mutex>
 Context* CommonSafeTimer<Mutex>::add_event_after(double seconds, Context *callback)
 {
-  return add_event_after(ceph::make_timespan(seconds), callback);
+  return add_event_after(stone::make_timespan(seconds), callback);
 }
 
 template <class Mutex>
-Context* CommonSafeTimer<Mutex>::add_event_after(ceph::timespan duration, Context *callback)
+Context* CommonSafeTimer<Mutex>::add_event_after(stone::timespan duration, Context *callback)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
 
   auto when = clock_t::now() + duration;
   return add_event_at(when, callback);
@@ -138,7 +138,7 @@ Context* CommonSafeTimer<Mutex>::add_event_after(ceph::timespan duration, Contex
 template <class Mutex>
 Context* CommonSafeTimer<Mutex>::add_event_at(CommonSafeTimer<Mutex>::clock_t::time_point when, Context *callback)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   ldout(cct,10) << __func__ << " " << when << " -> " << callback << dendl;
   if (stopping) {
     ldout(cct,5) << __func__ << " already shutdown, event not added" << dendl;
@@ -152,7 +152,7 @@ Context* CommonSafeTimer<Mutex>::add_event_at(CommonSafeTimer<Mutex>::clock_t::t
   pair < event_lookup_map_t::iterator, bool > rval(events.insert(e_val));
 
   /* If you hit this, you tried to insert the same Context* twice. */
-  ceph_assert(rval.second);
+  stone_assert(rval.second);
 
   /* If the event we have just inserted comes before everything else, we need to
    * adjust our timeout. */
@@ -164,7 +164,7 @@ Context* CommonSafeTimer<Mutex>::add_event_at(CommonSafeTimer<Mutex>::clock_t::t
 template <class Mutex>
 bool CommonSafeTimer<Mutex>::cancel_event(Context *callback)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
 
   auto p = events.find(callback);
   if (p == events.end()) {
@@ -184,7 +184,7 @@ template <class Mutex>
 void CommonSafeTimer<Mutex>::cancel_all_events()
 {
   ldout(cct,10) << "cancel_all_events" << dendl;
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
 
   while (!events.empty()) {
     auto p = events.begin();
@@ -208,5 +208,5 @@ void CommonSafeTimer<Mutex>::dump(const char *caller) const
     ldout(cct,10) << " " << s->first << "->" << s->second << dendl;
 }
 
-template class CommonSafeTimer<ceph::mutex>;
-template class CommonSafeTimer<ceph::fair_mutex>;
+template class CommonSafeTimer<stone::mutex>;
+template class CommonSafeTimer<stone::fair_mutex>;

@@ -11,8 +11,8 @@
 #include "tools/rbd_mirror/ProgressContext.h"
 #include "tools/rbd_mirror/image_replayer/snapshot/StateBuilder.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::snapshot::" \
                            << "PrepareReplayRequest: " << this << " " \
@@ -37,7 +37,7 @@ template <typename I>
 void PrepareReplayRequest<I>::load_local_image_meta() {
   dout(15) << dendl;
 
-  ceph_assert(m_state_builder->local_image_meta == nullptr);
+  stone_assert(m_state_builder->local_image_meta == nullptr);
   m_state_builder->local_image_meta =
     librbd::mirror::snapshot::ImageMeta<I>::create(
       m_state_builder->local_image_ctx, m_local_mirror_uuid);

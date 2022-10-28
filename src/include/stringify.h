@@ -1,5 +1,5 @@
-#ifndef __CEPH_STRINGIFY_H
-#define __CEPH_STRINGIFY_H
+#ifndef __STONE_STRINGIFY_H
+#define __STONE_STRINGIFY_H
 
 #include <string>
 #include <sstream>

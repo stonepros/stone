@@ -16,7 +16,7 @@
 #include "common/cmdparse.h"
 #include "include/stringify.h"
 
-#define dout_subsys ceph_subsys_mon
+#define dout_subsys stone_subsys_mon
 #undef dout_prefix
 #define dout_prefix _prefix(_dout, mon, this)
 using namespace TOPNSPC::common;
@@ -41,14 +41,14 @@ using std::to_string;
 using std::vector;
 using std::unique_ptr;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::Formatter;
-using ceph::JSONFormatter;
-using ceph::mono_clock;
-using ceph::mono_time;
-using ceph::timespan_str;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::Formatter;
+using stone::JSONFormatter;
+using stone::mono_clock;
+using stone::mono_time;
+using stone::timespan_str;
 static ostream& _prefix(std::ostream *_dout, const Monitor &mon,
                         const ConfigMonitor *hmon) {
   return *_dout << "mon." << mon.name << "@" << mon.rank
@@ -118,7 +118,7 @@ void ConfigMonitor::encode_pending_to_kvmon()
   string history = HISTORY_PREFIX + stringify(version+1) + "/";
   {
     bufferlist metabl;
-    ::encode(ceph_clock_now(), metabl);
+    ::encode(stone_clock_now(), metabl);
     ::encode(pending_description, metabl);
     mon.kvmon()->enqueue_set(history, metabl);
   }
@@ -228,7 +228,7 @@ bool ConfigMonitor::preprocess_command(MonOpRequestRef op)
     if (f) {
       f->open_array_section("options");
     }
-    for (auto& i : ceph_options) {
+    for (auto& i : stone_options) {
       if (f) {
 	f->dump_string("option", i.name);
       } else {
@@ -434,7 +434,7 @@ bool ConfigMonitor::preprocess_command(MonOpRequestRef op)
     }
   } else if (prefix == "config generate-minimal-conf") {
     ostringstream conf;
-    conf << "# minimal ceph.conf for " << mon.monmap->get_fsid() << "\n";
+    conf << "# minimal stone.conf for " << mon.monmap->get_fsid() << "\n";
 
     // the basics
     conf << "[global]\n";
@@ -448,7 +448,7 @@ bool ConfigMonitor::preprocess_command(MonOpRequestRef op)
       }
       if (i->second.public_addrs.size() == 1 &&
 	  i->second.public_addrs.front().is_legacy() &&
-	  i->second.public_addrs.front().get_port() == CEPH_MON_PORT_LEGACY) {
+	  i->second.public_addrs.front().get_port() == STONE_MON_PORT_LEGACY) {
 	// if this is a legacy addr on the legacy default port, then
 	// use the legacy-compatible formatting so that old clients
 	// can use this config.  new code will see the :6789 and correctly
@@ -609,7 +609,7 @@ bool ConfigMonitor::prepare_command(MonOpRequestRef op)
         revert_to > (int64_t)version) {
       err = -EINVAL;
       ss << "must specify a valid historical version to revert to; "
-         << "see 'ceph config log' for a list of avialable configuration "
+         << "see 'stone config log' for a list of avialable configuration "
          << "historical versions";
       goto reply;
     }
@@ -808,7 +808,7 @@ void ConfigMonitor::load_config()
     {
       auto p = renamed_pacific.find(name);
       if (p != renamed_pacific.end()) {
-	if (mon.monmap->min_mon_release >= ceph_release_t::pacific) {
+	if (mon.monmap->min_mon_release >= stone_release_t::pacific) {
 	  // schedule a cleanup
 	  pending_cleanup[key] = boost::none;
 	  pending_cleanup[who + "/" + p->second] = it->value();
@@ -882,7 +882,7 @@ void ConfigMonitor::load_config()
       crush_location,
       osdmap.crush.get(),
       string{}); // no device class
-    g_conf().set_mon_vals(g_ceph_context, out, nullptr);
+    g_conf().set_mon_vals(g_stone_context, out, nullptr);
   }
 }
 
@@ -900,7 +900,7 @@ void ConfigMonitor::load_changeset(version_t v, ConfigChangeSet *ch)
 	decode(ch->stamp, p);
 	decode(ch->name, p);
       }
-      catch (ceph::buffer::error& e) {
+      catch (stone::buffer::error& e) {
 	derr << __func__ << " failure decoding changeset " << v << dendl;
       }
     } else {

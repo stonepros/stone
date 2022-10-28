@@ -6,7 +6,7 @@
 #include "common/errno.h"
 #include "librbd/ImageCtx.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::SnapshotProtectRequest: "
 
@@ -45,7 +45,7 @@ void SnapshotProtectRequest<I>::send_op() {
 template <typename I>
 bool SnapshotProtectRequest<I>::should_complete(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": state=" << m_state << ", "
                 << "r=" << r << dendl;
   if (r < 0) {
@@ -61,9 +61,9 @@ bool SnapshotProtectRequest<I>::should_complete(int r) {
 template <typename I>
 void SnapshotProtectRequest<I>::send_protect_snap() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   int r = verify_and_send_protect_snap();
@@ -78,14 +78,14 @@ int SnapshotProtectRequest<I>::verify_and_send_protect_snap() {
   I &image_ctx = this->m_image_ctx;
   std::shared_lock image_locker{image_ctx.image_lock};
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   if ((image_ctx.features & RBD_FEATURE_LAYERING) == 0) {
     lderr(cct) << "image must support layering" << dendl;
     return -ENOSYS;
   }
 
   uint64_t snap_id = image_ctx.get_snap_id(m_snap_namespace, m_snap_name);
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     return -ENOENT;
   }
 
@@ -107,7 +107,7 @@ int SnapshotProtectRequest<I>::verify_and_send_protect_snap() {
     this->create_callback_completion();
   r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, rados_completion,
                                      &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
   return 0;
 }

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_COMMON_BIT_STR_H
-#define CEPH_COMMON_BIT_STR_H
+#ifndef STONE_COMMON_BIT_STR_H
+#define STONE_COMMON_BIT_STR_H
 
 #include <cstdint>
 #include <iosfwd>
@@ -34,4 +34,4 @@ extern void dump_bit_str(
     const std::function<const char*(uint64_t)> &func,
     bool dump_bit_val = false);
 
-#endif /* CEPH_COMMON_BIT_STR_H */
+#endif /* STONE_COMMON_BIT_STR_H */

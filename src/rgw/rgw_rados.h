@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 
-#ifndef CEPH_RGWRADOS_H
-#define CEPH_RGWRADOS_H
+#ifndef STONE_RGWRADOS_H
+#define STONE_RGWRADOS_H
 
 #include <functional>
 #include <boost/container/flat_map.hpp>

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CRYPTO_BLOCK_CRYPTO_H
-#define CEPH_LIBRBD_CRYPTO_BLOCK_CRYPTO_H
+#ifndef STONE_LIBRBD_CRYPTO_BLOCK_CRYPTO_H
+#define STONE_LIBRBD_CRYPTO_BLOCK_CRYPTO_H
 
 #include "include/Context.h"
 #include "librbd/crypto/CryptoInterface.h"
@@ -15,11 +15,11 @@ template <typename T>
 class BlockCrypto : public CryptoInterface {
 
 public:
-    static BlockCrypto* create(CephContext* cct, DataCryptor<T>* data_cryptor,
+    static BlockCrypto* create(StoneContext* cct, DataCryptor<T>* data_cryptor,
                                uint32_t block_size, uint64_t data_offset) {
       return new BlockCrypto(cct, data_cryptor, block_size, data_offset);
     }
-    BlockCrypto(CephContext* cct, DataCryptor<T>* data_cryptor,
+    BlockCrypto(StoneContext* cct, DataCryptor<T>* data_cryptor,
                 uint64_t block_size, uint64_t data_offset);
     ~BlockCrypto();
 
@@ -43,7 +43,7 @@ public:
     }
 
 private:
-    CephContext* m_cct;
+    StoneContext* m_cct;
     DataCryptor<T>* m_data_cryptor;
     uint64_t m_block_size;
     uint64_t m_data_offset;
@@ -57,4 +57,4 @@ private:
 
 extern template class librbd::crypto::BlockCrypto<EVP_CIPHER_CTX>;
 
-#endif //CEPH_LIBRBD_CRYPTO_BLOCK_CRYPTO_H
+#endif //STONE_LIBRBD_CRYPTO_BLOCK_CRYPTO_H

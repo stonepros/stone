@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_MIRROR_SNAPSHOT_PROMOTE_REQUEST_H
-#define CEPH_LIBRBD_MIRROR_SNAPSHOT_PROMOTE_REQUEST_H
+#ifndef STONE_LIBRBD_MIRROR_SNAPSHOT_PROMOTE_REQUEST_H
+#define STONE_LIBRBD_MIRROR_SNAPSHOT_PROMOTE_REQUEST_H
 
 #include "include/buffer.h"
 #include "include/rbd/librbd.hpp"
@@ -82,7 +82,7 @@ private:
   std::string m_global_image_id;
   Context *m_on_finish;
 
-  uint64_t m_rollback_snap_id = CEPH_NOSNAP;
+  uint64_t m_rollback_snap_id = STONE_NOSNAP;
   bool m_lock_acquired = false;
   NoOpProgressContext m_progress_ctx;
 
@@ -148,4 +148,4 @@ private:
 
 extern template class librbd::mirror::snapshot::PromoteRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_MIRROR_SNAPSHOT_PROMOTE_REQUEST_H
+#endif // STONE_LIBRBD_MIRROR_SNAPSHOT_PROMOTE_REQUEST_H

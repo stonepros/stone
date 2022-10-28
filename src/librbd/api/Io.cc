@@ -14,7 +14,7 @@
 #include "librbd/io/ImageDispatchSpec.h"
 #include "librbd/io/Types.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::api::Io " << __func__ << ": "
 
@@ -390,7 +390,7 @@ void Io<I>::aio_write_zeroes(I& image_ctx, io::AioCompletion *aio_comp,
                    << "write_same_length=" << write_same_length << ", "
                    << "append_offset=" << append_offset << ", "
                    << "append_length=" << append_length << dendl;
-    ceph_assert(prepend_length + write_same_length + append_length == len);
+    stone_assert(prepend_length + write_same_length + append_length == len);
 
     if (write_same_length <= data_length) {
       // unaligned or small write-zeroes request -- use single write
@@ -425,7 +425,7 @@ void Io<I>::aio_write_zeroes(I& image_ctx, io::AioCompletion *aio_comp,
       ++request_count;
     }
 
-    ceph_assert(request_count > 1);
+    stone_assert(request_count > 1);
     aio_comp->start_op();
     aio_comp->set_request_count(request_count);
 

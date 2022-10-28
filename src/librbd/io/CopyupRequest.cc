@@ -3,8 +3,8 @@
 
 #include "librbd/io/CopyupRequest.h"
 #include "include/neorados/RADOS.hpp"
-#include "common/ceph_context.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_context.h"
+#include "common/stone_mutex.h"
 #include "common/dout.h"
 #include "common/errno.h"
 #include "librbd/AsioEngine.h"
@@ -26,7 +26,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/construct.hpp>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::CopyupRequest: " << this            \
                            << " " << __func__ << ": "                          \
@@ -56,11 +56,11 @@ public:
 
   int send() override {
     auto& image_ctx = this->m_image_ctx;
-    ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+    stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
     if (image_ctx.exclusive_lock == nullptr) {
       return 1;
     }
-    ceph_assert(image_ctx.exclusive_lock->is_lock_owner());
+    stone_assert(image_ctx.exclusive_lock->is_lock_owner());
 
     std::shared_lock image_locker{image_ctx.image_lock};
     if (image_ctx.object_map == nullptr) {
@@ -68,7 +68,7 @@ public:
     }
 
     uint64_t snap_id = m_snap_ids[m_snap_id_idx];
-    if (snap_id == CEPH_NOSNAP) {
+    if (snap_id == STONE_NOSNAP) {
       return update_head();
     } else {
       return update_snapshot(snap_id);
@@ -77,17 +77,17 @@ public:
 
   int update_head() {
     auto& image_ctx = this->m_image_ctx;
-    ceph_assert(ceph_mutex_is_locked(image_ctx.image_lock));
+    stone_assert(stone_mutex_is_locked(image_ctx.image_lock));
 
     bool sent = image_ctx.object_map->template aio_update<Context>(
-      CEPH_NOSNAP, m_object_no, m_head_object_map_state, {}, m_trace, false,
+      STONE_NOSNAP, m_object_no, m_head_object_map_state, {}, m_trace, false,
       this);
     return (sent ? 0 : 1);
   }
 
   int update_snapshot(uint64_t snap_id) {
     auto& image_ctx = this->m_image_ctx;
-    ceph_assert(ceph_mutex_is_locked(image_ctx.image_lock));
+    stone_assert(stone_mutex_is_locked(image_ctx.image_lock));
 
     uint8_t state = OBJECT_EXISTS;
     if (image_ctx.test_features(RBD_FEATURE_FAST_DIFF, image_ctx.image_lock) &&
@@ -99,7 +99,7 @@ public:
 
     bool sent = image_ctx.object_map->template aio_update<Context>(
       snap_id, m_object_no, state, {}, m_trace, true, this);
-    ceph_assert(sent);
+    stone_assert(sent);
     return 0;
   }
 
@@ -121,13 +121,13 @@ CopyupRequest<I>::CopyupRequest(I *ictx, uint64_t objectno,
   : m_image_ctx(ictx), m_object_no(objectno), m_image_extents(image_extents),
     m_trace(librbd::util::create_trace(*m_image_ctx, "copy-up", parent_trace))
 {
-  ceph_assert(m_image_ctx->data_ctx.is_valid());
+  stone_assert(m_image_ctx->data_ctx.is_valid());
   m_async_op.start_op(*librbd::util::get_image_ctx(m_image_ctx));
 }
 
 template <typename I>
 CopyupRequest<I>::~CopyupRequest() {
-  ceph_assert(m_pending_requests.empty());
+  stone_assert(m_pending_requests.empty());
   m_async_op.finish_op();
 }
 
@@ -248,8 +248,8 @@ void CopyupRequest<I>::handle_read_from_parent(int r) {
 template <typename I>
 void CopyupRequest<I>::deep_copy() {
   auto cct = m_image_ctx->cct;
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx->image_lock));
-  ceph_assert(m_image_ctx->parent != nullptr);
+  stone_assert(stone_mutex_is_locked(m_image_ctx->image_lock));
+  stone_assert(m_image_ctx->parent != nullptr);
 
   m_lock.lock();
   m_deep_copied = true;
@@ -360,11 +360,11 @@ void CopyupRequest<I>::update_object_maps() {
 
   if ((*m_image_ctx->object_map)[m_object_no] != head_object_map_state) {
     // (maybe) need to update the HEAD object map state
-    m_snap_ids.push_back(CEPH_NOSNAP);
+    m_snap_ids.push_back(STONE_NOSNAP);
   }
   image_locker.unlock();
 
-  ceph_assert(m_image_ctx->exclusive_lock->is_lock_owner());
+  stone_assert(m_image_ctx->exclusive_lock->is_lock_owner());
   typename AsyncObjectThrottle<I>::ContextFactory context_factory(
     boost::lambda::bind(boost::lambda::new_ptr<C_UpdateObjectMap<I>>(),
     boost::lambda::_1, m_image_ctx, m_object_no, head_object_map_state,
@@ -501,7 +501,7 @@ void CopyupRequest<I>::handle_copyup(int r) {
   int copyup_ret_val = r;
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_pending_copyups > 0);
+    stone_assert(m_pending_copyups > 0);
     pending_copyups = --m_pending_copyups;
     if (m_copyup_ret_val < 0) {
       copyup_ret_val = m_copyup_ret_val;
@@ -561,7 +561,7 @@ void CopyupRequest<I>::complete_requests(bool override_restart_retval, int r) {
 
 template <typename I>
 void CopyupRequest<I>::disable_append_requests() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   m_append_request_permitted = false;
 }
 
@@ -577,7 +577,7 @@ void CopyupRequest<I>::remove_from_list() {
 
 template <typename I>
 bool CopyupRequest<I>::is_copyup_required() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   bool copy_on_read = m_pending_requests.empty();
   if (copy_on_read) {
@@ -599,13 +599,13 @@ bool CopyupRequest<I>::is_copyup_required() {
 
 template <typename I>
 bool CopyupRequest<I>::is_deep_copy() const {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx->image_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx->image_lock));
   return !m_image_ctx->migration_info.empty();
 }
 
 template <typename I>
 bool CopyupRequest<I>::is_update_object_map_required(int r) {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx->image_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx->image_lock));
 
   if (r < 0) {
     return false;
@@ -621,20 +621,20 @@ bool CopyupRequest<I>::is_update_object_map_required(int r) {
     return true;
   }
 
-  auto it = m_image_ctx->migration_info.snap_map.find(CEPH_NOSNAP);
-  ceph_assert(it != m_image_ctx->migration_info.snap_map.end());
-  return it->second[0] != CEPH_NOSNAP;
+  auto it = m_image_ctx->migration_info.snap_map.find(STONE_NOSNAP);
+  stone_assert(it != m_image_ctx->migration_info.snap_map.end());
+  return it->second[0] != STONE_NOSNAP;
 }
 
 template <typename I>
 void CopyupRequest<I>::compute_deep_copy_snap_ids() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx->image_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx->image_lock));
 
   // don't copy ids for the snaps updated by object deep copy or
   // that don't overlap
   std::set<uint64_t> deep_copied;
   for (auto &it : m_image_ctx->migration_info.snap_map) {
-    if (it.first != CEPH_NOSNAP) {
+    if (it.first != STONE_NOSNAP) {
       deep_copied.insert(it.second.front());
     }
   }
@@ -691,7 +691,7 @@ void CopyupRequest<I>::convert_copyup_extent_map() {
 
 template <typename I>
 int CopyupRequest<I>::prepare_copyup_data() {
-  ceph_assert(ceph_mutex_is_locked(m_image_ctx->image_lock));
+  stone_assert(stone_mutex_is_locked(m_image_ctx->image_lock));
   auto cct = m_image_ctx->cct;
 
   SnapshotSparseBufferlist snapshot_sparse_bufferlist;
@@ -733,7 +733,7 @@ int CopyupRequest<I>::prepare_copyup_data() {
         sub_bl.substr_of(
           m_copyup_data, buffer_offset + (copyup_offset - object_offset),
           copyup_length);
-        ceph_assert(sub_bl.length() == copyup_length);
+        stone_assert(sub_bl.length() == copyup_length);
 
         sparse_bufferlist.insert(
           copyup_offset, copyup_length,

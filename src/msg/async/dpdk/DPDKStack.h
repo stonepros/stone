@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -12,8 +12,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_MSG_DPDKSTACK_H
-#define CEPH_MSG_DPDKSTACK_H
+#ifndef STONE_MSG_DPDKSTACK_H
+#define STONE_MSG_DPDKSTACK_H
 
 #include <functional>
 
@@ -220,7 +220,7 @@ class DPDKWorker : public Worker {
     interface _netif;
     std::shared_ptr<DPDKDevice> _dev;
     ipv4 _inet;
-    Impl(CephContext *cct, unsigned i, EventCenter *c, std::shared_ptr<DPDKDevice> dev);
+    Impl(StoneeContext *cct, unsigned i, EventCenter *c, std::shared_ptr<DPDKDevice> dev);
     ~Impl();
   };
   std::unique_ptr<Impl> _impl;
@@ -232,7 +232,7 @@ class DPDKWorker : public Worker {
   using tcp4 = tcp<ipv4_traits>;
 
  public:
-  explicit DPDKWorker(CephContext *c, unsigned i): Worker(c, i) {}
+  explicit DPDKWorker(StoneeContext *c, unsigned i): Worker(c, i) {}
   virtual int listen(entity_addr_t &addr, unsigned addr_slot,
 		     const SocketOptions &opts, ServerSocket *) override;
   virtual int connect(const entity_addr_t &addr, const SocketOptions &opts, ConnectedSocket *socket) override;
@@ -249,12 +249,12 @@ class DPDKWorker : public Worker {
 class DPDKStack : public NetworkStack {
   vector<std::function<void()> > funcs;
 
-  virtual Worker* create_worker(CephContext *c, unsigned worker_id) override {
+  virtual Worker* create_worker(StoneeContext *c, unsigned worker_id) override {
     return new DPDKWorker(c, worker_id);
   }
 
  public:
-  explicit DPDKStack(CephContext *cct): NetworkStack(cct) {
+  explicit DPDKStack(StoneeContext *cct): NetworkStack(cct) {
     funcs.resize(cct->_conf->ms_async_max_op_threads);
   }
   virtual bool support_local_listen_table() const override { return true; }

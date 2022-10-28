@@ -11,7 +11,7 @@
 #include "librbd/Watcher.h"
 #include "librbd/asio/ContextWQ.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::managed_lock::ReleaseRequest: " \
                             << this << " " << __func__ << ": "
@@ -55,7 +55,7 @@ void ReleaseRequest<I>::send() {
 
 template <typename I>
 void ReleaseRequest<I>::send_unlock() {
-  CephContext *cct = reinterpret_cast<CephContext *>(m_ioctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(m_ioctx.cct());
   ldout(cct, 10) << "entity=client." << m_ioctx.get_instance_id() << ", "
                  << "cookie=" << m_cookie << dendl;
 
@@ -66,13 +66,13 @@ void ReleaseRequest<I>::send_unlock() {
   librados::AioCompletion *rados_completion =
     create_rados_callback<klass, &klass::handle_unlock>(this);
   int r = m_ioctx.aio_operate(m_oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 template <typename I>
 void ReleaseRequest<I>::handle_unlock(int r) {
-  CephContext *cct = reinterpret_cast<CephContext *>(m_ioctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(m_ioctx.cct());
   ldout(cct, 10) << "r=" << r << dendl;
 
   if (r < 0 && r != -ENOENT) {

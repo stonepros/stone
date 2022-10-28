@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "rgw/rgw_amqp.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "amqp_mock.h"
 #include <gtest/gtest.h>
 #include <chrono>
@@ -16,9 +16,9 @@ const std::chrono::milliseconds long_wait_time = wait_time*50;
 
 
 class CctCleaner {
-  CephContext* cct;
+  StoneContext* cct;
 public:
-  CctCleaner(CephContext* _cct) : cct(_cct) {}
+  CctCleaner(StoneContext* _cct) : cct(_cct) {}
   ~CctCleaner() { 
 #ifdef WITH_SEASTAR
     delete cct; 
@@ -28,7 +28,7 @@ public:
   }
 };
 
-auto cct = new CephContext(CEPH_ENTITY_TYPE_CLIENT);
+auto cct = new StoneContext(STONE_ENTITY_TYPE_CLIENT);
 
 CctCleaner cleaner(cct);
 

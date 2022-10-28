@@ -1,0 +1,13 @@
+[Unit]
+Description=Stone crash dump collector
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/stone-crash
+Restart=always
+RestartSec=10
+StartLimitInterval=10min
+StartLimitBurst=10
+
+[Install]
+WantedBy=stone.target

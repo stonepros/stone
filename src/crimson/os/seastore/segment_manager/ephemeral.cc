@@ -13,7 +13,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 }
 
@@ -47,7 +47,7 @@ Segment::close_ertr::future<> EphemeralSegment::close()
 }
 
 Segment::write_ertr::future<> EphemeralSegment::write(
-  segment_off_t offset, ceph::bufferlist bl)
+  segment_off_t offset, stone::bufferlist bl)
 {
   if (offset < write_pointer || offset % manager.config.block_size != 0)
     return crimson::ct_error::invarg::make();
@@ -71,7 +71,7 @@ Segment::close_ertr::future<> EphemeralSegmentManager::segment_close(segment_id_
 
 Segment::write_ertr::future<> EphemeralSegmentManager::segment_write(
   paddr_t addr,
-  ceph::bufferlist bl,
+  stone::bufferlist bl,
   bool ignore_check)
 {
   logger().debug(
@@ -189,7 +189,7 @@ SegmentManager::release_ertr::future<> EphemeralSegmentManager::release(
 SegmentManager::read_ertr::future<> EphemeralSegmentManager::read(
   paddr_t addr,
   size_t len,
-  ceph::bufferptr &out)
+  stone::bufferptr &out)
 {
   if (addr.segment >= get_num_segments()) {
     logger().error(

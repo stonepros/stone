@@ -11,10 +11,10 @@
 #include "common/perf_counters.h"
 
 // re-include our assert to clobber the system one; fix dout:
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_leveldb
+#define dout_subsys stone_subsys_leveldb
 #undef dout_prefix
 #define dout_prefix *_dout << "leveldb: "
 
@@ -24,16 +24,16 @@ using std::ostream;
 using std::pair;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
+using stone::bufferlist;
+using stone::bufferptr;
 
-class CephLevelDBLogger : public leveldb::Logger {
-  CephContext *cct;
+class StoneLevelDBLogger : public leveldb::Logger {
+  StoneContext *cct;
 public:
-  explicit CephLevelDBLogger(CephContext *c) : cct(c) {
+  explicit StoneLevelDBLogger(StoneContext *c) : cct(c) {
     cct->get();
   }
-  ~CephLevelDBLogger() override {
+  ~StoneLevelDBLogger() override {
     cct->put();
   }
 
@@ -46,9 +46,9 @@ public:
   }
 };
 
-leveldb::Logger *create_leveldb_ceph_logger()
+leveldb::Logger *create_leveldb_stone_logger()
 {
-  return new CephLevelDBLogger(g_ceph_context);
+  return new StoneLevelDBLogger(g_stone_context);
 }
 
 int LevelDBStore::init(string option_str)
@@ -68,14 +68,14 @@ int LevelDBStore::init(string option_str)
 
 int LevelDBStore::open(ostream &out, const std::string& cfs)  {
   if (!cfs.empty()) {
-    ceph_abort_msg("Not implemented");
+    stone_abort_msg("Not implemented");
   }
   return do_open(out, false);
 }
 
 int LevelDBStore::create_and_open(ostream &out, const std::string& cfs) {
   if (!cfs.empty()) {
-    ceph_abort_msg("Not implemented");
+    stone_abort_msg("Not implemented");
   }
   return do_open(out, true);
 }
@@ -100,7 +100,7 @@ int LevelDBStore::load_leveldb_options(bool create_if_missing, leveldb::Options 
     filterpolicy.reset(_filterpolicy);
     ldoptions.filter_policy = filterpolicy.get();
 #else
-    ceph_abort_msg("bloom size set but installed leveldb doesn't support bloom filters");
+    stone_abort_msg("bloom size set but installed leveldb doesn't support bloom filters");
 #endif
   }
   if (options.compression_enabled)
@@ -114,9 +114,9 @@ int LevelDBStore::load_leveldb_options(bool create_if_missing, leveldb::Options 
   ldoptions.paranoid_checks = options.paranoid_checks;
   ldoptions.create_if_missing = create_if_missing;
 
-  if (g_conf()->leveldb_log_to_ceph_log) {
-    ceph_logger = new CephLevelDBLogger(g_ceph_context);
-    ldoptions.info_log = ceph_logger;
+  if (g_conf()->leveldb_log_to_stone_log) {
+    stone_logger = new StoneLevelDBLogger(g_stone_context);
+    ldoptions.info_log = stone_logger;
   }
   
   if (options.log_file.length()) {
@@ -143,7 +143,7 @@ int LevelDBStore::do_open(ostream &out, bool create_if_missing)
     return -EINVAL;
   }
 
-  PerfCountersBuilder plb(g_ceph_context, "leveldb", l_leveldb_first, l_leveldb_last);
+  PerfCountersBuilder plb(g_stone_context, "leveldb", l_leveldb_first, l_leveldb_last);
   plb.add_u64_counter(l_leveldb_gets, "leveldb_get", "Gets");
   plb.add_u64_counter(l_leveldb_txns, "leveldb_transaction", "Transactions");
   plb.add_time_avg(l_leveldb_get_latency, "leveldb_get_latency", "Get Latency");
@@ -200,7 +200,7 @@ void LevelDBStore::close()
 
   // Ensure db is destroyed before dependent db_cache and filterpolicy
   db.reset();
-  delete ceph_logger;
+  delete stone_logger;
 }
 
 int LevelDBStore::repair(std::ostream &out)
@@ -223,11 +223,11 @@ int LevelDBStore::repair(std::ostream &out)
 
 int LevelDBStore::submit_transaction(KeyValueDB::Transaction t)
 {
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   LevelDBTransactionImpl * _t =
     static_cast<LevelDBTransactionImpl *>(t.get());
   leveldb::Status s = db->Write(leveldb::WriteOptions(), &(_t->bat));
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->inc(l_leveldb_txns);
   logger->tinc(l_leveldb_submit_latency, lat);
   return s.ok() ? 0 : -1;
@@ -235,13 +235,13 @@ int LevelDBStore::submit_transaction(KeyValueDB::Transaction t)
 
 int LevelDBStore::submit_transaction_sync(KeyValueDB::Transaction t)
 {
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   LevelDBTransactionImpl * _t =
     static_cast<LevelDBTransactionImpl *>(t.get());
   leveldb::WriteOptions options;
   options.sync = true;
   leveldb::Status s = db->Write(options, &(_t->bat));
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->inc(l_leveldb_txns);
   logger->tinc(l_leveldb_submit_sync_latency, lat);
   return s.ok() ? 0 : -1;
@@ -312,7 +312,7 @@ int LevelDBStore::get(
     const std::set<string> &keys,
     std::map<string, bufferlist> *out)
 {
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   for (std::set<string>::const_iterator i = keys.begin();
        i != keys.end(); ++i) {
     std::string value;
@@ -321,7 +321,7 @@ int LevelDBStore::get(
     if (status.ok())
       (*out)[*i].append(value);
   }
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->inc(l_leveldb_gets);
   logger->tinc(l_leveldb_get_latency, lat);
   return 0;
@@ -331,8 +331,8 @@ int LevelDBStore::get(const string &prefix,
       const string &key,
       bufferlist *out)
 {
-  ceph_assert(out && (out->length() == 0));
-  utime_t start = ceph_clock_now();
+  stone_assert(out && (out->length() == 0));
+  utime_t start = stone_clock_now();
   int r = 0;
   string value, k;
   leveldb::Status s;
@@ -343,7 +343,7 @@ int LevelDBStore::get(const string &prefix,
   } else {
     r = -ENOENT;
   }
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->inc(l_leveldb_gets);
   logger->tinc(l_leveldb_get_latency, lat);
   return r;

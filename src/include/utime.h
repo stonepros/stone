@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_UTIME_H
-#define CEPH_UTIME_H
+#ifndef STONE_UTIME_H
+#define STONE_UTIME_H
 
 #include <math.h>
 #include <sys/time.h>
@@ -157,7 +157,7 @@ public:
       "utime_t have padding");
   }
   void encode(ceph::buffer::list &bl) const {
-#if defined(CEPH_LITTLE_ENDIAN)
+#if defined(STONE_LITTLE_ENDIAN)
     bl.append((char *)(this), sizeof(__u32) + sizeof(__u32));
 #else
     using ceph::encode;
@@ -166,7 +166,7 @@ public:
 #endif
   }
   void decode(ceph::buffer::list::const_iterator &p) {
-#if defined(CEPH_LITTLE_ENDIAN)
+#if defined(STONE_LITTLE_ENDIAN)
     p.copy(sizeof(__u32) + sizeof(__u32), (char *)(this));
 #else
     using ceph::decode;

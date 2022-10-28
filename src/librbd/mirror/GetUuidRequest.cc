@@ -8,7 +8,7 @@
 #include "librbd/ImageCtx.h"
 #include "librbd/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::GetUuidRequest: " \
@@ -23,7 +23,7 @@ template <typename I>
 GetUuidRequest<I>::GetUuidRequest(
     librados::IoCtx& io_ctx, std::string* mirror_uuid, Context* on_finish)
   : m_mirror_uuid(mirror_uuid), m_on_finish(on_finish),
-    m_cct(reinterpret_cast<CephContext*>(io_ctx.cct())) {
+    m_cct(reinterpret_cast<StoneContext*>(io_ctx.cct())) {
   m_io_ctx.dup(io_ctx);
   m_io_ctx.set_namespace("");
 }
@@ -43,7 +43,7 @@ void GetUuidRequest<I>::get_mirror_uuid() {
   auto aio_comp = create_rados_callback<
     GetUuidRequest<I>, &GetUuidRequest<I>::handle_get_mirror_uuid>(this);
   int r = m_io_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 

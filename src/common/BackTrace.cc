@@ -9,7 +9,7 @@
 #include "common/version.h"
 #include "common/Formatter.h"
 
-namespace ceph {
+namespace stone {
 
 void BackTrace::print(std::ostream& out) const
 {

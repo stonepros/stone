@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_BITMAPPER_H
-#define CEPH_BITMAPPER_H
+#ifndef STONE_BITMAPPER_H
+#define STONE_BITMAPPER_H
 
 class bitmapper {
   char *_data;

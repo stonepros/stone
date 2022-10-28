@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         rbd default map options: ms_mode=legacy,rxbounce,read_from_replica=balance

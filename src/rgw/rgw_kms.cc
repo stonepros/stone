@@ -19,8 +19,8 @@
 #include "rapidjson/error/error.h"
 #include "rapidjson/error/en.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 using namespace rgw;
 
@@ -86,7 +86,7 @@ public:
 	return r;
     }
     static void Free(void *p) {
-	ceph_assert(0 == "Free should not be called");
+	stone_assert(0 == "Free should not be called");
     }
 private:
     //! Copy constructor is not permitted.
@@ -162,7 +162,7 @@ typedef std::map<std::string, std::string> EngineParmMap;
 class VaultSecretEngine: public SecretEngine {
 
 protected:
-  CephContext *cct;
+  StoneContext *cct;
 
   int load_token_from_file(std::string *vault_token)
   {
@@ -203,7 +203,7 @@ protected:
     }
     vault_token->assign(std::string{buf, static_cast<size_t>(res)});
     memset(buf, 0, sizeof(buf));
-    ::ceph::crypto::zeroize_for_security(buf, sizeof(buf));
+    ::stone::crypto::zeroize_for_security(buf, sizeof(buf));
     return res;
   }
 
@@ -301,7 +301,7 @@ protected:
 
 public:
 
-  VaultSecretEngine(CephContext *cct) {
+  VaultSecretEngine(StoneContext *cct) {
     this->cct = cct;
   }
 };
@@ -333,7 +333,7 @@ private:
   }
 
 public:
-  TransitSecretEngine(CephContext *cct, EngineParmMap parms): VaultSecretEngine(cct), parms(parms) {
+  TransitSecretEngine(StoneContext *cct, EngineParmMap parms): VaultSecretEngine(cct), parms(parms) {
     compat = COMPAT_UNSET;
     for (auto& e: parms) {
       if (e.first == "compat") {
@@ -578,7 +578,7 @@ class KvSecretEngine: public VaultSecretEngine {
 
 public:
 
-  KvSecretEngine(CephContext *cct, EngineParmMap parms): VaultSecretEngine(cct){
+  KvSecretEngine(StoneContext *cct, EngineParmMap parms): VaultSecretEngine(cct){
     if (!parms.empty()) {
       lderr(cct) << "ERROR: vault kv secrets engine takes no parameters (ignoring them)" << dendl;
     }
@@ -636,12 +636,12 @@ public:
 class KmipSecretEngine;
 class KmipGetTheKey {
 private:
-	CephContext *cct;
+	StoneContext *cct;
 	std::string work;
 	bool failed = false;
 	int ret;
 protected:
-	KmipGetTheKey(CephContext *cct) : cct(cct) {}
+	KmipGetTheKey(StoneContext *cct) : cct(cct) {}
 	KmipGetTheKey& keyid_to_keyname(std::string_view key_id);
 	KmipGetTheKey& get_uniqueid_for_keyname();
 	int get_key_for_uniqueid(std::string &);
@@ -713,11 +713,11 @@ KmipGetTheKey::get_key_for_uniqueid(std::string& actual_key)
 class KmipSecretEngine: public SecretEngine {
 
 protected:
-  CephContext *cct;
+  StoneContext *cct;
 
 public:
 
-  KmipSecretEngine(CephContext *cct) {
+  KmipSecretEngine(StoneContext *cct) {
     this->cct = cct;
   }
 
@@ -740,7 +740,7 @@ static map<string,string> get_str_map(const string &str) {
 }
 
 
-static int get_actual_key_from_conf(CephContext *cct,
+static int get_actual_key_from_conf(StoneContext *cct,
                                     std::string_view key_id,
                                     std::string_view key_selector,
                                     std::string& actual_key)
@@ -774,7 +774,7 @@ static int get_actual_key_from_conf(CephContext *cct,
     } else {
       res = -EIO;
     }
-    ::ceph::crypto::zeroize_for_security(_actual_key, sizeof(_actual_key));
+    ::stone::crypto::zeroize_for_security(_actual_key, sizeof(_actual_key));
   } else {
     ldout(cct, 20) << "Wrong size for key=" << key_id << dendl;
     res = -EIO;
@@ -783,7 +783,7 @@ static int get_actual_key_from_conf(CephContext *cct,
   return res;
 }
 
-static int request_key_from_barbican(CephContext *cct,
+static int request_key_from_barbican(StoneContext *cct,
                                      std::string_view key_id,
                                      const std::string& barbican_token,
                                      std::string& actual_key) {
@@ -822,7 +822,7 @@ static int request_key_from_barbican(CephContext *cct,
   return res;
 }
 
-static int get_actual_key_from_barbican(CephContext *cct,
+static int get_actual_key_from_barbican(StoneContext *cct,
                                         std::string_view key_id,
                                         std::string& actual_key)
 {
@@ -842,7 +842,7 @@ static int get_actual_key_from_barbican(CephContext *cct,
 }
 
 
-std::string config_to_engine_and_parms(CephContext *cct,
+std::string config_to_engine_and_parms(StoneContext *cct,
     const char* which,
     std::string& secret_engine_str,
     EngineParmMap& secret_engine_parms)
@@ -878,7 +878,7 @@ std::string config_to_engine_and_parms(CephContext *cct,
 }
 
 
-static int get_actual_key_from_vault(CephContext *cct,
+static int get_actual_key_from_vault(StoneContext *cct,
                                      map<string, bufferlist>& attrs,
                                      std::string& actual_key, bool make_it)
 {
@@ -909,7 +909,7 @@ static int get_actual_key_from_vault(CephContext *cct,
 }
 
 
-static int make_actual_key_from_vault(CephContext *cct,
+static int make_actual_key_from_vault(StoneContext *cct,
                                      map<string, bufferlist>& attrs,
                                      std::string& actual_key)
 {
@@ -917,7 +917,7 @@ static int make_actual_key_from_vault(CephContext *cct,
 }
 
 
-static int reconstitute_actual_key_from_vault(CephContext *cct,
+static int reconstitute_actual_key_from_vault(StoneContext *cct,
                                      map<string, bufferlist>& attrs,
                                      std::string& actual_key)
 {
@@ -925,7 +925,7 @@ static int reconstitute_actual_key_from_vault(CephContext *cct,
 }
 
 
-static int get_actual_key_from_kmip(CephContext *cct,
+static int get_actual_key_from_kmip(StoneContext *cct,
                                      std::string_view key_id,
                                      std::string& actual_key)
 {
@@ -942,7 +942,7 @@ static int get_actual_key_from_kmip(CephContext *cct,
 }
 
 
-int reconstitute_actual_key_from_kms(CephContext *cct,
+int reconstitute_actual_key_from_kms(StoneContext *cct,
                             map<string, bufferlist>& attrs,
                             std::string& actual_key)
 {
@@ -973,7 +973,7 @@ int reconstitute_actual_key_from_kms(CephContext *cct,
   return -EINVAL;
 }
 
-int make_actual_key_from_kms(CephContext *cct,
+int make_actual_key_from_kms(StoneContext *cct,
                             map<string, bufferlist>& attrs,
                             std::string& actual_key)
 {

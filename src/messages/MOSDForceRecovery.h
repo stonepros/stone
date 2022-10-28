@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2017 OVH
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_MOSDFORCERECOVERY_H
-#define CEPH_MOSDFORCERECOVERY_H
+#ifndef STONE_MOSDFORCERECOVERY_H
+#define STONE_MOSDFORCERECOVERY_H
 
 #include "msg/Message.h"
 
@@ -111,4 +111,4 @@ private:
   friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
 };
 
-#endif /* CEPH_MOSDFORCERECOVERY_H_ */
+#endif /* STONE_MOSDFORCERECOVERY_H_ */

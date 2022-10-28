@@ -8,9 +8,9 @@
 #include "librbd/ImageCtx.h"
 #include "librbd/ObjectMap.h"
 #include "librbd/Utils.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::object_map::RemoveRequest: "
 
@@ -31,18 +31,18 @@ void RemoveRequest<I>::send() {
 
 template <typename I>
 void RemoveRequest<I>::send_remove_object_map() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << dendl;
 
   std::unique_lock image_locker{m_image_ctx->image_lock};
   std::vector<uint64_t> snap_ids;
-  snap_ids.push_back(CEPH_NOSNAP);
+  snap_ids.push_back(STONE_NOSNAP);
   for (auto it : m_image_ctx->snap_info) {
     snap_ids.push_back(it.first);
   }
 
   std::lock_guard locker{m_lock};
-  ceph_assert(m_ref_counter == 0);
+  stone_assert(m_ref_counter == 0);
 
   for (auto snap_id : snap_ids) {
     m_ref_counter++;
@@ -52,19 +52,19 @@ void RemoveRequest<I>::send_remove_object_map() {
       create_rados_callback<klass, &klass::handle_remove_object_map>(this);
 
     int r = m_image_ctx->md_ctx.aio_remove(oid, comp);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     comp->release();
   }
 }
 
 template <typename I>
 Context *RemoveRequest<I>::handle_remove_object_map(int *result) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << __func__ << ": r=" << *result << dendl;
 
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_ref_counter > 0);
+    stone_assert(m_ref_counter > 0);
     m_ref_counter--;
 
     if (*result < 0 && *result != -ENOENT) {

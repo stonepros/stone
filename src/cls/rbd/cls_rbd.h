@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef __CEPH_CLS_RBD_H
-#define __CEPH_CLS_RBD_H
+#ifndef __STONE_CLS_RBD_H
+#define __STONE_CLS_RBD_H
 
 #include "include/types.h"
 #include "include/buffer_fwd.h"
@@ -15,7 +15,7 @@ struct cls_rbd_parent {
   int64_t pool_id = -1;
   std::string pool_namespace;
   std::string image_id;
-  snapid_t snap_id = CEPH_NOSNAP;
+  snapid_t snap_id = STONE_NOSNAP;
   std::optional<uint64_t> head_overlap = std::nullopt;
 
   cls_rbd_parent() {
@@ -29,7 +29,7 @@ struct cls_rbd_parent {
   }
 
   inline bool exists() const {
-    return (pool_id >= 0 && !image_id.empty() && snap_id != CEPH_NOSNAP);
+    return (pool_id >= 0 && !image_id.empty() && snap_id != STONE_NOSNAP);
   }
 
   inline bool operator==(const cls_rbd_parent& rhs) const {
@@ -45,7 +45,7 @@ struct cls_rbd_parent {
   void encode(ceph::buffer::list& bl, uint64_t features) const {
     // NOTE: remove support for version 1 after Nautilus EOLed
     uint8_t version = 1;
-    if ((features & CEPH_FEATURE_SERVER_NAUTILUS) != 0ULL) {
+    if ((features & STONE_FEATURE_SERVER_NAUTILUS) != 0ULL) {
       // break backwards compatability when using nautilus or later OSDs
       version = 2;
     }
@@ -103,7 +103,7 @@ struct cls_rbd_parent {
 WRITE_CLASS_ENCODER_FEATURES(cls_rbd_parent)
 
 struct cls_rbd_snap {
-  snapid_t id = CEPH_NOSNAP;
+  snapid_t id = STONE_NOSNAP;
   std::string name;
   uint64_t image_size = 0;
   uint8_t protection_status = RBD_PROTECTION_STATUS_UNPROTECTED;
@@ -130,14 +130,14 @@ struct cls_rbd_snap {
   }
 
   bool migrate_parent_format(uint64_t features) const {
-    return (((features & CEPH_FEATURE_SERVER_NAUTILUS) != 0) &&
+    return (((features & STONE_FEATURE_SERVER_NAUTILUS) != 0) &&
             (parent.exists()));
   }
 
   void encode(ceph::buffer::list& bl, uint64_t features) const {
     // NOTE: remove support for versions < 8 after Nautilus EOLed
     uint8_t min_version = 1;
-    if ((features & CEPH_FEATURE_SERVER_NAUTILUS) != 0ULL) {
+    if ((features & STONE_FEATURE_SERVER_NAUTILUS) != 0ULL) {
       // break backwards compatability when using nautilus or later OSDs
       min_version = 8;
     }
@@ -240,4 +240,4 @@ struct cls_rbd_snap {
 };
 WRITE_CLASS_ENCODER_FEATURES(cls_rbd_snap)
 
-#endif // __CEPH_CLS_RBD_H
+#endif // __STONE_CLS_RBD_H

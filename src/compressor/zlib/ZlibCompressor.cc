@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Mirantis, Inc.
  *
@@ -23,7 +23,7 @@
 
 // -----------------------------------------------------------------------------
 #define dout_context cct
-#define dout_subsys ceph_subsys_compressor
+#define dout_subsys stone_subsys_compressor
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 // -----------------------------------------------------------------------------
@@ -32,8 +32,8 @@
 
 using std::ostream;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
+using stone::bufferlist;
+using stone::bufferptr;
 
 static ostream&
 _prefix(std::ostream* _dout)
@@ -42,7 +42,7 @@ _prefix(std::ostream* _dout)
 }
 // -----------------------------------------------------------------------------
 
-#define MAX_LEN (CEPH_PAGE_SIZE)
+#define MAX_LEN (STONE_PAGE_SIZE)
 
 // default window size for Zlib 1.2.8, negated for raw deflate
 #define ZLIB_DEFAULT_WIN_SIZE -15
@@ -72,7 +72,7 @@ int ZlibCompressor::zlib_compress(const bufferlist &in, bufferlist &out, boost::
   }
   compressor_message = cct->_conf->compressor_zlib_winsize;
 
-  for (ceph::bufferlist::buffers_t::const_iterator i = in.buffers().begin();
+  for (stone::bufferlist::buffers_t::const_iterator i = in.buffers().begin();
       i != in.buffers().end();) {
 
     c_in = (unsigned char*) (*i).c_str();
@@ -84,7 +84,7 @@ int ZlibCompressor::zlib_compress(const bufferlist &in, bufferlist &out, boost::
 
     strm.next_in = c_in;
     do {
-      bufferptr ptr = ceph::buffer::create_page_aligned(MAX_LEN);
+      bufferptr ptr = stone::buffer::create_page_aligned(MAX_LEN);
       strm.next_out = (unsigned char*)ptr.c_str() + begin;
       strm.avail_out = MAX_LEN - begin;
       if (begin) {
@@ -127,7 +127,7 @@ int ZlibCompressor::isal_compress(const bufferlist &in, bufferlist &out, boost::
   strm.end_of_stream = 0;
   compressor_message = ZLIB_DEFAULT_WIN_SIZE;
 
-  for (ceph::bufferlist::buffers_t::const_iterator i = in.buffers().begin();
+  for (stone::bufferlist::buffers_t::const_iterator i = in.buffers().begin();
       i != in.buffers().end();) {
 
     c_in = (unsigned char*) (*i).c_str();
@@ -141,7 +141,7 @@ int ZlibCompressor::isal_compress(const bufferlist &in, bufferlist &out, boost::
     strm.next_in = c_in;
 
     do {
-      bufferptr ptr = ceph::buffer::create_page_aligned(MAX_LEN);
+      bufferptr ptr = stone::buffer::create_page_aligned(MAX_LEN);
       strm.next_out = (unsigned char*)ptr.c_str() + begin;
       strm.avail_out = MAX_LEN - begin;
       if (begin) {
@@ -225,7 +225,7 @@ int ZlibCompressor::decompress(bufferlist::const_iterator &p, size_t compressed_
 
     do {
       strm.avail_out = MAX_LEN;
-      bufferptr ptr = ceph::buffer::create_page_aligned(MAX_LEN);
+      bufferptr ptr = stone::buffer::create_page_aligned(MAX_LEN);
       strm.next_out = (unsigned char*)ptr.c_str();
       ret = inflate(&strm, Z_NO_FLUSH);
       if (ret != Z_OK && ret != Z_STREAM_END && ret != Z_BUF_ERROR) {

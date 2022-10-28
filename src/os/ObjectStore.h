@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_OBJECTSTORE_H
-#define CEPH_OBJECTSTORE_H
+#ifndef STONE_OBJECTSTORE_H
+#define STONE_OBJECTSTORE_H
 
 #include "include/buffer.h"
 #include "include/common_fwd.h"
@@ -458,7 +458,7 @@ public:
    * @param offset location offset of first byte to be read
    * @param len number of bytes to be read
    * @param bl output ceph::buffer::list
-   * @param op_flags is CEPH_OSD_OP_FLAG_*
+   * @param op_flags is STONE_OSD_OP_FLAG_*
    * @returns number of bytes read on success, or negative error code on failure.
    */
    virtual int read(
@@ -505,7 +505,7 @@ public:
    * @param oid oid of object
    * @param m intervals to be read
    * @param bl output ceph::buffer::list
-   * @param op_flags is CEPH_OSD_OP_FLAG_*
+   * @param op_flags is STONE_OSD_OP_FLAG_*
    * @returns number of bytes read on success, or negative error code on failure.
    */
    virtual int readv(

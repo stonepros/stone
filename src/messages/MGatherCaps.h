@@ -1,5 +1,5 @@
-#ifndef CEPH_MGATHERCAPS_H
-#define CEPH_MGATHERCAPS_H
+#ifndef STONE_MGATHERCAPS_H
+#define STONE_MGATHERCAPS_H
 
 #include "messages/MMDSOp.h"
 

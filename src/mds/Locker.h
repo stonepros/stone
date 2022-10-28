@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_MDS_LOCKER_H
-#define CEPH_MDS_LOCKER_H
+#ifndef STONE_MDS_LOCKER_H
+#define STONE_MDS_LOCKER_H
 
 #include "include/types.h"
 
@@ -217,7 +217,7 @@ protected:
   void handle_client_caps(const cref_t<MClientCaps> &m);
   void _update_cap_fields(CInode *in, int dirty, const cref_t<MClientCaps> &m, CInode::mempool_inode *pi);
   void _do_snap_update(CInode *in, snapid_t snap, int dirty, snapid_t follows, client_t client, const cref_t<MClientCaps> &m, const ref_t<MClientCaps> &ack);
-  void _do_null_snapflush(CInode *head_in, client_t client, snapid_t last=CEPH_NOSNAP);
+  void _do_null_snapflush(CInode *head_in, client_t client, snapid_t last=STONE_NOSNAP);
   bool _do_cap_update(CInode *in, Capability *cap, int dirty, snapid_t follows, const cref_t<MClientCaps> &m,
 		      const ref_t<MClientCaps> &ack, bool *need_flush=NULL);
   void handle_client_cap_release(const cref_t<MClientCapRelease> &m);

@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_UTILS_H
-#define CEPH_LIBRBD_UTILS_H
+#ifndef STONE_LIBRBD_UTILS_H
+#define STONE_LIBRBD_UTILS_H
 
 #include "include/rados/librados.hpp"
 #include "include/rbd_types.h"
@@ -238,7 +238,7 @@ inline ImageCtx *get_image_ctx(ImageCtx *image_ctx) {
   return image_ctx;
 }
 
-uint64_t get_rbd_default_features(CephContext* cct);
+uint64_t get_rbd_default_features(StoneContext* cct);
 
 bool calc_sparse_extent(const bufferptr &bp,
                         size_t sparse_size,
@@ -264,7 +264,7 @@ int create_ioctx(librados::IoCtx& src_io_ctx, const std::string& pool_desc,
                  const std::optional<std::string>& pool_namespace,
                  librados::IoCtx* dst_io_ctx);
 
-int snap_create_flags_api_to_internal(CephContext *cct, uint32_t api_flags,
+int snap_create_flags_api_to_internal(StoneContext *cct, uint32_t api_flags,
                                       uint64_t *internal_flags);
 
 uint32_t get_default_snap_create_flags(ImageCtx *ictx);
@@ -283,4 +283,4 @@ int get_config_key(librados::Rados& rados, const std::string& uri,
 } // namespace util
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_UTILS_H
+#endif // STONE_LIBRBD_UTILS_H

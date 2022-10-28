@@ -14,7 +14,7 @@ class AuthServer {
 public:
   AuthRegistry auth_registry;
 
-  AuthServer(CephContext *cct) : auth_registry(cct) {}
+  AuthServer(StoneContext *cct) : auth_registry(cct) {}
   virtual ~AuthServer() {}
 
   /// Get authentication methods and connection modes for the given peer type

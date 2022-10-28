@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_OSD_SESSION_H
-#define CEPH_OSD_SESSION_H
+#ifndef STONE_OSD_SESSION_H
+#define STONE_OSD_SESSION_H
 
 #include "common/RefCountedObj.h"
 #include "common/ceph_mutex.h"
@@ -156,7 +156,7 @@ struct Session : public RefCountedObject {
   }
 
   void ack_backoff(
-    CephContext *cct,
+    StoneeContext *cct,
     spg_t pgid,
     uint64_t id,
     const hobject_t& start,
@@ -191,7 +191,7 @@ struct Session : public RefCountedObject {
   }
 
   bool check_backoff(
-    CephContext *cct, spg_t pgid, const hobject_t& oid, const Message *m);
+    StoneeContext *cct, spg_t pgid, const hobject_t& oid, const Message *m);
 
   void add_backoff(ceph::ref_t<Backoff> b) {
     std::lock_guard l(backoff_lock);
@@ -229,7 +229,7 @@ struct Session : public RefCountedObject {
 
 private:
   FRIEND_MAKE_REF(Session);
-  explicit Session(CephContext *cct, Connection *con_) :
+  explicit Session(StoneeContext *cct, Connection *con_) :
     RefCountedObject(cct),
     con(con_),
     socket_addr(con_->get_peer_socket_addr()),

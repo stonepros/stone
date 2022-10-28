@@ -121,7 +121,7 @@ MATCHER(IsListSnaps, "") {
 MATCHER_P2(IsRead, snap_id, image_interval, "") {
   auto req = boost::get<io::ImageDispatchSpec::Read>(&arg->request);
   if (req == nullptr ||
-      arg->io_context->read_snap().value_or(CEPH_NOSNAP) != snap_id) {
+      arg->io_context->read_snap().value_or(STONE_NOSNAP) != snap_id) {
     return false;
   }
 
@@ -321,7 +321,7 @@ public:
                               Return(true)));
       } else {
         expect.WillOnce(DoAll(WithArg<7>(Invoke([&mock_image_ctx, snap_id, state](Context *ctx) {
-                                  ceph_assert(ceph_mutex_is_locked(mock_image_ctx.image_ctx->image_lock));
+                                  stone_assert(stone_mutex_is_locked(mock_image_ctx.image_ctx->image_lock));
                                   mock_image_ctx.image_ctx->object_map->aio_update<Context>(
                                     snap_id, 0, 1, state, boost::none, {}, false, ctx);
                                 })),
@@ -516,7 +516,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, DNE) {
   C_SaferCond ctx;
   MockObjectCopyRequest *request = create_request(mock_src_image_ctx,
                                                   mock_dst_image_ctx, 0,
-                                                  CEPH_NOSNAP, 0, 0, &ctx);
+                                                  STONE_NOSNAP, 0, 0, &ctx);
 
   InSequence seq;
   expect_list_snaps(mock_src_image_ctx, -ENOENT);
@@ -547,7 +547,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, Write) {
   C_SaferCond ctx;
   MockObjectCopyRequest *request = create_request(mock_src_image_ctx,
                                                   mock_dst_image_ctx, 0,
-                                                  CEPH_NOSNAP, 0, 0, &ctx);
+                                                  STONE_NOSNAP, 0, 0, &ctx);
 
   librados::MockTestMemIoCtxImpl &mock_dst_io_ctx(get_mock_io_ctx(
     request->get_dst_io_ctx()));
@@ -589,7 +589,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, ReadError) {
   C_SaferCond ctx;
   MockObjectCopyRequest *request = create_request(mock_src_image_ctx,
                                                   mock_dst_image_ctx, 0,
-                                                  CEPH_NOSNAP, 0, 0, &ctx);
+                                                  STONE_NOSNAP, 0, 0, &ctx);
 
   InSequence seq;
   expect_list_snaps(mock_src_image_ctx, 0);
@@ -622,7 +622,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, WriteError) {
   C_SaferCond ctx;
   MockObjectCopyRequest *request = create_request(mock_src_image_ctx,
                                                   mock_dst_image_ctx, 0,
-                                                  CEPH_NOSNAP, 0, 0, &ctx);
+                                                  STONE_NOSNAP, 0, 0, &ctx);
 
   librados::MockTestMemIoCtxImpl &mock_dst_io_ctx(get_mock_io_ctx(
     request->get_dst_io_ctx()));
@@ -676,7 +676,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, WriteSnaps) {
   C_SaferCond ctx;
   MockObjectCopyRequest *request = create_request(mock_src_image_ctx,
                                                   mock_dst_image_ctx, 0,
-                                                  CEPH_NOSNAP, 0, 0, &ctx);
+                                                  STONE_NOSNAP, 0, 0, &ctx);
 
   librados::MockTestMemIoCtxImpl &mock_dst_io_ctx(get_mock_io_ctx(
     request->get_dst_io_ctx()));
@@ -740,7 +740,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, Trim) {
   C_SaferCond ctx;
   MockObjectCopyRequest *request = create_request(mock_src_image_ctx,
                                                   mock_dst_image_ctx, 0,
-                                                  CEPH_NOSNAP, 0, 0, &ctx);
+                                                  STONE_NOSNAP, 0, 0, &ctx);
 
   librados::MockTestMemIoCtxImpl &mock_dst_io_ctx(get_mock_io_ctx(
     request->get_dst_io_ctx()));
@@ -794,7 +794,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, Remove) {
   C_SaferCond ctx;
   MockObjectCopyRequest *request = create_request(mock_src_image_ctx,
                                                   mock_dst_image_ctx, 0,
-                                                  CEPH_NOSNAP, 0, 0, &ctx);
+                                                  STONE_NOSNAP, 0, 0, &ctx);
 
   librados::MockTestMemIoCtxImpl &mock_dst_io_ctx(get_mock_io_ctx(
     request->get_dst_io_ctx()));
@@ -847,7 +847,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, ObjectMapUpdateError) {
   C_SaferCond ctx;
   MockObjectCopyRequest *request = create_request(mock_src_image_ctx,
                                                   mock_dst_image_ctx, 0,
-                                                  CEPH_NOSNAP, 0, 0, &ctx);
+                                                  STONE_NOSNAP, 0, 0, &ctx);
 
   InSequence seq;
   expect_list_snaps(mock_src_image_ctx, 0);
@@ -882,7 +882,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, PrepareCopyupError) {
   C_SaferCond ctx;
   MockObjectCopyRequest *request = create_request(mock_src_image_ctx,
                                                   mock_dst_image_ctx, 0,
-                                                  CEPH_NOSNAP, 0, 0, &ctx);
+                                                  STONE_NOSNAP, 0, 0, &ctx);
 
   InSequence seq;
   expect_list_snaps(mock_src_image_ctx, 0);
@@ -935,7 +935,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, WriteSnapsStart) {
 
   // map should begin after src start and src end's dst snap seqs should
   // point to HEAD revision
-  m_snap_seqs.rbegin()->second = CEPH_NOSNAP;
+  m_snap_seqs.rbegin()->second = STONE_NOSNAP;
   m_dst_snap_ids.pop_back();
 
   librbd::MockTestImageCtx mock_src_image_ctx(*m_src_image_ctx);
@@ -955,7 +955,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, WriteSnapsStart) {
   MockObjectCopyRequest *request = create_request(mock_src_image_ctx,
                                                   mock_dst_image_ctx,
                                                   src_snap_id_start,
-                                                  CEPH_NOSNAP,
+                                                  STONE_NOSNAP,
                                                   dst_snap_id_start,
                                                   0, &ctx);
 
@@ -974,7 +974,7 @@ TEST_F(TestMockDeepCopyObjectCopyRequest, WriteSnapsStart) {
 
   expect_start_op(mock_exclusive_lock);
   expect_update_object_map(mock_dst_image_ctx, mock_object_map,
-                           CEPH_NOSNAP, OBJECT_EXISTS, 0);
+                           STONE_NOSNAP, OBJECT_EXISTS, 0);
 
   expect_prepare_copyup(mock_dst_image_ctx);
   expect_start_op(mock_exclusive_lock);

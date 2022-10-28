@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Mirantis <akupczyk@mirantis.com>
  *
@@ -13,18 +13,18 @@
  */
 #include <iostream>
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "rgw/rgw_common.h"
 #include "rgw/rgw_rados.h"
 #include "rgw/rgw_crypt.h"
 #include <gtest/gtest.h>
-#include "include/ceph_assert.h"
-#define dout_subsys ceph_subsys_rgw
+#include "include/stone_assert.h"
+#define dout_subsys stone_subsys_rgw
 
 using namespace std;
 
 
-std::unique_ptr<BlockCrypt> AES_256_CBC_create(CephContext* cct, const uint8_t* key, size_t len);
+std::unique_ptr<BlockCrypt> AES_256_CBC_create(StoneContext* cct, const uint8_t* key, size_t len);
 
 
 class ut_get_sink : public RGWGetObj_Filter {
@@ -112,7 +112,7 @@ TEST(TestRGWCrypto, verify_AES_256_CBC_identity)
     for(size_t i=0;i<sizeof(key);i++)
       key[i]=i*step;
 
-    auto aes(AES_256_CBC_create(g_ceph_context, &key[0], 32));
+    auto aes(AES_256_CBC_create(g_stone_context, &key[0], 32));
     ASSERT_NE(aes.get(), nullptr);
 
     size_t block_size = aes->get_block_size();
@@ -164,7 +164,7 @@ TEST(TestRGWCrypto, verify_AES_256_CBC_identity_2)
     for(size_t i=0;i<sizeof(key);i++)
       key[i]=i*step;
 
-    auto aes(AES_256_CBC_create(g_ceph_context, &key[0], 32));
+    auto aes(AES_256_CBC_create(g_stone_context, &key[0], 32));
     ASSERT_NE(aes.get(), nullptr);
 
     size_t block_size = aes->get_block_size();
@@ -212,7 +212,7 @@ TEST(TestRGWCrypto, verify_AES_256_CBC_identity_3)
     for(size_t i=0;i<sizeof(key);i++)
       key[i]=i*step;
 
-    auto aes(AES_256_CBC_create(g_ceph_context, &key[0], 32));
+    auto aes(AES_256_CBC_create(g_stone_context, &key[0], 32));
     ASSERT_NE(aes.get(), nullptr);
 
     size_t block_size = aes->get_block_size();
@@ -289,7 +289,7 @@ TEST(TestRGWCrypto, verify_AES_256_CBC_size_0_15)
     for(size_t i=0;i<sizeof(key);i++)
       key[i]=i*step;
 
-    auto aes(AES_256_CBC_create(g_ceph_context, &key[0], 32));
+    auto aes(AES_256_CBC_create(g_stone_context, &key[0], 32));
     ASSERT_NE(aes.get(), nullptr);
 
     size_t block_size = aes->get_block_size();
@@ -338,7 +338,7 @@ TEST(TestRGWCrypto, verify_AES_256_CBC_identity_last_block)
     for(size_t i=0;i<sizeof(key);i++)
       key[i]=i*step;
 
-    auto aes(AES_256_CBC_create(g_ceph_context, &key[0], 32));
+    auto aes(AES_256_CBC_create(g_stone_context, &key[0], 32));
     ASSERT_NE(aes.get(), nullptr);
 
     size_t block_size = aes->get_block_size();
@@ -411,7 +411,7 @@ TEST(TestRGWCrypto, verify_RGWGetObj_BlockDecrypt_ranges)
   for(size_t i=0;i<sizeof(key);i++)
     key[i] = i;
 
-  auto cbc = AES_256_CBC_create(g_ceph_context, &key[0], 32);
+  auto cbc = AES_256_CBC_create(g_stone_context, &key[0], 32);
   ASSERT_NE(cbc.get(), nullptr);
   bufferlist encrypted;
   ASSERT_TRUE(cbc->encrypt(input, 0, test_range, encrypted, 0));
@@ -420,9 +420,9 @@ TEST(TestRGWCrypto, verify_RGWGetObj_BlockDecrypt_ranges)
   for (off_t r = 93; r < 150; r++ )
   {
     ut_get_sink get_sink;
-    auto cbc = AES_256_CBC_create(g_ceph_context, &key[0], 32);
+    auto cbc = AES_256_CBC_create(g_stone_context, &key[0], 32);
     ASSERT_NE(cbc.get(), nullptr);
-    RGWGetObj_BlockDecrypt decrypt(g_ceph_context, &get_sink, std::move(cbc) );
+    RGWGetObj_BlockDecrypt decrypt(g_stone_context, &get_sink, std::move(cbc) );
 
     //random ranges
     off_t begin = (r/3)*r*(r+13)*(r+23)*(r+53)*(r+71) % test_range;
@@ -457,7 +457,7 @@ TEST(TestRGWCrypto, verify_RGWGetObj_BlockDecrypt_chunks)
   for(size_t i=0;i<sizeof(key);i++)
     key[i] = i;
 
-  auto cbc = AES_256_CBC_create(g_ceph_context, &key[0], 32);
+  auto cbc = AES_256_CBC_create(g_stone_context, &key[0], 32);
   ASSERT_NE(cbc.get(), nullptr);
   bufferlist encrypted;
   ASSERT_TRUE(cbc->encrypt(input, 0, test_range, encrypted, 0));
@@ -465,9 +465,9 @@ TEST(TestRGWCrypto, verify_RGWGetObj_BlockDecrypt_chunks)
   for (off_t r = 93; r < 150; r++ )
   {
     ut_get_sink get_sink;
-    auto cbc = AES_256_CBC_create(g_ceph_context, &key[0], 32);
+    auto cbc = AES_256_CBC_create(g_stone_context, &key[0], 32);
     ASSERT_NE(cbc.get(), nullptr);
-    RGWGetObj_BlockDecrypt decrypt(g_ceph_context, &get_sink, std::move(cbc) );
+    RGWGetObj_BlockDecrypt decrypt(g_stone_context, &get_sink, std::move(cbc) );
 
     //random
     off_t begin = (r/3)*r*(r+13)*(r+23)*(r+53)*(r+71) % test_range;
@@ -511,7 +511,7 @@ TEST(TestRGWCrypto, check_RGWGetObj_BlockDecrypt_fixup)
 {
   ut_get_sink get_sink;
   auto nonecrypt = std::unique_ptr<BlockCrypt>(new BlockCryptNone);
-  RGWGetObj_BlockDecrypt decrypt(g_ceph_context, &get_sink,
+  RGWGetObj_BlockDecrypt decrypt(g_stone_context, &get_sink,
                                  std::move(nonecrypt));
   ASSERT_EQ(fixup_range(&decrypt,0,0),     range_t(0,255));
   ASSERT_EQ(fixup_range(&decrypt,1,256),   range_t(0,511));
@@ -552,7 +552,7 @@ TEST(TestRGWCrypto, check_RGWGetObj_BlockDecrypt_fixup_simple)
 
   ut_get_sink get_sink;
   auto nonecrypt = std::make_unique<BlockCryptNone>(4096);
-  TestRGWGetObj_BlockDecrypt decrypt(g_ceph_context, &get_sink,
+  TestRGWGetObj_BlockDecrypt decrypt(g_stone_context, &get_sink,
 				     std::move(nonecrypt));
   decrypt.set_parts_len(create_mp_parts(obj_size, part_size));
   ASSERT_EQ(fixup_range(&decrypt,0,0),     range_t(0,4095));
@@ -582,7 +582,7 @@ TEST(TestRGWCrypto, check_RGWGetObj_BlockDecrypt_fixup_non_aligned_obj_size)
 
   ut_get_sink get_sink;
   auto nonecrypt = std::make_unique<BlockCryptNone>(4096);
-  TestRGWGetObj_BlockDecrypt decrypt(g_ceph_context, &get_sink,
+  TestRGWGetObj_BlockDecrypt decrypt(g_stone_context, &get_sink,
 				     std::move(nonecrypt));
   auto na_obj_size = obj_size + 1;
   decrypt.set_parts_len(create_mp_parts(na_obj_size, part_size));
@@ -609,7 +609,7 @@ TEST(TestRGWCrypto, check_RGWGetObj_BlockDecrypt_fixup_non_aligned_part_size)
 
   ut_get_sink get_sink;
   auto nonecrypt = std::make_unique<BlockCryptNone>(4096);
-  TestRGWGetObj_BlockDecrypt decrypt(g_ceph_context, &get_sink,
+  TestRGWGetObj_BlockDecrypt decrypt(g_stone_context, &get_sink,
 				     std::move(nonecrypt));
   auto na_part_size = part_size + 1;
   decrypt.set_parts_len(create_mp_parts(obj_size, na_part_size));
@@ -642,7 +642,7 @@ TEST(TestRGWCrypto, check_RGWGetObj_BlockDecrypt_fixup_non_aligned)
 
   ut_get_sink get_sink;
   auto nonecrypt = std::make_unique<BlockCryptNone>(4096);
-  TestRGWGetObj_BlockDecrypt decrypt(g_ceph_context, &get_sink,
+  TestRGWGetObj_BlockDecrypt decrypt(g_stone_context, &get_sink,
 				     std::move(nonecrypt));
   auto na_part_size = part_size + 1;
   auto na_obj_size = obj_size + 7; // (6*(5MiB + 1) + 1) for the last 1B overflow
@@ -671,7 +671,7 @@ TEST(TestRGWCrypto, check_RGWGetObj_BlockDecrypt_fixup_invalid_ranges)
 
   ut_get_sink get_sink;
   auto nonecrypt = std::make_unique<BlockCryptNone>(4096);
-  TestRGWGetObj_BlockDecrypt decrypt(g_ceph_context, &get_sink,
+  TestRGWGetObj_BlockDecrypt decrypt(g_stone_context, &get_sink,
 				     std::move(nonecrypt));
 
   decrypt.set_parts_len(create_mp_parts(obj_size, part_size));
@@ -707,9 +707,9 @@ TEST(TestRGWCrypto, verify_RGWPutObj_BlockEncrypt_chunks)
   for (off_t r = 93; r < 150; r++ )
   {
     ut_put_sink put_sink;
-    auto cbc = AES_256_CBC_create(g_ceph_context, &key[0], 32);
+    auto cbc = AES_256_CBC_create(g_stone_context, &key[0], 32);
     ASSERT_NE(cbc.get(), nullptr);
-    RGWPutObj_BlockEncrypt encrypt(g_ceph_context, &put_sink,
+    RGWPutObj_BlockEncrypt encrypt(g_stone_context, &put_sink,
                                    std::move(cbc) );
 
     off_t test_size = (r/5)*(r+7)*(r+13)*(r+101)*(r*103) % (test_range - 1) + 1;
@@ -731,7 +731,7 @@ TEST(TestRGWCrypto, verify_RGWPutObj_BlockEncrypt_chunks)
 
     ASSERT_EQ(put_sink.get_sink().length(), static_cast<size_t>(test_size));
 
-    cbc = AES_256_CBC_create(g_ceph_context, &key[0], 32);
+    cbc = AES_256_CBC_create(g_stone_context, &key[0], 32);
     ASSERT_NE(cbc.get(), nullptr);
 
     bufferlist encrypted;
@@ -769,8 +769,8 @@ TEST(TestRGWCrypto, verify_Encrypt_Decrypt)
     memset(test_in, test_size & 0xff, test_size);
 
     ut_put_sink put_sink;
-    RGWPutObj_BlockEncrypt encrypt(g_ceph_context, &put_sink,
-				   AES_256_CBC_create(g_ceph_context, &key[0], 32) );
+    RGWPutObj_BlockEncrypt encrypt(g_stone_context, &put_sink,
+				   AES_256_CBC_create(g_stone_context, &key[0], 32) );
     bufferlist bl;
     bl.append((char*)test_in, test_size);
     encrypt.process(std::move(bl), 0);
@@ -781,8 +781,8 @@ TEST(TestRGWCrypto, verify_Encrypt_Decrypt)
     ASSERT_EQ(bl.length(), test_size);
 
     ut_get_sink get_sink;
-    RGWGetObj_BlockDecrypt decrypt(g_ceph_context, &get_sink,
-                                   AES_256_CBC_create(g_ceph_context, &key[0], 32) );
+    RGWGetObj_BlockDecrypt decrypt(g_stone_context, &get_sink,
+                                   AES_256_CBC_create(g_stone_context, &key[0], 32) );
 
     off_t bl_ofs = 0;
     off_t bl_end = test_size - 1;
@@ -800,10 +800,10 @@ int main(int argc, char **argv) {
   vector<const char*> args;
   argv_to_vec(argc, (const char **)argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

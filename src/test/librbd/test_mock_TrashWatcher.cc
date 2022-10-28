@@ -69,7 +69,7 @@ TEST_F(TestTrashWatcher, ImageAdded) {
 
   cls::rbd::TrashImageSpec trash_image_spec{
     cls::rbd::TRASH_IMAGE_SOURCE_USER, "image name",
-    ceph_clock_now(), ceph_clock_now()};
+    stone_clock_now(), stone_clock_now()};
 
   EXPECT_CALL(*m_trash_watcher, handle_image_added(StrEq("image id"),
                                                    trash_image_spec))

@@ -4,7 +4,7 @@
 #include "WriteLog.h"
 #include "include/buffer.h"
 #include "include/Context.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/deleter.h"
 #include "common/dout.h"
 #include "common/environment.h"
@@ -20,7 +20,7 @@
 #include <vector>
 
 #undef dout_subsys
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::ssd::WriteLog: " \
                            << this << " " <<  __func__ << ": "
@@ -104,7 +104,7 @@ void WriteLog<I>::complete_read(
 
 template <typename I>
 int WriteLog<I>::create_and_open_bdev() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   bdev = BlockDevice::create(cct, this->m_log_pool_name, aio_cache_cb,
                              nullptr, nullptr, nullptr);
@@ -115,7 +115,7 @@ int WriteLog<I>::create_and_open_bdev() {
     return r;
   }
 
-  ceph_assert(this->m_log_pool_size % MIN_WRITE_ALLOC_SSD_SIZE == 0);
+  stone_assert(this->m_log_pool_size % MIN_WRITE_ALLOC_SSD_SIZE == 0);
   if (bdev->get_size() != this->m_log_pool_size) {
     lderr(cct) << "size mismatch: bdev size " << bdev->get_size()
                << " (block size " << bdev->get_block_size()
@@ -132,9 +132,9 @@ template <typename I>
 bool WriteLog<I>::initialize_pool(Context *on_finish,
                                   pwl::DeferredContexts &later) {
   int r;
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
   if (access(this->m_log_pool_name.c_str(), F_OK) != 0) {
     int fd = ::open(this->m_log_pool_name.c_str(), O_RDWR|O_CREAT, 0644);
     bool succeed = true;
@@ -196,7 +196,7 @@ bool WriteLog<I>::initialize_pool(Context *on_finish,
       return false;
     }
   } else {
-    ceph_assert(m_cache_state->present);
+    stone_assert(m_cache_state->present);
     r = create_and_open_bdev();
     if (r < 0) {
       on_finish->complete(r);
@@ -219,7 +219,7 @@ bool WriteLog<I>::initialize_pool(Context *on_finish,
                   << " first_free_entry=" << pool_root.first_free_entry
                   << " flushed_sync_gen=" << pool_root.flushed_sync_gen
                   << dendl;
-    ceph_assert(is_valid_pool_root(pool_root));
+    stone_assert(is_valid_pool_root(pool_root));
     if (pool_root.layout_version != SSD_LAYOUT_VERSION) {
       lderr(cct) << "Pool layout version is "
                  << pool_root.layout_version
@@ -257,7 +257,7 @@ error_handle:
 
 template <typename I>
 void WriteLog<I>::remove_pool_file() {
-  ceph_assert(bdev);
+  stone_assert(bdev);
   bdev->close();
   delete bdev;
   bdev = nullptr;
@@ -280,7 +280,7 @@ void WriteLog<I>::remove_pool_file() {
 
 template <typename I>
 void WriteLog<I>::load_existing_entries(pwl::DeferredContexts &later) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   std::map<uint64_t, std::shared_ptr<SyncPointLogEntry>> sync_point_entries;
   std::map<uint64_t, bool> missing_sync_points;
 
@@ -349,12 +349,12 @@ bool WriteLog<I>::alloc_resources(C_BlockIORequestT *req) {
                               &num_lanes, &num_log_entries,
                               &num_unpublished_reserves);
 
-  ceph_assert(!num_lanes);
+  stone_assert(!num_lanes);
   if (num_log_entries) {
     bytes_allocated += num_log_entries * MIN_WRITE_ALLOC_SSD_SIZE;
     num_log_entries = 0;
   }
-  ceph_assert(!num_unpublished_reserves);
+  stone_assert(!num_unpublished_reserves);
 
   alloc_succeeds = this->check_allocation(req, bytes_cached, bytes_dirtied,
                                           bytes_allocated, num_lanes,
@@ -462,7 +462,7 @@ void WriteLog<I>::append_scheduled_ops(void) {
  */
 template <typename I>
 void WriteLog<I>::append_op_log_entries(GenericLogOperations &ops) {
-  ceph_assert(!ops.empty());
+  stone_assert(!ops.empty());
   ldout(m_image_ctx.cct, 20) << dendl;
   Context *ctx = new LambdaContext([this, ops](int r) {
     assert(r == 0);
@@ -496,7 +496,7 @@ void WriteLog<I>::append_op_log_entries(GenericLogOperations &ops) {
       {
         ldout(m_image_ctx.cct, 20) << "Finished appending at "
                                    << *new_first_free_entry << dendl;
-        utime_t now = ceph_clock_now();
+        utime_t now = stone_clock_now();
         for (auto &operation : ops) {
           operation->log_append_comp_time = now;
         }
@@ -638,7 +638,7 @@ void WriteLog<I>::construct_flush_entries(pwl::GenericLogEntries entries_to_flus
 
 template <typename I>
 void WriteLog<I>::process_work() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   int max_iterations = 4;
   bool wake_up_requested = false;
   uint64_t aggressive_high_water_bytes =
@@ -688,7 +688,7 @@ void WriteLog<I>::process_work() {
 */
 template <typename I>
 bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   GenericLogEntriesVector retiring_entries;
   uint64_t initial_first_valid_entry;
   uint64_t first_valid_entry;
@@ -715,11 +715,11 @@ bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
                            << ",data length is " << data_length << dendl;
             ldout(cct, 20) << "The log entry is " << *(*it) << dendl;
             if ((*it)->log_entry_index < control_block_pos) {
-              ceph_assert((*it)->log_entry_index ==
+              stone_assert((*it)->log_entry_index ==
                   (control_block_pos + data_length + MIN_WRITE_ALLOC_SSD_SIZE) %
                   this->m_log_pool_size + DATA_RING_BUFFER_OFFSET);
             } else {
-              ceph_assert((*it)->log_entry_index == control_block_pos +
+              stone_assert((*it)->log_entry_index == control_block_pos +
                   data_length + MIN_WRITE_ALLOC_SSD_SIZE);
             }
             break;
@@ -738,7 +738,7 @@ bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
       if (!retiring_subentries.empty()) {
         for (auto it = retiring_subentries.begin();
             it != retiring_subentries.end(); it++) {
-          ceph_assert(m_log_entries.front() == *it);
+          stone_assert(m_log_entries.front() == *it);
           m_log_entries.pop_front();
           if ((*it)->write_bytes() > 0 || (*it)->bytes_dirty() > 0) {
             auto gen_write_entry = static_pointer_cast<GenericWriteLogEntry>(*it);
@@ -779,7 +779,7 @@ bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
       flushed_sync_gen = this->m_flushed_sync_gen;
     }
 
-    ceph_assert(first_valid_entry != initial_first_valid_entry);
+    stone_assert(first_valid_entry != initial_first_valid_entry);
     auto new_root = std::make_shared<WriteLogPoolRoot>(pool_root);
     new_root->flushed_sync_gen = flushed_sync_gen;
     new_root->first_valid_entry = first_valid_entry;
@@ -793,7 +793,7 @@ bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
         uint64_t cached_bytes = 0;
         uint64_t former_log_pos = 0;
         for (auto &entry : retiring_entries) {
-          ceph_assert(entry->log_entry_index != 0);
+          stone_assert(entry->log_entry_index != 0);
           if (entry->log_entry_index != former_log_pos ) {
             // Space for control blocks
             allocated_bytes += MIN_WRITE_ALLOC_SSD_SIZE;
@@ -808,10 +808,10 @@ bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
         {
           std::lock_guard locker(m_lock);
           m_first_valid_entry = first_valid_entry;
-          ceph_assert(m_first_valid_entry % MIN_WRITE_ALLOC_SSD_SIZE == 0);
-          ceph_assert(this->m_bytes_allocated >= allocated_bytes);
+          stone_assert(m_first_valid_entry % MIN_WRITE_ALLOC_SSD_SIZE == 0);
+          stone_assert(this->m_bytes_allocated >= allocated_bytes);
           this->m_bytes_allocated -= allocated_bytes;
-          ceph_assert(this->m_bytes_cached >= cached_bytes);
+          stone_assert(this->m_bytes_cached >= cached_bytes);
           this->m_bytes_cached -= cached_bytes;
           if (!m_cache_state->empty && m_log_entries.empty()) {
             m_cache_state->empty = true;
@@ -850,7 +850,7 @@ template <typename I>
 void WriteLog<I>::append_ops(GenericLogOperations &ops, Context *ctx,
                              uint64_t* new_first_free_entry) {
   GenericLogEntriesVector log_entries;
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   uint64_t span_payload_len = 0;
   uint64_t bytes_to_free = 0;
   ldout(cct, 20) << "Appending " << ops.size() << " log entries." << dendl;
@@ -858,7 +858,7 @@ void WriteLog<I>::append_ops(GenericLogOperations &ops, Context *ctx,
   *new_first_free_entry = pool_root.first_free_entry;
   AioTransContext* aio = new AioTransContext(cct, ctx);
 
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   for (auto &operation : ops) {
     operation->log_append_start_time = now;
     auto log_entry = operation->get_log_entry();
@@ -894,9 +894,9 @@ void WriteLog<I>::append_ops(GenericLogOperations &ops, Context *ctx,
 template <typename I>
 void WriteLog<I>::write_log_entries(GenericLogEntriesVector log_entries,
                                     AioTransContext *aio, uint64_t *pos) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(m_image_ctx.cct, 20) << "pos=" << *pos << dendl;
-  ceph_assert(*pos >= DATA_RING_BUFFER_OFFSET &&
+  stone_assert(*pos >= DATA_RING_BUFFER_OFFSET &&
               *pos < this->m_log_pool_size &&
               *pos % MIN_WRITE_ALLOC_SSD_SIZE == 0);
 
@@ -932,16 +932,16 @@ void WriteLog<I>::write_log_entries(GenericLogEntriesVector log_entries,
   //aio write
   bufferlist bl;
   encode(persist_log_entries, bl);
-  ceph_assert(bl.length() <= MIN_WRITE_ALLOC_SSD_SIZE);
+  stone_assert(bl.length() <= MIN_WRITE_ALLOC_SSD_SIZE);
   bl.append_zero(MIN_WRITE_ALLOC_SSD_SIZE - bl.length());
   bl.append(data_bl);
-  ceph_assert(bl.length() % MIN_WRITE_ALLOC_SSD_SIZE == 0);
+  stone_assert(bl.length() % MIN_WRITE_ALLOC_SSD_SIZE == 0);
   if (control_block_pos + bl.length() > this->m_log_pool_size) {
     //exceeds border, need to split
     uint64_t size = bl.length();
     bufferlist bl1;
     bl.splice(0, this->m_log_pool_size - control_block_pos, &bl1);
-    ceph_assert(bl.length() == (size - bl1.length()));
+    stone_assert(bl.length() == (size - bl1.length()));
 
     ldout(cct, 20) << "write " << control_block_pos << "~"
 		   << size << " spans boundary, split into "
@@ -963,17 +963,17 @@ void WriteLog<I>::write_log_entries(GenericLogEntriesVector log_entries,
 template <typename I>
 void WriteLog<I>::schedule_update_root(
     std::shared_ptr<WriteLogPoolRoot> root, Context *ctx) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 15) << "New root: pool_size=" << root->pool_size
                  << " first_valid_entry=" << root->first_valid_entry
                  << " first_free_entry=" << root->first_free_entry
                  << " flushed_sync_gen=" << root->flushed_sync_gen
                  << dendl;
-  ceph_assert(is_valid_pool_root(*root));
+  stone_assert(is_valid_pool_root(*root));
 
   bool need_finisher;
   {
-    ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+    stone_assert(stone_mutex_is_locked_by_me(m_lock));
     need_finisher = m_poolroot_to_update.empty() && !m_updating_pool_root;
     std::shared_ptr<WriteLogPoolRootUpdate> entry =
       std::make_shared<WriteLogPoolRootUpdate>(root, ctx);
@@ -1014,7 +1014,7 @@ void WriteLog<I>::update_root_scheduled_ops() {
       root_updates.swap(m_poolroot_to_update);
     }
   }
-  ceph_assert(!root_updates.empty());
+  stone_assert(!root_updates.empty());
   ldout(m_image_ctx.cct, 15) << "Update root number: " << root_updates.size()
                              << dendl;
   // We just update the last one, and call all the completions.
@@ -1054,7 +1054,7 @@ void WriteLog<I>::update_pool_root(std::shared_ptr<WriteLogPoolRoot> root,
   superblock.root = *root;
   encode(superblock, bl);
   bl.append_zero(MIN_WRITE_ALLOC_SSD_SIZE - bl.length());
-  ceph_assert(bl.length() % MIN_WRITE_ALLOC_SSD_SIZE == 0);
+  stone_assert(bl.length() % MIN_WRITE_ALLOC_SSD_SIZE == 0);
   bdev->aio_write(0, bl, &aio->ioc, false, WRITE_LIFE_NOT_SET);
   bdev->aio_submit(&aio->ioc);
 }
@@ -1067,7 +1067,7 @@ int WriteLog<I>::update_pool_root_sync(
   superblock.root = *root;
   encode(superblock, bl);
   bl.append_zero(MIN_WRITE_ALLOC_SSD_SIZE - bl.length());
-  ceph_assert(bl.length() % MIN_WRITE_ALLOC_SSD_SIZE == 0);
+  stone_assert(bl.length() % MIN_WRITE_ALLOC_SSD_SIZE == 0);
   return bdev->write(0, bl, false);
 }
 
@@ -1083,7 +1083,7 @@ template <typename I>
 void WriteLog<I>::aio_read_data_blocks(
     std::vector<std::shared_ptr<GenericWriteLogEntry>> &log_entries,
     std::vector<bufferlist *> &bls, Context *ctx) {
-  ceph_assert(log_entries.size() == bls.size());
+  stone_assert(log_entries.size() == bls.size());
 
   //get the valid part
   Context *read_ctx = new LambdaContext(
@@ -1102,21 +1102,21 @@ void WriteLog<I>::aio_read_data_blocks(
      ctx->complete(r);
     });
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   AioTransContext *aio = new AioTransContext(cct, read_ctx);
   for (unsigned int i = 0; i < log_entries.size(); i++) {
     WriteLogCacheEntry *log_entry = &log_entries[i]->ram_entry;
 
-    ceph_assert(log_entry->is_write() || log_entry->is_writesame());
+    stone_assert(log_entry->is_write() || log_entry->is_writesame());
     uint64_t len = log_entry->is_write() ? log_entry->write_bytes :
                                            log_entry->ws_datalen;
     uint64_t align_len = round_up_to(len, MIN_WRITE_ALLOC_SSD_SIZE);
 
     ldout(cct, 20) << "entry i=" << i << " " << log_entry->write_data_pos
                    << "~" << len << dendl;
-    ceph_assert(log_entry->write_data_pos >= DATA_RING_BUFFER_OFFSET &&
+    stone_assert(log_entry->write_data_pos >= DATA_RING_BUFFER_OFFSET &&
                 log_entry->write_data_pos < pool_root.pool_size);
-    ceph_assert(align_len);
+    stone_assert(align_len);
     if (log_entry->write_data_pos + align_len > pool_root.pool_size) {
       // spans boundary, need to split
       uint64_t len1 = pool_root.pool_size - log_entry->write_data_pos;

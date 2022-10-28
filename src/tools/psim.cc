@@ -8,19 +8,19 @@ int main(int argc, char **argv)
 {
   /*
    * you need to create a suitable osdmap first.  e.g., for 40 osds, 
-   * $ ./osdmaptool --createsimple 40 --clobber .ceph_osdmap
+   * $ ./osdmaptool --createsimple 40 --clobber .stone_osdmap
    */
   bufferlist bl;
   std::string error;
-  if (bl.read_file(".ceph_osdmap", &error)) {
-    cout << argv[0] << ": error reading .ceph_osdmap: " << error << std::endl;
+  if (bl.read_file(".stone_osdmap", &error)) {
+    cout << argv[0] << ": error reading .stone_osdmap: " << error << std::endl;
     return 1;
   }
   OSDMap osdmap;
 
   try {
     osdmap.decode(bl);
-  } catch (ceph::buffer::end_of_buffer &eob) {
+  } catch (stone::buffer::end_of_buffer &eob) {
     cout << "Exception (end_of_buffer) in decode(), exit." << std::endl;
     exit(1);
   }
@@ -40,9 +40,9 @@ int main(int argc, char **argv)
   memset(size, 0, sizeof(size));
 
   for (int i=0; i<n; i++) {
-    osdmap.set_state(i, osdmap.get_state(i) | CEPH_OSD_UP);
+    osdmap.set_state(i, osdmap.get_state(i) | STONE_OSD_UP);
     //if (i<12)
-      osdmap.set_weight(i, CEPH_OSD_IN);
+      osdmap.set_weight(i, STONE_OSD_IN);
   }
 
   //pg_pool_t *p = (pg_pool_t *)osdmap.get_pg_pool(0);
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
       char foo[20];
       snprintf(foo, sizeof(foo), "%d.%d", f, b);
       object_t oid(foo);
-      ceph_object_layout l = osdmap.make_object_layout(oid, 0, nspace);
+      stone_object_layout l = osdmap.make_object_layout(oid, 0, nspace);
       vector<int> osds;
       pg_t pgid = pg_t(l.ol_pgid);
       //pgid.u.ps = f * 4 + b;
@@ -67,9 +67,9 @@ int main(int argc, char **argv)
       if (0) {
 	hash<object_t> H;
 	int x = H(oid);
-	x = ceph_stable_mod(x, 1023, 1023);
+	x = stone_stable_mod(x, 1023, 1023);
 	int s = crush_hash32(x) % 15;
-	//cout << "ceph_psim: x = " << x << " s = " << s << std::endl;
+	//cout << "stone_psim: x = " << x << " s = " << s << std::endl;
 	//osds[0] = s;
       }
 #endif

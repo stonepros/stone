@@ -45,7 +45,7 @@ struct RefreshRequest<librbd::MockTestImageCtx> {
                                 bool acquire_lock_refresh,
                                 bool skip_open_parent, Context *on_finish) {
     EXPECT_TRUE(acquire_lock_refresh);
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     return s_instance;
   }
@@ -98,7 +98,7 @@ public:
   }
 
   void expect_test_features(MockTestImageCtx &mock_image_ctx, uint64_t features,
-                            ceph::shared_mutex &lock, bool enabled) {
+                            stone::shared_mutex &lock, bool enabled) {
     EXPECT_CALL(mock_image_ctx, test_features(features, _))
                   .WillOnce(Return(enabled));
   }

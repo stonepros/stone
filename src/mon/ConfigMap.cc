@@ -27,14 +27,14 @@ using std::to_string;
 using std::vector;
 using std::unique_ptr;
 
-using ceph::bufferlist;
-using ceph::decode;
-using ceph::encode;
-using ceph::Formatter;
-using ceph::JSONFormatter;
-using ceph::mono_clock;
-using ceph::mono_time;
-using ceph::timespan_str;
+using stone::bufferlist;
+using stone::decode;
+using stone::encode;
+using stone::Formatter;
+using stone::JSONFormatter;
+using stone::mono_clock;
+using stone::mono_time;
+using stone::timespan_str;
 
 int MaskedOption::get_precision(const CrushWrapper *crush)
 {
@@ -225,7 +225,7 @@ bool ConfigMap::parse_mask(
     } else {
       type = i;
     }
-    if (EntityName::str_to_ceph_entity_type(type) == CEPH_ENTITY_TYPE_ANY) {
+    if (EntityName::str_to_stone_entity_type(type) == STONE_ENTITY_TYPE_ANY) {
       return false;
     }
     *section = i;

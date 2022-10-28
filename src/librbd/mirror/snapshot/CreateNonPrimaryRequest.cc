@@ -12,7 +12,7 @@
 #include "librbd/mirror/snapshot/Utils.h"
 #include "librbd/mirror/snapshot/WriteImageStateRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::snapshot::CreateNonPrimaryRequest: " \
@@ -50,7 +50,7 @@ void CreateNonPrimaryRequest<I>::refresh_image() {
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   auto ctx = create_context_callback<
@@ -61,7 +61,7 @@ void CreateNonPrimaryRequest<I>::refresh_image() {
 
 template <typename I>
 void CreateNonPrimaryRequest<I>::handle_refresh_image(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -75,7 +75,7 @@ void CreateNonPrimaryRequest<I>::handle_refresh_image(int r) {
 
 template <typename I>
 void CreateNonPrimaryRequest<I>::get_mirror_image() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   librados::ObjectReadOperation op;
@@ -85,13 +85,13 @@ void CreateNonPrimaryRequest<I>::get_mirror_image() {
     CreateNonPrimaryRequest<I>,
     &CreateNonPrimaryRequest<I>::handle_get_mirror_image>(this);
   int r = m_image_ctx->md_ctx.aio_operate(RBD_MIRRORING, comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void CreateNonPrimaryRequest<I>::handle_get_mirror_image(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   cls::rbd::MirrorImage mirror_image;
@@ -133,7 +133,7 @@ void CreateNonPrimaryRequest<I>::get_mirror_peers() {
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   librados::ObjectReadOperation op;
@@ -144,13 +144,13 @@ void CreateNonPrimaryRequest<I>::get_mirror_peers() {
     &CreateNonPrimaryRequest<I>::handle_get_mirror_peers>(this);
   m_out_bl.clear();
   int r = m_default_ns_ctx.aio_operate(RBD_MIRRORING, aio_comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
 template <typename I>
 void CreateNonPrimaryRequest<I>::handle_get_mirror_peers(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   std::vector<cls::rbd::MirrorPeer> peers;
@@ -178,7 +178,7 @@ void CreateNonPrimaryRequest<I>::handle_get_mirror_peers(int r) {
 
 template <typename I>
 void CreateNonPrimaryRequest<I>::create_snapshot() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
 
   cls::rbd::MirrorSnapshotNamespace ns{
     (m_demoted ? cls::rbd::MIRROR_SNAPSHOT_STATE_NON_PRIMARY_DEMOTED :
@@ -199,7 +199,7 @@ void CreateNonPrimaryRequest<I>::create_snapshot() {
 
 template <typename I>
 void CreateNonPrimaryRequest<I>::handle_create_snapshot(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -230,7 +230,7 @@ void CreateNonPrimaryRequest<I>::write_image_state() {
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << dendl;
 
   auto ctx = create_context_callback<
@@ -244,7 +244,7 @@ void CreateNonPrimaryRequest<I>::write_image_state() {
 
 template <typename I>
 void CreateNonPrimaryRequest<I>::handle_write_image_state(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -259,7 +259,7 @@ void CreateNonPrimaryRequest<I>::handle_write_image_state(int r) {
 
 template <typename I>
 void CreateNonPrimaryRequest<I>::finish(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

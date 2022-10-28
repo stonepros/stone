@@ -15,7 +15,7 @@
 #include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "common/errno.h"
 #include "common/Formatter.h"
@@ -96,8 +96,8 @@ using namespace librados;
 #define tracepoint(...)
 #endif
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 
 static string shadow_ns = "shadow";
@@ -107,7 +107,7 @@ static string default_storage_extra_pool_suffix = "rgw.buckets.non-ec";
 static RGWObjCategory main_category = RGWObjCategory::Main;
 #define RGW_USAGE_OBJ_PREFIX "usage."
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 static bool rgw_get_obj_data_pool(const RGWZoneGroup& zonegroup, const RGWZoneParams& zone_params,
@@ -282,7 +282,7 @@ void RGWObjectCtx::invalidate(const rgw_obj& obj) {
   }
 }
 
-void RGWObjVersionTracker::generate_new_write_ver(CephContext *cct)
+void RGWObjVersionTracker::generate_new_write_ver(StoneContext *cct)
 {
   write_version.ver = 1;
 #define TAG_LEN 24
@@ -372,7 +372,7 @@ void *RGWRadosThread::Worker::entry() {
   auto interval = std::chrono::milliseconds(msec);
 
   do {
-    auto start = ceph::real_clock::now();
+    auto start = stone::real_clock::now();
     int r = processor->process(this);
     if (r < 0) {
       ldpp_dout(this, 0) << "ERROR: processor->process() returned error r=" << r << dendl;
@@ -381,7 +381,7 @@ void *RGWRadosThread::Worker::entry() {
     if (processor->going_down())
       break;
 
-    auto end = ceph::real_clock::now() - start;
+    auto end = stone::real_clock::now() - start;
 
     uint64_t cur_msec = processor->interval_msec();
     if (cur_msec != msec) { /* was it reconfigured? */
@@ -624,7 +624,7 @@ public:
   }
 
   // implements DoutPrefixProvider
-  CephContext *get_cct() const override { return store->ctx(); }
+  StoneContext *get_cct() const override { return store->ctx(); }
   unsigned get_subsys() const override
   {
     return dout_subsys;
@@ -656,7 +656,7 @@ void RGWRados::wakeup_data_sync_shards(const rgw_zone_id& source_zone, map<int, 
   }
 
   RGWDataSyncProcessorThread *thread = iter->second;
-  ceph_assert(thread);
+  stone_assert(thread);
   thread->wakeup_sync_shards(shard_ids);
 }
 
@@ -765,7 +765,7 @@ int RGWRados::get_max_chunk_size(const rgw_placement_rule& placement_rule, const
 class RGWIndexCompletionManager;
 
 struct complete_op_data {
-  ceph::mutex lock = ceph::make_mutex("complete_op_data");
+  stone::mutex lock = stone::make_mutex("complete_op_data");
   AioCompletion *rados_completion{nullptr};
   int manager_shard_id{-1};
   RGWIndexCompletionManager *manager{nullptr};
@@ -797,8 +797,8 @@ class RGWIndexCompletionThread : public RGWRadosThread, public DoutPrefixProvide
 
   list<complete_op_data *> completions;
 
-  ceph::mutex completions_lock =
-    ceph::make_mutex("RGWIndexCompletionThread::completions_lock");
+  stone::mutex completions_lock =
+    stone::make_mutex("RGWIndexCompletionThread::completions_lock");
 public:
   RGWIndexCompletionThread(RGWRados *_store)
     : RGWRadosThread(_store, "index-complete"), store(_store) {}
@@ -814,7 +814,7 @@ public:
     signal();
   }
 
-  CephContext *get_cct() const override { return store->ctx(); }
+  StoneContext *get_cct() const override { return store->ctx(); }
   unsigned get_subsys() const { return dout_subsys; }
   std::ostream& gen_prefix(std::ostream& out) const { return out << "rgw index completion thread: "; }
 };
@@ -870,7 +870,7 @@ int RGWIndexCompletionThread::process(const DoutPrefixProvider *dpp)
 
 class RGWIndexCompletionManager {
   RGWRados *store{nullptr};
-  ceph::containers::tiny_vector<ceph::mutex> locks;
+  stone::containers::tiny_vector<stone::mutex> locks;
   vector<set<complete_op_data *> > completions;
 
   RGWIndexCompletionThread *completion_thread{nullptr};
@@ -883,10 +883,10 @@ class RGWIndexCompletionManager {
 public:
   RGWIndexCompletionManager(RGWRados *_store) :
     store(_store),
-    locks{ceph::make_lock_container<ceph::mutex>(
+    locks{stone::make_lock_container<stone::mutex>(
       store->ctx()->_conf->rgw_thread_pool_size,
       [](const size_t i) {
-        return ceph::make_mutex("RGWIndexCompletionManager::lock::" +
+        return stone::make_mutex("RGWIndexCompletionManager::lock::" +
 				std::to_string(i));
       })}
   {
@@ -1559,19 +1559,19 @@ int RGWRados::log_show_next(RGWAccessHandle handle, rgw_log_entry *entry)
  * If name is not being set, results for all users will be returned
  * and index will wrap only after total shards number.
  *
- * @param cct [in] ceph context
+ * @param cct [in] stone context
  * @param name [in] user name
  * @param hash [out] hash value
  * @param index [in] shard index number 
  */
-static void usage_log_hash(CephContext *cct, const string& name, string& hash, uint32_t index)
+static void usage_log_hash(StoneContext *cct, const string& name, string& hash, uint32_t index)
 {
   uint32_t val = index;
 
   if (!name.empty()) {
     int max_user_shards = cct->_conf->rgw_usage_max_user_shards;
     val %= max_user_shards;
-    val += ceph_str_hash_linux(name.c_str(), name.size());
+    val += stone_str_hash_linux(name.c_str(), name.size());
   }
   char buf[17];
   int max_shards = cct->_conf->rgw_usage_max_shards;
@@ -1717,7 +1717,7 @@ int RGWRados::decode_policy(bufferlist& bl, ACLOwner *owner)
   return 0;
 }
 
-int rgw_policy_from_attrset(const DoutPrefixProvider *dpp, CephContext *cct, map<string, bufferlist>& attrset, RGWAccessControlPolicy *policy)
+int rgw_policy_from_attrset(const DoutPrefixProvider *dpp, StoneContext *cct, map<string, bufferlist>& attrset, RGWAccessControlPolicy *policy)
 {
   map<string, bufferlist>::iterator aiter = attrset.find(RGW_ATTR_ACL);
   if (aiter == attrset.end())
@@ -1731,7 +1731,7 @@ int rgw_policy_from_attrset(const DoutPrefixProvider *dpp, CephContext *cct, map
     ldpp_dout(dpp, 0) << "ERROR: could not decode policy, caught buffer::error" << dendl;
     return -EIO;
   }
-  if (cct->_conf->subsys.should_gather<ceph_subsys_rgw, 15>()) {
+  if (cct->_conf->subsys.should_gather<stone_subsys_rgw, 15>()) {
     RGWAccessControlPolicy_S3 *s3policy = static_cast<RGWAccessControlPolicy_S3 *>(policy);
     ldpp_dout(dpp, 15) << __func__ << " Read AccessControlPolicy";
     s3policy->to_xml(*_dout);
@@ -1784,7 +1784,7 @@ int RGWRados::Bucket::List::list_objects_ordered(
   optional_yield y)
 {
   RGWRados *store = target->get_store();
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
   int shard_id = target->get_shard_id();
 
   int count = 0;
@@ -1952,7 +1952,7 @@ int RGWRados::Bucket::List::list_objects_ordered(
 	  } else {
 	    // NOTE: this condition is for older versions of the OSD
 	    // that do not filter on the CLS side, so the following code
-	    // must do the filtering; once we reach version 16 of ceph,
+	    // must do the filtering; once we reach version 16 of stone,
 	    // this code can be removed along with the conditional that
 	    // can lead this way
 
@@ -1991,7 +1991,7 @@ int RGWRados::Bucket::List::list_objects_ordered(
 
     // NOTE: the following conditional is needed by older versions of
     // the OSD that don't do delimiter filtering on the CLS side; once
-    // we reach version 16 of ceph, the following conditional and the
+    // we reach version 16 of stone, the following conditional and the
     // code within can be removed
     if (!cls_filtered && !params.delim.empty()) {
       int marker_delim_pos =
@@ -2265,7 +2265,7 @@ int RGWRados::create_bucket(const RGWUserInfo& owner, rgw_bucket& bucket,
 
     info.requester_pays = false;
     if (real_clock::is_zero(creation_time)) {
-      info.creation_time = ceph::real_clock::now();
+      info.creation_time = stone::real_clock::now();
     } else {
       info.creation_time = creation_time;
     }
@@ -2278,7 +2278,7 @@ int RGWRados::create_bucket(const RGWUserInfo& owner, rgw_bucket& bucket,
       return r;
     }
 
-    ret = put_linked_bucket_info(info, exclusive, ceph::real_time(), pep_objv, &attrs, true, dpp);
+    ret = put_linked_bucket_info(info, exclusive, stone::real_time(), pep_objv, &attrs, true, dpp);
     if (ret == -ECANCELED) {
       ret = -EEXIST;
     }
@@ -2823,7 +2823,7 @@ int RGWRados::swift_versioning_copy(RGWObjectCtx& obj_ctx,
 
   const string& src_name = obj->get_oid();
   char buf[src_name.size() + 32];
-  struct timespec ts = ceph::real_clock::to_timespec(state->mtime);
+  struct timespec ts = stone::real_clock::to_timespec(state->mtime);
   snprintf(buf, sizeof(buf), "%03x%s/%lld.%06ld", (int)src_name.size(),
            src_name.c_str(), (long long)ts.tv_sec, ts.tv_nsec / 1000);
 
@@ -2936,7 +2936,7 @@ int RGWRados::swift_versioning_restore(RGWObjectCtx& obj_ctx,
 
     /* We are requesting ATTRSMOD_NONE so the attr attribute is perfectly
      * irrelevant and may be safely skipped. */
-    std::map<std::string, ceph::bufferlist> no_attrs;
+    std::map<std::string, stone::bufferlist> no_attrs;
 
     rgw::sal::RGWRadosBucket archive_bucket(store, archive_binfo);
     rgw::sal::RGWRadosObject archive_obj(store, entry.key, &archive_bucket);
@@ -3315,7 +3315,7 @@ int RGWRados::Object::Write::write_meta(const DoutPrefixProvider *dpp, uint64_t 
 class RGWRadosPutObj : public RGWHTTPStreamRWRequest::ReceiveCB
 {
   const DoutPrefixProvider *dpp;
-  CephContext* cct;
+  StoneContext* cct;
   rgw_obj obj;
   rgw::putobj::DataProcessor *filter;
   boost::optional<RGWPutObj_Compress>& compressor;
@@ -3337,7 +3337,7 @@ class RGWRadosPutObj : public RGWHTTPStreamRWRequest::ReceiveCB
   std::function<int(map<string, bufferlist>&)> attrs_handler;
 public:
   RGWRadosPutObj(const DoutPrefixProvider *dpp, 
-                 CephContext* cct,
+                 StoneContext* cct,
                  CompressorRef& plugin,
                  boost::optional<RGWPutObj_Compress>& compressor,
                  rgw::putobj::ObjectProcessor *p,
@@ -3474,7 +3474,7 @@ public:
       }
     }
 
-    ceph_assert(uint64_t(ofs) >= extra_data_len);
+    stone_assert(uint64_t(ofs) >= extra_data_len);
 
     uint64_t size = bl.length();
     ofs += size;
@@ -3561,8 +3561,8 @@ struct obj_time_weight {
   obj_time_weight() : zone_short_id(0), pg_ver(0), high_precision(false) {}
 
   bool compare_low_precision(const obj_time_weight& rhs) {
-    struct timespec l = ceph::real_clock::to_timespec(mtime);
-    struct timespec r = ceph::real_clock::to_timespec(rhs.mtime);
+    struct timespec l = stone::real_clock::to_timespec(mtime);
+    struct timespec r = stone::real_clock::to_timespec(rhs.mtime);
     l.tv_nsec = 0;
     r.tv_nsec = 0;
     if (l > r) {
@@ -3762,7 +3762,7 @@ int RGWRados::stat_remote_obj(const DoutPrefixProvider *dpp,
   return 0;
 }
 
-int RGWFetchObjFilter_Default::filter(CephContext *cct,
+int RGWFetchObjFilter_Default::filter(StoneContext *cct,
                                       const rgw_obj_key& source_key,
                                       const RGWBucketInfo& dest_bucket_info,
                                       std::optional<rgw_placement_rule> dest_placement_rule,
@@ -5007,7 +5007,7 @@ void RGWRados::cls_obj_check_mtime(ObjectOperation& op, const real_time& mtime, 
 }
 
 struct tombstone_entry {
-  ceph::real_time mtime;
+  stone::real_time mtime;
   uint32_t zone_short_id;
   uint64_t pg_ver;
 
@@ -5113,8 +5113,8 @@ int RGWRados::Object::Delete::delete_obj(optional_yield y, const DoutPrefixProvi
   ObjectWriteOperation op;
 
   if (!real_clock::is_zero(params.unmod_since)) {
-    struct timespec ctime = ceph::real_clock::to_timespec(state->mtime);
-    struct timespec unmod = ceph::real_clock::to_timespec(params.unmod_since);
+    struct timespec ctime = stone::real_clock::to_timespec(state->mtime);
+    struct timespec unmod = stone::real_clock::to_timespec(params.unmod_since);
     if (!params.high_precision_time) {
       ctime.tv_nsec = 0;
       unmod.tv_nsec = 0;
@@ -5257,7 +5257,7 @@ int RGWRados::delete_raw_obj(const DoutPrefixProvider *dpp, const rgw_raw_obj& o
   return 0;
 }
 
-int RGWRados::delete_obj_index(const rgw_obj& obj, ceph::real_time mtime, const DoutPrefixProvider *dpp)
+int RGWRados::delete_obj_index(const rgw_obj& obj, stone::real_time mtime, const DoutPrefixProvider *dpp)
 {
   std::string oid, key;
   get_obj_bucket_and_oid_loc(obj, oid, key);
@@ -5289,8 +5289,8 @@ static void generate_fake_tag(const DoutPrefixProvider *dpp, rgw::sal::RGWStore*
     tag.append("_");
   }
 
-  unsigned char md5[CEPH_CRYPTO_MD5_DIGESTSIZE];
-  char md5_str[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
+  unsigned char md5[STONE_CRYPTO_MD5_DIGESTSIZE];
+  char md5_str[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 1];
   MD5 hash;
   // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
   hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
@@ -5303,7 +5303,7 @@ static void generate_fake_tag(const DoutPrefixProvider *dpp, rgw::sal::RGWStore*
   }
 
   hash.Final(md5);
-  buf_to_hex(md5, CEPH_CRYPTO_MD5_DIGESTSIZE, md5_str);
+  buf_to_hex(md5, STONE_CRYPTO_MD5_DIGESTSIZE, md5_str);
   tag.append(md5_str);
 
   ldout(store->ctx(), 10) << "generate_fake_tag new tag=" << tag << dendl;
@@ -5326,7 +5326,7 @@ static bool has_olh_tag(map<string, bufferlist>& attrs)
 int RGWRados::get_olh_target_state(const DoutPrefixProvider *dpp, RGWObjectCtx& obj_ctx, const RGWBucketInfo& bucket_info, const rgw_obj& obj,
                                    RGWObjState *olh_state, RGWObjState **target_state, optional_yield y)
 {
-  ceph_assert(olh_state->is_olh);
+  stone_assert(olh_state->is_olh);
 
   rgw_obj target;
   int r = RGWRados::follow_olh(dpp, bucket_info, obj_ctx, olh_state, obj, &target); /* might return -EAGAIN */
@@ -5448,7 +5448,7 @@ int RGWRados::get_obj_state_impl(const DoutPrefixProvider *dpp, RGWObjectCtx *rc
       return -EIO;
     }
     ldpp_dout(dpp, 10) << "manifest: total_size = " << s->manifest->get_obj_size() << dendl;
-    if (cct->_conf->subsys.should_gather<ceph_subsys_rgw, 20>() && \
+    if (cct->_conf->subsys.should_gather<stone_subsys_rgw, 20>() && \
 	s->manifest->has_explicit_objs()) {
       RGWObjManifest::obj_iterator mi;
       for (mi = s->manifest->obj_begin(dpp); mi != s->manifest->obj_end(dpp); ++mi) {
@@ -5570,7 +5570,7 @@ int RGWRados::Object::Stat::stat_async(const DoutPrefixProvider *dpp)
   if (s->has_attrs) {
     state.ret = 0;
     result.size = s->size;
-    result.mtime = ceph::real_clock::to_timespec(s->mtime);
+    result.mtime = stone::real_clock::to_timespec(s->mtime);
     result.attrs = s->attrset;
     result.manifest = s->manifest;
     return 0;
@@ -5930,7 +5930,7 @@ int RGWRados::set_attrs(const DoutPrefixProvider *dpp, void *ctx, const RGWBucke
 int RGWRados::Object::Read::prepare(optional_yield y, const DoutPrefixProvider *dpp)
 {
   RGWRados *store = source->get_store();
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
 
   bufferlist etag;
 
@@ -5962,7 +5962,7 @@ int RGWRados::Object::Read::prepare(optional_yield y, const DoutPrefixProvider *
   }
   if (params.attrs) {
     *params.attrs = astate->attrset;
-    if (cct->_conf->subsys.should_gather<ceph_subsys_rgw, 20>()) {
+    if (cct->_conf->subsys.should_gather<stone_subsys_rgw, 20>()) {
       for (iter = params.attrs->begin(); iter != params.attrs->end(); ++iter) {
         ldpp_dout(dpp, 20) << "Read xattr rgw_rados: " << iter->first << dendl;
       }
@@ -6123,7 +6123,7 @@ int RGWRados::Bucket::UpdateIndex::prepare(const DoutPrefixProvider *dpp, RGWMod
 
 int RGWRados::Bucket::UpdateIndex::complete(const DoutPrefixProvider *dpp, int64_t poolid, uint64_t epoch,
                                             uint64_t size, uint64_t accounted_size,
-                                            ceph::real_time& ut, const string& etag,
+                                            stone::real_time& ut, const string& etag,
                                             const string& content_type, const string& storage_class,
                                             bufferlist *acl_bl,
                                             RGWObjCategory category,
@@ -6462,7 +6462,7 @@ int RGWRados::Object::Read::iterate(const DoutPrefixProvider *dpp, int64_t ofs, 
                                     optional_yield y)
 {
   RGWRados *store = source->get_store();
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
   RGWObjectCtx& obj_ctx = source->get_ctx();
   const uint64_t chunk_size = cct->_conf->rgw_get_obj_max_req_size;
   const uint64_t window_size = cct->_conf->rgw_get_obj_window_size;
@@ -6580,7 +6580,7 @@ int RGWRados::olh_init_modification_impl(const DoutPrefixProvider *dpp, const RG
 {
   ObjectWriteOperation op;
 
-  ceph_assert(olh_obj.key.instance.empty());
+  stone_assert(olh_obj.key.instance.empty());
 
   bool has_tag = (state.exists && has_olh_tag(state.attrset));
 
@@ -6875,7 +6875,7 @@ int RGWRados::bucket_index_link_olh(const DoutPrefixProvider *dpp, const RGWBuck
 void RGWRados::bucket_index_guard_olh_op(const DoutPrefixProvider *dpp, RGWObjState& olh_state, ObjectOperation& op)
 {
   ldpp_dout(dpp, 20) << __func__ << "(): olh_state.olh_tag=" << string(olh_state.olh_tag.c_str(), olh_state.olh_tag.length()) << dendl;
-  op.cmpxattr(RGW_ATTR_OLH_ID_TAG, CEPH_OSD_CMPXATTR_OP_EQ, olh_state.olh_tag);
+  op.cmpxattr(RGW_ATTR_OLH_ID_TAG, STONE_OSD_CMPXATTR_OP_EQ, olh_state.olh_tag);
 }
 
 int RGWRados::bucket_index_unlink_instance(const DoutPrefixProvider *dpp, const RGWBucketInfo& bucket_info, const rgw_obj& obj_instance,
@@ -6970,7 +6970,7 @@ int RGWRados::bucket_index_read_olh_log(const DoutPrefixProvider *dpp,
 // a multisite sync bug resulted in the OLH head attributes being overwritten by
 // the attributes from another zone, causing link_olh() to fail endlessly due to
 // olh_tag mismatch. this attempts to detect this case and reconstruct the OLH
-// attributes from the bucket index. see http://tracker.ceph.com/issues/37792
+// attributes from the bucket index. see http://tracker.stone.com/issues/37792
 int RGWRados::repair_olh(const DoutPrefixProvider *dpp, RGWObjState* state, const RGWBucketInfo& bucket_info,
                          const rgw_obj& obj)
 {
@@ -6993,7 +6993,7 @@ int RGWRados::repair_olh(const DoutPrefixProvider *dpp, RGWObjState* state, cons
   // assert this is the same olh tag we think we're fixing
   bucket_index_guard_olh_op(dpp, *state, op);
   // preserve existing mtime
-  struct timespec mtime_ts = ceph::real_clock::to_timespec(state->mtime);
+  struct timespec mtime_ts = stone::real_clock::to_timespec(state->mtime);
   op.mtime2(&mtime_ts);
   {
     bufferlist bl;
@@ -7087,7 +7087,7 @@ int RGWRados::bucket_index_clear_olh(const DoutPrefixProvider *dpp, const RGWBuc
   return 0;
 }
 
-static int decode_olh_info(CephContext* cct, const bufferlist& bl, RGWOLHInfo *olh)
+static int decode_olh_info(StoneContext* cct, const bufferlist& bl, RGWOLHInfo *olh)
 {
   try {
     auto biter = bl.cbegin();
@@ -7120,8 +7120,8 @@ int RGWRados::apply_olh_log(const DoutPrefixProvider *dpp,
 
   map<uint64_t, vector<rgw_bucket_olh_log_entry> >::iterator iter = log.begin();
 
-  op.cmpxattr(RGW_ATTR_OLH_ID_TAG, CEPH_OSD_CMPXATTR_OP_EQ, olh_tag);
-  op.cmpxattr(RGW_ATTR_OLH_VER, CEPH_OSD_CMPXATTR_OP_GTE, last_ver);
+  op.cmpxattr(RGW_ATTR_OLH_ID_TAG, STONE_OSD_CMPXATTR_OP_EQ, olh_tag);
+  op.cmpxattr(RGW_ATTR_OLH_VER, STONE_OSD_CMPXATTR_OP_GTE, last_ver);
 
   bufferlist ver_bl;
   string last_ver_s = to_string(last_ver);
@@ -7220,7 +7220,7 @@ int RGWRados::apply_olh_log(const DoutPrefixProvider *dpp,
        liter != remove_instances.end(); ++liter) {
     cls_rgw_obj_key& key = *liter;
     rgw_obj obj_instance(bucket, key);
-    int ret = delete_obj(dpp, obj_ctx, bucket_info, obj_instance, 0, RGW_BILOG_FLAG_VERSIONED_OP, ceph::real_time(), zones_trace);
+    int ret = delete_obj(dpp, obj_ctx, bucket_info, obj_instance, 0, RGW_BILOG_FLAG_VERSIONED_OP, stone::real_time(), zones_trace);
     if (ret < 0 && ret != -ENOENT) {
       ldpp_dout(dpp, 0) << "ERROR: delete_obj() returned " << ret << " obj_instance=" << obj_instance << dendl;
       return ret;
@@ -7246,8 +7246,8 @@ int RGWRados::apply_olh_log(const DoutPrefixProvider *dpp,
   if (need_to_remove) {
     ObjectWriteOperation rm_op;
 
-    rm_op.cmpxattr(RGW_ATTR_OLH_ID_TAG, CEPH_OSD_CMPXATTR_OP_EQ, olh_tag);
-    rm_op.cmpxattr(RGW_ATTR_OLH_VER, CEPH_OSD_CMPXATTR_OP_EQ, last_ver);
+    rm_op.cmpxattr(RGW_ATTR_OLH_ID_TAG, STONE_OSD_CMPXATTR_OP_EQ, olh_tag);
+    rm_op.cmpxattr(RGW_ATTR_OLH_VER, STONE_OSD_CMPXATTR_OP_EQ, last_ver);
     cls_obj_check_prefix_exist(rm_op, RGW_ATTR_OLH_PENDING_PREFIX, true); /* fail if found one of these, pending modification */
     rm_op.remove();
 
@@ -7607,7 +7607,7 @@ int RGWRados::raw_obj_stat(const DoutPrefixProvider *dpp,
   if (psize)
     *psize = size;
   if (pmtime)
-    *pmtime = ceph::real_clock::from_timespec(mtime_ts);
+    *pmtime = stone::real_clock::from_timespec(mtime_ts);
   if (attrs) {
     rgw_filter_attrset(unfiltered_attrset, RGW_ATTR_PREFIX, attrs);
   }
@@ -7625,7 +7625,7 @@ int RGWRados::get_bucket_stats(const DoutPrefixProvider *dpp, RGWBucketInfo& buc
     return r;
   }
 
-  ceph_assert(headers.size() == bucket_instance_ids.size());
+  stone_assert(headers.size() == bucket_instance_ids.size());
 
   auto iter = headers.begin();
   map<int, string>::iterator viter = bucket_instance_ids.begin();
@@ -7661,7 +7661,7 @@ class RGWGetBucketStatsContext : public RGWGetDirHeader_CB {
   map<RGWObjCategory, RGWStorageStats> stats;
   int ret_code;
   bool should_cb;
-  ceph::mutex lock = ceph::make_mutex("RGWGetBucketStatsContext");
+  stone::mutex lock = stone::make_mutex("RGWGetBucketStatsContext");
 
 public:
   RGWGetBucketStatsContext(RGWGetBucketStats_CB *_cb, uint32_t _pendings)
@@ -7698,7 +7698,7 @@ int RGWRados::get_bucket_stats_async(const DoutPrefixProvider *dpp, RGWBucketInf
 {
   int num_aio = 0;
   RGWGetBucketStatsContext *get_ctx = new RGWGetBucketStatsContext(ctx, bucket_info.layout.current_index.layout.normal.num_shards ? : 1);
-  ceph_assert(get_ctx);
+  stone_assert(get_ctx);
   int r = cls_bucket_head_async(dpp, bucket_info, shard_id, get_ctx, &num_aio);
   if (r < 0) {
     ctx->put();
@@ -7758,7 +7758,7 @@ int RGWRados::get_bucket_info(RGWServices *svc,
 }
 
 int RGWRados::try_refresh_bucket_info(RGWBucketInfo& info,
-                                      ceph::real_time *pmtime,
+                                      stone::real_time *pmtime,
                                       const DoutPrefixProvider *dpp,
                                       map<string, bufferlist> *pattrs)
 {
@@ -7931,7 +7931,7 @@ string RGWRados::pool_iterate_get_cursor(RGWPoolIterCtx& ctx)
   return ctx.iter.get_cursor().to_str();
 }
 
-static int do_pool_iterate(CephContext* cct, RGWPoolIterCtx& ctx, uint32_t num,
+static int do_pool_iterate(StoneContext* cct, RGWPoolIterCtx& ctx, uint32_t num,
                            vector<rgw_bucket_dir_entry>& objs,
                            bool *is_truncated, RGWAccessListFilter *filter)
 {
@@ -8240,7 +8240,7 @@ int RGWRados::process_lc()
 
 bool RGWRados::process_expire_objects(const DoutPrefixProvider *dpp)
 {
-  return obj_expirer->inspect_all_shards(dpp, utime_t(), ceph_clock_now());
+  return obj_expirer->inspect_all_shards(dpp, utime_t(), stone_clock_now());
 }
 
 int RGWRados::cls_obj_prepare_op(const DoutPrefixProvider *dpp, BucketShard& bs, RGWModifyOp op, string& tag,
@@ -8482,7 +8482,7 @@ int RGWRados::cls_bucket_list_ordered(const DoutPrefixProvider *dpp,
   }; // ShardTracker
 
   // add the next unique candidate, or return false if we reach the end
-  auto next_candidate = [] (CephContext *cct, ShardTracker& t,
+  auto next_candidate = [] (StoneContext *cct, ShardTracker& t,
                             std::map<std::string, size_t>& candidates,
                             size_t tracker_idx) {
     while (!t.at_end()) {
@@ -8909,7 +8909,7 @@ int RGWRados::remove_objs_from_index(const DoutPrefixProvider *dpp, RGWBucketInf
   RGWSI_RADOS::Pool index_pool;
   string dir_oid;
 
-  uint8_t suggest_flag = (svc.zone->get_zone().log_data ? CEPH_RGW_DIR_SUGGEST_LOG_OP : 0);
+  uint8_t suggest_flag = (svc.zone->get_zone().log_data ? STONE_RGW_DIR_SUGGEST_LOG_OP : 0);
 
   int r = svc.bi_rados->open_bucket_index(dpp, bucket_info, &index_pool, &dir_oid);
   if (r < 0)
@@ -8922,7 +8922,7 @@ int RGWRados::remove_objs_from_index(const DoutPrefixProvider *dpp, RGWBucketInf
     entry.key = *iter;
     ldpp_dout(dpp, 2) << "RGWRados::remove_objs_from_index bucket=" << bucket_info.bucket << " obj=" << entry.key.name << ":" << entry.key.instance << dendl;
     entry.ver.epoch = (uint64_t)-1; // ULLONG_MAX, needed to that objclass doesn't skip out request
-    updates.append(CEPH_RGW_REMOVE | suggest_flag);
+    updates.append(STONE_RGW_REMOVE | suggest_flag);
     encode(entry, updates);
   }
 
@@ -8942,7 +8942,7 @@ int RGWRados::check_disk_state(const DoutPrefixProvider *dpp,
                                optional_yield y)
 {
   const rgw_bucket& bucket = bucket_info.bucket;
-  uint8_t suggest_flag = (svc.zone->get_zone().log_data ? CEPH_RGW_DIR_SUGGEST_LOG_OP : 0);
+  uint8_t suggest_flag = (svc.zone->get_zone().log_data ? STONE_RGW_DIR_SUGGEST_LOG_OP : 0);
 
   std::string loc;
 
@@ -8976,7 +8976,7 @@ int RGWRados::check_disk_state(const DoutPrefixProvider *dpp,
     // encode a suggested removal of that key
     list_state.ver.epoch = io_ctx.get_last_version();
     list_state.ver.pool = io_ctx.get_id();
-    cls_rgw_encode_suggestion(CEPH_RGW_REMOVE, list_state, suggested_updates);
+    cls_rgw_encode_suggestion(STONE_RGW_REMOVE, list_state, suggested_updates);
     return -ENOENT;
   }
 
@@ -9055,7 +9055,7 @@ int RGWRados::check_disk_state(const DoutPrefixProvider *dpp,
   list_state.meta.owner_display_name = owner.get_display_name();
 
   list_state.exists = true;
-  cls_rgw_encode_suggestion(CEPH_RGW_UPDATE | suggest_flag, list_state, suggested_updates);
+  cls_rgw_encode_suggestion(STONE_RGW_UPDATE | suggest_flag, list_state, suggested_updates);
   return 0;
 }
 

@@ -1,7 +1,7 @@
-add_executable(ceph_test_cls_hello
+add_executable(stone_test_cls_hello
   test_cls_hello.cc
   )
-target_link_libraries(ceph_test_cls_hello
+target_link_libraries(stone_test_cls_hello
   librados
   global
   ${EXTRALIBS}
@@ -11,5 +11,5 @@ target_link_libraries(ceph_test_cls_hello
   ${UNITTEST_LIBS}
   )
 install(TARGETS
-  ceph_test_cls_hello
+  stone_test_cls_hello
   DESTINATION ${CMAKE_INSTALL_BINDIR})

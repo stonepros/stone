@@ -1,5 +1,5 @@
-#ifndef CEPH_CRUSH_HASH_H
-#define CEPH_CRUSH_HASH_H
+#ifndef STONE_CRUSH_HASH_H
+#define STONE_CRUSH_HASH_H
 
 #ifdef __KERNEL__
 # include <linux/types.h>

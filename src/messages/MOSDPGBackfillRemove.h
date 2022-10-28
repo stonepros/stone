@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2017 Sage Weil <sage@redhat.com>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_MOSDPGBACKFILLREMOVE_H
-#define CEPH_MOSDPGBACKFILLREMOVE_H
+#ifndef STONE_MOSDPGBACKFILLREMOVE_H
+#define STONE_MOSDPGBACKFILLREMOVE_H
 
 #include "MOSDFastDispatchOp.h"
 

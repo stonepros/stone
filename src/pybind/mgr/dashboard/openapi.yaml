@@ -31,12 +31,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -73,19 +73,19 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   permissions:
                     description: List of permissions acquired
                     properties:
-                      cephfs:
+                      stonefs:
                         description: ''
                         items:
                           type: string
                         type: array
                     required:
-                    - cephfs
+                    - stonefs
                     type: object
                   pwdUpdateRequired:
                     description: Is password update required?
@@ -105,7 +105,7 @@ paths:
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -126,12 +126,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -157,7 +157,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 items:
                   properties:
@@ -228,12 +228,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -256,7 +256,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -278,7 +278,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -307,7 +307,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 items:
                   properties:
@@ -363,12 +363,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -403,12 +403,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -446,12 +446,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -478,12 +478,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -509,7 +509,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -549,12 +549,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -611,12 +611,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -643,12 +643,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -687,12 +687,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -729,12 +729,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -766,12 +766,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -812,12 +812,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -877,12 +877,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -914,12 +914,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -947,7 +947,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   mirror_mode:
@@ -989,12 +989,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -1034,12 +1034,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -1066,12 +1066,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -1098,7 +1098,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -1141,12 +1141,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -1178,12 +1178,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -1214,7 +1214,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -1259,12 +1259,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -1286,7 +1286,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   site_name:
@@ -1325,12 +1325,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -1352,7 +1352,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   content_data:
@@ -1451,7 +1451,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -1487,12 +1487,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -1524,12 +1524,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -1545,13 +1545,13 @@ paths:
       - jwt: []
       tags:
       - RbdNamespace
-  /api/cephfs:
+  /api/stonefs:
     get:
       parameters: []
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -1567,7 +1567,7 @@ paths:
       - jwt: []
       tags:
       - Cephfs
-  /api/cephfs/{fs_id}:
+  /api/stonefs/{fs_id}:
     get:
       parameters:
       - in: path
@@ -1578,7 +1578,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -1594,7 +1594,7 @@ paths:
       - jwt: []
       tags:
       - Cephfs
-  /api/cephfs/{fs_id}/client/{client_id}:
+  /api/stonefs/{fs_id}/client/{client_id}:
     delete:
       parameters:
       - in: path
@@ -1610,12 +1610,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -1631,7 +1631,7 @@ paths:
       - jwt: []
       tags:
       - Cephfs
-  /api/cephfs/{fs_id}/clients:
+  /api/stonefs/{fs_id}/clients:
     get:
       parameters:
       - in: path
@@ -1642,7 +1642,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -1658,7 +1658,7 @@ paths:
       - jwt: []
       tags:
       - Cephfs
-  /api/cephfs/{fs_id}/get_root_directory:
+  /api/stonefs/{fs_id}/get_root_directory:
     get:
       description: "\n        The root directory that can't be fetched using ls_dir\
         \ (api).\n        :param fs_id: The filesystem identifier.\n        :return:\
@@ -1672,7 +1672,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -1688,7 +1688,7 @@ paths:
       - jwt: []
       tags:
       - Cephfs
-  /api/cephfs/{fs_id}/ls_dir:
+  /api/stonefs/{fs_id}/ls_dir:
     get:
       description: "\n        List directories of specified path.\n        :param\
         \ fs_id: The filesystem identifier.\n        :param path: The path where to\
@@ -1716,7 +1716,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -1732,7 +1732,7 @@ paths:
       - jwt: []
       tags:
       - Cephfs
-  /api/cephfs/{fs_id}/mds_counters:
+  /api/stonefs/{fs_id}/mds_counters:
     get:
       parameters:
       - in: path
@@ -1748,7 +1748,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -1764,7 +1764,7 @@ paths:
       - jwt: []
       tags:
       - Cephfs
-  /api/cephfs/{fs_id}/quota:
+  /api/stonefs/{fs_id}/quota:
     get:
       description: "\n        Get the quotas of the specified path.\n        :param\
         \ fs_id: The filesystem identifier.\n        :param path: The path of the\
@@ -1786,7 +1786,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   max_bytes:
@@ -1842,12 +1842,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -1863,7 +1863,7 @@ paths:
       - jwt: []
       tags:
       - Cephfs
-  /api/cephfs/{fs_id}/snapshot:
+  /api/stonefs/{fs_id}/snapshot:
     delete:
       description: "\n        Remove a snapshot.\n        :param fs_id: The filesystem\
         \ identifier.\n        :param path: The path of the directory.\n        :param\
@@ -1887,12 +1887,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -1935,12 +1935,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -1956,7 +1956,7 @@ paths:
       - jwt: []
       tags:
       - Cephfs
-  /api/cephfs/{fs_id}/tree:
+  /api/stonefs/{fs_id}/tree:
     delete:
       description: "\n        Remove a directory.\n        :param fs_id: The filesystem\
         \ identifier.\n        :param path: The path of the directory.\n        "
@@ -1974,12 +1974,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -2017,12 +2017,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -2044,7 +2044,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v0.1+json:
+            application/vnd.stone.api.v0.1+json:
               type: object
           description: OK
         '400':
@@ -2077,12 +2077,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v0.1+json:
+            application/vnd.stone.api.v0.1+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v0.1+json:
+            application/vnd.stone.api.v0.1+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -2105,7 +2105,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -2139,12 +2139,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -2175,12 +2175,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -2208,7 +2208,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 items:
                   properties:
@@ -2316,12 +2316,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -2347,7 +2347,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -2369,7 +2369,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   max_size:
@@ -2442,12 +2442,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -2474,12 +2474,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -2505,7 +2505,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -2543,12 +2543,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v0.1+json:
+            application/vnd.stone.api.v0.1+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v0.1+json:
+            application/vnd.stone.api.v0.1+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -2570,7 +2570,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 items:
                   properties:
@@ -2631,12 +2631,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -2663,12 +2663,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -2694,7 +2694,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -2716,10 +2716,10 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
-                  cephfs:
+                  stonefs:
                     description: ''
                     type: boolean
                   iscsi:
@@ -2741,7 +2741,7 @@ paths:
                 - rbd
                 - mirroring
                 - iscsi
-                - cephfs
+                - stonefs
                 - rgw
                 - nfs
                 type: object
@@ -2766,12 +2766,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -2793,7 +2793,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   instance:
@@ -2828,7 +2828,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -2850,7 +2850,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -2872,7 +2872,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   client_perf:
@@ -3266,13 +3266,13 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.1+json:
+            application/vnd.stone.api.v1.1+json:
               schema:
                 properties:
                   addr:
                     description: Host address
                     type: string
-                  ceph_version:
+                  stone_version:
                     description: Ceph version
                     type: string
                   hostname:
@@ -3304,14 +3304,14 @@ paths:
                   sources:
                     description: Host Sources
                     properties:
-                      ceph:
+                      stone:
                         description: ''
                         type: boolean
                       orchestrator:
                         description: ''
                         type: boolean
                     required:
-                    - ceph
+                    - stone
                     - orchestrator
                     type: object
                   status:
@@ -3320,7 +3320,7 @@ paths:
                 required:
                 - hostname
                 - services
-                - ceph_version
+                - stone_version
                 - addr
                 - labels
                 - service_type
@@ -3369,12 +3369,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v0.1+json:
+            application/vnd.stone.api.v0.1+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v0.1+json:
+            application/vnd.stone.api.v0.1+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -3401,12 +3401,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -3434,7 +3434,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -3494,14 +3494,14 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v0.1+json:
+            application/vnd.stone.api.v0.1+json:
               schema:
                 properties: {}
                 type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v0.1+json:
+            application/vnd.stone.api.v0.1+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -3528,7 +3528,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -3555,7 +3555,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -3600,12 +3600,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -3639,7 +3639,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   addr:
@@ -3930,7 +3930,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -3952,7 +3952,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 items:
                   properties:
@@ -4042,12 +4042,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -4070,7 +4070,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -4113,12 +4113,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -4145,12 +4145,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -4176,7 +4176,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -4224,12 +4224,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -4251,7 +4251,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   audit_log:
@@ -4348,7 +4348,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 items:
                   properties:
@@ -4463,7 +4463,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -4503,12 +4503,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -4538,12 +4538,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -4573,12 +4573,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -4609,7 +4609,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -4631,7 +4631,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   in_quorum:
@@ -5013,7 +5013,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v0.1+json:
+            application/vnd.stone.api.v0.1+json:
               type: object
           description: OK
         '400':
@@ -5035,7 +5035,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 items:
                   properties:
@@ -5224,7 +5224,7 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v2.0+json:
+            application/vnd.stone.api.v2.0+json:
               schema:
                 properties:
                   access_type:
@@ -5313,7 +5313,7 @@ paths:
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v2.0+json:
+            application/vnd.stone.api.v2.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -5348,12 +5348,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v2.0+json:
+            application/vnd.stone.api.v2.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v2.0+json:
+            application/vnd.stone.api.v2.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -5387,7 +5387,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   access_type:
@@ -5582,7 +5582,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v2.0+json:
+            application/vnd.stone.api.v2.0+json:
               schema:
                 properties:
                   access_type:
@@ -5671,7 +5671,7 @@ paths:
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v2.0+json:
+            application/vnd.stone.api.v2.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -5694,7 +5694,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   available:
@@ -5728,7 +5728,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   available:
@@ -5762,7 +5762,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -5799,12 +5799,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -5826,7 +5826,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   list_of_flags:
@@ -5876,7 +5876,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   list_of_flags:
@@ -5890,7 +5890,7 @@ paths:
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -5913,7 +5913,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   flags:
@@ -5981,7 +5981,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   added:
@@ -6007,7 +6007,7 @@ paths:
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -6036,7 +6036,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6065,7 +6065,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   active:
@@ -6119,7 +6119,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v0.1+json:
+            application/vnd.stone.api.v0.1+json:
               type: object
           description: OK
         '400':
@@ -6156,12 +6156,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -6189,7 +6189,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6225,12 +6225,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -6249,7 +6249,7 @@ paths:
   /api/osd/{svc_id}/destroy:
     post:
       description: "\n        Mark osd as being destroyed. Keeps the ID intact (allowing\
-        \ reuse), but\n        removes cephx keys, config-key data and lockbox keys,\
+        \ reuse), but\n        removes stonex keys, config-key data and lockbox keys,\
         \ rendering data\n        permanently unreadable.\n\n        The osd must\
         \ be marked down before being destroyed.\n        "
       parameters:
@@ -6261,12 +6261,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -6293,7 +6293,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6321,7 +6321,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6361,12 +6361,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -6396,12 +6396,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -6420,12 +6420,12 @@ paths:
   /api/osd/{svc_id}/reweight:
     post:
       description: "\n        Reweights the OSD temporarily.\n\n        Note that\
-        \ \u2018ceph osd reweight\u2019 is not a persistent setting. When an OSD\n\
+        \ \u2018stone osd reweight\u2019 is not a persistent setting. When an OSD\n\
         \        gets marked out, the osd weight will be set to 0. When it gets marked\n\
         \        in again, the weight will be changed to 1.\n\n        Because of\
-        \ this \u2018ceph osd reweight\u2019 is a temporary solution. You should\n\
+        \ this \u2018stone osd reweight\u2019 is a temporary solution. You should\n\
         \        only use it to keep your cluster running while you\u2019re ordering\
-        \ more\n        hardware.\n\n        - Craig Lewis (http://lists.ceph.com/pipermail/ceph-users-ceph.com/2014-June/040967.html)\n\
+        \ more\n        hardware.\n\n        - Craig Lewis (http://lists.stone.com/pipermail/stone-users-stone.com/2014-June/040967.html)\n\
         \        "
       parameters:
       - in: path
@@ -6446,12 +6446,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -6492,12 +6492,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -6524,7 +6524,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6546,7 +6546,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   mon.a:
@@ -6613,7 +6613,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6640,7 +6640,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6667,7 +6667,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6694,7 +6694,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6721,7 +6721,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6748,7 +6748,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6775,7 +6775,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -6809,7 +6809,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 items:
                   properties:
@@ -7138,12 +7138,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -7170,12 +7170,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -7211,7 +7211,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -7249,12 +7249,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -7281,7 +7281,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -7303,7 +7303,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -7325,7 +7325,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -7347,7 +7347,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -7369,12 +7369,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -7401,12 +7401,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -7428,7 +7428,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -7465,7 +7465,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.1+json:
+            application/vnd.stone.api.v1.1+json:
               type: object
           description: OK
         '400':
@@ -7514,12 +7514,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -7556,12 +7556,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -7592,7 +7592,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -7647,12 +7647,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -7674,7 +7674,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 items:
                   properties:
@@ -7727,7 +7727,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -7759,7 +7759,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -7781,7 +7781,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   available:
@@ -7820,7 +7820,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   list_of_users:
@@ -7878,12 +7878,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -7910,7 +7910,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -7942,12 +7942,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -7983,7 +7983,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -8025,12 +8025,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -8072,12 +8072,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -8118,12 +8118,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -8170,12 +8170,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -8221,12 +8221,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -8258,7 +8258,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -8305,12 +8305,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -8362,12 +8362,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -8412,12 +8412,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -8439,7 +8439,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 items:
                   properties:
@@ -8452,13 +8452,13 @@ paths:
                     scopes_permissions:
                       description: ''
                       properties:
-                        cephfs:
+                        stonefs:
                           description: ''
                           items:
                             type: string
                           type: array
                       required:
-                      - cephfs
+                      - stonefs
                       type: object
                     system:
                       description: ''
@@ -8502,12 +8502,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -8534,12 +8534,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -8565,7 +8565,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -8601,12 +8601,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -8643,12 +8643,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -8675,7 +8675,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -8712,12 +8712,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -8741,7 +8741,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -8770,12 +8770,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -8801,7 +8801,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -8828,7 +8828,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -8860,7 +8860,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 items:
                   properties:
@@ -8903,12 +8903,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -8935,12 +8935,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -8970,7 +8970,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -9006,12 +9006,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -9033,7 +9033,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   executing_tasks:
@@ -9155,7 +9155,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   executing_tasks:
@@ -9252,12 +9252,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -9281,7 +9281,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   device_report:
@@ -9580,14 +9580,14 @@ paths:
                                 required:
                                 - x86_64
                                 type: object
-                              ceph_version:
+                              stone_version:
                                 description: ''
                                 properties:
-                                  ceph version 16.0.0-3151-gf202994fcf:
+                                  stone version 16.0.0-3151-gf202994fcf:
                                     description: ''
                                     type: integer
                                 required:
-                                - ceph version 16.0.0-3151-gf202994fcf
+                                - stone version 16.0.0-3151-gf202994fcf
                                 type: object
                               cpu:
                                 description: ''
@@ -9645,7 +9645,7 @@ paths:
                                 type: object
                             required:
                             - arch
-                            - ceph_version
+                            - stone_version
                             - os
                             - cpu
                             - kernel_description
@@ -9665,14 +9665,14 @@ paths:
                                 required:
                                 - x86_64
                                 type: object
-                              ceph_version:
+                              stone_version:
                                 description: ''
                                 properties:
-                                  ceph version 16.0.0-3151-gf202994fcf:
+                                  stone version 16.0.0-3151-gf202994fcf:
                                     description: ''
                                     type: integer
                                 required:
-                                - ceph version 16.0.0-3151-gf202994fcf
+                                - stone version 16.0.0-3151-gf202994fcf
                                 type: object
                               cpu:
                                 description: ''
@@ -9750,7 +9750,7 @@ paths:
                             - osd_objectstore
                             - rotational
                             - arch
-                            - ceph_version
+                            - stone_version
                             - os
                             - cpu
                             - kernel_description
@@ -10017,7 +10017,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               schema:
                 properties:
                   email:
@@ -10100,12 +10100,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -10147,12 +10147,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -10179,12 +10179,12 @@ paths:
       responses:
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '204':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource deleted.
         '400':
@@ -10210,7 +10210,7 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: OK
         '400':
@@ -10257,12 +10257,12 @@ paths:
       responses:
         '200':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource updated.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':
@@ -10302,12 +10302,12 @@ paths:
       responses:
         '201':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Resource created.
         '202':
           content:
-            application/vnd.ceph.api.v1.0+json:
+            application/vnd.stone.api.v1.0+json:
               type: object
           description: Operation is still executing. Please check the task queue.
         '400':

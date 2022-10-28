@@ -1,12 +1,12 @@
 [Unit]
 Description=Map RBD devices
-After=network-online.target ceph.target
+After=network-online.target stone.target
 Before=remote-fs-pre.target
-Wants=network-online.target remote-fs-pre.target ceph.target
+Wants=network-online.target remote-fs-pre.target stone.target
 
 [Service]
 EnvironmentFile=-@SYSTEMD_ENV_FILE@
-Environment=RBDMAPFILE=/etc/ceph/rbdmap
+Environment=RBDMAPFILE=/etc/stone/rbdmap
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/bin/rbdmap map

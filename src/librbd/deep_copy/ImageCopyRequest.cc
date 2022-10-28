@@ -10,7 +10,7 @@
 #include "librbd/object_map/DiffRequest.h"
 #include "osdc/Striper.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::deep_copy::ImageCopyRequest: " \
                            << this << " " << __func__ << ": "
@@ -36,7 +36,7 @@ ImageCopyRequest<I>::ImageCopyRequest(I *src_image_ctx, I *dst_image_ctx,
     m_src_snap_id_end(src_snap_id_end), m_dst_snap_id_start(dst_snap_id_start),
     m_flatten(flatten), m_object_number(object_number), m_snap_seqs(snap_seqs),
     m_handler(handler), m_on_finish(on_finish), m_cct(dst_image_ctx->cct),
-    m_lock(ceph::make_mutex(unique_lock_name("ImageCopyRequest::m_lock", this))) {
+    m_lock(stone::make_mutex(unique_lock_name("ImageCopyRequest::m_lock", this))) {
 }
 
 template <typename I>
@@ -83,7 +83,7 @@ void ImageCopyRequest<I>::map_src_objects(uint64_t dst_object,
     }
   }
 
-  ceph_assert(!src_objects->empty());
+  stone_assert(!src_objects->empty());
 
   ldout(m_cct, 20) << dst_object << " -> " << *src_objects << dendl;
 }
@@ -127,7 +127,7 @@ void ImageCopyRequest<I>::send_object_copies() {
   uint64_t size;
   {
     std::shared_lock image_locker{m_src_image_ctx->image_lock};
-    size =  m_src_image_ctx->get_image_size(CEPH_NOSNAP);
+    size =  m_src_image_ctx->get_image_size(STONE_NOSNAP);
     for (auto snap_id : m_src_image_ctx->snaps) {
       size = std::max(size, m_src_image_ctx->get_image_size(snap_id));
     }
@@ -162,7 +162,7 @@ void ImageCopyRequest<I>::send_object_copies() {
 
 template <typename I>
 int ImageCopyRequest<I>::send_next_object_copy() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   if (m_canceled && m_ret_val == 0) {
     ldout(m_cct, 10) << "image copy canceled" << dendl;
@@ -233,7 +233,7 @@ void ImageCopyRequest<I>::handle_object_copy(uint64_t object_no, int r) {
   bool complete;
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_current_ops > 0);
+    stone_assert(m_current_ops > 0);
     --m_current_ops;
 
     if (r < 0 && r != -ENOENT) {
@@ -253,7 +253,7 @@ void ImageCopyRequest<I>::handle_object_copy(uint64_t object_no, int r) {
         m_lock.unlock();
         m_handler->update_progress(progress_object_no, m_end_object_no);
         m_lock.lock();
-        ceph_assert(m_updating_progress);
+        stone_assert(m_updating_progress);
         m_updating_progress = false;
       }
     }

@@ -4,12 +4,12 @@
 #include "journal/ObjectRecorder.h"
 #include "journal/Future.h"
 #include "journal/Utils.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/Timer.h"
 #include "common/errno.h"
 #include "cls/journal/cls_journal_client.h"
 
-#define dout_subsys ceph_subsys_journaler
+#define dout_subsys stone_subsys_journaler
 #undef dout_prefix
 #define dout_prefix *_dout << "ObjectRecorder: " << this << " " \
                            << __func__ << " (" << m_oid << "): "
@@ -20,7 +20,7 @@ using std::shared_ptr;
 namespace journal {
 
 ObjectRecorder::ObjectRecorder(librados::IoCtx &ioctx, std::string_view oid,
-                               uint64_t object_number, ceph::mutex* lock,
+                               uint64_t object_number, stone::mutex* lock,
                                ContextWQ *work_queue, Handler *handler,
                                uint8_t order, int32_t max_in_flight_appends)
   : m_oid(oid), m_object_number(object_number),
@@ -30,8 +30,8 @@ ObjectRecorder::ObjectRecorder(librados::IoCtx &ioctx, std::string_view oid,
     m_lock(lock)
 {
   m_ioctx.dup(ioctx);
-  m_cct = reinterpret_cast<CephContext*>(m_ioctx.cct());
-  ceph_assert(m_handler != NULL);
+  m_cct = reinterpret_cast<StoneContext*>(m_ioctx.cct());
+  stone_assert(m_handler != NULL);
 
   librados::Rados rados(m_ioctx);
   int8_t require_osd_release = 0;
@@ -40,16 +40,16 @@ ObjectRecorder::ObjectRecorder(librados::IoCtx &ioctx, std::string_view oid,
     ldout(m_cct, 0) << "failed to retrieve min OSD release: "
                     << cpp_strerror(r) << dendl;
   }
-  m_compat_mode = require_osd_release < CEPH_RELEASE_OCTOPUS;
+  m_compat_mode = require_osd_release < STONE_RELEASE_OCTOPUS;
 
   ldout(m_cct, 20) << dendl;
 }
 
 ObjectRecorder::~ObjectRecorder() {
   ldout(m_cct, 20) << dendl;
-  ceph_assert(m_pending_buffers.empty());
-  ceph_assert(m_in_flight_tids.empty());
-  ceph_assert(m_in_flight_appends.empty());
+  stone_assert(m_pending_buffers.empty());
+  stone_assert(m_in_flight_tids.empty());
+  stone_assert(m_in_flight_appends.empty());
 }
 
 void ObjectRecorder::set_append_batch_options(int flush_interval,
@@ -59,7 +59,7 @@ void ObjectRecorder::set_append_batch_options(int flush_interval,
                   << "flush_bytes=" << flush_bytes << ", "
                   << "flush_age=" << flush_age << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(*m_lock));
+  stone_assert(stone_mutex_is_locked(*m_lock));
   m_flush_interval = flush_interval;
   m_flush_bytes = flush_bytes;
   m_flush_age = flush_age;
@@ -68,9 +68,9 @@ void ObjectRecorder::set_append_batch_options(int flush_interval,
 bool ObjectRecorder::append(AppendBuffers &&append_buffers) {
   ldout(m_cct, 20) << "count=" << append_buffers.size() << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(*m_lock));
+  stone_assert(stone_mutex_is_locked(*m_lock));
 
-  ceph::ref_t<FutureImpl> last_flushed_future;
+  stone::ref_t<FutureImpl> last_flushed_future;
   auto flush_handler = get_flush_handler();
   for (auto& append_buffer : append_buffers) {
     ldout(m_cct, 20) << *append_buffer.first << ", "
@@ -106,7 +106,7 @@ void ObjectRecorder::flush(Context *on_safe) {
       future = Future(m_pending_buffers.rbegin()->first);
     } else if (!m_in_flight_appends.empty()) {
       AppendBuffers &append_buffers = m_in_flight_appends.rbegin()->second;
-      ceph_assert(!append_buffers.empty());
+      stone_assert(!append_buffers.empty());
       future = Future(append_buffers.rbegin()->first);
     }
   }
@@ -122,7 +122,7 @@ void ObjectRecorder::flush(Context *on_safe) {
   }
 }
 
-void ObjectRecorder::flush(const ceph::ref_t<FutureImpl>& future) {
+void ObjectRecorder::flush(const stone::ref_t<FutureImpl>& future) {
   ldout(m_cct, 20) << "flushing " << *future << dendl;
 
   std::unique_lock locker{*m_lock};
@@ -146,10 +146,10 @@ void ObjectRecorder::flush(const ceph::ref_t<FutureImpl>& future) {
 void ObjectRecorder::claim_append_buffers(AppendBuffers *append_buffers) {
   ldout(m_cct, 20) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(*m_lock));
-  ceph_assert(m_in_flight_tids.empty());
-  ceph_assert(m_in_flight_appends.empty());
-  ceph_assert(m_object_closed || m_overflowed);
+  stone_assert(stone_mutex_is_locked(*m_lock));
+  stone_assert(m_in_flight_tids.empty());
+  stone_assert(m_in_flight_appends.empty());
+  stone_assert(m_object_closed || m_overflowed);
 
   for (auto& append_buffer : m_pending_buffers) {
     ldout(m_cct, 20) << "detached " << *append_buffer.first << dendl;
@@ -160,13 +160,13 @@ void ObjectRecorder::claim_append_buffers(AppendBuffers *append_buffers) {
 }
 
 bool ObjectRecorder::close() {
-  ceph_assert(ceph_mutex_is_locked(*m_lock));
+  stone_assert(stone_mutex_is_locked(*m_lock));
 
   ldout(m_cct, 20) << dendl;
 
   send_appends(true, {});
 
-  ceph_assert(!m_object_closed);
+  stone_assert(!m_object_closed);
   m_object_closed = true;
 
   if (!m_in_flight_tids.empty() || m_in_flight_callbacks > 0) {
@@ -184,11 +184,11 @@ void ObjectRecorder::handle_append_flushed(uint64_t tid, int r) {
   ++m_in_flight_callbacks;
 
   auto tid_iter = m_in_flight_tids.find(tid);
-  ceph_assert(tid_iter != m_in_flight_tids.end());
+  stone_assert(tid_iter != m_in_flight_tids.end());
   m_in_flight_tids.erase(tid_iter);
 
   InFlightAppends::iterator iter = m_in_flight_appends.find(tid);
-  ceph_assert(iter != m_in_flight_appends.end());
+  stone_assert(iter != m_in_flight_appends.end());
 
   bool notify_overflowed = false;
   AppendBuffers append_buffers;
@@ -206,13 +206,13 @@ void ObjectRecorder::handle_append_flushed(uint64_t tid, int r) {
     m_overflowed = true;
   } else {
     append_buffers.swap(iter->second);
-    ceph_assert(!append_buffers.empty());
+    stone_assert(!append_buffers.empty());
 
     for (auto& append_buffer : append_buffers) {
       auto length = append_buffer.second.length();
       m_object_bytes += length;
 
-      ceph_assert(m_in_flight_bytes >= length);
+      stone_assert(m_in_flight_bytes >= length);
       m_in_flight_bytes -= length;
     }
     ldout(m_cct, 20) << "object_bytes=" << m_object_bytes << dendl;
@@ -244,8 +244,8 @@ void ObjectRecorder::handle_append_flushed(uint64_t tid, int r) {
 void ObjectRecorder::append_overflowed() {
   ldout(m_cct, 10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(*m_lock));
-  ceph_assert(!m_in_flight_appends.empty());
+  stone_assert(stone_mutex_is_locked(*m_lock));
+  stone_assert(!m_in_flight_appends.empty());
 
   InFlightAppends in_flight_appends;
   in_flight_appends.swap(m_in_flight_appends);
@@ -264,10 +264,10 @@ void ObjectRecorder::append_overflowed() {
   restart_append_buffers.swap(m_pending_buffers);
 }
 
-bool ObjectRecorder::send_appends(bool force, ceph::ref_t<FutureImpl> flush_future) {
+bool ObjectRecorder::send_appends(bool force, stone::ref_t<FutureImpl> flush_future) {
   ldout(m_cct, 20) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(*m_lock));
+  stone_assert(stone_mutex_is_locked(*m_lock));
   if (m_object_closed || m_overflowed) {
     ldout(m_cct, 20) << "already closed or overflowed" << dendl;
     return false;
@@ -282,14 +282,14 @@ bool ObjectRecorder::send_appends(bool force, ceph::ref_t<FutureImpl> flush_futu
       ((m_flush_interval > 0 && m_pending_buffers.size() >= m_flush_interval) ||
        (m_flush_bytes > 0 && m_pending_bytes >= m_flush_bytes) ||
        (m_flush_age > 0 && !m_last_flush_time.is_zero() &&
-        m_last_flush_time + m_flush_age <= ceph_clock_now()))) {
+        m_last_flush_time + m_flush_age <= stone_clock_now()))) {
     ldout(m_cct, 20) << "forcing batch flush" << dendl;
     force = true;
   }
 
   // start tracking flush time after the first append event
   if (m_last_flush_time.is_zero()) {
-    m_last_flush_time = ceph_clock_now();
+    m_last_flush_time = stone_clock_now();
   }
 
   auto max_in_flight_appends = m_max_in_flight_appends;
@@ -335,7 +335,7 @@ bool ObjectRecorder::send_appends(bool force, ceph::ref_t<FutureImpl> flush_futu
 
     if (m_compat_mode) {
       op.append(bl);
-      op.set_op_flags2(CEPH_OSD_OP_FLAG_FADVISE_DONTNEED);
+      op.set_op_flags2(STONE_OSD_OP_FLAG_FADVISE_DONTNEED);
     } else {
       append_bl.append(bl);
     }
@@ -351,14 +351,14 @@ bool ObjectRecorder::send_appends(bool force, ceph::ref_t<FutureImpl> flush_futu
   }
 
   if (append_bytes > 0) {
-    m_last_flush_time = ceph_clock_now();
+    m_last_flush_time = stone_clock_now();
 
     uint64_t append_tid = m_append_tid++;
     m_in_flight_tids.insert(append_tid);
     m_in_flight_appends[append_tid].swap(append_buffers);
     m_in_flight_bytes += append_bytes;
 
-    ceph_assert(m_pending_bytes >= append_bytes);
+    stone_assert(m_pending_bytes >= append_bytes);
     m_pending_bytes -= append_bytes;
 
     if (!m_compat_mode) {
@@ -368,7 +368,7 @@ bool ObjectRecorder::send_appends(bool force, ceph::ref_t<FutureImpl> flush_futu
     auto rados_completion = librados::Rados::aio_create_completion(
       new C_AppendFlush(this, append_tid), utils::rados_ctx_callback);
     int r = m_ioctx.aio_operate(m_oid, rados_completion, &op);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     rados_completion->release();
     ldout(m_cct, 20) << "flushing journal tid=" << append_tid << ", "
                      << "append_bytes=" << append_bytes << ", "
@@ -380,7 +380,7 @@ bool ObjectRecorder::send_appends(bool force, ceph::ref_t<FutureImpl> flush_futu
 }
 
 void ObjectRecorder::wake_up_flushes() {
-  ceph_assert(ceph_mutex_is_locked(*m_lock));
+  stone_assert(stone_mutex_is_locked(*m_lock));
   --m_in_flight_callbacks;
   if (m_in_flight_callbacks == 0) {
     m_in_flight_callbacks_cond.notify_all();
@@ -388,14 +388,14 @@ void ObjectRecorder::wake_up_flushes() {
 }
 
 void ObjectRecorder::notify_handler_unlock(
-    std::unique_lock<ceph::mutex>& locker, bool notify_overflowed) {
-  ceph_assert(ceph_mutex_is_locked(*m_lock));
-  ceph_assert(m_in_flight_callbacks > 0);
+    std::unique_lock<stone::mutex>& locker, bool notify_overflowed) {
+  stone_assert(stone_mutex_is_locked(*m_lock));
+  stone_assert(m_in_flight_callbacks > 0);
 
   if (!m_object_closed && notify_overflowed) {
     // TODO need to delay completion until after aio_notify completes
     ldout(m_cct, 10) << "overflow" << dendl;
-    ceph_assert(m_overflowed);
+    stone_assert(m_overflowed);
 
     locker.unlock();
     m_handler->overflow(this);
@@ -412,7 +412,7 @@ void ObjectRecorder::notify_handler_unlock(
   if (m_in_flight_tids.empty()) {
     std::swap(object_closed_notify, m_object_closed_notify);
   }
-  ceph_assert(m_object_closed || !object_closed_notify);
+  stone_assert(m_object_closed || !object_closed_notify);
   locker.unlock();
 
   if (object_closed_notify) {

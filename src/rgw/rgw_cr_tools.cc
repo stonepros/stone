@@ -12,13 +12,13 @@
 
 #include "services/svc_zone.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rgw
 
 template<>
 int RGWUserCreateCR::Request::_send_request(const DoutPrefixProvider *dpp)
 {
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
 
   const int32_t default_max_buckets =
     cct->_conf.get_val<int64_t>("rgw_user_max_buckets");
@@ -106,7 +106,7 @@ int RGWGetBucketInfoCR::Request::_send_request(const DoutPrefixProvider *dpp)
 template<>
 int RGWBucketCreateLocalCR::Request::_send_request(const DoutPrefixProvider *dpp)
 {
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
   auto& zone_svc = store->svc()->zone;
 
   const auto& user_info = params.user_info.get();
@@ -233,7 +233,7 @@ int RGWObjectSimplePutCR::Request::_send_request(const DoutPrefixProvider *dpp)
 {
   RGWDataAccess::ObjectRef obj;
 
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
 
   int ret = params.bucket->get_object(params.key, &obj);
   if (ret < 0) {
@@ -256,7 +256,7 @@ int RGWObjectSimplePutCR::Request::_send_request(const DoutPrefixProvider *dpp)
 template<>
 int RGWBucketLifecycleConfigCR::Request::_send_request(const DoutPrefixProvider *dpp)
 {
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
 
   RGWLC *lc = store->getRados()->get_lc();
   if (!lc) {

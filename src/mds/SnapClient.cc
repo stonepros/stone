@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,10 +19,10 @@
 #include "SnapClient.h"
 
 #include "common/config.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mds
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mds
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << mds->get_nodeid() << ".snapclient "
 
@@ -45,13 +45,13 @@ void SnapClient::handle_query_result(const cref_t<MMDSTableRequest> &m)
   dout(10) << __func__ << " " << *m << dendl;
 
   char type;
-  using ceph::decode;
+  using stone::decode;
   auto p = m->bl.cbegin();
   decode(type, p);
 
   switch (type) {
   case 'U': // uptodate
-    ceph_assert(cached_version == m->get_tid());
+    stone_assert(cached_version == m->get_tid());
     break;
   case 'F': // full
     {
@@ -72,7 +72,7 @@ void SnapClient::handle_query_result(const cref_t<MMDSTableRequest> &m)
     }
     break;
   default:
-    ceph_abort();
+    stone_abort();
   };
 
   if (!committing_tids.empty()) {
@@ -123,7 +123,7 @@ void SnapClient::notify_commit(version_t tid)
 {
   dout(10) << __func__ << " tid " << tid << dendl;
 
-  ceph_assert(cached_version == 0 || cached_version >= tid);
+  stone_assert(cached_version == 0 || cached_version >= tid);
   if (cached_version == 0) {
     committing_tids.insert(tid);
   } else if (cached_pending_update.count(tid)) {
@@ -137,7 +137,7 @@ void SnapClient::notify_commit(version_t tid)
   } else if (cached_version > tid) {
     // no need to record the tid if it has already been committed.
   } else {
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -145,7 +145,7 @@ void SnapClient::refresh(version_t want, MDSContext *onfinish)
 {
   dout(10) << __func__ << " want " << want << dendl;
 
-  ceph_assert(want >= cached_version);
+  stone_assert(want >= cached_version);
   if (onfinish)
     waiting_for_version[want].push_back(onfinish);
 
@@ -154,7 +154,7 @@ void SnapClient::refresh(version_t want, MDSContext *onfinish)
 
   mds_rank_t ts = mds->mdsmap->get_tableserver();
   auto req = make_message<MMDSTableRequest>(table, TABLESERVER_OP_QUERY, ++last_reqid, 0);
-  using ceph::encode;
+  using stone::encode;
   char op = 'F';
   encode(op, req->bl);
   encode(cached_version, req->bl);
@@ -175,7 +175,7 @@ void SnapClient::sync(MDSContext *onfinish)
 
 void SnapClient::get_snaps(set<snapid_t>& result) const
 {
-  ceph_assert(cached_version > 0);
+  stone_assert(cached_version > 0);
   for (auto& p : cached_snaps)
     result.insert(p.first);
 
@@ -192,7 +192,7 @@ void SnapClient::get_snaps(set<snapid_t>& result) const
 
 set<snapid_t> SnapClient::filter(const set<snapid_t>& snaps) const
 {
-  ceph_assert(cached_version > 0);
+  stone_assert(cached_version > 0);
   if (snaps.empty())
     return snaps;
 
@@ -221,7 +221,7 @@ set<snapid_t> SnapClient::filter(const set<snapid_t>& snaps) const
 
 const SnapInfo* SnapClient::get_snap_info(snapid_t snapid) const
 {
-  ceph_assert(cached_version > 0);
+  stone_assert(cached_version > 0);
 
   const SnapInfo* result = NULL;
   auto it = cached_snaps.find(snapid);
@@ -249,7 +249,7 @@ const SnapInfo* SnapClient::get_snap_info(snapid_t snapid) const
 void SnapClient::get_snap_infos(map<snapid_t, const SnapInfo*>& infomap,
 			        const set<snapid_t>& snaps) const
 {
-  ceph_assert(cached_version > 0);
+  stone_assert(cached_version > 0);
 
   if (snaps.empty())
     return;
@@ -280,7 +280,7 @@ int SnapClient::dump_cache(Formatter *f) const
 {
   if (!is_synced()) {
     dout(5) << "dump_cache: not synced" << dendl;
-    return -CEPHFS_EINVAL;
+    return -STONEFS_EINVAL;
   }
 
   map<snapid_t, const SnapInfo*> snaps;

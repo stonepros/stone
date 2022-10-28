@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -34,8 +34,8 @@
 #include "include/scope_guard.h"
 
 #include "common/async/context_pool.h"
-#include "common/ceph_time.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_time.h"
+#include "common/stone_argparse.h"
 #include "common/async/blocked_completion.h"
 
 #include "global/global_init.h"
@@ -45,7 +45,7 @@
 
 namespace ba = boost::asio;
 namespace bs = boost::system;
-namespace ca = ceph::async;
+namespace ca = stone::async;
 namespace R = neorados;
 
 std::string_view hostname() {
@@ -71,7 +71,7 @@ std::string temp_pool_name(const std::string_view prefix)
     prefix,
     hostname(),
     getpid(),
-    duration_cast<milliseconds>(ceph::coarse_real_clock::now()
+    duration_cast<milliseconds>(stone::coarse_real_clock::now()
                                 .time_since_epoch()).count(),
     num++);
 }
@@ -112,7 +112,7 @@ bs::error_code create_several(R::RADOS& r, const R::IOContext& i,
   for (const auto& o : l) try {
       R::WriteOp op;
       std::cout << "Creating " << o << std::endl;
-      ceph::bufferlist bl;
+      stone::bufferlist bl;
       bl.append("My bologna has no name.");
       op.write_full(std::move(bl));
       r.execute(o, i, std::move(op), ca::use_blocked);
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
   argv_to_vec(argc, const_cast<const char**>(argv), args);
   env_to_vec(args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY, 0);
   common_init_finish(cct.get());
 
@@ -139,7 +139,7 @@ int main(int argc, char** argv)
     ca::io_context_pool p(1);
     auto r = R::RADOS::make_with_cct(cct.get(), p, ca::use_blocked);
 
-    auto pool_name = get_temp_pool_name("ceph_test_RADOS_list_pool"sv);
+    auto pool_name = get_temp_pool_name("stone_test_RADOS_list_pool"sv);
     r.create_pool(pool_name, std::nullopt, ca::use_blocked);
     auto pd = make_scope_guard(
     [&pool_name, &r]() {

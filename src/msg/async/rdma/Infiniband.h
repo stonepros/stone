@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2016 XSKY <haomai@xsky.com>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_INFINIBAND_H
-#define CEPH_INFINIBAND_H
+#ifndef STONE_INFINIBAND_H
+#define STONE_INFINIBAND_H
 
 #include <boost/pool/pool.hpp>
 // need this because boost messes with ceph log/assert definitions
@@ -68,7 +68,7 @@ class Port {
   union ibv_gid gid;
 
  public:
-  explicit Port(CephContext *cct, struct ibv_context* ictxt, uint8_t ipn);
+  explicit Port(StoneeContext *cct, struct ibv_context* ictxt, uint8_t ipn);
   uint16_t get_lid() { return lid; }
   ibv_gid  get_gid() { return gid; }
   int get_port_num() { return port_num; }
@@ -82,8 +82,8 @@ class Device {
   const char* name;
   uint8_t  port_cnt = 0;
  public:
-  explicit Device(CephContext *c, ibv_device* ib_dev);
-  explicit Device(CephContext *c, ibv_context *ib_ctx);
+  explicit Device(StoneeContext *c, ibv_device* ib_dev);
+  explicit Device(StoneeContext *c, ibv_context *ib_ctx);
   ~Device() {
     if (active_port) {
       delete active_port;
@@ -94,7 +94,7 @@ class Device {
   uint16_t get_lid() { return active_port->get_lid(); }
   ibv_gid get_gid() { return active_port->get_gid(); }
   int get_gid_idx() { return active_port->get_gid_idx(); }
-  void binding_port(CephContext *c, int port_num);
+  void binding_port(StoneeContext *c, int port_num);
   struct ibv_context *ctxt;
   ibv_device_attr device_attr;
   Port* active_port;
@@ -107,7 +107,7 @@ class DeviceList {
   int num;
   Device** devices;
  public:
-  explicit DeviceList(CephContext *cct): device_list(nullptr), device_context_list(nullptr),
+  explicit DeviceList(StoneeContext *cct): device_list(nullptr), device_context_list(nullptr),
                                          num(0), devices(nullptr) {
     device_list = ibv_get_device_list(&num);
     ceph_assert(device_list);
@@ -196,7 +196,7 @@ class Infiniband {
  public:
   class ProtectionDomain {
    public:
-    explicit ProtectionDomain(CephContext *cct, Device *device);
+    explicit ProtectionDomain(StoneeContext *cct, Device *device);
     ~ProtectionDomain();
 
     ibv_pd* const pd;
@@ -312,7 +312,7 @@ class Infiniband {
      * modify boost pool so that it is possible to
      * have a thread safe 'context' when allocating/freeing
      * the memory. It is needed to allow a different pool
-     * configurations and bookkeeping per CephContext and
+     * configurations and bookkeeping per StoneeContext and
      * also to be able to use same allocator to deal with
      * RX and TX pool.
      * TODO: use boost pool to allocate TX chunks too
@@ -339,7 +339,7 @@ class Infiniband {
       }
     };
 
-    MemoryManager(CephContext *c, Device *d, ProtectionDomain *p);
+    MemoryManager(StoneeContext *c, Device *d, ProtectionDomain *p);
     ~MemoryManager();
 
     void* malloc(size_t size);
@@ -372,7 +372,7 @@ class Infiniband {
       rxbuf_pool_ctx.set_stat_logger(logger);
     }
 
-    CephContext  *cct;
+    StoneeContext  *cct;
    private:
     // TODO: Cluster -> TxPool txbuf_pool
     // chunk layout fix
@@ -398,7 +398,7 @@ class Infiniband {
   Device *device = NULL;
   ProtectionDomain *pd = NULL;
   DeviceList *device_list = nullptr;
-  CephContext *cct;
+  StoneeContext *cct;
   ceph::mutex lock = ceph::make_mutex("IB lock");
   bool initialized = false;
   const std::string &device_name;
@@ -406,21 +406,21 @@ class Infiniband {
   bool support_srq = false;
 
  public:
-  explicit Infiniband(CephContext *c);
+  explicit Infiniband(StoneeContext *c);
   ~Infiniband();
   void init();
-  static void verify_prereq(CephContext *cct);
+  static void verify_prereq(StoneeContext *cct);
 
   class CompletionChannel {
     static const uint32_t MAX_ACK_EVENT = 5000;
-    CephContext *cct;
+    StoneeContext *cct;
     Infiniband& infiniband;
     ibv_comp_channel *channel;
     ibv_cq *cq;
     uint32_t cq_events_that_need_ack;
 
    public:
-    CompletionChannel(CephContext *c, Infiniband &ib);
+    CompletionChannel(StoneeContext *c, Infiniband &ib);
     ~CompletionChannel();
     int init();
     bool get_cq_event();
@@ -436,7 +436,7 @@ class Infiniband {
   // You need to call init and it will create a cq and associate to comp channel
   class CompletionQueue {
    public:
-    CompletionQueue(CephContext *c, Infiniband &ib,
+    CompletionQueue(StoneeContext *c, Infiniband &ib,
                     const uint32_t qd, CompletionChannel *cc)
       : cct(c), infiniband(ib), channel(cc), cq(NULL), queue_depth(qd) {}
     ~CompletionQueue();
@@ -447,7 +447,7 @@ class Infiniband {
     int rearm_notify(bool solicited_only=true);
     CompletionChannel* get_cc() const { return channel; }
    private:
-    CephContext *cct;
+    StoneeContext *cct;
     Infiniband&  infiniband;     // Infiniband to which this QP belongs
     CompletionChannel *channel;
     ibv_cq *cq;
@@ -463,7 +463,7 @@ class Infiniband {
   class QueuePair {
    public:
     typedef MemoryManager::Chunk Chunk;
-    QueuePair(CephContext *c, Infiniband& infiniband, ibv_qp_type type,
+    QueuePair(StoneeContext *c, Infiniband& infiniband, ibv_qp_type type,
               int ib_physical_port,  ibv_srq *srq,
               Infiniband::CompletionQueue* txcq,
               Infiniband::CompletionQueue* rxcq,
@@ -505,8 +505,8 @@ class Infiniband {
     /*
      * send/receive connection management meta data
      */
-    int send_cm_meta(CephContext *cct, int socket_fd);
-    int recv_cm_meta(CephContext *cct, int socket_fd);
+    int send_cm_meta(StoneeContext *cct, int socket_fd);
+    int recv_cm_meta(StoneeContext *cct, int socket_fd);
     void wire_gid_to_gid(const char *wgid, ib_cm_meta_t* cm_meta_data);
     void gid_to_wire_gid(const ib_cm_meta_t& cm_meta_data, char wgid[]);
     ibv_qp* get_qp() const { return qp; }
@@ -535,7 +535,7 @@ class Infiniband {
     ibv_srq* get_srq() const { return srq; }
 
    private:
-    CephContext  *cct;
+    StoneeContext  *cct;
     Infiniband&  infiniband;     // Infiniband to which this QP belongs
     ibv_qp_type  type;           // QP type (IBV_QPT_RC, etc.)
     ibv_context* ctxt;           // device context of the HCA to use
@@ -560,7 +560,7 @@ class Infiniband {
  public:
   typedef MemoryManager::Cluster Cluster;
   typedef MemoryManager::Chunk Chunk;
-  QueuePair* create_queue_pair(CephContext *c, CompletionQueue*, CompletionQueue*,
+  QueuePair* create_queue_pair(StoneeContext *c, CompletionQueue*, CompletionQueue*,
       ibv_qp_type type, struct rdma_cm_id *cm_id);
   ibv_srq* create_shared_receive_queue(uint32_t max_wr, uint32_t max_sge);
   // post rx buffers to srq, return number of buffers actually posted
@@ -573,8 +573,8 @@ class Infiniband {
     get_memory_manager()->release_rx_buffer(chunk);
   }
   int get_tx_buffers(std::vector<Chunk*> &c, size_t bytes);
-  CompletionChannel *create_comp_channel(CephContext *c);
-  CompletionQueue *create_comp_queue(CephContext *c, CompletionChannel *cc=NULL);
+  CompletionChannel *create_comp_channel(StoneeContext *c);
+  CompletionQueue *create_comp_queue(StoneeContext *c, CompletionChannel *cc=NULL);
   uint8_t get_ib_physical_port() { return ib_physical_port; }
   uint16_t get_lid() { return device->get_lid(); }
   ibv_gid get_gid() { return device->get_gid(); }

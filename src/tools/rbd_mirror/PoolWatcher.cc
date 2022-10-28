@@ -17,8 +17,8 @@
 #include "tools/rbd_mirror/Threads.h"
 #include "tools/rbd_mirror/pool_watcher/RefreshImagesRequest.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::PoolWatcher: " << this << " " \
                            << __func__ << ": "
@@ -76,7 +76,7 @@ PoolWatcher<I>::PoolWatcher(Threads<I> *threads,
     m_io_ctx(io_ctx),
     m_mirror_uuid(mirror_uuid),
     m_listener(listener),
-    m_lock(ceph::make_mutex(librbd::util::unique_lock_name(
+    m_lock(stone::make_mutex(librbd::util::unique_lock_name(
                               "rbd::mirror::PoolWatcher", this))) {
   m_mirroring_watcher = new MirroringWatcher(m_io_ctx,
                                              m_threads->work_queue, this);
@@ -101,7 +101,7 @@ void PoolWatcher<I>::init(Context *on_finish) {
     std::lock_guard locker{m_lock};
     m_on_init_finish = on_finish;
 
-    ceph_assert(!m_refresh_in_progress);
+    stone_assert(!m_refresh_in_progress);
     m_refresh_in_progress = true;
   }
 
@@ -116,7 +116,7 @@ void PoolWatcher<I>::shut_down(Context *on_finish) {
   {
     std::scoped_lock locker{m_threads->timer_lock, m_lock};
 
-    ceph_assert(!m_shutting_down);
+    stone_assert(!m_shutting_down);
     m_shutting_down = true;
     if (m_timer_ctx != nullptr) {
       m_threads->timer->cancel_event(m_timer_ctx);
@@ -134,8 +134,8 @@ template <typename I>
 void PoolWatcher<I>::register_watcher() {
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_image_ids_invalid);
-    ceph_assert(m_refresh_in_progress);
+    stone_assert(m_image_ids_invalid);
+    stone_assert(m_refresh_in_progress);
   }
 
   // if the watch registration is in-flight, let the watcher
@@ -160,8 +160,8 @@ void PoolWatcher<I>::handle_register_watcher(int r) {
 
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_image_ids_invalid);
-    ceph_assert(m_refresh_in_progress);
+    stone_assert(m_image_ids_invalid);
+    stone_assert(m_refresh_in_progress);
     if (r < 0) {
       m_refresh_in_progress = false;
     }
@@ -220,8 +220,8 @@ void PoolWatcher<I>::refresh_images() {
 
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_image_ids_invalid);
-    ceph_assert(m_refresh_in_progress);
+    stone_assert(m_image_ids_invalid);
+    stone_assert(m_refresh_in_progress);
 
     // clear all pending notification events since we need to perform
     // a full image list refresh
@@ -248,8 +248,8 @@ void PoolWatcher<I>::handle_refresh_images(int r) {
   Context *on_init_finish = nullptr;
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_image_ids_invalid);
-    ceph_assert(m_refresh_in_progress);
+    stone_assert(m_image_ids_invalid);
+    stone_assert(m_refresh_in_progress);
     m_refresh_in_progress = false;
 
     if (r == -ENOENT) {
@@ -355,13 +355,13 @@ void PoolWatcher<I>::handle_image_updated(const std::string &id,
 
 template <typename I>
 void PoolWatcher<I>::process_refresh_images() {
-  ceph_assert(ceph_mutex_is_locked(m_threads->timer_lock));
-  ceph_assert(m_timer_ctx != nullptr);
+  stone_assert(stone_mutex_is_locked(m_threads->timer_lock));
+  stone_assert(m_timer_ctx != nullptr);
   m_timer_ctx = nullptr;
 
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(!m_refresh_in_progress);
+    stone_assert(!m_refresh_in_progress);
     m_refresh_in_progress = true;
     m_deferred_refresh = false;
   }
@@ -377,7 +377,7 @@ void PoolWatcher<I>::process_refresh_images() {
 
 template <typename I>
 void PoolWatcher<I>::schedule_listener() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
   m_pending_updates = true;
   if (m_shutting_down || m_image_ids_invalid || m_notify_listener_in_progress) {
     return;
@@ -404,7 +404,7 @@ void PoolWatcher<I>::notify_listener() {
   ImageIds removed_image_ids;
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_notify_listener_in_progress);
+    stone_assert(m_notify_listener_in_progress);
   }
 
   if (!removed_image_ids.empty()) {
@@ -414,7 +414,7 @@ void PoolWatcher<I>::notify_listener() {
 
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(m_notify_listener_in_progress);
+    stone_assert(m_notify_listener_in_progress);
 
     // if the watch failed while we didn't own the lock, we are going
     // to need to perform a full refresh

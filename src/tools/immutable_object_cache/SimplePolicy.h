@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_CACHE_SIMPLE_POLICY_H
-#define CEPH_CACHE_SIMPLE_POLICY_H
+#ifndef STONE_CACHE_SIMPLE_POLICY_H
+#define STONE_CACHE_SIMPLE_POLICY_H
 
 #include "common/ceph_context.h"
 #include "common/ceph_mutex.h"
@@ -65,4 +65,4 @@ class SimplePolicy : public Policy {
 
 }  // namespace immutable_obj_cache
 }  // namespace ceph
-#endif  // CEPH_CACHE_SIMPLE_POLICY_H
+#endif  // STONE_CACHE_SIMPLE_POLICY_H

@@ -1,11 +1,11 @@
 tasks:
-- ceph:
+- stone:
     fs: ext4
     log-ignorelist:
     - but it is still running
     - overall HEALTH_
     - \(POOL_APP_NOT_ENABLED\)
-- ceph-fuse:
+- stone-fuse:
 - workunit:
     clients:
       all:

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_CONNECTION_H
-#define CEPH_CONNECTION_H
+#ifndef STONE_CONNECTION_H
+#define STONE_CONNECTION_H
 
 #include <stdlib.h>
 #include <ostream>
@@ -175,11 +175,11 @@ public:
   int64_t get_peer_id() const { return peer_id; }
   void set_peer_id(int64_t t) { peer_id = t; }
 
-  bool peer_is_mon() const { return peer_type == CEPH_ENTITY_TYPE_MON; }
-  bool peer_is_mgr() const { return peer_type == CEPH_ENTITY_TYPE_MGR; }
-  bool peer_is_mds() const { return peer_type == CEPH_ENTITY_TYPE_MDS; }
-  bool peer_is_osd() const { return peer_type == CEPH_ENTITY_TYPE_OSD; }
-  bool peer_is_client() const { return peer_type == CEPH_ENTITY_TYPE_CLIENT; }
+  bool peer_is_mon() const { return peer_type == STONE_ENTITY_TYPE_MON; }
+  bool peer_is_mgr() const { return peer_type == STONE_ENTITY_TYPE_MGR; }
+  bool peer_is_mds() const { return peer_type == STONE_ENTITY_TYPE_MDS; }
+  bool peer_is_osd() const { return peer_type == STONE_ENTITY_TYPE_OSD; }
+  bool peer_is_client() const { return peer_type == STONE_ENTITY_TYPE_CLIENT; }
 
   /// which of the peer's addrs is actually in use for this connection
   virtual entity_addr_t get_peer_socket_addr() const = 0;
@@ -204,7 +204,7 @@ public:
   void set_feature(uint64_t f) { features |= f; }
 
   virtual int get_con_mode() const {
-    return CEPH_CON_MODE_CRC;
+    return STONE_CON_MODE_CRC;
   }
 
   void post_rx_buffer(ceph_tid_t tid, ceph::buffer::list& bl) {
@@ -241,7 +241,7 @@ public:
   bool is_blackhole() const;
 
 protected:
-  Connection(CephContext *cct, Messenger *m)
+  Connection(StoneeContext *cct, Messenger *m)
     : RefCountedObjectSafe(cct),
       msgr(m)
   {}
@@ -253,4 +253,4 @@ protected:
 
 using ConnectionRef = ceph::ref_t<Connection>;
 
-#endif /* CEPH_CONNECTION_H */
+#endif /* STONE_CONNECTION_H */

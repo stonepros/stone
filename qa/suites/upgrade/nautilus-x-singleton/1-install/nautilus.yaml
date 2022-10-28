@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - \(MON_DOWN\)
       - \(MGR_DOWN\)
@@ -7,24 +7,24 @@ overrides:
       - Not found or unloadable
       - evicting unresponsive client
 meta:
-- desc: install ceph/nautilus latest
+- desc: install stone/nautilus latest
 tasks:
 - install:
     branch: nautilus
     exclude_packages:
-      - ceph-mgr-cephadm
-      - cephadm
+      - stone-mgr-stoneadm
+      - stoneadm
 - print: "**** done install nautilus"
-- ceph:
-- print: "**** done ceph"
+- stone:
+- print: "**** done stone"
 
 # create a hit set test pool that will generate hit sets prior to octopus
 - exec:
     mon.a:
-      - sudo ceph osd pool create test-hit-set-base 32
-      - sudo ceph osd pool create test-hit-set-cache 32
-      - sudo ceph osd tier add test-hit-set-base test-hit-set-cache
-      - sudo ceph osd pool set test-hit-set-cache hit_set_type bloom
-      - sudo ceph osd pool set test-hit-set-cache hit_set_count 32
-      - sudo ceph osd pool set test-hit-set-cache hit_set_period 15
+      - sudo stone osd pool create test-hit-set-base 32
+      - sudo stone osd pool create test-hit-set-cache 32
+      - sudo stone osd tier add test-hit-set-base test-hit-set-cache
+      - sudo stone osd pool set test-hit-set-cache hit_set_type bloom
+      - sudo stone osd pool set test-hit-set-cache hit_set_count 32
+      - sudo stone osd pool set test-hit-set-cache hit_set_period 15
       - rados -p test-hit-set-cache bench 30 write -b 1

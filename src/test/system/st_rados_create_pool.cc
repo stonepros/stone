@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stone - scalable distributed file system
 *
 * Copyright (C) 2011 New Dream Network
 *
@@ -13,7 +13,7 @@
 */
 
 #include "cross_process_sem.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/rados/librados.h"
 #include "st_rados_create_pool.h"
 #include "systest_runnable.h"
@@ -118,15 +118,15 @@ out:
 
 std::string get_temp_pool_name(const char* prefix)
 {
-  ceph_assert(prefix);
+  stone_assert(prefix);
   char hostname[80];
   int ret = 0;
   ret = gethostname(hostname, sizeof(hostname));
-  ceph_assert(!ret);
+  stone_assert(!ret);
   char poolname[256];
   ret = snprintf(poolname, sizeof(poolname),
                  "%s.%s-%d", prefix, hostname, getpid());
-  ceph_assert(ret > 0);
-  ceph_assert((unsigned int)ret < sizeof(poolname));
+  stone_assert(ret > 0);
+  stone_assert((unsigned int)ret < sizeof(poolname));
   return poolname;
 }

@@ -1,0 +1,14 @@
+tasks:
+- stoneadm.shell:
+    env: [sha1]
+    mon.a:
+      - while stone orch upgrade status | jq '.in_progress' | grep true && ! stone orch upgrade status | jq '.message' | grep Error ; do stone orch ps ; stone versions ; stone orch upgrade status ; sleep 30 ; done
+      - stone orch ps
+      - stone versions
+      - echo "wait for servicemap items w/ changing names to refresh"
+      - sleep 60
+      - stone orch ps
+      - stone versions
+      - stone versions | jq -e '.overall | length == 1'
+      - stone versions | jq -e '.overall | keys' | grep $sha1
+      - stone orch ls | grep '^osd '

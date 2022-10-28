@@ -5,8 +5,8 @@
  * Server-side encryption integrations with Key Management Systems (SSE-KMS)
  */
 
-#ifndef CEPH_RGW_KMS_H
-#define CEPH_RGW_KMS_H
+#ifndef STONE_RGW_KMS_H
+#define STONE_RGW_KMS_H
 
 static const std::string RGW_SSE_KMS_BACKEND_TESTING = "testing";
 static const std::string RGW_SSE_KMS_BACKEND_BARBICAN = "barbican";

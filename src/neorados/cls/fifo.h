@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson
@@ -13,8 +13,8 @@
  *
  */
 
-#ifndef CEPH_NEORADOS_CLS_FIFIO_H
-#define CEPH_NEORADOS_CLS_FIFIO_H
+#ifndef STONE_NEORADOS_CLS_FIFIO_H
+#define STONE_NEORADOS_CLS_FIFIO_H
 
 #include <cstdint>
 #include <deque>
@@ -1751,4 +1751,4 @@ public:
 }
 }
 
-#endif // CEPH_RADOS_CLS_FIFIO_H
+#endif // STONE_RADOS_CLS_FIFIO_H

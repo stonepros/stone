@@ -9,7 +9,7 @@
 #include "librbd/internal.h"
 #include "librbd/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::operation::RenameRequest: "
 
@@ -69,7 +69,7 @@ void RenameRequest<I>::send_op() {
 template <typename I>
 bool RenameRequest<I>::should_complete(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": state=" << m_state << ", "
                 << "r=" << r << dendl;
   r = filter_return_code(r);
@@ -121,7 +121,7 @@ bool RenameRequest<I>::should_complete(int r) {
     send_remove_source_header();
     break;
   default:
-    ceph_abort();
+    stone_abort();
     break;
   }
   return false;
@@ -130,7 +130,7 @@ bool RenameRequest<I>::should_complete(int r) {
 template <typename I>
 int RenameRequest<I>::filter_return_code(int r) const {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   if (m_state == STATE_READ_SOURCE_HEADER && r == -ENOENT) {
     std::shared_lock image_locker{image_ctx.image_lock};
@@ -151,7 +151,7 @@ int RenameRequest<I>::filter_return_code(int r) const {
 template <typename I>
 void RenameRequest<I>::send_read_directory() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
   m_state = STATE_READ_DIRECTORY;
 
@@ -161,14 +161,14 @@ void RenameRequest<I>::send_read_directory() {
   auto comp = this->create_callback_completion();
   int r = image_ctx.md_ctx.aio_operate(RBD_DIRECTORY, comp, &op,
                                        &m_source_name_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void RenameRequest<I>::send_read_source_header() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
   m_state = STATE_READ_SOURCE_HEADER;
 
@@ -180,14 +180,14 @@ void RenameRequest<I>::send_read_source_header() {
   librados::AioCompletion *rados_completion = this->create_callback_completion();
   int r = image_ctx.md_ctx.aio_operate(m_source_oid, rados_completion, &op,
                                        &m_header_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 template <typename I>
 void RenameRequest<I>::send_write_destination_header() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
   m_state = STATE_WRITE_DEST_HEADER;
 
@@ -197,14 +197,14 @@ void RenameRequest<I>::send_write_destination_header() {
 
   librados::AioCompletion *rados_completion = this->create_callback_completion();
   int r = image_ctx.md_ctx.aio_operate(m_dest_oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 template <typename I>
 void RenameRequest<I>::send_update_directory() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
   m_state = STATE_UPDATE_DIRECTORY;
 
@@ -212,10 +212,10 @@ void RenameRequest<I>::send_update_directory() {
   if (image_ctx.old_format) {
     bufferlist cmd_bl;
     bufferlist empty_bl;
-    encode(static_cast<__u8>(CEPH_OSD_TMAP_SET), cmd_bl);
+    encode(static_cast<__u8>(STONE_OSD_TMAP_SET), cmd_bl);
     encode(m_dest_name, cmd_bl);
     encode(empty_bl, cmd_bl);
-    encode(static_cast<__u8>(CEPH_OSD_TMAP_RM), cmd_bl);
+    encode(static_cast<__u8>(STONE_OSD_TMAP_RM), cmd_bl);
     encode(image_ctx.name, cmd_bl);
     op.tmap_update(cmd_bl);
   } else {
@@ -225,14 +225,14 @@ void RenameRequest<I>::send_update_directory() {
 
   librados::AioCompletion *rados_completion = this->create_callback_completion();
   int r = image_ctx.md_ctx.aio_operate(RBD_DIRECTORY, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 template <typename I>
 void RenameRequest<I>::send_remove_source_header() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
   m_state = STATE_REMOVE_SOURCE_HEADER;
 
@@ -241,7 +241,7 @@ void RenameRequest<I>::send_remove_source_header() {
 
   librados::AioCompletion *rados_completion = this->create_callback_completion();
   int r = image_ctx.md_ctx.aio_operate(m_source_oid, rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 

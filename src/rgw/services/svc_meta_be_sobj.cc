@@ -9,10 +9,10 @@
 #include "rgw/rgw_metadata.h"
 #include "rgw/rgw_mdlog.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
-RGWSI_MetaBackend_SObj::RGWSI_MetaBackend_SObj(CephContext *cct) : RGWSI_MetaBackend(cct) {
+RGWSI_MetaBackend_SObj::RGWSI_MetaBackend_SObj(StoneContext *cct) : RGWSI_MetaBackend(cct) {
 }
 
 RGWSI_MetaBackend_SObj::~RGWSI_MetaBackend_SObj() {
@@ -128,7 +128,7 @@ void RGWSI_MetaBackend_SObj::Context_SObj::init(RGWSI_MetaBackend_Handler *h)
   }
 }
 
-int RGWSI_MetaBackend_SObj::call_with_get_params(ceph::real_time *pmtime, std::function<int(RGWSI_MetaBackend::GetParams&)> cb)
+int RGWSI_MetaBackend_SObj::call_with_get_params(stone::real_time *pmtime, std::function<int(RGWSI_MetaBackend::GetParams&)> cb)
 {
   bufferlist bl;
   RGWSI_MBSObj_GetParams params;

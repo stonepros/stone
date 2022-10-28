@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -30,11 +30,11 @@ using std::pair;
 using std::string;
 using std::set;
 
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_
 
 // features
 CompatSet MDSMap::get_compat_set_all() {
@@ -106,7 +106,7 @@ void MDSMap::mds_info_t::dump(Formatter *f) const
   f->dump_string("name", name);
   f->dump_int("rank", rank);
   f->dump_int("incarnation", inc);
-  f->dump_stream("state") << ceph_mds_state_name(state);
+  f->dump_stream("state") << stone_mds_state_name(state);
   f->dump_int("state_seq", state_seq);
   f->dump_stream("addr") << addrs.get_legacy_str();
   f->dump_object("addrs", addrs);
@@ -128,7 +128,7 @@ void MDSMap::mds_info_t::dump(Formatter *f) const
 void MDSMap::mds_info_t::dump(std::ostream& o) const
 {
   o << "[mds." << name << "{" <<  rank << ":" << global_id << "}"
-       << " state " << ceph_mds_state_name(state)
+       << " state " << stone_mds_state_name(state)
        << " seq " << state_seq;
   if (laggy()) {
     o << " laggy since " << laggy_since;
@@ -172,7 +172,7 @@ void MDSMap::dump(Formatter *f) const
   f->dump_int("session_timeout", session_timeout);
   f->dump_int("session_autoclose", session_autoclose);
   f->open_object_section("required_client_features");
-  cephfs_dump_features(f, required_client_features);
+  stonefs_dump_features(f, required_client_features);
   f->close_section();
   f->dump_int("max_file_size", max_file_size);
   f->dump_int("last_failure", last_failure);
@@ -252,7 +252,7 @@ void MDSMap::print(ostream& out) const
   out << "session_timeout\t" << session_timeout << "\n"
       << "session_autoclose\t" << session_autoclose << "\n";
   out << "max_file_size\t" << max_file_size << "\n";
-  out << "required_client_features\t" << cephfs_stringify_features(required_client_features) << "\n";
+  out << "required_client_features\t" << stonefs_stringify_features(required_client_features) << "\n";
   out << "last_failure\t" << last_failure << "\n"
       << "last_failure_osd_epoch\t" << last_failure_osd_epoch << "\n";
   out << "compat\t" << compat << "\n";
@@ -296,7 +296,7 @@ void MDSMap::print_summary(Formatter *f, ostream *out) const
   if (f)
     f->open_array_section("by_rank");
   for (const auto &p : mds_info) {
-    string s = ceph_mds_state_name(p.second.state);
+    string s = stone_mds_state_name(p.second.state);
     if (p.second.laggy())
       s += "(laggy or crashed)";
 
@@ -579,7 +579,7 @@ void MDSMap::mds_info_t::encode_versioned(bufferlist& bl, uint64_t features) con
 void MDSMap::mds_info_t::encode_unversioned(bufferlist& bl) const
 {
   __u8 struct_v = 3;
-  using ceph::encode;
+  using stone::encode;
   encode(struct_v, bl);
   encode(global_id, bl);
   encode(name, bl);
@@ -654,8 +654,8 @@ void MDSMap::encode(bufferlist& bl, uint64_t features) const
     inc.insert(std::make_pair(rank, epoch));
   }
 
-  using ceph::encode;
-  if ((features & CEPH_FEATURE_PGID64) == 0) {
+  using stone::encode;
+  if ((features & STONE_FEATURE_PGID64) == 0) {
     __u16 v = 2;
     encode(v, bl);
     encode(epoch, bl);
@@ -683,7 +683,7 @@ void MDSMap::encode(bufferlist& bl, uint64_t features) const
     int32_t m = cas_pool;
     encode(m, bl);
     return;
-  } else if ((features & CEPH_FEATURE_MDSENC) == 0) {
+  } else if ((features & STONE_FEATURE_MDSENC) == 0) {
     __u16 v = 3;
     encode(v, bl);
     encode(epoch, bl);
@@ -756,7 +756,7 @@ void MDSMap::encode(bufferlist& bl, uint64_t features) const
   encode(standby_count_wanted, bl);
   encode(old_max_mds, bl);
   {
-    ceph_release_t min_compat_client = ceph_release_t::unknown;
+    stone_release_t min_compat_client = stone_release_t::unknown;
     encode(min_compat_client, bl);
   }
   encode(required_client_features, bl);
@@ -841,9 +841,9 @@ void MDSMap::decode(bufferlist::const_iterator& p)
       // previously this was a bool about snaps, not a flag map
       bool flag;
       decode(flag, p);
-      ever_allowed_features = flag ? CEPH_MDSMAP_ALLOW_SNAPS : 0;
+      ever_allowed_features = flag ? STONE_MDSMAP_ALLOW_SNAPS : 0;
       decode(flag, p);
-      explicitly_allowed_features = flag ? CEPH_MDSMAP_ALLOW_SNAPS : 0;
+      explicitly_allowed_features = flag ? STONE_MDSMAP_ALLOW_SNAPS : 0;
     } else {
       decode(ever_allowed_features, p);
       decode(explicitly_allowed_features, p);
@@ -856,7 +856,7 @@ void MDSMap::decode(bufferlist::const_iterator& p)
     decode(inline_data_enabled, p);
 
   if (ev >= 8) {
-    ceph_assert(struct_v >= 5);
+    stone_assert(struct_v >= 5);
     decode(enabled, p);
     decode(fs_name, p);
   } else {
@@ -888,14 +888,14 @@ void MDSMap::decode(bufferlist::const_iterator& p)
   }
 
   if (ev >= 14) {
-    ceph_release_t min_compat_client;
+    stone_release_t min_compat_client;
     if (ev == 14) {
       int8_t r;
       decode(r, p);
       if (r < 0) {
-	min_compat_client = ceph_release_t::unknown;
+	min_compat_client = stone_release_t::unknown;
       } else {
-	min_compat_client = ceph_release_t{static_cast<uint8_t>(r)};
+	min_compat_client = stone_release_t{static_cast<uint8_t>(r)};
       }
     } else if (ev >= 15) {
       decode(min_compat_client, p);
@@ -954,7 +954,7 @@ MDSMap::availability_t MDSMap::is_cluster_available() const
     }
   }
 
-  if (get_num_mds(CEPH_MDS_STATE_ACTIVE) > 0) {
+  if (get_num_mds(STONE_MDS_STATE_ACTIVE) > 0) {
     // Nobody looks stuck, so indicate to client they should go ahead
     // and try mounting if anybody is active.  This may include e.g.
     // one MDS failing over and another active: the client should
@@ -1052,7 +1052,7 @@ uint64_t MDSMap::get_up_features() {
          ++p) {
       std::map<mds_gid_t, mds_info_t>::const_iterator q =
         mds_info.find(p->second);
-      ceph_assert(q != mds_info.end());
+      stone_assert(q != mds_info.end());
       if (first) {
         cached_up_features = q->second.mds_features;
         first = false;
@@ -1108,22 +1108,22 @@ bool MDSMap::is_degraded() const {
   return false;
 }
 
-void MDSMap::set_min_compat_client(ceph_release_t version)
+void MDSMap::set_min_compat_client(stone_release_t version)
 {
-  vector<size_t> bits = CEPHFS_FEATURES_MDS_REQUIRED;
+  vector<size_t> bits = STONEFS_FEATURES_MDS_REQUIRED;
 
-  if (version >= ceph_release_t::octopus)
-    bits.push_back(CEPHFS_FEATURE_OCTOPUS);
-  else if (version >= ceph_release_t::nautilus)
-    bits.push_back(CEPHFS_FEATURE_NAUTILUS);
-  else if (version >= ceph_release_t::mimic)
-    bits.push_back(CEPHFS_FEATURE_MIMIC);
-  else if (version >= ceph_release_t::luminous)
-    bits.push_back(CEPHFS_FEATURE_LUMINOUS);
-  else if (version >= ceph_release_t::kraken)
-    bits.push_back(CEPHFS_FEATURE_KRAKEN);
-  else if (version >= ceph_release_t::jewel)
-    bits.push_back(CEPHFS_FEATURE_JEWEL);
+  if (version >= stone_release_t::octopus)
+    bits.push_back(STONEFS_FEATURE_OCTOPUS);
+  else if (version >= stone_release_t::nautilus)
+    bits.push_back(STONEFS_FEATURE_NAUTILUS);
+  else if (version >= stone_release_t::mimic)
+    bits.push_back(STONEFS_FEATURE_MIMIC);
+  else if (version >= stone_release_t::luminous)
+    bits.push_back(STONEFS_FEATURE_LUMINOUS);
+  else if (version >= stone_release_t::kraken)
+    bits.push_back(STONEFS_FEATURE_KRAKEN);
+  else if (version >= stone_release_t::jewel)
+    bits.push_back(STONEFS_FEATURE_JEWEL);
 
   std::sort(bits.begin(), bits.end());
   required_client_features = feature_bitset_t(bits);

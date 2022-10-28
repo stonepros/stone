@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "tools/rbd/Utils.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/Context.h"
 #include "include/encoding.h"
 #include "common/common_init.h"
@@ -107,7 +107,7 @@ int read_string(int fd, unsigned max, std::string *out) {
 int extract_spec(const std::string &spec, std::string *pool_name,
                  std::string *namespace_name, std::string *name,
                  std::string *snap_name, SpecValidation spec_validation) {
-  if (!g_ceph_context->_conf.get_val<bool>("rbd_validate_names")) {
+  if (!g_stone_context->_conf.get_val<bool>("rbd_validate_names")) {
     spec_validation = SPEC_VALIDATION_NONE;
   }
 
@@ -127,7 +127,7 @@ int extract_spec(const std::string &spec, std::string *pool_name,
     pattern = "^(?:([^/]+)/(?:([^/@]+)/)?)?([^@]+)(?:@(.+))?$";
     break;
   default:
-    ceph_abort();
+    stone_abort();
     break;
   }
 
@@ -194,7 +194,7 @@ void normalize_pool_name(std::string* pool_name) {
 }
 
 std::string get_default_pool_name() {
-  return g_ceph_context->_conf.get_val<std::string>("rbd_default_pool");
+  return g_stone_context->_conf.get_val<std::string>("rbd_default_pool");
 }
 
 int get_pool_and_namespace_names(
@@ -221,7 +221,7 @@ int get_pool_and_namespace_names(
     }
   }
 
-  if (!g_ceph_context->_conf.get_val<bool>("rbd_validate_names")) {
+  if (!g_stone_context->_conf.get_val<bool>("rbd_validate_names")) {
     validate_pool_name = false;
   }
 
@@ -522,7 +522,7 @@ int get_image_options(const boost::program_options::variables_map &vm,
 
     if (format_specified) {
       int r = g_conf().set_val("rbd_default_format", stringify(format));
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       opts->set(RBD_IMAGE_OPTION_FORMAT, format);
     }
   }
@@ -571,7 +571,7 @@ int get_journal_options(const boost::program_options::variables_map &vm,
     opts->set(RBD_IMAGE_OPTION_JOURNAL_ORDER, order);
 
     int r = g_conf().set_val("rbd_journal_order", stringify(order));
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
   if (vm.count(at::JOURNAL_SPLAY_WIDTH)) {
     opts->set(RBD_IMAGE_OPTION_JOURNAL_SPLAY_WIDTH,
@@ -580,7 +580,7 @@ int get_journal_options(const boost::program_options::variables_map &vm,
     int r = g_conf().set_val("rbd_journal_splay_width",
 			    stringify(
 			      vm[at::JOURNAL_SPLAY_WIDTH].as<uint64_t>()));
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
   if (vm.count(at::JOURNAL_POOL)) {
     opts->set(RBD_IMAGE_OPTION_JOURNAL_POOL,
@@ -588,7 +588,7 @@ int get_journal_options(const boost::program_options::variables_map &vm,
 
     int r = g_conf().set_val("rbd_journal_pool",
 			    vm[at::JOURNAL_POOL].as<std::string>());
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
 
   return 0;
@@ -678,7 +678,7 @@ void init_context() {
 int init_rados(librados::Rados *rados) {
   init_context();
 
-  int r = rados->init_with_context(g_ceph_context);
+  int r = rados->init_with_context(g_stone_context);
   if (r < 0) {
     std::cerr << "rbd: couldn't initialize rados!" << std::endl;
     return r;
@@ -838,7 +838,7 @@ void calc_sparse_extent(const bufferptr &bp,
                         bool *zeroed) {
   if (sparse_size == 0) {
     // sparse writes are disabled -- write the full extent
-    ceph_assert(buffer_offset == 0);
+    stone_assert(buffer_offset == 0);
     *write_length = buffer_length;
     *zeroed = false;
     return;
@@ -856,7 +856,7 @@ void calc_sparse_extent(const bufferptr &bp,
     if (original_offset == buffer_offset) {
       *zeroed = extent_is_zero;
     } else if (*zeroed != extent_is_zero) {
-      ceph_assert(*write_length > 0);
+      stone_assert(*write_length > 0);
       return;
     }
 
@@ -969,7 +969,7 @@ std::string timestr(time_t t) {
   return buf;
 }
 
-uint64_t get_rbd_default_features(CephContext* cct) {
+uint64_t get_rbd_default_features(StoneContext* cct) {
   auto features = cct->_conf.get_val<std::string>("rbd_default_features");
   return boost::lexical_cast<uint64_t>(features);
 }

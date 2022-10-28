@@ -8,7 +8,7 @@
 #include "librbd/crypto/luks/EncryptionFormat.h"
 #endif
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::api::util: " << __func__ << ": "
 
@@ -18,7 +18,7 @@ namespace util {
 
 template <typename I>
 int create_encryption_format(
-        CephContext* cct, encryption_format_t format,
+        StoneContext* cct, encryption_format_t format,
         encryption_options_t opts, size_t opts_size, bool c_api,
         crypto::EncryptionFormat<I>** result_format) {
   size_t expected_opts_size;
@@ -79,6 +79,6 @@ int create_encryption_format(
 } // namespace librbd
 
 template int librbd::api::util::create_encryption_format(
-    CephContext* cct, encryption_format_t format, encryption_options_t opts,
+    StoneContext* cct, encryption_format_t format, encryption_options_t opts,
     size_t opts_size, bool c_api,
     crypto::EncryptionFormat<librbd::ImageCtx>** result_format);

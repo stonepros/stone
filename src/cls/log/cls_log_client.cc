@@ -10,7 +10,7 @@
 using std::list;
 using std::string;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 using namespace librados;
 
@@ -106,7 +106,7 @@ public:
           *truncated = ret.truncated;
         if (marker)
           *marker = std::move(ret.marker);
-      } catch (ceph::buffer::error& err) {
+      } catch (stone::buffer::error& err) {
         // nothing we can do about it atm
       }
     }
@@ -142,7 +142,7 @@ public:
         decode(ret, iter);
         if (header)
 	  *header = ret.header;
-      } catch (ceph::buffer::error& err) {
+      } catch (stone::buffer::error& err) {
         // nothing we can do about it atm
       }
     }

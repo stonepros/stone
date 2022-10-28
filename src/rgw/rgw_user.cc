@@ -9,7 +9,7 @@
 
 #include "common/errno.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/RWLock.h"
 #include "rgw_sal.h"
 #include "rgw_sal_rados.h"
@@ -32,7 +32,7 @@
 #include "services/svc_user.h"
 #include "services/svc_meta.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 
@@ -54,7 +54,7 @@ int rgw_user_sync_all_stats(const DoutPrefixProvider *dpp, rgw::sal::RGWRadosSto
   rgw::sal::RGWBucketList user_buckets;
   rgw::sal::RGWRadosUser user(store, user_id);
 
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
   size_t max_entries = cct->_conf->rgw_list_buckets_max_chunk;
   string marker;
   int ret;
@@ -103,7 +103,7 @@ int rgw_user_get_all_buckets_stats(const DoutPrefixProvider *dpp,
 				   map<string, cls_user_bucket_entry>& buckets_usage_map,
 				   optional_yield y)
 {
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
   size_t max_entries = cct->_conf->rgw_list_buckets_max_chunk;
   bool done;
   string marker;
@@ -700,7 +700,7 @@ int RGWAccessKeyPool::generate_key(const DoutPrefixProvider *dpp, RGWUserAdminOp
     key = op_state.get_secret_key();
   } else {
     char secret_key_buf[SECRET_KEY_LEN + 1];
-    gen_rand_alphanumeric_plain(g_ceph_context, secret_key_buf, sizeof(secret_key_buf));
+    gen_rand_alphanumeric_plain(g_stone_context, secret_key_buf, sizeof(secret_key_buf));
     key = secret_key_buf;
   }
 
@@ -710,7 +710,7 @@ int RGWAccessKeyPool::generate_key(const DoutPrefixProvider *dpp, RGWUserAdminOp
 
     do {
       int id_buf_size = sizeof(public_id_buf);
-      gen_rand_alphanumeric_upper(g_ceph_context, public_id_buf, id_buf_size);
+      gen_rand_alphanumeric_upper(g_stone_context, public_id_buf, id_buf_size);
       id = public_id_buf;
       if (!validate_access_key(id))
         continue;
@@ -800,7 +800,7 @@ int RGWAccessKeyPool::modify_key(RGWUserAdminOpState& op_state, std::string *err
   if (op_state.will_gen_secret()) {
     char secret_key_buf[SECRET_KEY_LEN + 1];
     int key_buf_size = sizeof(secret_key_buf);
-    gen_rand_alphanumeric_plain(g_ceph_context, secret_key_buf, key_buf_size);
+    gen_rand_alphanumeric_plain(g_stone_context, secret_key_buf, key_buf_size);
     key = secret_key_buf;
   }
 
@@ -1710,7 +1710,7 @@ int RGWUser::execute_rename(const DoutPrefixProvider *dpp, RGWUserAdminOpState& 
 
   //unlink and link buckets to new user
   string marker;
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
   size_t max_buckets = cct->_conf->rgw_list_buckets_max_chunk;
   rgw::sal::RGWBucketList buckets;
 
@@ -1782,7 +1782,7 @@ int RGWUser::execute_add(const DoutPrefixProvider *dpp, RGWUserAdminOpState& op_
   if (!user_email.empty())
     user_info.user_email = user_email;
 
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
   if (op_state.max_buckets_specified) {
     user_info.max_buckets = op_state.get_max_buckets();
   } else {
@@ -1922,7 +1922,7 @@ int RGWUser::execute_remove(const DoutPrefixProvider *dpp, RGWUserAdminOpState& 
 
   rgw::sal::RGWBucketList buckets;
   string marker;
-  CephContext *cct = store->ctx();
+  StoneContext *cct = store->ctx();
   size_t max_buckets = cct->_conf->rgw_list_buckets_max_chunk;
   do {
     ret = rgw_read_user_buckets(dpp, store, uid, buckets, marker, string(),
@@ -2076,7 +2076,7 @@ int RGWUser::execute_modify(const DoutPrefixProvider *dpp, RGWUserAdminOpState& 
     }
 
     string marker;
-    CephContext *cct = store->ctx();
+    StoneContext *cct = store->ctx();
     size_t max_buckets = cct->_conf->rgw_list_buckets_max_chunk;
     do {
       ret = rgw_read_user_buckets(dpp, store, user_id, buckets, marker, string(),
@@ -2644,7 +2644,7 @@ public:
     return 0;
   }
 
-  RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const ceph::real_time& mtime) override {
+  RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const stone::real_time& mtime) override {
     RGWUserCompleteInfo uci;
 
     try {
@@ -2881,7 +2881,7 @@ int RGWUserCtl::remove_info(const DoutPrefixProvider *dpp,
 int RGWUserCtl::add_bucket(const DoutPrefixProvider *dpp, 
                            const rgw_user& user,
                            const rgw_bucket& bucket,
-                           ceph::real_time creation_time,
+                           stone::real_time creation_time,
 			   optional_yield y)
 
 {
@@ -2961,8 +2961,8 @@ int RGWUserCtl::reset_stats(const DoutPrefixProvider *dpp, const rgw_user& user,
 int RGWUserCtl::read_stats(const DoutPrefixProvider *dpp, 
                            const rgw_user& user, RGWStorageStats *stats,
 			   optional_yield y,
-			   ceph::real_time *last_stats_sync,
-			   ceph::real_time *last_stats_update)
+			   stone::real_time *last_stats_sync,
+			   stone::real_time *last_stats_update)
 {
   return be_handler->call([&](RGWSI_MetaBackend_Handler::Op *op) {
     return svc.user->read_stats(dpp, op->ctx(), user, stats,

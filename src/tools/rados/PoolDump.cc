@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -19,8 +19,8 @@
 
 using namespace librados;
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rados
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rados
 
 /**
  * Export RADOS objects from a live cluster
@@ -30,7 +30,7 @@ using namespace librados;
  */
 int PoolDump::dump(IoCtx *io_ctx)
 {
-  ceph_assert(io_ctx != NULL);
+  stone_assert(io_ctx != NULL);
 
   int r = 0;
   write_super();
@@ -56,7 +56,7 @@ int PoolDump::dump(IoCtx *io_ctx)
     obj_begin.hoid.hobj.set_key(i->get_locator());
 
     // Only output head, RadosImport only wants that
-    obj_begin.hoid.hobj.snap = CEPH_NOSNAP;
+    obj_begin.hoid.hobj.snap = STONE_NOSNAP;
 
     // Skip setting object_begin.oi, RadosImport doesn't care
 

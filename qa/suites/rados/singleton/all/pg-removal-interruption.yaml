@@ -11,9 +11,9 @@ openstack:
       size: 10 # GB
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     log-ignorelist:
       - but it is still running
       - slow request
@@ -23,14 +23,14 @@ tasks:
       - \(PG_
 - exec:
     client.0:
-      - sudo ceph osd pool create foo 128 128
-      - sudo ceph osd pool application enable foo rados
+      - sudo stone osd pool create foo 128 128
+      - sudo stone osd pool application enable foo rados
       - sleep 5
-      - sudo ceph tell osd.0 injectargs -- --osd-inject-failure-on-pg-removal
-      - sudo ceph osd pool delete foo foo --yes-i-really-really-mean-it
-- ceph.wait_for_failure: [osd.0]
+      - sudo stone tell osd.0 injectargs -- --osd-inject-failure-on-pg-removal
+      - sudo stone osd pool delete foo foo --yes-i-really-really-mean-it
+- stone.wait_for_failure: [osd.0]
 - exec:
     client.0:
-      - sudo ceph osd down 0
-- ceph.restart: [osd.0]
-- ceph.healthy:
+      - sudo stone osd down 0
+- stone.restart: [osd.0]
+- stone.healthy:

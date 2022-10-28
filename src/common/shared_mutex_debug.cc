@@ -5,7 +5,7 @@
 #include "acconfig.h"
 #include "common/valgrind.h"
 
-namespace ceph {
+namespace stone {
 
 shared_mutex_debug::shared_mutex_debug(std::string group,
                                        bool track_lock,
@@ -130,10 +130,10 @@ void shared_mutex_debug::unlock_shared()
 void shared_mutex_debug::_pre_unlock()
 {
   if (track) {
-    ceph_assert(nlock > 0);
+    stone_assert(nlock > 0);
     --nlock;
-    ceph_assert(locked_by == std::this_thread::get_id());
-    ceph_assert(nlock == 0);
+    stone_assert(locked_by == std::this_thread::get_id());
+    stone_assert(nlock == 0);
     locked_by = std::thread::id();
   }
 }
@@ -141,7 +141,7 @@ void shared_mutex_debug::_pre_unlock()
 void shared_mutex_debug::_post_lock()
 {
   if (track) {
-    ceph_assert(nlock == 0);
+    stone_assert(nlock == 0);
     locked_by = std::this_thread::get_id();
     ++nlock;
   }
@@ -151,7 +151,7 @@ void shared_mutex_debug::_post_lock()
 void shared_mutex_debug::_pre_unlock_shared()
 {
   if (track) {
-    ceph_assert(nrlock > 0);
+    stone_assert(nrlock > 0);
     nrlock--;
   }
 }
@@ -163,4 +163,4 @@ void shared_mutex_debug::_post_lock_shared()
   }
 }
 
-} // namespace ceph
+} // namespace stone

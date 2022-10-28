@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -42,7 +42,7 @@ public:
 
       std::string val(before + "$run_dir${run_dir}" + after);
       early_expand_meta(val, &oss);
-      EXPECT_EQ(before + "/var/run/ceph/var/run/ceph" + after, val);
+      EXPECT_EQ(before + "/var/run/stone/var/run/stone" + after, val);
       EXPECT_EQ("", oss.str());
     }
     {
@@ -52,7 +52,7 @@ public:
 
       std::string val(before + "$$1$run_dir$2${run_dir}$3$" + after);
       early_expand_meta(val, &oss);
-      EXPECT_EQ(before + "$$1/var/run/ceph$2/var/run/ceph$3$" + after, val);
+      EXPECT_EQ(before + "$$1/var/run/stone$2/var/run/stone$3$" + after, val);
       EXPECT_EQ("", oss.str());
     }
     {
@@ -61,7 +61,7 @@ public:
       std::string after = " AFTER ";
       std::string val(before + "$host${host}" + after);
       early_expand_meta(val, &oss);
-      std::string hostname = ceph_get_short_hostname();
+      std::string hostname = stone_get_short_hostname();
       EXPECT_EQ(before + hostname + hostname + after, val);
       EXPECT_EQ("", oss.str());
     }
@@ -136,17 +136,17 @@ TEST(md_config_t, parse_env)
   {
     ConfigProxy conf{false};
     setenv("POD_MEMORY_REQUEST", "1", 1);
-    conf.parse_env(CEPH_ENTITY_TYPE_OSD);
+    conf.parse_env(STONE_ENTITY_TYPE_OSD);
   }
   {
     ConfigProxy conf{false};
     setenv("POD_MEMORY_REQUEST", "0", 1);
-    conf.parse_env(CEPH_ENTITY_TYPE_OSD);
+    conf.parse_env(STONE_ENTITY_TYPE_OSD);
   }
   {
     ConfigProxy conf{false};
-    setenv("CEPH_KEYRING", "", 1);
-    conf.parse_env(CEPH_ENTITY_TYPE_OSD);
+    setenv("STONE_KEYRING", "", 1);
+    conf.parse_env(STONE_ENTITY_TYPE_OSD);
   }
 }
 

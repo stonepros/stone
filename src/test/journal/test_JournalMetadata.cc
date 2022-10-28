@@ -29,7 +29,7 @@ public:
     return metadata;
   }
 
-  typedef std::list<ceph::ref_t<journal::JournalMetadata>> MetadataList;
+  typedef std::list<stone::ref_t<journal::JournalMetadata>> MetadataList;
   MetadataList m_metadata_list;
 };
 

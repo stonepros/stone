@@ -4,7 +4,7 @@
 #include "auth/RotatingKeyRing.h"
 #include "auth/KeyRing.h"
 
-#define dout_subsys ceph_subsys_auth
+#define dout_subsys stone_subsys_auth
 #undef dout_prefix
 #define dout_prefix *_dout << "auth: "
 
@@ -49,8 +49,8 @@ bool RotatingKeyRing::get_service_secret(uint32_t service_id_, uint64_t secret_i
   std::lock_guard l{lock};
 
   if (service_id_ != this->service_id) {
-    ldout(cct, 0) << "do not have service " << ceph_entity_type_name(service_id_)
-	    << ", i am " << ceph_entity_type_name(this->service_id) << dendl;
+    ldout(cct, 0) << "do not have service " << stone_entity_type_name(service_id_)
+	    << ", i am " << stone_entity_type_name(this->service_id) << dendl;
     return false;
   }
 

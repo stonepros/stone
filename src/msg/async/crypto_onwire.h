@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_CRYPTO_ONWIRE_H
-#define CEPH_CRYPTO_ONWIRE_H
+#ifndef STONE_CRYPTO_ONWIRE_H
+#define STONE_CRYPTO_ONWIRE_H
 
 #include <cstdint>
 #include <memory>
@@ -119,7 +119,7 @@ struct rxtx_t {
   std::unique_ptr<TxHandler> tx;
 
   static rxtx_t create_handler_pair(
-    CephContext* ctx,
+    StoneeContext* ctx,
     const class AuthConnectionMeta& auth_meta,
     bool new_nonce_format,
     bool crossed);
@@ -127,4 +127,4 @@ struct rxtx_t {
 
 } // namespace ceph::crypto::onwire
 
-#endif // CEPH_CRYPTO_ONWIRE_H
+#endif // STONE_CRYPTO_ONWIRE_H

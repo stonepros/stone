@@ -1,0 +1,8 @@
+overrides:
+   stone-deploy:
+      use-stone-volume: True
+      bluestore: True
+      dmcrypt: True
+      conf:
+        osd:
+          bluestore fsck on mount: true

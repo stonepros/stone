@@ -9,10 +9,10 @@
 
 #include "common/errno.h"
 #include "common/Formatter.h"
-#include "common/ceph_json.h"
-#include "common/ceph_time.h"
+#include "common/stone_json.h"
+#include "common/stone_time.h"
 #include "auth/Crypto.h"
-#include "include/ceph_fs.h"
+#include "include/stone_fs.h"
 #include "common/iso_8601.h"
 
 #include "include/types.h"
@@ -28,7 +28,7 @@
 #include "rgw_sal.h"
 #include "rgw_sal_rados.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace STS {
 
@@ -40,7 +40,7 @@ void Credentials::dump(Formatter *f) const
   encode_json("SessionToken", sessionToken , f);
 }
 
-int Credentials::generateCredentials(CephContext* cct,
+int Credentials::generateCredentials(StoneContext* cct,
                           const uint64_t& duration,
                           const boost::optional<string>& policy,
                           const boost::optional<string>& roleId,
@@ -63,10 +63,10 @@ int Credentials::generateCredentials(CephContext* cct,
   //Expiration
   real_clock::time_point t = real_clock::now();
   real_clock::time_point exp = t + std::chrono::seconds(duration);
-  expiration = ceph::to_iso_8601(exp);
+  expiration = stone::to_iso_8601(exp);
 
   //Session Token - Encrypt using AES
-  auto* cryptohandler = cct->get_crypto_handler(CEPH_CRYPTO_AES);
+  auto* cryptohandler = cct->get_crypto_handler(STONE_CRYPTO_AES);
   if (! cryptohandler) {
     ldout(cct, 0) << "ERROR: No AES cryto handler found !" << dendl;
     return -EINVAL;
@@ -92,7 +92,7 @@ int Credentials::generateCredentials(CephContext* cct,
   token.access_key_id = accessKeyId;
   token.secret_access_key = secretAccessKey;
   token.expiration = expiration;
-  token.issued_at = ceph::to_iso_8601(t);
+  token.issued_at = stone::to_iso_8601(t);
 
   //Authorization info
   if (policy)
@@ -151,7 +151,7 @@ void AssumedRoleUser::dump(Formatter *f) const
   encode_json("AssumeRoleId", assumeRoleId , f);
 }
 
-int AssumedRoleUser::generateAssumedRoleUser(CephContext* cct,
+int AssumedRoleUser::generateAssumedRoleUser(StoneContext* cct,
                                               rgw::sal::RGWRadosStore *store,
                                               const string& roleId,
                                               const rgw::ARN& roleArn,
@@ -173,7 +173,7 @@ int AssumedRoleUser::generateAssumedRoleUser(CephContext* cct,
   return 0;
 }
 
-AssumeRoleRequestBase::AssumeRoleRequestBase( CephContext* cct,
+AssumeRoleRequestBase::AssumeRoleRequestBase( StoneContext* cct,
                                               const string& duration,
                                               const string& iamPolicy,
                                               const string& roleArn,

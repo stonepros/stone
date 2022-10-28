@@ -8,8 +8,8 @@
 #include "Driver.h"
 #include "Request.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::ggate::Driver: " << this \
                            << " " << __func__ << ": "
@@ -147,7 +147,7 @@ int Driver::send(Request *req) {
 
   if (ggate_drv_req_cmd(req->req) == GGATE_DRV_CMD_READ &&
       ggate_drv_req_error(req->req) == 0) {
-    ceph_assert(req->bl.length() == ggate_drv_req_length(req->req));
+    stone_assert(req->bl.length() == ggate_drv_req_length(req->req));
     // TODO: avoid copying?
     req->bl.begin().copy(ggate_drv_req_length(req->req),
                  static_cast<char *>(ggate_drv_req_buf(req->req)));

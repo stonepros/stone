@@ -11,13 +11,13 @@
 #endif
 #include "common/debug.h"
 #include "common/admin_socket.h"
-#define dout_subsys ceph_subsys_bluestore
+#define dout_subsys stone_subsys_bluestore
 
 using std::string;
 using std::to_string;
 
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
 class Allocator::SocketHook : public AdminSocketHook {
   Allocator *alloc;
@@ -29,7 +29,7 @@ public:
                       const std::string& _name) :
     alloc(alloc), name(_name)
   {
-    AdminSocket *admin_socket = g_ceph_context->get_admin_socket();
+    AdminSocket *admin_socket = g_stone_context->get_admin_socket();
     if (name.empty()) {
       name = to_string((uintptr_t)this);
     }
@@ -45,18 +45,18 @@ public:
 	  ("bluestore allocator score " + name).c_str(),
 	  this,
 	  "give score on allocator fragmentation (0-no fragmentation, 1-absolute fragmentation)");
-        ceph_assert(r == 0);
+        stone_assert(r == 0);
         r = admin_socket->register_command(
           ("bluestore allocator fragmentation " + name).c_str(),
           this,
           "give allocator fragmentation (0-no fragmentation, 1-absolute fragmentation)");
-        ceph_assert(r == 0);
+        stone_assert(r == 0);
       }
     }
   }
   ~SocketHook()
   {
-    AdminSocket *admin_socket = g_ceph_context->get_admin_socket();
+    AdminSocket *admin_socket = g_stone_context->get_admin_socket();
     if (admin_socket && alloc) {
       admin_socket->unregister_commands(this);
     }
@@ -77,7 +77,7 @@ public:
 
       f->open_array_section("extents");
       auto iterated_allocation = [&](size_t off, size_t len) {
-        ceph_assert(len > 0);
+        stone_assert(len > 0);
         f->open_object_section("free");
         char off_hex[30];
         char len_hex[30];
@@ -124,7 +124,7 @@ const string& Allocator::get_name() const {
   return asok_hook->name;
 }
 
-Allocator *Allocator::create(CephContext* cct, string type,
+Allocator *Allocator::create(StoneContext* cct, string type,
                              int64_t size, int64_t block_size, const std::string& name)
 {
   Allocator* alloc = nullptr;
@@ -199,7 +199,7 @@ double Allocator::get_fragmentation_score()
   };
 
   auto iterated_allocation = [&](size_t off, size_t len) {
-    ceph_assert(len > 0);
+    stone_assert(len > 0);
     score_sum += get_score(len);
     sum += len;
   };

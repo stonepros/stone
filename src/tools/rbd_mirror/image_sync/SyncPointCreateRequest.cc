@@ -12,8 +12,8 @@
 #include "tools/rbd_mirror/image_sync/Types.h"
 #include "tools/rbd_mirror/image_sync/Utils.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_sync::SyncPointCreateRequest: " \
                            << this << " " << __func__
@@ -35,7 +35,7 @@ SyncPointCreateRequest<I>::SyncPointCreateRequest(
     m_sync_point_handler(sync_point_handler),
     m_on_finish(on_finish) {
   m_sync_points_copy = m_sync_point_handler->get_sync_points();
-  ceph_assert(m_sync_points_copy.size() < 2);
+  stone_assert(m_sync_points_copy.size() < 2);
 
   // initialize the updated client meta with the new sync point
   m_sync_points_copy.emplace_back();

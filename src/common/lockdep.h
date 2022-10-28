@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2008-2011 New Dream Network
  *
@@ -12,14 +12,14 @@
  *
  */
 
-#ifndef CEPH_LOCKDEP_H
-#define CEPH_LOCKDEP_H
+#ifndef STONE_LOCKDEP_H
+#define STONE_LOCKDEP_H
 
 #include "include/common_fwd.h"
 extern bool g_lockdep;
 
-extern void lockdep_register_ceph_context(CephContext *cct);
-extern void lockdep_unregister_ceph_context(CephContext *cct);
+extern void lockdep_register_ceph_context(StoneeContext *cct);
+extern void lockdep_unregister_ceph_context(StoneeContext *cct);
 // lockdep tracks dependencies between multiple and different instances
 // of locks within a class denoted by `n`.
 // Caller is obliged to guarantee name uniqueness.

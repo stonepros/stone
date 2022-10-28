@@ -1,0 +1,29 @@
+[Unit]
+Description=Stone FUSE client
+After=network-online.target local-fs.target time-sync.target
+Wants=network-online.target local-fs.target time-sync.target
+Conflicts=umount.target
+PartOf=stone-fuse.target
+
+[Service]
+Environment=CLUSTER=stone
+EnvironmentFile=-@SYSTEMD_ENV_FILE@
+ExecStart=/usr/bin/stone-fuse -f --cluster ${CLUSTER} %I
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+# stone-fuse requires access to /dev fuse device
+PrivateDevices=no
+ProtectControlGroups=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+Restart=on-failure
+RestrictSUIDSGID=true
+StartLimitBurst=3
+StartLimitInterval=30min
+TasksMax=infinity
+
+[Install]
+WantedBy=stone-fuse.target

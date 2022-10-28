@@ -12,7 +12,7 @@ TEST(Striper, Stripe1)
   l.stripe_count = 3;
 
   vector<ObjectExtent> ex;
-  Striper::file_to_extents(g_ceph_context, 1, &l, 5006035, 46419, 5006035, ex);
+  Striper::file_to_extents(g_stone_context, 1, &l, 5006035, 46419, 5006035, ex);
 
   cout << "result " << ex << std::endl;
 
@@ -31,23 +31,23 @@ TEST(Striper, EmptyPartialResult)
   l.stripe_count = 1;
 
   vector<ObjectExtent> ex;
-  Striper::file_to_extents(g_ceph_context, 1, &l, 725549056, 131072, 72554905600, ex);
+  Striper::file_to_extents(g_stone_context, 1, &l, 725549056, 131072, 72554905600, ex);
   cout << "ex " << ex << std::endl;
   ASSERT_EQ(2u, ex.size());
 
   Striper::StripedReadResult r;
 
   bufferlist bl;
-  r.add_partial_result(g_ceph_context, bl, ex[1].buffer_extents);
+  r.add_partial_result(g_stone_context, bl, ex[1].buffer_extents);
 
   bufferptr bp(65536);
   bp.zero();
   bl.append(bp);
 
-  r.add_partial_result(g_ceph_context, bl, ex[0].buffer_extents);
+  r.add_partial_result(g_stone_context, bl, ex[0].buffer_extents);
 
   bufferlist outbl;
-  r.assemble_result(g_ceph_context, outbl, false);
+  r.assemble_result(g_stone_context, outbl, false);
 
   ASSERT_EQ(65536u, outbl.length());
 }
@@ -82,6 +82,6 @@ TEST(Striper, GetFileOffset)
   uint64_t object_no = 100;
   uint64_t object_off = 200000;
   uint64_t file_offset = Striper::get_file_offset(
-          g_ceph_context, &l, object_no, object_off);
+          g_stone_context, &l, object_no, object_off);
   ASSERT_EQ(26549568u, file_offset);
 }

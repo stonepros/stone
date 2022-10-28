@@ -6,7 +6,7 @@
 #include <amqp_ssl_socket.h>
 #include <amqp_tcp_socket.h>
 #include <amqp_framing.h>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include <sstream>
 #include <cstring>
 #include <unordered_map>
@@ -19,7 +19,7 @@
 #include "common/dout.h"
 #include <openssl/ssl.h>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 // TODO investigation, not necessarily issues:
 // (1) in case of single threaded writer context use spsc_queue
@@ -124,9 +124,9 @@ struct connection_t {
   int reply_type;
   int reply_code;
   mutable std::atomic<int> ref_count;
-  CephContext* cct;
+  StoneContext* cct;
   CallbackList callbacks;
-  ceph::coarse_real_clock::time_point next_reconnect;
+  stone::coarse_real_clock::time_point next_reconnect;
   bool mandatory;
   bool use_ssl;
   bool verify_ssl;
@@ -142,7 +142,7 @@ struct connection_t {
     reply_code(RGW_AMQP_NO_REPLY_CODE),
     ref_count(0),
     cct(nullptr),
-    next_reconnect(ceph::coarse_real_clock::now()),
+    next_reconnect(stone::coarse_real_clock::now()),
     mandatory(false),
     use_ssl(false),
     verify_ssl(false),
@@ -388,7 +388,7 @@ static const amqp_channel_t CONFIRMING_CHANNEL_ID = 2;
 
 // utility function to create a connection, when the connection object already exists
 connection_ptr_t& create_connection(connection_ptr_t& conn, const amqp_connection_info& info) {
-  ceph_assert(conn);
+  stone_assert(conn);
 
   // reset all status codes
   conn->status = AMQP_STATUS_OK; 
@@ -538,7 +538,7 @@ connection_ptr_t& create_connection(connection_ptr_t& conn, const amqp_connectio
 
 // utility function to create a new connection
 connection_ptr_t create_new_connection(const amqp_connection_info& info, 
-    const std::string& exchange, bool mandatory_delivery, CephContext* cct, bool verify_ssl, boost::optional<const std::string&> ca_location) { 
+    const std::string& exchange, bool mandatory_delivery, StoneContext* cct, bool verify_ssl, boost::optional<const std::string&> ca_location) { 
   // create connection state
   connection_ptr_t conn = new connection_t;
   conn->exchange = exchange;
@@ -592,10 +592,10 @@ private:
   MessageQueue messages;
   std::atomic<size_t> queued;
   std::atomic<size_t> dequeued;
-  CephContext* const cct;
+  StoneContext* const cct;
   mutable std::mutex connections_lock;
-  const ceph::coarse_real_clock::duration idle_time;
-  const ceph::coarse_real_clock::duration reconnect_time;
+  const stone::coarse_real_clock::duration idle_time;
+  const stone::coarse_real_clock::duration reconnect_time;
   std::thread runner;
 
   void publish_internal(message_wrapper_t* message) {
@@ -700,7 +700,7 @@ private:
 
         // try to reconnect the connection if it has an error
         if (!conn->is_ok()) {
-          const auto now = ceph::coarse_real_clock::now();
+          const auto now = stone::coarse_real_clock::now();
           if (now >= conn->next_reconnect) {
             // pointers are used temporarily inside the amqp_connection_info object
             // as read-only values, hence the assignment, and const_cast are safe here
@@ -761,7 +761,7 @@ private:
             {
               result = AMQP_STATUS_OK;
               const auto ack = (amqp_basic_ack_t*)frame.payload.method.decoded;
-              ceph_assert(ack);
+              stone_assert(ack);
               tag = ack->delivery_tag;
               multiple = ack->multiple;
               break;
@@ -770,7 +770,7 @@ private:
             {
               result = RGW_AMQP_STATUS_BROKER_NACK;
               const auto nack = (amqp_basic_nack_t*)frame.payload.method.decoded;
-              ceph_assert(nack);
+              stone_assert(nack);
               tag = nack->delivery_tag;
               multiple = nack->multiple;
               break;
@@ -847,7 +847,7 @@ public:
       long _usec_timeout,
       unsigned reconnect_time_ms,
       unsigned idle_time_ms,
-      CephContext* _cct) : 
+      StoneContext* _cct) : 
     max_connections(_max_connections),
     max_inflight(_max_inflight),
     max_queue(_max_queue),
@@ -868,8 +868,8 @@ public:
       // when a new connection is added.
       connections.max_load_factor(10.0);
       // give the runner thread a name for easier debugging
-      const auto rc = ceph_pthread_setname(runner.native_handle(), "amqp_manager");
-      ceph_assert(rc==0);
+      const auto rc = stone_pthread_setname(runner.native_handle(), "amqp_manager");
+      stone_assert(rc==0);
   }
 
   // non copyable
@@ -924,7 +924,7 @@ public:
     // create_new_connection must always return a connection object
     // even if error occurred during creation. 
     // in such a case the creation will be retried in the main thread
-    ceph_assert(conn);
+    stone_assert(conn);
     ++connection_count;
     ldout(cct, 10) << "AMQP connect: new connection is created. Total connections: " << connection_count << dendl;
     ldout(cct, 10) << "AMQP connect: new connection status is: " << status_to_string(conn->status) << dendl;
@@ -1018,11 +1018,11 @@ static const long READ_TIMEOUT_USEC = 100;
 static const unsigned IDLE_TIME_MS = 100;
 static const unsigned RECONNECT_TIME_MS = 100;
 
-bool init(CephContext* cct) {
+bool init(StoneContext* cct) {
   if (s_manager) {
     return false;
   }
-  // TODO: take conf from CephContext
+  // TODO: take conf from StoneContext
   s_manager = new Manager(MAX_CONNECTIONS_DEFAULT, MAX_INFLIGHT_DEFAULT, MAX_QUEUE_DEFAULT, 
       READ_TIMEOUT_USEC, IDLE_TIME_MS, RECONNECT_TIME_MS, cct);
   return true;

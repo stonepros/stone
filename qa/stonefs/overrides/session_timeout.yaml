@@ -1,0 +1,4 @@
+overrides:
+  stone:
+    stonefs:
+      session_timeout: 300

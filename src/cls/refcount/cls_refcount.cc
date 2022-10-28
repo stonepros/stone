@@ -10,7 +10,7 @@
 
 using std::string;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 CLS_VER(1,0)
 CLS_NAME(refcount)
@@ -36,7 +36,7 @@ static int read_refcount(cls_method_context_t hctx, bool implicit_ref, obj_refco
   try {
     auto iter = bl.cbegin();
     decode(*objr, iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(0, "ERROR: read_refcount(): failed to decode refcount entry\n");
     return -EIO;
   }
@@ -64,7 +64,7 @@ static int cls_rc_refcount_get(cls_method_context_t hctx, bufferlist *in, buffer
   cls_refcount_get_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_rc_refcount_get(): failed to decode entry\n");
     return -EINVAL;
   }
@@ -92,7 +92,7 @@ static int cls_rc_refcount_put(cls_method_context_t hctx, bufferlist *in, buffer
   cls_refcount_put_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_rc_refcount_put(): failed to decode entry\n");
     return -EINVAL;
   }
@@ -145,7 +145,7 @@ static int cls_rc_refcount_set(cls_method_context_t hctx, bufferlist *in, buffer
   cls_refcount_set_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_refcount_set(): failed to decode entry\n");
     return -EINVAL;
   }
@@ -173,7 +173,7 @@ static int cls_rc_refcount_read(cls_method_context_t hctx, bufferlist *in, buffe
   cls_refcount_read_op op;
   try {
     decode(op, in_iter);
-  } catch (ceph::buffer::error& err) {
+  } catch (stone::buffer::error& err) {
     CLS_LOG(1, "ERROR: cls_rc_refcount_read(): failed to decode entry\n");
     return -EINVAL;
   }

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,7 +20,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include "include/rados/librados.h"
-#include "ceph_ver.h"
+#include "stone_ver.h"
 
 namespace po = boost::program_options;
 
@@ -48,8 +48,8 @@ int main(int argc, const char **argv)
   } else if (vm.count("vernum")) {
     std::cout << std::hex << LIBRADOS_VERSION_CODE << std::dec << std::endl;
   } else if (vm.count("release")) {
-    std::cout << CEPH_RELEASE_NAME << ' '
-	      << '(' << CEPH_RELEASE_TYPE << ')'
+    std::cout << STONE_RELEASE_NAME << ' '
+	      << '(' << STONE_RELEASE_TYPE << ')'
 	      << std::endl;
   } else {
     std::cerr << argv[0] << ": -h or --help for usage" << std::endl;

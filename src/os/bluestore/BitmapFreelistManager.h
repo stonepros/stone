@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_OS_BLUESTORE_BITMAPFREELISTMANAGER_H
-#define CEPH_OS_BLUESTORE_BITMAPFREELISTMANAGER_H
+#ifndef STONE_OS_BLUESTORE_BITMAPFREELISTMANAGER_H
+#define STONE_OS_BLUESTORE_BITMAPFREELISTMANAGER_H
 
 #include "FreelistManager.h"
 

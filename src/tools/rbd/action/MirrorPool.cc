@@ -9,7 +9,7 @@
 #include "include/Context.h"
 #include "include/stringify.h"
 #include "include/rbd/librbd.hpp"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/config.h"
 #include "common/debug.h"
 #include "common/errno.h"
@@ -23,12 +23,12 @@
 #include <regex>
 #include <set>
 #include <boost/program_options.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include <atomic>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::action::MirrorPool: "
 
@@ -823,7 +823,7 @@ void get_peer_bootstrap_create_arguments(po::options_description *positional,
 
 int execute_peer_bootstrap_create(
     const po::variables_map &vm,
-    const std::vector<std::string> &ceph_global_init_args) {
+    const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   size_t arg_index = 0;
   int r = utils::get_pool_and_namespace_names(vm, true, true, &pool_name,
@@ -882,7 +882,7 @@ void get_peer_bootstrap_import_arguments(po::options_description *positional,
 
 int execute_peer_bootstrap_import(
     const po::variables_map &vm,
-    const std::vector<std::string> &ceph_global_init_args) {
+    const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   size_t arg_index = 0;
   int r = utils::get_pool_and_namespace_names(vm, true, true, &pool_name,
@@ -975,7 +975,7 @@ void get_peer_add_arguments(po::options_description *positional,
 }
 
 int execute_peer_add(const po::variables_map &vm,
-                     const std::vector<std::string> &ceph_global_init_args) {
+                     const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   size_t arg_index = 0;
   int r = utils::get_pool_and_namespace_names(vm, true, true, &pool_name,
@@ -984,7 +984,7 @@ int execute_peer_add(const po::variables_map &vm,
     return r;
   }
 
-  std::string remote_client_name = g_ceph_context->_conf->name.to_str();
+  std::string remote_client_name = g_stone_context->_conf->name.to_str();
   std::string remote_cluster;
   std::map<std::string, std::string> attributes;
   r = get_remote_cluster_spec(
@@ -1066,7 +1066,7 @@ void get_peer_remove_arguments(po::options_description *positional,
 }
 
 int execute_peer_remove(const po::variables_map &vm,
-                        const std::vector<std::string> &ceph_global_init_args) {
+                        const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   size_t arg_index = 0;
   int r = utils::get_pool_and_namespace_names(vm, true, true, &pool_name,
@@ -1114,7 +1114,7 @@ void get_peer_set_arguments(po::options_description *positional,
 }
 
 int execute_peer_set(const po::variables_map &vm,
-                     const std::vector<std::string> &ceph_global_init_args) {
+                     const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   size_t arg_index = 0;
   int r = utils::get_pool_and_namespace_names(vm, true, true, &pool_name,
@@ -1284,7 +1284,7 @@ int execute_enable_disable(librados::IoCtx& io_ctx,
 }
 
 int execute_disable(const po::variables_map &vm,
-                    const std::vector<std::string> &ceph_global_init_args) {
+                    const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   std::string namespace_name;
   size_t arg_index = 0;
@@ -1307,7 +1307,7 @@ int execute_disable(const po::variables_map &vm,
 }
 
 int execute_enable(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   std::string namespace_name;
   size_t arg_index = 0;
@@ -1363,7 +1363,7 @@ void get_info_arguments(po::options_description *positional,
 }
 
 int execute_info(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   std::string namespace_name;
   size_t arg_index = 0;
@@ -1459,7 +1459,7 @@ void get_status_arguments(po::options_description *positional,
 }
 
 int execute_status(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   std::string namespace_name;
   size_t arg_index = 0;
@@ -1544,7 +1544,7 @@ int execute_status(const po::variables_map &vm,
         formatter->dump_string("instance_id", mirror_service.instance_id);
         formatter->dump_string("client_id", mirror_service.client_id);
         formatter->dump_string("hostname", mirror_service.hostname);
-        formatter->dump_string("ceph_version", mirror_service.ceph_version);
+        formatter->dump_string("stone_version", mirror_service.stone_version);
         formatter->dump_bool("leader", mirror_service.leader);
         formatter->dump_stream("health") << mirror_service.health;
         if (!mirror_service.callouts.empty()) {
@@ -1569,7 +1569,7 @@ int execute_status(const po::variables_map &vm,
                   << std::endl
                   << "  client_id: " << mirror_service.client_id << std::endl
                   << "  hostname: " << mirror_service.hostname << std::endl
-                  << "  version: " << mirror_service.ceph_version << std::endl
+                  << "  version: " << mirror_service.stone_version << std::endl
                   << "  leader: " << (mirror_service.leader ? "true" : "false")
                   << std::endl
                   << "  health: " << mirror_service.health << std::endl;
@@ -1606,7 +1606,7 @@ int execute_status(const po::variables_map &vm,
       r = rbd.mirror_image_instance_id_list(io_ctx, start_image_id, 1024, &ids);
       if (r < 0) {
         if (r == -EOPNOTSUPP) {
-          std::cerr << "rbd: newer release of Ceph OSDs required to map image "
+          std::cerr << "rbd: newer release of Stone OSDs required to map image "
                     << "to rbd-mirror daemon instance" << std::endl;
         } else {
           std::cerr << "rbd: failed to get instance id list: "
@@ -1649,7 +1649,7 @@ void get_promote_arguments(po::options_description *positional,
 }
 
 int execute_promote(const po::variables_map &vm,
-                    const std::vector<std::string> &ceph_global_init_args) {
+                    const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   std::string namespace_name;
   size_t arg_index = 0;
@@ -1688,7 +1688,7 @@ void get_demote_arguments(po::options_description *positional,
 }
 
 int execute_demote(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   std::string namespace_name;
   size_t arg_index = 0;

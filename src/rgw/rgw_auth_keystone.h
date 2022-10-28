@@ -2,8 +2,8 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 
-#ifndef CEPH_RGW_AUTH_KEYSTONE_H
-#define CEPH_RGW_AUTH_KEYSTONE_H
+#ifndef STONE_RGW_AUTH_KEYSTONE_H
+#define STONE_RGW_AUTH_KEYSTONE_H
 
 #include <string_view>
 #include <utility>
@@ -192,4 +192,4 @@ public:
 }; /* namespace auth */
 }; /* namespace rgw */
 
-#endif /* CEPH_RGW_AUTH_KEYSTONE_H */
+#endif /* STONE_RGW_AUTH_KEYSTONE_H */

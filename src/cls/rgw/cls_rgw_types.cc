@@ -2,14 +2,14 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "cls/rgw/cls_rgw_types.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "include/utime.h"
 
 using std::list;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
 void rgw_zone_set_entry::from_str(const string& s)
 {
@@ -35,14 +35,14 @@ string rgw_zone_set_entry::to_str() const
 void rgw_zone_set_entry::encode(bufferlist &bl) const
 {
   /* no ENCODE_START, ENCODE_END for backward compatibility */
-  ceph::encode(to_str(), bl);
+  stone::encode(to_str(), bl);
 }
 
 void rgw_zone_set_entry::decode(bufferlist::const_iterator &bl)
 {
   /* no DECODE_START, DECODE_END for backward compatibility */
   string s;
-  ceph::decode(s, bl);
+  stone::decode(s, bl);
   from_str(s);
 }
 
@@ -67,7 +67,7 @@ bool rgw_zone_set::exists(const string& zone, std::optional<string> location_key
   return entries.find(rgw_zone_set_entry(zone, location_key)) != entries.end();
 }
 
-void encode_json(const char *name, const rgw_zone_set& zs, ceph::Formatter *f)
+void encode_json(const char *name, const rgw_zone_set& zs, stone::Formatter *f)
 {
   encode_json(name, zs.entries, f);
 }
@@ -265,7 +265,7 @@ void rgw_cls_bi_entry::decode_json(JSONObj *obj, cls_rgw_obj_key *effective_key)
   } else {
     type = BIIndexType::Invalid;
   }
-  using ceph::encode;
+  using stone::encode;
   switch (type) {
     case BIIndexType::Plain:
     case BIIndexType::Instance:
@@ -322,7 +322,7 @@ bool rgw_cls_bi_entry::get_info(cls_rgw_obj_key *key,
 {
   bool account = false;
   auto iter = data.cbegin();
-  using ceph::decode;
+  using stone::decode;
   switch (type) {
     case BIIndexType::Plain:
         account = true;
@@ -552,7 +552,7 @@ void rgw_bi_log_entry::generate_test_instances(list<rgw_bi_log_entry*>& ls)
   ls.push_back(new rgw_bi_log_entry);
   ls.back()->id = "midf";
   ls.back()->object = "obj";
-  ls.back()->timestamp = ceph::real_clock::from_ceph_timespec({init_le32(2), init_le32(3)});
+  ls.back()->timestamp = stone::real_clock::from_stone_timespec({init_le32(2), init_le32(3)});
   ls.back()->index_ver = 4323;
   ls.back()->tag = "tagasdfds";
   ls.back()->op = CLS_RGW_OP_DEL;
@@ -729,7 +729,7 @@ void cls_rgw_reshard_entry::generate_test_instances(list<cls_rgw_reshard_entry*>
 {
   ls.push_back(new cls_rgw_reshard_entry);
   ls.push_back(new cls_rgw_reshard_entry);
-  ls.back()->time = ceph::real_clock::from_ceph_timespec({init_le32(2), init_le32(3)});
+  ls.back()->time = stone::real_clock::from_stone_timespec({init_le32(2), init_le32(3)});
   ls.back()->tenant = "tenant";
   ls.back()->bucket_name = "bucket1""";
   ls.back()->bucket_id = "bucket_id";

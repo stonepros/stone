@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -21,7 +21,7 @@
 
 #include "include/stringify.h"
 #include "common/code_environment.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "global/global_init.h"
 #include "rgw/rgw_auth.h"
 #include "rgw/rgw_iam_policy.h"
@@ -100,22 +100,22 @@ public:
 
   explicit FakeIdentity(Principal&& id) : id(std::move(id)) {}
   uint32_t get_perms_from_aclspec(const DoutPrefixProvider* dpp, const aclspec_t& aclspec) const override {
-    ceph_abort();
+    stone_abort();
     return 0;
   };
 
   bool is_admin_of(const rgw_user& uid) const override {
-    ceph_abort();
+    stone_abort();
     return false;
   }
 
   bool is_owner_of(const rgw_user& uid) const override {
-    ceph_abort();
+    stone_abort();
     return false;
   }
 
   virtual uint32_t get_perm_mask() const override {
-    ceph_abort();
+    stone_abort();
     return 0;
   }
 
@@ -147,7 +147,7 @@ public:
 
 class PolicyTest : public ::testing::Test {
 protected:
-  intrusive_ptr<CephContext> cct;
+  intrusive_ptr<StoneContext> cct;
   static const string arbitrary_tenant;
   static string example1;
   static string example2;
@@ -158,7 +158,7 @@ protected:
   static string example7;
 public:
   PolicyTest() {
-    cct = new CephContext(CEPH_ENTITY_TYPE_CLIENT);
+    cct = new StoneContext(STONE_ENTITY_TYPE_CLIENT);
   }
 };
 
@@ -842,7 +842,7 @@ string PolicyTest::example7 = R"(
 )";
 class IPPolicyTest : public ::testing::Test {
 protected:
-  intrusive_ptr<CephContext> cct;
+  intrusive_ptr<StoneContext> cct;
   static const string arbitrary_tenant;
   static string ip_address_allow_example;
   static string ip_address_deny_example;
@@ -859,7 +859,7 @@ protected:
   const rgw::IAM::MaskedIP allowedIPv6Range = { true, rgw::IAM::Address("00100000000000010000110110111000100001011010001100000000000000000000000000000000100010100010111000000011011100000111001100110000"), 124 };
 public:
   IPPolicyTest() {
-    cct = new CephContext(CEPH_ENTITY_TYPE_CLIENT);
+    cct = new StoneContext(STONE_ENTITY_TYPE_CLIENT);
   }
 };
 const string IPPolicyTest::arbitrary_tenant = "arbitrary_tenant";

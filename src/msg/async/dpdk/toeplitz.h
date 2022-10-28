@@ -41,8 +41,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef CEPH_MSG_TOEPLITZ_H_
-#define CEPH_MSG_TOEPLITZ_H_
+#ifndef STONE_MSG_TOEPLITZ_H_
+#define STONE_MSG_TOEPLITZ_H_
 
 #include <vector>
 

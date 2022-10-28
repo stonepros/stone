@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc.
  *
@@ -25,7 +25,7 @@
 #include "services/svc_zone.h"
 #include "rgw_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace {
 
@@ -87,8 +87,8 @@ int bucket_source_sync_checkpoint(const DoutPrefixProvider* dpp,
                                   const RGWBucketInfo& source_bucket_info,
                                   const rgw_sync_bucket_pipe& pipe,
                                   const BucketIndexShardsManager& remote_markers,
-                                  ceph::timespan retry_delay,
-                                  ceph::coarse_mono_time timeout_at)
+                                  stone::timespan retry_delay,
+                                  stone::coarse_mono_time timeout_at)
 {
   const auto num_shards = source_bucket_info.layout.current_index.layout.normal.num_shards;
 
@@ -106,7 +106,7 @@ int bucket_source_sync_checkpoint(const DoutPrefixProvider* dpp,
   }
 
   while (status < remote_markers) {
-    auto delay_until = ceph::coarse_mono_clock::now() + retry_delay;
+    auto delay_until = stone::coarse_mono_clock::now() + retry_delay;
     if (delay_until > timeout_at) {
       ldpp_dout(dpp, 0) << "bucket checkpoint timed out waiting for incremental sync to catch up" << dendl;
       return -ETIMEDOUT;
@@ -132,7 +132,7 @@ int source_bilog_markers(const DoutPrefixProvider *dpp,
                          BucketIndexShardsManager& remote_markers,
                          optional_yield y)
 {
-  ceph_assert(pipe.source.zone);
+  stone_assert(pipe.source.zone);
 
   auto& zone_conn_map = zone_svc->get_zone_conn_map();
   auto conn = zone_conn_map.find(pipe.source.zone->id);
@@ -152,8 +152,8 @@ int rgw_bucket_sync_checkpoint(const DoutPrefixProvider* dpp,
                                const RGWBucketInfo& info,
                                std::optional<rgw_zone_id> opt_source_zone,
                                std::optional<rgw_bucket> opt_source_bucket,
-                               ceph::timespan retry_delay,
-                               ceph::coarse_mono_time timeout_at)
+                               stone::timespan retry_delay,
+                               stone::coarse_mono_time timeout_at)
 {
   struct sync_source_entry {
     rgw_sync_bucket_pipe pipe;

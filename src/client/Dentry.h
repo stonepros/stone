@@ -1,5 +1,5 @@
-#ifndef CEPH_CLIENT_DENTRY_H
-#define CEPH_CLIENT_DENTRY_H
+#ifndef STONE_CLIENT_DENTRY_H
+#define STONE_CLIENT_DENTRY_H
 
 #include "include/lru.h"
 #include "include/xlist.h"

@@ -5,8 +5,8 @@
 
 #include "common/config.h"
 #include "common/errno.h"
-#include "common/ceph_argparse.h"
-#include "common/ceph_json.h"
+#include "common/stone_argparse.h"
+#include "common/stone_json.h"
 #include "common/common_init.h"
 #include "common/TracepointProvider.h"
 #include "common/hobject.h"
@@ -72,7 +72,7 @@ using std::set;
 using std::vector;
 using std::list;
 
-#define dout_subsys ceph_subsys_rados
+#define dout_subsys stone_subsys_rados
 #undef dout_prefix
 #define dout_prefix *_dout << "librados: "
 
@@ -102,13 +102,13 @@ static TracepointProvider::Traits tracepoint_traits("librados_tp.so", "rados_tra
 
 ///////////////////////////// C API //////////////////////////////
 
-static CephContext *rados_create_cct(
+static StoneContext *rados_create_cct(
   const char * const clustername,
-  CephInitParameters *iparams)
+  StoneInitParameters *iparams)
 {
   // missing things compared to global_init:
-  // g_ceph_context, g_conf, g_lockdep, signal handlers
-  CephContext *cct = common_preinit(*iparams, CODE_ENVIRONMENT_LIBRARY, 0);
+  // g_stone_context, g_conf, g_lockdep, signal handlers
+  StoneContext *cct = common_preinit(*iparams, CODE_ENVIRONMENT_LIBRARY, 0);
   if (clustername)
     cct->_conf->cluster = clustername;
   cct->_conf.parse_env(cct->get_module_type()); // environment variables override
@@ -122,11 +122,11 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_create)(
   rados_t *pcluster,
   const char * const id)
 {
-  CephInitParameters iparams(CEPH_ENTITY_TYPE_CLIENT);
+  StoneInitParameters iparams(STONE_ENTITY_TYPE_CLIENT);
   if (id) {
-    iparams.name.set(CEPH_ENTITY_TYPE_CLIENT, id);
+    iparams.name.set(STONE_ENTITY_TYPE_CLIENT, id);
   }
-  CephContext *cct = rados_create_cct("", &iparams);
+  StoneContext *cct = rados_create_cct("", &iparams);
 
   tracepoint(librados, rados_create_enter, id);
   *pcluster = reinterpret_cast<rados_t>(new librados::RadosClient(cct));
@@ -151,12 +151,12 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_create2)(
 {
   // client is assumed, but from_str will override
   int retval = 0;
-  CephInitParameters iparams(CEPH_ENTITY_TYPE_CLIENT);
+  StoneInitParameters iparams(STONE_ENTITY_TYPE_CLIENT);
   if (!name || !iparams.name.from_str(name)) {
     retval = -EINVAL;
   }
 
-  CephContext *cct = rados_create_cct(clustername, &iparams);
+  StoneContext *cct = rados_create_cct(clustername, &iparams);
   tracepoint(librados, rados_create2_enter, clustername, name, flags);
   if (retval == 0) {
     *pcluster = reinterpret_cast<rados_t>(new librados::RadosClient(cct));
@@ -168,7 +168,7 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_create2)(
 }
 LIBRADOS_C_API_BASE_DEFAULT(rados_create2);
 
-/* This function is intended for use by Ceph daemons. These daemons have
+/* This function is intended for use by Stone daemons. These daemons have
  * already called global_init and want to use that particular configuration for
  * their cluster.
  */
@@ -176,7 +176,7 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_create_with_context)(
   rados_t *pcluster,
   rados_config_t cct_)
 {
-  CephContext *cct = (CephContext *)cct_;
+  StoneContext *cct = (StoneContext *)cct_;
   TracepointProvider::initialize<tracepoint_traits>(cct);
 
   tracepoint(librados, rados_create_with_context_enter, cct_);
@@ -340,7 +340,7 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_conf_parse_argv_remainder)(
     return ret;
   }
   conf.apply_changes(NULL);
-  ceph_assert(args.size() <= (unsigned int)argc);
+  stone_assert(args.size() <= (unsigned int)argc);
   for (i = 0; i < (unsigned int)argc; ++i) {
     if (i < args.size())
       remargv[i] = args[i];
@@ -393,7 +393,7 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_cluster_stat)(
   tracepoint(librados, rados_cluster_stat_enter, cluster);
   librados::RadosClient *client = (librados::RadosClient *)cluster;
 
-  ceph_statfs stats;
+  stone_statfs stats;
   int r = client->get_fs_stats(stats);
   result->kb = stats.kb;
   result->kb_used = stats.kb_used;
@@ -522,7 +522,7 @@ extern "C" void LIBRADOS_C_API_DEFAULT_F(rados_set_osdmap_full_try)(
   rados_ioctx_t io)
 {
   librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
-  ctx->extra_op_flags |= CEPH_OSD_FLAG_FULL_TRY;
+  ctx->extra_op_flags |= STONE_OSD_FLAG_FULL_TRY;
 }
 LIBRADOS_C_API_BASE_DEFAULT(rados_set_osdmap_full_try);
 
@@ -530,21 +530,21 @@ extern "C" void LIBRADOS_C_API_DEFAULT_F(rados_unset_osdmap_full_try)(
   rados_ioctx_t io)
 {
   librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
-  ctx->extra_op_flags &= ~CEPH_OSD_FLAG_FULL_TRY;
+  ctx->extra_op_flags &= ~STONE_OSD_FLAG_FULL_TRY;
 }
 LIBRADOS_C_API_BASE_DEFAULT(rados_unset_pool_full_try);
 
 extern "C" void _rados_set_pool_full_try(rados_ioctx_t io)
 {
   librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
-  ctx->extra_op_flags |= CEPH_OSD_FLAG_FULL_TRY;
+  ctx->extra_op_flags |= STONE_OSD_FLAG_FULL_TRY;
 }
 LIBRADOS_C_API_BASE_DEFAULT(rados_set_pool_full_try);
 
 extern "C" void _rados_unset_pool_full_try(rados_ioctx_t io)
 {
   librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
-  ctx->extra_op_flags &= ~CEPH_OSD_FLAG_FULL_TRY;
+  ctx->extra_op_flags &= ~STONE_OSD_FLAG_FULL_TRY;
 }
 LIBRADOS_C_API_BASE_DEFAULT(rados_unset_osdmap_full_try);
 
@@ -1486,7 +1486,7 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_pool_create_with_auid)(
   librados::RadosClient *radosp = (librados::RadosClient *)cluster;
   string sname(name);
   int retval = 0;
-  if (auid != CEPH_AUTH_UID_DEFAULT) {
+  if (auid != STONE_AUTH_UID_DEFAULT) {
     retval = -EINVAL;
   } else {
     retval = radosp->pool_create(sname);
@@ -1520,7 +1520,7 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_pool_create_with_all)(
   librados::RadosClient *radosp = (librados::RadosClient *)cluster;
   string sname(name);
   int retval = 0;
-  if (auid != CEPH_AUTH_UID_DEFAULT) {
+  if (auid != STONE_AUTH_UID_DEFAULT) {
     retval = -EINVAL;
   } else {
     retval = radosp->pool_create(sname, crush_rule_num);
@@ -2259,7 +2259,7 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_object_list)(rados_ioctx_t io,
   rados_object_list_item *result_items,
   rados_object_list_cursor *next)
 {
-  ceph_assert(next);
+  stone_assert(next);
 
   librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
 
@@ -2272,7 +2272,7 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_object_list)(rados_ioctx_t io,
     filter_bl.append(filter_buf, filter_buf_len);
   }
 
-  ceph::async::waiter<boost::system::error_code,
+  stone::async::waiter<boost::system::error_code,
 		      std::vector<librados::ListObjectImpl>,
 		      hobject_t> w;
   ctx->objecter->enumerate_objects<librados::ListObjectImpl>(
@@ -2285,16 +2285,16 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_object_list)(rados_ioctx_t io,
       w);
 
   hobject_t *next_hobj = (hobject_t*)(*next);
-  ceph_assert(next_hobj);
+  stone_assert(next_hobj);
 
   auto [ec, result, next_hash] = w.wait();
 
   if (ec) {
     *next_hobj = hobject_t::get_max();
-    return ceph::from_error_code(ec);
+    return stone::from_error_code(ec);
   }
 
-  ceph_assert(result.size() <= result_item_count);  // Don't overflow!
+  stone_assert(result.size() <= result_item_count);  // Don't overflow!
 
   int k = 0;
   for (auto i = result.begin(); i != result.end(); ++i) {
@@ -2314,7 +2314,7 @@ extern "C" void LIBRADOS_C_API_DEFAULT_F(rados_object_list_free)(
   const size_t result_size,
   rados_object_list_item *results)
 {
-  ceph_assert(results);
+  stone_assert(results);
 
   for (unsigned int i = 0; i < result_size; ++i) {
     LIBRADOS_C_API_DEFAULT_F(rados_buffer_free)(results[i].oid);
@@ -3621,7 +3621,7 @@ extern "C" void LIBRADOS_C_API_DEFAULT_F(rados_write_op_cmpxattr)(
   bl.append(value, value_len);
   ((::ObjectOperation *)write_op)->cmpxattr(name,
 					    comparison_operator,
-					    CEPH_OSD_CMPXATTR_MODE_STRING,
+					    STONE_OSD_CMPXATTR_MODE_STRING,
 					    bl);
   tracepoint(librados, rados_write_op_cmpxattr_exit);
 }
@@ -3946,11 +3946,11 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_write_op_operate)(
   ::ObjectOperation *oo = (::ObjectOperation *) write_op;
   librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
 
-  ceph::real_time *prt = NULL;
-  ceph::real_time rt;
+  stone::real_time *prt = NULL;
+  stone::real_time rt;
 
   if (mtime) {
-    rt = ceph::real_clock::from_time_t(*mtime);
+    rt = stone::real_clock::from_time_t(*mtime);
     prt = &rt;
   }
 
@@ -3972,11 +3972,11 @@ extern "C" int LIBRADOS_C_API_DEFAULT_F(rados_write_op_operate2)(
   ::ObjectOperation *oo = (::ObjectOperation *) write_op;
   librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
 
-  ceph::real_time *prt = NULL;
-  ceph::real_time rt;
+  stone::real_time *prt = NULL;
+  stone::real_time rt;
 
   if (ts) {
-    rt = ceph::real_clock::from_timespec(*ts);
+    rt = stone::real_clock::from_timespec(*ts);
     prt = &rt;
   }
 
@@ -4078,7 +4078,7 @@ extern "C" void LIBRADOS_C_API_DEFAULT_F(rados_read_op_cmpxattr)(
   bl.append(value, value_len);
   ((::ObjectOperation *)read_op)->cmpxattr(name,
 					   comparison_operator,
-					   CEPH_OSD_CMPXATTR_MODE_STRING,
+					   STONE_OSD_CMPXATTR_MODE_STRING,
 					   bl);
   tracepoint(librados, rados_read_op_cmpxattr_exit);
 }
@@ -4573,12 +4573,12 @@ extern "C" void LIBRADOS_C_API_DEFAULT_F(rados_object_list_slice)(
 {
   librados::IoCtxImpl *ctx = (librados::IoCtxImpl *)io;
 
-  ceph_assert(split_start);
-  ceph_assert(split_finish);
+  stone_assert(split_start);
+  stone_assert(split_finish);
   hobject_t *split_start_hobj = (hobject_t*)(*split_start);
   hobject_t *split_finish_hobj = (hobject_t*)(*split_finish);
-  ceph_assert(split_start_hobj);
-  ceph_assert(split_finish_hobj);
+  stone_assert(split_start_hobj);
+  stone_assert(split_finish_hobj);
   hobject_t *start_hobj = (hobject_t*)(start);
   hobject_t *finish_hobj = (hobject_t*)(finish);
 

@@ -13,7 +13,7 @@ openstack:
       count: 3
       size: 10 # GB
 override:
-  ceph:
+  stone:
     conf:
       mon:
         osd default pool size: 3
@@ -21,9 +21,9 @@ override:
         osd max pg log entries: 10
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     log-ignorelist:
     - but it is still running
     - missing primary copy of

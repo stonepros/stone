@@ -39,7 +39,7 @@ namespace fs = std::experimental::filesystem;
 #include "common/debug.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_rocksdb
+#define dout_subsys stone_subsys_rocksdb
 #undef dout_prefix
 #define dout_prefix *_dout << "rocksdb: "
 
@@ -53,9 +53,9 @@ using std::string;
 using std::unique_ptr;
 using std::vector;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::bufferptr;
+using stone::Formatter;
 
 static const char* sharding_def_dir = "sharding";
 static const char* sharding_def_file = "sharding/def";
@@ -176,18 +176,18 @@ int RocksDBStore::set_merge_operator(
   std::shared_ptr<KeyValueDB::MergeOperator> mop)
 {
   // If you fail here, it's because you can't do this on an open database
-  ceph_assert(db == nullptr);
+  stone_assert(db == nullptr);
   merge_ops.push_back(std::make_pair(prefix,mop));
   return 0;
 }
 
-class CephRocksdbLogger : public rocksdb::Logger {
-  CephContext *cct;
+class StoneRocksdbLogger : public rocksdb::Logger {
+  StoneContext *cct;
 public:
-  explicit CephRocksdbLogger(CephContext *c) : cct(c) {
+  explicit StoneRocksdbLogger(StoneContext *c) : cct(c) {
     cct->get();
   }
-  ~CephRocksdbLogger() override {
+  ~StoneRocksdbLogger() override {
     cct->put();
   }
 
@@ -203,16 +203,16 @@ public:
   void Logv(const rocksdb::InfoLogLevel log_level, const char* format,
 	    va_list ap) override {
     int v = rocksdb::NUM_INFO_LOG_LEVELS - log_level - 1;
-    dout(ceph::dout::need_dynamic(v));
+    dout(stone::dout::need_dynamic(v));
     char buf[65536];
     vsnprintf(buf, sizeof(buf), format, ap);
     *_dout << buf << dendl;
   }
 };
 
-rocksdb::Logger *create_rocksdb_ceph_logger()
+rocksdb::Logger *create_rocksdb_stone_logger()
 {
-  return new CephRocksdbLogger(g_ceph_context);
+  return new StoneRocksdbLogger(g_stone_context);
 }
 
 static int string2bool(const string &val, bool &b_val)
@@ -360,7 +360,7 @@ int RocksDBStore::ParseOptionsFromString(const string &opt_str, rocksdb::Options
 }
 
 int RocksDBStore::ParseOptionsFromStringStatic(
-  CephContext *cct,
+  StoneContext *cct,
   const string& opt_str,
   rocksdb::Options& opt,
   function<int(const string&, const string&, rocksdb::Options&)> interp)
@@ -438,7 +438,7 @@ int RocksDBStore::install_cf_mergeop(
   const string &key_prefix,
   rocksdb::ColumnFamilyOptions *cf_opt)
 {
-  ceph_assert(cf_opt != nullptr);
+  stone_assert(cf_opt != nullptr);
   cf_opt->merge_operator.reset();
   for (auto& i : merge_ops) {
     if (i.first == key_prefix) {
@@ -499,7 +499,7 @@ int RocksDBStore::load_rocksdb_options(bool create_if_missing, rocksdb::Options&
     opt.wal_dir = path + ".wal";
   }
 
-  // Since ceph::for_each_substr doesn't return a value and
+  // Since stone::for_each_substr doesn't return a value and
   // std::stoull does throw, we may as well just catch everything here.
   try {
     if (kv_options.count("db_paths")) {
@@ -528,8 +528,8 @@ int RocksDBStore::load_rocksdb_options(bool create_if_missing, rocksdb::Options&
     return -e.code().value();
   }
 
-  if (cct->_conf->rocksdb_log_to_ceph_log) {
-    opt.info_log.reset(new CephRocksdbLogger(cct));
+  if (cct->_conf->rocksdb_log_to_stone_log) {
+    opt.info_log.reset(new StoneRocksdbLogger(cct));
   }
 
   if (priv) {
@@ -609,10 +609,10 @@ void RocksDBStore::add_column_family(const std::string& cf_name, uint32_t hash_l
   bool exists = cf_handles.count(cf_name) > 0;
   auto& column = cf_handles[cf_name];
   if (exists) {
-    ceph_assert(hash_l == column.hash_l);
-    ceph_assert(hash_h == column.hash_h);
+    stone_assert(hash_l == column.hash_l);
+    stone_assert(hash_h == column.hash_h);
   } else {
-    ceph_assert(hash_l < hash_h);
+    stone_assert(hash_l < hash_h);
     column.hash_l = hash_l;
     column.hash_h = hash_h;
   }
@@ -634,7 +634,7 @@ std::string_view RocksDBStore::get_key_hash_view(const prefix_shards& shards, co
 
 rocksdb::ColumnFamilyHandle *RocksDBStore::get_key_cf(const prefix_shards& shards, const char* key, const size_t keylen) {
   auto sv = get_key_hash_view(shards, key, keylen);
-  uint32_t hash = ceph_str_hash_rjenkins(sv.data(), sv.size());
+  uint32_t hash = stone_str_hash_rjenkins(sv.data(), sv.size());
   return shards.handles[hash % shards.handles.size()];
 }
 
@@ -675,8 +675,8 @@ rocksdb::ColumnFamilyHandle *RocksDBStore::get_cf_handle(const std::string& pref
     return nullptr;
   }
   auto iter = cf_handles.find(prefix);
-  ceph_assert(iter != cf_handles.end());
-  ceph_assert(iter->second.handles.size() != 1);
+  stone_assert(iter != cf_handles.end());
+  stone_assert(iter->second.handles.size() != 1);
   if (iter->second.hash_l != 0) {
     return nullptr;
   }
@@ -901,7 +901,7 @@ int RocksDBStore::split_column_family_options(const std::string& options,
 // Updates column family options.
 // Take options from more_options and apply them to cf_opt.
 // Allowed options are exactly the same as allowed for column families in RocksDB.
-// Ceph addition is "block_cache" option that is translated to block_cache and
+// Stone addition is "block_cache" option that is translated to block_cache and
 // allows to specialize separate block cache for O column family.
 //
 // base_name - name of column without shard suffix: "-"+number
@@ -1116,7 +1116,7 @@ int RocksDBStore::do_open(ostream &out,
 			  bool open_readonly,
 			  const std::string& sharding_text)
 {
-  ceph_assert(!(create_if_missing && open_readonly));
+  stone_assert(!(create_if_missing && open_readonly));
   rocksdb::Options opt;
   int r = load_rocksdb_options(create_if_missing, opt);
   if (r) {
@@ -1153,7 +1153,7 @@ int RocksDBStore::do_open(ostream &out,
 				       &sharding_recreate_text);
     bool recreate_mode = status.ok() && sharding_recreate_text == "1";
 
-    ceph_assert(!recreate_mode || !open_readonly);
+    stone_assert(!recreate_mode || !open_readonly);
     if (recreate_mode == false && missing_cfs.size() != 0) {
       // We do not accept when there are missing column families, except case that we are during resharding.
       // We can get into this case if resharding was interrupted. It gives a chance to continue.
@@ -1193,8 +1193,8 @@ int RocksDBStore::do_open(ostream &out,
 	derr << status.ToString() << dendl;
 	return -EINVAL;
       }
-      ceph_assert(existing_cfs.size() == existing_cfs_shard.size() + 1);
-      ceph_assert(handles.size() == existing_cfs.size());
+      stone_assert(existing_cfs.size() == existing_cfs_shard.size() + 1);
+      stone_assert(handles.size() == existing_cfs.size());
       dout(10) << __func__ << " existing_cfs=" << existing_cfs.size() << dendl;
       for (size_t i = 0; i < existing_cfs_shard.size(); i++) {
 	add_column_family(existing_cfs_shard[i].second.name,
@@ -1212,8 +1212,8 @@ int RocksDBStore::do_open(ostream &out,
 		       ) == missing_cfs.end())
 	{
 	dout(10) << __func__ << " missing_cfs=" << missing_cfs.size() << dendl;
-	ceph_assert(recreate_mode);
-	ceph_assert(missing_cfs.size() == missing_cfs_shard.size());
+	stone_assert(recreate_mode);
+	stone_assert(missing_cfs.size() == missing_cfs_shard.size());
 	for (size_t i = 0; i < missing_cfs.size(); i++) {
 	  rocksdb::ColumnFamilyHandle *cf;
 	  status = db->CreateColumnFamily(missing_cfs[i].options, missing_cfs[i].name, &cf);
@@ -1232,7 +1232,7 @@ int RocksDBStore::do_open(ostream &out,
       }
     }
   }
-  ceph_assert(default_cf != nullptr);
+  stone_assert(default_cf != nullptr);
   
   PerfCountersBuilder plb(cct, "rocksdb", l_rocksdb_first, l_rocksdb_last);
   plb.add_u64_counter(l_rocksdb_gets, "get", "Gets");
@@ -1489,7 +1489,7 @@ struct RocksDBStore::RocksWBHandler: public rocksdb::WriteBatch::Handler {
       db.split_key(key_in, &prefix, &key);
     } else {
       auto it = db.cf_ids_to_prefix.find(column_family_id);
-      ceph_assert(it != db.cf_ids_to_prefix.end());
+      stone_assert(it != db.cf_ids_to_prefix.end());
       prefix = it->second;
       key = key_in.ToString();
     }
@@ -1584,13 +1584,13 @@ int RocksDBStore::submit_common(rocksdb::WriteOptions& woptions, KeyValueDB::Tra
 
 int RocksDBStore::submit_transaction(KeyValueDB::Transaction t) 
 {
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   rocksdb::WriteOptions woptions;
   woptions.sync = false;
 
   int result = submit_common(woptions, t);
 
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->tinc(l_rocksdb_submit_latency, lat);
   
   return result;
@@ -1598,14 +1598,14 @@ int RocksDBStore::submit_transaction(KeyValueDB::Transaction t)
 
 int RocksDBStore::submit_transaction_sync(KeyValueDB::Transaction t)
 {
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   rocksdb::WriteOptions woptions;
   // if disableWAL, sync can't set
   woptions.sync = !disableWAL;
   
   int result = submit_common(woptions, t);
   
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->tinc(l_rocksdb_submit_sync_latency, lat);
 
   return result;
@@ -1724,7 +1724,7 @@ void RocksDBStore::RocksDBTransactionImpl::rmkeys_by_prefix(const string &prefix
       bat.PopSavePoint();
     }
   } else {
-    ceph_assert(p_iter->second.handles.size() >= 1);
+    stone_assert(p_iter->second.handles.size() >= 1);
     for (auto cf : p_iter->second.handles) {
       uint64_t cnt = db->delete_range_threshold;
       bat.SetSavePoint();
@@ -1766,12 +1766,12 @@ void RocksDBStore::RocksDBTransactionImpl::rm_range_keys(const string &prefix,
       bat.PopSavePoint();
     }
   } else {
-    ceph_assert(p_iter->second.handles.size() >= 1);
+    stone_assert(p_iter->second.handles.size() >= 1);
     for (auto cf : p_iter->second.handles) {
       uint64_t cnt = db->delete_range_threshold;
       bat.SetSavePoint();
       rocksdb::Iterator* it = db->new_shard_iterator(cf);
-      ceph_assert(it != nullptr);
+      stone_assert(it != nullptr);
       for (it->Seek(start);
 	   it->Valid() && db->comparator->Compare(it->key(), end) < 0 && (--cnt) != 0;
 	   it->Next()) {
@@ -1834,7 +1834,7 @@ int RocksDBStore::get(
     std::map<string, bufferlist> *out)
 {
   rocksdb::PinnableSlice value;
-  utime_t start = ceph_clock_now();
+  utime_t start = stone_clock_now();
   if (cf_handles.count(prefix) > 0) {
     for (auto& key : keys) {
       auto cf_handle = get_cf_handle(prefix, key);
@@ -1845,7 +1845,7 @@ int RocksDBStore::get(
       if (status.ok()) {
 	(*out)[key].append(value.data(), value.size());
       } else if (status.IsIOError()) {
-	ceph_abort_msg(status.getState());
+	stone_abort_msg(status.getState());
       }
       value.Reset();
     }
@@ -1859,12 +1859,12 @@ int RocksDBStore::get(
       if (status.ok()) {
 	(*out)[key].append(value.data(), value.size());
       } else if (status.IsIOError()) {
-	ceph_abort_msg(status.getState());
+	stone_abort_msg(status.getState());
       }
       value.Reset();
     }
   }
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->inc(l_rocksdb_gets);
   logger->tinc(l_rocksdb_get_latency, lat);
   return 0;
@@ -1875,8 +1875,8 @@ int RocksDBStore::get(
     const string &key,
     bufferlist *out)
 {
-  ceph_assert(out && (out->length() == 0));
-  utime_t start = ceph_clock_now();
+  stone_assert(out && (out->length() == 0));
+  utime_t start = stone_clock_now();
   int r = 0;
   rocksdb::PinnableSlice value;
   rocksdb::Status s;
@@ -1898,9 +1898,9 @@ int RocksDBStore::get(
   } else if (s.IsNotFound()) {
     r = -ENOENT;
   } else {
-    ceph_abort_msg(s.getState());
+    stone_abort_msg(s.getState());
   }
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->inc(l_rocksdb_gets);
   logger->tinc(l_rocksdb_get_latency, lat);
   return r;
@@ -1912,8 +1912,8 @@ int RocksDBStore::get(
   size_t keylen,
   bufferlist *out)
 {
-  ceph_assert(out && (out->length() == 0));
-  utime_t start = ceph_clock_now();
+  stone_assert(out && (out->length() == 0));
+  utime_t start = stone_clock_now();
   int r = 0;
   rocksdb::PinnableSlice value;
   rocksdb::Status s;
@@ -1936,9 +1936,9 @@ int RocksDBStore::get(
   } else if (s.IsNotFound()) {
     r = -ENOENT;
   } else {
-    ceph_abort_msg(s.getState());
+    stone_abort_msg(s.getState());
   }
-  utime_t lat = ceph_clock_now() - start;
+  utime_t lat = stone_clock_now() - start;
   logger->inc(l_rocksdb_gets);
   logger->tinc(l_rocksdb_get_latency, lat);
   return r;
@@ -2108,20 +2108,20 @@ RocksDBStore::RocksDBWholeSpaceIteratorImpl::~RocksDBWholeSpaceIteratorImpl()
 int RocksDBStore::RocksDBWholeSpaceIteratorImpl::seek_to_first()
 {
   dbiter->SeekToFirst();
-  ceph_assert(!dbiter->status().IsIOError());
+  stone_assert(!dbiter->status().IsIOError());
   return dbiter->status().ok() ? 0 : -1;
 }
 int RocksDBStore::RocksDBWholeSpaceIteratorImpl::seek_to_first(const string &prefix)
 {
   rocksdb::Slice slice_prefix(prefix);
   dbiter->Seek(slice_prefix);
-  ceph_assert(!dbiter->status().IsIOError());
+  stone_assert(!dbiter->status().IsIOError());
   return dbiter->status().ok() ? 0 : -1;
 }
 int RocksDBStore::RocksDBWholeSpaceIteratorImpl::seek_to_last()
 {
   dbiter->SeekToLast();
-  ceph_assert(!dbiter->status().IsIOError());
+  stone_assert(!dbiter->status().IsIOError());
   return dbiter->status().ok() ? 0 : -1;
 }
 int RocksDBStore::RocksDBWholeSpaceIteratorImpl::seek_to_last(const string &prefix)
@@ -2163,7 +2163,7 @@ int RocksDBStore::RocksDBWholeSpaceIteratorImpl::next()
   if (valid()) {
     dbiter->Next();
   }
-  ceph_assert(!dbiter->status().IsIOError());
+  stone_assert(!dbiter->status().IsIOError());
   return dbiter->status().ok() ? 0 : -1;
 }
 int RocksDBStore::RocksDBWholeSpaceIteratorImpl::prev()
@@ -2171,7 +2171,7 @@ int RocksDBStore::RocksDBWholeSpaceIteratorImpl::prev()
   if (valid()) {
     dbiter->Prev();
   }
-  ceph_assert(!dbiter->status().IsIOError());
+  stone_assert(!dbiter->status().IsIOError());
   return dbiter->status().ok() ? 0 : -1;
 }
 string RocksDBStore::RocksDBWholeSpaceIteratorImpl::key()
@@ -2340,7 +2340,7 @@ public:
     if (main->valid()) {
       if (current_shard != shards.end()) {
 	auto main_rk = main->raw_key();
-	ceph_assert(current_shard->second->valid());
+	stone_assert(current_shard->second->valid());
 	auto shards_rk = current_shard->second->raw_key();
 	if (main_rk.first < shards_rk.first)
 	  return true;
@@ -2637,7 +2637,7 @@ public:
     }
   }
 
-  ceph::buffer::list value() override
+  stone::buffer::list value() override
   {
     if (smaller == on_main) {
       return main->value();
@@ -2937,7 +2937,7 @@ public:
       /* there is no previous element */
       if (iters[0]->Valid()) {
 	iters[0]->Prev();
-	ceph_assert(!iters[0]->Valid());
+	stone_assert(!iters[0]->Valid());
       }
       return 0;
     }
@@ -2959,7 +2959,7 @@ public:
       std::swap(hold, iters[i]);
       if (hold == highest) break;
     }
-    ceph_assert(hold == highest);
+    stone_assert(hold == highest);
     return 0;
   }
   bool valid() override {
@@ -3264,9 +3264,9 @@ int RocksDBStore::reshard_cleanup(const RocksDBStore::columns_t& current_columns
     // verify that column is empty
     std::unique_ptr<rocksdb::Iterator> it{
       db->NewIterator(rocksdb::ReadOptions(), handle.get())};
-    ceph_assert(it);
+    stone_assert(it);
     it->SeekToFirst();
-    ceph_assert(!it->Valid());
+    stone_assert(!it->Valid());
 
     if (rocksdb::Status status = db->DropColumnFamily(handle.get()); !status.ok()) {
       derr << __func__ << " Failed to drop column: "  << name << dendl;
@@ -3293,7 +3293,7 @@ int RocksDBStore::reshard(const std::string& new_sharding, const RocksDBStore::r
     rocksdb::WriteOptions woptions;
     woptions.sync = true;
     rocksdb::Status s = db->Write(woptions, batch);
-    ceph_assert(s.ok());
+    stone_assert(s.ok());
     bytes_in_batch = 0;
     keys_in_batch = 0;
     batch->Clear();
@@ -3305,7 +3305,7 @@ int RocksDBStore::reshard(const std::string& new_sharding, const RocksDBStore::r
     dout(5) << " column=" << (void*)handle << " prefix=" << fixed_prefix << dendl;
     std::unique_ptr<rocksdb::Iterator> it{
       db->NewIterator(rocksdb::ReadOptions(), handle)};
-    ceph_assert(it);
+    stone_assert(it);
 
     rocksdb::WriteBatch bat;
     for (it->SeekToFirst(); it->Valid(); it->Next()) {
@@ -3319,9 +3319,9 @@ int RocksDBStore::reshard(const std::string& new_sharding, const RocksDBStore::r
 	keys_per_iterator = 0;
 	std::string raw_key_str = raw_key.ToString();
 	it.reset(db->NewIterator(rocksdb::ReadOptions(), handle));
-	ceph_assert(it);
+	stone_assert(it);
 	it->Seek(raw_key_str);
-	ceph_assert(it->Valid());
+	stone_assert(it->Valid());
 	raw_key = it->key();
       }
       rocksdb::Slice value = it->value();
@@ -3390,7 +3390,7 @@ int RocksDBStore::reshard(const std::string& new_sharding, const RocksDBStore::r
     dout(5) << "Processing column=" << name
 	    << " handle=" << handle.get() << dendl;
     if (name == rocksdb::kDefaultColumnFamilyName) {
-      ceph_assert(handle.get() == default_cf);
+      stone_assert(handle.get() == default_cf);
       r = process_column(default_cf, std::string());
     } else {
       std::string fixed_prefix = name.substr(0, name.find('-'));

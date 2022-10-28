@@ -13,7 +13,7 @@
 #include <seastar/util/std-compat.hh>
 
 #include "auth/KeyRing.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "crimson/common/buffer_io.h"
 #include "crimson/common/config_proxy.h"
 #include "crimson/net/Messenger.h"
@@ -38,15 +38,15 @@ auto partition_args(seastar::app_template& app, char** argv_begin, char** argv_e
     .options(app.get_options_description()).allow_unregistered().run();
   auto unknown_args = bpo::collect_unrecognized(parsed.options,
                                                 bpo::include_positional);
-  std::vector<const char*> ceph_args, app_args;
-  // ceph_argparse_early_args() and
+  std::vector<const char*> stone_args, app_args;
+  // stone_argparse_early_args() and
   // seastar::smp::get_options_description() use "-c" for different
-  // options. and ceph wins
+  // options. and stone wins
   auto consume_conf_arg = [&](char** argv) {
     if (std::strcmp(*argv, "-c") == 0) {
-      ceph_args.push_back(*argv++);
+      stone_args.push_back(*argv++);
       if (argv != argv_end) {
-        ceph_args.push_back(*argv++);
+        stone_args.push_back(*argv++);
       }
     }
     return argv;
@@ -59,7 +59,7 @@ auto partition_args(seastar::app_template& app, char** argv_begin, char** argv_e
       if (std::strcmp(*argv, "--help-seastar") == 0) {
         app_args.push_back("--help");
       } else {
-        ceph_args.push_back(*argv);
+        stone_args.push_back(*argv);
       }
     }
     return argv;
@@ -73,7 +73,7 @@ auto partition_args(seastar::app_template& app, char** argv_begin, char** argv_e
       app_args.push_back(*argv++);
     }
   }
-  return make_pair(std::move(ceph_args), std::move(app_args));
+  return make_pair(std::move(stone_args), std::move(app_args));
 }
 
 using crimson::common::local_conf;
@@ -91,7 +91,7 @@ seastar::future<> make_keyring()
       seastar::fprint(std::cerr, "already have key in keyring: %s\n", path);
       return seastar::now();
     } else {
-      auth.key.create(std::make_unique<CephContext>().get(), CEPH_CRYPTO_AES);
+      auth.key.create(std::make_unique<StoneContext>().get(), STONE_CRYPTO_AES);
       keyring.add(name, auth);
       bufferlist bl;
       keyring.encode_plaintext(bl);
@@ -126,18 +126,18 @@ int main(int argc, char* argv[])
     ("mkfs", "create a [new] data directory")
     ("debug", "enable debug output on all loggers");
 
-  auto [ceph_args, app_args] = partition_args(app, argv, argv + argc);
-  if (ceph_argparse_need_usage(ceph_args) &&
+  auto [stone_args, app_args] = partition_args(app, argv, argv + argc);
+  if (stone_argparse_need_usage(stone_args) &&
       std::find(app_args.begin(), app_args.end(), "--help") == app_args.end()) {
     usage(argv[0]);
     return EXIT_SUCCESS;
   }
-  std::string cluster_name{"ceph"};
+  std::string cluster_name{"stone"};
   std::string conf_file_list;
-  // ceph_argparse_early_args() could _exit(), while local_conf() won't ready
+  // stone_argparse_early_args() could _exit(), while local_conf() won't ready
   // until it's started. so do the boilerplate-settings parsing here.
-  auto init_params = ceph_argparse_early_args(ceph_args,
-                                              CEPH_ENTITY_TYPE_OSD,
+  auto init_params = stone_argparse_early_args(stone_args,
+                                              STONE_ENTITY_TYPE_OSD,
                                               &cluster_name,
                                               &conf_file_list);
   seastar::sharded<crimson::osd::OSD> osd;
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
   using crimson::common::sharded_perf_coll;
   try {
     return app.run_deprecated(app_args.size(), const_cast<char**>(app_args.data()),
-      [&, &ceph_args=ceph_args] {
+      [&, &stone_args=stone_args] {
       auto& config = app.configuration();
       return seastar::async([&] {
 	if (config.count("debug")) {
@@ -162,13 +162,13 @@ int main(int argc, char* argv[])
           return sharded_perf_coll().stop();
         });
         local_conf().parse_config_files(conf_file_list).get();
-        local_conf().parse_argv(ceph_args).get();
+        local_conf().parse_argv(stone_args).get();
         if (const auto ret = pidfile_write(local_conf()->pid_file);
             ret == -EACCES || ret == -EAGAIN) {
-          ceph_abort_msg(
+          stone_abort_msg(
             "likely there is another crimson-osd instance with the same id");
         } else if (ret < 0) {
-          ceph_abort_msg(fmt::format("pidfile_write failed with {} {}",
+          stone_abort_msg(fmt::format("pidfile_write failed with {} {}",
                                      ret, cpp_strerror(-ret)));
         }
         // just ignore SIGHUP, we don't reread settings

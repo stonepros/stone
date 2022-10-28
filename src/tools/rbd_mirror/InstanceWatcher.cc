@@ -14,8 +14,8 @@
 #include "Throttler.h"
 #include "common/Cond.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::InstanceWatcher: "
 
@@ -75,7 +75,7 @@ struct C_RemoveInstanceRequest : public Context {
   void finish(int r) override {
     dout(10) << "C_RemoveInstanceRequest: " << this << " " << __func__ << ": r="
              << r << dendl;
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
 
     on_finish->complete(r);
   }
@@ -105,10 +105,10 @@ struct InstanceWatcher<I>::C_NotifyInstanceRequest : public Context {
              << ": instance_watcher=" << instance_watcher << ", instance_id="
              << instance_id << ", request_id=" << request_id << dendl;
 
-    ceph_assert(ceph_mutex_is_locked(instance_watcher->m_lock));
+    stone_assert(stone_mutex_is_locked(instance_watcher->m_lock));
 
     if (!send_to_leader) {
-      ceph_assert((!instance_id.empty()));
+      stone_assert((!instance_id.empty()));
       notifier.reset(new librbd::watcher::Notifier(
                          instance_watcher->m_work_queue,
                          instance_watcher->m_ioctx,
@@ -118,13 +118,13 @@ struct InstanceWatcher<I>::C_NotifyInstanceRequest : public Context {
     instance_watcher->m_notify_op_tracker.start_op();
     auto result = instance_watcher->m_notify_ops.insert(
         std::make_pair(instance_id, this)).second;
-    ceph_assert(result);
+    stone_assert(result);
   }
 
   void send() {
     dout(10) << "C_NotifyInstanceRequest: " << this << " " << __func__ << dendl;
 
-    ceph_assert(ceph_mutex_is_locked(instance_watcher->m_lock));
+    stone_assert(stone_mutex_is_locked(instance_watcher->m_lock));
 
     if (canceling) {
       dout(10) << "C_NotifyInstanceRequest: " << this << " " << __func__
@@ -144,13 +144,13 @@ struct InstanceWatcher<I>::C_NotifyInstanceRequest : public Context {
       if (instance_watcher->m_leader_instance_id != instance_id) {
         auto count = instance_watcher->m_notify_ops.erase(
             std::make_pair(instance_id, this));
-        ceph_assert(count > 0);
+        stone_assert(count > 0);
 
         instance_id = instance_watcher->m_leader_instance_id;
 
         auto result = instance_watcher->m_notify_ops.insert(
             std::make_pair(instance_id, this)).second;
-        ceph_assert(result);
+        stone_assert(result);
 
         notifier.reset(new librbd::watcher::Notifier(
                            instance_watcher->m_work_queue,
@@ -167,7 +167,7 @@ struct InstanceWatcher<I>::C_NotifyInstanceRequest : public Context {
   void cancel() {
     dout(10) << "C_NotifyInstanceRequest: " << this << " " << __func__ << dendl;
 
-    ceph_assert(ceph_mutex_is_locked(instance_watcher->m_lock));
+    stone_assert(stone_mutex_is_locked(instance_watcher->m_lock));
 
     canceling = true;
     instance_watcher->unsuspend_notify_request(this);
@@ -239,7 +239,7 @@ struct InstanceWatcher<I>::C_NotifyInstanceRequest : public Context {
       std::lock_guard locker{instance_watcher->m_lock};
       auto result = instance_watcher->m_notify_ops.erase(
         std::make_pair(instance_id, this));
-      ceph_assert(result > 0);
+      stone_assert(result > 0);
       instance_watcher->m_notify_op_tracker.finish_op();
     }
 
@@ -298,7 +298,7 @@ void InstanceWatcher<I>::get_instances(librados::IoCtx &io_ctx,
   librados::AioCompletion *aio_comp = create_rados_callback(ctx);
 
   int r = io_ctx.aio_operate(RBD_MIRROR_LEADER, aio_comp, &op, &ctx->out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -332,7 +332,7 @@ InstanceWatcher<I>::InstanceWatcher(librados::IoCtx &io_ctx,
             RBD_MIRROR_INSTANCE_PREFIX + instance_id),
     m_instance_replayer(instance_replayer),
     m_image_sync_throttler(image_sync_throttler), m_instance_id(instance_id),
-    m_lock(ceph::make_mutex(
+    m_lock(stone::make_mutex(
       unique_lock_name("rbd::mirror::InstanceWatcher::m_lock", this))),
     m_instance_lock(librbd::ManagedLock<I>::create(
       m_ioctx, asio_engine, m_oid, this, librbd::managed_lock::EXCLUSIVE, true,
@@ -341,11 +341,11 @@ InstanceWatcher<I>::InstanceWatcher(librados::IoCtx &io_ctx,
 
 template <typename I>
 InstanceWatcher<I>::~InstanceWatcher() {
-  ceph_assert(m_requests.empty());
-  ceph_assert(m_notify_ops.empty());
-  ceph_assert(m_notify_op_tracker.empty());
-  ceph_assert(m_suspended_ops.empty());
-  ceph_assert(m_inflight_sync_reqs.empty());
+  stone_assert(m_requests.empty());
+  stone_assert(m_notify_ops.empty());
+  stone_assert(m_notify_op_tracker.empty());
+  stone_assert(m_suspended_ops.empty());
+  stone_assert(m_inflight_sync_reqs.empty());
   m_instance_lock->destroy();
 }
 
@@ -362,7 +362,7 @@ void InstanceWatcher<I>::init(Context *on_finish) {
 
   std::lock_guard locker{m_lock};
 
-  ceph_assert(m_on_finish == nullptr);
+  stone_assert(m_on_finish == nullptr);
   m_on_finish = on_finish;
   m_ret_val = 0;
 
@@ -374,7 +374,7 @@ void InstanceWatcher<I>::shut_down() {
   C_SaferCond shut_down_ctx;
   shut_down(&shut_down_ctx);
   int r = shut_down_ctx.wait();
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 }
 
 template <typename I>
@@ -383,7 +383,7 @@ void InstanceWatcher<I>::shut_down(Context *on_finish) {
 
   std::lock_guard locker{m_lock};
 
-  ceph_assert(m_on_finish == nullptr);
+  stone_assert(m_on_finish == nullptr);
   m_on_finish = on_finish;
   m_ret_val = 0;
 
@@ -396,7 +396,7 @@ void InstanceWatcher<I>::remove(Context *on_finish) {
 
   std::lock_guard locker{m_lock};
 
-  ceph_assert(m_on_finish == nullptr);
+  stone_assert(m_on_finish == nullptr);
   m_on_finish = on_finish;
   m_ret_val = 0;
 
@@ -412,7 +412,7 @@ void InstanceWatcher<I>::notify_image_acquire(
 
   std::lock_guard locker{m_lock};
 
-  ceph_assert(m_on_finish == nullptr);
+  stone_assert(m_on_finish == nullptr);
 
   uint64_t request_id = ++m_request_seq;
   bufferlist bl;
@@ -431,7 +431,7 @@ void InstanceWatcher<I>::notify_image_release(
 
   std::lock_guard locker{m_lock};
 
-  ceph_assert(m_on_finish == nullptr);
+  stone_assert(m_on_finish == nullptr);
 
   uint64_t request_id = ++m_request_seq;
   bufferlist bl;
@@ -450,7 +450,7 @@ void InstanceWatcher<I>::notify_peer_image_removed(
            << "peer_mirror_uuid=" << peer_mirror_uuid << dendl;
 
   std::lock_guard locker{m_lock};
-  ceph_assert(m_on_finish == nullptr);
+  stone_assert(m_on_finish == nullptr);
 
   uint64_t request_id = ++m_request_seq;
   bufferlist bl;
@@ -468,7 +468,7 @@ void InstanceWatcher<I>::notify_sync_request(const std::string &sync_id,
 
   std::lock_guard locker{m_lock};
 
-  ceph_assert(m_inflight_sync_reqs.count(sync_id) == 0);
+  stone_assert(m_inflight_sync_reqs.count(sync_id) == 0);
 
   uint64_t request_id = ++m_request_seq;
 
@@ -500,7 +500,7 @@ bool InstanceWatcher<I>::cancel_sync_request(const std::string &sync_id) {
     return false;
   }
 
-  ceph_assert(sync_ctx->req != nullptr);
+  stone_assert(sync_ctx->req != nullptr);
   sync_ctx->req->cancel();
   return true;
 }
@@ -537,16 +537,16 @@ void InstanceWatcher<I>::notify_sync_complete(const std::string &sync_id) {
 }
 
 template <typename I>
-void InstanceWatcher<I>::notify_sync_complete(const ceph::mutex&,
+void InstanceWatcher<I>::notify_sync_complete(const stone::mutex&,
                                               const std::string &sync_id) {
   dout(10) << "sync_id=" << sync_id << dendl;
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   auto it = m_inflight_sync_reqs.find(sync_id);
-  ceph_assert(it != m_inflight_sync_reqs.end());
+  stone_assert(it != m_inflight_sync_reqs.end());
 
   auto sync_ctx = it->second;
-  ceph_assert(sync_ctx->req == nullptr);
+  stone_assert(sync_ctx->req == nullptr);
 
   m_inflight_sync_reqs.erase(it);
   m_work_queue->queue(sync_ctx, 0);
@@ -560,8 +560,8 @@ void InstanceWatcher<I>::handle_notify_sync_request(C_SyncRequest *sync_ctx,
   Context *on_start = nullptr;
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(sync_ctx->req != nullptr);
-    ceph_assert(sync_ctx->on_start != nullptr);
+    stone_assert(sync_ctx->req != nullptr);
+    stone_assert(sync_ctx->on_start != nullptr);
 
     if (sync_ctx->req->canceling) {
       r = -ECANCELED;
@@ -639,7 +639,7 @@ void InstanceWatcher<I>::cancel_notify_requests(
 
 template <typename I>
 void InstanceWatcher<I>::register_instance() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   dout(10) << dendl;
 
@@ -649,7 +649,7 @@ void InstanceWatcher<I>::register_instance() {
     InstanceWatcher<I>, &InstanceWatcher<I>::handle_register_instance>(this);
 
   int r = m_ioctx.aio_operate(RBD_MIRROR_LEADER, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -678,7 +678,7 @@ template <typename I>
 void InstanceWatcher<I>::create_instance_object() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   librados::ObjectWriteOperation op;
   op.create(true);
@@ -687,7 +687,7 @@ void InstanceWatcher<I>::create_instance_object() {
     InstanceWatcher<I>,
     &InstanceWatcher<I>::handle_create_instance_object>(this);
   int r = m_ioctx.aio_operate(m_oid, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -713,7 +713,7 @@ template <typename I>
 void InstanceWatcher<I>::register_watch() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   Context *ctx = create_async_context_callback(
     m_work_queue, create_context_callback<
@@ -744,7 +744,7 @@ template <typename I>
 void InstanceWatcher<I>::acquire_lock() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   Context *ctx = create_async_context_callback(
     m_work_queue, create_context_callback<
@@ -780,7 +780,7 @@ template <typename I>
 void InstanceWatcher<I>::release_lock() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   Context *ctx = create_async_context_callback(
     m_work_queue, create_context_callback<
@@ -806,7 +806,7 @@ template <typename I>
 void InstanceWatcher<I>::unregister_watch() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   Context *ctx = create_async_context_callback(
     m_work_queue, create_context_callback<
@@ -830,7 +830,7 @@ void InstanceWatcher<I>::handle_unregister_watch(int r) {
 
 template <typename I>
 void InstanceWatcher<I>::remove_instance_object() {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   dout(10) << dendl;
 
@@ -841,7 +841,7 @@ void InstanceWatcher<I>::remove_instance_object() {
     InstanceWatcher<I>,
     &InstanceWatcher<I>::handle_remove_instance_object>(this);
   int r = m_ioctx.aio_operate(m_oid, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -866,7 +866,7 @@ template <typename I>
 void InstanceWatcher<I>::unregister_instance() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   librados::ObjectWriteOperation op;
   librbd::cls_client::mirror_instances_remove(&op, m_instance_id);
@@ -874,7 +874,7 @@ void InstanceWatcher<I>::unregister_instance() {
     InstanceWatcher<I>, &InstanceWatcher<I>::handle_unregister_instance>(this);
 
   int r = m_ioctx.aio_operate(RBD_MIRROR_LEADER, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
@@ -894,7 +894,7 @@ template <typename I>
 void InstanceWatcher<I>::wait_for_notify_ops() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   for (auto op : m_notify_ops) {
     op.second->cancel();
@@ -911,13 +911,13 @@ template <typename I>
 void InstanceWatcher<I>::handle_wait_for_notify_ops(int r) {
   dout(10) << "r=" << r << dendl;
 
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
 
   Context *on_finish = nullptr;
   {
     std::lock_guard locker{m_lock};
 
-    ceph_assert(m_notify_ops.empty());
+    stone_assert(m_notify_ops.empty());
 
     std::swap(on_finish, m_on_finish);
     r = m_ret_val;
@@ -929,7 +929,7 @@ template <typename I>
 void InstanceWatcher<I>::get_instance_locker() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   Context *ctx = create_async_context_callback(
     m_work_queue, create_context_callback<
@@ -959,7 +959,7 @@ template <typename I>
 void InstanceWatcher<I>::break_instance_lock() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   Context *ctx = create_async_context_callback(
     m_work_queue, create_context_callback<
@@ -989,10 +989,10 @@ template <typename I>
 void InstanceWatcher<I>::suspend_notify_request(C_NotifyInstanceRequest *req) {
   dout(10) << req << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   auto result = m_suspended_ops.insert(req).second;
-  ceph_assert(result);
+  stone_assert(result);
 }
 
 template <typename I>
@@ -1000,7 +1000,7 @@ bool InstanceWatcher<I>::unsuspend_notify_request(
   C_NotifyInstanceRequest *req) {
   dout(10) << req << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   auto result = m_suspended_ops.erase(req);
   if (result == 0) {
@@ -1015,7 +1015,7 @@ template <typename I>
 void InstanceWatcher<I>::unsuspend_notify_requests() {
   dout(10) << dendl;
 
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   std::set<C_NotifyInstanceRequest *> suspended_ops;
   std::swap(m_suspended_ops, suspended_ops);
@@ -1066,7 +1066,7 @@ void InstanceWatcher<I>::complete_request(const std::string &instance_id,
     std::lock_guard locker{m_lock};
     Request request(instance_id, request_id);
     auto it = m_requests.find(request);
-    ceph_assert(it != m_requests.end());
+    stone_assert(it != m_requests.end());
     on_notify_ack = it->on_notify_ack;
     m_requests.erase(it);
   }

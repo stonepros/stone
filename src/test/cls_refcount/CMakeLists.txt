@@ -1,8 +1,8 @@
-# ceph_test_cls_refcount
-add_executable(ceph_test_cls_refcount
+# stone_test_cls_refcount
+add_executable(stone_test_cls_refcount
   test_cls_refcount.cc
   )
-target_link_libraries(ceph_test_cls_refcount
+target_link_libraries(stone_test_cls_refcount
   librados
   cls_refcount_client
   global
@@ -14,5 +14,5 @@ target_link_libraries(ceph_test_cls_refcount
   radostest-cxx
   )
 install(TARGETS
-  ceph_test_cls_refcount
+  stone_test_cls_refcount
   DESTINATION ${CMAKE_INSTALL_BINDIR})

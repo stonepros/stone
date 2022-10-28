@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -24,11 +24,11 @@
 #include "gtest/gtest.h"
 #include "common/Thread.h"
 #include "common/sharedptr_registry.hpp"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 
 class SharedPtrRegistryTest : public SharedPtrRegistry<unsigned int, int> {
 public:
-  ceph::mutex &get_lock() { return lock; }
+  stone::mutex &get_lock() { return lock; }
   map<unsigned int, pair<std::weak_ptr<int>, int*> > &get_contents() {
     return contents;
   }
@@ -239,7 +239,7 @@ TEST_F(SharedPtrRegistry_all, get_next) {
   }
   {
     //
-    // http://tracker.ceph.com/issues/6117
+    // http://tracker.stone.com/issues/6117
     // reproduce the issue.
     //
     SharedPtrRegistryTest registry;
@@ -270,9 +270,9 @@ TEST_F(SharedPtrRegistry_all, remove) {
 
     ptr1 = std::shared_ptr<int>();
     std::shared_ptr<int> res = registry.lookup(key1);
-    ceph_assert(res);
-    ceph_assert(res == ptr2);
-    ceph_assert(*res == 500);
+    stone_assert(res);
+    stone_assert(res == ptr2);
+    stone_assert(*res == 500);
   }
   {
     SharedPtrRegistryTest registry;
@@ -284,9 +284,9 @@ TEST_F(SharedPtrRegistry_all, remove) {
 
     ptr1 = std::shared_ptr<int>();
     std::shared_ptr<int> res = registry.lookup(key1);
-    ceph_assert(res);
-    ceph_assert(res == ptr2);
-    ceph_assert(*res == 500);
+    stone_assert(res);
+    stone_assert(res == ptr2);
+    stone_assert(*res == 500);
   }
 }
 

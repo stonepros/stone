@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef CEPH_CRUSH_LN_H
-#define CEPH_CRUSH_LN_H
+#ifndef STONE_CRUSH_LN_H
+#define STONE_CRUSH_LN_H
 
 #ifdef __KERNEL__
 # include <linux/types.h>

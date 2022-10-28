@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 Inktank Storage, Inc.
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -11,8 +11,8 @@
  * License version 2.1, as published by the Free Software 
  * Foundation.  See file COPYING.
  */
-#ifndef CEPH_UTIL_H
-#define CEPH_UTIL_H
+#ifndef STONE_UTIL_H
+#define STONE_UTIL_H
 
 #include "common/Formatter.h"
 #include "include/types.h"
@@ -77,7 +77,7 @@ int get_fs_stats(ceph_data_stats_t &stats, const char *path);
 int get_cgroup_memory_limit(uint64_t *limit);
 
 /// collect info from @p uname(2), @p /proc/meminfo and @p /proc/cpuinfo
-void collect_sys_info(std::map<std::string, std::string> *m, CephContext *cct);
+void collect_sys_info(std::map<std::string, std::string> *m, StoneContext *cct);
 
 #ifdef _WIN32
 /// Retrieve the actual Windows version, regardless of the app manifest.
@@ -111,4 +111,4 @@ bool match_str(const std::string& s, const XS& ...xs)
 }
 
 } // namespace ceph::util
-#endif /* CEPH_UTIL_H */
+#endif /* STONE_UTIL_H */

@@ -10,9 +10,9 @@
 #include "auth/Crypto.h"
 
 #include "common/armor.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/config.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/Formatter.h"
 #include "common/errno.h"
 
@@ -30,7 +30,7 @@
 #include "rgw_usage.h"
 #include "rgw_object_expirer_core.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 static rgw::sal::RGWRadosStore *store = NULL;
 
@@ -59,29 +59,29 @@ int main(const int argc, const char **argv)
     cerr << argv[0] << ": -h or --help for usage" << std::endl;
     exit(1);
   }
-  if (ceph_argparse_need_usage(args)) {
+  if (stone_argparse_need_usage(args)) {
     usage();
     exit(0);
   }
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_DAEMON,
 			 CINIT_FLAG_UNPRIVILEGED_DAEMON_DEFAULTS);
 
   for (std::vector<const char *>::iterator i = args.begin(); i != args.end(); ) {
-    if (ceph_argparse_double_dash(args, i)) {
+    if (stone_argparse_double_dash(args, i)) {
       break;
     }
   }
 
   if (g_conf()->daemonize) {
-    global_init_daemonize(g_ceph_context);
+    global_init_daemonize(g_stone_context);
   }
 
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   const DoutPrefix dp(cct.get(), dout_subsys, "rgw object expirer: ");
-  store = RGWStoreManager::get_storage(&dp, g_ceph_context, false, false, false, false, false);
+  store = RGWStoreManager::get_storage(&dp, g_stone_context, false, false, false, false, false);
   if (!store) {
     std::cerr << "couldn't init storage provider" << std::endl;
     return EIO;
@@ -93,7 +93,7 @@ int main(const int argc, const char **argv)
   RGWObjectExpirer objexp(store);
   objexp.start_processor();
 
-  const utime_t interval(g_ceph_context->_conf->rgw_objexp_gc_interval, 0);
+  const utime_t interval(g_stone_context->_conf->rgw_objexp_gc_interval, 0);
   while (true) {
     interval.sleep();
   }

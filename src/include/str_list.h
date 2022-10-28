@@ -1,5 +1,5 @@
-#ifndef CEPH_STRLIST_H
-#define CEPH_STRLIST_H
+#ifndef STONE_STRLIST_H
+#define STONE_STRLIST_H
 
 #include <list>
 #include <set>

@@ -1,6 +1,6 @@
 overrides:
-  ceph:
-    cephfs:
+  stone:
+    stonefs:
       ec_profile:
         - disabled
     log-ignorelist:
@@ -33,6 +33,6 @@ overrides:
         debug objecter: 20
         debug objectcacher: 20
 tasks:
-  - cephfs_test_runner:
+  - stonefs_test_runner:
       modules:
-        - tasks.cephfs.test_full
+        - tasks.stonefs.test_full

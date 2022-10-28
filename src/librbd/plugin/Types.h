@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_PLUGIN_TYPES_H
-#define CEPH_LIBRBD_PLUGIN_TYPES_H
+#ifndef STONE_LIBRBD_PLUGIN_TYPES_H
+#define STONE_LIBRBD_PLUGIN_TYPES_H
 
 #include "include/common_fwd.h"
 #include "include/Context.h"
@@ -28,7 +28,7 @@ typedef std::list<std::unique_ptr<HookPoints>> PluginHookPoints;
 
 template <typename ImageCtxT>
 struct Interface : public ceph::Plugin {
-  Interface(CephContext* cct) : Plugin(cct) {
+  Interface(StoneContext* cct) : Plugin(cct) {
   }
 
   virtual ~Interface() {
@@ -42,4 +42,4 @@ struct Interface : public ceph::Plugin {
 } // namespace plugin
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_PLUGIN_TYPES_H
+#endif // STONE_LIBRBD_PLUGIN_TYPES_H

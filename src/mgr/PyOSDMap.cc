@@ -12,8 +12,8 @@
 #include "PyFormatter.h"
 #include "Gil.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 
 
 typedef struct {
@@ -59,7 +59,7 @@ static PyObject *osdmap_new_incremental(BasePyOSDMap *self, PyObject *obj)
   // always include latest crush map here... this is okay since we never
   // actually use this map in the real world (and even if we did it would
   // be a no-op).
-  self->osdmap->crush->encode(inc->crush, CEPH_FEATURES_ALL);
+  self->osdmap->crush->encode(inc->crush, STONE_FEATURES_ALL);
   dout(10) << __func__ << " " << inc << dendl;
 
   return construct_with_capsule("mgr_module", "OSDMapIncremental",
@@ -75,7 +75,7 @@ static PyObject *osdmap_apply_incremental(BasePyOSDMap *self,
   }
 
   bufferlist bl;
-  self->osdmap->encode(bl, CEPH_FEATURES_ALL|CEPH_FEATURE_RESERVED);
+  self->osdmap->encode(bl, STONE_FEATURES_ALL|STONE_FEATURE_RESERVED);
   OSDMap *next = new OSDMap;
   next->decode(bl);
   next->apply_incremental(*(incobj->inc));
@@ -148,7 +148,7 @@ static PyObject *osdmap_calc_pg_upmaps(BasePyOSDMap* self, PyObject *args)
 	   << " pools " << pools
 	   << dendl;
   PyThreadState *tstate = PyEval_SaveThread();
-  int r = self->osdmap->calc_pg_upmaps(g_ceph_context,
+  int r = self->osdmap->calc_pg_upmaps(g_stone_context,
 				 max_deviation,
 				 max_iterations,
 				 pools,
@@ -194,14 +194,14 @@ BasePyOSDMap_init(BasePyOSDMap *self, PyObject *args, PyObject *kwds)
     if (! PyArg_ParseTupleAndKeywords(args, kwds, "O",
                                       const_cast<char**>(kwlist),
                                       &osdmap_capsule)) {
-      ceph_abort();
+      stone_abort();
       return -1;
     }
-    ceph_assert(PyObject_TypeCheck(osdmap_capsule, &PyCapsule_Type));
+    stone_assert(PyObject_TypeCheck(osdmap_capsule, &PyCapsule_Type));
 
     self->osdmap = (OSDMap*)PyCapsule_GetPointer(
         osdmap_capsule, nullptr);
-    ceph_assert(self->osdmap);
+    stone_assert(self->osdmap);
 
     return 0;
 }
@@ -298,7 +298,7 @@ PyMethodDef BasePyOSDMap_methods[] = {
 
 PyTypeObject BasePyOSDMapType = {
   PyVarObject_HEAD_INIT(NULL, 0)
-  "ceph_module.BasePyOSDMap", /* tp_name */
+  "stone_module.BasePyOSDMap", /* tp_name */
   sizeof(BasePyOSDMap),     /* tp_basicsize */
   0,                         /* tp_itemsize */
   (destructor)BasePyOSDMap_dealloc,      /* tp_dealloc */
@@ -317,7 +317,7 @@ PyTypeObject BasePyOSDMapType = {
   0,                         /* tp_setattro */
   0,                         /* tp_as_buffer */
   Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,        /* tp_flags */
-  "Ceph OSDMap",             /* tp_doc */
+  "Stone OSDMap",             /* tp_doc */
   0,                         /* tp_traverse */
   0,                         /* tp_clear */
   0,                         /* tp_richcompare */
@@ -350,14 +350,14 @@ BasePyOSDMapIncremental_init(BasePyOSDMapIncremental *self,
     if (! PyArg_ParseTupleAndKeywords(args, kwds, "O",
                                       const_cast<char**>(kwlist),
                                       &inc_capsule)) {
-      ceph_abort();
+      stone_abort();
       return -1;
     }
-    ceph_assert(PyObject_TypeCheck(inc_capsule, &PyCapsule_Type));
+    stone_assert(PyObject_TypeCheck(inc_capsule, &PyCapsule_Type));
 
     self->inc = (OSDMap::Incremental*)PyCapsule_GetPointer(
         inc_capsule, nullptr);
-    ceph_assert(self->inc);
+    stone_assert(self->inc);
 
     return 0;
 }
@@ -435,20 +435,20 @@ static PyObject *osdmap_inc_set_compat_weight_set_weights(
   }
 
   CrushWrapper crush;
-  ceph_assert(self->inc->crush.length());  // see new_incremental
+  stone_assert(self->inc->crush.length());  // see new_incremental
   auto p = self->inc->crush.cbegin();
   decode(crush, p);
   crush.create_choose_args(CrushWrapper::DEFAULT_CHOOSE_ARGS, 1);
   for (auto i : wm) {
     crush.choose_args_adjust_item_weightf(
-      g_ceph_context,
+      g_stone_context,
       crush.choose_args_get(CrushWrapper::DEFAULT_CHOOSE_ARGS),
       i.first,
       { i.second },
       nullptr);
   }
   self->inc->crush.clear();
-  crush.encode(self->inc->crush, CEPH_FEATURES_ALL);
+  crush.encode(self->inc->crush, STONE_FEATURES_ALL);
   Py_RETURN_NONE;
 }
 
@@ -467,7 +467,7 @@ PyMethodDef BasePyOSDMapIncremental_methods[] = {
 
 PyTypeObject BasePyOSDMapIncrementalType = {
   PyVarObject_HEAD_INIT(NULL, 0)
-  "ceph_module.BasePyOSDMapIncremental", /* tp_name */
+  "stone_module.BasePyOSDMapIncremental", /* tp_name */
   sizeof(BasePyOSDMapIncremental),     /* tp_basicsize */
   0,                         /* tp_itemsize */
   (destructor)BasePyOSDMapIncremental_dealloc,      /* tp_dealloc */
@@ -486,7 +486,7 @@ PyTypeObject BasePyOSDMapIncrementalType = {
   0,                         /* tp_setattro */
   0,                         /* tp_as_buffer */
   Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,        /* tp_flags */
-  "Ceph OSDMapIncremental",  /* tp_doc */
+  "Stone OSDMapIncremental",  /* tp_doc */
   0,                         /* tp_traverse */
   0,                         /* tp_clear */
   0,                         /* tp_richcompare */
@@ -519,10 +519,10 @@ BasePyCRUSH_init(BasePyCRUSH *self,
     if (! PyArg_ParseTupleAndKeywords(args, kwds, "O",
                                       const_cast<char**>(kwlist),
                                       &crush_capsule)) {
-      ceph_abort();
+      stone_abort();
       return -1;
     }
-    ceph_assert(PyObject_TypeCheck(crush_capsule, &PyCapsule_Type));
+    stone_assert(PyObject_TypeCheck(crush_capsule, &PyCapsule_Type));
 
     auto ptr_ref = (std::shared_ptr<CrushWrapper>*)(
         PyCapsule_GetPointer(crush_capsule, nullptr));
@@ -532,7 +532,7 @@ BasePyCRUSH_init(BasePyCRUSH *self,
     // pointer construction now, and then we throw away that pointer to
     // the shared pointer.
     self->crush = *ptr_ref;
-    ceph_assert(self->crush);
+    stone_assert(self->crush);
 
     return 0;
 }
@@ -642,7 +642,7 @@ PyMethodDef BasePyCRUSH_methods[] = {
 
 PyTypeObject BasePyCRUSHType = {
   PyVarObject_HEAD_INIT(NULL, 0)
-  "ceph_module.BasePyCRUSH", /* tp_name */
+  "stone_module.BasePyCRUSH", /* tp_name */
   sizeof(BasePyCRUSH),     /* tp_basicsize */
   0,                         /* tp_itemsize */
   (destructor)BasePyCRUSH_dealloc,      /* tp_dealloc */
@@ -661,7 +661,7 @@ PyTypeObject BasePyCRUSHType = {
   0,                         /* tp_setattro */
   0,                         /* tp_as_buffer */
   Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,        /* tp_flags */
-  "Ceph OSDMapIncremental",  /* tp_doc */
+  "Stone OSDMapIncremental",  /* tp_doc */
   0,                         /* tp_traverse */
   0,                         /* tp_clear */
   0,                         /* tp_richcompare */

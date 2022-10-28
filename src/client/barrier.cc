@@ -18,12 +18,12 @@
 #include "include/Context.h"
 #include "Client.h"
 #include "barrier.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #undef dout_prefix
 #define dout_prefix *_dout << "client." << whoami << " "
 
-#define dout_subsys ceph_subsys_client
+#define dout_subsys stone_subsys_client
 
 #define cldout(cl, v)  dout_impl((cl)->cct, dout_subsys, v) \
   *_dout << "client." << cl->whoami << " "
@@ -184,7 +184,7 @@ void BarrierContext::complete(C_Block_Sync &cbs)
     }
     break;
     default:
-      ceph_abort();
+      stone_abort();
       break;
     }
 

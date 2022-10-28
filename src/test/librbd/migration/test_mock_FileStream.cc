@@ -4,7 +4,7 @@
 #include "test/librbd/test_mock_fixture.h"
 #include "test/librbd/test_support.h"
 #include "include/rbd_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/migration/FileStream.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

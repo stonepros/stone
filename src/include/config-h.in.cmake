@@ -4,7 +4,7 @@
 #define CONFIG_H
 
 /* fallocate(2) is supported */
-#cmakedefine CEPH_HAVE_FALLOCATE
+#cmakedefine STONE_HAVE_FALLOCATE
 
 /* Define to 1 if you have the `posix_fadvise' function. */
 #cmakedefine HAVE_POSIX_FADVISE 1
@@ -94,10 +94,10 @@
 #cmakedefine HAVE_LIBFUSE
 
 /* Define version major */
-#define CEPH_FUSE_MAJOR_VERSION @FUSE_MAJOR_VERSION@
+#define STONE_FUSE_MAJOR_VERSION @FUSE_MAJOR_VERSION@
 
 /* Define version minor */
-#define CEPH_FUSE_MINOR_VERSION @FUSE_MINOR_VERSION@
+#define STONE_FUSE_MINOR_VERSION @FUSE_MINOR_VERSION@
 
 /* Define to 1 if you have libxfs */
 #cmakedefine HAVE_LIBXFS 1
@@ -130,8 +130,8 @@
 /* define if bluestore enabled */
 #cmakedefine WITH_BLUESTORE
 
-/* define if cephfs enabled */
-#cmakedefine WITH_CEPHFS
+/* define if stonefs enabled */
+#cmakedefine WITH_STONEFS
 
 /*define if GSSAPI/KRB5 enabled */
 #cmakedefine HAVE_GSSAPI
@@ -197,7 +197,7 @@
 #cmakedefine FASTCGI_INCLUDE_DIR
 
 /* splice(2) is supported */
-#cmakedefine CEPH_HAVE_SPLICE
+#cmakedefine STONE_HAVE_SPLICE
 
 /* Define if you want C_Gather debugging */
 #cmakedefine DEBUG_GATHER
@@ -320,10 +320,10 @@
 #cmakedefine HAVE_POWER8
 
 /* Define if endian type is big endian */
-#cmakedefine CEPH_BIG_ENDIAN
+#cmakedefine STONE_BIG_ENDIAN
 
 /* Define if endian type is little endian */
-#cmakedefine CEPH_LITTLE_ENDIAN
+#cmakedefine STONE_LITTLE_ENDIAN
 
 #cmakedefine MGR_PYTHON_EXECUTABLE "@MGR_PYTHON_EXECUTABLE@"
 

@@ -8,7 +8,7 @@
 #include "librbd/MirroringWatcher.h"
 #include "librbd/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::ImageRemoveRequest: " \
                            << this << " " << __func__ << ": "
@@ -23,7 +23,7 @@ ImageRemoveRequest<I>::ImageRemoveRequest(
     librados::IoCtx& io_ctx, const std::string& global_image_id,
     const std::string& image_id, Context* on_finish)
   : m_io_ctx(io_ctx), m_global_image_id(global_image_id), m_image_id(image_id),
-    m_on_finish(on_finish), m_cct(static_cast<CephContext*>(m_io_ctx.cct())) {
+    m_on_finish(on_finish), m_cct(static_cast<StoneContext*>(m_io_ctx.cct())) {
 }
 
 template <typename I>
@@ -42,7 +42,7 @@ void ImageRemoveRequest<I>::remove_mirror_image() {
     ImageRemoveRequest<I>,
     &ImageRemoveRequest<I>::handle_remove_mirror_image>(this);
   int r = m_io_ctx.aio_operate(RBD_MIRRORING, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 

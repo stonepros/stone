@@ -38,7 +38,7 @@ void Api<I>::execute_image_metadata_remove(
 
 template <typename I>
 void Api<I>::get_image_timer_instance(
-    CephContext *cct, SafeTimer **timer, ceph::mutex **timer_lock) {
+    StoneContext *cct, SafeTimer **timer, stone::mutex **timer_lock) {
   ImageCtx::get_timer_instance(cct, timer, timer_lock);
 }
 

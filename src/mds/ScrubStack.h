@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -54,7 +54,7 @@ public:
    * caller should provide a context which is completed after all
    * in-progress scrub operations are completed and pending inodes
    * are removed from the scrub stack (with the context callbacks for
-   * inodes completed with -CEPHFS_ECANCELED).
+   * inodes completed with -STONEFS_ECANCELED).
    * @param on_finish Context callback to invoke after abort
    */
   void scrub_abort(Context *on_finish);
@@ -72,8 +72,8 @@ public:
   /**
    * Resume a paused scrub. Unlike abort or pause, this is instantaneous.
    * Pending pause operations are cancelled (context callbacks are
-   * invoked with -CEPHFS_ECANCELED).
-   * @returns 0 (success) if resumed, -CEPHFS_EINVAL if an abort is in-progress.
+   * invoked with -STONEFS_ECANCELED).
+   * @returns 0 (success) if resumed, -STONEFS_EINVAL if an abort is in-progress.
    */
   bool scrub_resume();
 
@@ -242,7 +242,7 @@ private:
 
   /**
    * Abort pending scrubs for inodes waiting in the inode stack.
-   * Completion context is complete with -CEPHFS_ECANCELED.
+   * Completion context is complete with -STONEFS_ECANCELED.
    */
   void abort_pending_scrubs();
 

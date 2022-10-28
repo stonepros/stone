@@ -4,7 +4,7 @@
 #include "WriteLog.h"
 #include "include/buffer.h"
 #include "include/Context.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/deleter.h"
 #include "common/dout.h"
 #include "common/environment.h"
@@ -21,7 +21,7 @@
 #include <vector>
 
 #undef dout_subsys
-#define dout_subsys ceph_subsys_rbd_pwl
+#define dout_subsys stone_subsys_rbd_pwl
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::cache::pwl::rwl::WriteLog: " << this \
                            << " " <<  __func__ << ": "
@@ -73,7 +73,7 @@ void WriteLog<I>::collect_read_extents(
   buffer::list entry_bl_copy;
   write_entry->copy_cache_bl(&entry_bl_copy);
   entry_bl_copy.begin(read_buffer_offset).copy(entry_hit_length, hit_bl);
-  ceph_assert(hit_bl.length() == entry_hit_length);
+  stone_assert(hit_bl.length() == entry_hit_length);
 
   /* Add hit extent to read extents */
   auto hit_extent_buf = std::make_shared<ImageExtentBuf>(hit_extent, hit_bl);
@@ -100,7 +100,7 @@ void WriteLog<I>::alloc_op_log_entries(GenericLogOperations &ops)
   pool_root = POBJ_ROOT(m_log_pool, struct WriteLogPoolRoot);
   struct WriteLogCacheEntry *pmem_log_entries = D_RW(D_RW(pool_root)->log_entries);
 
-  ceph_assert(ceph_mutex_is_locked_by_me(this->m_log_append_lock));
+  stone_assert(stone_mutex_is_locked_by_me(this->m_log_append_lock));
 
   /* Allocate the (already reserved) log entries */
   std::lock_guard locker(m_lock);
@@ -130,13 +130,13 @@ void WriteLog<I>::alloc_op_log_entries(GenericLogOperations &ops)
 template <typename I>
 int WriteLog<I>::append_op_log_entries(GenericLogOperations &ops)
 {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   GenericLogOperationsVector entries_to_flush;
   TOID(struct WriteLogPoolRoot) pool_root;
   pool_root = POBJ_ROOT(m_log_pool, struct WriteLogPoolRoot);
   int ret = 0;
 
-  ceph_assert(ceph_mutex_is_locked_by_me(this->m_log_append_lock));
+  stone_assert(stone_mutex_is_locked_by_me(this->m_log_append_lock));
 
   if (ops.empty()) {
     return 0;
@@ -144,7 +144,7 @@ int WriteLog<I>::append_op_log_entries(GenericLogOperations &ops)
   entries_to_flush.reserve(OPS_APPENDED_TOGETHER);
 
   /* Write log entries to ring and persist */
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   for (auto &operation : ops) {
     if (!entries_to_flush.empty()) {
       /* Flush these and reset the list if the current entry wraps to the
@@ -155,7 +155,7 @@ int WriteLog<I>::append_op_log_entries(GenericLogOperations &ops)
                                    << "operation=[" << *operation << "]" << dendl;
         flush_op_log_entries(entries_to_flush);
         entries_to_flush.clear();
-        now = ceph_clock_now();
+        now = stone_clock_now();
       }
     }
     ldout(m_image_ctx.cct, 20) << "Copying entry for operation at index="
@@ -183,7 +183,7 @@ int WriteLog<I>::append_op_log_entries(GenericLogOperations &ops)
    * Atomically advance the log head pointer and publish the
    * allocations for all the data buffers they refer to.
    */
-  utime_t tx_start = ceph_clock_now();
+  utime_t tx_start = stone_clock_now();
   TX_BEGIN(m_log_pool) {
     D_RW(pool_root)->first_free_entry = this->m_first_free_entry;
     for (auto &operation : ops) {
@@ -198,12 +198,12 @@ int WriteLog<I>::append_op_log_entries(GenericLogOperations &ops)
   } TX_ONABORT {
     lderr(cct) << "failed to commit " << ops.size()
                << " log entries (" << this->m_log_pool_name << ")" << dendl;
-    ceph_assert(false);
+    stone_assert(false);
     ret = -EIO;
   } TX_FINALLY {
   } TX_END;
 
-  utime_t tx_end = ceph_clock_now();
+  utime_t tx_end = stone_clock_now();
   m_perfcounter->tinc(l_librbd_pwl_append_tx_t, tx_end - tx_start);
   m_perfcounter->hinc(
     l_librbd_pwl_append_tx_t_hist, utime_t(tx_end - tx_start).to_nsec(), ops.size());
@@ -226,7 +226,7 @@ void WriteLog<I>::flush_op_log_entries(GenericLogOperationsVector &ops)
   }
 
   if (ops.size() > 1) {
-    ceph_assert(ops.front()->get_log_entry()->cache_entry < ops.back()->get_log_entry()->cache_entry);
+    stone_assert(ops.front()->get_log_entry()->cache_entry < ops.back()->get_log_entry()->cache_entry);
   }
 
   ldout(m_image_ctx.cct, 20) << "entry count=" << ops.size() << " "
@@ -261,9 +261,9 @@ void WriteLog<I>::remove_pool_file() {
 
 template <typename I>
 bool WriteLog<I>::initialize_pool(Context *on_finish, pwl::DeferredContexts &later) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   TOID(struct WriteLogPoolRoot) pool_root;
-  ceph_assert(ceph_mutex_is_locked_by_me(m_lock));
+  stone_assert(stone_mutex_is_locked_by_me(m_lock));
   if (access(this->m_log_pool_name.c_str(), F_OK) != 0) {
     if ((m_log_pool =
          pmemobj_create(this->m_log_pool_name.c_str(),
@@ -324,7 +324,7 @@ bool WriteLog<I>::initialize_pool(Context *on_finish, pwl::DeferredContexts &lat
     } TX_FINALLY {
     } TX_END;
   } else {
-    ceph_assert(m_cache_state->present);
+    stone_assert(m_cache_state->present);
     /* Open existing pool */
     if ((m_log_pool =
          pmemobj_open(this->m_log_pool_name.c_str(),
@@ -422,7 +422,7 @@ void WriteLog<I>::load_existing_entries(DeferredContexts &later) {
   while (entry_index != m_first_free_entry) {
     WriteLogCacheEntry *pmem_entry = &pmem_log_entries[entry_index];
     std::shared_ptr<GenericLogEntry> log_entry = nullptr;
-    ceph_assert(pmem_entry->entry_index == entry_index);
+    stone_assert(pmem_entry->entry_index == entry_index);
 
     this->update_entries(&log_entry, pmem_entry, missing_sync_points,
         sync_point_entries, entry_index);
@@ -463,7 +463,7 @@ void WriteLog<I>::write_data_to_buffer(
  */
 template <typename I>
 bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   GenericLogEntriesVector retiring_entries;
   uint32_t initial_first_valid_entry;
   uint32_t first_valid_entry;
@@ -485,7 +485,7 @@ bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
                    << ") and first valid log entry index (" << first_valid_entry
                    << ") must be ==." << dendl;
       }
-      ceph_assert(entry->log_entry_index == first_valid_entry);
+      stone_assert(entry->log_entry_index == first_valid_entry);
       first_valid_entry = (first_valid_entry + 1) % this->m_total_log_entries;
       m_log_entries.pop_front();
       retiring_entries.push_back(entry);
@@ -516,7 +516,7 @@ bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
         flushed_sync_gen = this->m_flushed_sync_gen;
       }
 
-      tx_start = ceph_clock_now();
+      tx_start = stone_clock_now();
       TX_BEGIN(m_log_pool) {
         if (D_RO(pool_root)->flushed_sync_gen < flushed_sync_gen) {
           ldout(m_image_ctx.cct, 20) << "flushed_sync_gen in log updated from "
@@ -538,10 +538,10 @@ bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
       } TX_ONABORT {
         lderr(cct) << "failed to commit free of" << retiring_entries.size()
                    << " log entries (" << this->m_log_pool_name << ")" << dendl;
-        ceph_assert(false);
+        stone_assert(false);
       } TX_FINALLY {
       } TX_END;
-      tx_end = ceph_clock_now();
+      tx_end = stone_clock_now();
     }
     m_perfcounter->tinc(l_librbd_pwl_retire_tx_t, tx_end - tx_start);
     m_perfcounter->hinc(l_librbd_pwl_retire_tx_t_hist, utime_t(tx_end - tx_start).to_nsec(),
@@ -551,7 +551,7 @@ bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
     {
       std::lock_guard locker(m_lock);
 
-      ceph_assert(this->m_first_valid_entry == initial_first_valid_entry);
+      stone_assert(this->m_first_valid_entry == initial_first_valid_entry);
       this->m_first_valid_entry = first_valid_entry;
       this->m_free_log_entries += retiring_entries.size();
       if (!m_cache_state->empty && m_log_entries.empty()) {
@@ -560,13 +560,13 @@ bool WriteLog<I>::retire_entries(const unsigned long int frees_per_tx) {
       }
       for (auto &entry: retiring_entries) {
         if (entry->write_bytes()) {
-          ceph_assert(this->m_bytes_cached >= entry->write_bytes());
+          stone_assert(this->m_bytes_cached >= entry->write_bytes());
           this->m_bytes_cached -= entry->write_bytes();
           uint64_t entry_allocation_size = entry->write_bytes();
           if (entry_allocation_size < MIN_WRITE_ALLOC_SIZE) {
             entry_allocation_size = MIN_WRITE_ALLOC_SIZE;
           }
-          ceph_assert(this->m_bytes_allocated >= entry_allocation_size);
+          stone_assert(this->m_bytes_allocated >= entry_allocation_size);
           this->m_bytes_allocated -= entry_allocation_size;
         }
       }
@@ -775,7 +775,7 @@ void WriteLog<I>::schedule_flush_and_append(GenericLogOperationsVector &ops)
 
 template <typename I>
 void WriteLog<I>::process_work() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   int max_iterations = 4;
   bool wake_up_requested = false;
   uint64_t aggressive_high_water_bytes = this->m_bytes_allocated_cap * AGGRESSIVE_RETIRE_HIGH_WATER;
@@ -796,7 +796,7 @@ void WriteLog<I>::process_work() {
         this->m_bytes_allocated > high_water_bytes ||
         (m_log_entries.size() > high_water_entries)) {
       int retired = 0;
-      utime_t started = ceph_clock_now();
+      utime_t started = stone_clock_now();
       ldout(m_image_ctx.cct, 10) << "alloc_fail=" << this->m_alloc_failed_since_retire
                                  << ", allocated > high_water="
                                  << (this->m_bytes_allocated > high_water_bytes)
@@ -808,7 +808,7 @@ void WriteLog<I>::process_work() {
             (m_log_entries.size() > high_water_entries) ||
             (((this->m_bytes_allocated > low_water_bytes) ||
               (m_log_entries.size() > low_water_entries)) &&
-            (utime_t(ceph_clock_now() - started).to_msec() < RETIRE_BATCH_TIME_LIMIT_MS))) {
+            (utime_t(stone_clock_now() - started).to_msec() < RETIRE_BATCH_TIME_LIMIT_MS))) {
         if (!retire_entries((this->m_shutting_down || this->m_invalidating ||
            (this->m_bytes_allocated > aggressive_high_water_bytes) ||
            (m_log_entries.size() > aggressive_high_water_entries) ||
@@ -851,7 +851,7 @@ template <typename I>
 template <typename V>
 void WriteLog<I>::flush_pmem_buffer(V& ops)
 {
-  utime_t now = ceph_clock_now();
+  utime_t now = stone_clock_now();
   for (auto &operation : ops) {
     if (operation->reserved_allocated()) {
       operation->buf_persist_start_time = now;
@@ -871,7 +871,7 @@ void WriteLog<I>::flush_pmem_buffer(V& ops)
   /* Drain once for all */
   pmemobj_drain(m_log_pool);
 
-  now = ceph_clock_now();
+  now = stone_clock_now();
   for (auto &operation : ops) {
     if (operation->reserved_allocated()) {
       operation->buf_persist_comp_time = now;
@@ -907,7 +907,7 @@ void WriteLog<I>::persist_last_flushed_sync_gen()
     } TX_ONCOMMIT {
     } TX_ONABORT {
       lderr(m_image_ctx.cct) << "failed to commit update of flushed sync point" << dendl;
-      ceph_assert(false);
+      stone_assert(false);
     } TX_FINALLY {
     } TX_END;
   }
@@ -918,12 +918,12 @@ void WriteLog<I>::reserve_cache(C_BlockIORequestT *req,
                                          bool &alloc_succeeds, bool &no_space) {
   std::vector<WriteBufferAllocation>& buffers = req->get_resources_buffers();
   for (auto &buffer : buffers) {
-    utime_t before_reserve = ceph_clock_now();
+    utime_t before_reserve = stone_clock_now();
     buffer.buffer_oid = pmemobj_reserve(m_log_pool,
                                         &buffer.buffer_alloc_action,
                                         buffer.allocation_size,
                                         0 /* Object type */);
-    buffer.allocation_lat = ceph_clock_now() - before_reserve;
+    buffer.allocation_lat = stone_clock_now() - before_reserve;
     if (TOID_IS_NULL(buffer.buffer_oid)) {
       if (!req->has_io_waited_for_buffers()) {
         req->set_io_waited_for_buffers(true);

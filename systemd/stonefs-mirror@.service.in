@@ -1,0 +1,32 @@
+[Unit]
+Description=StoneFS Mirror Daemon
+After=network-online.target local-fs.target
+Wants=network-online.target local-fs.target
+PartOf=stonefs-mirror.target
+
+[Service]
+Environment=CLUSTER=stone
+EnvironmentFile=-@SYSTEMD_ENV_FILE@
+ExecStart=/usr/bin/stonefs-mirror --id %i --cluster ${CLUSTER} -f --setuser stone --setgroup stone
+LimitNOFILE=1048576
+LimitNPROC=1048576
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+PrivateDevices=yes
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectSystem=full
+Restart=on-failure
+RestrictSUIDSGID=true
+StartLimitBurst=3
+StartLimitInterval=30min
+TasksMax=infinity
+
+[Install]
+WantedBy=stonefs-mirror.target

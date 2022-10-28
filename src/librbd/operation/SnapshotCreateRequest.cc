@@ -13,7 +13,7 @@
 #include "librbd/io/ImageDispatcherInterface.h"
 #include "librbd/mirror/snapshot/SetImageStateRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::SnapshotCreateRequest: "
 
@@ -43,7 +43,7 @@ SnapshotCreateRequest<I>::SnapshotCreateRequest(I &image_ctx,
 template <typename I>
 void SnapshotCreateRequest<I>::send_op() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   if (!image_ctx.data_ctx.is_valid()) {
     lderr(cct) << "missing data pool" << dendl;
@@ -62,7 +62,7 @@ void SnapshotCreateRequest<I>::send_notify_quiesce() {
   }
 
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   image_ctx.image_watcher->notify_quiesce(
@@ -74,7 +74,7 @@ void SnapshotCreateRequest<I>::send_notify_quiesce() {
 template <typename I>
 Context *SnapshotCreateRequest<I>::handle_notify_quiesce(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0 && !m_ignore_notify_quiesce_error) {
@@ -93,7 +93,7 @@ Context *SnapshotCreateRequest<I>::handle_notify_quiesce(int *result) {
 template <typename I>
 void SnapshotCreateRequest<I>::send_suspend_requests() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   // TODO suspend (shrink) resize to ensure consistent RBD mirror
@@ -103,7 +103,7 @@ void SnapshotCreateRequest<I>::send_suspend_requests() {
 template <typename I>
 Context *SnapshotCreateRequest<I>::handle_suspend_requests(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   // TODO
@@ -114,9 +114,9 @@ Context *SnapshotCreateRequest<I>::handle_suspend_requests(int *result) {
 template <typename I>
 void SnapshotCreateRequest<I>::send_suspend_aio() {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   image_ctx.io_image_dispatcher->block_writes(create_context_callback<
@@ -127,7 +127,7 @@ void SnapshotCreateRequest<I>::send_suspend_aio() {
 template <typename I>
 Context *SnapshotCreateRequest<I>::handle_suspend_aio(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -152,14 +152,14 @@ void SnapshotCreateRequest<I>::send_append_op_event() {
     return;
   }
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 }
 
 template <typename I>
 Context *SnapshotCreateRequest<I>::handle_append_op_event(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -176,7 +176,7 @@ Context *SnapshotCreateRequest<I>::handle_append_op_event(int *result) {
 template <typename I>
 void SnapshotCreateRequest<I>::send_allocate_snap_id() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   librados::AioCompletion *rados_completion = create_rados_callback<
@@ -189,7 +189,7 @@ void SnapshotCreateRequest<I>::send_allocate_snap_id() {
 template <typename I>
 Context *SnapshotCreateRequest<I>::handle_allocate_snap_id(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << ", "
                 << "snap_id=" << m_snap_id << dendl;
 
@@ -207,14 +207,14 @@ Context *SnapshotCreateRequest<I>::handle_allocate_snap_id(int *result) {
 template <typename I>
 void SnapshotCreateRequest<I>::send_create_snap() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   std::shared_lock owner_locker{image_ctx.owner_lock};
   std::shared_lock image_locker{image_ctx.image_lock};
 
   // should have been canceled prior to releasing lock
-  ceph_assert(image_ctx.exclusive_lock == nullptr ||
+  stone_assert(image_ctx.exclusive_lock == nullptr ||
               image_ctx.exclusive_lock->is_lock_owner());
 
   // save current size / parent info for creating snapshot record in ImageCtx
@@ -233,14 +233,14 @@ void SnapshotCreateRequest<I>::send_create_snap() {
     &SnapshotCreateRequest<I>::handle_create_snap>(this);
   int r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid,
                                        rados_completion, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   rados_completion->release();
 }
 
 template <typename I>
 Context *SnapshotCreateRequest<I>::handle_create_snap(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result == -ESTALE) {
@@ -266,7 +266,7 @@ Context *SnapshotCreateRequest<I>::send_create_object_map() {
     return send_create_image_state();
   }
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   image_ctx.object_map->snapshot_add(
@@ -280,7 +280,7 @@ Context *SnapshotCreateRequest<I>::send_create_object_map() {
 template <typename I>
 Context *SnapshotCreateRequest<I>::handle_create_object_map(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -305,7 +305,7 @@ Context *SnapshotCreateRequest<I>::send_create_image_state() {
     return send_notify_unquiesce();
   }
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   auto req = mirror::snapshot::SetImageStateRequest<I>::create(
@@ -319,7 +319,7 @@ Context *SnapshotCreateRequest<I>::send_create_image_state() {
 template <typename I>
 Context *SnapshotCreateRequest<I>::handle_create_image_state(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   update_snap_context();
@@ -335,10 +335,10 @@ Context *SnapshotCreateRequest<I>::handle_create_image_state(int *result) {
 template <typename I>
 void SnapshotCreateRequest<I>::send_release_snap_id() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
-  ceph_assert(m_snap_id != CEPH_NOSNAP);
+  stone_assert(m_snap_id != STONE_NOSNAP);
 
   librados::AioCompletion *rados_completion = create_rados_callback<
     SnapshotCreateRequest<I>,
@@ -350,7 +350,7 @@ void SnapshotCreateRequest<I>::send_release_snap_id() {
 template <typename I>
 Context *SnapshotCreateRequest<I>::handle_release_snap_id(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   return send_notify_unquiesce();
@@ -359,7 +359,7 @@ Context *SnapshotCreateRequest<I>::handle_release_snap_id(int *result) {
 template <typename I>
 Context *SnapshotCreateRequest<I>::send_notify_unquiesce() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   if (m_writes_blocked) {
     image_ctx.io_image_dispatcher->unblock_writes();
@@ -382,7 +382,7 @@ Context *SnapshotCreateRequest<I>::send_notify_unquiesce() {
 template <typename I>
 Context *SnapshotCreateRequest<I>::handle_notify_unquiesce(int *result) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -405,15 +405,15 @@ void SnapshotCreateRequest<I>::update_snap_context() {
     return;
   }
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << this << " " << __func__ << dendl;
 
   // should have been canceled prior to releasing lock
-  ceph_assert(image_ctx.exclusive_lock == nullptr ||
+  stone_assert(image_ctx.exclusive_lock == nullptr ||
               image_ctx.exclusive_lock->is_lock_owner());
 
   // immediately add a reference to the new snapshot
-  utime_t snap_time = ceph_clock_now();
+  utime_t snap_time = stone_clock_now();
   image_ctx.add_snap(m_snap_namespace, m_snap_name, m_snap_id, m_size,
 		     m_parent_info, RBD_PROTECTION_STATUS_UNPROTECTED,
 		     0, snap_time);
@@ -432,10 +432,10 @@ void SnapshotCreateRequest<I>::update_snap_context() {
   image_ctx.rebuild_data_io_context();
 
   if (!image_ctx.migration_info.empty()) {
-    auto it = image_ctx.migration_info.snap_map.find(CEPH_NOSNAP);
-    ceph_assert(it != image_ctx.migration_info.snap_map.end());
-    ceph_assert(!it->second.empty());
-    if (it->second[0] == CEPH_NOSNAP) {
+    auto it = image_ctx.migration_info.snap_map.find(STONE_NOSNAP);
+    stone_assert(it != image_ctx.migration_info.snap_map.end());
+    stone_assert(!it->second.empty());
+    if (it->second[0] == STONE_NOSNAP) {
       ldout(cct, 5) << this << " " << __func__
                     << ": updating migration snap_map" << dendl;
       it->second[0] = m_snap_id;

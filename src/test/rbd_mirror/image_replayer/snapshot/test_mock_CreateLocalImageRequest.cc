@@ -34,7 +34,7 @@ static std::string s_image_id;
 
 template <>
 std::string generate_image_id<MockTestImageCtx>(librados::IoCtx&) {
-  ceph_assert(!s_image_id.empty());
+  stone_assert(!s_image_id.empty());
   return s_image_id;
 }
 
@@ -46,7 +46,7 @@ namespace mirror {
 
 template <>
 struct Threads<librbd::MockTestImageCtx> {
-  ceph::mutex &timer_lock;
+  stone::mutex &timer_lock;
   SafeTimer *timer;
   librbd::asio::ContextWQ *work_queue;
 
@@ -73,14 +73,14 @@ struct CreateImageRequest<librbd::MockTestImageCtx> {
                                     PoolMetaCache* pool_meta_cache,
                                     cls::rbd::MirrorImageMode mirror_image_mode,
                                     Context *on_finish) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     s_instance->on_finish = on_finish;
     s_instance->construct(local_image_id);
     return s_instance;
   }
 
   CreateImageRequest() {
-    ceph_assert(s_instance == nullptr);
+    stone_assert(s_instance == nullptr);
     s_instance = this;
   }
   ~CreateImageRequest() {
@@ -205,7 +205,7 @@ public:
       on_finish);
   }
 
-  PoolMetaCache m_pool_meta_cache{g_ceph_context};
+  PoolMetaCache m_pool_meta_cache{g_stone_context};
 
   librbd::ImageCtx *m_remote_image_ctx;
   librbd::MockTestImageCtx *m_mock_remote_image_ctx = nullptr;

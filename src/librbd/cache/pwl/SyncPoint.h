@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CACHE_RWL_SYNC_POINT_H
-#define CEPH_LIBRBD_CACHE_RWL_SYNC_POINT_H 
+#ifndef STONE_LIBRBD_CACHE_RWL_SYNC_POINT_H
+#define STONE_LIBRBD_CACHE_RWL_SYNC_POINT_H 
 
 #include "librbd/ImageCtx.h"
 #include "librbd/cache/pwl/LogEntry.h"
@@ -27,7 +27,7 @@ public:
    * aio_flush() calls are added to this. */
   std::vector<Context*> on_sync_point_persisted;
 
-  SyncPoint(uint64_t sync_gen_num, CephContext *cct);
+  SyncPoint(uint64_t sync_gen_num, StoneContext *cct);
   ~SyncPoint();
   SyncPoint(const SyncPoint&) = delete;
   SyncPoint &operator=(const SyncPoint&) = delete;
@@ -42,7 +42,7 @@ public:
   void setup_earlier_sync_point(std::shared_ptr<SyncPoint> sync_point,
                                 uint64_t last_op_sequence_num);
 private:
-  CephContext *m_cct;
+  StoneContext *m_cct;
   bool m_append_scheduled = false;
   uint64_t m_final_op_sequence_num = 0;
   /* A sync point can't appear in the log until all the writes bearing
@@ -66,4 +66,4 @@ private:
 } // namespace cache
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_CACHE_RWL_SYNC_POINT_H
+#endif // STONE_LIBRBD_CACHE_RWL_SYNC_POINT_H

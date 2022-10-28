@@ -9,7 +9,7 @@
 
 using std::cerr;
 
-namespace ceph::logging {
+namespace stone::logging {
 
 Graylog::Graylog(const SubsystemMap * const s, const std::string &logger)
     : m_subs(s),
@@ -77,8 +77,8 @@ void Graylog::log_entry(const Entry& e)
     m_formatter->dump_string("version", "1.1");
     m_formatter->dump_string("host", m_hostname);
     m_formatter->dump_string("short_message", s);
-    m_formatter->dump_string("_app", "ceph");
-    auto t = ceph::logging::log_clock::to_timeval(e.m_stamp);
+    m_formatter->dump_string("_app", "stone");
+    auto t = stone::logging::log_clock::to_timeval(e.m_stamp);
     m_formatter->dump_float("timestamp", t.tv_sec + (t.tv_usec / 1000000.0));
     m_formatter->dump_unsigned("_thread", (uint64_t)e.m_thread);
     m_formatter->dump_int("_level", e.m_prio);
@@ -120,7 +120,7 @@ void Graylog::log_log_entry(LogEntry const * const e)
     m_formatter->dump_string("host", m_hostname);
     m_formatter->dump_string("short_message", e->msg);
     m_formatter->dump_float("timestamp", e->stamp.sec() + (e->stamp.usec() / 1000000.0));
-    m_formatter->dump_string("_app", "ceph");
+    m_formatter->dump_string("_app", "stone");
 
     m_formatter->dump_string("name", e->name.to_str());
 
@@ -167,4 +167,4 @@ void Graylog::log_log_entry(LogEntry const * const e)
   }
 }
 
-} // name ceph::logging
+} // name stone::logging

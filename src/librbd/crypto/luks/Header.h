@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_CRYPTO_LUKS_HEADER_H
-#define CEPH_LIBRBD_CRYPTO_LUKS_HEADER_H
+#ifndef STONE_LIBRBD_CRYPTO_LUKS_HEADER_H
+#define STONE_LIBRBD_CRYPTO_LUKS_HEADER_H
 
 #include <libcryptsetup.h>
 #include "common/ceph_context.h"
@@ -14,7 +14,7 @@ namespace luks {
 
 class Header {
 public:
-    Header(CephContext* cct);
+    Header(StoneContext* cct);
     ~Header();
     int init();
 
@@ -39,7 +39,7 @@ private:
     static void libcryptsetup_log_wrapper(int level, const char* msg,
                                           void* header);
 
-    CephContext* m_cct;
+    StoneContext* m_cct;
     int m_fd;
     struct crypt_device *m_cd;
 };
@@ -48,4 +48,4 @@ private:
 } // namespace crypto
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_CRYPTO_LUKS_HEADER_H
+#endif // STONE_LIBRBD_CRYPTO_LUKS_HEADER_H

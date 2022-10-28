@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_IO_UTILS_H
-#define CEPH_LIBRBD_IO_UTILS_H
+#ifndef STONE_LIBRBD_IO_UTILS_H
+#define STONE_LIBRBD_IO_UTILS_H
 
 #include "include/int_types.h"
 #include "include/buffer_fwd.h"
@@ -46,7 +46,7 @@ inline uint64_t get_extents_length(const Extents &extents) {
   return total_bytes;
 }
 
-void unsparsify(CephContext* cct, ceph::bufferlist* bl,
+void unsparsify(StoneContext* cct, ceph::bufferlist* bl,
                 const Extents& extent_map, uint64_t bl_off,
                 uint64_t out_bl_len);
 
@@ -76,4 +76,4 @@ inline ObjectDispatchLayer get_previous_layer(ObjectDispatchLayer layer) {
 } // namespace io
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_IO_UTILS_H
+#endif // STONE_LIBRBD_IO_UTILS_H

@@ -12,7 +12,7 @@
 #include "librbd/journal/Types.h"
 #include "librbd/journal/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::journal::OpenRequest: " << this << " " \
                            << __func__ << ": "
@@ -25,7 +25,7 @@ using librbd::util::create_context_callback;
 using util::C_DecodeTags;
 
 template <typename I>
-OpenRequest<I>::OpenRequest(I *image_ctx, Journaler *journaler, ceph::mutex *lock,
+OpenRequest<I>::OpenRequest(I *image_ctx, Journaler *journaler, stone::mutex *lock,
                             journal::ImageClientMeta *client_meta,
                             uint64_t *tag_tid, journal::TagData *tag_data,
                             Context *on_finish)
@@ -41,7 +41,7 @@ void OpenRequest<I>::send() {
 
 template <typename I>
 void OpenRequest<I>::send_init() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << dendl;
 
   m_journaler->init(create_async_context_callback(
@@ -51,7 +51,7 @@ void OpenRequest<I>::send_init() {
 
 template <typename I>
 void OpenRequest<I>::handle_init(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -106,7 +106,7 @@ void OpenRequest<I>::handle_init(int r) {
 
 template <typename I>
 void OpenRequest<I>::send_get_tags() {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << dendl;
 
   C_DecodeTags *tags_ctx = new C_DecodeTags(
@@ -118,7 +118,7 @@ void OpenRequest<I>::send_get_tags() {
 
 template <typename I>
 void OpenRequest<I>::handle_get_tags(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -131,7 +131,7 @@ void OpenRequest<I>::handle_get_tags(int r) {
 
 template <typename I>
 void OpenRequest<I>::finish(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 20) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

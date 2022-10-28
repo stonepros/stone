@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank
  *
@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <regex>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 static inline bool is_not_alnum_space(char c) {
   return !(isalpha(c) || isdigit(c) || (c == '-') || (c == '_'));
@@ -42,7 +42,7 @@ static std::string maybe_quote_string(const std::string& str) {
   return std::string("\"") + str + std::string("\"");
 }
 
-#define dout_subsys ceph_subsys_mgr
+#define dout_subsys stone_subsys_mgr
 
 std::ostream& operator<<(std::ostream& out, const mgr_rwxa_t& p) {
   if (p == MGR_CAP_ANY)
@@ -236,7 +236,7 @@ bool MgrCapGrant::validate_arguments(
 }
 
 mgr_rwxa_t MgrCapGrant::get_allowed(
-    CephContext *cct, EntityName name, const std::string& s,
+    StoneContext *cct, EntityName name, const std::string& s,
     const std::string& m, const std::string& c,
     const std::map<std::string, std::string>& args) const {
   if (!profile.empty()) {
@@ -309,7 +309,7 @@ void MgrCap::set_allow_all() {
 }
 
 bool MgrCap::is_capable(
-    CephContext *cct,
+    StoneContext *cct,
     EntityName name,
     const std::string& service,
     const std::string& module,
@@ -365,14 +365,14 @@ bool MgrCap::is_capable(
   return false;
 }
 
-void MgrCap::encode(ceph::buffer::list& bl) const {
+void MgrCap::encode(stone::buffer::list& bl) const {
   // remain backwards compatible w/ MgrCap
   ENCODE_START(4, 4, bl);
   encode(text, bl);
   ENCODE_FINISH(bl);
 }
 
-void MgrCap::decode(ceph::buffer::list::const_iterator& bl) {
+void MgrCap::decode(stone::buffer::list::const_iterator& bl) {
   // remain backwards compatible w/ MgrCap
   std::string s;
   DECODE_START(4, bl);
@@ -381,7 +381,7 @@ void MgrCap::decode(ceph::buffer::list::const_iterator& bl) {
   parse(s, NULL);
 }
 
-void MgrCap::dump(ceph::Formatter *f) const {
+void MgrCap::dump(stone::Formatter *f) const {
   f->dump_string("text", text);
 }
 

@@ -5,11 +5,11 @@
 #include "common/errno.h"
 #include "common/Timer.h"
 #include "journal/Settings.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "librbd/Utils.h"
 #include "librbd/journal/RemoveRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::Journal::RemoveRequest: "
 
@@ -26,7 +26,7 @@ RemoveRequest<I>::RemoveRequest(IoCtx &ioctx, const std::string &image_id,
                                 Context *on_finish)
   : m_ioctx(ioctx), m_image_id(image_id), m_image_client_id(client_id),
     m_op_work_queue(op_work_queue), m_on_finish(on_finish) {
-  m_cct = reinterpret_cast<CephContext *>(m_ioctx.cct());
+  m_cct = reinterpret_cast<StoneContext *>(m_ioctx.cct());
 }
 
 template<typename I>

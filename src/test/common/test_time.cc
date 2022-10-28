@@ -2,7 +2,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -15,35 +15,35 @@
 
 #include <ctime>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "include/rados.h"
 #include "gtest/gtest.h"
 #include "include/stringify.h"
 
 
-using ceph::real_clock;
-using ceph::real_time;
+using stone::real_clock;
+using stone::real_time;
 
-using ceph::real_clock;
-using ceph::real_time;
+using stone::real_clock;
+using stone::real_time;
 
-using ceph::coarse_real_clock;
-using ceph::coarse_mono_clock;
+using stone::coarse_real_clock;
+using stone::coarse_mono_clock;
 
-using ceph::timespan;
-using ceph::signedspan;
+using stone::timespan;
+using stone::signedspan;
 
 using std::chrono::seconds;
 using std::chrono::microseconds;
 using std::chrono::nanoseconds;
 
-static_assert(!real_clock::is_steady, "ceph::real_clock must not be steady.");
+static_assert(!real_clock::is_steady, "stone::real_clock must not be steady.");
 static_assert(!coarse_real_clock::is_steady,
-	      "ceph::coarse_real_clock must not be steady.");
+	      "stone::coarse_real_clock must not be steady.");
 
-static_assert(mono_clock::is_steady, "ceph::mono_clock must be steady.");
+static_assert(mono_clock::is_steady, "stone::mono_clock must be steady.");
 static_assert(coarse_mono_clock::is_steady,
-	      "ceph::coarse_mono_clock must be steady.");
+	      "stone::coarse_mono_clock must be steady.");
 
 // Before this file was written.
 static constexpr uint32_t bs = 1440701569;
@@ -51,7 +51,7 @@ static constexpr uint32_t bns = 123456789;
 static constexpr uint32_t bus = 123456;
 static constexpr time_t btt = bs;
 static constexpr struct timespec bts = { bs, bns };
-static struct ceph_timespec bcts = { init_le32(bs), init_le32(bns) };
+static struct stone_timespec bcts = { init_le32(bs), init_le32(bns) };
 static constexpr struct timeval btv = { bs, bus };
 static constexpr double bd = bs + ((double)bns / 1000000000.);
 
@@ -67,8 +67,8 @@ static void system_clock_sanity() {
   ASSERT_GT(Clock::to_timespec(now).tv_sec, bts.tv_sec);
   ASSERT_LT(Clock::to_timespec(now).tv_nsec, 1000000000L);
 
-  ASSERT_GT(Clock::to_ceph_timespec(now).tv_sec, bcts.tv_sec);
-  ASSERT_LT(Clock::to_ceph_timespec(now).tv_nsec, 1000000000UL);
+  ASSERT_GT(Clock::to_stone_timespec(now).tv_sec, bcts.tv_sec);
+  ASSERT_LT(Clock::to_stone_timespec(now).tv_nsec, 1000000000UL);
 
   ASSERT_GT(Clock::to_timeval(now).tv_sec, btv.tv_sec);
   ASSERT_LT(Clock::to_timeval(now).tv_usec, 1000000L);
@@ -96,14 +96,14 @@ static void system_clock_conversions() {
   }
 
   {
-    const struct ceph_timespec tcts = Clock::to_ceph_timespec(brt);
+    const struct stone_timespec tcts = Clock::to_stone_timespec(brt);
     ASSERT_EQ(tcts.tv_sec, bcts.tv_sec);
     ASSERT_EQ(tcts.tv_nsec, bcts.tv_nsec);
   }
-  ASSERT_EQ(Clock::from_ceph_timespec(bcts), brt);
+  ASSERT_EQ(Clock::from_stone_timespec(bcts), brt);
   {
-    struct ceph_timespec tcts;
-    Clock::to_ceph_timespec(brt, tcts);
+    struct stone_timespec tcts;
+    Clock::to_stone_timespec(brt, tcts);
     ASSERT_EQ(tcts.tv_sec, bcts.tv_sec);
     ASSERT_EQ(tcts.tv_nsec, bcts.tv_nsec);
   }
@@ -145,47 +145,47 @@ TEST(CoarseRealClock, Conversions) {
 }
 
 TEST(TimePoints, SignedSubtraciton) {
-  ceph::real_time rta(std::chrono::seconds(3));
-  ceph::real_time rtb(std::chrono::seconds(5));
+  stone::real_time rta(std::chrono::seconds(3));
+  stone::real_time rtb(std::chrono::seconds(5));
 
-  ceph::coarse_real_time crta(std::chrono::seconds(3));
-  ceph::coarse_real_time crtb(std::chrono::seconds(5));
+  stone::coarse_real_time crta(std::chrono::seconds(3));
+  stone::coarse_real_time crtb(std::chrono::seconds(5));
 
-  ceph::mono_time mta(std::chrono::seconds(3));
-  ceph::mono_time mtb(std::chrono::seconds(5));
+  stone::mono_time mta(std::chrono::seconds(3));
+  stone::mono_time mtb(std::chrono::seconds(5));
 
-  ceph::coarse_mono_time cmta(std::chrono::seconds(3));
-  ceph::coarse_mono_time cmtb(std::chrono::seconds(5));
+  stone::coarse_mono_time cmta(std::chrono::seconds(3));
+  stone::coarse_mono_time cmtb(std::chrono::seconds(5));
 
-  ASSERT_LT(rta - rtb, ceph::signedspan::zero());
+  ASSERT_LT(rta - rtb, stone::signedspan::zero());
   ASSERT_LT((rta - rtb).count(), 0);
-  ASSERT_GT(rtb - rta, ceph::signedspan::zero());
+  ASSERT_GT(rtb - rta, stone::signedspan::zero());
   ASSERT_GT((rtb - rta).count(), 0);
 
-  ASSERT_LT(crta - crtb, ceph::signedspan::zero());
+  ASSERT_LT(crta - crtb, stone::signedspan::zero());
   ASSERT_LT((crta - crtb).count(), 0);
-  ASSERT_GT(crtb - crta, ceph::signedspan::zero());
+  ASSERT_GT(crtb - crta, stone::signedspan::zero());
   ASSERT_GT((crtb - crta).count(), 0);
 
-  ASSERT_LT(mta - mtb, ceph::signedspan::zero());
+  ASSERT_LT(mta - mtb, stone::signedspan::zero());
   ASSERT_LT((mta - mtb).count(), 0);
-  ASSERT_GT(mtb - mta, ceph::signedspan::zero());
+  ASSERT_GT(mtb - mta, stone::signedspan::zero());
   ASSERT_GT((mtb - mta).count(), 0);
 
-  ASSERT_LT(cmta - cmtb, ceph::signedspan::zero());
+  ASSERT_LT(cmta - cmtb, stone::signedspan::zero());
   ASSERT_LT((cmta - cmtb).count(), 0);
-  ASSERT_GT(cmtb - cmta, ceph::signedspan::zero());
+  ASSERT_GT(cmtb - cmta, stone::signedspan::zero());
   ASSERT_GT((cmtb - cmta).count(), 0);
 }
 
 TEST(TimePoints, stringify) {
-  ceph::real_clock::time_point tp(seconds(1556122013) + nanoseconds(39923122));
+  stone::real_clock::time_point tp(seconds(1556122013) + nanoseconds(39923122));
   string s = stringify(tp);
   ASSERT_EQ(s.size(), strlen("2019-04-24T11:06:53.039923-0500"));
   ASSERT_TRUE(s[26] == '-' || s[26] == '+');
   ASSERT_EQ(s.substr(0, 9), "2019-04-2");
 
-  ceph::coarse_real_clock::time_point ctp(seconds(1556122013) +
+  stone::coarse_real_clock::time_point ctp(seconds(1556122013) +
 					  nanoseconds(399000000));
   s = stringify(ctp);
   ASSERT_EQ(s.size(), strlen("2019-04-24T11:06:53.399000-0500"));
@@ -224,10 +224,10 @@ namespace {
 
 TEST(TimeDurations, print) {
   float_format_eq("0.123456700s",
-                  to_string(std::chrono::duration_cast<ceph::timespan>(0.1234567s)),
+                  to_string(std::chrono::duration_cast<stone::timespan>(0.1234567s)),
                   9);
   float_format_eq("-0.123456700s",
-                  to_string(std::chrono::duration_cast<ceph::signedspan>(-0.1234567s)),
+                  to_string(std::chrono::duration_cast<stone::signedspan>(-0.1234567s)),
                   9);
   EXPECT_EQ("42s", to_string(42s));
   float_format_eq("0.123000000s", to_string(123ms), 9);

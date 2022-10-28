@@ -1,5 +1,5 @@
-#ifndef CEPH_IPADDR_H
-#define CEPH_IPADDR_H
+#ifndef STONE_IPADDR_H
+#define STONE_IPADDR_H
 
 class entity_addr_t;
 

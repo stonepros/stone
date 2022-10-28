@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -20,7 +20,7 @@
 #include "services/svc_sys_obj.h"
 #include "rgw_sal_rados.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 namespace rgw::putobj {
 
@@ -42,7 +42,7 @@ int HeadObjectProcessor::process(bufferlist&& data, uint64_t logical_offset)
 
     if (data_offset == head_chunk_size) {
       // process the first complete chunk
-      ceph_assert(head_data.length() == head_chunk_size);
+      stone_assert(head_data.length() == head_chunk_size);
       int r = process_first_chunk(std::move(head_data), &processor);
       if (r < 0) {
         return r;
@@ -52,7 +52,7 @@ int HeadObjectProcessor::process(bufferlist&& data, uint64_t logical_offset)
       return 0;
     }
   }
-  ceph_assert(processor); // process_first_chunk() must initialize
+  stone_assert(processor); // process_first_chunk() must initialize
 
   // send everything else through the processor
   auto write_offset = data_offset;
@@ -158,7 +158,7 @@ RadosWriter::~RadosWriter()
   if (need_to_remove_head) {
     std::string version_id;
     ldpp_dout(dpp, 5) << "NOTE: we are going to process the head obj (" << *raw_head << ")" << dendl;
-    int r = head_obj->delete_object(dpp, &obj_ctx, ACLOwner(), bucket->get_acl_owner(), ceph::real_time(),
+    int r = head_obj->delete_object(dpp, &obj_ctx, ACLOwner(), bucket->get_acl_owner(), stone::real_time(),
 				    false, 0, version_id, null_yield);
     if (r < 0 && r != -ENOENT) {
       ldpp_dout(dpp, 0) << "WARNING: failed to remove obj (" << *raw_head << "), leaked" << dendl;
@@ -266,10 +266,10 @@ int AtomicObjectProcessor::prepare(optional_yield y)
 
 int AtomicObjectProcessor::complete(size_t accounted_size,
                                     const std::string& etag,
-                                    ceph::real_time *mtime,
-                                    ceph::real_time set_mtime,
+                                    stone::real_time *mtime,
+                                    stone::real_time set_mtime,
                                     rgw::sal::RGWAttrs& attrs,
-                                    ceph::real_time delete_at,
+                                    stone::real_time delete_at,
                                     const char *if_match,
                                     const char *if_nomatch,
                                     const std::string *user_data,
@@ -405,10 +405,10 @@ int MultipartObjectProcessor::prepare(optional_yield y)
 
 int MultipartObjectProcessor::complete(size_t accounted_size,
                                        const std::string& etag,
-                                       ceph::real_time *mtime,
-                                       ceph::real_time set_mtime,
+                                       stone::real_time *mtime,
+                                       stone::real_time set_mtime,
                                        std::map<std::string, bufferlist>& attrs,
-                                       ceph::real_time delete_at,
+                                       stone::real_time delete_at,
                                        const char *if_match,
                                        const char *if_nomatch,
                                        const std::string *user_data,
@@ -538,7 +538,7 @@ int AppendObjectProcessor::prepare(optional_yield y)
       return -ERR_POSITION_NOT_EQUAL_TO_LENGTH;
     }
     try {
-      using ceph::decode;
+      using stone::decode;
       decode(cur_part_num, iter->second);
     } catch (buffer::error& err) {
       ldpp_dout(dpp, 5) << "ERROR: failed to decode part num" << dendl;
@@ -593,9 +593,9 @@ int AppendObjectProcessor::prepare(optional_yield y)
   return 0;
 }
 
-int AppendObjectProcessor::complete(size_t accounted_size, const string &etag, ceph::real_time *mtime,
-                                    ceph::real_time set_mtime, rgw::sal::RGWAttrs& attrs,
-                                    ceph::real_time delete_at, const char *if_match, const char *if_nomatch,
+int AppendObjectProcessor::complete(size_t accounted_size, const string &etag, stone::real_time *mtime,
+                                    stone::real_time set_mtime, rgw::sal::RGWAttrs& attrs,
+                                    stone::real_time delete_at, const char *if_match, const char *if_nomatch,
                                     const string *user_data, rgw_zone_set *zones_trace, bool *pcanceled,
                                     optional_yield y)
 {
@@ -630,7 +630,7 @@ int AppendObjectProcessor::complete(size_t accounted_size, const string &etag, c
   obj_op->params.attrs = &attrs;
   //Add the append part number
   bufferlist cur_part_num_bl;
-  using ceph::encode;
+  using stone::encode;
   encode(cur_part_num, cur_part_num_bl);
   attrs[RGW_ATTR_APPEND_PART_NUM] = cur_part_num_bl;
   //calculate the etag
@@ -638,16 +638,16 @@ int AppendObjectProcessor::complete(size_t accounted_size, const string &etag, c
     MD5 hash;
     // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
     hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
-    char petag[CEPH_CRYPTO_MD5_DIGESTSIZE];
-    char final_etag[CEPH_CRYPTO_MD5_DIGESTSIZE];
-    char final_etag_str[CEPH_CRYPTO_MD5_DIGESTSIZE * 2 + 16];
-    hex_to_buf(cur_etag.c_str(), petag, CEPH_CRYPTO_MD5_DIGESTSIZE);
+    char petag[STONE_CRYPTO_MD5_DIGESTSIZE];
+    char final_etag[STONE_CRYPTO_MD5_DIGESTSIZE];
+    char final_etag_str[STONE_CRYPTO_MD5_DIGESTSIZE * 2 + 16];
+    hex_to_buf(cur_etag.c_str(), petag, STONE_CRYPTO_MD5_DIGESTSIZE);
     hash.Update((const unsigned char *)petag, sizeof(petag));
-    hex_to_buf(etag.c_str(), petag, CEPH_CRYPTO_MD5_DIGESTSIZE);
+    hex_to_buf(etag.c_str(), petag, STONE_CRYPTO_MD5_DIGESTSIZE);
     hash.Update((const unsigned char *)petag, sizeof(petag));
     hash.Final((unsigned char *)final_etag);
     buf_to_hex((unsigned char *)final_etag, sizeof(final_etag), final_etag_str);
-    snprintf(&final_etag_str[CEPH_CRYPTO_MD5_DIGESTSIZE * 2],  sizeof(final_etag_str) - CEPH_CRYPTO_MD5_DIGESTSIZE * 2,
+    snprintf(&final_etag_str[STONE_CRYPTO_MD5_DIGESTSIZE * 2],  sizeof(final_etag_str) - STONE_CRYPTO_MD5_DIGESTSIZE * 2,
              "-%lld", (long long)cur_part_num);
     bufferlist etag_bl;
     etag_bl.append(final_etag_str, strlen(final_etag_str) + 1);

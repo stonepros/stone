@@ -13,11 +13,11 @@
 
 #include "rgw/rgw_basic_types.h"
 
-#define CEPH_RGW_REMOVE 'r'
-#define CEPH_RGW_UPDATE 'u'
-#define CEPH_RGW_TAG_TIMEOUT 120
-#define CEPH_RGW_DIR_SUGGEST_LOG_OP  0x80
-#define CEPH_RGW_DIR_SUGGEST_OP_MASK 0x7f
+#define STONE_RGW_REMOVE 'r'
+#define STONE_RGW_UPDATE 'u'
+#define STONE_RGW_TAG_TIMEOUT 120
+#define STONE_RGW_DIR_SUGGEST_LOG_OP  0x80
+#define STONE_RGW_DIR_SUGGEST_OP_MASK 0x7f
 
 class JSONObj;
 

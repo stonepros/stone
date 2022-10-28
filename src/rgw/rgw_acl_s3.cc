@@ -11,7 +11,7 @@
 #include "rgw_acl_s3.h"
 #include "rgw_user.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 
 
@@ -207,7 +207,7 @@ bool ACLGrant_S3::xml_end(const char *el) {
   return true;
 }
 
-void ACLGrant_S3::to_xml(CephContext *cct, ostream& out) {
+void ACLGrant_S3::to_xml(StoneContext *cct, ostream& out) {
   ACLPermission_S3& perm = static_cast<ACLPermission_S3 &>(permission);
 
   /* only show s3 compatible permissions */

@@ -28,7 +28,7 @@ public:
     RadosTestFixture::TearDown();
   }
 
-  int append_payload(const ceph::ref_t<journal::JournalMetadata>& metadata,
+  int append_payload(const stone::ref_t<journal::JournalMetadata>& metadata,
                      const std::string &oid, uint64_t object_num,
                      const std::string &payload, uint64_t *commit_tid) {
     int r = append(oid + "." + stringify(object_num), create_payload(payload));
@@ -47,7 +47,7 @@ public:
   }
 
   journal::JournalTrimmer *create_trimmer(const std::string &oid,
-                                          const ceph::ref_t<journal::JournalMetadata>& metadata) {
+                                          const stone::ref_t<journal::JournalMetadata>& metadata) {
     journal::JournalTrimmer *trimmer(new journal::JournalTrimmer(
       m_ioctx, oid + ".", metadata));
     m_trimmers.push_back(trimmer);
@@ -60,7 +60,7 @@ public:
     return m_ioctx.operate(oid, &op);
   }
 
-  typedef std::list<ceph::ref_t<journal::JournalMetadata>> MetadataList;
+  typedef std::list<stone::ref_t<journal::JournalMetadata>> MetadataList;
   MetadataList m_metadata_list;
   std::list<journal::JournalTrimmer*> m_trimmers;
 };

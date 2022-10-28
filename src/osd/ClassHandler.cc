@@ -4,7 +4,7 @@
 #include "include/types.h"
 #include "ClassHandler.h"
 #include "common/errno.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "include/dlfcn_compat.h"
 
 #include <map>
@@ -16,7 +16,7 @@
 #include "common/config.h"
 #include "common/debug.h"
 
-#define dout_subsys ceph_subsys_osd
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix *_dout
 
@@ -28,7 +28,7 @@ using std::map;
 using std::set;
 using std::string;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 
 int ClassHandler::open_class(const string& cname, ClassData **pcls)
@@ -208,7 +208,7 @@ int ClassHandler::_load_class(ClassData *cls)
 
 ClassHandler::ClassData *ClassHandler::register_class(const char *cname)
 {
-  ceph_assert(ceph_mutex_is_locked(mutex));
+  stone_assert(stone_mutex_is_locked(mutex));
 
   ClassData *cls = _get_class(cname, false);
   ldout(cct, 10) << "register_class " << cname << " status " << cls->status << dendl;
@@ -324,7 +324,7 @@ int ClassHandler::ClassMethod::exec(cls_method_context_t ctx, bufferlist& indata
       ret = method(ctx, indata.c_str(), indata.length(), &out, &olen);
       if (out) {
         // assume *out was allocated via cls_alloc (which calls malloc!)
-	ceph::buffer::ptr bp = ceph::buffer::claim_malloc(olen, out);
+	stone::buffer::ptr bp = stone::buffer::claim_malloc(olen, out);
         outdata.push_back(bp);
       }
     } else {
@@ -341,10 +341,10 @@ ClassHandler& ClassHandler::get_instance()
   //   1. random number generation (cls_gen_random_bytes)
   //   2. accessing the configuration
   //   3. logging
-  static CephContext cct;
+  static StoneContext cct;
   static ClassHandler single(&cct);
 #else
-  static ClassHandler single(g_ceph_context);
+  static ClassHandler single(g_stone_context);
 #endif // WITH_SEASTAR
   return single;
 }

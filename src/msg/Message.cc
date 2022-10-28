@@ -223,13 +223,13 @@
 
 #define DEBUGLVL  10    // debug level of output
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 
 void Message::encode(uint64_t features, int crcflags, bool skip_header_crc)
 {
   // encode and copy out of *m
   if (empty_payload()) {
-    ceph_assert(middle.length() == 0);
+    stone_assert(middle.length() == 0);
     encode_payload(features);
 
     if (byte_throttler) {
@@ -251,7 +251,7 @@ void Message::encode(uint64_t features, int crcflags, bool skip_header_crc)
   if (!skip_header_crc && (crcflags & MSG_CRC_HEADER))
     calc_header_crc();
 
-  footer.flags = CEPH_MSG_FOOTER_COMPLETE;
+  footer.flags = STONE_MSG_FOOTER_COMPLETE;
 
   if (crcflags & MSG_CRC_DATA) {
     calc_data_crc();
@@ -261,7 +261,7 @@ void Message::encode(uint64_t features, int crcflags, bool skip_header_crc)
     encode(get_header(), bl);
 
     // dump the old footer format
-    ceph_msg_footer_old old_footer;
+    stone_msg_footer_old old_footer;
     old_footer.front_crc = footer.front_crc;
     old_footer.middle_crc = footer.middle_crc;
     old_footer.data_crc = footer.data_crc;
@@ -294,24 +294,24 @@ void Message::encode(uint64_t features, int crcflags, bool skip_header_crc)
     }
 #endif
   } else {
-    footer.flags = (unsigned)footer.flags | CEPH_MSG_FOOTER_NOCRC;
+    footer.flags = (unsigned)footer.flags | STONE_MSG_FOOTER_NOCRC;
   }
 }
 
-void Message::dump(ceph::Formatter *f) const
+void Message::dump(stone::Formatter *f) const
 {
   std::stringstream ss;
   print(ss);
   f->dump_string("summary", ss.str());
 }
 
-Message *decode_message(CephContext *cct,
+Message *decode_message(StoneContext *cct,
                         int crcflags,
-                        ceph_msg_header& header,
-                        ceph_msg_footer& footer,
-                        ceph::bufferlist& front,
-                        ceph::bufferlist& middle,
-                        ceph::bufferlist& data,
+                        stone_msg_header& header,
+                        stone_msg_footer& footer,
+                        stone::bufferlist& front,
+                        stone::bufferlist& middle,
+                        stone::bufferlist& data,
                         Message::ConnectionRef conn)
 {
   // verify crc
@@ -341,7 +341,7 @@ Message *decode_message(CephContext *cct,
     }
   }
   if (crcflags & MSG_CRC_DATA) {
-    if ((footer.flags & CEPH_MSG_FOOTER_NOCRC) == 0) {
+    if ((footer.flags & STONE_MSG_FOOTER_NOCRC) == 0) {
       __u32 data_crc = data.crc32c(0);
       if (data_crc != footer.data_crc) {
 	if (cct) {
@@ -357,13 +357,13 @@ Message *decode_message(CephContext *cct,
   }
 
   // make message
-  ceph::ref_t<Message> m;
+  stone::ref_t<Message> m;
   int type = header.type;
   switch (type) {
 
     // -- with payload --
 
-    using ceph::make_message;
+    using stone::make_message;
 
   case MSG_PGSTATS:
     m = make_message<MPGStats>();
@@ -372,10 +372,10 @@ Message *decode_message(CephContext *cct,
     m = make_message<MPGStatsAck>();
     break;
 
-  case CEPH_MSG_STATFS:
+  case STONE_MSG_STATFS:
     m = make_message<MStatfs>();
     break;
-  case CEPH_MSG_STATFS_REPLY:
+  case STONE_MSG_STATFS_REPLY:
     m = make_message<MStatfsReply>();
     break;
   case MSG_GETPOOLSTATS:
@@ -384,10 +384,10 @@ Message *decode_message(CephContext *cct,
   case MSG_GETPOOLSTATSREPLY:
     m = make_message<MGetPoolStatsReply>();
     break;
-  case CEPH_MSG_POOLOP:
+  case STONE_MSG_POOLOP:
     m = make_message<MPoolOp>();
     break;
-  case CEPH_MSG_POOLOP_REPLY:
+  case STONE_MSG_POOLOP_REPLY:
     m = make_message<MPoolOpReply>();
     break;
   case MSG_MON_COMMAND:
@@ -435,7 +435,7 @@ Message *decode_message(CephContext *cct,
     m = make_message<MLogAck>();
     break;
 
-  case CEPH_MSG_PING:
+  case STONE_MSG_PING:
     m = make_message<MPing>();
     break;
   case MSG_COMMAND:
@@ -461,13 +461,13 @@ Message *decode_message(CephContext *cct,
     m = make_message<MForward>();
     break;
     
-  case CEPH_MSG_MON_MAP:
+  case STONE_MSG_MON_MAP:
     m = make_message<MMonMap>();
     break;
-  case CEPH_MSG_MON_GET_MAP:
+  case STONE_MSG_MON_GET_MAP:
     m = make_message<MMonGetMap>();
     break;
-  case CEPH_MSG_MON_GET_OSDMAP:
+  case STONE_MSG_MON_GET_OSDMAP:
     m = make_message<MMonGetOSDMap>();
     break;
   case MSG_MON_GET_PURGED_SNAPS:
@@ -476,10 +476,10 @@ Message *decode_message(CephContext *cct,
   case MSG_MON_GET_PURGED_SNAPS_REPLY:
     m = make_message<MMonGetPurgedSnapsReply>();
     break;
-  case CEPH_MSG_MON_GET_VERSION:
+  case STONE_MSG_MON_GET_VERSION:
     m = make_message<MMonGetVersion>();
     break;
-  case CEPH_MSG_MON_GET_VERSION_REPLY:
+  case STONE_MSG_MON_GET_VERSION_REPLY:
     m = make_message<MMonGetVersionReply>();
     break;
 
@@ -510,10 +510,10 @@ Message *decode_message(CephContext *cct,
   case MSG_OSD_PING:
     m = make_message<MOSDPing>();
     break;
-  case CEPH_MSG_OSD_OP:
+  case STONE_MSG_OSD_OP:
     m = make_message<MOSDOp>();
     break;
-  case CEPH_MSG_OSD_OPREPLY:
+  case STONE_MSG_OSD_OPREPLY:
     m = make_message<MOSDOpReply>();
     break;
   case MSG_OSD_REPOP:
@@ -531,15 +531,15 @@ Message *decode_message(CephContext *cct,
   case MSG_OSD_PG_UPDATE_LOG_MISSING_REPLY:
     m = make_message<MOSDPGUpdateLogMissingReply>();
     break;
-  case CEPH_MSG_OSD_BACKOFF:
+  case STONE_MSG_OSD_BACKOFF:
     m = make_message<MOSDBackoff>();
     break;
 
-  case CEPH_MSG_OSD_MAP:
+  case STONE_MSG_OSD_MAP:
     m = make_message<MOSDMap>();
     break;
 
-  case CEPH_MSG_WATCH_NOTIFY:
+  case STONE_MSG_WATCH_NOTIFY:
     m = make_message<MWatchNotify>();
     break;
 
@@ -641,10 +641,10 @@ Message *decode_message(CephContext *cct,
     m = make_message<MOSDECSubOpReadReply>();
     break;
    // auth
-  case CEPH_MSG_AUTH:
+  case STONE_MSG_AUTH:
     m = make_message<MAuth>();
     break;
-  case CEPH_MSG_AUTH_REPLY:
+  case STONE_MSG_AUTH_REPLY:
     m = make_message<MAuthReply>();
     break;
 
@@ -653,49 +653,49 @@ Message *decode_message(CephContext *cct,
     break; 
 
     // clients
-  case CEPH_MSG_MON_SUBSCRIBE:
+  case STONE_MSG_MON_SUBSCRIBE:
     m = make_message<MMonSubscribe>();
     break;
-  case CEPH_MSG_MON_SUBSCRIBE_ACK:
+  case STONE_MSG_MON_SUBSCRIBE_ACK:
     m = make_message<MMonSubscribeAck>();
     break;
-  case CEPH_MSG_CLIENT_SESSION:
+  case STONE_MSG_CLIENT_SESSION:
     m = make_message<MClientSession>();
     break;
-  case CEPH_MSG_CLIENT_RECONNECT:
+  case STONE_MSG_CLIENT_RECONNECT:
     m = make_message<MClientReconnect>();
     break;
-  case CEPH_MSG_CLIENT_REQUEST:
+  case STONE_MSG_CLIENT_REQUEST:
     m = make_message<MClientRequest>();
     break;
-  case CEPH_MSG_CLIENT_REQUEST_FORWARD:
+  case STONE_MSG_CLIENT_REQUEST_FORWARD:
     m = make_message<MClientRequestForward>();
     break;
-  case CEPH_MSG_CLIENT_REPLY:
+  case STONE_MSG_CLIENT_REPLY:
     m = make_message<MClientReply>();
     break;
-  case CEPH_MSG_CLIENT_RECLAIM:
+  case STONE_MSG_CLIENT_RECLAIM:
     m = make_message<MClientReclaim>();
     break;
-  case CEPH_MSG_CLIENT_RECLAIM_REPLY:
+  case STONE_MSG_CLIENT_RECLAIM_REPLY:
     m = make_message<MClientReclaimReply>();
     break;
-  case CEPH_MSG_CLIENT_CAPS:
+  case STONE_MSG_CLIENT_CAPS:
     m = make_message<MClientCaps>();
     break;
-  case CEPH_MSG_CLIENT_CAPRELEASE:
+  case STONE_MSG_CLIENT_CAPRELEASE:
     m = make_message<MClientCapRelease>();
     break;
-  case CEPH_MSG_CLIENT_LEASE:
+  case STONE_MSG_CLIENT_LEASE:
     m = make_message<MClientLease>();
     break;
-  case CEPH_MSG_CLIENT_SNAP:
+  case STONE_MSG_CLIENT_SNAP:
     m = make_message<MClientSnap>();
     break;
-  case CEPH_MSG_CLIENT_QUOTA:
+  case STONE_MSG_CLIENT_QUOTA:
     m = make_message<MClientQuota>();
     break;
-  case CEPH_MSG_CLIENT_METRICS:
+  case STONE_MSG_CLIENT_METRICS:
     m = make_message<MClientMetrics>();
     break;
 
@@ -704,13 +704,13 @@ Message *decode_message(CephContext *cct,
     m = make_message<MMDSPeerRequest>();
     break;
 
-  case CEPH_MSG_MDS_MAP:
+  case STONE_MSG_MDS_MAP:
     m = make_message<MMDSMap>();
     break;
-  case CEPH_MSG_FS_MAP:
+  case STONE_MSG_FS_MAP:
     m = make_message<MFSMap>();
     break;
-  case CEPH_MSG_FS_MAP_USER:
+  case STONE_MSG_FS_MAP_USER:
     m = make_message<MFSMapUser>();
     break;
   case MSG_MDS_BEACON:
@@ -922,15 +922,15 @@ Message *decode_message(CephContext *cct,
 
     // -- simple messages without payload --
 
-  case CEPH_MSG_SHUTDOWN:
+  case STONE_MSG_SHUTDOWN:
     m = make_message<MGenericMessage>(type);
     break;
 
   default:
     if (cct) {
-      ldout(cct, 0) << "can't decode unknown message type " << type << " MSG_AUTH=" << CEPH_MSG_AUTH << dendl;
+      ldout(cct, 0) << "can't decode unknown message type " << type << " MSG_AUTH=" << STONE_MSG_AUTH << dendl;
       if (cct->_conf->ms_die_on_bad_msg)
-	ceph_abort();
+	stone_abort();
     }
     return 0;
   }
@@ -948,7 +948,7 @@ Message *decode_message(CephContext *cct,
 		    << " because compat_version " << header.compat_version
 		    << " > supported version " << m->get_header().version << dendl;
       if (cct->_conf->ms_die_on_bad_msg)
-	ceph_abort();
+	stone_abort();
     }
     return 0;
   }
@@ -963,17 +963,17 @@ Message *decode_message(CephContext *cct,
   try {
     m->decode_payload();
   }
-  catch (const ceph::buffer::error &e) {
+  catch (const stone::buffer::error &e) {
     if (cct) {
       lderr(cct) << "failed to decode message of type " << type
 		 << " v" << header.version
 		 << ": " << e.what() << dendl;
-      ldout(cct, ceph::dout::need_dynamic(
+      ldout(cct, stone::dout::need_dynamic(
 	cct->_conf->ms_dump_corrupt_message_level)) << "dump: \n";
       m->get_payload().hexdump(*_dout);
       *_dout << dendl;
       if (cct->_conf->ms_die_on_bad_msg)
-	ceph_abort();
+	stone_abort();
     }
     return 0;
   }
@@ -982,9 +982,9 @@ Message *decode_message(CephContext *cct,
   return m.detach();
 }
 
-void Message::encode_trace(ceph::bufferlist &bl, uint64_t features) const
+void Message::encode_trace(stone::bufferlist &bl, uint64_t features) const
 {
-  using ceph::encode;
+  using stone::encode;
   auto p = trace.get_info();
   static const blkin_trace_info empty = { 0, 0, 0 };
   if (!p) {
@@ -993,7 +993,7 @@ void Message::encode_trace(ceph::bufferlist &bl, uint64_t features) const
   encode(*p, bl);
 }
 
-void Message::decode_trace(ceph::bufferlist::const_iterator &p, bool create)
+void Message::decode_trace(stone::bufferlist::const_iterator &p, bool create)
 {
   blkin_trace_info info = {};
   decode(info, p);
@@ -1026,21 +1026,21 @@ void Message::decode_trace(ceph::bufferlist::const_iterator &p, bool create)
 // problems, we currently always encode and decode using the old footer format that doesn't
 // allow for message authentication.  Eventually we should fix that.  PLR
 
-void encode_message(Message *msg, uint64_t features, ceph::bufferlist& payload)
+void encode_message(Message *msg, uint64_t features, stone::bufferlist& payload)
 {
-  ceph_msg_footer_old old_footer;
+  stone_msg_footer_old old_footer;
   msg->encode(features, MSG_CRC_ALL);
   encode(msg->get_header(), payload);
 
   // Here's where we switch to the old footer format.  PLR
-  ceph_msg_footer footer = msg->get_footer();
+  stone_msg_footer footer = msg->get_footer();
   old_footer.front_crc = footer.front_crc;   
   old_footer.middle_crc = footer.middle_crc;   
   old_footer.data_crc = footer.data_crc;   
   old_footer.flags = footer.flags;   
   encode(old_footer, payload);
 
-  using ceph::encode;
+  using stone::encode;
   encode(msg->get_payload(), payload);
   encode(msg->get_middle(), payload);
   encode(msg->get_data(), payload);
@@ -1051,12 +1051,12 @@ void encode_message(Message *msg, uint64_t features, ceph::bufferlist& payload)
 // We've slipped in a 0 signature at this point, so any signature checking after this will
 // fail.  PLR
 
-Message *decode_message(CephContext *cct, int crcflags, ceph::bufferlist::const_iterator& p)
+Message *decode_message(StoneContext *cct, int crcflags, stone::bufferlist::const_iterator& p)
 {
-  ceph_msg_header h;
-  ceph_msg_footer_old fo;
-  ceph_msg_footer f;
-  ceph::bufferlist fr, mi, da;
+  stone_msg_header h;
+  stone_msg_footer_old fo;
+  stone_msg_footer f;
+  stone::bufferlist fr, mi, da;
   decode(h, p);
   decode(fo, p);
   f.front_crc = fo.front_crc;
@@ -1064,7 +1064,7 @@ Message *decode_message(CephContext *cct, int crcflags, ceph::bufferlist::const_
   f.data_crc = fo.data_crc;
   f.flags = fo.flags;
   f.sig = 0;
-  using ceph::decode;
+  using stone::decode;
   decode(fr, p);
   decode(mi, p);
   decode(da, p);

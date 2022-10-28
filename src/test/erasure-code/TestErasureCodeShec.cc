@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014,2015 FUJITSU LIMITED
  *
@@ -2385,7 +2385,7 @@ TEST(ErasureCodeShec, create_rule_1_2)
   for (int h = 0; h < num_host; ++h) {
     loc["host"] = string("host-") + stringify(h);
     for (int o = 0; o < num_osd; ++o, ++osd) {
-      crush->insert_item(g_ceph_context, osd, 1.0,
+      crush->insert_item(g_stone_context, osd, 1.0,
 			 string("osd.") + stringify(osd), loc);
     }
   }
@@ -2443,7 +2443,7 @@ TEST(ErasureCodeShec, create_rule_4)
   for (int h = 0; h < num_host; ++h) {
     loc["host"] = string("host-") + stringify(h);
     for (int o = 0; o < num_osd; ++o, ++osd) {
-      crush->insert_item(g_ceph_context, osd, 1.0,
+      crush->insert_item(g_stone_context, osd, 1.0,
 			 string("osd.") + stringify(osd), loc);
     }
   }
@@ -2494,7 +2494,7 @@ TEST(ErasureCodeShec, create_rule2_1)
   for (int h = 0; h < num_host; ++h) {
     loc["host"] = string("host-") + stringify(h);
     for (int o = 0; o < num_osd; ++o, ++osd) {
-      crush->insert_item(g_ceph_context, osd, 1.0,
+      crush->insert_item(g_stone_context, osd, 1.0,
 			 string("osd.") + stringify(osd), loc);
     }
   }
@@ -2553,7 +2553,7 @@ TEST(ErasureCodeShec, create_rule2_3)
   for (int h = 0; h < num_host; ++h) {
     loc["host"] = string("host-") + stringify(h);
     for (int o = 0; o < num_osd; ++o, ++osd) {
-      crush->insert_item(g_ceph_context, osd, 1.0,
+      crush->insert_item(g_stone_context, osd, 1.0,
 			 string("osd.") + stringify(osd), loc);
     }
   }
@@ -2738,7 +2738,7 @@ void* thread3(void* pParam)
   for (int h = 0; h < num_host; ++h) {
     loc["host"] = string("host-") + stringify(h);
     for (int o = 0; o < num_osd; ++o, ++osd) {
-      crush->insert_item(g_ceph_context, osd, 1.0,
+      crush->insert_item(g_stone_context, osd, 1.0,
 			 string("osd.") + stringify(osd), loc);
     }
   }

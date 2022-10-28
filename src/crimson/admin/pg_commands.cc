@@ -33,9 +33,9 @@ public:
   {}
   seastar::future<tell_result_t> call(const cmdmap_t& cmdmap,
                                       std::string_view format,
-                                      ceph::bufferlist&& input) const final
+                                      stone::bufferlist&& input) const final
   {
-    // we have "ceph tell <pgid> <cmd>". and it is the ceph cli's responsibility
+    // we have "stone tell <pgid> <cmd>". and it is the stone cli's responsibility
     // to add "pgid" to the cmd dict. as rados_pg_command() does not set it for
     // us. moreover, and "pgid" is not listed in the command description, as user
     // command format does not follow the convention of "<prefix> [<args>,...]"
@@ -73,7 +73,7 @@ private:
   do_command(Ref<PG> pg,
              const cmdmap_t& cmdmap,
              std::string_view format,
-             ceph::bufferlist&& input) const = 0;
+             stone::bufferlist&& input) const = 0;
 
   OSD& osd;
 };
@@ -92,7 +92,7 @@ private:
   do_command(Ref<PG> pg,
              const cmdmap_t&,
              std::string_view format,
-             ceph::bufferlist&& input) const final
+             stone::bufferlist&& input) const final
   {
     std::unique_ptr<Formatter> f{Formatter::create(format,
                                                    "json-pretty",
@@ -109,8 +109,8 @@ public:
   explicit MarkUnfoundLostCommand(crimson::osd::OSD& osd) :
     PGCommand{osd,
               "mark_unfound_lost",
-              "name=pgid,type=CephPgid,req=false"
-              " name=mulcmd,type=CephChoices,strings=revert|delete",
+              "name=pgid,type=StonePgid,req=false"
+              " name=mulcmd,type=StoneChoices,strings=revert|delete",
               "mark all unfound objects in this pg as lost, either"
               " removing or reverting to a prior version if one is"
               " available"}
@@ -119,7 +119,7 @@ public:
   do_command(Ref<PG> pg,
              const cmdmap_t& cmdmap,
              std::string_view,
-             ceph::bufferlist&&) const final
+             stone::bufferlist&&) const final
   {
     // what to do with the unfound object specifically.
     std::string cmd;

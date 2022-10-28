@@ -18,7 +18,7 @@
 #include "services/svc_zone.h"
 #include "services/svc_sys_obj.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #define DEFAULT_NUM_SHARDS 64
 
@@ -215,7 +215,7 @@ int RGWOrphanSearch::init(const DoutPrefixProvider *dpp, const string& job_name,
     search_info = *info;
     search_info.job_name = job_name;
     search_info.num_shards = (info->num_shards ? info->num_shards : DEFAULT_NUM_SHARDS);
-    search_info.start_time = ceph_clock_now();
+    search_info.start_time = stone_clock_now();
     search_stage = RGWOrphanSearchStage(ORPHAN_SEARCH_STAGE_INIT);
 
     r = save_state();
@@ -733,7 +733,7 @@ int OMAPReader::get_next(string *key, bufferlist *pbl, bool *done)
 
 int RGWOrphanSearch::compare_oid_indexes(const DoutPrefixProvider *dpp)
 {
-  ceph_assert(linked_objs_index.size() == all_objs_index.size());
+  stone_assert(linked_objs_index.size() == all_objs_index.size());
 
   librados::IoCtx& ioctx = orphan_store.get_ioctx();
 
@@ -878,7 +878,7 @@ int RGWOrphanSearch::run(const DoutPrefixProvider *dpp)
       break;
 
     default:
-      ceph_abort();
+      stone_abort();
   };
 
   return 0;
@@ -1091,7 +1091,7 @@ int RGWRadosList::pop_and_handle_stat_op(
 done:
 
   // invalidate object context for this object to avoid memory leak
-  // (see pr https://github.com/ceph/ceph/pull/30174)
+  // (see pr https://github.com/stone/stone/pull/30174)
   obj_ctx.invalidate(front_op.result.obj);
 
   ops.pop_front();

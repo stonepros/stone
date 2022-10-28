@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_CONTEXT_H
-#define CEPH_CONTEXT_H
+#ifndef STONE_CONTEXT_H
+#define STONE_CONTEXT_H
 
 #include "common/dout.h"
 
@@ -193,7 +193,7 @@ GenContextURef<T> make_gen_lambda_context(F &&f) {
  * finish and destroy a list of Contexts
  */
 template<class C>
-inline void finish_contexts(CephContext *cct, C& finished, int result = 0)
+inline void finish_contexts(StoneeContext *cct, C& finished, int result = 0)
 {
   if (finished.empty())
     return;
@@ -241,10 +241,10 @@ struct C_Lock : public Context {
 template <class ContextType, class ContextInstanceType, class Container = std::list<ContextType *>>
 class C_ContextsBase : public ContextInstanceType {
 public:
-  CephContext *cct;
+  StoneeContext *cct;
   Container contexts;
 
-  C_ContextsBase(CephContext *cct_)
+  C_ContextsBase(StoneeContext *cct_)
     : cct(cct_)
   {
   }
@@ -304,7 +304,7 @@ typedef C_ContextsBase<Context, Context> C_Contexts;
 template <class ContextType, class ContextInstanceType>
 class C_GatherBase {
 private:
-  CephContext *cct;
+  StoneeContext *cct;
   int result = 0;
   ContextType *onfinish;
 #ifdef DEBUG_GATHER
@@ -368,7 +368,7 @@ private:
   };
 
 public:
-  C_GatherBase(CephContext *cct_, ContextType *onfinish_)
+  C_GatherBase(StoneeContext *cct_, ContextType *onfinish_)
     : cct(cct_), onfinish(onfinish_)
   {
     mydout(cct,10) << "C_GatherBase " << this << ".new" << dendl;
@@ -452,11 +452,11 @@ template <class ContextType, class GatherType>
 class C_GatherBuilderBase
 {
 public:
-  C_GatherBuilderBase(CephContext *cct_)
+  C_GatherBuilderBase(StoneeContext *cct_)
     : cct(cct_), c_gather(NULL), finisher(NULL), activated(false)
   {
   }
-  C_GatherBuilderBase(CephContext *cct_, ContextType *finisher_)
+  C_GatherBuilderBase(StoneeContext *cct_, ContextType *finisher_)
     : cct(cct_), c_gather(NULL), finisher(finisher_), activated(false)
   {
   }
@@ -506,7 +506,7 @@ public:
   }
 
 private:
-  CephContext *cct;
+  StoneeContext *cct;
   GatherType *c_gather;
   ContextType *finisher;
   bool activated;

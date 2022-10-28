@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -28,7 +28,7 @@
 #include "common/config.h"
 #include "common/debug.h"
 #include "include/buffer.h"
-#include "common/ceph_crypto.h"
+#include "common/stone_crypto.h"
 #include "common/errno.h"
 #include "include/compat.h"
 #include "chain_xattr.h"
@@ -36,7 +36,7 @@
 #include "LFNIndex.h"
 
 #define dout_context cct
-#define dout_subsys ceph_subsys_filestore
+#define dout_subsys stone_subsys_filestore
 #undef dout_prefix
 #define dout_prefix *_dout << "LFNIndex(" << get_base_path() << ") "
 
@@ -46,13 +46,13 @@ using std::set;
 using std::string;
 using std::vector;
 
-using ceph::crypto::SHA1;
+using stone::crypto::SHA1;
 
-using ceph::bufferlist;
-using ceph::bufferptr;
+using stone::bufferlist;
+using stone::bufferptr;
 
-const string LFNIndex::LFN_ATTR = "user.cephos.lfn";
-const string LFNIndex::PHASH_ATTR_PREFIX = "user.cephos.phash.";
+const string LFNIndex::LFN_ATTR = "user.stoneos.lfn";
+const string LFNIndex::PHASH_ATTR_PREFIX = "user.stoneos.phash.";
 const string LFNIndex::SUBDIR_PREFIX = "DIR_";
 const string LFNIndex::FILENAME_COOKIE = "long";
 const int LFNIndex::FILENAME_PREFIX_LEN =  FILENAME_SHORT_LEN - FILENAME_HASH_LEN -
@@ -188,7 +188,7 @@ int LFNIndex::fsync_dir(const vector<string> &path)
   maybe_inject_failure();
   if (r < 0) {
     derr << __func__ << " fsync failed: " << cpp_strerror(errno) << dendl;
-    ceph_abort();
+    stone_abort();
   }
   return 0;
 }
@@ -395,11 +395,11 @@ static int get_hobject_from_oinfo(const char *dir, const char *file,
 {
   char path[PATH_MAX];
   snprintf(path, sizeof(path), "%s/%s", dir, file);
-  // Hack, user.ceph._ is the attribute used to store the object info
+  // Hack, user.stone._ is the attribute used to store the object info
   bufferptr bp;
   int r = chain_getxattr_buf(
     path,
-    "user.ceph._",
+    "user.stone._",
     &bp);
   if (r < 0)
     return r;
@@ -458,7 +458,7 @@ int LFNIndex::list_objects(const vector<string> &to_list, int max_objs,
       } else {
 	string long_name = lfn_generate_object_name(obj);
 	if (!lfn_must_hash(long_name)) {
-	  ceph_assert(long_name == short_name);
+	  stone_assert(long_name == short_name);
 	}
 	if (index_version == HASH_INDEX_TAG)
 	  get_hobject_from_oinfo(to_list_path.c_str(), short_name.c_str(), &obj);
@@ -593,7 +593,7 @@ string LFNIndex::lfn_generate_object_name_keyless(const ghobject_t &oid)
   char *end = s + sizeof(s);
   char *t = s;
 
-  ceph_assert(oid.generation == ghobject_t::NO_GEN);
+  stone_assert(oid.generation == ghobject_t::NO_GEN);
   const char *i = oid.hobj.oid.name.c_str();
   // Escape subdir prefix
   if (oid.hobj.oid.name.substr(0, 4) == "DIR_") {
@@ -616,9 +616,9 @@ string LFNIndex::lfn_generate_object_name_keyless(const ghobject_t &oid)
     i++;
   }
 
-  if (oid.hobj.snap == CEPH_NOSNAP)
+  if (oid.hobj.snap == STONE_NOSNAP)
     t += snprintf(t, end - t, "_head");
-  else if (oid.hobj.snap == CEPH_SNAPDIR)
+  else if (oid.hobj.snap == STONE_SNAPDIR)
     t += snprintf(t, end - t, "_snapdir");
   else
     t += snprintf(t, end - t, "_%llx", (long long unsigned)oid.hobj.snap);
@@ -665,9 +665,9 @@ string LFNIndex::lfn_generate_object_name_current(const ghobject_t &oid)
   char buf[PATH_MAX];
   char *t = buf;
   const char *end = t + sizeof(buf);
-  if (oid.hobj.snap == CEPH_NOSNAP)
+  if (oid.hobj.snap == STONE_NOSNAP)
     t += snprintf(t, end - t, "head");
-  else if (oid.hobj.snap == CEPH_SNAPDIR)
+  else if (oid.hobj.snap == STONE_SNAPDIR)
     t += snprintf(t, end - t, "snapdir");
   else
     t += snprintf(t, end - t, "%llx", (long long unsigned)oid.hobj.snap);
@@ -708,7 +708,7 @@ string LFNIndex::lfn_generate_object_name_poolless(const ghobject_t &oid)
   if (index_version == HASH_INDEX_TAG)
     return lfn_generate_object_name_keyless(oid);
 
-  ceph_assert(oid.generation == ghobject_t::NO_GEN);
+  stone_assert(oid.generation == ghobject_t::NO_GEN);
   string full_name;
   string::const_iterator i = oid.hobj.oid.name.begin();
   if (oid.hobj.oid.name.substr(0, 4) == "DIR_") {
@@ -726,9 +726,9 @@ string LFNIndex::lfn_generate_object_name_poolless(const ghobject_t &oid)
   char snap_with_hash[PATH_MAX];
   char *t = snap_with_hash;
   char *end = t + sizeof(snap_with_hash);
-  if (oid.hobj.snap == CEPH_NOSNAP)
+  if (oid.hobj.snap == STONE_NOSNAP)
     t += snprintf(t, end - t, "head");
-  else if (oid.hobj.snap == CEPH_SNAPDIR)
+  else if (oid.hobj.snap == STONE_SNAPDIR)
     t += snprintf(t, end - t, "snapdir");
   else
     t += snprintf(t, end - t, "%llx", (long long unsigned)oid.hobj.snap);
@@ -797,7 +797,7 @@ int LFNIndex::lfn_get_name(const vector<string> &path,
 	*hardlink = 0;
       return 0;
     }
-    ceph_assert(r > 0);
+    stone_assert(r > 0);
     string lfn(bp.c_str(), bp.length());
     if (lfn == full_name) {
       if (mangled_name)
@@ -854,7 +854,7 @@ int LFNIndex::lfn_get_name(const vector<string> &path,
       }
     }
   }
-  ceph_abort(); // Unreachable
+  stone_abort(); // Unreachable
   return 0;
 }
 
@@ -1040,7 +1040,7 @@ static int parse_object(const char *s, ghobject_t& o)
 	  *t++ = '_';
 	  break;
 	}
-	default: ceph_abort();
+	default: stone_abort();
 	}
       } else {
 	*t++ = *i;
@@ -1050,9 +1050,9 @@ static int parse_object(const char *s, ghobject_t& o)
     *t = 0;
     o.hobj.oid.name = string(buf, t-buf);
     if (strncmp(bar+1, "head", 4) == 0)
-      o.hobj.snap = CEPH_NOSNAP;
+      o.hobj.snap = STONE_NOSNAP;
     else if (strncmp(bar+1, "snapdir", 7) == 0)
-      o.hobj.snap = CEPH_SNAPDIR;
+      o.hobj.snap = STONE_SNAPDIR;
     else
       o.hobj.snap = strtoull(bar+1, NULL, 16);
 
@@ -1153,9 +1153,9 @@ int LFNIndex::lfn_parse_object_name_poolless(const string &long_name,
   string hash_str(current, end);
 
   if (snap_str == "head")
-    snap = CEPH_NOSNAP;
+    snap = STONE_NOSNAP;
   else if (snap_str == "snapdir")
-    snap = CEPH_SNAPDIR;
+    snap = STONE_SNAPDIR;
   else
     snap = strtoull(snap_str.c_str(), NULL, 16);
   sscanf(hash_str.c_str(), "%X", &hash);
@@ -1260,9 +1260,9 @@ int LFNIndex::lfn_parse_object_name(const string &long_name, ghobject_t *out)
   }
 
   if (snap_str == "head")
-    snap = CEPH_NOSNAP;
+    snap = STONE_NOSNAP;
   else if (snap_str == "snapdir")
-    snap = CEPH_SNAPDIR;
+    snap = STONE_SNAPDIR;
   else
     snap = strtoull(snap_str.c_str(), NULL, 16);
   sscanf(hash_str.c_str(), "%X", &hash);
@@ -1325,7 +1325,7 @@ void LFNIndex::build_filename(const char *old_filename, int i, char *filename, i
 {
   char hash[FILENAME_HASH_LEN + 1];
 
-  ceph_assert(len >= FILENAME_SHORT_LEN + 4);
+  stone_assert(len >= FILENAME_SHORT_LEN + 4);
 
   strncpy(filename, old_filename, FILENAME_PREFIX_LEN);
   filename[FILENAME_PREFIX_LEN] = '\0';
@@ -1356,7 +1356,7 @@ bool LFNIndex::short_name_matches(const char *short_name, const char *cand_long_
 
   int index = -1;
   char buf[FILENAME_SHORT_LEN + 4];
-  ceph_assert((end - suffix) < (int)sizeof(buf));
+  stone_assert((end - suffix) < (int)sizeof(buf));
   int r = sscanf(suffix, "_%d_%s", &index, buf);
   if (r < 2)
     return false;
@@ -1369,7 +1369,7 @@ bool LFNIndex::short_name_matches(const char *short_name, const char *cand_long_
 string LFNIndex::lfn_get_short_name(const ghobject_t &oid, int i)
 {
   string long_name = lfn_generate_object_name(oid);
-  ceph_assert(lfn_must_hash(long_name));
+  stone_assert(lfn_must_hash(long_name));
   char buf[FILENAME_SHORT_LEN + 4];
   build_filename(long_name.c_str(), i, buf, sizeof(buf));
   return string(buf);

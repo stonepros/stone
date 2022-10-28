@@ -88,7 +88,7 @@ TEST_F(LibRadosSnapshotsPP, SnapGetNamePP) {
 }
 
 TEST_F(LibRadosSnapshotsPP, SnapCreateRemovePP) {
-  // reproduces http://tracker.ceph.com/issues/10262
+  // reproduces http://tracker.stone.com/issues/10262
   bufferlist bl;
   bl.append("foo");
   ASSERT_EQ(0, ioctx.write("foo", bl, bl.length(), 0));

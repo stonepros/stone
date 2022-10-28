@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 FUJITSU LIMITED
  * Copyright (C) 2014 CERN (Switzerland)
@@ -24,8 +24,8 @@
 using namespace std;
 
 // -----------------------------------------------------------------------------
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_osd
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_osd
 #undef dout_prefix
 #define dout_prefix _tc_prefix(_dout)
 // -----------------------------------------------------------------------------
@@ -152,7 +152,7 @@ ErasureCodeShecTableCache::setEncodingTable(int technique, int k, int m, int c, 
   }
 }
 
-ceph::mutex*
+stone::mutex*
 ErasureCodeShecTableCache::getLock()
 {
   return &codec_tables_guard;

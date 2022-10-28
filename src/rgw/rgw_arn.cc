@@ -22,7 +22,7 @@ boost::optional<Partition> to_partition(const smatch::value_type& p,
     return boost::none;
   }
 
-  ceph_abort();
+  stone_abort();
 }
 
 boost::optional<Service> to_service(const smatch::value_type& s,

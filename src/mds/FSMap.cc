@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -31,10 +31,10 @@ using std::pair;
 using std::ostream;
 using std::string;
 
-using ceph::bufferlist;
-using ceph::Formatter;
+using stone::bufferlist;
+using stone::Formatter;
 
-void ClusterInfo::encode(ceph::buffer::list &bl) const {
+void ClusterInfo::encode(stone::buffer::list &bl) const {
   ENCODE_START(1, 1, bl);
   encode(client_name, bl);
   encode(cluster_name, bl);
@@ -42,7 +42,7 @@ void ClusterInfo::encode(ceph::buffer::list &bl) const {
   ENCODE_FINISH(bl);
 }
 
-void ClusterInfo::decode(ceph::buffer::list::const_iterator &iter) {
+void ClusterInfo::decode(stone::buffer::list::const_iterator &iter) {
   DECODE_START(1, iter);
   decode(client_name, iter);
   decode(cluster_name, iter);
@@ -50,7 +50,7 @@ void ClusterInfo::decode(ceph::buffer::list::const_iterator &iter) {
   DECODE_FINISH(iter);
 }
 
-void ClusterInfo::dump(ceph::Formatter *f) const {
+void ClusterInfo::dump(stone::Formatter *f) const {
   f->dump_string("client_name", client_name);
   f->dump_string("cluster_name", cluster_name);
   f->dump_string("fs_name", fs_name);
@@ -61,21 +61,21 @@ void ClusterInfo::print(std::ostream& out) const {
       << ", fs_name=" << fs_name << "]" << std::endl;
 }
 
-void Peer::encode(ceph::buffer::list &bl) const {
+void Peer::encode(stone::buffer::list &bl) const {
   ENCODE_START(1, 1, bl);
   encode(uuid, bl);
   encode(remote, bl);
   ENCODE_FINISH(bl);
 }
 
-void Peer::decode(ceph::buffer::list::const_iterator &iter) {
+void Peer::decode(stone::buffer::list::const_iterator &iter) {
   DECODE_START(1, iter);
   decode(uuid, iter);
   decode(remote, iter);
   DECODE_FINISH(iter);
 }
 
-void Peer::dump(ceph::Formatter *f) const {
+void Peer::dump(stone::Formatter *f) const {
   f->open_object_section(uuid);
   f->dump_object("remote", remote);
   f->close_section();
@@ -85,21 +85,21 @@ void Peer::print(std::ostream& out) const {
   out << "[uuid=" << uuid << ", remote=" << remote << "]" << std::endl;
 }
 
-void MirrorInfo::encode(ceph::buffer::list &bl) const {
+void MirrorInfo::encode(stone::buffer::list &bl) const {
   ENCODE_START(1, 1, bl);
   encode(mirrored, bl);
   encode(peers, bl);
   ENCODE_FINISH(bl);
 }
 
-void MirrorInfo::decode(ceph::buffer::list::const_iterator &iter) {
+void MirrorInfo::decode(stone::buffer::list::const_iterator &iter) {
   DECODE_START(1, iter);
   decode(mirrored, iter);
   decode(peers, iter);
   DECODE_FINISH(iter);
 }
 
-void MirrorInfo::dump(ceph::Formatter *f) const {
+void MirrorInfo::dump(stone::Formatter *f) const {
   f->open_object_section("peers");
   for (auto &peer : peers) {
     peer.dump(f);
@@ -226,7 +226,7 @@ void FSMap::print(ostream& out) const
 
 void FSMap::print_daemon_summary(ostream& out) const
 {
-  // this appears in the "services:" section of "ceph status"
+  // this appears in the "services:" section of "stone status"
   int num_up = 0, num_in = 0, num_failed = 0;
   int num_standby_replay = 0;
   for (auto& [fscid, fs] : filesystems) {
@@ -250,7 +250,7 @@ void FSMap::print_daemon_summary(ostream& out) const
 
 void FSMap::print_fs_summary(ostream& out) const
 {
-  // this appears in the "data:" section of "ceph status"
+  // this appears in the "data:" section of "stone status"
   if (!filesystems.empty()) {
     int num_failed = 0, num_recovering = 0, num_stopped = 0, num_healthy = 0;
     int num_damaged = 0;
@@ -350,7 +350,7 @@ void FSMap::print_summary(Formatter *f, ostream *out) const
       continue;
 
     const auto& info = filesystems.at(fscid)->mds_map.get_info_gid(gid);
-    auto s = std::string(ceph_mds_state_name(info.state));
+    auto s = std::string(stone_mds_state_name(info.state));
     if (info.laggy()) {
       s += "(laggy or crashed)";
     }
@@ -396,7 +396,7 @@ void FSMap::print_summary(Formatter *f, ostream *out) const
     }
     for (const auto& [state, count] : by_state) {
       if (count > 0) {
-        auto s = std::string_view(ceph_mds_state_name(state));
+        auto s = std::string_view(stone_mds_state_name(state));
         *out << " " << count << " " << s;
       }
     }
@@ -404,7 +404,7 @@ void FSMap::print_summary(Formatter *f, ostream *out) const
 
   if (f) {
     const auto state = MDSMap::DaemonState::STATE_STANDBY;
-    auto&& name = ceph_mds_state_name(state);
+    auto&& name = stone_mds_state_name(state);
     auto count = standby_daemons.size();
     f->dump_unsigned(name, count);
   }
@@ -459,8 +459,8 @@ Filesystem::ref FSMap::create_filesystem(std::string_view name,
   fs->mds_map.metadata_pool = metadata_pool;
   fs->mds_map.cas_pool = -1;
   fs->mds_map.compat = default_compat;
-  fs->mds_map.created = ceph_clock_now();
-  fs->mds_map.modified = ceph_clock_now();
+  fs->mds_map.created = stone_clock_now();
+  fs->mds_map.modified = stone_clock_now();
   fs->mds_map.enabled = true;
   if (fscid == FS_CLUSTER_ID_NONE) {
     fs->fscid = next_filesystem_id++;
@@ -475,7 +475,7 @@ Filesystem::ref FSMap::create_filesystem(std::string_view name,
     fs->mds_map.in.insert(mds_rank_t(0));
     fs->mds_map.failed.insert(mds_rank_t(0));
 
-    fs->mds_map.set_flag(CEPH_MDSMAP_NOT_JOINABLE);
+    fs->mds_map.set_flag(STONE_MDSMAP_NOT_JOINABLE);
   }
 
   // File system's ID can be FS_CLUSTER_ID_ANONYMOUS if we're recovering
@@ -484,7 +484,7 @@ Filesystem::ref FSMap::create_filesystem(std::string_view name,
   if (fscid != FS_CLUSTER_ID_ANONYMOUS) {
     // ANONYMOUS is only for upgrades from legacy mdsmaps, we should
     // have initialized next_filesystem_id such that it's never used here.
-    ceph_assert(fs->fscid != FS_CLUSTER_ID_ANONYMOUS);
+    stone_assert(fs->fscid != FS_CLUSTER_ID_ANONYMOUS);
   }
   filesystems[fs->fscid] = fs;
 
@@ -534,8 +534,8 @@ void FSMap::reset_filesystem(fs_cluster_id_t fscid)
   new_fs->mds_map.cas_pool = fs->mds_map.cas_pool;
   new_fs->mds_map.fs_name = fs->mds_map.fs_name;
   new_fs->mds_map.compat = default_compat;
-  new_fs->mds_map.created = ceph_clock_now();
-  new_fs->mds_map.modified = ceph_clock_now();
+  new_fs->mds_map.created = stone_clock_now();
+  new_fs->mds_map.modified = stone_clock_now();
   new_fs->mds_map.standby_count_wanted = fs->mds_map.standby_count_wanted;
   new_fs->mds_map.enabled = true;
 
@@ -665,7 +665,7 @@ void FSMap::decode(bufferlist::const_iterator& p)
     filesystems.clear();
     for (auto& ref : v) {
       auto em = filesystems.emplace(std::piecewise_construct, std::forward_as_tuple(ref->fscid), std::forward_as_tuple(std::move(ref)));
-      ceph_assert(em.second);
+      stone_assert(em.second);
     }
   }
   decode(mds_roles, p);
@@ -724,7 +724,7 @@ int FSMap::parse_filesystem(
         return 0;
       }
     }
-    return -CEPHFS_ENOENT;
+    return -STONEFS_ENOENT;
   } else {
     *result = get_filesystem(fscid);
     return 0;
@@ -773,8 +773,8 @@ const MDSMap::mds_info_t* FSMap::get_available_standby(const Filesystem& fs) con
   const bool upgradeable = fs.is_upgradeable();
   const mds_info_t* who = nullptr;
   for (const auto& [gid, info] : standby_daemons) {
-    ceph_assert(info.rank == MDS_RANK_NONE);
-    ceph_assert(info.state == MDSMap::STATE_STANDBY);
+    stone_assert(info.rank == MDS_RANK_NONE);
+    stone_assert(info.state == MDSMap::STATE_STANDBY);
 
     if (info.laggy() || info.is_frozen()) {
       continue;
@@ -841,7 +841,7 @@ const MDSMap::mds_info_t* FSMap::find_replacement_for(mds_role_t role) const
         /* the standby-replay is frozen, do nothing! */
         return nullptr;
       } else {
-        ceph_assert(info.compat.writeable(fs->mds_map.compat));
+        stone_assert(info.compat.writeable(fs->mds_map.compat));
         return &info;
       }
     }
@@ -857,53 +857,53 @@ void FSMap::sanity(bool pending) const
    */
 
   if (legacy_client_fscid != FS_CLUSTER_ID_NONE) {
-    ceph_assert(filesystems.count(legacy_client_fscid) == 1);
+    stone_assert(filesystems.count(legacy_client_fscid) == 1);
   }
 
   for (const auto& [fscid, fs] : filesystems) {
-    ceph_assert(fscid  == fs->fscid);
+    stone_assert(fscid  == fs->fscid);
     for (const auto& [gid, info] : fs->mds_map.mds_info) {
-      ceph_assert(info.rank != MDS_RANK_NONE);
-      ceph_assert(mds_roles.at(gid) == fscid);
-      ceph_assert(standby_daemons.count(gid) == 0);
-      ceph_assert(standby_epochs.count(gid) == 0);
+      stone_assert(info.rank != MDS_RANK_NONE);
+      stone_assert(mds_roles.at(gid) == fscid);
+      stone_assert(standby_daemons.count(gid) == 0);
+      stone_assert(standby_epochs.count(gid) == 0);
       if (info.state != MDSMap::STATE_STANDBY_REPLAY) {
-        ceph_assert(fs->mds_map.up.at(info.rank) == gid);
-        ceph_assert(fs->mds_map.failed.count(info.rank) == 0);
-        ceph_assert(fs->mds_map.damaged.count(info.rank) == 0);
+        stone_assert(fs->mds_map.up.at(info.rank) == gid);
+        stone_assert(fs->mds_map.failed.count(info.rank) == 0);
+        stone_assert(fs->mds_map.damaged.count(info.rank) == 0);
       } else {
-        ceph_assert(!pending || fs->mds_map.allows_standby_replay());
+        stone_assert(!pending || fs->mds_map.allows_standby_replay());
       }
-      ceph_assert(info.compat.writeable(fs->mds_map.compat));
+      stone_assert(info.compat.writeable(fs->mds_map.compat));
     }
 
     for (const auto &j : fs->mds_map.up) {
       mds_rank_t rank = j.first;
-      ceph_assert(fs->mds_map.in.count(rank) == 1);
+      stone_assert(fs->mds_map.in.count(rank) == 1);
       mds_gid_t gid = j.second;
-      ceph_assert(fs->mds_map.mds_info.count(gid) == 1);
+      stone_assert(fs->mds_map.mds_info.count(gid) == 1);
     }
   }
 
   for (const auto &i : standby_daemons) {
-    ceph_assert(i.second.state == MDSMap::STATE_STANDBY);
-    ceph_assert(i.second.rank == MDS_RANK_NONE);
-    ceph_assert(i.second.global_id == i.first);
-    ceph_assert(standby_epochs.count(i.first) == 1);
-    ceph_assert(mds_roles.count(i.first) == 1);
-    ceph_assert(mds_roles.at(i.first) == FS_CLUSTER_ID_NONE);
+    stone_assert(i.second.state == MDSMap::STATE_STANDBY);
+    stone_assert(i.second.rank == MDS_RANK_NONE);
+    stone_assert(i.second.global_id == i.first);
+    stone_assert(standby_epochs.count(i.first) == 1);
+    stone_assert(mds_roles.count(i.first) == 1);
+    stone_assert(mds_roles.at(i.first) == FS_CLUSTER_ID_NONE);
   }
 
   for (const auto &i : standby_epochs) {
-    ceph_assert(standby_daemons.count(i.first) == 1);
+    stone_assert(standby_daemons.count(i.first) == 1);
   }
 
   for (const auto &i : mds_roles) {
     if (i.second == FS_CLUSTER_ID_NONE) {
-      ceph_assert(standby_daemons.count(i.first) == 1);
+      stone_assert(standby_daemons.count(i.first) == 1);
     } else {
-      ceph_assert(filesystems.count(i.second) == 1);
-      ceph_assert(filesystems.at(i.second)->mds_map.mds_info.count(i.first) == 1);
+      stone_assert(filesystems.count(i.second) == 1);
+      stone_assert(filesystems.at(i.second)->mds_map.mds_info.count(i.first) == 1);
     }
   }
 }
@@ -913,11 +913,11 @@ void FSMap::promote(
     Filesystem& filesystem,
     mds_rank_t assigned_rank)
 {
-  ceph_assert(gid_exists(standby_gid));
+  stone_assert(gid_exists(standby_gid));
   bool is_standby_replay = mds_roles.at(standby_gid) != FS_CLUSTER_ID_NONE;
   if (!is_standby_replay) {
-    ceph_assert(standby_daemons.count(standby_gid));
-    ceph_assert(standby_daemons.at(standby_gid).state == MDSMap::STATE_STANDBY);
+    stone_assert(standby_daemons.count(standby_gid));
+    stone_assert(standby_daemons.at(standby_gid).state == MDSMap::STATE_STANDBY);
   }
 
   MDSMap &mds_map = filesystem.mds_map;
@@ -926,14 +926,14 @@ void FSMap::promote(
   if (!is_standby_replay) {
     mds_map.mds_info[standby_gid] = standby_daemons.at(standby_gid);
   } else {
-    ceph_assert(mds_map.mds_info.count(standby_gid));
-    ceph_assert(mds_map.mds_info.at(standby_gid).state == MDSMap::STATE_STANDBY_REPLAY);
-    ceph_assert(mds_map.mds_info.at(standby_gid).rank == assigned_rank);
+    stone_assert(mds_map.mds_info.count(standby_gid));
+    stone_assert(mds_map.mds_info.at(standby_gid).state == MDSMap::STATE_STANDBY_REPLAY);
+    stone_assert(mds_map.mds_info.at(standby_gid).rank == assigned_rank);
   }
   auto& info = mds_map.mds_info.at(standby_gid);
 
   if (!filesystem.mds_map.compat.writeable(info.compat)) {
-    ceph_assert(filesystem.is_upgradeable());
+    stone_assert(filesystem.is_upgradeable());
     filesystem.mds_map.compat.merge(info.compat);
   }
 
@@ -971,10 +971,10 @@ void FSMap::assign_standby_replay(
     const fs_cluster_id_t leader_ns,
     const mds_rank_t leader_rank)
 {
-  ceph_assert(mds_roles.at(standby_gid) == FS_CLUSTER_ID_NONE);
-  ceph_assert(gid_exists(standby_gid));
-  ceph_assert(!gid_has_rank(standby_gid));
-  ceph_assert(standby_daemons.count(standby_gid));
+  stone_assert(mds_roles.at(standby_gid) == FS_CLUSTER_ID_NONE);
+  stone_assert(gid_exists(standby_gid));
+  stone_assert(!gid_has_rank(standby_gid));
+  stone_assert(standby_daemons.count(standby_gid));
 
   // Insert to the filesystem
   auto fs = filesystems.at(leader_ns);
@@ -1010,7 +1010,7 @@ void FSMap::erase(mds_gid_t who, epoch_t blocklist_epoch)
         // STANDBY will pick it up.
         fs->mds_map.failed.insert(info.rank);
       }
-      ceph_assert(fs->mds_map.up.at(info.rank) == info.global_id);
+      stone_assert(fs->mds_map.up.at(info.rank) == info.global_id);
       fs->mds_map.up.erase(info.rank);
     }
     fs->mds_map.mds_info.erase(who);
@@ -1023,7 +1023,7 @@ void FSMap::erase(mds_gid_t who, epoch_t blocklist_epoch)
 
 void FSMap::damaged(mds_gid_t who, epoch_t blocklist_epoch)
 {
-  ceph_assert(mds_roles.at(who) != FS_CLUSTER_ID_NONE);
+  stone_assert(mds_roles.at(who) != FS_CLUSTER_ID_NONE);
   auto fs = filesystems.at(mds_roles.at(who));
   mds_rank_t rank = fs->mds_map.mds_info.at(who).rank;
 
@@ -1031,7 +1031,7 @@ void FSMap::damaged(mds_gid_t who, epoch_t blocklist_epoch)
   fs->mds_map.failed.erase(rank);
   fs->mds_map.damaged.insert(rank);
 
-  ceph_assert(fs->mds_map.epoch == epoch);
+  stone_assert(fs->mds_map.epoch == epoch);
 }
 
 /**
@@ -1055,8 +1055,8 @@ void FSMap::insert(const MDSMap::mds_info_t &new_info)
 {
   static const CompatSet empty;
 
-  ceph_assert(new_info.state == MDSMap::STATE_STANDBY);
-  ceph_assert(new_info.rank == MDS_RANK_NONE);
+  stone_assert(new_info.state == MDSMap::STATE_STANDBY);
+  stone_assert(new_info.rank == MDS_RANK_NONE);
   mds_roles[new_info.global_id] = FS_CLUSTER_ID_NONE;
   auto& info = standby_daemons[new_info.global_id];
   info = new_info;
@@ -1074,7 +1074,7 @@ void FSMap::insert(const MDSMap::mds_info_t &new_info)
 
 std::vector<mds_gid_t> FSMap::stop(mds_gid_t who)
 {
-  ceph_assert(mds_roles.at(who) != FS_CLUSTER_ID_NONE);
+  stone_assert(mds_roles.at(who) != FS_CLUSTER_ID_NONE);
   auto fs = filesystems.at(mds_roles.at(who));
   const auto &info = fs->mds_map.mds_info.at(who);
   fs->mds_map.up.erase(info.rank);
@@ -1128,7 +1128,7 @@ int FSMap::parse_role(
     if (r >= 0) {
       ss << "Invalid file system";
     }
-    return -CEPHFS_ENOENT;
+    return -STONEFS_ENOENT;
   }
 
   return r;
@@ -1145,14 +1145,14 @@ int FSMap::parse_role(
   if (colon_pos == std::string::npos) {
     if (legacy_client_fscid == FS_CLUSTER_ID_NONE) {
       ss << "No filesystem selected";
-      return -CEPHFS_ENOENT;
+      return -STONEFS_ENOENT;
     }
     fs = get_filesystem(legacy_client_fscid);
     rank_pos = 0;
   } else {
     if (parse_filesystem(role_str.substr(0, colon_pos), &fs) < 0) {
       ss << "Invalid filesystem";
-      return -CEPHFS_ENOENT;
+      return -STONEFS_ENOENT;
     }
     rank_pos = colon_pos+1;
   }
@@ -1163,14 +1163,14 @@ int FSMap::parse_role(
   long rank_i = strict_strtol(rank_str.c_str(), 10, &err);
   if (rank_i < 0 || !err.empty()) {
     ss << "Invalid rank '" << rank_str << "'";
-    return -CEPHFS_EINVAL;
+    return -STONEFS_EINVAL;
   } else {
     rank = rank_i;
   }
 
   if (fs->mds_map.in.count(rank) == 0) {
     ss << "Rank '" << rank << "' not found";
-    return -CEPHFS_ENOENT;
+    return -STONEFS_ENOENT;
   }
 
   *role = {fs->fscid, rank};

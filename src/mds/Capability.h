@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,8 +13,8 @@
  */
 
 
-#ifndef CEPH_CAPABILITY_H
-#define CEPH_CAPABILITY_H
+#ifndef STONE_CAPABILITY_H
+#define STONE_CAPABILITY_H
 
 #include "include/buffer_fwd.h"
 #include "include/counter.h"
@@ -251,7 +251,7 @@ public:
   void dec_suppress() { suppress--; }
 
   static bool is_wanted_notable(int wanted) {
-    return wanted & (CEPH_CAP_ANY_WR|CEPH_CAP_FILE_WR|CEPH_CAP_FILE_RD);
+    return wanted & (STONE_CAP_ANY_WR|STONE_CAP_FILE_WR|STONE_CAP_FILE_RD);
   }
   bool is_wanted_notable() const {
     return is_wanted_notable(wanted());

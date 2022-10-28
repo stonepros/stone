@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 SUSE LLC
  *
@@ -17,8 +17,8 @@
 
 #include "common/debug.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr " << __func__ << " "
 
@@ -27,7 +27,7 @@
 SafeThreadState::SafeThreadState(PyThreadState *ts_)
     : ts(ts_)
 {
-  ceph_assert(ts != nullptr);
+  stone_assert(ts != nullptr);
   thread = pthread_self();
 }
 
@@ -60,7 +60,7 @@ Gil::Gil(SafeThreadState &ts, bool new_thread) : pThreadState(ts)
     PyThreadState_Swap(pNewThreadState);
     dout(20) << "Switched to new thread state " << pNewThreadState << dendl;
   } else {
-    ceph_assert(pthread_self() == pThreadState.thread);
+    stone_assert(pthread_self() == pThreadState.thread);
   }
 }
 

@@ -12,7 +12,7 @@ namespace mirror {
 
 template <typename I>
 Threads<I>::Threads(std::shared_ptr<librados::Rados>& rados) {
-  auto cct = static_cast<CephContext*>(rados->cct());
+  auto cct = static_cast<StoneContext*>(rados->cct());
   asio_engine = new librbd::AsioEngine(rados);
   work_queue = asio_engine->get_work_queue();
 

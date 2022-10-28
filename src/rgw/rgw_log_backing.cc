@@ -8,9 +8,9 @@
 #include "rgw_tools.h"
 #include "cls_fifo_legacy.h"
 
-namespace cb = ceph::buffer;
+namespace cb = stone::buffer;
 
-static constexpr auto dout_subsys = ceph_subsys_rgw;
+static constexpr auto dout_subsys = stone_subsys_rgw;
 
 enum class shard_check { dne, omap, fifo, corrupt };
 inline std::ostream& operator <<(std::ostream& m, const shard_check& t) {
@@ -216,7 +216,7 @@ bs::error_code log_remove(const DoutPrefixProvider *dpp,
 
 logback_generations::~logback_generations() {
   if (watchcookie > 0) {
-    auto cct = static_cast<CephContext*>(ioctx.cct());
+    auto cct = static_cast<StoneContext*>(ioctx.cct());
     auto r = ioctx.unwatch2(watchcookie);
     if (r < 0) {
       lderr(cct) << __PRETTY_FUNCTION__ << ":" << __LINE__
@@ -232,7 +232,7 @@ bs::error_code logback_generations::setup(const DoutPrefixProvider *dpp,
 {
   try {
     // First, read.
-    auto cct = static_cast<CephContext*>(ioctx.cct());
+    auto cct = static_cast<StoneContext*>(ioctx.cct());
     auto res = read(dpp, y);
     if (!res && res.error() != bs::errc::no_such_file_or_directory) {
       return res.error();
@@ -434,7 +434,7 @@ bs::error_code logback_generations::write(const DoutPrefixProvider *dpp, entries
 					  optional_yield y) noexcept
 {
   auto l = std::move(l_);
-  ceph_assert(l.mutex() == &m &&
+  stone_assert(l.mutex() == &m &&
 	      l.owns_lock());
   try {
     librados::ObjectWriteOperation op;
@@ -473,7 +473,7 @@ bs::error_code logback_generations::write(const DoutPrefixProvider *dpp, entries
 
 bs::error_code logback_generations::watch() noexcept {
   try {
-    auto cct = static_cast<CephContext*>(ioctx.cct());
+    auto cct = static_cast<StoneContext*>(ioctx.cct());
     auto r = ioctx.watch2(oid, &watchcookie, this);
     if (r < 0) {
       lderr(cct) << __PRETTY_FUNCTION__ << ":" << __LINE__
@@ -568,7 +568,7 @@ bs::error_code logback_generations::empty_to(const DoutPrefixProvider *dpp,
       }
       for (auto i = es.begin(); i < ei; ++i) {
 	newtail = i->first;
-	i->second.pruned = ceph::real_clock::now();
+	i->second.pruned = stone::real_clock::now();
       }
       ec = write(dpp, std::move(es), std::move(l), y);
       ++tries;
@@ -609,7 +609,7 @@ bs::error_code logback_generations::remove_empty(const DoutPrefixProvider *dpp, 
     auto tries = 0;
     entries_t new_entries;
     std::unique_lock l(m);
-    ceph_assert(!entries_.empty());
+    stone_assert(!entries_.empty());
     {
       auto i = lowest_nomempty(entries_);
       if (i == entries_.begin()) {
@@ -617,7 +617,7 @@ bs::error_code logback_generations::remove_empty(const DoutPrefixProvider *dpp, 
       }
     }
     entries_t es;
-    auto now = ceph::real_clock::now();
+    auto now = stone::real_clock::now();
     l.unlock();
     do {
       std::copy_if(entries_.cbegin(), entries_.cend(),
@@ -631,7 +631,7 @@ bs::error_code logback_generations::remove_empty(const DoutPrefixProvider *dpp, 
 		   });
       auto es2 = entries_;
       for (const auto& [gen_id, e] : es) {
-	ceph_assert(e.pruned);
+	stone_assert(e.pruned);
 	auto ec = log_remove(dpp, ioctx, shards,
 			     [this, gen_id = gen_id](int shard) {
 			       return this->get_oid(gen_id, shard);
@@ -673,7 +673,7 @@ void logback_generations::handle_notify(uint64_t notify_id,
 					uint64_t notifier_id,
 					bufferlist& bl)
 {
-  auto cct = static_cast<CephContext*>(ioctx.cct());
+  auto cct = static_cast<StoneContext*>(ioctx.cct());
   const DoutPrefix dp(cct, dout_subsys, "logback generations handle_notify: ");
   if (notifier_id != my_id) {
     auto ec = update(&dp, null_yield);
@@ -690,7 +690,7 @@ void logback_generations::handle_notify(uint64_t notify_id,
 }
 
 void logback_generations::handle_error(uint64_t cookie, int err) {
-  auto cct = static_cast<CephContext*>(ioctx.cct());
+  auto cct = static_cast<StoneContext*>(ioctx.cct());
   auto r = ioctx.unwatch2(watchcookie);
   if (r < 0) {
     lderr(cct) << __PRETTY_FUNCTION__ << ":" << __LINE__

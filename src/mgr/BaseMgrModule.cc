@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -13,8 +13,8 @@
 
 /**
  * The interface we present to python code that runs within
- * ceph-mgr.  This is implemented as a Python class from which
- * all modules must inherit -- access to the Ceph state is then
+ * stone-mgr.  This is implemented as a Python class from which
+ * all modules must inherit -- access to the Stone state is then
  * available as methods on that object.
  */
 
@@ -33,8 +33,8 @@
 
 #include <algorithm>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 
 #define PLACEHOLDER ""
 
@@ -62,7 +62,7 @@ public:
     : py_modules(py_modules_), python_completion(ev),
       tag(tag_), pThreadState(ts_)
   {
-    ceph_assert(python_completion != nullptr);
+    stone_assert(python_completion != nullptr);
     Py_INCREF(python_completion);
   }
 
@@ -79,7 +79,7 @@ public:
 
   void finish(int r) override
   {
-    ceph_assert(python_completion != nullptr);
+    stone_assert(python_completion != nullptr);
 
     dout(10) << "MonCommandCompletion::finish()" << dendl;
     {
@@ -89,7 +89,7 @@ public:
       Gil gil(pThreadState, true);
 
       auto set_fn = PyObject_GetAttrString(python_completion, "complete");
-      ceph_assert(set_fn != nullptr);
+      stone_assert(set_fn != nullptr);
 
       auto pyR = PyLong_FromLong(r);
       auto pyOutBl = PyUnicode_FromString(outbl.to_str().c_str());
@@ -115,7 +115,7 @@ public:
 
 
 static PyObject*
-ceph_send_command(BaseMgrModule *self, PyObject *args)
+stone_send_command(BaseMgrModule *self, PyObject *args)
 {
   // Like mon, osd, mds
   char *type = nullptr;
@@ -130,7 +130,7 @@ ceph_send_command(BaseMgrModule *self, PyObject *args)
   bufferlist inbuf = {};
 
   PyObject *completion = nullptr;
-  if (!PyArg_ParseTuple(args, "Ossssz#:ceph_send_command",
+  if (!PyArg_ParseTuple(args, "Ossssz#:stone_send_command",
         &completion, &type, &name, &cmd_json, &tag, &inbuf_ptr, &inbuf_len)) {
     return nullptr;
   }
@@ -141,9 +141,9 @@ ceph_send_command(BaseMgrModule *self, PyObject *args)
 
   auto set_fn = PyObject_GetAttrString(completion, "complete");
   if (set_fn == nullptr) {
-    ceph_abort();  // TODO raise python exception instead
+    stone_abort();  // TODO raise python exception instead
   } else {
-    ceph_assert(PyCallable_Check(set_fn));
+    stone_assert(PyCallable_Check(set_fn));
   }
   Py_DECREF(set_fn);
 
@@ -187,14 +187,14 @@ ceph_send_command(BaseMgrModule *self, PyObject *args)
       return nullptr;
     }
 
-    ceph_tid_t tid;
+    stone_tid_t tid;
     self->py_modules->get_objecter().osd_command(
         osd_id,
         {cmd_json},
         inbuf,
         &tid,
 	[command_c, f = &self->py_modules->cmd_finisher]
-	(boost::system::error_code ec, std::string s, ceph::buffer::list bl) {
+	(boost::system::error_code ec, std::string s, stone::buffer::list bl) {
 	  command_c->outs = std::move(s);
 	  command_c->outbl = std::move(bl);
 	  f->queue(command_c);
@@ -225,14 +225,14 @@ ceph_send_command(BaseMgrModule *self, PyObject *args)
       return nullptr;
     }
 
-    ceph_tid_t tid;
+    stone_tid_t tid;
     self->py_modules->get_objecter().pg_command(
         pgid,
         {cmd_json},
         inbuf,
         &tid,
 	[command_c, f = &self->py_modules->cmd_finisher]
-	(boost::system::error_code ec, std::string s, ceph::buffer::list bl) {
+	(boost::system::error_code ec, std::string s, stone::buffer::list bl) {
 	  command_c->outs = std::move(s);
 	  command_c->outbl = std::move(bl);
 	  f->queue(command_c);
@@ -253,10 +253,10 @@ ceph_send_command(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_set_health_checks(BaseMgrModule *self, PyObject *args)
+stone_set_health_checks(BaseMgrModule *self, PyObject *args)
 {
   PyObject *checks = NULL;
-  if (!PyArg_ParseTuple(args, "O:ceph_set_health_checks", &checks)) {
+  if (!PyArg_ParseTuple(args, "O:stone_set_health_checks", &checks)) {
     return NULL;
   }
   if (!PyDict_Check(checks)) {
@@ -368,10 +368,10 @@ ceph_set_health_checks(BaseMgrModule *self, PyObject *args)
 
 
 static PyObject*
-ceph_state_get(BaseMgrModule *self, PyObject *args)
+stone_state_get(BaseMgrModule *self, PyObject *args)
 {
   char *what = NULL;
-  if (!PyArg_ParseTuple(args, "s:ceph_state_get", &what)) {
+  if (!PyArg_ParseTuple(args, "s:stone_state_get", &what)) {
     return NULL;
   }
 
@@ -380,10 +380,10 @@ ceph_state_get(BaseMgrModule *self, PyObject *args)
 
 
 static PyObject*
-ceph_get_server(BaseMgrModule *self, PyObject *args)
+stone_get_server(BaseMgrModule *self, PyObject *args)
 {
   char *hostname = NULL;
-  if (!PyArg_ParseTuple(args, "z:ceph_get_server", &hostname)) {
+  if (!PyArg_ParseTuple(args, "z:stone_get_server", &hostname)) {
     return NULL;
   }
 
@@ -395,16 +395,16 @@ ceph_get_server(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_get_mgr_id(BaseMgrModule *self, PyObject *args)
+stone_get_mgr_id(BaseMgrModule *self, PyObject *args)
 {
   return PyUnicode_FromString(g_conf()->name.get_id().c_str());
 }
 
 static PyObject*
-ceph_option_get(BaseMgrModule *self, PyObject *args)
+stone_option_get(BaseMgrModule *self, PyObject *args)
 {
   char *what = nullptr;
-  if (!PyArg_ParseTuple(args, "s:ceph_option_get", &what)) {
+  if (!PyArg_ParseTuple(args, "s:stone_option_get", &what)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -420,24 +420,24 @@ ceph_option_get(BaseMgrModule *self, PyObject *args)
       PyErr_SetString(PyExc_ValueError, "value too long");
       return nullptr;
     default:
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       break;
     }
-    dout(10) << "ceph_option_get " << what << " found: " << value << dendl;
+    dout(10) << "stone_option_get " << what << " found: " << value << dendl;
     return get_python_typed_option_value(opt->type, value);
   } else {
-    dout(4) << "ceph_option_get " << what << " not found " << dendl;
+    dout(4) << "stone_option_get " << what << " not found " << dendl;
     PyErr_Format(PyExc_KeyError, "option not found: %s", what);
     return nullptr;
   }
 }
 
 static PyObject*
-ceph_foreign_option_get(BaseMgrModule *self, PyObject *args)
+stone_foreign_option_get(BaseMgrModule *self, PyObject *args)
 {
   char *who = nullptr;
   char *what = nullptr;
-  if (!PyArg_ParseTuple(args, "ss:ceph_foreign_option_get", &who, &what)) {
+  if (!PyArg_ParseTuple(args, "ss:stone_foreign_option_get", &who, &what)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -445,12 +445,12 @@ ceph_foreign_option_get(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_get_module_option(BaseMgrModule *self, PyObject *args)
+stone_get_module_option(BaseMgrModule *self, PyObject *args)
 {
   char *module = nullptr;
   char *key = nullptr;
   char *prefix = nullptr;
-  if (!PyArg_ParseTuple(args, "ss|s:ceph_get_module_option", &module, &key,
+  if (!PyArg_ParseTuple(args, "ss|s:stone_get_module_option", &module, &key,
 			&prefix)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
@@ -465,10 +465,10 @@ ceph_get_module_option(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_store_get_prefix(BaseMgrModule *self, PyObject *args)
+stone_store_get_prefix(BaseMgrModule *self, PyObject *args)
 {
   char *prefix = nullptr;
-  if (!PyArg_ParseTuple(args, "s:ceph_store_get_prefix", &prefix)) {
+  if (!PyArg_ParseTuple(args, "s:stone_store_get_prefix", &prefix)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -478,12 +478,12 @@ ceph_store_get_prefix(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_set_module_option(BaseMgrModule *self, PyObject *args)
+stone_set_module_option(BaseMgrModule *self, PyObject *args)
 {
   char *module = nullptr;
   char *key = nullptr;
   char *value = nullptr;
-  if (!PyArg_ParseTuple(args, "ssz:ceph_set_module_option",
+  if (!PyArg_ParseTuple(args, "ssz:stone_set_module_option",
         &module, &key, &value)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
@@ -500,10 +500,10 @@ ceph_set_module_option(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_store_get(BaseMgrModule *self, PyObject *args)
+stone_store_get(BaseMgrModule *self, PyObject *args)
 {
   char *what = nullptr;
-  if (!PyArg_ParseTuple(args, "s:ceph_store_get", &what)) {
+  if (!PyArg_ParseTuple(args, "s:stone_store_get", &what)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -512,20 +512,20 @@ ceph_store_get(BaseMgrModule *self, PyObject *args)
   bool found = self->py_modules->get_store(self->this_module->get_name(),
       what, &value);
   if (found) {
-    dout(10) << "ceph_store_get " << what << " found: " << value.c_str() << dendl;
+    dout(10) << "stone_store_get " << what << " found: " << value.c_str() << dendl;
     return PyUnicode_FromString(value.c_str());
   } else {
-    dout(4) << "ceph_store_get " << what << " not found " << dendl;
+    dout(4) << "stone_store_get " << what << " not found " << dendl;
     Py_RETURN_NONE;
   }
 }
 
 static PyObject*
-ceph_store_set(BaseMgrModule *self, PyObject *args)
+stone_store_set(BaseMgrModule *self, PyObject *args)
 {
   char *key = nullptr;
   char *value = nullptr;
-  if (!PyArg_ParseTuple(args, "sz:ceph_store_set", &key, &value)) {
+  if (!PyArg_ParseTuple(args, "sz:stone_store_set", &key, &value)) {
     return nullptr;
   }
   boost::optional<string> val;
@@ -563,14 +563,14 @@ get_daemon_status(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_log(BaseMgrModule *self, PyObject *args)
+stone_log(BaseMgrModule *self, PyObject *args)
 {
   char *record = nullptr;
   if (!PyArg_ParseTuple(args, "s:log", &record)) {
     return nullptr;
   }
 
-  ceph_assert(self->this_module);
+  stone_assert(self->this_module);
 
   self->this_module->log(record);
 
@@ -578,13 +578,13 @@ ceph_log(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_cluster_log(BaseMgrModule *self, PyObject *args)
+stone_cluster_log(BaseMgrModule *self, PyObject *args)
 {
   int prio = 0;
   char *channel = nullptr;
   char *message = nullptr;
 
-  if (!PyArg_ParseTuple(args, "sis:ceph_cluster_log", &channel, &prio, &message)) {
+  if (!PyArg_ParseTuple(args, "sis:stone_cluster_log", &channel, &prio, &message)) {
     return nullptr;
   }
 
@@ -596,35 +596,35 @@ ceph_cluster_log(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject *
-ceph_get_version(BaseMgrModule *self, PyObject *args)
+stone_get_version(BaseMgrModule *self, PyObject *args)
 {
   return PyUnicode_FromString(pretty_version_to_str().c_str());
 }
 
 static PyObject *
-ceph_get_ceph_conf_path(BaseMgrModule *self, PyObject *args)
+stone_get_stone_conf_path(BaseMgrModule *self, PyObject *args)
 {
   return PyUnicode_FromString(g_conf().get_conf_path().c_str());
 }
 
 static PyObject *
-ceph_get_release_name(BaseMgrModule *self, PyObject *args)
+stone_get_release_name(BaseMgrModule *self, PyObject *args)
 {
-  return PyUnicode_FromString(ceph_release_to_str());
+  return PyUnicode_FromString(stone_release_to_str());
 }
 
 static PyObject *
-ceph_lookup_release_name(BaseMgrModule *self, PyObject *args)
+stone_lookup_release_name(BaseMgrModule *self, PyObject *args)
 {
   int major = 0;
-  if (!PyArg_ParseTuple(args, "i:ceph_lookup_release_name", &major)) {
+  if (!PyArg_ParseTuple(args, "i:stone_lookup_release_name", &major)) {
     return nullptr;
   }
-  return PyUnicode_FromString(ceph_release_name(major));
+  return PyUnicode_FromString(stone_release_name(major));
 }
 
 static PyObject *
-ceph_get_context(BaseMgrModule *self)
+stone_get_context(BaseMgrModule *self)
 {
   return self->py_modules->get_context();
 }
@@ -671,16 +671,16 @@ get_perf_schema(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject *
-ceph_get_osdmap(BaseMgrModule *self, PyObject *args)
+stone_get_osdmap(BaseMgrModule *self, PyObject *args)
 {
   return self->py_modules->get_osdmap();
 }
 
 static PyObject*
-ceph_set_uri(BaseMgrModule *self, PyObject *args)
+stone_set_uri(BaseMgrModule *self, PyObject *args)
 {
   char *svc_str = nullptr;
-  if (!PyArg_ParseTuple(args, "s:ceph_advertize_service",
+  if (!PyArg_ParseTuple(args, "s:stone_advertize_service",
         &svc_str)) {
     return nullptr;
   }
@@ -696,11 +696,11 @@ ceph_set_uri(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_set_wear_level(BaseMgrModule *self, PyObject *args)
+stone_set_wear_level(BaseMgrModule *self, PyObject *args)
 {
   char *devid = nullptr;
   float wear_level;
-  if (!PyArg_ParseTuple(args, "sf:ceph_set_wear_level",
+  if (!PyArg_ParseTuple(args, "sf:stone_set_wear_level",
 			&devid, &wear_level)) {
     return nullptr;
   }
@@ -713,7 +713,7 @@ ceph_set_wear_level(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_have_mon_connection(BaseMgrModule *self, PyObject *args)
+stone_have_mon_connection(BaseMgrModule *self, PyObject *args)
 {
   if (self->py_modules->get_monc().is_connected()) {
     Py_RETURN_TRUE;
@@ -723,29 +723,29 @@ ceph_have_mon_connection(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_update_progress_event(BaseMgrModule *self, PyObject *args)
+stone_update_progress_event(BaseMgrModule *self, PyObject *args)
 {
   char *evid = nullptr;
   char *desc = nullptr;
   float progress = 0.0;
-  bool add_to_ceph_s = false;
-  if (!PyArg_ParseTuple(args, "ssfb:ceph_update_progress_event",
-			&evid, &desc, &progress, &add_to_ceph_s)) {
+  bool add_to_stone_s = false;
+  if (!PyArg_ParseTuple(args, "ssfb:stone_update_progress_event",
+			&evid, &desc, &progress, &add_to_stone_s)) {
     return nullptr;
   }
 
   PyThreadState *tstate = PyEval_SaveThread();
-  self->py_modules->update_progress_event(evid, desc, progress, add_to_ceph_s);
+  self->py_modules->update_progress_event(evid, desc, progress, add_to_stone_s);
   PyEval_RestoreThread(tstate);
 
   Py_RETURN_NONE;
 }
 
 static PyObject*
-ceph_complete_progress_event(BaseMgrModule *self, PyObject *args)
+stone_complete_progress_event(BaseMgrModule *self, PyObject *args)
 {
   char *evid = nullptr;
-  if (!PyArg_ParseTuple(args, "s:ceph_complete_progress_event",
+  if (!PyArg_ParseTuple(args, "s:stone_complete_progress_event",
 			&evid)) {
     return nullptr;
   }
@@ -758,7 +758,7 @@ ceph_complete_progress_event(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_clear_all_progress_events(BaseMgrModule *self, PyObject *args)
+stone_clear_all_progress_events(BaseMgrModule *self, PyObject *args)
 {
   PyThreadState *tstate = PyEval_SaveThread();
   self->py_modules->clear_all_progress_events();
@@ -770,13 +770,13 @@ ceph_clear_all_progress_events(BaseMgrModule *self, PyObject *args)
 
 
 static PyObject *
-ceph_dispatch_remote(BaseMgrModule *self, PyObject *args)
+stone_dispatch_remote(BaseMgrModule *self, PyObject *args)
 {
   char *other_module = nullptr;
   char *method = nullptr;
   PyObject *remote_args = nullptr;
   PyObject *remote_kwargs = nullptr;
-  if (!PyArg_ParseTuple(args, "ssOO:ceph_dispatch_remote",
+  if (!PyArg_ParseTuple(args, "ssOO:stone_dispatch_remote",
         &other_module, &method, &remote_args, &remote_kwargs)) {
     return nullptr;
   }
@@ -817,7 +817,7 @@ ceph_dispatch_remote(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_add_osd_perf_query(BaseMgrModule *self, PyObject *args)
+stone_add_osd_perf_query(BaseMgrModule *self, PyObject *args)
 {
   static const std::string NAME_KEY_DESCRIPTOR = "key_descriptor";
   static const std::string NAME_COUNTERS_DESCRIPTORS =
@@ -850,7 +850,7 @@ ceph_add_osd_perf_query(BaseMgrModule *self, PyObject *args)
   };
 
   PyObject *py_query = nullptr;
-  if (!PyArg_ParseTuple(args, "O:ceph_add_osd_perf_query", &py_query)) {
+  if (!PyArg_ParseTuple(args, "O:stone_add_osd_perf_query", &py_query)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -1053,10 +1053,10 @@ ceph_add_osd_perf_query(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_remove_osd_perf_query(BaseMgrModule *self, PyObject *args)
+stone_remove_osd_perf_query(BaseMgrModule *self, PyObject *args)
 {
   MetricQueryID query_id;
-  if (!PyArg_ParseTuple(args, "i:ceph_remove_osd_perf_query", &query_id)) {
+  if (!PyArg_ParseTuple(args, "i:stone_remove_osd_perf_query", &query_id)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -1066,10 +1066,10 @@ ceph_remove_osd_perf_query(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_get_osd_perf_counters(BaseMgrModule *self, PyObject *args)
+stone_get_osd_perf_counters(BaseMgrModule *self, PyObject *args)
 {
   MetricQueryID query_id;
-  if (!PyArg_ParseTuple(args, "i:ceph_get_osd_perf_counters", &query_id)) {
+  if (!PyArg_ParseTuple(args, "i:stone_get_osd_perf_counters", &query_id)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -1077,11 +1077,11 @@ ceph_get_osd_perf_counters(BaseMgrModule *self, PyObject *args)
   return self->py_modules->get_osd_perf_counters(query_id);
 }
 
-// MDS perf query interface -- mostly follows ceph_add_osd_perf_query()
+// MDS perf query interface -- mostly follows stone_add_osd_perf_query()
 // style
 
 static PyObject*
-ceph_add_mds_perf_query(BaseMgrModule *self, PyObject *args)
+stone_add_mds_perf_query(BaseMgrModule *self, PyObject *args)
 {
   static const std::string NAME_KEY_DESCRIPTOR = "key_descriptor";
   static const std::string NAME_COUNTERS_DESCRIPTORS =
@@ -1109,7 +1109,7 @@ ceph_add_mds_perf_query(BaseMgrModule *self, PyObject *args)
   };
 
   PyObject *py_query = nullptr;
-  if (!PyArg_ParseTuple(args, "O:ceph_add_mds_perf_query", &py_query)) {
+  if (!PyArg_ParseTuple(args, "O:stone_add_mds_perf_query", &py_query)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -1315,10 +1315,10 @@ ceph_add_mds_perf_query(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_remove_mds_perf_query(BaseMgrModule *self, PyObject *args)
+stone_remove_mds_perf_query(BaseMgrModule *self, PyObject *args)
 {
   MetricQueryID query_id;
-  if (!PyArg_ParseTuple(args, "i:ceph_remove_mds_perf_query", &query_id)) {
+  if (!PyArg_ParseTuple(args, "i:stone_remove_mds_perf_query", &query_id)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -1328,10 +1328,10 @@ ceph_remove_mds_perf_query(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_get_mds_perf_counters(BaseMgrModule *self, PyObject *args)
+stone_get_mds_perf_counters(BaseMgrModule *self, PyObject *args)
 {
   MetricQueryID query_id;
-  if (!PyArg_ParseTuple(args, "i:ceph_get_mds_perf_counters", &query_id)) {
+  if (!PyArg_ParseTuple(args, "i:stone_get_mds_perf_counters", &query_id)) {
     derr << "Invalid args!" << dendl;
     return nullptr;
   }
@@ -1340,10 +1340,10 @@ ceph_get_mds_perf_counters(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_is_authorized(BaseMgrModule *self, PyObject *args)
+stone_is_authorized(BaseMgrModule *self, PyObject *args)
 {
   PyObject *args_dict = NULL;
-  if (!PyArg_ParseTuple(args, "O:ceph_is_authorized", &args_dict)) {
+  if (!PyArg_ParseTuple(args, "O:stone_is_authorized", &args_dict)) {
     return nullptr;
   }
 
@@ -1379,10 +1379,10 @@ ceph_is_authorized(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_register_client(BaseMgrModule *self, PyObject *args)
+stone_register_client(BaseMgrModule *self, PyObject *args)
 {
   char *addrs = nullptr;
-  if (!PyArg_ParseTuple(args, "s:ceph_register_client", &addrs)) {
+  if (!PyArg_ParseTuple(args, "s:stone_register_client", &addrs)) {
     return nullptr;
   }
   PyThreadState *tstate = PyEval_SaveThread();
@@ -1392,10 +1392,10 @@ ceph_register_client(BaseMgrModule *self, PyObject *args)
 }
 
 static PyObject*
-ceph_unregister_client(BaseMgrModule *self, PyObject *args)
+stone_unregister_client(BaseMgrModule *self, PyObject *args)
 {
   char *addrs = nullptr;
-  if (!PyArg_ParseTuple(args, "s:ceph_unregister_client", &addrs)) {
+  if (!PyArg_ParseTuple(args, "s:stone_unregister_client", &addrs)) {
     return nullptr;
   }
   PyThreadState *tstate = PyEval_SaveThread();
@@ -1405,126 +1405,126 @@ ceph_unregister_client(BaseMgrModule *self, PyObject *args)
 }
 
 PyMethodDef BaseMgrModule_methods[] = {
-  {"_ceph_get", (PyCFunction)ceph_state_get, METH_VARARGS,
+  {"_stone_get", (PyCFunction)stone_state_get, METH_VARARGS,
    "Get a cluster object"},
 
-  {"_ceph_get_server", (PyCFunction)ceph_get_server, METH_VARARGS,
+  {"_stone_get_server", (PyCFunction)stone_get_server, METH_VARARGS,
    "Get a server object"},
 
-  {"_ceph_get_metadata", (PyCFunction)get_metadata, METH_VARARGS,
+  {"_stone_get_metadata", (PyCFunction)get_metadata, METH_VARARGS,
    "Get a service's metadata"},
 
-  {"_ceph_get_daemon_status", (PyCFunction)get_daemon_status, METH_VARARGS,
+  {"_stone_get_daemon_status", (PyCFunction)get_daemon_status, METH_VARARGS,
    "Get a service's status"},
 
-  {"_ceph_send_command", (PyCFunction)ceph_send_command, METH_VARARGS,
+  {"_stone_send_command", (PyCFunction)stone_send_command, METH_VARARGS,
    "Send a mon command"},
 
-  {"_ceph_set_health_checks", (PyCFunction)ceph_set_health_checks, METH_VARARGS,
+  {"_stone_set_health_checks", (PyCFunction)stone_set_health_checks, METH_VARARGS,
    "Set health checks for this module"},
 
-  {"_ceph_get_mgr_id", (PyCFunction)ceph_get_mgr_id, METH_NOARGS,
+  {"_stone_get_mgr_id", (PyCFunction)stone_get_mgr_id, METH_NOARGS,
    "Get the name of the Mgr daemon where we are running"},
 
-  {"_ceph_get_ceph_conf_path", (PyCFunction)ceph_get_ceph_conf_path, METH_NOARGS,
-   "Get path to ceph.conf"},
+  {"_stone_get_stone_conf_path", (PyCFunction)stone_get_stone_conf_path, METH_NOARGS,
+   "Get path to stone.conf"},
 
-  {"_ceph_get_option", (PyCFunction)ceph_option_get, METH_VARARGS,
+  {"_stone_get_option", (PyCFunction)stone_option_get, METH_VARARGS,
    "Get a native configuration option value"},
 
-  {"_ceph_get_foreign_option", (PyCFunction)ceph_foreign_option_get, METH_VARARGS,
+  {"_stone_get_foreign_option", (PyCFunction)stone_foreign_option_get, METH_VARARGS,
    "Get a native configuration option value for another entity"},
 
-  {"_ceph_get_module_option", (PyCFunction)ceph_get_module_option, METH_VARARGS,
+  {"_stone_get_module_option", (PyCFunction)stone_get_module_option, METH_VARARGS,
    "Get a module configuration option value"},
 
-  {"_ceph_get_store_prefix", (PyCFunction)ceph_store_get_prefix, METH_VARARGS,
+  {"_stone_get_store_prefix", (PyCFunction)stone_store_get_prefix, METH_VARARGS,
    "Get all KV store values with a given prefix"},
 
-  {"_ceph_set_module_option", (PyCFunction)ceph_set_module_option, METH_VARARGS,
+  {"_stone_set_module_option", (PyCFunction)stone_set_module_option, METH_VARARGS,
    "Set a module configuration option value"},
 
-  {"_ceph_get_store", (PyCFunction)ceph_store_get, METH_VARARGS,
+  {"_stone_get_store", (PyCFunction)stone_store_get, METH_VARARGS,
    "Get a stored field"},
 
-  {"_ceph_set_store", (PyCFunction)ceph_store_set, METH_VARARGS,
+  {"_stone_set_store", (PyCFunction)stone_store_set, METH_VARARGS,
    "Set a stored field"},
 
-  {"_ceph_get_counter", (PyCFunction)get_counter, METH_VARARGS,
+  {"_stone_get_counter", (PyCFunction)get_counter, METH_VARARGS,
     "Get a performance counter"},
 
-  {"_ceph_get_latest_counter", (PyCFunction)get_latest_counter, METH_VARARGS,
+  {"_stone_get_latest_counter", (PyCFunction)get_latest_counter, METH_VARARGS,
     "Get the latest performance counter"},
 
-  {"_ceph_get_perf_schema", (PyCFunction)get_perf_schema, METH_VARARGS,
+  {"_stone_get_perf_schema", (PyCFunction)get_perf_schema, METH_VARARGS,
     "Get the performance counter schema"},
 
-  {"_ceph_log", (PyCFunction)ceph_log, METH_VARARGS,
+  {"_stone_log", (PyCFunction)stone_log, METH_VARARGS,
    "Emit a (local) log message"},
 
-  {"_ceph_cluster_log", (PyCFunction)ceph_cluster_log, METH_VARARGS,
+  {"_stone_cluster_log", (PyCFunction)stone_cluster_log, METH_VARARGS,
    "Emit a cluster log message"},
 
-  {"_ceph_get_version", (PyCFunction)ceph_get_version, METH_NOARGS,
-   "Get the ceph version of this process"},
+  {"_stone_get_version", (PyCFunction)stone_get_version, METH_NOARGS,
+   "Get the stone version of this process"},
 
-  {"_ceph_get_release_name", (PyCFunction)ceph_get_release_name, METH_NOARGS,
-   "Get the ceph release name of this process"},
+  {"_stone_get_release_name", (PyCFunction)stone_get_release_name, METH_NOARGS,
+   "Get the stone release name of this process"},
 
-  {"_ceph_lookup_release_name", (PyCFunction)ceph_lookup_release_name, METH_VARARGS,
-   "Get the ceph release name for a given major number"},
+  {"_stone_lookup_release_name", (PyCFunction)stone_lookup_release_name, METH_VARARGS,
+   "Get the stone release name for a given major number"},
 
-  {"_ceph_get_context", (PyCFunction)ceph_get_context, METH_NOARGS,
-    "Get a CephContext* in a python capsule"},
+  {"_stone_get_context", (PyCFunction)stone_get_context, METH_NOARGS,
+    "Get a StoneContext* in a python capsule"},
 
-  {"_ceph_get_osdmap", (PyCFunction)ceph_get_osdmap, METH_NOARGS,
+  {"_stone_get_osdmap", (PyCFunction)stone_get_osdmap, METH_NOARGS,
     "Get an OSDMap* in a python capsule"},
 
-  {"_ceph_set_uri", (PyCFunction)ceph_set_uri, METH_VARARGS,
+  {"_stone_set_uri", (PyCFunction)stone_set_uri, METH_VARARGS,
     "Advertize a service URI served by this module"},
 
-  {"_ceph_set_device_wear_level", (PyCFunction)ceph_set_wear_level, METH_VARARGS,
+  {"_stone_set_device_wear_level", (PyCFunction)stone_set_wear_level, METH_VARARGS,
    "Set device wear_level value"},
 
-  {"_ceph_have_mon_connection", (PyCFunction)ceph_have_mon_connection,
+  {"_stone_have_mon_connection", (PyCFunction)stone_have_mon_connection,
     METH_NOARGS, "Find out whether this mgr daemon currently has "
                  "a connection to a monitor"},
 
-  {"_ceph_update_progress_event", (PyCFunction)ceph_update_progress_event,
+  {"_stone_update_progress_event", (PyCFunction)stone_update_progress_event,
    METH_VARARGS, "Update status of a progress event"},
-  {"_ceph_complete_progress_event", (PyCFunction)ceph_complete_progress_event,
+  {"_stone_complete_progress_event", (PyCFunction)stone_complete_progress_event,
    METH_VARARGS, "Complete a progress event"},
-  {"_ceph_clear_all_progress_events", (PyCFunction)ceph_clear_all_progress_events,
+  {"_stone_clear_all_progress_events", (PyCFunction)stone_clear_all_progress_events,
    METH_NOARGS, "Clear all progress events"},
 
-  {"_ceph_dispatch_remote", (PyCFunction)ceph_dispatch_remote,
+  {"_stone_dispatch_remote", (PyCFunction)stone_dispatch_remote,
     METH_VARARGS, "Dispatch a call to another module"},
 
-  {"_ceph_add_osd_perf_query", (PyCFunction)ceph_add_osd_perf_query,
+  {"_stone_add_osd_perf_query", (PyCFunction)stone_add_osd_perf_query,
     METH_VARARGS, "Add an osd perf query"},
 
-  {"_ceph_remove_osd_perf_query", (PyCFunction)ceph_remove_osd_perf_query,
+  {"_stone_remove_osd_perf_query", (PyCFunction)stone_remove_osd_perf_query,
     METH_VARARGS, "Remove an osd perf query"},
 
-  {"_ceph_get_osd_perf_counters", (PyCFunction)ceph_get_osd_perf_counters,
+  {"_stone_get_osd_perf_counters", (PyCFunction)stone_get_osd_perf_counters,
     METH_VARARGS, "Get osd perf counters"},
 
-  {"_ceph_add_mds_perf_query", (PyCFunction)ceph_add_mds_perf_query,
+  {"_stone_add_mds_perf_query", (PyCFunction)stone_add_mds_perf_query,
     METH_VARARGS, "Add an osd perf query"},
 
-  {"_ceph_remove_mds_perf_query", (PyCFunction)ceph_remove_mds_perf_query,
+  {"_stone_remove_mds_perf_query", (PyCFunction)stone_remove_mds_perf_query,
     METH_VARARGS, "Remove an osd perf query"},
 
-  {"_ceph_get_mds_perf_counters", (PyCFunction)ceph_get_mds_perf_counters,
+  {"_stone_get_mds_perf_counters", (PyCFunction)stone_get_mds_perf_counters,
     METH_VARARGS, "Get osd perf counters"},
 
-  {"_ceph_is_authorized", (PyCFunction)ceph_is_authorized,
+  {"_stone_is_authorized", (PyCFunction)stone_is_authorized,
     METH_VARARGS, "Verify the current session caps are valid"},
 
-  {"_ceph_register_client", (PyCFunction)ceph_register_client,
+  {"_stone_register_client", (PyCFunction)stone_register_client,
     METH_VARARGS, "Register RADOS instance for potential blocklisting"},
 
-  {"_ceph_unregister_client", (PyCFunction)ceph_unregister_client,
+  {"_stone_unregister_client", (PyCFunction)stone_unregister_client,
     METH_VARARGS, "Unregister RADOS instance for potential blocklisting"},
 
   {NULL, NULL, 0, NULL}
@@ -1557,17 +1557,17 @@ BaseMgrModule_init(BaseMgrModule *self, PyObject *args, PyObject *kwds)
 
     self->py_modules = static_cast<ActivePyModules*>(PyCapsule_GetPointer(
         py_modules_capsule, nullptr));
-    ceph_assert(self->py_modules);
+    stone_assert(self->py_modules);
     self->this_module = static_cast<ActivePyModule*>(PyCapsule_GetPointer(
         this_module_capsule, nullptr));
-    ceph_assert(self->this_module);
+    stone_assert(self->this_module);
 
     return 0;
 }
 
 PyTypeObject BaseMgrModuleType = {
   PyVarObject_HEAD_INIT(NULL, 0)
-  "ceph_module.BaseMgrModule", /* tp_name */
+  "stone_module.BaseMgrModule", /* tp_name */
   sizeof(BaseMgrModule),     /* tp_basicsize */
   0,                         /* tp_itemsize */
   0,                         /* tp_dealloc */
@@ -1586,7 +1586,7 @@ PyTypeObject BaseMgrModuleType = {
   0,                         /* tp_setattro */
   0,                         /* tp_as_buffer */
   Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,        /* tp_flags */
-  "ceph-mgr Python Plugin", /* tp_doc */
+  "stone-mgr Python Plugin", /* tp_doc */
   0,                         /* tp_traverse */
   0,                         /* tp_clear */
   0,                         /* tp_richcompare */

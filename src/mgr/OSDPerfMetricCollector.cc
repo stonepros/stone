@@ -7,8 +7,8 @@
 #include "messages/MMgrReport.h"
 #include "OSDPerfMetricCollector.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr.osd_perf_metric_collector " << __func__ << " "
 

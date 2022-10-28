@@ -1,0 +1,20 @@
+overrides:
+  stone:
+    log-ignorelist:
+      - \(MON_DOWN\)
+tasks:
+- install:
+    branch: nautilus
+    exclude_packages:
+      - stoneadm
+      - stone-mgr-stoneadm
+      - stone-immutable-object-cache
+      - python3-rados
+      - python3-rgw
+      - python3-rbd
+      - python3-stonefs
+    extra_packages:
+      - python-rados
+      - python-rgw
+      - python-rbd
+      - python-stonefs

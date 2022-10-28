@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat
  *
@@ -16,7 +16,7 @@
 #include <regex>                 // For regex, regex_search
 
 #include "common/admin_socket_client.h"     // For AdminSocketClient
-#include "common/ceph_json.h"               // For JSONParser, JSONObjIter
+#include "common/stone_json.h"               // For JSONParser, JSONObjIter
 #include "include/buffer.h"                 // For bufferlist
 
 #include "admin_socket_output.h"
@@ -115,7 +115,7 @@ AdminSocketOutput::run_command(AdminSocketClient &client,
   if (!err.empty()) {
     std::cerr << __func__  << " AdminSocketClient::do_request errored with: "
               << err << std::endl;
-    ceph_abort();
+    stone_abort();
   }
   return std::make_pair(command, output);
 }
@@ -233,8 +233,8 @@ bool AdminSocketOutput::run_tests() const {
 }
 
 void AdminSocketOutput::exec() {
-  ceph_assert(init_directories());
-  ceph_assert(init_sockets());
-  ceph_assert(gather_socket_output());
-  ceph_assert(run_tests());
+  stone_assert(init_directories());
+  stone_assert(init_sockets());
+  stone_assert(gather_socket_output());
+  stone_assert(run_tests());
 }

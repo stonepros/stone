@@ -1,9 +1,9 @@
 meta:
-- desc: run two ceph clusters and install rbd-mirror
+- desc: run two stone clusters and install rbd-mirror
 tasks:
 - install:
     extra_packages: [rbd-mirror]
-- ceph:
+- stone:
     cluster: cluster1
-- ceph:
+- stone:
     cluster: cluster2

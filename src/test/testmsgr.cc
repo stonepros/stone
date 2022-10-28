@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -26,24 +26,24 @@ using namespace std;
 
 #include "common/Timer.h"
 #include "global/global_init.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 
 Messenger *messenger = 0;
 
-ceph::mutex test_lock = ceph::make_mutex("mylock");
-ceph::condition_variable cond;
+stone::mutex test_lock = stone::make_mutex("mylock");
+stone::condition_variable cond;
 
 uint64_t received = 0;
 
 class Admin : public Dispatcher {
 public:
   Admin() 
-    : Dispatcher(g_ceph_context)
+    : Dispatcher(g_stone_context)
   {
   }
 private:
@@ -72,38 +72,38 @@ int main(int argc, const char **argv, const char *envp[]) {
   vector<const char*> args;
   argv_to_vec(argc, argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+  auto cct = global_init(NULL, args, STONE_ENTITY_TYPE_CLIENT,
 			 CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
+  common_init_finish(g_stone_context);
 
   dout(0) << "i am mon " << args[0] << dendl;
 
   // get monmap
-  MonClient mc(g_ceph_context);
+  MonClient mc(g_stone_context);
   if (mc.build_initial_monmap() < 0)
     return -1;
   
   // start up network
   int whoami = mc.monmap.get_rank(args[0]);
-  ceph_assert(whoami >= 0);
+  stone_assert(whoami >= 0);
   ostringstream ss;
   ss << mc.monmap.get_addr(whoami);
   std::string sss(ss.str());
-  g_ceph_context->_conf.set_val("public_addr", sss.c_str());
-  g_ceph_context->_conf.apply_changes(nullptr);
+  g_stone_context->_conf.set_val("public_addr", sss.c_str());
+  g_stone_context->_conf.apply_changes(nullptr);
   std::string public_msgr_type = g_conf()->ms_public_type.empty() ? g_conf().get_val<std::string>("ms_type") : g_conf()->ms_public_type;
-  Messenger *rank = Messenger::create(g_ceph_context,
+  Messenger *rank = Messenger::create(g_stone_context,
 				      public_msgr_type,
 				      entity_name_t::MON(whoami), "tester",
 				      getpid());
-  int err = rank->bind(g_ceph_context->_conf->public_addr);
+  int err = rank->bind(g_stone_context->_conf->public_addr);
   if (err < 0)
     return 1;
 
   // start monitor
   messenger = rank;
-  messenger->set_default_send_priority(CEPH_MSG_PRIO_HIGH);
+  messenger->set_default_send_priority(STONE_MSG_PRIO_HIGH);
   messenger->add_dispatcher_head(&dispatcher);
 
   rank->start();

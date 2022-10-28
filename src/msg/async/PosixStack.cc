@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 XSKY <haomai@xsky.com>
  *
@@ -33,18 +33,18 @@
 #include "include/compat.h"
 #include "include/sock_compat.h"
 
-#define dout_subsys ceph_subsys_ms
+#define dout_subsys stone_subsys_ms
 #undef dout_prefix
 #define dout_prefix *_dout << "PosixStack "
 
 class PosixConnectedSocketImpl final : public ConnectedSocketImpl {
-  ceph::NetHandler &handler;
+  stone::NetHandler &handler;
   int _fd;
   entity_addr_t sa;
   bool connected;
 
  public:
-  explicit PosixConnectedSocketImpl(ceph::NetHandler &h, const entity_addr_t &sa,
+  explicit PosixConnectedSocketImpl(stone::NetHandler &h, const entity_addr_t &sa,
 				    int f, bool connected)
       : handler(h), _fd(f), sa(sa), connected(connected) {}
 
@@ -70,7 +70,7 @@ class PosixConnectedSocketImpl final : public ConnectedSocketImpl {
     ssize_t r = ::read(_fd, buf, len);
     #endif
     if (r < 0)
-      r = -ceph_sock_errno();
+      r = -stone_sock_errno();
     return r;
   }
 
@@ -85,7 +85,7 @@ class PosixConnectedSocketImpl final : public ConnectedSocketImpl {
       ssize_t r;
       r = ::sendmsg(fd, &msg, MSG_NOSIGNAL | (more ? MSG_MORE : 0));
       if (r < 0) {
-        int err = ceph_sock_errno();
+        int err = stone_sock_errno();
         if (err == EINTR) {
           continue;
         } else if (err == EAGAIN) {
@@ -113,7 +113,7 @@ class PosixConnectedSocketImpl final : public ConnectedSocketImpl {
     return (ssize_t)sent;
   }
 
-  ssize_t send(ceph::buffer::list &bl, bool more) override {
+  ssize_t send(stone::buffer::list &bl, bool more) override {
     size_t sent_bytes = 0;
     auto pb = std::cbegin(bl.buffers());
     uint64_t left_pbrs = bl.get_num_buffers();
@@ -145,7 +145,7 @@ class PosixConnectedSocketImpl final : public ConnectedSocketImpl {
     }
 
     if (sent_bytes) {
-      ceph::buffer::list swapped;
+      stone::buffer::list swapped;
       if (sent_bytes < bl.length()) {
         bl.splice(sent_bytes, bl.length()-sent_bytes, &swapped);
         bl.swap(swapped);
@@ -214,11 +214,11 @@ class PosixConnectedSocketImpl final : public ConnectedSocketImpl {
 };
 
 class PosixServerSocketImpl : public ServerSocketImpl {
-  ceph::NetHandler &handler;
+  stone::NetHandler &handler;
   int _fd;
 
  public:
-  explicit PosixServerSocketImpl(ceph::NetHandler &h, int f,
+  explicit PosixServerSocketImpl(stone::NetHandler &h, int f,
 				 const entity_addr_t& listen_addr, unsigned slot)
     : ServerSocketImpl(listen_addr.get_type(), slot),
       handler(h), _fd(f) {}
@@ -233,27 +233,27 @@ class PosixServerSocketImpl : public ServerSocketImpl {
 };
 
 int PosixServerSocketImpl::accept(ConnectedSocket *sock, const SocketOptions &opt, entity_addr_t *out, Worker *w) {
-  ceph_assert(sock);
+  stone_assert(sock);
   sockaddr_storage ss;
   socklen_t slen = sizeof(ss);
   int sd = accept_cloexec(_fd, (sockaddr*)&ss, &slen);
   if (sd < 0) {
-    return -ceph_sock_errno();
+    return -stone_sock_errno();
   }
 
   int r = handler.set_nonblock(sd);
   if (r < 0) {
     ::close(sd);
-    return -ceph_sock_errno();
+    return -stone_sock_errno();
   }
 
   r = handler.set_socket_options(sd, opt.nodelay, opt.rcbuf_size);
   if (r < 0) {
     ::close(sd);
-    return -ceph_sock_errno();
+    return -stone_sock_errno();
   }
 
-  ceph_assert(NULL != out); //out should not be NULL in accept connection
+  stone_assert(NULL != out); //out should not be NULL in accept connection
 
   out->set_type(addr_type);
   out->set_sockaddr((sockaddr*)&ss);
@@ -275,24 +275,24 @@ int PosixWorker::listen(entity_addr_t &sa,
 {
   int listen_sd = net.create_socket(sa.get_family(), true);
   if (listen_sd < 0) {
-    return -ceph_sock_errno();
+    return -stone_sock_errno();
   }
 
   int r = net.set_nonblock(listen_sd);
   if (r < 0) {
     ::close(listen_sd);
-    return -ceph_sock_errno();
+    return -stone_sock_errno();
   }
 
   r = net.set_socket_options(listen_sd, opt.nodelay, opt.rcbuf_size);
   if (r < 0) {
     ::close(listen_sd);
-    return -ceph_sock_errno();
+    return -stone_sock_errno();
   }
 
   r = ::bind(listen_sd, sa.get_sockaddr(), sa.get_sockaddr_len());
   if (r < 0) {
-    r = -ceph_sock_errno();
+    r = -stone_sock_errno();
     ldout(cct, 10) << __func__ << " unable to bind to " << sa.get_sockaddr()
                    << ": " << cpp_strerror(r) << dendl;
     ::close(listen_sd);
@@ -301,7 +301,7 @@ int PosixWorker::listen(entity_addr_t &sa,
 
   r = ::listen(listen_sd, cct->_conf->ms_tcp_listen_backlog);
   if (r < 0) {
-    r = -ceph_sock_errno();
+    r = -stone_sock_errno();
     lderr(cct) << __func__ << " unable to listen on " << sa << ": " << cpp_strerror(r) << dendl;
     ::close(listen_sd);
     return r;
@@ -323,7 +323,7 @@ int PosixWorker::connect(const entity_addr_t &addr, const SocketOptions &opts, C
   }
 
   if (sd < 0) {
-    return -ceph_sock_errno();
+    return -stone_sock_errno();
   }
 
   net.set_priority(sd, opts.priority, addr.get_family());
@@ -332,7 +332,7 @@ int PosixWorker::connect(const entity_addr_t &addr, const SocketOptions &opts, C
   return 0;
 }
 
-PosixNetworkStack::PosixNetworkStack(CephContext *c)
+PosixNetworkStack::PosixNetworkStack(StoneContext *c)
     : NetworkStack(c)
 {
 }

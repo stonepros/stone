@@ -4,9 +4,9 @@
 #include "rgw_period_history.h"
 #include "rgw_zone.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #undef dout_prefix
 #define dout_prefix (*_dout << "rgw period history: ")
@@ -81,7 +81,7 @@ bool operator!=(const Cursor& lhs, const Cursor& rhs)
 
 class RGWPeriodHistory::Impl final {
  public:
-  Impl(CephContext* cct, Puller* puller, const RGWPeriod& current_period);
+  Impl(StoneContext* cct, Puller* puller, const RGWPeriod& current_period);
   ~Impl();
 
   Cursor get_current() const { return current_cursor; }
@@ -109,7 +109,7 @@ class RGWPeriodHistory::Impl final {
   /// construct a Cursor object using Cursor's private constuctor
   Cursor make_cursor(Set::const_iterator history, epoch_t epoch);
 
-  CephContext *const cct;
+  StoneContext *const cct;
   Puller *const puller; //< interface for pulling missing periods
   Cursor current_cursor; //< Cursor to realm's current period
 
@@ -123,7 +123,7 @@ class RGWPeriodHistory::Impl final {
   Set::const_iterator current_history;
 };
 
-RGWPeriodHistory::Impl::Impl(CephContext* cct, Puller* puller,
+RGWPeriodHistory::Impl::Impl(StoneContext* cct, Puller* puller,
                              const RGWPeriod& current_period)
   : cct(cct), puller(puller)
 {
@@ -303,7 +303,7 @@ Cursor RGWPeriodHistory::Impl::insert_locked(RGWPeriod&& period)
 RGWPeriodHistory::Impl::Set::iterator
 RGWPeriodHistory::Impl::merge(Set::iterator dst, Set::iterator src)
 {
-  ceph_assert(dst->get_newest_epoch() + 1 == src->get_oldest_epoch());
+  stone_assert(dst->get_newest_epoch() + 1 == src->get_oldest_epoch());
 
   // always merge into current_history
   if (src == current_history) {
@@ -329,7 +329,7 @@ Cursor RGWPeriodHistory::Impl::make_cursor(Set::const_iterator history,
 }
 
 
-RGWPeriodHistory::RGWPeriodHistory(CephContext* cct, Puller* puller,
+RGWPeriodHistory::RGWPeriodHistory(StoneContext* cct, Puller* puller,
                                    const RGWPeriod& current_period)
   : impl(new Impl(cct, puller, current_period)) {}
 

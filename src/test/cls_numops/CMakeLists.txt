@@ -1,7 +1,7 @@
-# ceph_test_cls_numops
-add_executable(ceph_test_cls_numops 
+# stone_test_cls_numops
+add_executable(stone_test_cls_numops 
   test_cls_numops.cc)
-target_link_libraries(ceph_test_cls_numops 
+target_link_libraries(stone_test_cls_numops 
   librados
   global
   cls_numops_client 
@@ -12,5 +12,5 @@ target_link_libraries(ceph_test_cls_numops
   ${UNITTEST_LIBS} 
   )
 install(TARGETS
-  ceph_test_cls_numops
+  stone_test_cls_numops
   DESTINATION ${CMAKE_INSTALL_BINDIR})

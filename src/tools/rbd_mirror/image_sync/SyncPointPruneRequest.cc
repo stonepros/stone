@@ -10,8 +10,8 @@
 #include "librbd/Utils.h"
 #include <set>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_sync::SyncPointPruneRequest: " \
                            << this << " " << __func__
@@ -66,7 +66,7 @@ void SyncPointPruneRequest<I>::send() {
       if (&sync_point == &m_sync_points_copy.front()) {
         if (m_remote_image_ctx->get_snap_id(
 	      cls::rbd::UserSnapshotNamespace(), sync_point.snap_name) ==
-              CEPH_NOSNAP) {
+              STONE_NOSNAP) {
           derr << ": failed to locate sync point snapshot: "
                << sync_point.snap_name << dendl;
         } else if (!sync_point.from_snap_name.empty()) {
@@ -120,7 +120,7 @@ template <typename I>
 void SyncPointPruneRequest<I>::handle_remove_snap(int r) {
   dout(20) << ": r=" << r << dendl;
 
-  ceph_assert(!m_snap_names.empty());
+  stone_assert(!m_snap_names.empty());
   std::string snap_name = m_snap_names.front();
   m_snap_names.pop_front();
 

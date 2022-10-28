@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 #include "test/librados/test_cxx.h"
 #include "global/global_context.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 #include <errno.h>
 #include <string>
@@ -97,7 +97,7 @@ void index_complete(librados::IoCtx& ioctx, string& oid, RGWModifyOp index_op,
     rgw_zone_set zone_set;
     ASSERT_EQ(0, cls_rgw_bucket_link_olh(ioctx, oid, key, olh_tag,
                                          false, tag, &meta, epoch,
-                                         ceph::real_time{}, true, true, zone_set));
+                                         stone::real_time{}, true, true, zone_set));
   }
 }
 
@@ -340,7 +340,7 @@ TEST_F(cls_rgw, index_suggest)
     dirent.meta.size = 1024;
     dirent.meta.accounted_size = 1024;
 
-    char suggest_op = (i < num_objs / 2 ? CEPH_RGW_UPDATE : CEPH_RGW_REMOVE);
+    char suggest_op = (i < num_objs / 2 ? STONE_RGW_UPDATE : STONE_RGW_REMOVE);
     cls_rgw_encode_suggestion(suggest_op, dirent, updates);
   }
 
@@ -555,7 +555,7 @@ TEST_F(cls_rgw, bi_list)
 {
   string bucket_oid = str_int("bucket", 5);
 
-  CephContext *cct = reinterpret_cast<CephContext *>(ioctx.cct());
+  StoneContext *cct = reinterpret_cast<StoneContext *>(ioctx.cct());
 
   ObjectWriteOperation op;
   cls_rgw_bucket_init_index(op);

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2010-2011 Dreamhost
  *
@@ -15,18 +15,18 @@
 #include "include/compat.h"
 #include "common/common_init.h"
 #include "common/admin_socket.h"
-#include "common/ceph_argparse.h"
-#include "common/ceph_context.h"
+#include "common/stone_argparse.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "common/dout.h"
 #include "common/strtol.h"
 #include "common/valgrind.h"
 #include "common/zipkin_trace.h"
 
-#define dout_subsys ceph_subsys_
+#define dout_subsys stone_subsys_
 
 #ifndef WITH_SEASTAR
-CephContext *common_preinit(const CephInitParameters &iparams,
+StoneContext *common_preinit(const StoneInitParameters &iparams,
 			    enum code_environment_t code_env, int flags)
 {
   // set code environment
@@ -34,7 +34,7 @@ CephContext *common_preinit(const CephInitParameters &iparams,
   g_code_env = code_env;
 
   // Create a configuration object
-  CephContext *cct = new CephContext(iparams.module_type, code_env, flags);
+  StoneContext *cct = new StoneContext(iparams.module_type, code_env, flags);
 
   auto& conf = cct->_conf;
   // add config observers here
@@ -70,7 +70,7 @@ CephContext *common_preinit(const CephInitParameters &iparams,
 }
 #endif	// #ifndef WITH_SEASTAR
 
-void complain_about_parse_error(CephContext *cct,
+void complain_about_parse_error(StoneContext *cct,
 				const std::string& parse_error)
 {
   if (parse_error.empty())
@@ -83,7 +83,7 @@ void complain_about_parse_error(CephContext *cct,
 
 /* Please be sure that this can safely be called multiple times by the
  * same application. */
-void common_init_finish(CephContext *cct)
+void common_init_finish(StoneContext *cct)
 {
   // only do this once per cct
   if (cct->_finished) {

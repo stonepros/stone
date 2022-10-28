@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_PLUGIN_PARENT_CACHE_H
-#define CEPH_LIBRBD_PLUGIN_PARENT_CACHE_H
+#ifndef STONE_LIBRBD_PLUGIN_PARENT_CACHE_H
+#define STONE_LIBRBD_PLUGIN_PARENT_CACHE_H
 
 #include "librbd/plugin/Types.h"
 #include "include/Context.h"
@@ -16,7 +16,7 @@ namespace plugin {
 template <typename ImageCtxT>
 class ParentCache : public Interface<ImageCtxT> {
 public:
-  ParentCache(CephContext* cct) : Interface<ImageCtxT>(cct) {
+  ParentCache(StoneContext* cct) : Interface<ImageCtxT>(cct) {
   }
 
   void init(ImageCtxT* image_ctx, Api<ImageCtxT>& api,
@@ -35,4 +35,4 @@ private:
 
 extern template class librbd::plugin::ParentCache<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_PLUGIN_PARENT_CACHE_H
+#endif // STONE_LIBRBD_PLUGIN_PARENT_CACHE_H

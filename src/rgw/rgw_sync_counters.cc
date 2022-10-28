@@ -1,16 +1,16 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "rgw_sync_counters.h"
 
 namespace sync_counters {
 
-PerfCountersRef build(CephContext *cct, const std::string& name)
+PerfCountersRef build(StoneContext *cct, const std::string& name)
 {
   PerfCountersBuilder b(cct, name, l_first, l_last);
 
-  // share these counters with ceph-mgr
+  // share these counters with stone-mgr
   b.set_prio_default(PerfCountersBuilder::PRIO_USEFUL);
 
   b.add_u64_avg(l_fetch, "fetch_bytes", "Number of object bytes replicated");

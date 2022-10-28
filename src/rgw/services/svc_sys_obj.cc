@@ -8,7 +8,7 @@
 
 #include "rgw/rgw_zone.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 RGWSysObjectCtx RGWSI_SysObj::init_obj_ctx()
 {

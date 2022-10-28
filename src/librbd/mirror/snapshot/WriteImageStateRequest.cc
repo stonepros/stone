@@ -9,7 +9,7 @@
 #include "librbd/Utils.h"
 #include "librbd/mirror/snapshot/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::snapshot::WriteImageStateRequest: " \
@@ -25,7 +25,7 @@ static size_t header_length() {
   bufferlist bl;
   ImageStateHeader header;
 
-  using ceph::encode;
+  using stone::encode;
   encode(header, bl);
 
   return bl.length();
@@ -59,8 +59,8 @@ void WriteImageStateRequest<I>::send() {
 
 template <typename I>
 void WriteImageStateRequest<I>::write_object() {
-  CephContext *cct = m_image_ctx->cct;
-  ceph_assert(m_object_count > 0);
+  StoneContext *cct = m_image_ctx->cct;
+  stone_assert(m_object_count > 0);
 
   m_object_count--;
 
@@ -80,13 +80,13 @@ void WriteImageStateRequest<I>::write_object() {
     WriteImageStateRequest<I>,
     &WriteImageStateRequest<I>::handle_write_object>(this);
   int r = m_image_ctx->md_ctx.aio_operate(oid, comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
 template <typename I>
 void WriteImageStateRequest<I>::handle_write_object(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -106,7 +106,7 @@ void WriteImageStateRequest<I>::handle_write_object(int r) {
 
 template <typename I>
 void WriteImageStateRequest<I>::finish(int r) {
-  CephContext *cct = m_image_ctx->cct;
+  StoneContext *cct = m_image_ctx->cct;
   ldout(cct, 15) << "r=" << r << dendl;
 
   m_on_finish->complete(r);

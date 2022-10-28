@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_COMMON_ENTITY_NAME_H
-#define CEPH_COMMON_ENTITY_NAME_H
+#ifndef STONE_COMMON_ENTITY_NAME_H
+#define STONE_COMMON_ENTITY_NAME_H
 
 #include <string_view>
 
@@ -21,7 +21,7 @@
 
 #include "msg/msg_types.h"
 
-/* Represents a Ceph entity name.
+/* Represents a Stonee entity name.
  *
  * For example, mds.0 is the name of the first metadata server.
  * client
@@ -55,11 +55,11 @@ struct EntityName
   const char* get_type_str() const;
 
   uint32_t get_type() const { return type; }
-  bool is_osd() const { return get_type() == CEPH_ENTITY_TYPE_OSD; }
-  bool is_mgr() const { return get_type() == CEPH_ENTITY_TYPE_MGR; }
-  bool is_mds() const { return get_type() == CEPH_ENTITY_TYPE_MDS; }
-  bool is_client() const { return get_type() == CEPH_ENTITY_TYPE_CLIENT; }
-  bool is_mon() const { return get_type() == CEPH_ENTITY_TYPE_MON; }
+  bool is_osd() const { return get_type() == STONE_ENTITY_TYPE_OSD; }
+  bool is_mgr() const { return get_type() == STONE_ENTITY_TYPE_MGR; }
+  bool is_mds() const { return get_type() == STONE_ENTITY_TYPE_MDS; }
+  bool is_client() const { return get_type() == STONE_ENTITY_TYPE_CLIENT; }
+  bool is_mon() const { return get_type() == STONE_ENTITY_TYPE_MON; }
 
   std::string_view get_type_name() const;
   const std::string &get_id() const;

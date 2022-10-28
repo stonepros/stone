@@ -11,7 +11,7 @@
 #include "librbd/image/RefreshParentRequest.h"
 #include "librbd/io/ImageDispatcherInterface.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::image::SetSnapRequest: "
 
@@ -30,7 +30,7 @@ SetSnapRequest<I>::SetSnapRequest(I &image_ctx, uint64_t snap_id,
 
 template <typename I>
 SetSnapRequest<I>::~SetSnapRequest() {
-  ceph_assert(!m_writes_blocked);
+  stone_assert(!m_writes_blocked);
   delete m_refresh_parent;
   if (m_object_map) {
     m_object_map->put();
@@ -42,7 +42,7 @@ SetSnapRequest<I>::~SetSnapRequest() {
 
 template <typename I>
 void SetSnapRequest<I>::send() {
-  if (m_snap_id == CEPH_NOSNAP) {
+  if (m_snap_id == STONE_NOSNAP) {
     send_init_exclusive_lock();
   } else {
     send_block_writes();
@@ -54,7 +54,7 @@ void SetSnapRequest<I>::send_init_exclusive_lock() {
   {
     std::shared_lock image_locker{m_image_ctx.image_lock};
     if (m_image_ctx.exclusive_lock != nullptr) {
-      ceph_assert(m_image_ctx.snap_id == CEPH_NOSNAP);
+      stone_assert(m_image_ctx.snap_id == STONE_NOSNAP);
       send_complete();
       return;
     }
@@ -69,7 +69,7 @@ void SetSnapRequest<I>::send_init_exclusive_lock() {
     return;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << __func__ << dendl;
 
   m_exclusive_lock = ExclusiveLock<I>::create(m_image_ctx);
@@ -84,7 +84,7 @@ void SetSnapRequest<I>::send_init_exclusive_lock() {
 
 template <typename I>
 Context *SetSnapRequest<I>::handle_init_exclusive_lock(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -98,7 +98,7 @@ Context *SetSnapRequest<I>::handle_init_exclusive_lock(int *result) {
 
 template <typename I>
 void SetSnapRequest<I>::send_block_writes() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << __func__ << dendl;
 
   m_writes_blocked = true;
@@ -113,7 +113,7 @@ void SetSnapRequest<I>::send_block_writes() {
 
 template <typename I>
 Context *SetSnapRequest<I>::handle_block_writes(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -150,7 +150,7 @@ Context *SetSnapRequest<I>::send_shut_down_exclusive_lock(int *result) {
     return send_refresh_parent(result);
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << __func__ << dendl;
 
   using klass = SetSnapRequest<I>;
@@ -162,7 +162,7 @@ Context *SetSnapRequest<I>::send_shut_down_exclusive_lock(int *result) {
 
 template <typename I>
 Context *SetSnapRequest<I>::handle_shut_down_exclusive_lock(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -177,7 +177,7 @@ Context *SetSnapRequest<I>::handle_shut_down_exclusive_lock(int *result) {
 
 template <typename I>
 Context *SetSnapRequest<I>::send_refresh_parent(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
 
   ParentImageInfo parent_md;
   bool refresh_parent;
@@ -198,7 +198,7 @@ Context *SetSnapRequest<I>::send_refresh_parent(int *result) {
   }
 
   if (!refresh_parent) {
-    if (m_snap_id == CEPH_NOSNAP) {
+    if (m_snap_id == STONE_NOSNAP) {
       // object map is loaded when exclusive lock is acquired
       *result = apply();
       finalize();
@@ -223,7 +223,7 @@ Context *SetSnapRequest<I>::send_refresh_parent(int *result) {
 
 template <typename I>
 Context *SetSnapRequest<I>::handle_refresh_parent(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -233,7 +233,7 @@ Context *SetSnapRequest<I>::handle_refresh_parent(int *result) {
     return m_on_finish;
   }
 
-  if (m_snap_id == CEPH_NOSNAP) {
+  if (m_snap_id == STONE_NOSNAP) {
     // object map is loaded when exclusive lock is acquired
     *result = apply();
     if (*result < 0) {
@@ -260,7 +260,7 @@ Context *SetSnapRequest<I>::send_open_object_map(int *result) {
     return send_finalize_refresh_parent(result);
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << __func__ << dendl;
 
   using klass = SetSnapRequest<I>;
@@ -273,7 +273,7 @@ Context *SetSnapRequest<I>::send_open_object_map(int *result) {
 
 template <typename I>
 Context *SetSnapRequest<I>::handle_open_object_map(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -299,7 +299,7 @@ Context *SetSnapRequest<I>::send_finalize_refresh_parent(int *result) {
     return m_on_finish;
   }
 
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << dendl;
 
   using klass = SetSnapRequest<I>;
@@ -311,7 +311,7 @@ Context *SetSnapRequest<I>::send_finalize_refresh_parent(int *result) {
 
 template <typename I>
 Context *SetSnapRequest<I>::handle_finalize_refresh_parent(int *result) {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << this << " " << __func__ << ": r=" << *result << dendl;
 
   if (*result < 0) {
@@ -324,12 +324,12 @@ Context *SetSnapRequest<I>::handle_finalize_refresh_parent(int *result) {
 
 template <typename I>
 int SetSnapRequest<I>::apply() {
-  CephContext *cct = m_image_ctx.cct;
+  StoneContext *cct = m_image_ctx.cct;
   ldout(cct, 10) << __func__ << dendl;
 
   std::scoped_lock locker{m_image_ctx.owner_lock, m_image_ctx.image_lock};
-  if (m_snap_id != CEPH_NOSNAP) {
-    ceph_assert(m_image_ctx.exclusive_lock == nullptr);
+  if (m_snap_id != STONE_NOSNAP) {
+    stone_assert(m_image_ctx.exclusive_lock == nullptr);
     int r = m_image_ctx.snap_set(m_snap_id);
     if (r < 0) {
       return r;

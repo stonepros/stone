@@ -4,7 +4,7 @@
 #include "OSDMapMapping.h"
 #include "OSDMap.h"
 
-#define dout_subsys ceph_subsys_mon
+#define dout_subsys stone_subsys_mon
 
 #include "common/debug.h"
 
@@ -41,7 +41,7 @@ void OSDMapMapping::_init_mappings(const OSDMap& osdmap)
 				       p.second.is_erasure()));
   }
   pools.erase(q, pools.end());
-  ceph_assert(pools.size() == osdmap.get_pools().size());
+  stone_assert(pools.size() == osdmap.get_pools().size());
 }
 
 void OSDMapMapping::update(const OSDMap& osdmap)
@@ -111,9 +111,9 @@ void OSDMapMapping::_update_range(
   unsigned pg_end)
 {
   auto i = pools.find(pool);
-  ceph_assert(i != pools.end());
-  ceph_assert(pg_begin <= pg_end);
-  ceph_assert(pg_end <= i->second.pg_num);
+  stone_assert(i != pools.end());
+  stone_assert(pg_begin <= pg_end);
+  stone_assert(pg_end <= i->second.pg_num);
   for (unsigned ps = pg_begin; ps < pg_end; ++ps) {
     std::vector<int> up, acting;
     int up_primary, acting_primary;
@@ -134,7 +134,7 @@ void ParallelPGMapper::Job::finish_one()
     std::lock_guard l(lock);
     if (--shards == 0) {
       if (!aborted) {
-	finish = ceph_clock_now();
+	finish = stone_clock_now();
 	complete();
       }
       cond.notify_all();
@@ -189,7 +189,7 @@ void ParallelPGMapper::queue(
       wq.queue(new Item(job, item_pgs));
       any = true;
     }
-    ceph_assert(any);
+    stone_assert(any);
     return;
   }
   // no input pgs, load all from map
@@ -203,5 +203,5 @@ void ParallelPGMapper::queue(
       any = true;
     }
   }
-  ceph_assert(any);
+  stone_assert(any);
 }

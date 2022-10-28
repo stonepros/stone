@@ -23,7 +23,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
 }
 
@@ -42,7 +42,7 @@ PGRecovery::start_recovery_ops(size_t max_to_start)
   assert(pg->is_primary());
   assert(pg->is_peered());
   assert(pg->is_recovering());
-  // in ceph-osd the do_recovery() path handles both the pg log-based
+  // in stone-osd the do_recovery() path handles both the pg log-based
   // recovery and the backfill, albeit they are separated at the layer
   // of PeeringState. In crimson-osd backfill has been cut from it, so
   // and do_recovery() is actually solely for pg log-based recovery.
@@ -208,7 +208,7 @@ size_t PGRecovery::start_replica_recovery_ops(
 	    __func__,
 	    soid,
 	    pi.last_backfill);
-	  ceph_abort();
+	  stone_abort();
 	}
 	continue;
       }
@@ -310,7 +310,7 @@ void PGRecovery::on_local_recover(
   const hobject_t& soid,
   const ObjectRecoveryInfo& recovery_info,
   const bool is_delete,
-  ceph::os::Transaction& t)
+  stone::os::Transaction& t)
 {
   pg->get_peering_state().recover_got(soid,
       recovery_info.version, is_delete, t);
@@ -360,7 +360,7 @@ void PGRecovery::on_peer_recover(
   const hobject_t &oid,
   const ObjectRecoveryInfo &recovery_info)
 {
-  crimson::get_logger(ceph_subsys_osd).debug(
+  crimson::get_logger(stone_subsys_osd).debug(
       "{}: {}, {} on {}", __func__, oid,
       recovery_info.version, peer);
   pg->get_peering_state().on_peer_recover(peer, oid, recovery_info.version);
@@ -372,7 +372,7 @@ void PGRecovery::_committed_pushed_object(epoch_t epoch,
   if (!pg->has_reset_since(epoch)) {
     pg->get_peering_state().recovery_committed_to(last_complete);
   } else {
-    crimson::get_logger(ceph_subsys_osd).debug(
+    crimson::get_logger(stone_subsys_osd).debug(
 	"{} pg has changed, not touching last_complete_ondisk",
 	__func__);
   }
@@ -434,7 +434,7 @@ void PGRecovery::enqueue_push(
   pg->get_recovery_backend()->add_recovering(obj);
   std::ignore = pg->get_recovery_backend()->recover_object(obj, v).\
   handle_exception([] (auto) {
-    ceph_abort_msg("got exception on backfill's push");
+    stone_abort_msg("got exception on backfill's push");
     return seastar::make_ready_future<>();
   }).then([this, obj] {
     logger().debug("enqueue_push:{}", __func__);
@@ -451,7 +451,7 @@ void PGRecovery::enqueue_drop(
   // allocate a pair if target is seen for the first time
   auto& req = backfill_drop_requests[target];
   if (!req) {
-    req = ceph::make_message<MOSDPGBackfillRemove>(
+    req = stone::make_message<MOSDPGBackfillRemove>(
       spg_t(pg->get_pgid().pgid, target.shard), pg->get_osdmap_epoch());
   }
   req->ls.emplace_back(obj, v);
@@ -545,6 +545,6 @@ void PGRecovery::on_backfill_reserved()
   // events -- they must be mutually exclusive with PeeringEvent
   // instances. Otherwise the execution might begin without having
   // the state updated.
-  ceph_assert(!pg->get_peering_state().is_backfilling());
+  stone_assert(!pg->get_peering_state().is_backfilling());
   start_backfill_recovery(BackfillState::Triggered{});
 }

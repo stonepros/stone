@@ -1,10 +1,10 @@
 overrides:
-  ceph:
+  stone:
     conf:
       client:
         fuse set user groups: true
 tasks:
-- ceph-fuse:
+- stone-fuse:
 - workunit:
     clients:
       all:

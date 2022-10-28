@@ -1,14 +1,14 @@
 meta:
-- desc: install ceph/nautilus latest
+- desc: install stone/nautilus latest
 tasks:
 - install:
     exclude_packages:
-      - ceph-mgr-cephadm
-      - cephadm
-      - libcephfs-dev
+      - stone-mgr-stoneadm
+      - stoneadm
+      - libstonefs-dev
     branch: nautilus
 - print: "**** done install nautilus"
-- ceph:
+- stone:
     conf:
       global:
         bluestore_warn_on_legacy_statfs: false
@@ -19,14 +19,14 @@ tasks:
       - evicting unresponsive client
 - exec:
     osd.0:
-      - ceph osd require-osd-release nautilus
-      - ceph osd set-require-min-compat-client nautilus
-- print: "**** done ceph"
+      - stone osd require-osd-release nautilus
+      - stone osd set-require-min-compat-client nautilus
+- print: "**** done stone"
 - rgw:
    - client.0
 - print: "**** done => started rgw client.0"
 overrides:
-  ceph:
+  stone:
     conf:
       mon:
         mon warn on osd down out interval zero: false

@@ -3,8 +3,8 @@
 
 #include "librbd/migration/S3Stream.h"
 #include "common/armor.h"
-#include "common/ceph_crypto.h"
-#include "common/ceph_time.h"
+#include "common/stone_crypto.h"
+#include "common/stone_time.h"
 #include "common/dout.h"
 #include "common/errno.h"
 #include "librbd/AsioEngine.h"
@@ -49,7 +49,7 @@ struct S3Stream<I>::HttpProcessor : public HttpProcessorInterface {
   }
 };
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::migration::S3Stream: " << this \
                            << " " << __func__ << ": "
@@ -154,7 +154,7 @@ void S3Stream<I>::process_request(HttpRequest& http_request) {
   ldout(m_cct, 20) << dendl;
 
   // format RFC 1123 date/time
-  auto time = ceph::real_clock::to_time_t(ceph::real_clock::now());
+  auto time = stone::real_clock::to_time_t(stone::real_clock::now());
   struct tm timeInfo;
   gmtime_r(&time, &timeInfo);
 
@@ -171,7 +171,7 @@ void S3Stream<I>::process_request(HttpRequest& http_request) {
 
   // create HMAC-SHA1 signature from secret key + string-to-sign
   sha1_digest_t digest;
-  ceph::crypto::HMACSHA1 hmac(
+  stone::crypto::HMACSHA1 hmac(
     reinterpret_cast<const unsigned char*>(m_secret_key.data()),
     m_secret_key.size());
   hmac.Update(reinterpret_cast<const unsigned char*>(string_to_sign.data()),
@@ -180,11 +180,11 @@ void S3Stream<I>::process_request(HttpRequest& http_request) {
 
   // base64 encode the result
   char buf[64];
-  int r = ceph_armor(std::begin(buf), std::begin(buf) + sizeof(buf),
+  int r = stone_armor(std::begin(buf), std::begin(buf) + sizeof(buf),
                      reinterpret_cast<const char *>(digest.v),
                      reinterpret_cast<const char *>(digest.v + digest.SIZE));
   if (r < 0) {
-    ceph_abort("ceph_armor failed");
+    stone_abort("stone_armor failed");
   }
 
   // store the access-key + signature in the HTTP authorization header

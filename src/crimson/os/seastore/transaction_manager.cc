@@ -12,7 +12,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 }
 
@@ -48,7 +48,7 @@ TransactionManager::mkfs_ertr::future<> TransactionManager::mkfs()
 	  logger().debug("TransactionManager::mkfs: about to submit_transaction");
 	  return submit_transaction(std::move(transaction)).handle_error(
 	    crimson::ct_error::eagain::handle([] {
-	      ceph_assert(0 == "eagain impossible");
+	      stone_assert(0 == "eagain impossible");
 	      return mkfs_ertr::now();
 	    }),
 	    mkfs_ertr::pass_further{}
@@ -95,7 +95,7 @@ TransactionManager::mount_ertr::future<> TransactionManager::mount()
   }).handle_error(
     mount_ertr::pass_further{},
     crimson::ct_error::all_same_way([] {
-      ceph_assert(0 == "unhandled error");
+      stone_assert(0 == "unhandled error");
       return mount_ertr::now();
     }));
 }
@@ -116,7 +116,7 @@ TransactionManager::ref_ret TransactionManager::inc_ref(
   }).handle_error(
     ref_ertr::pass_further{},
     ct_error::all_same_way([](auto e) {
-      ceph_assert(0 == "unhandled error, TODO");
+      stone_assert(0 == "unhandled error, TODO");
     }));
 }
 
@@ -196,7 +196,7 @@ TransactionManager::submit_transaction(
     }).handle_error(
       submit_transaction_ertr::pass_further{},
       crimson::ct_error::all_same_way([](auto e) {
-	ceph_assert(0 == "Hit error submitting to journal");
+	stone_assert(0 == "Hit error submitting to journal");
       }));
   });
 }
@@ -254,7 +254,7 @@ TransactionManager::get_extent_if_live_ret TransactionManager::get_extent_if_liv
       t,
       laddr,
       len).safe_then([=, &t](lba_pin_list_t pins) {
-	ceph_assert(pins.size() <= 1);
+	stone_assert(pins.size() <= 1);
 	if (pins.empty()) {
 	  return get_extent_if_live_ret(
 	    get_extent_if_live_ertr::ready_future_marker{},
@@ -263,8 +263,8 @@ TransactionManager::get_extent_if_live_ret TransactionManager::get_extent_if_liv
 
 	auto pin = std::move(pins.front());
 	pins.pop_front();
-	ceph_assert(pin->get_laddr() == laddr);
-	ceph_assert(pin->get_length() == (extent_len_t)len);
+	stone_assert(pin->get_laddr() == laddr);
+	stone_assert(pin->get_length() == (extent_len_t)len);
 	if (pin->get_paddr() == addr) {
 	  return cache.get_extent_by_type(
 	    t,

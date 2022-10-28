@@ -5,8 +5,8 @@
  * Author: Ramesh Chander, Ramesh.Chander@sandisk.com
  */
 
-#ifndef CEPH_OS_BLUESTORE_MEMDB_H
-#define CEPH_OS_BLUESTORE_MEMDB_H
+#ifndef STONE_OS_BLUESTORE_MEMDB_H
+#define STONE_OS_BLUESTORE_MEMDB_H
 
 #include "include/buffer.h"
 #include <ostream>
@@ -46,7 +46,7 @@ class MemDB : public KeyValueDB
 
   mdb_map_t m_map;
 
-  CephContext *m_cct;
+  StoneeContext *m_cct;
   PerfCounters *logger;
   void* m_priv;
   std::string m_options;
@@ -64,7 +64,7 @@ class MemDB : public KeyValueDB
   uint64_t iterator_seq_no;
 
 public:
-  MemDB(CephContext *c, const std::string &path, void *p) :
+  MemDB(StoneeContext *c, const std::string &path, void *p) :
     m_total_bytes(0), m_allocated_bytes(0), m_using_btree(false),
     m_cct(c), logger(NULL), m_priv(p), m_db_path(path), iterator_seq_no(1)
   {

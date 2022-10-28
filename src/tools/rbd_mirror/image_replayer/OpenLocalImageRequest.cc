@@ -17,8 +17,8 @@
 #include "librbd/mirror/GetInfoRequest.h"
 #include <type_traits>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::image_replayer::OpenLocalImageRequest: " \
                            << this << " " << __func__ << " "
@@ -273,7 +273,7 @@ template <typename I>
 void OpenLocalImageRequest<I>::handle_close_image(int r) {
   dout(20) << dendl;
 
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   finish(m_ret_val);
 }
 

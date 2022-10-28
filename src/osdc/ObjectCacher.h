@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
-#ifndef CEPH_OBJECTCACHER_H
-#define CEPH_OBJECTCACHER_H
+#ifndef STONE_OBJECTCACHER_H
+#define STONE_OBJECTCACHER_H
 
 #include "include/types.h"
 #include "include/lru.h"
@@ -52,7 +52,7 @@ enum {
 class ObjectCacher {
   PerfCounters *perfcounter;
  public:
-  CephContext *cct;
+  StoneeContext *cct;
   class Object;
   struct ObjectSet;
   class C_ReadFinish;
@@ -583,7 +583,7 @@ class ObjectCacher {
 
 
 
-  ObjectCacher(CephContext *cct_, std::string name, WritebackHandler& wb, ceph::mutex& l,
+  ObjectCacher(StoneeContext *cct_, std::string name, WritebackHandler& wb, ceph::mutex& l,
 	       flush_set_callback_t flush_callback,
 	       void *flush_callback_arg,
 	       uint64_t max_bytes, uint64_t max_objects,

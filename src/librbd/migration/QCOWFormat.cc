@@ -23,7 +23,7 @@
 #include <unordered_map>
 #include <vector>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 
 namespace librbd {
 namespace migration {
@@ -75,7 +75,7 @@ void LookupTable::decode() {
   decoded = true;
 }
 
-void populate_cluster_extents(CephContext* cct, uint64_t cluster_size,
+void populate_cluster_extents(StoneContext* cct, uint64_t cluster_size,
                               const io::Extents& image_extents,
                               ClusterExtents* cluster_extents) {
   uint64_t buffer_offset = 0;
@@ -404,7 +404,7 @@ private:
       l2_table->decode();
       *request.l2_table = l2_table;
     } else {
-      ceph_assert(false);
+      stone_assert(false);
     }
 
     // complete the L2 cache request
@@ -491,7 +491,7 @@ private:
     auto& l2_cache = l2_cache_entries[min_idx];
     l2_cache.l2_table = std::make_shared<LookupTable>(qcow_format->m_l2_size);
     l2_cache.l2_offset = l2_offset;
-    l2_cache.timestamp = ceph_clock_now();
+    l2_cache.timestamp = stone_clock_now();
     l2_cache.count = 1;
     l2_cache.in_flight = true;
 
@@ -512,7 +512,7 @@ private:
                    << "index=" << index << dendl;
 
     auto& l2_cache = l2_cache_entries[index];
-    ceph_assert(l2_cache.in_flight);
+    stone_assert(l2_cache.in_flight);
     l2_cache.in_flight = false;
 
     if (r < 0) {
@@ -653,7 +653,7 @@ private:
     delete this;
   }
 
-  void handle_read_cluster(CephContext* cct, int r, uint64_t image_offset,
+  void handle_read_cluster(StoneContext* cct, int r, uint64_t image_offset,
                            uint64_t image_length, Context* on_finish) const {
     // NOTE: treat as static function, expect object has been deleted
 
@@ -743,7 +743,7 @@ private:
   }
 
   void handle_get_l2_table(int r, uint64_t snap_id) {
-    ceph_assert(qcow_format->m_strand.running_in_this_thread());
+    stone_assert(qcow_format->m_strand.running_in_this_thread());
 
     auto cct = qcow_format->m_image_ctx->cct;
     ldout(cct, 20) << "r=" << r << ", "
@@ -1232,7 +1232,7 @@ void QCOWFormat<I>::handle_read_snapshot(int r, Context* on_finish) {
 
 template <typename I>
 void QCOWFormat<I>::read_snapshot_extra(Context* on_finish) {
-  ceph_assert(!m_snapshots.empty());
+  stone_assert(!m_snapshots.empty());
   auto& snapshot = m_snapshots.rbegin()->second;
 
   uint32_t length = snapshot.extra_data_size +
@@ -1263,7 +1263,7 @@ void QCOWFormat<I>::read_snapshot_extra(Context* on_finish) {
 
 template <typename I>
 void QCOWFormat<I>::handle_read_snapshot_extra(int r, Context* on_finish) {
-  ceph_assert(!m_snapshots.empty());
+  stone_assert(!m_snapshots.empty());
   auto& snapshot = m_snapshots.rbegin()->second;
 
   auto cct = m_image_ctx->cct;
@@ -1310,7 +1310,7 @@ void QCOWFormat<I>::handle_read_snapshot_extra(int r, Context* on_finish) {
 
 template <typename I>
 void QCOWFormat<I>::read_snapshot_l1_table(Context* on_finish) {
-  ceph_assert(!m_snapshots.empty());
+  stone_assert(!m_snapshots.empty());
   auto& snapshot = m_snapshots.rbegin()->second;
 
   auto cct = m_image_ctx->cct;
@@ -1327,7 +1327,7 @@ void QCOWFormat<I>::read_snapshot_l1_table(Context* on_finish) {
 
 template <typename I>
 void QCOWFormat<I>::handle_read_snapshot_l1_table(int r, Context* on_finish) {
-  ceph_assert(!m_snapshots.empty());
+  stone_assert(!m_snapshots.empty());
   auto& snapshot = m_snapshots.rbegin()->second;
 
   auto cct = m_image_ctx->cct;
@@ -1416,7 +1416,7 @@ void QCOWFormat<I>::get_image_size(uint64_t snap_id, uint64_t* size,
   auto cct = m_image_ctx->cct;
   ldout(cct, 10) << "snap_id=" << snap_id << dendl;
 
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     *size = m_size;
   } else {
     auto snapshot_it = m_snapshots.find(snap_id);
@@ -1442,7 +1442,7 @@ bool QCOWFormat<I>::read(
                  << "image_extents=" << image_extents << dendl;
 
   const LookupTable* l1_table = nullptr;
-  if (snap_id == CEPH_NOSNAP) {
+  if (snap_id == STONE_NOSNAP) {
     l1_table = &m_l1_table;
   } else {
     auto snapshot_it = m_snapshots.find(snap_id);
@@ -1491,7 +1491,7 @@ void QCOWFormat<I>::list_snaps(io::Extents&& image_extents,
   for (auto& [snap_id, snapshot] : m_snapshots) {
     snap_id_to_l1_table[snap_id] = &snapshot.l1_table;
   }
-  snap_id_to_l1_table[CEPH_NOSNAP] = &m_l1_table;
+  snap_id_to_l1_table[STONE_NOSNAP] = &m_l1_table;
 
   on_finish = new LambdaContext([this, image_extents,
                                  snap_ids=std::move(snap_ids),
@@ -1528,8 +1528,8 @@ void QCOWFormat<I>::handle_list_snaps(int r, io::Extents&& image_extents,
                                &previous_size, sparse_extents);
   }
 
-  auto sparse_extents = &(*snapshot_delta)[{CEPH_NOSNAP, CEPH_NOSNAP}];
-  util::zero_shrunk_snapshot(cct, image_extents, CEPH_NOSNAP, m_size,
+  auto sparse_extents = &(*snapshot_delta)[{STONE_NOSNAP, STONE_NOSNAP}];
+  util::zero_shrunk_snapshot(cct, image_extents, STONE_NOSNAP, m_size,
                              &previous_size, sparse_extents);
 
   util::merge_snapshot_delta(snap_ids, snapshot_delta);

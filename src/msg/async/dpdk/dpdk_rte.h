@@ -15,8 +15,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#ifndef CEPH_DPDK_RTE_H_
-#define CEPH_DPDK_RTE_H_
+#ifndef STONE_DPDK_RTE_H_
+#define STONE_DPDK_RTE_H_
 
 
 #include <condition_variable>
@@ -50,7 +50,7 @@ class eal {
   static std::mutex lock;
   static std::condition_variable cond;
   static std::list<std::function<void()>> funcs;
-  static int init(CephContext *c);
+  static int init(StoneeContext *c);
   static void execute_on_master(std::function<void()> &&f) {
     bool done = false;
     std::unique_lock<std::mutex> l(lock);
@@ -71,4 +71,4 @@ class eal {
 };
 
 } // namespace dpdk
-#endif // CEPH_DPDK_RTE_H_
+#endif // STONE_DPDK_RTE_H_

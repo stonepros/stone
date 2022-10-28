@@ -64,8 +64,8 @@ endif()
 # libcls_* are runtime dependencies
 add_dependencies(osd cls_journal cls_hello cls_lock cls_log cls_numops
   cls_refcount cls_timeindex cls_user cls_version cls_cas cls_cmpomap)
-if(WITH_CEPHFS)
-  add_dependencies(osd cls_cephfs)
+if(WITH_STONEFS)
+  add_dependencies(osd cls_stonefs)
 endif()
 if(WITH_RBD)
   add_dependencies(osd cls_rbd)

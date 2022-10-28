@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2010 Sage Weil <sage@newdream.net>
  * Copyright (C) 2010 Dreamhost
@@ -13,8 +13,8 @@
  *
  */
 
-#ifndef CEPH_DOUT_H
-#define CEPH_DOUT_H
+#ifndef STONE_DOUT_H
+#define STONE_DOUT_H
 
 #include <type_traits>
 
@@ -47,20 +47,20 @@ inline std::ostream& operator<<(std::ostream& out, _bad_endl_use_dendl_t) {
 class DoutPrefixProvider {
 public:
   virtual std::ostream& gen_prefix(std::ostream& out) const = 0;
-  virtual CephContext *get_cct() const = 0;
+  virtual StoneeContext *get_cct() const = 0;
   virtual unsigned get_subsys() const = 0;
   virtual ~DoutPrefixProvider() {}
 };
 
 // a prefix provider with empty prefix
 class NoDoutPrefix : public DoutPrefixProvider {
-  CephContext *const cct;
+  StoneeContext *const cct;
   const unsigned subsys;
  public:
-  NoDoutPrefix(CephContext *cct, unsigned subsys) : cct(cct), subsys(subsys) {}
+  NoDoutPrefix(StoneeContext *cct, unsigned subsys) : cct(cct), subsys(subsys) {}
 
   std::ostream& gen_prefix(std::ostream& out) const override { return out; }
-  CephContext *get_cct() const override { return cct; }
+  StoneeContext *get_cct() const override { return cct; }
   unsigned get_subsys() const override { return subsys; }
 };
 
@@ -68,7 +68,7 @@ class NoDoutPrefix : public DoutPrefixProvider {
 class DoutPrefix : public NoDoutPrefix {
   const char *const prefix;
  public:
-  DoutPrefix(CephContext *cct, unsigned subsys, const char *prefix)
+  DoutPrefix(StoneeContext *cct, unsigned subsys, const char *prefix)
     : NoDoutPrefix(cct, subsys), prefix(prefix) {}
 
   std::ostream& gen_prefix(std::ostream& out) const override {
@@ -87,7 +87,7 @@ class DoutPrefixPipe : public DoutPrefixProvider {
     add_prefix(out);
     return out;
   }
-  CephContext *get_cct() const override { return dpp.get_cct(); }
+  StoneeContext *get_cct() const override { return dpp.get_cct(); }
   unsigned get_subsys() const override { return dpp.get_subsys(); }
 
   virtual void add_prefix(std::ostream& out) const = 0;
@@ -161,8 +161,8 @@ struct is_dynamic<dynamic_marker_t<T>> : public std::true_type {};
   if (should_gather) {							\
     ceph::logging::MutableEntry _dout_e(v, sub);                        \
     static_assert(std::is_convertible<decltype(&*cct), 			\
-				      CephContext* >::value,		\
-		  "provided cct must be compatible with CephContext*"); \
+				      StoneeContext* >::value,		\
+		  "provided cct must be compatible with StoneeContext*"); \
     auto _dout_cct = cct;						\
     std::ostream* _dout = &_dout_e.get_ostream();
 

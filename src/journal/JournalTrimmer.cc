@@ -7,7 +7,7 @@
 #include "common/errno.h"
 #include <limits>
 
-#define dout_subsys ceph_subsys_journaler
+#define dout_subsys stone_subsys_journaler
 #undef dout_prefix
 #define dout_prefix *_dout << "JournalTrimmer: " << this << " "
 
@@ -16,7 +16,7 @@ namespace journal {
 struct JournalTrimmer::C_RemoveSet : public Context {
   JournalTrimmer *journal_trimmer;
   uint64_t object_set;
-  ceph::mutex lock = ceph::make_mutex("JournalTrimmer::m_lock");
+  stone::mutex lock = stone::make_mutex("JournalTrimmer::m_lock");
   uint32_t refs;
   int return_value;
 
@@ -31,26 +31,26 @@ struct JournalTrimmer::C_RemoveSet : public Context {
 
 JournalTrimmer::JournalTrimmer(librados::IoCtx &ioctx,
                                const std::string &object_oid_prefix,
-                               const ceph::ref_t<JournalMetadata>& journal_metadata)
+                               const stone::ref_t<JournalMetadata>& journal_metadata)
     : m_cct(NULL), m_object_oid_prefix(object_oid_prefix),
       m_journal_metadata(journal_metadata), m_metadata_listener(this),
       m_remove_set_pending(false),
       m_remove_set(0), m_remove_set_ctx(NULL) {
   m_ioctx.dup(ioctx);
-  m_cct = reinterpret_cast<CephContext *>(m_ioctx.cct());
+  m_cct = reinterpret_cast<StoneContext *>(m_ioctx.cct());
 
   m_journal_metadata->add_listener(&m_metadata_listener);
 }
 
 JournalTrimmer::~JournalTrimmer() {
-  ceph_assert(m_shutdown);
+  stone_assert(m_shutdown);
 }
 
 void JournalTrimmer::shut_down(Context *on_finish) {
   ldout(m_cct, 20) << __func__ << dendl;
   {
     std::lock_guard locker{m_lock};
-    ceph_assert(!m_shutdown);
+    stone_assert(!m_shutdown);
     m_shutdown = true;
   }
 
@@ -103,7 +103,7 @@ void JournalTrimmer::committed(uint64_t commit_tid) {
 }
 
 void JournalTrimmer::trim_objects(uint64_t minimum_set) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   ldout(m_cct, 20) << __func__ << ": min_set=" << minimum_set << dendl;
   if (minimum_set <= m_journal_metadata->get_minimum_set()) {
@@ -121,7 +121,7 @@ void JournalTrimmer::trim_objects(uint64_t minimum_set) {
 }
 
 void JournalTrimmer::remove_set(uint64_t object_set) {
-  ceph_assert(ceph_mutex_is_locked(m_lock));
+  stone_assert(stone_mutex_is_locked(m_lock));
 
   m_async_op_tracker.start_op();
   uint8_t splay_width = m_journal_metadata->get_splay_width();
@@ -139,8 +139,8 @@ void JournalTrimmer::remove_set(uint64_t object_set) {
     auto comp =
       librados::Rados::aio_create_completion(ctx, utils::rados_ctx_callback);
     int r = m_ioctx.aio_remove(oid, comp,
-                               CEPH_OSD_FLAG_FULL_FORCE | CEPH_OSD_FLAG_FULL_TRY);
-    ceph_assert(r == 0);
+                               STONE_OSD_FLAG_FULL_FORCE | STONE_OSD_FLAG_FULL_TRY);
+    stone_assert(r == 0);
     comp->release();
   }
 }
@@ -222,7 +222,7 @@ JournalTrimmer::C_RemoveSet::C_RemoveSet(JournalTrimmer *_journal_trimmer,
                                          uint64_t _object_set,
                                          uint8_t _splay_width)
   : journal_trimmer(_journal_trimmer), object_set(_object_set),
-    lock(ceph::make_mutex(utils::unique_lock_name("C_RemoveSet::lock", this))),
+    lock(stone::make_mutex(utils::unique_lock_name("C_RemoveSet::lock", this))),
     refs(_splay_width), return_value(-ENOENT) {
 }
 

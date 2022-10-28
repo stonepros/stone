@@ -64,8 +64,8 @@ struct TestMockIoSimpleSchedulerObjectDispatch : public TestMockFixture {
   typedef SimpleSchedulerObjectDispatch<librbd::MockTestImageCtx> MockSimpleSchedulerObjectDispatch;
 
   MockSafeTimer m_mock_timer;
-  ceph::mutex m_mock_timer_lock =
-    ceph::make_mutex("TestMockIoSimpleSchedulerObjectDispatch::Mutex");
+  stone::mutex m_mock_timer_lock =
+    stone::make_mutex("TestMockIoSimpleSchedulerObjectDispatch::Mutex");
 
   TestMockIoSimpleSchedulerObjectDispatch() {
     MockTestImageCtx::set_timer_instance(&m_mock_timer, &m_mock_timer_lock);
@@ -99,7 +99,7 @@ struct TestMockIoSimpleSchedulerObjectDispatch : public TestMockFixture {
 
   void expect_add_timer_task(Context **timer_task) {
     EXPECT_CALL(m_mock_timer, add_event_at(_, _))
-      .WillOnce(Invoke([timer_task](ceph::real_clock::time_point, Context *task) {
+      .WillOnce(Invoke([timer_task](stone::real_clock::time_point, Context *task) {
                   *timer_task = task;
                   return task;
                 }));
@@ -166,7 +166,7 @@ TEST_F(TestMockIoSimpleSchedulerObjectDispatch, Write) {
   MockSimpleSchedulerObjectDispatch
       mock_simple_scheduler_object_dispatch(&mock_image_ctx);
 
-  ceph::bufferlist data;
+  stone::bufferlist data;
   data.append("X");
   int object_dispatch_flags = 0;
   C_SaferCond cond;
@@ -189,7 +189,7 @@ TEST_F(TestMockIoSimpleSchedulerObjectDispatch, WriteSame) {
       mock_simple_scheduler_object_dispatch(&mock_image_ctx);
 
   io::LightweightBufferExtents buffer_extents;
-  ceph::bufferlist data;
+  stone::bufferlist data;
   C_SaferCond cond;
   Context *on_finish = &cond;
   ASSERT_FALSE(mock_simple_scheduler_object_dispatch.write_same(
@@ -209,8 +209,8 @@ TEST_F(TestMockIoSimpleSchedulerObjectDispatch, CompareAndWrite) {
   MockSimpleSchedulerObjectDispatch
       mock_simple_scheduler_object_dispatch(&mock_image_ctx);
 
-  ceph::bufferlist cmp_data;
-  ceph::bufferlist write_data;
+  stone::bufferlist cmp_data;
+  stone::bufferlist write_data;
   C_SaferCond cond;
   Context *on_finish = &cond;
   ASSERT_FALSE(mock_simple_scheduler_object_dispatch.compare_and_write(
@@ -253,7 +253,7 @@ TEST_F(TestMockIoSimpleSchedulerObjectDispatch, WriteDelayed) {
 
   InSequence seq;
 
-  ceph::bufferlist data;
+  stone::bufferlist data;
   data.append("X");
   int object_dispatch_flags = 0;
   C_SaferCond cond1;
@@ -301,7 +301,7 @@ TEST_F(TestMockIoSimpleSchedulerObjectDispatch, WriteDelayedFlush) {
 
   InSequence seq;
 
-  ceph::bufferlist data;
+  stone::bufferlist data;
   data.append("X");
   int object_dispatch_flags = 0;
   C_SaferCond cond1;
@@ -358,7 +358,7 @@ TEST_F(TestMockIoSimpleSchedulerObjectDispatch, WriteMerged) {
 
   InSequence seq;
 
-  ceph::bufferlist data;
+  stone::bufferlist data;
   data.append("X");
   int object_dispatch_flags = 0;
   C_SaferCond cond1;
@@ -476,7 +476,7 @@ TEST_F(TestMockIoSimpleSchedulerObjectDispatch, WriteNonSequential) {
 
   InSequence seq;
 
-  ceph::bufferlist data;
+  stone::bufferlist data;
   int object_dispatch_flags = 0;
   C_SaferCond cond1;
   Context *on_finish1 = &cond1;
@@ -541,7 +541,7 @@ TEST_F(TestMockIoSimpleSchedulerObjectDispatch, Mixed) {
 
   // write (1) 0~0 (in-flight)
   // will wrap on_finish with dispatch_seq=1 to dispatch future delayed writes
-  ceph::bufferlist data;
+  stone::bufferlist data;
   int object_dispatch_flags = 0;
   C_SaferCond cond1;
   Context *on_finish1 = &cond1;
@@ -697,7 +697,7 @@ TEST_F(TestMockIoSimpleSchedulerObjectDispatch, DispatchQueue) {
   // send 2 writes to object 0
 
   uint64_t object_no = 0;
-  ceph::bufferlist data;
+  stone::bufferlist data;
   int object_dispatch_flags = 0;
   C_SaferCond cond1;
   Context *on_finish1 = &cond1;
@@ -782,7 +782,7 @@ TEST_F(TestMockIoSimpleSchedulerObjectDispatch, Timer) {
 
   InSequence seq;
 
-  ceph::bufferlist data;
+  stone::bufferlist data;
   int object_dispatch_flags = 0;
   C_SaferCond cond1;
   Context *on_finish1 = &cond1;

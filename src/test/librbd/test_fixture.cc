@@ -60,7 +60,7 @@ std::string TestFixture::get_temp_image_name() {
 
 void TestFixture::SetUp() {
   ASSERT_EQ(0, _rados.ioctx_create(_pool_name.c_str(), m_ioctx));
-  m_cct = reinterpret_cast<CephContext*>(m_ioctx.cct());
+  m_cct = reinterpret_cast<StoneContext*>(m_ioctx.cct());
   librados::Rados rados(m_ioctx);
   rados.conf_set("rbd_persistent_cache_path", ".");
 
@@ -144,7 +144,7 @@ int TestFixture::acquire_exclusive_lock(librbd::ImageCtx &ictx) {
   }
 
   std::shared_lock owner_locker{ictx.owner_lock};
-  ceph_assert(ictx.exclusive_lock != nullptr);
+  stone_assert(ictx.exclusive_lock != nullptr);
   return ictx.exclusive_lock->is_lock_owner() ? 0 : -EINVAL;
 }
 

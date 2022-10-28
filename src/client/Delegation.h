@@ -1,20 +1,20 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
-#ifndef _CEPH_CLIENT_DELEGATION_H
-#define _CEPH_CLIENT_DELEGATION_H
+#ifndef _STONE_CLIENT_DELEGATION_H
+#define _STONE_CLIENT_DELEGATION_H
 
 #include "common/Clock.h"
 #include "common/Timer.h"
 #include "include/cephfs/ceph_ll_client.h"
 
 /* Commands for manipulating delegation state */
-#ifndef CEPH_DELEGATION_NONE
-# define CEPH_DELEGATION_NONE	0
-# define CEPH_DELEGATION_RD	1
-# define CEPH_DELEGATION_WR	2
+#ifndef STONE_DELEGATION_NONE
+# define STONE_DELEGATION_NONE	0
+# define STONE_DELEGATION_RD	1
+# define STONE_DELEGATION_WR	2
 #endif
 
-/* Converts CEPH_DELEGATION_* to cap mask */
+/* Converts STONE_DELEGATION_* to cap mask */
 int ceph_deleg_caps_for_type(unsigned type);
 
 /*
@@ -38,7 +38,7 @@ private:
   // opaque token that will be passed to the callback
   void				*priv;
 
-  // CEPH_DELEGATION_* type
+  // STONE_DELEGATION_* type
   unsigned			type;
 
   // callback into application to recall delegation
@@ -54,4 +54,4 @@ private:
   void disarm_timeout();
 };
 
-#endif /* _CEPH_CLIENT_DELEGATION_H */
+#endif /* _STONE_CLIENT_DELEGATION_H */

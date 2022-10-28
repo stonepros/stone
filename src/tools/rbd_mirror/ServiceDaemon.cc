@@ -4,7 +4,7 @@
 #include "tools/rbd_mirror/ServiceDaemon.h"
 #include "include/Context.h"
 #include "include/stringify.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "common/debug.h"
 #include "common/errno.h"
@@ -13,8 +13,8 @@
 #include "tools/rbd_mirror/Threads.h"
 #include <sstream>
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rbd_mirror
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_rbd_mirror
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd::mirror::ServiceDaemon: " << this << " " \
                            << __func__ << ": "
@@ -27,10 +27,10 @@ namespace {
 const std::string RBD_MIRROR_AUTH_ID_PREFIX("rbd-mirror.");
 
 struct AttributeDumpVisitor : public boost::static_visitor<void> {
-  ceph::Formatter *f;
+  stone::Formatter *f;
   const std::string& name;
 
-  AttributeDumpVisitor(ceph::Formatter *f, const std::string& name)
+  AttributeDumpVisitor(stone::Formatter *f, const std::string& name)
     : f(f), name(name) {
   }
 
@@ -50,7 +50,7 @@ struct AttributeDumpVisitor : public boost::static_visitor<void> {
 using namespace service_daemon;
 
 template <typename I>
-ServiceDaemon<I>::ServiceDaemon(CephContext *cct, RadosRef rados,
+ServiceDaemon<I>::ServiceDaemon(StoneContext *cct, RadosRef rados,
                                 Threads<I>* threads)
   : m_cct(cct), m_rados(rados), m_threads(threads) {
   dout(20) << dendl;
@@ -271,9 +271,9 @@ void ServiceDaemon<I>::schedule_update_status() {
 template <typename I>
 void ServiceDaemon<I>::update_status() {
   dout(20) << dendl;
-  ceph_assert(ceph_mutex_is_locked(m_threads->timer_lock));
+  stone_assert(stone_mutex_is_locked(m_threads->timer_lock));
 
-  ceph::JSONFormatter f;
+  stone::JSONFormatter f;
   {
     std::lock_guard locker{m_lock};
     f.open_object_section("pools");

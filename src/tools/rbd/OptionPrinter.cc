@@ -3,7 +3,7 @@
 
 #include "tools/rbd/OptionPrinter.h"
 #include "tools/rbd/IndentStream.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace rbd {
 
@@ -50,7 +50,7 @@ void OptionPrinter::print_short(std::ostream &os, size_t initial_offset) {
     bool required = !m_positional.options()[i]->semantic()->apply_default(v);
     if (!required) {
       auto ptr = boost::any_cast<std::string>(&v);
-      ceph_assert(ptr && ptr->empty());
+      stone_assert(ptr && ptr->empty());
       option << "[";
     }
     option << "<" << m_positional.options()[i]->long_name() << ">";

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Inktank
  *
@@ -12,11 +12,11 @@
  *
  */
 
-#ifndef CEPH_COMMON_FD_H
-#define CEPH_COMMON_FD_H
+#ifndef STONE_COMMON_FD_H
+#define STONE_COMMON_FD_H
 
 #include "include/common_fwd.h"
 
-void dump_open_fds(CephContext *cct);
+void dump_open_fds(StoneeContext *cct);
 
 #endif

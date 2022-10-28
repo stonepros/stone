@@ -14,7 +14,7 @@
 
 namespace {
   seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 }
 
@@ -301,7 +301,7 @@ LBAInternalNode::split_entry(
     return mut->split_entry(c, addr, mut_iter, entry);
   }
 
-  ceph_assert(!at_max_capacity());
+  stone_assert(!at_max_capacity());
   auto [left, right, pivot] = entry->make_split_children(c);
 
   journal_update(
@@ -429,7 +429,7 @@ LBAInternalNode::get_containing_child(laddr_t laddr)
     if (i.contains(laddr))
       return i;
   }
-  ceph_assert(0 == "invalid");
+  stone_assert(0 == "invalid");
   return end();
 }
 
@@ -468,7 +468,7 @@ LBALeafNode::insert_ret LBALeafNode::insert(
   laddr_t laddr,
   lba_map_val_t val)
 {
-  ceph_assert(!at_max_capacity());
+  stone_assert(!at_max_capacity());
 
   if (!is_pending()) {
     return c.cache.duplicate_for_write(c.trans, this
@@ -558,7 +558,7 @@ LBALeafNode::mutate_internal_address_ret LBALeafNode::mutate_internal_address(
   laddr_t laddr,
   paddr_t paddr)
 {
-  ceph_assert(0 == "Impossible");
+  stone_assert(0 == "Impossible");
   return mutate_internal_address_ret(
     mutate_internal_address_ertr::ready_future_marker{},
     paddr);
@@ -650,7 +650,7 @@ Cache::get_extent_ertr::future<LBANodeRef> get_lba_btree_extent(
   paddr_t base)
 {
   offset = offset.maybe_relative_to(base);
-  ceph_assert(depth > 0);
+  stone_assert(depth > 0);
   if (depth > 1) {
     logger().debug(
       "get_lba_btree_extent: reading internal at offset {}, depth {}",
@@ -662,8 +662,8 @@ Cache::get_extent_ertr::future<LBANodeRef> get_lba_btree_extent(
       LBA_BLOCK_SIZE).safe_then([c](auto ret) {
 	auto meta = ret->get_meta();
 	if (ret->get_size()) {
-	  ceph_assert(meta.begin <= ret->begin()->get_key());
-	  ceph_assert(meta.end > (ret->end() - 1)->get_key());
+	  stone_assert(meta.begin <= ret->begin()->get_key());
+	  stone_assert(meta.end > (ret->end() - 1)->get_key());
 	}
 	if (!ret->is_pending() && !ret->pin.is_linked()) {
 	  ret->pin.set_range(meta);
@@ -686,8 +686,8 @@ Cache::get_extent_ertr::future<LBANodeRef> get_lba_btree_extent(
 	  *ret);
 	auto meta = ret->get_meta();
 	if (ret->get_size()) {
-	  ceph_assert(meta.begin <= ret->begin()->get_key());
-	  ceph_assert(meta.end > (ret->end() - 1)->get_key());
+	  stone_assert(meta.begin <= ret->begin()->get_key());
+	  stone_assert(meta.end > (ret->end() - 1)->get_key());
 	}
 	if (!ret->is_pending() && !ret->pin.is_linked()) {
 	  ret->pin.set_range(meta);

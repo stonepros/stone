@@ -1,8 +1,8 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#ifndef CEPH_LIBRBD_MANAGED_LOCK_TYPES_H
-#define CEPH_LIBRBD_MANAGED_LOCK_TYPES_H
+#ifndef STONE_LIBRBD_MANAGED_LOCK_TYPES_H
+#define STONE_LIBRBD_MANAGED_LOCK_TYPES_H
 
 #include "msg/msg_types.h"
 #include <string>
@@ -43,4 +43,4 @@ enum Mode {
 } // namespace managed_lock
 } // namespace librbd
 
-#endif // CEPH_LIBRBD_MANAGED_LOCK_TYPES_H
+#endif // STONE_LIBRBD_MANAGED_LOCK_TYPES_H

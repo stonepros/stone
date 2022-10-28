@@ -4,9 +4,9 @@ roles:
 
 tasks:
 - install:
-- ceph:
+- stone:
     pre-mgr-commands:
-      - sudo ceph config set mgr mgr/devicehealth/enable_monitoring false --force
+      - sudo stone config set mgr mgr/devicehealth/enable_monitoring false --force
     fs: xfs
     log-ignorelist:
       - overall HEALTH_

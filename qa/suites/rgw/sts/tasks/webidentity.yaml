@@ -6,11 +6,11 @@ tasks:
 - s3tests:
     client.0:
       sts_tests: True
-      force-branch: ceph-pacific
+      force-branch: stone-pacific
       rgw_server: client.0
       extra_attrs: ['webidentity_test']
 overrides:
-  ceph:
+  stone:
     conf:
       client:
               rgw sts key: abcdefghijklmnop

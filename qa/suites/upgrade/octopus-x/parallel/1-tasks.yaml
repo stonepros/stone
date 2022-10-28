@@ -2,11 +2,11 @@ tasks:
 - install:
     branch: octopus
 - print: "**** done install task..."
-- print: "**** done start installing octopus cephadm ..."
-- cephadm:
-    image: quay.ceph.io/ceph-ci/ceph:octopus
-    cephadm_branch: octopus
-    cephadm_git_url: https://github.com/ceph/ceph
+- print: "**** done start installing octopus stoneadm ..."
+- stoneadm:
+    image: quay.stone.io/stone-ci/stone:octopus
+    stoneadm_branch: octopus
+    stoneadm_git_url: https://github.com/stone/stone
     conf:
       osd:
         #set config option for which cls modules are allowed to be loaded / used
@@ -15,22 +15,22 @@ tasks:
     # deploy additional mons the "old" (octopus) way
     add_mons_via_daemon_add: true
     avoid_pacific_features: true
-- print: "**** done end installing octopus cephadm ..."
+- print: "**** done end installing octopus stoneadm ..."
 
-- cephadm.shell:
+- stoneadm.shell:
     mon.a:
-      - ceph fs volume create foo
-- ceph.healthy:
+      - stone fs volume create foo
+- stone.healthy:
 
 - print: "**** done creating new fs"
 
-- cephadm.shell:
+- stoneadm.shell:
     mon.a:
-      - ceph config set mgr mgr/cephadm/use_repo_digest true --force
-      - ceph config set mon mon_warn_on_insecure_global_id_reclaim false --force
-      - ceph config set mon mon_warn_on_insecure_global_id_reclaim_allowed false --force
+      - stone config set mgr mgr/stoneadm/use_repo_digest true --force
+      - stone config set mon mon_warn_on_insecure_global_id_reclaim false --force
+      - stone config set mon mon_warn_on_insecure_global_id_reclaim_allowed false --force
 
-- print: "**** done cephadm.shell ceph config set mgr..."
+- print: "**** done stoneadm.shell stone config set mgr..."
 
 - print: "**** done start parallel"
 - parallel:

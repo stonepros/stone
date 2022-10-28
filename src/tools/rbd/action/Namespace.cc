@@ -26,7 +26,7 @@ void get_create_arguments(po::options_description *positional,
 }
 
 int execute_create(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   std::string namespace_name;
   size_t arg_index = 0;
@@ -65,7 +65,7 @@ void get_remove_arguments(po::options_description *positional,
 }
 
 int execute_remove(const po::variables_map &vm,
-                   const std::vector<std::string> &ceph_global_init_args) {
+                   const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   std::string namespace_name;
   size_t arg_index = 0;
@@ -112,7 +112,7 @@ void get_list_arguments(po::options_description *positional,
 }
 
 int execute_list(const po::variables_map &vm,
-                 const std::vector<std::string> &ceph_global_init_args) {
+                 const std::vector<std::string> &stone_global_init_args) {
   std::string pool_name;
   size_t arg_index = 0;
   int r = utils::get_pool_and_namespace_names(vm, true, true, &pool_name,

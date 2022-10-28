@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
       - bad backtrace on directory inode
       - error reading table object
@@ -8,6 +8,6 @@ overrides:
       - Behind on trimming
       - error reading sessionmap
 tasks:
-  - cephfs_test_runner:
+  - stonefs_test_runner:
       modules:
-        - tasks.cephfs.test_journal_repair
+        - tasks.stonefs.test_journal_repair

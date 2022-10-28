@@ -2,7 +2,7 @@
 
 #include "auth/Auth.h"
 #include "messages/MPing.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "crimson/auth/DummyAuth.h"
 #include "crimson/common/throttle.h"
 #include "crimson/net/Connection.h"
@@ -26,13 +26,13 @@ enum class echo_role {
 namespace seastar_pingpong {
 struct DummyAuthAuthorizer : public AuthAuthorizer {
   DummyAuthAuthorizer()
-    : AuthAuthorizer(CEPH_AUTH_CEPHX)
+    : AuthAuthorizer(STONE_AUTH_STONEX)
   {}
   bool verify_reply(bufferlist::const_iterator&,
                     std::string *connection_secret) override {
     return true;
   }
-  bool add_challenge(CephContext*, const bufferlist&) override {
+  bool add_challenge(StoneContext*, const bufferlist&) override {
     return true;
   }
 };
@@ -121,8 +121,8 @@ public:
       std::vector<const char*> args;
       std::string cluster;
       std::string conf_file_list;
-      auto init_params = ceph_argparse_early_args(args,
-                                                CEPH_ENTITY_TYPE_CLIENT,
+      auto init_params = stone_argparse_early_args(args,
+                                                STONE_ENTITY_TYPE_CLIENT,
                                                 &cluster,
                                                 &conf_file_list);
       return crimson::common::sharded_conf().start(init_params.name, cluster)
@@ -186,7 +186,7 @@ seastar_echo(const entity_addr_t addr, echo_role role, unsigned count)
       ).safe_then([&server] {
         return server.msgr->start({&server.dispatcher});
       }, crimson::net::Messenger::bind_ertr::all_same_way([](auto& e) {
-        ceph_abort_msg("bind failed");
+        stone_abort_msg("bind failed");
       })).then([&dispatcher=server.dispatcher, count] {
         return dispatcher.on_reply.wait([&dispatcher, count] {
           return dispatcher.count >= count;

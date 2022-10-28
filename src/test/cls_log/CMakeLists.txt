@@ -1,6 +1,6 @@
-add_executable(ceph_test_cls_log
+add_executable(stone_test_cls_log
   test_cls_log.cc)
-target_link_libraries(ceph_test_cls_log
+target_link_libraries(stone_test_cls_log
   librados
   cls_log_client
   global
@@ -12,5 +12,5 @@ target_link_libraries(ceph_test_cls_log
   ${EXTRALIBS}
   )
 install(TARGETS
-  ceph_test_cls_log
+  stone_test_cls_log
   DESTINATION ${CMAKE_INSTALL_BINDIR})

@@ -1,5 +1,5 @@
-#ifndef CEPH_LIBRADOSSTRIPER_H
-#define CEPH_LIBRADOSSTRIPER_H
+#ifndef STONE_LIBRADOSSTRIPER_H
+#define STONE_LIBRADOSSTRIPER_H
 
 #ifdef __cplusplus
 extern "C" {

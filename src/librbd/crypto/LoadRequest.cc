@@ -9,7 +9,7 @@
 #include "librbd/ImageCtx.h"
 #include "librbd/crypto/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::crypto::LoadRequest: " << this \
                            << " " << __func__ << ": "

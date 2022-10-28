@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -29,8 +29,8 @@
  */
 
 
-#ifndef CEPH_CYCLES_H
-#define CEPH_CYCLES_H
+#ifndef STONE_CYCLES_H
+#define STONE_CYCLES_H
 
 /**
  * This class provides static methods that read the fine-grain CPU
@@ -112,4 +112,4 @@ private:
   }
 };
 
-#endif  // CEPH_CYCLES_H
+#endif  // STONE_CYCLES_H

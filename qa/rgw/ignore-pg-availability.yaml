@@ -1,5 +1,5 @@
-# https://tracker.ceph.com/issues/45802
+# https://tracker.stone.com/issues/45802
 overrides:
-  ceph:
+  stone:
     log-ignorelist:
     - \(PG_AVAILABILITY\)

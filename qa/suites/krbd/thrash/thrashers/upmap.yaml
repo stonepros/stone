@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     crush_tunables: optimal
     conf:
       mon:

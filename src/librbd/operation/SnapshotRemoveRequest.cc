@@ -4,7 +4,7 @@
 #include "librbd/operation/SnapshotRemoveRequest.h"
 #include "common/dout.h"
 #include "common/errno.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "cls/rbd/cls_rbd_client.h"
 #include "librbd/ImageCtx.h"
 #include "librbd/ObjectMap.h"
@@ -12,7 +12,7 @@
 #include "librbd/image/DetachChildRequest.h"
 #include "librbd/mirror/snapshot/RemoveImageStateRequest.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::SnapshotRemoveRequest: " << this << " " \
                            << __func__ << ": "
@@ -35,9 +35,9 @@ SnapshotRemoveRequest<I>::SnapshotRemoveRequest(
 template <typename I>
 void SnapshotRemoveRequest<I>::send_op() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
-  ceph_assert(ceph_mutex_is_locked(image_ctx.owner_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.owner_lock));
   {
     std::shared_lock image_locker{image_ctx.image_lock};
     if (image_ctx.snap_info.find(m_snap_id) == image_ctx.snap_info.end()) {
@@ -53,7 +53,7 @@ void SnapshotRemoveRequest<I>::send_op() {
 template <typename I>
 bool SnapshotRemoveRequest<I>::should_complete(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
   if (r < 0 && r != -EBUSY) {
     lderr(cct) << "encountered error: " << cpp_strerror(r) << dendl;
@@ -73,7 +73,7 @@ void SnapshotRemoveRequest<I>::trash_snap() {
     return;
   }
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << dendl;
 
   librados::ObjectWriteOperation op;
@@ -83,14 +83,14 @@ void SnapshotRemoveRequest<I>::trash_snap() {
     SnapshotRemoveRequest<I>,
     &SnapshotRemoveRequest<I>::handle_trash_snap>(this);
   int r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
 template <typename I>
 void SnapshotRemoveRequest<I>::handle_trash_snap(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r == -EOPNOTSUPP) {
@@ -111,7 +111,7 @@ void SnapshotRemoveRequest<I>::handle_trash_snap(int r) {
 template <typename I>
 void SnapshotRemoveRequest<I>::get_snap() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << dendl;
 
   librados::ObjectReadOperation op;
@@ -123,14 +123,14 @@ void SnapshotRemoveRequest<I>::get_snap() {
   m_out_bl.clear();
   int r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, aio_comp, &op,
                                        &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
 template <typename I>
 void SnapshotRemoveRequest<I>::handle_get_snap(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r == 0) {
@@ -158,7 +158,7 @@ void SnapshotRemoveRequest<I>::handle_get_snap(int r) {
 template <typename I>
 void SnapshotRemoveRequest<I>::list_children() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << dendl;
 
   librados::ObjectReadOperation op;
@@ -171,14 +171,14 @@ void SnapshotRemoveRequest<I>::list_children() {
     &SnapshotRemoveRequest<I>::handle_list_children>(this);
   int r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, aio_comp, &op,
                                        &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
 template <typename I>
 void SnapshotRemoveRequest<I>::handle_list_children(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r == 0) {
@@ -199,7 +199,7 @@ void SnapshotRemoveRequest<I>::handle_list_children(int r) {
 template <typename I>
 void SnapshotRemoveRequest<I>::detach_stale_child() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << dendl;
 
   for (auto& child_image : m_child_images) {
@@ -218,7 +218,7 @@ void SnapshotRemoveRequest<I>::detach_stale_child() {
         SnapshotRemoveRequest<I>,
         &SnapshotRemoveRequest<I>::handle_detach_stale_child>(this);
       r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, aio_comp, &op);
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       aio_comp->release();
       return;
     } else if (r < 0) {
@@ -233,7 +233,7 @@ void SnapshotRemoveRequest<I>::detach_stale_child() {
 template <typename I>
 void SnapshotRemoveRequest<I>::handle_detach_stale_child(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r < 0 && r != -ENOENT) {
@@ -250,7 +250,7 @@ void SnapshotRemoveRequest<I>::handle_detach_stale_child(int r) {
 template <typename I>
 void SnapshotRemoveRequest<I>::detach_child() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   bool detach_child = false;
   {
@@ -293,7 +293,7 @@ void SnapshotRemoveRequest<I>::detach_child() {
 template <typename I>
 void SnapshotRemoveRequest<I>::handle_detach_child(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r < 0 && r != -ENOENT) {
@@ -316,7 +316,7 @@ void SnapshotRemoveRequest<I>::remove_object_map() {
     return;
   }
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
 
   {
     std::shared_lock owner_lock{image_ctx.owner_lock};
@@ -339,7 +339,7 @@ void SnapshotRemoveRequest<I>::remove_object_map() {
 template <typename I>
 void SnapshotRemoveRequest<I>::handle_remove_object_map(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -362,7 +362,7 @@ void SnapshotRemoveRequest<I>::remove_image_state() {
     return;
   }
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << dendl;
 
   auto ctx = create_context_callback<
@@ -376,7 +376,7 @@ void SnapshotRemoveRequest<I>::remove_image_state() {
 template <typename I>
 void SnapshotRemoveRequest<I>::handle_remove_image_state(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -400,7 +400,7 @@ void SnapshotRemoveRequest<I>::release_snap_id() {
     return;
   }
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "snap_name=" << m_snap_name << ", "
                 << "snap_id=" << m_snap_id << dendl;
 
@@ -414,7 +414,7 @@ void SnapshotRemoveRequest<I>::release_snap_id() {
 template <typename I>
 void SnapshotRemoveRequest<I>::handle_release_snap_id(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r < 0 && r != -ENOENT) {
@@ -430,7 +430,7 @@ template <typename I>
 void SnapshotRemoveRequest<I>::remove_snap() {
   I &image_ctx = this->m_image_ctx;
 
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << dendl;
 
   librados::ObjectWriteOperation op;
@@ -444,14 +444,14 @@ void SnapshotRemoveRequest<I>::remove_snap() {
     SnapshotRemoveRequest<I>,
     &SnapshotRemoveRequest<I>::handle_remove_snap>(this);
   int r = image_ctx.md_ctx.aio_operate(image_ctx.header_oid, aio_comp, &op);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   aio_comp->release();
 }
 
 template <typename I>
 void SnapshotRemoveRequest<I>::handle_remove_snap(int r) {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << "r=" << r << dendl;
 
   if (r < 0) {
@@ -467,7 +467,7 @@ void SnapshotRemoveRequest<I>::handle_remove_snap(int r) {
 template <typename I>
 void SnapshotRemoveRequest<I>::remove_snap_context() {
   I &image_ctx = this->m_image_ctx;
-  CephContext *cct = image_ctx.cct;
+  StoneContext *cct = image_ctx.cct;
   ldout(cct, 5) << dendl;
 
   std::unique_lock image_locker{image_ctx.image_lock};
@@ -478,13 +478,13 @@ template <typename I>
 int SnapshotRemoveRequest<I>::scan_for_parents(
     cls::rbd::ParentImageSpec &pspec) {
   I &image_ctx = this->m_image_ctx;
-  ceph_assert(ceph_mutex_is_locked(image_ctx.image_lock));
+  stone_assert(stone_mutex_is_locked(image_ctx.image_lock));
 
   if (pspec.pool_id != -1) {
     map<uint64_t, SnapInfo>::iterator it;
     for (it = image_ctx.snap_info.begin();
          it != image_ctx.snap_info.end(); ++it) {
-      // skip our snap id (if checking base image, CEPH_NOSNAP won't match)
+      // skip our snap id (if checking base image, STONE_NOSNAP won't match)
       if (it->first == m_snap_id) {
         continue;
       }

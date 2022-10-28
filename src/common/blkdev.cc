@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (c) 2015 Hewlett-Packard Development Company, L.P.
  *
@@ -82,7 +82,7 @@ using namespace std::literals;
 
 using std::string;
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 
 BlkDev::BlkDev(int f)
@@ -460,7 +460,7 @@ std::string get_device_id(const std::string& devname,
 
   // ****
   //   NOTE: please keep this implementation in sync with _get_device_id() in
-  //   src/ceph-volume/ceph_volume/util/device.py
+  //   src/stone-volume/stone_volume/util/device.py
   // ****
 
   std::string id_vendor, id_model, id_serial, id_serial_short, id_scsi_serial;

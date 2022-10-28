@@ -6,7 +6,7 @@
 
 namespace crimson::osd {
 
-void Operation::dump(ceph::Formatter* f)
+void Operation::dump(stone::Formatter* f)
 {
   f->open_object_section("operation");
   f->dump_string("type", get_type_name());
@@ -24,7 +24,7 @@ void Operation::dump(ceph::Formatter* f)
   f->close_section();
 }
 
-void Operation::dump_brief(ceph::Formatter* f)
+void Operation::dump_brief(stone::Formatter* f)
 {
   f->open_object_section("operation");
   f->dump_string("type", get_type_name());
@@ -39,7 +39,7 @@ std::ostream &operator<<(std::ostream &lhs, const Operation &rhs) {
   return lhs;
 }
 
-void Blocker::dump(ceph::Formatter* f) const
+void Blocker::dump(stone::Formatter* f) const
 {
   f->open_object_section("blocker");
   f->dump_string("op_type", get_type_name());
@@ -51,7 +51,7 @@ void Blocker::dump(ceph::Formatter* f) const
   f->close_section();
 }
 
-void AggregateBlocker::dump_detail(ceph::Formatter *f) const
+void AggregateBlocker::dump_detail(stone::Formatter *f) const
 {
   f->open_array_section("parent_blockers");
   for (auto b : parent_blockers) {
@@ -82,7 +82,7 @@ void OperationThrottler::wake()
 
 void OperationThrottler::release_throttle()
 {
-  ceph_assert(in_progress > 0);
+  stone_assert(in_progress > 0);
   --in_progress;
   wake();
 }
@@ -152,7 +152,7 @@ OrderedPipelinePhase::Handle::~Handle()
   exit();
 }
 
-void OrderedPipelinePhase::dump_detail(ceph::Formatter* f) const
+void OrderedPipelinePhase::dump_detail(stone::Formatter* f) const
 {
 }
 

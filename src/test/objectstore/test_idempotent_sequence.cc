@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stone - scalable distributed file system
 *
 * Copyright (C) 2012 New Dream Network
 *
@@ -16,7 +16,7 @@
 #include <sstream>
 #include <time.h>
 #include <stdlib.h>
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "global/global_init.h"
 #include "common/debug.h"
 #include "os/filestore/FileStore.h"
@@ -25,15 +25,15 @@
 #include "FileStoreDiff.h"
 
 #include "common/config.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_
+#define dout_context g_stone_context
+#define dout_subsys stone_subsys_
 #undef dout_prefix
 #define dout_prefix *_dout << "test_idempotent_sequence "
 
 void usage(const char *name, std::string command = "") {
-  ceph_assert(name != NULL);
+  stone_assert(name != NULL);
 
   std::string more = "cmd <args...>";
   std::string diff = "diff <filestoreA> <journalA> <filestoreB> <journalB>";
@@ -80,8 +80,8 @@ std::string status_file;
 int run_diff(std::string& a_path, std::string& a_journal,
 	     std::string& b_path, std::string& b_journal)
 {
-  FileStore *a = new FileStore(g_ceph_context, a_path, a_journal, 0, "a");
-  FileStore *b = new FileStore(g_ceph_context, b_path, b_journal, 0, "b");
+  FileStore *a = new FileStore(g_stone_context, a_path, a_journal, 0, "a");
+  FileStore *b = new FileStore(g_stone_context, b_path, b_journal, 0, "b");
 
   int ret = 0;
   {
@@ -101,7 +101,7 @@ int run_diff(std::string& a_path, std::string& a_journal,
 
 int run_get_last_op(std::string& filestore_path, std::string& journal_path)
 {
-  FileStore *store = new FileStore(g_ceph_context, filestore_path,
+  FileStore *store = new FileStore(g_stone_context, filestore_path,
 				   journal_path);
 
   int err = store->mount();
@@ -145,7 +145,7 @@ int run_sequence_to(int val, std::string& filestore_path,
   if (!is_seed_set)
     seed = (int) time(NULL);
 
-  FileStore *store = new FileStore(g_ceph_context, filestore_path,
+  FileStore *store = new FileStore(g_stone_context, filestore_path,
 				   journal_path);
 
   int err;
@@ -160,10 +160,10 @@ int run_sequence_to(int val, std::string& filestore_path,
   }
   
   err = store->mkfs();
-  ceph_assert(err == 0);
+  stone_assert(err == 0);
 
   err = store->mount();
-  ceph_assert(err == 0);
+  stone_assert(err == 0);
 
   DeterministicOpSequence op_sequence(store, status_file);
   op_sequence.init(num_colls, num_objs);
@@ -215,10 +215,10 @@ int main(int argc, const char *argv[])
   argv_to_vec(argc, argv, args);
 
   auto cct = global_init(NULL, args,
-			 CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY,
+			 STONE_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY,
 			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  g_ceph_context->_conf.apply_changes(nullptr);
+  common_init_finish(g_stone_context);
+  g_stone_context->_conf.apply_changes(nullptr);
 
   std::string command;
   std::vector<std::string> command_args;
@@ -226,22 +226,22 @@ int main(int argc, const char *argv[])
   for (std::vector<const char*>::iterator i = args.begin(); i != args.end();) {
     string val;
 
-    if (ceph_argparse_double_dash(args, i)) {
+    if (stone_argparse_double_dash(args, i)) {
       break;
-    } else if (ceph_argparse_witharg(args, i, &val,
+    } else if (stone_argparse_witharg(args, i, &val,
         "--test-seed", (char*) NULL)) {
       seed = strtoll(val.c_str(), NULL, 10);
       is_seed_set = true;
-    } else if (ceph_argparse_witharg(args, i, &val,
+    } else if (stone_argparse_witharg(args, i, &val,
         "--test-num-colls", (char*) NULL)) {
       num_colls = strtoll(val.c_str(), NULL, 10);
-    } else if (ceph_argparse_witharg(args, i, &val,
+    } else if (stone_argparse_witharg(args, i, &val,
         "--test-num-objs", (char*) NULL)) {
       num_objs = strtoll(val.c_str(), NULL, 10);
-    } else if (ceph_argparse_witharg(args, i, &val,
+    } else if (stone_argparse_witharg(args, i, &val,
         "--test-status-file", (char*) NULL)) {
       status_file = val;
-    } else if (ceph_argparse_flag(args, i, "--help", (char*) NULL)) {
+    } else if (stone_argparse_flag(args, i, "--help", (char*) NULL)) {
       usage(our_name);
       exit(0);
     } else {

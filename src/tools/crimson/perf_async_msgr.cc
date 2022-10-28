@@ -13,15 +13,15 @@
 
 namespace {
 
-constexpr int CEPH_OSD_PROTOCOL = 10;
+constexpr int STONE_OSD_PROTOCOL = 10;
 
 struct Server {
-  Server(CephContext* cct, unsigned msg_len)
+  Server(StoneContext* cct, unsigned msg_len)
     : dummy_auth(cct), dispatcher(cct, msg_len)
   {
     msgr.reset(Messenger::create(cct, "async", entity_name_t::OSD(0), "server", 0));
     dummy_auth.auth_registry.refresh_config();
-    msgr->set_cluster_protocol(CEPH_OSD_PROTOCOL);
+    msgr->set_cluster_protocol(STONE_OSD_PROTOCOL);
     msgr->set_default_policy(Messenger::Policy::stateless_server(0));
     msgr->set_auth_client(&dummy_auth);
     msgr->set_auth_server(&dummy_auth);
@@ -33,7 +33,7 @@ struct Server {
     unsigned msg_len = 0;
     bufferlist msg_data;
 
-    ServerDispatcher(CephContext* cct, unsigned msg_len)
+    ServerDispatcher(StoneContext* cct, unsigned msg_len)
       : Dispatcher(cct), msg_len(msg_len)
     {
       msg_data.append_zero(msg_len);
@@ -42,13 +42,13 @@ struct Server {
       return true;
     }
     bool ms_can_fast_dispatch(const Message* m) const override {
-      return m->get_type() == CEPH_MSG_OSD_OP;
+      return m->get_type() == STONE_MSG_OSD_OP;
     }
     void ms_fast_dispatch(Message* m) override {
-      ceph_assert(m->get_type() == CEPH_MSG_OSD_OP);
+      stone_assert(m->get_type() == STONE_MSG_OSD_OP);
       const static pg_t pgid;
       const static object_locator_t oloc;
-      const static hobject_t hobj(object_t(), oloc.key, CEPH_NOSNAP, pgid.ps(),
+      const static hobject_t hobj(object_t(), oloc.key, STONE_NOSNAP, pgid.ps(),
                                   pgid.pool(), oloc.nspace);
       static spg_t spgid(pgid);
       MOSDOp *rep = new MOSDOp(0, 0, hobj, spgid, 0, 0, 0);
@@ -59,7 +59,7 @@ struct Server {
       m->put();
     }
     bool ms_dispatch(Message*) override {
-      ceph_abort();
+      stone_abort();
     }
     bool ms_handle_reset(Connection*) override {
       return true;
@@ -74,7 +74,7 @@ struct Server {
 
 }
 
-static void run(CephContext* cct, entity_addr_t addr, unsigned bs)
+static void run(StoneContext* cct, entity_addr_t addr, unsigned bs)
 {
   std::cout << "async server listening at " << addr << std::endl;
   Server server{cct, bs};
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
 
   std::vector<const char*> args(argv, argv + argc);
   auto cct = global_init(nullptr, args,
-                         CEPH_ENTITY_TYPE_CLIENT,
+                         STONE_ENTITY_TYPE_CLIENT,
                          CODE_ENVIRONMENT_UTILITY,
                          CINIT_FLAG_NO_MON_CONFIG);
   common_init_finish(cct.get());

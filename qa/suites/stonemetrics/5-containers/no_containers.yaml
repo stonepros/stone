@@ -1,0 +1,10 @@
+meta:
+  - desc: "Packaged prometheus and grafana"
+overrides:
+  stonemetrics:
+    group_vars:
+      all:
+        prometheus:
+          containerized: false
+        grafana:
+          containerized: false

@@ -10,7 +10,7 @@
 #include "librbd/Journal.h"
 #include "librbd/Utils.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::mirror::GetInfoRequest: " << this \
                            << " " << __func__ << ": "
@@ -32,7 +32,7 @@ GetInfoRequest<I>::GetInfoRequest(librados::IoCtx& io_ctx,
   : m_io_ctx(io_ctx), m_op_work_queue(op_work_queue), m_image_id(image_id),
     m_mirror_image(mirror_image), m_promotion_state(promotion_state),
     m_primary_mirror_uuid(primary_mirror_uuid), m_on_finish(on_finish),
-    m_cct(reinterpret_cast<CephContext *>(io_ctx.cct())) {
+    m_cct(reinterpret_cast<StoneContext *>(io_ctx.cct())) {
 }
 
 template <typename I>
@@ -63,7 +63,7 @@ void GetInfoRequest<I>::get_mirror_image() {
   librados::AioCompletion *comp = create_rados_callback<
     GetInfoRequest<I>, &GetInfoRequest<I>::handle_get_mirror_image>(this);
   int r = m_io_ctx.aio_operate(RBD_MIRRORING, comp, &op, &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -155,7 +155,7 @@ void GetInfoRequest<I>::get_snapcontext() {
   m_out_bl.clear();
   int r = m_io_ctx.aio_operate(util::header_name(m_image_id), comp, &op,
                                &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 
@@ -207,7 +207,7 @@ void GetInfoRequest<I>::get_snapshots() {
   m_out_bl.clear();
   int r = m_io_ctx.aio_operate(util::header_name(m_image_id), comp, &op,
                                &m_out_bl);
-  ceph_assert(r == 0);
+  stone_assert(r == 0);
   comp->release();
 }
 

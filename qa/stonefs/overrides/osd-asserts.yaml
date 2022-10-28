@@ -1,0 +1,5 @@
+overrides:
+  stone:
+    conf:
+      osd:
+        osd shutdown pgref assert: true

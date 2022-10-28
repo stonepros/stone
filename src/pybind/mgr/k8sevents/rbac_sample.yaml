@@ -3,13 +3,13 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ceph
+  name: stone
 ---
 # Define the access rules to open the events API to k8sevents
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: ceph-mgr-events-rules
+  name: stone-mgr-events-rules
 rules:
 - apiGroups:
   - ""
@@ -26,20 +26,20 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: ceph-mgr
-  namespace: ceph
+  name: stone-mgr
+  namespace: stone
 ---
-# Allow the ceph-mgr service account access to the events api
+# Allow the stone-mgr service account access to the events api
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: ceph-mgr
-  namespace: ceph
+  name: stone-mgr
+  namespace: stone
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: ceph-mgr-events-rules
+  name: stone-mgr-events-rules
 subjects:
 - kind: ServiceAccount
-  name: ceph-mgr
-  namespace: ceph
+  name: stone-mgr
+  namespace: stone

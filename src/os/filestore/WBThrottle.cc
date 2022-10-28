@@ -10,7 +10,7 @@
 using std::pair;
 using std::string;
 
-WBThrottle::WBThrottle(CephContext *cct) :
+WBThrottle::WBThrottle(StoneContext *cct) :
   cur_ios(0), cur_size(0),
   cct(cct),
   logger(NULL),
@@ -21,7 +21,7 @@ WBThrottle::WBThrottle(CephContext *cct) :
     std::lock_guard l{lock};
     set_from_conf();
   }
-  ceph_assert(cct);
+  stone_assert(cct);
   PerfCountersBuilder b(
     cct, string("WBThrottle"),
     l_wbthrottle_first, l_wbthrottle_last);
@@ -40,7 +40,7 @@ WBThrottle::WBThrottle(CephContext *cct) :
 }
 
 WBThrottle::~WBThrottle() {
-  ceph_assert(cct);
+  stone_assert(cct);
   cct->get_perfcounters_collection()->remove(logger);
   delete logger;
   cct->_conf.remove_observer(this);
@@ -88,7 +88,7 @@ const char** WBThrottle::get_tracked_conf_keys() const
 
 void WBThrottle::set_from_conf()
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
+  stone_assert(stone_mutex_is_locked(lock));
   if (fs == BTRFS) {
     size_limits.first =
       cct->_conf->filestore_wbthrottle_btrfs_bytes_start_flusher;
@@ -116,7 +116,7 @@ void WBThrottle::set_from_conf()
     fd_limits.second =
       cct->_conf->filestore_wbthrottle_xfs_inodes_hard_limit;
   } else {
-    ceph_abort_msg("invalid value for fs");
+    stone_abort_msg("invalid value for fs");
   }
   cond.notify_all();
 }
@@ -134,11 +134,11 @@ void WBThrottle::handle_conf_change(const ConfigProxy& conf,
 }
 
 bool WBThrottle::get_next_should_flush(
-  std::unique_lock<ceph::mutex>& locker,
+  std::unique_lock<stone::mutex>& locker,
   boost::tuple<ghobject_t, FDRef, PendingWB> *next)
 {
-  ceph_assert(ceph_mutex_is_locked(lock));
-  ceph_assert(next);
+  stone_assert(stone_mutex_is_locked(lock));
+  stone_assert(next);
   {
     cond.wait(locker, [this] {
       return stopping || (beyond_limit() && !pending_wbs.empty());
@@ -146,10 +146,10 @@ bool WBThrottle::get_next_should_flush(
   }
   if (stopping)
     return false;
-  ceph_assert(!pending_wbs.empty());
+  stone_assert(!pending_wbs.empty());
   ghobject_t obj(pop_object());
 
-  ceph::unordered_map<ghobject_t, pair<PendingWB, FDRef> >::iterator i =
+  stone::unordered_map<ghobject_t, pair<PendingWB, FDRef> >::iterator i =
     pending_wbs.find(obj);
   *next = boost::make_tuple(obj, i->second.second, i->second.first);
   pending_wbs.erase(i);
@@ -179,12 +179,12 @@ void *WBThrottle::entry()
 #endif
     if (r < 0) {
       lderr(cct) << "WBThrottle fsync failed: " << cpp_strerror(errno) << dendl;
-      ceph_abort();
+      stone_abort();
     }
 #ifdef HAVE_POSIX_FADVISE
     if (cct->_conf->filestore_fadvise && wb.get<2>().nocache) {
       int fa_r = posix_fadvise(**wb.get<1>(), 0, 0, POSIX_FADV_DONTNEED);
-      ceph_assert(fa_r == 0);
+      stone_assert(fa_r == 0);
     }
 #endif
     l.lock();
@@ -200,7 +200,7 @@ void WBThrottle::queue_wb(
   bool nocache)
 {
   std::lock_guard l{lock};
-  ceph::unordered_map<ghobject_t, pair<PendingWB, FDRef> >::iterator wbiter =
+  stone::unordered_map<ghobject_t, pair<PendingWB, FDRef> >::iterator wbiter =
     pending_wbs.find(hoid);
   if (wbiter == pending_wbs.end()) {
     wbiter = pending_wbs.insert(
@@ -227,14 +227,14 @@ void WBThrottle::queue_wb(
 void WBThrottle::clear()
 {
   std::lock_guard l{lock};
-  for (ceph::unordered_map<ghobject_t, pair<PendingWB, FDRef> >::iterator i =
+  for (stone::unordered_map<ghobject_t, pair<PendingWB, FDRef> >::iterator i =
 	 pending_wbs.begin();
        i != pending_wbs.end();
        ++i) {
 #ifdef HAVE_POSIX_FADVISE
     if (cct->_conf->filestore_fadvise && i->second.first.nocache) {
       int fa_r = posix_fadvise(**i->second.second, 0, 0, POSIX_FADV_DONTNEED);
-      ceph_assert(fa_r == 0);
+      stone_assert(fa_r == 0);
     }
 #endif
 
@@ -253,7 +253,7 @@ void WBThrottle::clear_object(const ghobject_t &hoid)
 {
   std::unique_lock l{lock};
   cond.wait(l, [hoid, this] { return clearing != hoid; });
-  ceph::unordered_map<ghobject_t, pair<PendingWB, FDRef> >::iterator i =
+  stone::unordered_map<ghobject_t, pair<PendingWB, FDRef> >::iterator i =
     pending_wbs.find(hoid);
   if (i == pending_wbs.end())
     return;

@@ -1,7 +1,7 @@
-add_executable(ceph_test_cls_queue
+add_executable(stone_test_cls_queue
   test_cls_queue.cc
 )
-target_link_libraries(ceph_test_cls_queue
+target_link_libraries(stone_test_cls_queue
   cls_queue_client
   librados
   global
@@ -12,6 +12,6 @@ target_link_libraries(ceph_test_cls_queue
   radostest-cxx)
 
 install(TARGETS
-  ceph_test_cls_queue
+  stone_test_cls_queue
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 

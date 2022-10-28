@@ -72,7 +72,7 @@ TEST_F(TestMockMirrorSnapshotUtils, CanCreatePrimarySnapshot) {
                                                 &requires_orphan,
                                                 &rollback_snap_id));
   ASSERT_FALSE(requires_orphan);
-  ASSERT_EQ(rollback_snap_id, CEPH_NOSNAP);
+  ASSERT_EQ(rollback_snap_id, STONE_NOSNAP);
 
   cls::rbd::MirrorSnapshotNamespace nns{
     cls::rbd::MIRROR_SNAPSHOT_STATE_NON_PRIMARY, {}, "mirror_uuid", 123};
@@ -92,7 +92,7 @@ TEST_F(TestMockMirrorSnapshotUtils, CanCreatePrimarySnapshot) {
                                                 &requires_orphan,
                                                 &rollback_snap_id));
   ASSERT_TRUE(requires_orphan);
-  ASSERT_EQ(rollback_snap_id, CEPH_NOSNAP);
+  ASSERT_EQ(rollback_snap_id, STONE_NOSNAP);
 
   nns.complete = false;
   snap_create(mock_image_ctx, nns, "NPS2");
@@ -114,7 +114,7 @@ TEST_F(TestMockMirrorSnapshotUtils, CanCreatePrimarySnapshot) {
                                                 nullptr, nullptr));
 
   cls::rbd::MirrorSnapshotNamespace pns{
-    cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY_DEMOTED, {"uuid"}, "", CEPH_NOSNAP};
+    cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY_DEMOTED, {"uuid"}, "", STONE_NOSNAP};
   snap_create(mock_image_ctx, pns, "PS1");
 
   // previous primary snapshot is demoted, no force
@@ -158,7 +158,7 @@ TEST_F(TestMockMirrorSnapshotUtils, CanCreateNonPrimarySnapshot) {
   ASSERT_TRUE(util::can_create_non_primary_snapshot(&mock_image_ctx));
 
   cls::rbd::MirrorSnapshotNamespace pns{
-    cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {"uuid"}, "", CEPH_NOSNAP};
+    cls::rbd::MIRROR_SNAPSHOT_STATE_PRIMARY, {"uuid"}, "", STONE_NOSNAP};
   snap_create(mock_image_ctx, pns, "PS1");
 
   // previous primary snapshot is not in demoted state

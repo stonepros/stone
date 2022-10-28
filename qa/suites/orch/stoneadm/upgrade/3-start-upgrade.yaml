@@ -1,0 +1,13 @@
+tasks:
+- stoneadm.shell:
+    env: [sha1]
+    mon.a:
+      - radosgw-admin realm create --rgw-realm=r --default
+      - radosgw-admin zonegroup create --rgw-zonegroup=default --master --default
+      - radosgw-admin zone create --rgw-zonegroup=default --rgw-zone=z --master --default
+      - radosgw-admin period update --rgw-realm=r --commit
+      - stone orch apply rgw r z --placement=2 --port=8000
+      - sleep 120
+      - stone config set mon mon_warn_on_insecure_global_id_reclaim false --force
+      - stone config set mon mon_warn_on_insecure_global_id_reclaim_allowed false --force
+      - stone orch upgrade start --image quay.stone.io/stone-ci/stone:$sha1

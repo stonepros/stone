@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -11,8 +11,8 @@
  * Foundation.  See file COPYING.
  *
  */
-#ifndef CEPH_LIBRGW_H
-#define CEPH_LIBRGW_H
+#ifndef STONE_LIBRGW_H
+#define STONE_LIBRGW_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,4 +33,4 @@ void librgw_shutdown(librgw_t rgw);
 }
 #endif
 
-#endif /* CEPH_LIBRGW_H */
+#endif /* STONE_LIBRGW_H */

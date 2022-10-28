@@ -1,5 +1,5 @@
 overrides:
-  ceph:
+  stone:
     wait-for-scrub: false
     log-ignorelist:
       - candidate had a stat error

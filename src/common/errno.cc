@@ -14,7 +14,7 @@ std::string cpp_strerror(int err)
     err = -err;
   std::ostringstream oss;
 
-  errmsg = ceph_strerror_r(err, buf, sizeof(buf));
+  errmsg = stone_strerror_r(err, buf, sizeof(buf));
 
   oss << "(" << err << ") " << errmsg;
 

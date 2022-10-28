@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stonee - scalable distributed file system
  *
  *  Copyright (C) 2015 Intel <jianpeng.ma@intel.com>
  *
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef CEPH_BLK_PMEMDEVICE_H
-#define CEPH_BLK_PMEMDEVICE_H
+#ifndef STONE_BLK_PMEMDEVICE_H
+#define STONE_BLK_PMEMDEVICE_H
 
 #include <atomic>
 
@@ -36,7 +36,7 @@ class PMEMDevice : public BlockDevice {
   int _lock();
 
 public:
-  PMEMDevice(CephContext *cct, aio_callback_t cb, void *cbpriv);
+  PMEMDevice(StoneeContext *cct, aio_callback_t cb, void *cbpriv);
 
 
   void aio_submit(IOContext *ioc) override;
