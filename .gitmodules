@@ -69,12 +69,9 @@
 [submodule "src/dmclock"]
 	path = src/dmclock
 	url = https://github.com/stonepros/dmclock.git
-[submodule "stone-object-corpus"]
-	path = stone-object-corpus
-	url = https://github.com/stonepros/stone-object-corpus.git
-[submodule "stone-erasure-code-corpus"]
-	path = stone-erasure-code-corpus
-	url = https://github.com/stonepros/stone-erasure-code-corpus.git
 [submodule "src/s3select"]
 	path = src/s3select
 	url = https://github.com/stonepros/s3select.git
+[submodule "src/blkin"]
+	path = src/blkin
+	url = https://github.com/stonepros/blkin
